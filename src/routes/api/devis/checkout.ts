@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/devis/checkout")({
 
         const { data: devis, error } = await supabaseAdmin
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, email, nom, prenom, stripe_session_id, paid_at")
+          .select("id, numero, depart, arrivee, prix_estime, avoir_applique, statut, email, nom, prenom, stripe_session_id, paid_at")
           .eq("id", devisId)
           .maybeSingle();
         if (error || !devis) {
@@ -59,7 +59,9 @@ export const Route = createFileRoute("/api/devis/checkout")({
         if (!["accepte", "envoye"].includes(String(devis.statut))) {
           return Response.json({ error: "Devis non payable" }, { status: 409 });
         }
-        const ttc = Number(devis.prix_estime);
+        // Compte Kilomètres : l'avoir déjà appliqué est déduit du montant à régler.
+        const avoir = Number((devis as { avoir_applique?: number }).avoir_applique ?? 0);
+        const ttc = Math.max(Number(devis.prix_estime) - avoir, 0);
         if (!ttc || ttc < 1) {
           return Response.json({ error: "Montant invalide" }, { status: 400 });
         }
@@ -67,7 +69,8 @@ export const Route = createFileRoute("/api/devis/checkout")({
         try {
           const stripe = createStripeClient(env);
 
-          if (devis.stripe_session_id) {
+          // Un avoir appliqué change le montant : on ne réutilise pas l'ancienne session.
+          if (devis.stripe_session_id && avoir <= 0) {
             try {
               const existing = await stripe.checkout.sessions.retrieve(devis.stripe_session_id);
               if (existing.status === "open" && existing.client_secret) {
@@ -82,7 +85,7 @@ export const Route = createFileRoute("/api/devis/checkout")({
                 currency: "eur",
                 product_data: {
                   name: `Convoyage ${devis.numero}`,
-                  description: `${devis.depart} → ${devis.arrivee}`,
+                  description: `${devis.depart} → ${devis.arrivee}${avoir > 0 ? ` — avoir fidélité déduit : ${avoir.toFixed(2)} €` : ""}`,
                 },
                 unit_amount: Math.round(ttc * 100),
               },

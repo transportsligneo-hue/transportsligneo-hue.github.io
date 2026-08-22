@@ -92,6 +92,7 @@ import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
 import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_authenticated/dashboard-pro.flotte'
+import { Route as AuthenticatedDashboardProFideliteRouteImport } from './routes/_authenticated/dashboard-pro.fidelite'
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
@@ -99,6 +100,7 @@ import { Route as AuthenticatedDashboardProApiRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
+import { Route as AuthenticatedDashboardClientFideliteRouteImport } from './routes/_authenticated/dashboard-client.fidelite'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
 import { Route as AuthenticatedDashboardClientDevisRouteImport } from './routes/_authenticated/dashboard-client.devis'
 import { Route as AuthenticatedDashboardClientAdressesRouteImport } from './routes/_authenticated/dashboard-client.adresses'
@@ -128,6 +130,7 @@ import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './rou
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
+import { Route as AuthenticatedAdminFideliteRouteImport } from './routes/_authenticated/admin.fidelite'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
@@ -157,6 +160,7 @@ import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
+import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
@@ -627,6 +631,12 @@ const AuthenticatedDashboardProFlotteRoute =
     path: '/flotte',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
+const AuthenticatedDashboardProFideliteRoute =
+  AuthenticatedDashboardProFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardProDocumentsRoute =
   AuthenticatedDashboardProDocumentsRouteImport.update({
     id: '/documents',
@@ -667,6 +677,12 @@ const AuthenticatedDashboardClientNouvelleReservationRoute =
   AuthenticatedDashboardClientNouvelleReservationRouteImport.update({
     id: '/nouvelle-reservation',
     path: '/nouvelle-reservation',
+    getParentRoute: () => AuthenticatedDashboardClientRoute,
+  } as any)
+const AuthenticatedDashboardClientFideliteRoute =
+  AuthenticatedDashboardClientFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
 const AuthenticatedDashboardClientDocumentsRoute =
@@ -843,6 +859,12 @@ const AuthenticatedAdminFormationRoute =
     path: '/formation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFideliteRoute =
+  AuthenticatedAdminFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFacturesRoute =
   AuthenticatedAdminFacturesRouteImport.update({
     id: '/factures',
@@ -1011,6 +1033,12 @@ const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
     path: '/api/public/scan/handoff-extract',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksLoyaltyDailyRoute =
+  ApiPublicHooksLoyaltyDailyRouteImport.update({
+    id: '/api/public/hooks/loyalty-daily',
+    path: '/api/public/hooks/loyalty-daily',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksGoogleReviewDispatchRoute =
@@ -1243,6 +1271,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1272,6 +1301,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1279,6 +1309,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1330,6 +1361,7 @@ export interface FileRoutesByFullPath {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1414,6 +1446,7 @@ export interface FileRoutesByTo {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1442,6 +1475,7 @@ export interface FileRoutesByTo {
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1449,6 +1483,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
@@ -1498,6 +1533,7 @@ export interface FileRoutesByTo {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1590,6 +1626,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/_authenticated/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1619,6 +1656,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/_authenticated/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
+  '/_authenticated/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
@@ -1626,6 +1664,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/_authenticated/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1677,6 +1716,7 @@ export interface FileRoutesById {
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
+  '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -1769,6 +1809,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
+    | '/admin/fidelite'
     | '/admin/formation'
     | '/admin/historique'
     | '/admin/incidents'
@@ -1798,6 +1839,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
+    | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
@@ -1805,6 +1847,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
@@ -1856,6 +1899,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -1940,6 +1984,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
+    | '/admin/fidelite'
     | '/admin/formation'
     | '/admin/historique'
     | '/admin/incidents'
@@ -1968,6 +2013,7 @@ export interface FileRouteTypes {
     | '/dashboard-client/adresses'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
+    | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
@@ -1975,6 +2021,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
@@ -2024,6 +2071,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2115,6 +2163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
+    | '/_authenticated/admin/fidelite'
     | '/_authenticated/admin/formation'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/incidents'
@@ -2144,6 +2193,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-client/adresses'
     | '/_authenticated/dashboard-client/devis'
     | '/_authenticated/dashboard-client/documents'
+    | '/_authenticated/dashboard-client/fidelite'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
     | '/_authenticated/dashboard-pro/adresses'
@@ -2151,6 +2201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
+    | '/_authenticated/dashboard-pro/fidelite'
     | '/_authenticated/dashboard-pro/flotte'
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
@@ -2202,6 +2253,7 @@ export interface FileRouteTypes {
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
     | '/api/public/hooks/google-review-dispatch'
+    | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
@@ -2287,6 +2339,7 @@ export interface RootRouteChildren {
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
+  ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -2888,6 +2941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProFlotteRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
+    '/_authenticated/dashboard-pro/fidelite': {
+      id: '/_authenticated/dashboard-pro/fidelite'
+      path: '/fidelite'
+      fullPath: '/dashboard-pro/fidelite'
+      preLoaderRoute: typeof AuthenticatedDashboardProFideliteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
     '/_authenticated/dashboard-pro/documents': {
       id: '/_authenticated/dashboard-pro/documents'
       path: '/documents'
@@ -2935,6 +2995,13 @@ declare module '@tanstack/react-router' {
       path: '/nouvelle-reservation'
       fullPath: '/dashboard-client/nouvelle-reservation'
       preLoaderRoute: typeof AuthenticatedDashboardClientNouvelleReservationRouteImport
+      parentRoute: typeof AuthenticatedDashboardClientRoute
+    }
+    '/_authenticated/dashboard-client/fidelite': {
+      id: '/_authenticated/dashboard-client/fidelite'
+      path: '/fidelite'
+      fullPath: '/dashboard-client/fidelite'
+      preLoaderRoute: typeof AuthenticatedDashboardClientFideliteRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
     '/_authenticated/dashboard-client/documents': {
@@ -3140,6 +3207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFormationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/fidelite': {
+      id: '/_authenticated/admin/fidelite'
+      path: '/fidelite'
+      fullPath: '/admin/fidelite'
+      preLoaderRoute: typeof AuthenticatedAdminFideliteRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/factures': {
       id: '/_authenticated/admin/factures'
       path: '/factures'
@@ -3341,6 +3415,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/scan/handoff-extract'
       fullPath: '/api/public/scan/handoff-extract'
       preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/loyalty-daily': {
+      id: '/api/public/hooks/loyalty-daily'
+      path: '/api/public/hooks/loyalty-daily'
+      fullPath: '/api/public/hooks/loyalty-daily'
+      preLoaderRoute: typeof ApiPublicHooksLoyaltyDailyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/google-review-dispatch': {
@@ -3619,6 +3700,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+  AuthenticatedAdminFideliteRoute: typeof AuthenticatedAdminFideliteRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
@@ -3660,6 +3742,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+  AuthenticatedAdminFideliteRoute: AuthenticatedAdminFideliteRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
@@ -3754,6 +3837,7 @@ interface AuthenticatedDashboardClientRouteChildren {
   AuthenticatedDashboardClientAdressesRoute: typeof AuthenticatedDashboardClientAdressesRoute
   AuthenticatedDashboardClientDevisRoute: typeof AuthenticatedDashboardClientDevisRoute
   AuthenticatedDashboardClientDocumentsRoute: typeof AuthenticatedDashboardClientDocumentsRoute
+  AuthenticatedDashboardClientFideliteRoute: typeof AuthenticatedDashboardClientFideliteRoute
   AuthenticatedDashboardClientNouvelleReservationRoute: typeof AuthenticatedDashboardClientNouvelleReservationRoute
   AuthenticatedDashboardClientProfilRoute: typeof AuthenticatedDashboardClientProfilRoute
   AuthenticatedDashboardClientIndexRoute: typeof AuthenticatedDashboardClientIndexRoute
@@ -3769,6 +3853,8 @@ const AuthenticatedDashboardClientRouteChildren: AuthenticatedDashboardClientRou
       AuthenticatedDashboardClientDevisRoute,
     AuthenticatedDashboardClientDocumentsRoute:
       AuthenticatedDashboardClientDocumentsRoute,
+    AuthenticatedDashboardClientFideliteRoute:
+      AuthenticatedDashboardClientFideliteRoute,
     AuthenticatedDashboardClientNouvelleReservationRoute:
       AuthenticatedDashboardClientNouvelleReservationRoute,
     AuthenticatedDashboardClientProfilRoute:
@@ -3828,6 +3914,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
+  AuthenticatedDashboardProFideliteRoute: typeof AuthenticatedDashboardProFideliteRoute
   AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -3847,6 +3934,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProDevisInstantaneRoute,
     AuthenticatedDashboardProDocumentsRoute:
       AuthenticatedDashboardProDocumentsRoute,
+    AuthenticatedDashboardProFideliteRoute:
+      AuthenticatedDashboardProFideliteRoute,
     AuthenticatedDashboardProFlotteRoute: AuthenticatedDashboardProFlotteRoute,
     AuthenticatedDashboardProMissionsRoute:
       AuthenticatedDashboardProMissionsRouteWithChildren,
@@ -4043,6 +4132,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
+  ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
