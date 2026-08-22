@@ -8,7 +8,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailServer } from '@/server/email-send'
 import { sendSms } from '@/lib/sms.server'
-import { createShortLink } from '@/lib/short-links.server'
+import { buildGoogleReviewSms } from '@/lib/google-review-message'
 
 export type ReviewRecipientType = 'client' | 'contact_livraison'
 export type ReviewChannel = 'email' | 'sms' | 'email+sms'
@@ -141,53 +141,15 @@ function getRecipientInfo(trajet: any, recipientType: ReviewRecipientType): Reci
   return { email, phone, name, prenom }
 }
 
-/**
- * Retire les accents : un SMS contenant un caractère non GSM-7 bascule en
- * UCS-2 (70 caractères par segment), ce qui provoquait la coupure du lien.
- */
-function toGsm7(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’‘]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/[–—]/g, '-')
-}
-
-/**
- * Message SMS d'avis Google.
- * Aucune mention du convoyeur (ni prénom, ni initiale, ni nom).
- * Le lien est toujours placé en fin de message et n'est jamais tronqué.
- */
-function buildSmsBody(shortUrl: string): string {
-  return toGsm7(
-    `Transports Ligneo : votre vehicule a bien ete livre. Si vous etes satisfait, un avis nous aiderait beaucoup : ${shortUrl}`,
-  )
-}
-
-/**
- * Raccourcit le lien uniquement si le SMS complet dépasserait un segment
- * GSM-7 (160 caractères). Sinon, l'URL d'avis est reprise intégralement.
- */
-async function ensureShortReviewUrl(reviewUrl: string): Promise<string> {
-  if (buildSmsBody(reviewUrl).length <= 160) return reviewUrl
-  try {
-    return await createShortLink(reviewUrl, 'avis-google')
-  } catch {
-    return reviewUrl
-  }
-}
-
-
 async function sendReviewEmail(params: {
   attribution: any
   trajet: any
   recipient: RecipientInfo
-  convoyeurLabel: string | null
+  recipientType: ReviewRecipientType
   settings: GoogleReviewSettings
   auto?: boolean
 }): Promise<{ success: boolean; reason?: string }> {
-  const { attribution, trajet, recipient, convoyeurLabel, settings, auto } = params
+  const { attribution, trajet, recipient, settings, auto } = params
   if (!isValidEmail(recipient.email)) {
     return { success: false, reason: 'Adresse email invalide ou manquante.' }
   }
@@ -206,9 +168,8 @@ async function sendReviewEmail(params: {
         numero: attribution.numero_mission ?? '',
         depart: trajet.depart,
         arrivee: trajet.arrivee,
-        convoyeur: convoyeurLabel ?? '',
         reviewUrl: settings.url,
-        isContactLivraison: false,
+        isContactLivraison: params.recipientType === 'contact_livraison',
       },
     })
     if (res?.success) return { success: true }
@@ -220,20 +181,18 @@ async function sendReviewEmail(params: {
 
 
 async function sendReviewSms(params: {
-  attribution: any
   recipient: RecipientInfo
-  convoyeurLabel: string | null
   settings: GoogleReviewSettings
 }): Promise<{ success: boolean; reason?: string }> {
-  if (!isValidPhone(params.recipient.phone)) {
+  const phone = params.recipient.phone
+  if (!phone || !isValidPhone(phone)) {
     return { success: false, reason: 'Numéro de téléphone invalide ou manquant.' }
   }
   if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
   try {
-    const shortUrl = await ensureShortReviewUrl(params.settings.url)
-    const body = buildSmsBody(shortUrl)
+    const body = buildGoogleReviewSms(params.settings.url)
     const res = await sendSms({
-      to: params.recipient.phone!,
+      to: phone,
       body,
       from: params.settings.sms_from || 'LIGNEO',
     })
@@ -339,7 +298,7 @@ export async function sendGoogleReviewRequestServer(params: {
 
   const { data: attribution } = await supabaseAdmin
     .from('attributions')
-    .select('id, trajet_id, convoyeur_id, numero_mission, statut')
+    .select('id, trajet_id, numero_mission, statut')
     .eq('id', params.attributionId)
     .maybeSingle()
   if (!attribution) return { ok: false, error: 'Mission introuvable.' }
@@ -352,16 +311,6 @@ export async function sendGoogleReviewRequestServer(params: {
     .eq('id', attribution.trajet_id)
     .maybeSingle()
   if (!trajet) return { ok: false, error: 'Trajet introuvable.' }
-
-  let convoyeurLabel: string | null = null
-  if (attribution.convoyeur_id) {
-    const { data: c } = await supabaseAdmin
-      .from('convoyeurs')
-      .select('nom, prenom')
-      .eq('id', attribution.convoyeur_id)
-      .maybeSingle()
-    if (c) convoyeurLabel = [c.prenom, c.nom ? `${String(c.nom).charAt(0)}.` : null].filter(Boolean).join(' ') || null
-  }
 
   const recipient = getRecipientInfo(trajet, params.recipientType)
   if (params.emailOverride) recipient.email = params.emailOverride
@@ -396,7 +345,7 @@ export async function sendGoogleReviewRequestServer(params: {
       attribution,
       trajet,
       recipient,
-      convoyeurLabel,
+      recipientType: params.recipientType,
       settings,
       auto: params.auto,
     })
@@ -427,9 +376,7 @@ export async function sendGoogleReviewRequestServer(params: {
 
   if (channel === 'sms' || channel === 'email+sms') {
     const smsRes = await sendReviewSms({
-      attribution,
       recipient,
-      convoyeurLabel,
       settings,
     })
     await recordReviewRequest({

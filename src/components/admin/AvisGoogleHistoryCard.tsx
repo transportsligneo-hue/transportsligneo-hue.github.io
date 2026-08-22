@@ -7,6 +7,7 @@ import { History, Mail, Smartphone, Eye, RefreshCw, CheckCircle2, AlertTriangle,
 import { supabase } from "@/integrations/supabase/client";
 import { Card, Button, Badge } from "@/components/admin/AdminUI";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { buildGoogleReviewSms } from "@/lib/google-review-message";
 
 interface Row {
   id: string;
@@ -33,10 +34,6 @@ const STATUS: Record<string, { label: string; tone: "success" | "danger" | "info
   failed: { label: "Échec", tone: "danger" },
   review_left: { label: "Avis laissé", tone: "info" },
 };
-
-function buildSmsBody(shortUrl: string): string {
-  return `Transports Ligneo - Bonjour, votre véhicule a bien été livré par notre convoyeur. Si vous êtes satisfait, un avis nous aiderait beaucoup : ${shortUrl}`;
-}
 
 export function AvisGoogleHistoryCard() {
   const [rows, setRows] = useState<Enriched[]>([]);
@@ -102,7 +99,7 @@ export function AvisGoogleHistoryCard() {
   const openPreview = async (row: Enriched) => {
     setPreview({ row, html: null, sms: null });
     const isSmsOnly = row.channel === "sms";
-    const sms = row.channel.includes("sms") ? buildSmsBody(reviewUrl || "https://…") : null;
+    const sms = row.channel.includes("sms") ? buildGoogleReviewSms(reviewUrl || "https://…") : null;
     let html: string | null = null;
     if (!isSmsOnly) {
       const [{ render }, mod, React] = await Promise.all([

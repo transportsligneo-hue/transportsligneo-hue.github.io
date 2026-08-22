@@ -7,12 +7,11 @@ interface Props {
   numero?: string
   depart?: string
   arrivee?: string
-  convoyeur?: string
   reviewUrl?: string
   isContactLivraison?: boolean
 }
 
-const Email = ({ prenom, numero, depart, arrivee, convoyeur, reviewUrl, isContactLivraison }: Props) => (
+const Email = ({ prenom, numero, depart, arrivee, reviewUrl, isContactLivraison }: Props) => (
   <LigneoEmailShell
     preview="Votre avis compte — 30 secondes suffisent"
     tagline="Merci pour votre confiance"
@@ -20,17 +19,15 @@ const Email = ({ prenom, numero, depart, arrivee, convoyeur, reviewUrl, isContac
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro={
       isContactLivraison
-        ? `Vous avez réceptionné un véhicule convoyé par Transports Ligneo${convoyeur ? ` avec ${convoyeur}` : ''}. Si tout s'est bien passé, un avis Google nous aiderait énormément — cela prend moins de 30 secondes.`
-        : `Votre véhicule est bien arrivé${convoyeur ? `, convoyé par ${convoyeur}` : ''}. Si vous êtes satisfait de la prestation, un avis Google nous aiderait énormément — cela prend moins de 30 secondes.`
+        ? `Vous avez réceptionné un véhicule livré par Transports Ligneo. Si tout s'est bien passé, un avis Google nous aiderait énormément — cela prend moins de 30 secondes.`
+        : `Votre véhicule a bien été livré. Si vous êtes satisfait de la prestation, un avis Google nous aiderait énormément — cela prend moins de 30 secondes.`
     }
     primaryCta={reviewUrl ? { label: 'Laisser un avis Google', href: reviewUrl } : null}
     footnote="Un souci ou une remarque ? Répondez simplement à cet email, nous vous répondons sous 24h."
   >
     <SimpleCard
       title={depart && arrivee ? `${depart} → ${arrivee}` : 'Convoyage terminé'}
-      subtitle={[numero ? `Référence ${numero}` : null, convoyeur ? `Convoyeur : ${convoyeur}` : null]
-        .filter(Boolean)
-        .join(' · ')}
+      subtitle={numero ? `Référence ${numero}` : ''}
     />
   </LigneoEmailShell>
 )
@@ -45,7 +42,6 @@ export const template = {
     numero: 'MIS-TLG-2026-114',
     depart: 'La Riche',
     arrivee: 'Tours',
-    convoyeur: 'Julien D.',
     reviewUrl: 'https://g.page/r/example/review',
   },
 } satisfies TemplateEntry
