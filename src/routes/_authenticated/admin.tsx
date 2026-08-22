@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   Wallet,
   Gauge,
+  Inbox,
 
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -63,7 +64,7 @@ function AdminLayout() {
       const { count } = await supabase
         .from("demandes_convoyage" as never)
         .select("id", { count: "exact", head: true })
-        .in("statut" as never, ["nouvelle", "a_traiter", "en_attente"] as never);
+        .in("statut" as never, ["nouvelle", "a_traiter"] as never);
       setDemandesCount(count ?? 0);
     };
     fetchDemandes();
