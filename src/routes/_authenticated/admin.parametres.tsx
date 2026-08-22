@@ -627,7 +627,7 @@ function AvisGoogleCard() {
   const [delayHours, setDelayHours] = useState(2);
   const [sendToContact, setSendToContact] = useState(true);
   const [channel, setChannel] = useState<"email" | "sms" | "email+sms">("email");
-  const [smsFrom, setSmsFrom] = useState("TRSP LIGNEO");
+  const [smsFrom, setSmsFrom] = useState("LIGNEO");
   const [cooldownMonths, setCooldownMonths] = useState(4);
   const [smsCount, setSmsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -739,7 +739,7 @@ function AvisGoogleCard() {
               value={smsFrom}
               disabled={loading}
               onChange={(e) => setSmsFrom(e.target.value)}
-              placeholder="TRSP LIGNEO"
+              placeholder="LIGNEO"
             />
             {smsFrom.trim().length > 11 && !/^\+?\d+$/.test(smsFrom.trim()) ? (
               <p className="mt-1 text-[11px] font-medium text-red-600">
@@ -748,7 +748,7 @@ function AvisGoogleCard() {
               </p>
             ) : (
               <p className="mt-1 text-[11px] text-pro-muted">
-                11 caractères maximum (norme GSM). Exemple : « TRSP LIGNEO ».
+                11 caractères maximum (norme GSM). Exemple : « LIGNEO ».
               </p>
             )}
           </FormField>
