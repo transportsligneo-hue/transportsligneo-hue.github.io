@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import AvoirRedemption from "@/components/loyalty/AvoirRedemption";
 import { VehiculeDocsStep } from "@/components/devis/VehiculeDocsStep";
 import { DevisAcceptationStep } from "@/components/devis/DevisAcceptationStep";
 import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
