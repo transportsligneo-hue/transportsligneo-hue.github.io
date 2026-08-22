@@ -8036,26 +8036,73 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  padding: 96px 24px 104px;
+  /* on démarre le fondu plus bas (sous les chiffres 5000+/6 ans...) */
+  padding: 150px 24px 170px;
+  margin-top: -1px;
+  margin-bottom: -1px;
   background: transparent;
   isolation: isolate;
 }
 html.theme-light .r4-page .ligneo-map::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -1px 0;
   z-index: -1;
   background:
-    radial-gradient(120% 70% at 50% 45%, rgba(47,95,255,0.20), transparent 70%),
+    radial-gradient(120% 60% at 50% 50%, rgba(47,95,255,0.18), transparent 72%),
     linear-gradient(180deg,
       #f5f7fc 0%,
-      rgba(11,16,38,0.55) 16%,
-      #0b1026 34%,
-      #0b1026 66%,
-      rgba(11,16,38,0.55) 84%,
-      #f5f7fc 100%);
+      #eef1f9 6%,
+      #dfe4f1 11%,
+      #c3cbe0 15%,
+      #9ba6c4 19%,
+      #7280a8 22%,
+      #4d5b87 25%,
+      #2f3c68 28%,
+      #1a2449 31%,
+      #0f1631 34%,
+      #0b1026 38%,
+      #0b1026 60%,
+      #0f1631 64%,
+      #1a2449 67%,
+      #2f3c68 70%,
+      #4d5b87 73%,
+      #7280a8 76%,
+      #9ba6c4 80%,
+      #c6cee1 84%,
+      #e4e9f4 89%,
+      #f3f6fc 94%,
+      #fbfcfe 97%,
+      #ffffff 100%);
   pointer-events: none;
 }
+/* la bande "Ils nous font confiance" repart en blanc : fondu continu, sans filet */
+html.theme-light .r4-page .v5-trust {
+  background: #ffffff !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+/* on supprime les voiles de brume qui effaçaient le titre en thème clair */
+html.theme-light .r4-page .v5-trust::before,
+html.theme-light .r4-page .v5-trust::after {
+  display: none !important;
+}
+html.theme-light .r4-page .v5-trust-label {
+  color: #0b1026 !important;
+  -webkit-text-fill-color: #0b1026;
+  opacity: 1;
+  position: relative;
+  z-index: 3;
+}
+html.theme-light .r4-page .v5-trust-sub {
+  color: #5a6486 !important;
+  -webkit-text-fill-color: #5a6486;
+  opacity: 1;
+  position: relative;
+  z-index: 3;
+}
+
+
 html.theme-light .r4-page .ligneo-map .ligneo-map-card {
   background: transparent;
   border: 0;
@@ -8064,4 +8111,6 @@ html.theme-light .r4-page .ligneo-map .ligneo-map-card {
   padding: 0;
   overflow: visible;
 }
-html.theme-light .r4-page .ligneo-map .ligneo-map-legend-item { color: #9aa6c9; }
+/* la légende (point doré isolé) n'a plus de sens sur fond clair fondu */
+html.theme-light .r4-page .ligneo-map .ligneo-map-legend { display: none; }
+
