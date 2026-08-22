@@ -3538,9 +3538,13 @@ body.is-driver-app .closed-link svg {
     border-radius: 0 0 22px 22px;
     border: 1px solid transparent;
     border-top: none;
+    /* Fallback opaque (Edge / navigateurs qui n'appliquent pas la pile de fonds) */
+    background-color: #0b1a4d;
+    background-image: none;
     background:
       linear-gradient(90deg, rgba(9,17,46,0.96), rgba(14,32,96,0.9) 50%, rgba(9,17,46,0.96)) padding-box,
       linear-gradient(120deg, rgba(217,181,74,0.45), rgba(79,140,255,0.55) 35%, rgba(122,163,255,0.15) 60%, rgba(217,181,74,0.4)) border-box;
+    background-color: #0b1a4d;
     background-size: 100% 100%, 240% 240%;
     -webkit-backdrop-filter: blur(20px) saturate(165%);
     backdrop-filter: blur(20px) saturate(165%);
@@ -3627,6 +3631,7 @@ body.is-driver-app .closed-link svg {
     background:
       linear-gradient(90deg, rgba(9,17,46,0.96), rgba(14,32,96,0.9) 50%, rgba(9,17,46,0.96)) padding-box,
       linear-gradient(120deg, rgba(217,181,74,0.45), rgba(79,140,255,0.55) 35%, rgba(122,163,255,0.15) 60%, rgba(217,181,74,0.4)) border-box;
+    background-color: #0b1a4d;
     box-shadow:
       0 18px 50px -22px rgba(0,0,0,0.85),
       0 0 0 1px rgba(255,255,255,0.04) inset,
