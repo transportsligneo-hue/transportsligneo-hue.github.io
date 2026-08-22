@@ -4489,14 +4489,15 @@ body.is-driver-app .closed-link svg {
 .feat-cat-title { position: relative; font-family: 'Space Grotesk', sans-serif; font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #d9b54a; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(122,163,255,0.16); }
 .feat-cat-title::after { content: ''; position: absolute; bottom: -1px; left: 0; height: 1px; width: 60px; background: linear-gradient(90deg, #d9b54a, transparent); }
 .feat-grid2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 20px; }
-.feat-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; transition: background .25s ease, transform .25s ease; }
-.feat-item:hover { background: rgba(63,123,255,0.08); transform: translateY(-2px); }
-.feat-item-ic { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, rgba(63,123,255,0.18), rgba(47,95,255,0.05)); border: 1px solid rgba(122,163,255,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .3s cubic-bezier(.34,1.56,.64,1); color: #8fb4ff; }
-.feat-item:hover .feat-item-ic { background: linear-gradient(135deg, rgba(63,123,255,0.4), rgba(47,95,255,0.15)); border-color: rgba(122,163,255,0.6); transform: scale(1.12) rotate(-6deg); box-shadow: 0 6px 16px rgba(47,95,255,0.35); color: #fff; }
-.feat-item span { font-size: 13.5px; font-weight: 600; color: #e4e9f7; transition: color .25s ease; }
-.feat-item:hover span { color: #fff; }
+.feat-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; transition: background .25s ease, transform .25s ease, box-shadow .25s ease; }
+.feat-item:hover { background: rgba(63,123,255,0.12); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(47,95,255,0.18); }
+.feat-item-ic { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(63,123,255,0.22), rgba(47,95,255,0.08)); border: 1px solid rgba(122,163,255,0.45); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .3s cubic-bezier(.34,1.56,.64,1); color: #6aa7ff; filter: drop-shadow(0 0 4px rgba(79,140,255,0.35)); }
+.feat-item:hover .feat-item-ic { background: linear-gradient(135deg, rgba(63,123,255,0.55), rgba(47,95,255,0.2)); border-color: rgba(122,163,255,0.85); transform: scale(1.12) rotate(-6deg); box-shadow: 0 0 22px rgba(79,140,255,0.55), inset 0 0 8px rgba(79,140,255,0.25); color: #ffffff; filter: drop-shadow(0 0 8px rgba(79,140,255,0.6)); }
+.feat-item span { font-size: 14px; font-weight: 700; color: #ffffff; letter-spacing: 0.01em; transition: color .25s ease, text-shadow .25s ease; text-shadow: 0 0 10px rgba(79,140,255,0.15); }
+.feat-item:hover span { color: #ffffff; text-shadow: 0 0 14px rgba(79,140,255,0.45), 0 0 28px rgba(79,140,255,0.25); }
 @media (max-width: 860px) { .feat-grid2 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .feat-grid2 { grid-template-columns: 1fr; } }
+
 
 /* ============================================================
    Admin V6 — Tableau de bord & Missions unifiées
