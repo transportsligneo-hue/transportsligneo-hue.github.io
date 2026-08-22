@@ -8,7 +8,6 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailServer } from '@/server/email-send'
 import { sendSms } from '@/lib/sms.server'
-import { createShortLink } from '@/lib/short-links.server'
 
 export type ReviewRecipientType = 'client' | 'contact_livraison'
 export type ReviewChannel = 'email' | 'sms' | 'email+sms'
@@ -165,24 +164,11 @@ function buildSmsBody(reviewUrl: string): string {
   )
 }
 
-/**
- * Raccourcit le lien uniquement si le SMS complet dépasserait un segment
- * GSM-7 (160 caractères). Sinon, l'URL d'avis est reprise intégralement.
- */
-async function ensureShortReviewUrl(reviewUrl: string): Promise<string> {
-  if (buildSmsBody(reviewUrl).length <= 160) return reviewUrl
-  try {
-    return await createShortLink(reviewUrl, 'avis-google')
-  } catch {
-    return reviewUrl
-  }
-}
-
-
 async function sendReviewEmail(params: {
   attribution: any
   trajet: any
   recipient: RecipientInfo
+  recipientType: ReviewRecipientType
   settings: GoogleReviewSettings
   auto?: boolean
 }): Promise<{ success: boolean; reason?: string }> {
@@ -206,7 +192,7 @@ async function sendReviewEmail(params: {
         depart: trajet.depart,
         arrivee: trajet.arrivee,
         reviewUrl: settings.url,
-        isContactLivraison: params.recipient === getRecipientInfo(trajet, 'contact_livraison'),
+        isContactLivraison: params.recipientType === 'contact_livraison',
       },
     })
     if (res?.success) return { success: true }
@@ -226,8 +212,7 @@ async function sendReviewSms(params: {
   }
   if (!params.settings.url) return { success: false, reason: "Lien d'avis Google non configuré." }
   try {
-    const shortUrl = await ensureShortReviewUrl(params.settings.url)
-    const body = buildSmsBody(shortUrl)
+    const body = buildSmsBody(params.settings.url)
     const res = await sendSms({
       to: params.recipient.phone!,
       body,
@@ -382,6 +367,7 @@ export async function sendGoogleReviewRequestServer(params: {
       attribution,
       trajet,
       recipient,
+      recipientType: params.recipientType,
       settings,
       auto: params.auto,
     })
