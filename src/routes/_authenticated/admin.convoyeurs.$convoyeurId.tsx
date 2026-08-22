@@ -26,6 +26,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { MessageSquare } from "lucide-react";
+import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
 import { ConvoyeurFinancesPanel } from "@/components/admin/finances/ConvoyeurFinancesPanel";
 import { humanizeAction } from "@/lib/activity-humanizer";
 import {
@@ -126,6 +128,8 @@ function AdminConvoyeurDetail() {
   const [dispos, setDispos] = useState<DispoRow[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const { count: msgCount, refresh: refreshMsgCount } = useUserMessagesCount(conv?.user_id ?? null);
+
   const [form, setForm] = useState<Editable>(EMPTY);
   const [original, setOriginal] = useState<Editable>(EMPTY);
   const [saving, setSaving] = useState(false);
@@ -548,6 +552,13 @@ function AdminConvoyeurDetail() {
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/{requiredDocs.length})</TabsTrigger>
           <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
+          <TabsTrigger value="messages" className="gap-1.5">
+            <MessageSquare size={14} className={msgCount > 0 ? "text-[#6effcd] drop-shadow-[0_0_6px_rgba(110,255,205,0.9)]" : ""} />
+            Messages
+            {msgCount > 0 && (
+              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#6effcd] px-1.5 text-[10px] font-bold text-[#04231a] shadow-[0_0_10px_rgba(110,255,205,0.8)]">{msgCount}</span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="finances" className="gap-1.5"><Wallet size={14} /> Finances</TabsTrigger>
           <TabsTrigger value="dispos" className="gap-1.5"><CalendarDays size={14} /> Disponibilités</TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5"><Activity size={14} /> Activité</TabsTrigger>
@@ -724,6 +735,15 @@ function AdminConvoyeurDetail() {
                 nom: conv.nom,
                 role: "convoyeur",
               }}
+            />
+          </AdminSection>
+        </TabsContent>
+
+        <TabsContent value="messages" className="mt-6">
+          <AdminSection title="Messagerie directe" description="Envoyer un message par email et/ou dans l'app Driver du convoyeur.">
+            <UserMessagesPanel
+              target={{ userId: conv.user_id, email: conv.email, prenom: conv.prenom, label: fullName, role: "convoyeur" }}
+              onSent={refreshMsgCount}
             />
           </AdminSection>
         </TabsContent>

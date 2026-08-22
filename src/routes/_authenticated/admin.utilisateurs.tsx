@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, Search, Users, Shield, IdCard, Building2, UserRound,
-  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt,
+  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
 import { getHighestActiveRole } from "@/lib/roles";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUtilisateurs,
@@ -315,6 +316,8 @@ function UserDetailDrawer({
   const [devis, setDevis] = useState<any[]>([]);
   const [factures, setFactures] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
+  const { count: msgCount, refresh: refreshMsgCount } = useUserMessagesCount(user?.user_id ?? null);
+
 
   const [missions, setMissions] = useState<any[]>([]);
   const [paiements, setPaiements] = useState<any[]>([]);
@@ -516,13 +519,26 @@ function UserDetailDrawer({
       }
     >
       <Tabs defaultValue="profil" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full bg-slate-100 p-1 rounded-lg">
+        <TabsList className="grid grid-cols-6 w-full bg-slate-100 p-1 rounded-lg">
           <TabsTrigger value="profil" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Profil</TabsTrigger>
           <TabsTrigger value="devis" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Devis ({devis.length})</TabsTrigger>
           <TabsTrigger value="missions" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="factures" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Factures ({factures.length})</TabsTrigger>
+          <TabsTrigger value="messages" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-slate-600 font-medium">
+            <MessageSquare
+              size={14}
+              className={msgCount > 0 ? "text-[#6effcd] drop-shadow-[0_0_6px_rgba(110,255,205,0.9)]" : "text-slate-400"}
+            />
+            <span className={msgCount > 0 ? "text-[#0f8f6c]" : ""}>Messages</span>
+            {msgCount > 0 && (
+              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#6effcd] px-1.5 text-[10px] font-bold text-[#04231a] shadow-[0_0_10px_rgba(110,255,205,0.8)]">
+                {msgCount}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="logs" className="data-[state=active]:bg-white data-[state=active]:text-[color:var(--admin-accent,#2563eb)] data-[state=active]:shadow-sm text-slate-600 font-medium">Logs</TabsTrigger>
         </TabsList>
+
 
 
         <TabsContent value="profil" className="mt-4 space-y-4">
@@ -612,7 +628,21 @@ function UserDetailDrawer({
           ))}
         </TabsContent>
 
+        <TabsContent value="messages" className="mt-4">
+          <UserMessagesPanel
+            target={{
+              userId: user.user_id,
+              email: user.email,
+              prenom: (user as any).prenom ?? null,
+              label: `${(user as any).prenom ?? ""} ${(user as any).nom ?? ""}`.trim() || user.email || undefined,
+              role: (user as any).role === "convoyeur" ? "convoyeur" : "client",
+            }}
+            onSent={refreshMsgCount}
+          />
+        </TabsContent>
+
         <TabsContent value="logs" className="mt-4 space-y-2">
+
           {logs.length === 0 ? (
             <p className="text-sm text-white/50 text-center py-8">Aucune activité enregistrée.</p>
           ) : logs.map((l) => (

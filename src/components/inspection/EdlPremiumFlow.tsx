@@ -32,7 +32,6 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { toastSignatureError } from "@/lib/signature-upload";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
-import { EdlStartChecklistGate } from "@/components/inspection/EdlStartChecklistGate";
 
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
@@ -283,8 +282,8 @@ export function EdlPremiumFlow({
   const [inspectionId, setInspectionId] = useState<string | null>(
     initialState?.inspectionId ?? null
   );
-  // Checklist sécurité obligatoire à chaque ouverture d'EDL (départ ET arrivée).
-  const [startChecklistDone, setStartChecklistDone] = useState(false);
+
+
 
   const [askExit, setAskExit] = useState(false);
   const [completing, setCompleting] = useState(false);
@@ -1411,17 +1410,9 @@ export function EdlPremiumFlow({
     );
   }
 
-  // Checklist obligatoire avant toute prise de photo (départ ET arrivée).
-  if (!startChecklistDone) {
-    return createPortal(
-      <EdlStartChecklistGate
-        phase={type}
-        onConfirm={() => setStartChecklistDone(true)}
-        onClose={onClose}
-      />,
-      document.body,
-    );
-  }
+  // La checklist sécurité (gilet, tenue…) est validée une seule fois,
+  // au moment du départ vers le véhicule (cockpit mission).
+
 
   const overlay = (
 
