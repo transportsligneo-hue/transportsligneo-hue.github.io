@@ -315,6 +315,8 @@ function UserDetailDrawer({
   const [devis, setDevis] = useState<any[]>([]);
   const [factures, setFactures] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
+  const { count: msgCount, refresh: refreshMsgCount } = useUserMessagesCount(user?.user_id ?? null);
+
 
   const [missions, setMissions] = useState<any[]>([]);
   const [paiements, setPaiements] = useState<any[]>([]);
