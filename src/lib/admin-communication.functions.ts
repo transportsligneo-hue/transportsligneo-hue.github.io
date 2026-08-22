@@ -153,3 +153,109 @@ export const sendAdminPushNotification = createServerFn({ method: 'POST' })
 
     return { recipients: userIds.length, inserted: rows.length, sent, removed }
   })
+/* ------------------------------------------------------------------ */
+/* Messagerie directe admin -> utilisateur (email + compte / app Driver) */
+/* ------------------------------------------------------------------ */
+
+async function assertAdmin(context: any) {
+  const { data: isAdmin } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' })
+  const { data: isSuper } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'super_admin' })
+  if (!isAdmin && !isSuper) throw new Error('Forbidden')
+}
+
+export const getUserMessages = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: rows, error } = await supabaseAdmin
+      .from('user_notifications')
+      .select('id, titre, message, category, priority, lu, created_at, metadata, link')
+      .eq('user_id', data.userId)
+      .eq('category', 'message')
+      .order('created_at', { ascending: false })
+      .limit(50)
+    if (error) throw new Error(error.message)
+    const items = rows ?? []
+    return {
+      items,
+      total: items.length,
+      unread: items.filter((r: any) => !r.lu).length,
+    }
+  })
+
+export const sendAdminDirectMessage = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: {
+    userId?: string | null
+    email?: string | null
+    prenom?: string | null
+    title: string
+    body: string
+    channels: { email: boolean; app: boolean }
+    role?: 'convoyeur' | 'client' | null
+  }) =>
+    z.object({
+      userId: z.string().uuid().nullable().optional(),
+      email: z.string().email().nullable().optional(),
+      prenom: z.string().max(120).nullable().optional(),
+      title: z.string().min(2).max(120),
+      body: z.string().min(1).max(2000),
+      channels: z.object({ email: z.boolean(), app: z.boolean() }),
+      role: z.enum(['convoyeur', 'client']).nullable().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const result = { app: false, push: 0, email: false, emailReason: undefined as string | undefined }
+
+    if (data.channels.app && data.userId) {
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+      const url = data.role === 'client' ? '/dashboard-client' : '/convoyeur'
+      const { error } = await supabaseAdmin.from('user_notifications').insert({
+        user_id: data.userId,
+        type: 'message_admin',
+        titre: data.title,
+        message: data.body,
+        link: url,
+        deep_link: url,
+        category: 'message',
+        priority: 'high',
+        metadata: { source: 'admin_direct_message' },
+      })
+      if (error) throw new Error(error.message)
+      result.app = true
+      try {
+        const { sendPushToUser } = await import('@/lib/push/send.server')
+        const res = await sendPushToUser(data.userId, {
+          title: data.title,
+          body: data.body.slice(0, 160),
+          url,
+          tag: `admin-message-${Date.now()}`,
+        })
+        result.push = res.sent
+      } catch (error) {
+        console.warn('[admin-direct-message] push failed', error)
+      }
+    }
+
+    if (data.channels.email && data.email) {
+      const { sendTransactionalEmailServer } = await import('@/server/email-send')
+      const res = await sendTransactionalEmailServer({
+        templateName: 'message-manuel',
+        recipientEmail: data.email,
+        templateData: {
+          prenom: data.prenom ?? undefined,
+          titre: data.title,
+          message: data.body,
+          ctaLabel: 'Accéder à mon espace',
+          ctaUrl: 'https://transportsligneo.fr/login',
+        },
+      })
+      result.email = res.success
+      result.emailReason = res.reason
+    }
+
+    return result
+  })
