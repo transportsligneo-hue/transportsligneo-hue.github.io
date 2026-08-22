@@ -46,6 +46,9 @@ import { template as vehiculeDocumentExpiration } from './vehicule-document-expi
 import { template as invite } from './invite'
 import { template as invitationConvoyeur } from './invitation-convoyeur'
 import { template as avisGoogle } from './avis-google'
+import { template as fidelitePalier } from './fidelite-palier'
+import { template as fideliteAvoir } from './fidelite-avoir'
+import { template as fideliteExpiration } from './fidelite-expiration'
 import { template as suppressionCompteAdmin } from './suppression-compte-admin'
 
 
@@ -87,6 +90,9 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'vehicule-document-expiration': vehiculeDocumentExpiration,
   'invite': invite,
   'avis-google': avisGoogle,
+  'fidelite-palier': fidelitePalier,
+  'fidelite-avoir': fideliteAvoir,
+  'fidelite-expiration': fideliteExpiration,
   'suppression-compte-admin': suppressionCompteAdmin,
   'waitlist-convoyeur': waitlistConvoyeur,
   'waitlist-convoyeur-admin': waitlistConvoyeurAdmin,

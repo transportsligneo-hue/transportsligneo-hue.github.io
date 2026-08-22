@@ -130,6 +130,7 @@ import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './rou
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
+import { Route as AuthenticatedAdminFideliteRouteImport } from './routes/_authenticated/admin.fidelite'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
@@ -858,6 +859,12 @@ const AuthenticatedAdminFormationRoute =
     path: '/formation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFideliteRoute =
+  AuthenticatedAdminFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminFacturesRoute =
   AuthenticatedAdminFacturesRouteImport.update({
     id: '/factures',
@@ -1264,6 +1271,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1438,6 +1446,7 @@ export interface FileRoutesByTo {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1617,6 +1626,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
+  '/_authenticated/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
@@ -1799,6 +1809,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
+    | '/admin/fidelite'
     | '/admin/formation'
     | '/admin/historique'
     | '/admin/incidents'
@@ -1973,6 +1984,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
+    | '/admin/fidelite'
     | '/admin/formation'
     | '/admin/historique'
     | '/admin/incidents'
@@ -2151,6 +2163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
+    | '/_authenticated/admin/fidelite'
     | '/_authenticated/admin/formation'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/incidents'
@@ -3194,6 +3207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFormationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/fidelite': {
+      id: '/_authenticated/admin/fidelite'
+      path: '/fidelite'
+      fullPath: '/admin/fidelite'
+      preLoaderRoute: typeof AuthenticatedAdminFideliteRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/factures': {
       id: '/_authenticated/admin/factures'
       path: '/factures'
@@ -3680,6 +3700,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
+  AuthenticatedAdminFideliteRoute: typeof AuthenticatedAdminFideliteRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
@@ -3721,6 +3742,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
+  AuthenticatedAdminFideliteRoute: AuthenticatedAdminFideliteRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
