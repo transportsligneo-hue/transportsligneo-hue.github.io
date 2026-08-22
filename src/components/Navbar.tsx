@@ -80,7 +80,7 @@ export default function Navbar() {
                     <Link
                       to={l.to}
                       search={l.search}
-                      activeOptions={{ exact: l.search ? false : true }}
+                      activeOptions={{ exact: l.search ? false : true, includeSearch: false }}
                       activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
                       inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
                     >
@@ -133,7 +133,7 @@ export default function Navbar() {
                     to={l.to}
                     search={l.search}
                     onClick={() => setMobileOpen(false)}
-                    activeOptions={{ exact: l.search ? false : true }}
+                    activeOptions={{ exact: l.search ? false : true, includeSearch: false }}
                     activeProps={{ className: "text-primary" }}
                     className="text-sm tracking-[0.15em] uppercase text-cream/80 hover:text-primary transition-colors"
                   >
