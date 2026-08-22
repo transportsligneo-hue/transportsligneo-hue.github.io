@@ -3,13 +3,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
-import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User } from "lucide-react";
+import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User, Inbox, Clock, CheckCircle2, Euro } from "lucide-react";
 import {
   AdminPageHeader,
   AdminSection,
   AdminBadge,
   AdminEmpty,
+  AdminStatCard,
 } from "@/components/admin/ui";
+
 import { PriceBlock } from "@/components/admin/PriceBlock";
 import { quoteFromDemande } from "@/lib/pricing-engine";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
