@@ -12,6 +12,7 @@ import PwaSplash from "@/components/pwa/PwaSplash";
 import BiometricLock from "@/components/BiometricLock";
 import CookieBanner from "@/components/CookieBanner";
 import BiometricEnrollPrompt from "@/components/BiometricEnrollPrompt";
+import BackToHome from "@/components/BackToHome";
 import { PricingProvider } from "@/lib/pricing";
 import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
@@ -224,6 +225,7 @@ function PublicChrome() {
       <MobileNavbar />
       <AssistantIaWidget />
       <CookieBanner />
+      <BackToHome />
     </>
   );
 }
