@@ -86,7 +86,7 @@ export default function CommentCaMarcheTimeline() {
           Comment <span className="v4-accent">ça marche</span>
         </h1>
         <p>
-          De la création de compte à la facture : <b style={{ color: "#fff" }}>4 grandes étapes</b>, 12 actions précises, 100 % digitalisées.
+          De la création de compte à la facture : <b className="text-[#2F5FFF]">4 grandes étapes</b>, 12 actions précises, 100 % digitalisées.
         </p>
         <div style={{ marginTop: 12 }}>
           <span className="v5-platform-pill">⚡ Plateforme digitale nouvelle génération</span>
