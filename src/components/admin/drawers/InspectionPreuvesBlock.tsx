@@ -13,6 +13,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DrawerSection } from "@/components/admin/AdminDetailDrawer";
+import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
+
 import {
   Camera, PenLine, FileImage, FileText, ZoomIn, Download, Loader2, X, Image as ImgIcon, ShieldCheck,
 } from "lucide-react";
