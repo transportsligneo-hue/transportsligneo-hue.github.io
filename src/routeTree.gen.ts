@@ -92,6 +92,7 @@ import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
 import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_authenticated/dashboard-pro.flotte'
+import { Route as AuthenticatedDashboardProFideliteRouteImport } from './routes/_authenticated/dashboard-pro.fidelite'
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
@@ -627,6 +628,12 @@ const AuthenticatedDashboardProFlotteRoute =
   AuthenticatedDashboardProFlotteRouteImport.update({
     id: '/flotte',
     path: '/flotte',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProFideliteRoute =
+  AuthenticatedDashboardProFideliteRouteImport.update({
+    id: '/fidelite',
+    path: '/fidelite',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProDocumentsRoute =
@@ -1294,6 +1301,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1466,6 +1474,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
@@ -1645,6 +1654,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/_authenticated/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1826,6 +1836,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
@@ -1998,6 +2009,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
@@ -2176,6 +2188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
+    | '/_authenticated/dashboard-pro/fidelite'
     | '/_authenticated/dashboard-pro/flotte'
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
@@ -2913,6 +2926,13 @@ declare module '@tanstack/react-router' {
       path: '/flotte'
       fullPath: '/dashboard-pro/flotte'
       preLoaderRoute: typeof AuthenticatedDashboardProFlotteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/fidelite': {
+      id: '/_authenticated/dashboard-pro/fidelite'
+      path: '/fidelite'
+      fullPath: '/dashboard-pro/fidelite'
+      preLoaderRoute: typeof AuthenticatedDashboardProFideliteRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/documents': {
@@ -3872,6 +3892,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
+  AuthenticatedDashboardProFideliteRoute: typeof AuthenticatedDashboardProFideliteRoute
   AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -3891,6 +3912,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProDevisInstantaneRoute,
     AuthenticatedDashboardProDocumentsRoute:
       AuthenticatedDashboardProDocumentsRoute,
+    AuthenticatedDashboardProFideliteRoute:
+      AuthenticatedDashboardProFideliteRoute,
     AuthenticatedDashboardProFlotteRoute: AuthenticatedDashboardProFlotteRoute,
     AuthenticatedDashboardProMissionsRoute:
       AuthenticatedDashboardProMissionsRouteWithChildren,
