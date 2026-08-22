@@ -128,6 +128,8 @@ function AdminConvoyeurDetail() {
   const [dispos, setDispos] = useState<DispoRow[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const { count: msgCount, refresh: refreshMsgCount } = useUserMessagesCount(conv?.user_id ?? null);
+
   const [form, setForm] = useState<Editable>(EMPTY);
   const [original, setOriginal] = useState<Editable>(EMPTY);
   const [saving, setSaving] = useState(false);
