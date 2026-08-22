@@ -72,6 +72,8 @@ import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditIn
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
 import { MissionLotPlaquesPanel } from "@/components/admin/missions/MissionLotPlaquesPanel";
+import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
+
 
 
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
