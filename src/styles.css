@@ -8114,3 +8114,17 @@ html.theme-light .r4-page .ligneo-map .ligneo-map-card {
 /* la légende (point doré isolé) n'a plus de sens sur fond clair fondu */
 html.theme-light .r4-page .ligneo-map .ligneo-map-legend { display: none; }
 
+
+/* ============================================================
+   Thème sombre · plus aucun voile blanc autour de la bande
+   "Ils nous font confiance" (les fondus clairs sont réservés
+   au thème clair).
+   ============================================================ */
+html.theme-dark .r4-page .v5-trust::before,
+html.theme-dark .r4-page .v5-trust::after {
+  display: none !important;
+  background: none !important;
+}
+html.theme-dark .r4-page .v5-trust {
+  background: linear-gradient(90deg, rgba(20,45,140,0.22), rgba(47,95,255,0.14) 50%, rgba(20,45,140,0.22)) !important;
+}
