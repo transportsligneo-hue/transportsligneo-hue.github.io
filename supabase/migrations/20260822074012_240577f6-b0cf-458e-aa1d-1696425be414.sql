@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_legacy_mission_from_trajet() FROM PUBLIC, anon, authenticated;
