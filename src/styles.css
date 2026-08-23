@@ -8492,3 +8492,8 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: rgba(255, 
 .dvx-btn.outline { color:#2f5fff; background:#fff; border:1px solid #dce6fd; }
 .dvx-btn.outline:hover:not(:disabled) { background:#eef2ff; transform:translateY(-1px); }
 .dvx-foot-select { margin-left:auto; }
+
+/* Devis admin — repères Duo (Livraison / Restitution) */
+.dvx-leg { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:.03em; border:1px solid transparent; }
+.dvx-leg.l { background:#eef2ff; color:#1c3fc4; border-color:#dce6fd; }
+.dvx-leg.r { background:#fdf3e7; color:#b45309; border-color:#f6e0c0; }
