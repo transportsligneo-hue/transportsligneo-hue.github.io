@@ -227,9 +227,20 @@ function AdminMessages() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
+                    <IconButton
+                      onClick={() => {
+                        setComposeTo(m.email);
+                        setComposing(true);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      title="Répondre par email"
+                    >
+                      <Mail size={15} />
+                    </IconButton>
                     <IconButton onClick={() => setSelected(m)} title="Voir" tone="primary">
                       <Eye size={15} />
                     </IconButton>
+
                   </div>
                 </TD>
               </TR>
