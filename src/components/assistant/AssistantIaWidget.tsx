@@ -58,7 +58,6 @@ const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; d
 const WELCOME =
   "Vrooom, bonjour ! Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
 
-const PROACTIVE_PATHS = ["/tarifs", "/estimer", "/estimation"];
 
 const HIDDEN_PREFIXES = ["/admin", "/convoyeur", "/dashboard", "/scan", "/espace", "/lovable"];
 
