@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { useClientBrands, clientBrandOf, cleanSociete } from "@/components/admin/ClientBrand";
+import { ClientLogo } from "@/components/admin/ClientLogo";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle, Euro, CheckCircle2, Search, Plus, Layers, ArrowLeftRight, ArrowRight, ArrowLeft } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
@@ -302,6 +304,7 @@ function AdminDevisPage() {
     URL.revokeObjectURL(url);
   };
 
+  const brands = useClientBrands(devis.map((d) => d.email));
   const filtered = devis
     .filter((d) => {
       if (!showArchived && d.archived_at) return false;
@@ -439,6 +442,9 @@ function AdminDevisPage() {
             const vehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.modele || v.marque));
             const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
             const isAR = /aller[-_ ]?retour/i.test(d.option_trajet ?? "");
+            const brand = clientBrandOf(brands, d.email);
+            const societe = cleanSociete(brand?.societe);
+            const contactName = `${d.prenom ?? ""} ${d.nom ?? ""}`.trim();
             return (
               <div key={d.id} className={`dvx-card ${d.archived_at ? "is-archived" : ""}`}>
                 {/* En-tête de carte */}
@@ -474,9 +480,29 @@ function AdminDevisPage() {
                 {/* Corps 4 colonnes */}
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className="dvx-avatar">{initials}</span>
+                    {societe || brand?.logoUrl ? (
+                      <ClientLogo
+                        src={brand?.logoUrl}
+                        name={societe || contactName}
+                        isCompany={!!societe}
+                        size="md"
+                      />
+                    ) : (
+                      <span className="dvx-avatar">{initials}</span>
+                    )}
                     <div className="min-w-0">
-                      <p className="text-[13.5px] font-bold text-[#14161c] truncate">{d.prenom} {d.nom}</p>
+                      {societe ? (
+                        <>
+                          <p className="text-[15px] font-extrabold leading-tight text-[#14161c] truncate" title={societe}>
+                            {societe}
+                          </p>
+                          {contactName && (
+                            <p className="text-[11px] text-[#a3a4ac] truncate">{contactName}</p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-[13.5px] font-bold text-[#14161c] truncate">{contactName || "—"}</p>
+                      )}
                       <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d] truncate">
                         <Mail size={11} className="shrink-0" />{d.email}
                       </p>
