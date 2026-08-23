@@ -256,6 +256,7 @@ function AdminMissionDetail() {
   const [generatingFacture, setGeneratingFacture] = useState(false);
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [edlPreviewUrl, setEdlPreviewUrl] = useState<string | null>(null);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [contactNom, setContactNom] = useState("");
   const [contactPrenom, setContactPrenom] = useState("");
