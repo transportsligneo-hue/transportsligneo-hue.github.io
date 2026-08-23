@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Download, Mail, FileArchive, X } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
-import { useServerFn } from "@tanstack/react-start";
-import { sendMissionDossierEmail } from "@/lib/mission-dossier-email.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 interface Props {
   open: boolean;
@@ -36,7 +36,6 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
   const [message, setMessage] = useState(
     `Bonjour,\n\nVeuillez trouver ci-joint le dossier complet de la mission ${numero} : état des lieux départ et arrivée, PV de livraison signé et documents du véhicule.\n\nBien cordialement,\nTransports Ligneo`,
   );
-  const sendFn = useServerFn(sendMissionDossierEmail);
 
   useEffect(() => {
     if (!open) return;
@@ -84,8 +83,22 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
     }
     setSending(true);
     try {
-      const pdfBase64 = await blobToBase64(blob);
-      await sendFn({ data: { to: to.trim(), subject, message, filename, pdfBase64 } });
+      const path = `dossiers/${filename}`;
+      const { error: upErr } = await supabase.storage
+        .from("devis-acceptes")
+        .upload(path, blob, { contentType: "application/pdf", upsert: true });
+      if (upErr) throw new Error(upErr.message);
+      const { data: signed, error: signErr } = await supabase.storage
+        .from("devis-acceptes")
+        .createSignedUrl(path, 60 * 60 * 24 * 30, { download: filename });
+      if (signErr || !signed?.signedUrl) throw new Error(signErr?.message ?? "Lien de téléchargement indisponible");
+
+      await sendTransactionalEmail({
+        templateName: "dossier-mission",
+        recipientEmail: to.trim(),
+        idempotencyKey: `dossier-${numero}-${Date.now()}`,
+        templateData: { numero, message, pdfUrl: signed.signedUrl },
+      });
       toast.success("Dossier envoyé", { description: to.trim() });
       onClose();
     } catch (e) {
@@ -135,7 +148,7 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
               value={to}
               onChange={(e) => setTo(e.target.value)}
               placeholder="adresse@email.fr"
-              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[#2F5FFF]"
+              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#2F5FFF]"
             />
             {suggestions.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -158,7 +171,7 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[#2F5FFF]"
+              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#2F5FFF]"
             />
           </div>
 
@@ -168,7 +181,7 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
-              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[#2F5FFF]"
+              className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#2F5FFF]"
             />
           </div>
         </div>

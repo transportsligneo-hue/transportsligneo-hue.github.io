@@ -18,6 +18,7 @@ import { template as offreAcceptee } from './offre-acceptee'
 import { template as offreRefusee } from './offre-refusee'
 import { template as nouvelleOffreAdmin } from './nouvelle-offre-admin'
 import { template as documentMissionAdmin } from './document-mission-admin'
+import { template as dossierMission } from './dossier-mission'
 import { template as missionTermineeAdmin } from './mission-terminee-admin'
 import { template as b2bPaiementAdmin } from './b2b-paiement-admin'
 import { template as b2bLeadFlotteAdmin } from './b2b-lead-flotte-admin'
@@ -65,6 +66,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'offre-refusee': offreRefusee,
   'nouvelle-offre-admin': nouvelleOffreAdmin,
   'document-mission-admin': documentMissionAdmin,
+  'dossier-mission': dossierMission,
   'mission-terminee-admin': missionTermineeAdmin,
   'b2b-paiement-admin': b2bPaiementAdmin,
   'b2b-lead-flotte-admin': b2bLeadFlotteAdmin,
