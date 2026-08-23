@@ -69,6 +69,7 @@ interface Attribution {
     client_email?: string | null;
     client_telephone?: string | null; type_transport?: string | null; is_test_data?: boolean | null;
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
+    archived_at?: string | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
     vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
     options_meta?: unknown;
@@ -172,6 +173,8 @@ function vueLabelFor(vueType: string): string {
 function AdminAttributions() {
   const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
+  const [archivedView, setArchivedView] = useState(false);
+  const [statutFilter, setStatutFilter] = useState<"all" | "encours" | "terminees" | "annulees">("all");
   const clientBrands = useClientBrands(attributions.map((a) => a.trajet?.client_email));
   const pvMap = useMissionPv(attributions.map((a) => a.id));
   const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
@@ -358,6 +361,38 @@ function AdminAttributions() {
     return map;
   }, [attributions]);
 
+  /* ---- Tri par défaut & archivage (60 jours) ---- */
+  const isClosedAttr = (a: Attribution) =>
+    ["termine", "validee", "annule", "refuse", "refusee"].includes(a.statut) ||
+    ["termine", "annule"].includes(a.trajet?.statut ?? "");
+
+  const attrTime = (a: Attribution) =>
+    new Date(a.trajet?.date_trajet ?? a.created_at).getTime();
+
+  const archivedCount = useMemo(
+    () => attributions.filter((a) => !!a.trajet?.archived_at).length,
+    [attributions],
+  );
+
+  const visibleAttributions = useMemo(() => {
+    const list = attributions.filter((a) => {
+      const archived = !!a.trajet?.archived_at;
+      if (archivedView !== archived) return false;
+      if (statutFilter === "encours") return !isClosedAttr(a);
+      if (statutFilter === "terminees") return ["termine", "validee"].includes(a.statut) || a.trajet?.statut === "termine";
+      if (statutFilter === "annulees") return ["annule", "refuse", "refusee"].includes(a.statut) || a.trajet?.statut === "annule";
+      return true;
+    });
+    return list.sort((x, y) => {
+      const cx = isClosedAttr(x);
+      const cy = isClosedAttr(y);
+      if (cx !== cy) return cx ? 1 : -1;
+      // Actives : date la plus proche en premier — clôturées : plus récentes d'abord
+      return cx ? attrTime(y) - attrTime(x) : attrTime(x) - attrTime(y);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attributions, archivedView, statutFilter]);
+
   type GroupedItem =
     | { kind: "group"; gid: string; seq: string; items: Attribution[] }
     | { kind: "single"; a: Attribution };
@@ -365,12 +400,12 @@ function AdminAttributions() {
   const groupedAttributions = useMemo<GroupedItem[]>(() => {
     const out: GroupedItem[] = [];
     const seen = new Set<string>();
-    attributions.forEach((a) => {
+    visibleAttributions.forEach((a) => {
       const gid = a.trajet?.mission_group_id ?? null;
       if (!gid) { out.push({ kind: "single", a }); return; }
       if (seen.has(gid)) return;
       seen.add(gid);
-      const items = attributions
+      const items = visibleAttributions
         .filter((x) => x.trajet?.mission_group_id === gid)
         .sort((x, y) => ((x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1)) - (y.trajet?.leg_index ?? (y.trajet?.leg_type === "retour" ? 2 : 1))));
       if (items.length < 2) { out.push({ kind: "single", a }); return; }
@@ -378,7 +413,7 @@ function AdminAttributions() {
       out.push({ kind: "group", gid, seq, items });
     });
     return out;
-  }, [attributions, arBaseByGroup]);
+  }, [visibleAttributions, arBaseByGroup]);
 
   const [devisVehicules, setDevisVehicules] = useState<Map<string, DevisVehicule[]>>(new Map());
 
@@ -397,7 +432,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, archived_at, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -885,10 +920,51 @@ function AdminAttributions() {
         </div>
       )}
 
+      {/* Filtres statut + archive */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {([
+          { v: "all", l: "Toutes" },
+          { v: "encours", l: "En cours / à venir" },
+          { v: "terminees", l: "Terminées" },
+          { v: "annulees", l: "Annulées" },
+        ] as const).map((f) => (
+          <button
+            key={f.v}
+            onClick={() => setStatutFilter(f.v)}
+            className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
+              statutFilter === f.v
+                ? "border-[#2f5fff] bg-[#2f5fff] text-white"
+                : "border-[#e3e6ef] bg-white text-pro-text-soft hover:border-[#2f5fff]"
+            }`}
+          >
+            {f.l}
+          </button>
+        ))}
+        <button
+          onClick={() => setArchivedView((v) => !v)}
+          title="Missions terminées ou annulées depuis plus de 60 jours"
+          className={`ml-auto rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
+            archivedView
+              ? "border-[#B8862A] bg-[#B8862A] text-white"
+              : "border-[#e3e6ef] bg-white text-pro-text-soft hover:border-[#B8862A]"
+          }`}
+        >
+          Archivées · {archivedCount}
+        </button>
+      </div>
+
       <LegSuffixLegend className="mb-3" />
 
-      {attributions.length === 0 ? (
-        <EmptyState icon={Send} title="Aucune attribution" description="Attribuez un trajet à un convoyeur pour commencer." />
+      {visibleAttributions.length === 0 ? (
+        <EmptyState
+          icon={Send}
+          title={archivedView ? "Aucune mission archivée" : "Aucune attribution"}
+          description={
+            archivedView
+              ? "Les missions terminées ou annulées depuis plus de 60 jours apparaîtront ici."
+              : "Attribuez un trajet à un convoyeur pour commencer."
+          }
+        />
       ) : (
         <div className="space-y-3">
           {groupedAttributions.map((item) =>
