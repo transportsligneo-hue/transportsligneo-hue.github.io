@@ -84,7 +84,7 @@ function TarifsPage() {
             <div className="v4-svc-card">
               <h3>Options</h3>
               {[
-                ["Livraison hors horaires / week-end / express (24h)", "+20 %"],
+                ["Livraison hors horaires / week-end", "+20 %"],
                 ["Lavage intérieur", "Sur devis"],
                 ["Lavage intérieur + extérieur", "Sur devis"],
                 ["Stockage véhicules", "Sur devis"],
