@@ -169,41 +169,42 @@ async function toDataUrl(url: string): Promise<string | null> {
 
 // ---------- Blocs HTML ----------
 
-function renderCoverHeader(logoData: string, m: EdlFinalPdfData): string {
+/**
+ * En-tête premium identique sur TOUTES les pages :
+ * bande navy 30mm + liseré bleu électrique néon, logo + wordmark à gauche,
+ * badge de référence + contexte de page à droite.
+ */
+function renderHeader(logoData: string, m: EdlFinalPdfData, right: string): string {
   return `
-    <div class="cover-head">
+    <div class="pdf-head">
       <div class="brand">
-        <img class="brand-logo" src="${logoData}" alt="Transports Ligneo">
+        ${logoData ? `<img class="brand-logo" src="${logoData}" alt="Transports Ligneo">` : ""}
         <div>
-          <div class="brand-name">TRANSPORTS LIGNEO</div>
+          <div class="brand-name"><span class="bn-1">TRANSPORTS</span> <span class="bn-2">LIGNEO</span></div>
           <div class="brand-tag">Convoyage automobile</div>
         </div>
       </div>
       <div class="ref-block">
         <div class="ref-pill">${escape(m.numero)}</div>
-        <div class="ref-date">Édité le ${escape(fmtDate(m.date_mission ?? new Date().toISOString()))}</div>
+        <div class="ref-date">${escape(right)}</div>
       </div>
     </div>`;
 }
 
-function renderPageHeader(logoData: string, m: EdlFinalPdfData, section: string, pageNum: number, total: number): string {
-  return `
-    <div class="pg-head">
-      <div class="pg-brand">
-        <img class="pg-logo" src="${logoData}" alt="Transports Ligneo">
-        <div class="pg-brand-name">TRANSPORTS LIGNEO</div>
-      </div>
-      <div class="pg-section">${escape(section)}</div>
-      <div class="pg-ref">
-        <div class="pg-ref-num">${escape(m.numero)}</div>
-        <div class="pg-ref-page">Page ${pageNum}/${total}</div>
-      </div>
-    </div>`;
+function renderCoverHeader(logoData: string, m: EdlFinalPdfData): string {
+  return renderHeader(logoData, m, `Édité le ${fmtDate(m.date_mission ?? new Date().toISOString())}`);
 }
 
-function renderFoot(): string {
-  return `<div class="pg-foot">Transports Ligneo — Document confidentiel — Aucune valeur commerciale</div>`;
+function renderPageHeader(logoData: string, m: EdlFinalPdfData, section: string, _pageNum: number, _total: number): string {
+  return renderHeader(logoData, m, section);
 }
+
+function renderFoot(pageNum?: number, total?: number): string {
+  return `<div class="pg-foot"><span>Transports Ligneo — Document confidentiel — Aucune valeur commerciale</span>${
+    pageNum && total ? `<span class="pg-foot-num">Page ${pageNum}/${total}</span>` : ""
+  }</div>`;
+}
+
 
 function renderCoverBody(
   m: EdlFinalPdfData,
