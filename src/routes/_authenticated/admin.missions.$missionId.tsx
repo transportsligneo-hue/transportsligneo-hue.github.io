@@ -33,6 +33,7 @@ import {
   Fingerprint,
   Pencil,
   Eye,
+  FileArchive,
 } from "lucide-react";
 import {
   Card,
@@ -68,6 +69,7 @@ import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionNotifAdminPanel } from "@/components/admin/missions/MissionNotifAdminPanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
+import { MissionDossierDialog } from "@/components/admin/missions/MissionDossierDialog";
 import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
@@ -255,6 +257,7 @@ function AdminMissionDetail() {
   const [generatingFacture, setGeneratingFacture] = useState(false);
   const [generatingEdlPdf, setGeneratingEdlPdf] = useState(false);
   const [edlPreviewUrl, setEdlPreviewUrl] = useState<string | null>(null);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [contactNom, setContactNom] = useState("");
   const [contactPrenom, setContactPrenom] = useState("");
@@ -585,7 +588,139 @@ function AdminMissionDetail() {
     }
   };
 
+  /**
+   * Collecte les documents scannés de la mission (PV de livraison, carte grise…)
+   * pour les intégrer en pleine page dans le dossier complet.
+   * Les documents absents sont simplement ignorés.
+   */
+  const collectMissionDocuments = async (): Promise<{ label: string; url: string; meta?: string | null }[]> => {
+    const out: { label: string; url: string; meta?: string | null; rank: number }[] = [];
+    const isImage = (p: string) => /\.(jpe?g|png|webp|heic)$/i.test(p);
+
+    try {
+      const { data: docs } = await supabase
+        .from("mission_documents")
+        .select("type_document, nom_fichier, url_fichier, created_at")
+        .eq("attribution_id", attribution!.id)
+        .order("created_at", { ascending: false });
+      const rows = ((docs ?? []) as { type_document: string; nom_fichier: string | null; url_fichier: string; created_at: string }[])
+        .filter((d) => /pv_livraison|pv_restitution|carte_grise/i.test(d.type_document) && isImage(d.url_fichier));
+      const seen = new Set<string>();
+      const uniques = rows.filter((d) => (seen.has(d.type_document) ? false : (seen.add(d.type_document), true)));
+      if (uniques.length) {
+        const paths = uniques.map((d) => d.url_fichier);
+        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(paths, 3600);
+        uniques.forEach((d, i) => {
+          const url = signed?.[i]?.signedUrl;
+          if (!url) return;
+          const isCg = /carte_grise/i.test(d.type_document);
+          out.push({
+            label: isCg ? "Carte grise" : "PV de livraison signé",
+            url,
+            meta: d.nom_fichier ?? null,
+            rank: isCg ? 2 : 1,
+          });
+        });
+      }
+    } catch {
+      // documents optionnels : on n'échoue pas la génération
+    }
+
+    // Carte grise fournie à la commande (fallback)
+    if (!out.some((d) => d.rank === 2)) {
+      const t = trajet as unknown as { carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null };
+      for (const [face, raw] of [["recto", t?.carte_grise_recto_url], ["verso", t?.carte_grise_verso_url]] as const) {
+        if (!raw) continue;
+        let url = raw;
+        if (!/^https?:\/\//i.test(raw)) {
+          const { data: s } = await supabase.storage.from("devis-documents").createSignedUrl(raw, 3600);
+          if (!s?.signedUrl) continue;
+          url = s.signedUrl;
+        }
+        if (!isImage(url.split("?")[0])) continue;
+        out.push({ label: `Carte grise — ${face}`, url, meta: null, rank: 2 });
+      }
+    }
+
+    return out.sort((a, b) => a.rank - b.rank).map(({ rank: _rank, ...d }) => d);
+  };
+
+  /** Compile le dossier complet de la mission en un seul PDF. */
+  const buildDossierBlob = async (): Promise<Blob> => {
+    if (!attribution || !trajet) throw new Error("Mission incomplète");
+
+    const { data: inspFull } = await supabase
+      .from("inspections")
+      .select("type, equipements, kilometrage_depart, kilometrage_arrivee")
+      .eq("attribution_id", attribution.id);
+    const inspDepart = inspFull?.find((i) => i.type === "depart");
+    const inspArrivee = inspFull?.find((i) => i.type === "arrivee");
+
+    const vin = (trajet as { vin?: string | null; vehicule_vin?: string | null }).vin
+      ?? (trajet as { vehicule_vin?: string | null }).vehicule_vin
+      ?? null;
+
+    const { data: sigsRaw } = await supabase
+      .from("mission_signatures")
+      .select("kind, signature_data")
+      .eq("attribution_id", attribution.id);
+    const signatures = ((sigsRaw ?? []) as { kind: string; signature_data: string | null }[])
+      .map((s) => ({ kind: s.kind, url: s.signature_data }));
+
+    const { data: incidents } = await supabase
+      .from("mission_incidents")
+      .select("titre, description, gravite, created_at")
+      .eq("attribution_id", attribution.id)
+      .order("created_at", { ascending: true });
+
+    const photosDepart = inspections
+      .filter((i) => i.type === "depart")
+      .flatMap((i) => i.photos)
+      .filter((p) => !p.vue_type.startsWith("signature"))
+      .map((p) => ({ vue_type: p.vue_type, url: p.url_photo }));
+    const photosArrivee = inspections
+      .filter((i) => i.type === "arrivee")
+      .flatMap((i) => i.photos)
+      .filter((p) => !p.vue_type.startsWith("signature"))
+      .map((p) => ({ vue_type: p.vue_type, url: p.url_photo }));
+
+    const docs = await collectMissionDocuments();
+
+    return generateEdlFinalPdf(
+      {
+        numero: missionNumberOf(attribution),
+        date_mission: trajet.date_trajet,
+        depart: trajet.depart,
+        arrivee: trajet.arrivee,
+        vehicule: {
+          marque: trajet.marque,
+          modele: trajet.modele,
+          immatriculation: trajet.immatriculation,
+          vin,
+        },
+        convoyeur: convoyeur
+          ? { prenom: convoyeur.prenom, nom: convoyeur.nom, telephone: convoyeur.telephone }
+          : null,
+        contactArrivee: {
+          nom: trajet.arrivee_contact_nom,
+          telephone: trajet.arrivee_contact_telephone,
+          instructions: trajet.arrivee_contact_instructions,
+        },
+        equipements: (inspDepart?.equipements ?? inspArrivee?.equipements ?? null) as Record<string, unknown> | null,
+        kilometrage_depart: inspDepart?.kilometrage_depart ?? null,
+        kilometrage_arrivee: inspArrivee?.kilometrage_arrivee ?? null,
+        photosDepart,
+        photosArrivee,
+        signatures,
+        incidents: incidents ?? [],
+        documents: docs,
+      },
+      { dossier: true },
+    );
+  };
+
   const downloadEdlPdf = async (mode: "download" | "preview" = "download") => {
+
     if (!attribution || !trajet || generatingEdlPdf) return;
     setGeneratingEdlPdf(true);
     try {
@@ -1134,6 +1269,12 @@ function AdminMissionDetail() {
               disabled={generatingEdlPdf}
             >
               PDF état des lieux
+            </Button>
+            <Button
+              icon={<FileArchive size={14} />}
+              onClick={() => setDossierOpen(true)}
+            >
+              Générer le dossier complet
             </Button>
             <button
               type="button"
@@ -2008,6 +2149,20 @@ function AdminMissionDetail() {
           </div>
         </div>
       )}
+
+      {attribution && trajet && (
+        <MissionDossierDialog
+          open={dossierOpen}
+          onClose={() => setDossierOpen(false)}
+          numero={missionNumberOf(attribution)}
+          buildPdf={buildDossierBlob}
+          suggestions={[
+            ...(trajet.client_email ? [{ label: "Client", email: trajet.client_email }] : []),
+            ...(convoyeur?.email ? [{ label: "Convoyeur", email: convoyeur.email }] : []),
+          ]}
+        />
+      )}
     </div>
+
   );
 }

@@ -43,7 +43,27 @@ export interface EdlFinalPdfData {
   photosArrivee: EdlFinalPdfPhoto[];
   signatures?: { kind: string; url?: string | null }[];
   incidents?: { titre: string; description: string; gravite: string; created_at: string }[];
+  /** Documents scannés (PV de livraison, carte grise…) rendus en pleine page. */
+  documents?: EdlFinalPdfDocument[];
 }
+
+export interface EdlFinalPdfDocument {
+  /** Libellé affiché en bandeau (ex : « PV de livraison signé »). */
+  label: string;
+  url: string;
+  /** Sous-titre optionnel (date, origine…). */
+  meta?: string | null;
+}
+
+export interface EdlFinalPdfOptions {
+  /** Mode « dossier complet » : couverture + sommaire adaptés. */
+  dossier?: boolean;
+}
+
+/** Types de vues considérés comme des documents scannés (rendus en pleine page). */
+const DOC_VUE_RE = /(pv_livraison|pv_restitution|carte_grise|cpi|bon_commande|bon_livraison|mandat)/i;
+export const isScannedDocumentVue = (vueType: string) => DOC_VUE_RE.test(vueType);
+
 
 const VUE_LABELS: Record<string, string> = {
   face_avant: "Face avant",
@@ -185,7 +205,13 @@ function renderFoot(): string {
   return `<div class="pg-foot">Transports Ligneo — Document confidentiel — Aucune valeur commerciale</div>`;
 }
 
-function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhotos: { dep: number; arr: number }): string {
+function renderCoverBody(
+  m: EdlFinalPdfData,
+  distance: number | null,
+  totalPhotos: { dep: number; arr: number },
+  docs: EdlFinalPdfDocument[] = [],
+  dossier = false,
+): string {
   const dep = splitAddress(m.depart);
   const arr = splitAddress(m.arrivee);
   const veh = [m.vehicule?.marque, m.vehicule?.modele].filter(Boolean).join(" ") || "—";
@@ -238,8 +264,9 @@ function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhoto
 
 
   return `
-    <div class="cover-title">État des lieux</div>
-    <div class="cover-sub">Dossier de convoyage complet — départ &amp; arrivée</div>
+    <div class="cover-title">${dossier ? "Dossier complet de mission" : "État des lieux"}</div>
+    <div class="cover-sub">${dossier ? "État des lieux, PV de livraison signé &amp; documents du véhicule" : "Dossier de convoyage complet — départ &amp; arrivée"}</div>
+
 
     <div class="stats-row">
       ${stats
@@ -288,11 +315,20 @@ function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhoto
     </div>
 
     <div class="toc">
-      <div class="toc-row"><span class="toc-num">1</span><span class="toc-text">Informations &amp; équipements</span></div>
-      <div class="toc-row"><span class="toc-num">2</span><span class="toc-text">État des lieux — Départ (${totalPhotos.dep} photos)</span></div>
-      <div class="toc-row"><span class="toc-num">3</span><span class="toc-text">État des lieux — Arrivée (${totalPhotos.arr} photos)</span></div>
-      <div class="toc-row"><span class="toc-num">4</span><span class="toc-text">Signatures &amp; validation</span></div>
+      ${[
+        "Informations &amp; équipements",
+        `État des lieux — Départ (${totalPhotos.dep} photos)`,
+        `État des lieux — Arrivée (${totalPhotos.arr} photos)`,
+        "Signatures &amp; validation",
+        ...docs.map((d) => `${escape(d.label)} (document scanné)`),
+      ]
+        .map(
+          (t, i) =>
+            `<div class="toc-row"><span class="toc-num">${i + 1}</span><span class="toc-text">${t}</span></div>`,
+        )
+        .join("")}
     </div>
+
   `;
 }
 
@@ -475,39 +511,63 @@ const CSS = `
 .edl-pdf-root .sig-caption span{color:var(--text-mute);font-weight:600;}
 
 .edl-pdf-root .mention{background:#FBF8EC;border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
+
+/* ===== DOCUMENTS SCANNÉS (pleine page) ===== */
+.edl-pdf-root .doc-frame{
+  height:222mm;border:1px solid var(--panel-border);border-radius:8px;background:#fff;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4mm;
+}
+.edl-pdf-root .doc-frame img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;}
+.edl-pdf-root .doc-empty{font-size:11px;color:var(--text-mute);font-style:italic;}
+.edl-pdf-root .doc-meta{margin-top:6px;font-size:9.5px;color:var(--text-mute);text-align:right;}
 `;
+
 
 // ---------- Rendu principal ----------
 
-export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
+export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfOptions = {}): Promise<Blob> {
+  // 0) Extraire les documents scannés des grilles photos : ils sont illisibles
+  //    en vignette et sont désormais rendus en pleine page.
+  const isDoc = (p: EdlFinalPdfPhoto) => isScannedDocumentVue(p.vue_type);
+  const extractedDocs: EdlFinalPdfDocument[] = [
+    ...m.photosDepart.filter(isDoc).map((p) => ({ label: `${p.label ?? labelOf(p.vue_type)} — départ`, url: p.url })),
+    ...m.photosArrivee.filter(isDoc).map((p) => ({ label: `${p.label ?? labelOf(p.vue_type)} — arrivée`, url: p.url })),
+  ];
+  const gridDepart = m.photosDepart.filter((p) => !isDoc(p));
+  const gridArrivee = m.photosArrivee.filter((p) => !isDoc(p));
+  const allDocsRaw = [...(m.documents ?? []), ...extractedDocs].filter((d) => !!d.url);
+
   // 1) Précharger images en dataURL
   const logoData = (await toDataUrl(logoLigneo)) ?? "";
   const dep = await Promise.all(
-    m.photosDepart.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
+    gridDepart.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
   );
   const arr = await Promise.all(
-    m.photosArrivee.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
+    gridArrivee.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
   );
   const sigs = await Promise.all(
     (m.signatures ?? []).map(async (s) => ({ ...s, url: s.url ? ((await toDataUrl(s.url)) ?? s.url) : s.url })),
   );
-  const data: EdlFinalPdfData = { ...m, photosDepart: dep, photosArrivee: arr, signatures: sigs };
+  const docs = await Promise.all(
+    allDocsRaw.map(async (d) => ({ ...d, url: (await toDataUrl(d.url)) ?? d.url })),
+  );
+  const data: EdlFinalPdfData = { ...m, photosDepart: dep, photosArrivee: arr, signatures: sigs, documents: docs };
 
   const distance =
     data.kilometrage_depart != null && data.kilometrage_arrivee != null
       ? Math.max(0, data.kilometrage_arrivee - data.kilometrage_depart)
       : null;
 
-  const totalPages = 4;
+  const totalPages = 4 + docs.length;
 
-  // 2) Construction des 4 pages
+  // 2) Construction des pages
   const pagesHtml: string[] = [];
 
   // Page 1 : Couverture
   pagesHtml.push(`
     <div class="page">
       ${renderCoverHeader(logoData, data)}
-      ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length })}
+      ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length }, docs, !!opts.dossier)}
       ${renderFoot()}
     </div>`);
 
@@ -537,6 +597,21 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
       ${renderSignatures(data.signatures)}
       ${renderFoot()}
     </div>`);
+
+  // Pages suivantes : documents scannés, un par page, en grand format
+  docs.forEach((d, i) => {
+    pagesHtml.push(`
+      <div class="page">
+        ${renderPageHeader(logoData, data, d.label, 5 + i, totalPages)}
+        ${renderSectionBand(d.label.toUpperCase(), "Document scanné")}
+        <div class="doc-frame">${
+          d.url ? `<img src="${d.url}" alt="${escape(d.label)}" crossorigin="anonymous" />` : `<div class="doc-empty">Document indisponible</div>`
+        }</div>
+        ${d.meta ? `<div class="doc-meta">${escape(d.meta)}</div>` : ""}
+        ${renderFoot()}
+      </div>`);
+  });
+
 
   // 3) Monter dans le DOM hors-écran
   const root = document.createElement("div");
