@@ -22,6 +22,8 @@ export type NativePushPayload = {
   body?: string;
   url?: string;
   tag?: string;
+  /** Grande image (https) affichée dans la notification Android. */
+  image?: string;
 };
 
 function readServiceAccount(): ServiceAccount | null {
@@ -140,7 +142,7 @@ export async function sendNativePushToUser(userId: string, payload: NativePushPa
               android: {
                 priority: "HIGH",
                 notification: {
-                  channel_id: "ligneo",
+                  channel_id: "missions",
                   // Petite icône : Android impose une silhouette monochrome
                   icon: "ic_notification",
                   // Teinte appliquée à la silhouette + accent système
@@ -148,7 +150,7 @@ export async function sendNativePushToUser(userId: string, payload: NativePushPa
                   // Visuel couleur (logo complet avec badge) affiché à l'ouverture
                   // de la notification (grande image) — seule façon d'avoir de la
                   // couleur et le badge sur Android.
-                  image: NOTIFICATION_IMAGE_URL,
+                  image: payload.image ?? NOTIFICATION_IMAGE_URL,
                 },
               },
               apns: {

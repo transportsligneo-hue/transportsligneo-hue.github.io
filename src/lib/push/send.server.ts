@@ -19,6 +19,7 @@ export type PushPayload = {
   url?: string;
   tag?: string;
   icon?: string;
+  image?: string;
   badge?: string;
   requireInteraction?: boolean;
   data?: Record<string, unknown>;
@@ -38,6 +39,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
       body: payload.body,
       url: payload.url,
       tag: payload.tag,
+      image: payload.image,
     });
   } catch (e) {
     console.warn("[push] natif indisponible", e);
