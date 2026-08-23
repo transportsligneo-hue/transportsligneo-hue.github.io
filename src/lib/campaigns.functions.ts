@@ -132,9 +132,6 @@ export const sendCampaign = createServerFn({ method: 'POST' })
     await assertAdmin(context as any)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
-    const gatewayKey = process.env['LOVABLE_API_KEY']
-    const resendKey = process.env['RESEND_API_KEY']
-    if (!gatewayKey || !resendKey) throw new Error("Le service d'envoi email n'est pas configuré")
 
     const { data: campaign, error: campaignError } = await supabaseAdmin
       .from('campaigns')
