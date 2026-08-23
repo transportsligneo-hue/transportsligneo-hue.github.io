@@ -194,29 +194,22 @@ export const sendCampaign = createServerFn({ method: 'POST' })
       const subject = campaign.subject || campaign.name
 
       try {
-        const response = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${gatewayKey}`,
-            'X-Connection-Api-Key': resendKey,
-          },
-          body: JSON.stringify({
-            from: `${campaign.sender_name || 'Transports Ligneo'} <contact@transportsligneo.fr>`,
-            to: [contact.email],
-            subject,
-            html,
-            text,
-          }),
+        const { sendRawEmailServer } = await import('@/server/email-send')
+        const res = await sendRawEmailServer({
+          to: contact.email,
+          subject,
+          html,
+          text,
+          senderName: campaign.sender_name,
+          label: `campagne_${campaign.id}`,
+          idempotencyKey: `campaign_${campaign.id}_${recipient.id}`,
         })
 
-        if (!response.ok) {
-          const errorBody = await response.text()
-          console.error(`[send-campaign] provider error [${response.status}]: ${errorBody}`)
+        if (!res.success) {
           failed += 1
           await supabaseAdmin
             .from('campaign_recipients')
-            .update({ status: 'failed', error_message: `${response.status}: ${errorBody.slice(0, 500)}` })
+            .update({ status: 'failed', error_message: res.reason ?? 'send_failed' })
             .eq('id', recipient.id)
           continue
         }

@@ -35,10 +35,6 @@ export const sendDirectEmail = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     await assertAdmin(context as any)
 
-    const gatewayKey = process.env['LOVABLE_API_KEY']
-    const resendKey = process.env['RESEND_API_KEY']
-    if (!gatewayKey || !resendKey) throw new Error("Le service d'envoi email n'est pas configuré")
-
     const vars = {
       prenom: data.prenom ?? '',
       nom: data.nom ?? '',
@@ -49,26 +45,21 @@ export const sendDirectEmail = createServerFn({ method: 'POST' })
     const html = buildCampaignHtml({ campaign: data, vars })
     const text = buildCampaignText(data, vars)
 
-    const response = await fetch('https://connector-gateway.lovable.dev/resend/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${gatewayKey}`,
-        'X-Connection-Api-Key': resendKey,
-      },
-      body: JSON.stringify({
-        from: `${data.sender_name || 'Transports Ligneo'} <contact@transportsligneo.fr>`,
-        to: [data.to],
-        subject: data.subject,
-        html,
-        text,
-      }),
+    const { sendRawEmailServer } = await import('@/server/email-send')
+    const res = await sendRawEmailServer({
+      to: data.to,
+      subject: data.subject,
+      html,
+      text,
+      senderName: data.sender_name,
+      label: 'email_direct',
     })
-
-    if (!response.ok) {
-      const errorBody = await response.text()
-      console.error(`[send-direct-email] provider error [${response.status}]: ${errorBody}`)
-      throw new Error(`Envoi refusé [${response.status}]: ${errorBody.slice(0, 300)}`)
+    if (!res.success) {
+      throw new Error(
+        res.reason === 'email_suppressed'
+          ? "Ce destinataire s'est désinscrit des emails"
+          : "Envoi impossible pour le moment",
+      )
     }
 
     return { ok: true as const, to: data.to }
