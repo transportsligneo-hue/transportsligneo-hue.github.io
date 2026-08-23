@@ -1269,6 +1269,12 @@ function AdminMissionDetail() {
             >
               PDF état des lieux
             </Button>
+            <Button
+              icon={<FileArchive size={14} />}
+              onClick={() => setDossierOpen(true)}
+            >
+              Générer le dossier complet
+            </Button>
             <button
               type="button"
               onClick={async () => {
