@@ -716,6 +716,19 @@ function AdminConvoyeurDetail() {
 
         <TabsContent value="documents" className="mt-6">
           <AdminSection
+            title="Photo de profil"
+            description="Importer et recadrer la photo du convoyeur (visible partout dans l'admin et l'app Driver)."
+          >
+            <AdminAvatarUploader
+              ownerUserId={conv.user_id ?? null}
+              convoyeurId={conv.id}
+              value={avatarUrl}
+              onChange={setAvatarUrl}
+            />
+          </AdminSection>
+
+
+          <AdminSection
             title="Centre de validation des documents"
             description="Ouvrir, zoomer, télécharger, approuver, refuser, demander un nouveau document."
           >
