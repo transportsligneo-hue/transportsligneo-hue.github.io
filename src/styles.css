@@ -7070,7 +7070,14 @@ html.theme-light .theme-pref--compact .theme-pref-btn.is-active { color: #ffffff
 
 
 /* ============ SERVICES : onglets Particuliers / Professionnels ============ */
-.r4-page .v4-tabs { display:flex; justify-content:center; gap:8px; padding:96px 16px 0; }
+/* Hauteur réservée sous la barre de navigation fixe (mobile / tablette par défaut) */
+.r4-page { --tln-nav-h: 122px; }
+@media (min-width: 1536px) { .r4-page { --tln-nav-h: 92px; } }
+.r4-page .v4-tabs {
+  display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
+  padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 28px) 16px 0;
+}
+
 .r4-page .v4-tab { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:999px;
   font-size:14px; font-weight:700; color:var(--v4-text-muted); background:rgba(255,255,255,0.04);
   border:1px solid var(--v4-border); cursor:pointer; transition:all .2s ease; }
