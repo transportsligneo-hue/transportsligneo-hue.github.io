@@ -14,6 +14,7 @@ import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { ConvoyeurFinancesPanel } from "@/components/admin/finances/ConvoyeurFinancesPanel";
 import { RemunerationDetailModal } from "@/components/admin/finances/RemunerationDetailModal";
 import { EcheancierPaiements } from "@/components/admin/finances/EcheancierPaiements";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import {
   REMU_STATUT_LABEL, REMU_STATUT_TONE, PAIEMENT_STATUT_LABEL, PAIEMENT_STATUT_TONE,
   AJUSTEMENT_LABEL, eur, dateFr, toCsv, downloadFile, buildSepaXml,
@@ -204,6 +205,11 @@ function AdminPaiementsConvoyeurs() {
     if (error) return toast.error(error.message);
     if (statut === "confirme") {
       await supabase.from("remunerations_missions").update({ statut: "paye" }).eq("paiement_id", p.id);
+      notifyDriver({
+        convoyeurId: p.convoyeur_id,
+        event: "paiement_effectue",
+        detail: `Virement de ${Number(p.montant_total).toFixed(2)} € (${p.nb_missions ?? 0} mission(s)) exécuté.`,
+      });
     }
     if (statut === "annule") {
       await supabase.from("remunerations_missions")

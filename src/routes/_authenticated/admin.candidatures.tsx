@@ -7,6 +7,7 @@ import {
   Loader2, CheckCircle2, XCircle, MessageSquare, Send, Star, Filter, Search,
   Euro, MapPin, Clock, User, TrendingUp,
 } from "lucide-react";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/candidatures")({
@@ -131,7 +132,17 @@ function AdminCandidatures() {
     setBusy(id);
     const { error } = await supabase.rpc("admin_award_offer", { _offre_id: id });
     setBusy(null);
-    if (error) toast.error(error.message); else { toast.success("Mission attribuée !"); fetchData(); }
+    if (error) toast.error(error.message);
+    else {
+      const offre = offers.find((o) => o.id === id);
+      notifyDriver({
+        convoyeurId: (offre as { convoyeur_id?: string } | undefined)?.convoyeur_id,
+        trajetId: (offre as { trajet_id?: string } | undefined)?.trajet_id,
+        event: "mission_validee",
+      });
+      toast.success("Mission attribuée !");
+      fetchData();
+    }
   };
   const reject = async (id: string) => {
     const reason = prompt("Motif du refus (facultatif) :", "");

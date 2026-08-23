@@ -22,7 +22,23 @@ export type NativePushPayload = {
   body?: string;
   url?: string;
   tag?: string;
+  /** Grande image (https) affichée dans la notification Android. */
+  image?: string;
 };
+
+/**
+ * Normalise une clé privée PEM : certains exports de compte de service ont des
+ * en-têtes traduits (ex. "-----FIN DE LA CLÉ PRIVÉE-----"), ce qui casse
+ * l'import de clé. On reconstruit un PEM canonique à partir du corps base64.
+ */
+function normalizePrivateKey(input: string): string {
+  const key = input.replace(/\\n/g, "\n").trim();
+  const lines = key.split("\n").filter((l) => !/^-{3,}.*-{3,}$/.test(l.trim()));
+  const body = lines.join("").replace(/\s+/g, "");
+  if (!body) return key;
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") ?? body;
+  return `-----BEGIN PRIVATE KEY-----\n${wrapped}\n-----END PRIVATE KEY-----\n`;
+}
 
 function readServiceAccount(): ServiceAccount | null {
   const raw = process.env["FIREBASE_SERVICE_ACCOUNT"];
@@ -30,12 +46,13 @@ function readServiceAccount(): ServiceAccount | null {
   try {
     const parsed = JSON.parse(raw) as ServiceAccount;
     if (!parsed.client_email || !parsed.private_key || !parsed.project_id) return null;
-    return { ...parsed, private_key: parsed.private_key.replace(/\\n/g, "\n") };
+    return { ...parsed, private_key: normalizePrivateKey(parsed.private_key) };
   } catch {
     console.warn("[fcm] FIREBASE_SERVICE_ACCOUNT n'est pas un JSON valide");
     return null;
   }
 }
+
 
 function b64url(input: ArrayBuffer | string): string {
   const bytes =
@@ -140,7 +157,7 @@ export async function sendNativePushToUser(userId: string, payload: NativePushPa
               android: {
                 priority: "HIGH",
                 notification: {
-                  channel_id: "ligneo",
+                  channel_id: "missions",
                   // Petite icône : Android impose une silhouette monochrome
                   icon: "ic_notification",
                   // Teinte appliquée à la silhouette + accent système
@@ -148,7 +165,7 @@ export async function sendNativePushToUser(userId: string, payload: NativePushPa
                   // Visuel couleur (logo complet avec badge) affiché à l'ouverture
                   // de la notification (grande image) — seule façon d'avoir de la
                   // couleur et le badge sur Android.
-                  image: NOTIFICATION_IMAGE_URL,
+                  image: payload.image ?? NOTIFICATION_IMAGE_URL,
                 },
               },
               apns: {

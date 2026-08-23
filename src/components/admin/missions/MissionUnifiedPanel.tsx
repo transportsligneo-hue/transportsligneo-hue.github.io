@@ -16,6 +16,7 @@ import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functio
 import { confirmToast } from "@/lib/confirm-toast";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import type { UnifiedMission } from "./mission-unified-types";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { UNIFIED_STATUS } from "./mission-unified-types";
 
 interface Offre {
@@ -174,6 +175,7 @@ export function MissionUnifiedPanel({
     if (!(await confirmToast(`Valider ${o.convoyeur?.prenom ?? ""} ${o.convoyeur?.nom ?? ""} à ${o.prix_propose} € ?`))) return;
     const { error } = await supabase.rpc("admin_award_offer", { _offre_id: o.id });
     if (error) { toast.error(error.message); return; }
+    notifyDriver({ convoyeurId: o.convoyeur_id ?? undefined, trajetId: mission.id, event: "mission_validee" });
     toast.success("Mission attribuée");
     loadOffres();
     onChanged();

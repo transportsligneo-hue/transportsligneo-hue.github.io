@@ -45,6 +45,7 @@ import { DocumentsValidationCenter } from "@/components/admin/convoyeur/Document
 import ContratYousignCard from "@/components/admin/ContratYousignCard";
 import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
 import { AdminManualCommunication } from "@/components/admin/AdminManualCommunication";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import {
   getConvoyeurDocLabel,
   getRequiredConvoyeurDocTypes,
@@ -278,6 +279,7 @@ function AdminConvoyeurDetail() {
     setConv({ ...conv, ...updates });
     setBypassValidation(false);
     if (statut === "valide" && wasNotValid) {
+      notifyDriver({ convoyeurId: conv.id, event: "compte_valide" });
       try {
         await sendTransactionalEmail({
           templateName: "convoyeur-validation",
