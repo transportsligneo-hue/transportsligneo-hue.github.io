@@ -57,6 +57,8 @@ interface Demande {
   vehicule_couleur?: string | null;
   vehicule_km?: number | null;
   vehicule_notes?: string | null;
+  refus_motif?: string | null;
+  refused_at?: string | null;
   options_meta?: Record<string, unknown> | null;
   // Restitution (Aller-retour)
   depart_retour?: string | null;
@@ -653,6 +655,15 @@ function DemandeDrawer({
         })()}
       </DrawerSection>
 
+
+      {demande.refus_motif && (
+        <DrawerSection title="Motif du refus" icon={<XCircle size={12} />}>
+          <p className="text-sm text-rose-300 whitespace-pre-wrap">{demande.refus_motif}</p>
+          {demande.refused_at && (
+            <p className="mt-1 text-xs text-white/50">Refusée le {new Date(demande.refused_at).toLocaleString("fr-FR")}</p>
+          )}
+        </DrawerSection>
+      )}
 
       {demande.message && (
         <DrawerSection title="Message client" icon={<Mail size={12} />}>
