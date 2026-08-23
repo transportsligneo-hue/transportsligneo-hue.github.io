@@ -260,7 +260,21 @@ function UploadCard({
             </div>
           </label>
         )}
+        <div className="mt-3 flex justify-center">
+          <DocScanButton
+            label={`Scanner ${label.toLowerCase()}`}
+            maxPages={2}
+            filenameBase="carte-grise"
+            onFiles={(files) => {
+              if (files[0]) {
+                setPreviewUrl(null);
+                onFile(files[0]);
+              }
+            }}
+          />
+        </div>
       </div>
+
     </div>
   );
 }
