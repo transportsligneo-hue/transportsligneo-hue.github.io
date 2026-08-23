@@ -45,17 +45,31 @@ export function QrHandoffButton({
   const [session, setSession] = useState<Session | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [received, setReceived] = useState<ExtractionResult[]>([]);
-  const [remaining, setRemaining] = useState<number>(600);
+  const [remaining, setRemaining] = useState<number>(1800);
+  const [live, setLive] = useState(false);
   const create = useServerFn(createHandoffSession);
   const close = useServerFn(closeHandoffSession);
   const receivedRef = useRef<ExtractionResult[]>([]);
+  const seenIdsRef = useRef<Set<string>>(new Set());
+
+  // `onExtracted` est souvent une closure recréée à chaque rendu : on la garde
+  // dans une ref pour ne JAMAIS relancer la souscription Realtime (sinon le
+  // canal se détruit/recrée en boucle et n'a jamais le temps de se connecter).
+  const onExtractedRef = useRef(onExtracted);
+  useEffect(() => { onExtractedRef.current = onExtracted; }, [onExtracted]);
 
   // ─── Créer la session ────────────────────────────────────────────────────
   const startSession = useCallback(async () => {
     setCreating(true);
     try {
       const s = await create({ data: { context } });
-      const url = `${window.location.origin}/scan/${s.token}`;
+      // Le téléphone doit atterrir sur un domaine public accessible : les URLs
+      // de preview / localhost ne sont pas joignables depuis le mobile.
+      const host = window.location.hostname;
+      const isPublic =
+        !/localhost|127\.0\.0\.1|(^|\.)id-preview|lovableproject\.com|\.sandbox\./i.test(host);
+      const origin = isPublic ? window.location.origin : "https://www.transportsligneo.fr";
+      const url = `${origin}/scan/${s.token}`;
       const qr = await QRCode.toDataURL(url, {
         width: 320,
         margin: 1,
@@ -65,6 +79,8 @@ export function QrHandoffButton({
       setQrDataUrl(qr);
       setReceived([]);
       receivedRef.current = [];
+      seenIdsRef.current = new Set();
+      setRemaining(Math.max(0, Math.floor((new Date(s.expires_at).getTime() - Date.now()) / 1000)));
     } catch (err) {
       console.error(err);
       toast.error("Impossible de créer la session de scan");
@@ -79,42 +95,81 @@ export function QrHandoffButton({
   }, [open, session, creating, startSession]);
 
   // ─── Timer ───────────────────────────────────────────────────────────────
+  const expiresAt = session?.expires_at ?? null;
   useEffect(() => {
-    if (!session) return;
-    const iv = setInterval(() => {
-      const ms = new Date(session.expires_at).getTime() - Date.now();
+    if (!expiresAt) return;
+    const tick = () => {
+      const ms = new Date(expiresAt).getTime() - Date.now();
       setRemaining(Math.max(0, Math.floor(ms / 1000)));
-    }, 1000);
+    };
+    tick();
+    const iv = setInterval(tick, 1000);
     return () => clearInterval(iv);
-  }, [session]);
+  }, [expiresAt]);
 
-  // ─── Realtime : écoute les extractions ───────────────────────────────────
+  // ─── Réception des extractions (Realtime + polling de secours) ───────────
+  const sessionId = session?.id ?? null;
   useEffect(() => {
-    if (!session) return;
+    if (!sessionId) return;
+    let stopped = false;
+
+    const ingest = (rows: { id: string; extraction: ExtractionResult }[]) => {
+      const fresh = rows.filter((r) => r.id && !seenIdsRef.current.has(r.id) && r.extraction);
+      if (fresh.length === 0) return;
+      fresh.forEach((r) => seenIdsRef.current.add(r.id));
+      const next = [...receivedRef.current, ...fresh.map((r) => r.extraction)];
+      receivedRef.current = next;
+      setReceived(next);
+      onExtractedRef.current(mergeExtractions(next), next);
+      fresh.forEach((r) => {
+        toast.success(`📱 Reçu : ${DOCUMENT_LABEL[r.extraction.document_type] ?? "Document"}`);
+      });
+    };
+
     const channel = supabase
-      .channel(`scan-handoff-${session.id}`)
+      .channel(`scan-handoff-${sessionId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "scan_handoff_extractions",
-          filter: `session_id=eq.${session.id}`,
+          filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          const extraction = (payload.new as { extraction: ExtractionResult })?.extraction;
-          if (!extraction) return;
-          const next = [...receivedRef.current, extraction];
-          receivedRef.current = next;
-          setReceived(next);
-          const merged = mergeExtractions(next);
-          onExtracted(merged, next);
-          toast.success(`📱 Reçu : ${DOCUMENT_LABEL[extraction.document_type] ?? "Document"}`);
+          const row = payload.new as { id: string; extraction: ExtractionResult };
+          ingest([row]);
         },
       )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [session, onExtracted]);
+      .subscribe((status) => {
+        if (stopped) return;
+        setLive(status === "SUBSCRIBED");
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.warn("[handoff] realtime status", status);
+        }
+      });
+
+    // Filet de sécurité : certains réseaux/navigateurs (Safari iOS en
+    // arrière-plan, proxys d'entreprise) coupent le WebSocket. On interroge
+    // la table toutes les 3 s : le parcours fonctionne même sans Realtime.
+    const poll = setInterval(async () => {
+      const { data, error } = await supabase
+        .from("scan_handoff_extractions")
+        .select("id, extraction")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: true });
+      if (error || !data || stopped) return;
+      ingest(data as unknown as { id: string; extraction: ExtractionResult }[]);
+    }, 3000);
+
+    return () => {
+      stopped = true;
+      clearInterval(poll);
+      setLive(false);
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
+
 
   // ─── Fermeture / cleanup ─────────────────────────────────────────────────
   const handleClose = useCallback(async () => {
@@ -212,6 +267,10 @@ export function QrHandoffButton({
                     <p className={`text-[11px] mt-1 ${expired ? "text-red-400" : "text-white/50"}`}>
                       {expired ? "Expirée" : `Expire dans ${mm}:${ss}`}
                     </p>
+                    <p className="text-[10px] mt-0.5 flex items-center gap-1.5 text-white/40">
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${live ? "bg-emerald-400" : "bg-amber-400"}`} />
+                      {live ? "Liaison temps réel active" : "Liaison en cours (secours actif)"}
+                    </p>
                   </div>
 
                   {/* Reçus */}
@@ -221,6 +280,7 @@ export function QrHandoffButton({
                         En attente d'un document depuis le téléphone…
                       </p>
                     ) : (
+
                       <ul className="space-y-1.5">
                         {received.map((d, i) => (
                           <li key={i} className="flex items-center gap-2 text-white/80 text-xs">
