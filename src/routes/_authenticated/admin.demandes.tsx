@@ -121,9 +121,17 @@ function AdminDemandes() {
     if (data) setDemandes(data as Demande[]);
   }, []);
 
+  // Dernier passage sur la page (avant de marquer comme vu) : sert à surligner les nouveautés.
+  const [previousSeenAt] = useState<string | null>(() => getDemandesSeenAt());
+
   useEffect(() => {
     fetchDemandes();
   }, [fetchDemandes]);
+
+  // À l'ouverture de la page, le badge de la barre latérale est remis à zéro.
+  useEffect(() => {
+    markDemandesSeen();
+  }, []);
 
   // Temps réel : toute nouvelle demande remonte immédiatement dans la liste.
   useEffect(() => {
