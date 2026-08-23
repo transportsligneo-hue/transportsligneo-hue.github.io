@@ -122,6 +122,21 @@ function statutLabel(s: string): string {
   return STATUTS.find((x) => x.value === s)?.label ?? s;
 }
 
+/** Couleur du badge selon la valeur réelle du statut. */
+function statutBadgeTone(s: string): string {
+  switch (s) {
+    case "accepte": return "green";
+    case "convertit": return "grey";
+    case "refuse": return "red";
+    case "expire": return "red";
+    case "envoye":
+    case "en_attente": return "orange";
+    case "genere": return "blue";
+    default: return "grey";
+  }
+}
+
+
 function isExpired(d: DevisRow): boolean {
   if (d.statut === "expire") return true;
   if (!d.expires_at || d.paid_at || d.locked_at) return false;
