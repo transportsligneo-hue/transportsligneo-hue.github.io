@@ -438,6 +438,7 @@ function AdminDevisPage() {
             const acc = acceptations[d.id];
             const vehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.modele || v.marque));
             const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
+            const isAR = /aller[-_ ]?retour/i.test(d.option_trajet ?? "");
             return (
               <div key={d.id} className={`dvx-card ${d.archived_at ? "is-archived" : ""}`}>
                 {/* En-tête de carte */}
@@ -446,6 +447,11 @@ function AdminDevisPage() {
                     <span className="dvx-ref">{d.numero}</span>
                     {(d.version ?? 1) > 1 && <span className="dvx-badge grey">v{d.version}</span>}
                     <span className={`dvx-badge ${statutBadgeTone(effective)}`}>{statutLabel(effective)}</span>
+                    {isAR && (
+                      <span className="dvx-badge violet" title="Duo : mission Livraison (L) + mission Restitution (R)">
+                        <ArrowLeftRight size={11} /> Duo L + R
+                      </span>
+                    )}
                     {d.locked_at && <span className="dvx-badge green"><PenLine size={11} /> Signé</span>}
                     {d.paid_at && <span className="dvx-badge green">Payé</span>}
                     {d.email_envoye && <span className="dvx-badge blue">Email envoyé</span>}
@@ -492,13 +498,21 @@ function AdminDevisPage() {
                       <span className="dvx-dot end" />
                       <p className="text-[12.5px] text-[#14161c] leading-snug">{d.arrivee}</p>
                     </div>
-                    <p className="mt-1.5 text-[11px] text-[#a3a4ac]">{d.distance_km ?? "—"} km</p>
+                    {isAR && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span className="dvx-leg l"><ArrowRight size={10} /> L · Livraison</span>
+                        <span className="dvx-leg r"><ArrowLeft size={10} /> R · Restitution</span>
+                      </div>
+                    )}
+                    <p className="mt-1.5 text-[11px] text-[#a3a4ac]">
+                      {d.distance_km ?? "—"} km{isAR ? " · aller + retour" : ""}
+                    </p>
                   </div>
 
                   <div className="min-w-0">
                     <p className="dvx-col-k">Option choisie</p>
                     <p className="text-[13px] font-semibold capitalize text-[#14161c]">
-                      {(d.option_trajet || "—").replaceAll("_", " ")}
+                      {isAR ? "Livraison + restitution" : (d.option_trajet || "—").replaceAll("_", " ").replace("aller-simple", "Livraison simple")}
                     </p>
                     <p className="mt-1 text-[11.5px] text-[#a3a4ac]">
                       {d.prestation || d.tarif_label || "Prestation standard"}
@@ -512,7 +526,11 @@ function AdminDevisPage() {
                       {[d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—"}
                     </span>
                     {(d as unknown as { immatriculation?: string }).immatriculation && (
-                      <p className="dvx-vin mt-1.5">{(d as unknown as { immatriculation?: string }).immatriculation}</p>
+                      <div className="mt-2">
+                        <span className="plate-tag plate-tag--sm">
+                          {(d as unknown as { immatriculation?: string }).immatriculation}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -530,8 +548,12 @@ function AdminDevisPage() {
                             <div className="min-w-0">
                               <p className="text-[12.5px] font-bold text-[#14161c] truncate">
                                 {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
-                                {v.immatriculation ? ` · ${v.immatriculation}` : ""}
                               </p>
+                              {v.immatriculation && (
+                                <div className="mt-1">
+                                  <span className="plate-tag plate-tag--sm">{v.immatriculation}</span>
+                                </div>
+                              )}
                               {v.vin && <p className="dvx-vin mt-0.5">VIN {v.vin}</p>}
                               {v.arrivee && (
                                 <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
