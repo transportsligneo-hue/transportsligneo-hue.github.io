@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
-import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User, Inbox, Clock, CheckCircle2, Euro } from "lucide-react";
+import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User, Inbox, Clock, CheckCircle2, Euro, XCircle } from "lucide-react";
 import {
   AdminPageHeader,
   AdminSection,
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
 import { getDemandesSeenAt, markDemandesSeen } from "@/lib/admin/demandes-seen";
+import { RefusDialog } from "@/components/admin/RefusDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
@@ -56,6 +57,8 @@ interface Demande {
   vehicule_couleur?: string | null;
   vehicule_km?: number | null;
   vehicule_notes?: string | null;
+  refus_motif?: string | null;
+  refused_at?: string | null;
   options_meta?: Record<string, unknown> | null;
   // Restitution (Aller-retour)
   depart_retour?: string | null;
@@ -95,6 +98,10 @@ const statutLabels: Record<string, string> = {
   annulee: "Annulée",
 };
 
+function isClosedStatut(statut: string): boolean {
+  return statut === "annulee" || statut === "terminee" || statut === "convertie";
+}
+
 function extractFromOptions(options: string | null): { prix: number | null; distance: number | null } {
   if (!options) return { prix: null, distance: null };
   const prixMatch = options.match(/Estimation:\s*(\d+(?:[.,]\d+)?)\s*€/i);
@@ -111,6 +118,7 @@ function AdminDemandes() {
   const [search, setSearch] = useState("");
   const [converting, setConverting] = useState<string | null>(null);
   const [selected, setSelected] = useState<Demande | null>(null);
+  const [refusing, setRefusing] = useState<Demande | null>(null);
   const convertDemande = useServerFn(convertDemandeToMissions);
 
   const fetchDemandes = useCallback(async () => {
@@ -370,8 +378,12 @@ function AdminDemandes() {
                       </td>
                       <td>
                         <div className="flex flex-wrap items-center gap-1">
-                          <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
+                          <AdminBadge
+                            label={statutLabels[d.statut] ?? d.statut}
+                            tone={d.statut === "annulee" ? "danger" : d.statut === "terminee" ? "success" : undefined}
+                          />
                           {(() => {
+                            if (isClosedStatut(d.statut)) return null;
                             const marque = d.vehicule_marque ?? d.marque;
                             const modele = d.vehicule_modele ?? d.modele;
                             const plaque = d.vehicule_immatriculation ?? d.immatriculation;
@@ -382,6 +394,7 @@ function AdminDemandes() {
                         </div>
                       </td>
 
+
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button
@@ -391,18 +404,28 @@ function AdminDemandes() {
                           >
                             <Eye size={15} />
                           </button>
-                          {d.statut !== "convertie" && d.statut !== "terminee" && (
-                            <button
-                              onClick={() => convertToTrajet(d)}
-                              disabled={converting === d.id}
-                              title="Convertir en trajet"
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
-                            >
-                              <ArrowRightCircle size={15} />
-                            </button>
+                          {!isClosedStatut(d.statut) && (
+                            <>
+                              <button
+                                onClick={() => convertToTrajet(d)}
+                                disabled={converting === d.id}
+                                title="Convertir en trajet"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
+                              >
+                                <ArrowRightCircle size={15} />
+                              </button>
+                              <button
+                                onClick={() => setRefusing(d)}
+                                title="Refuser la demande"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-rose-600 hover:bg-rose-50"
+                              >
+                                <XCircle size={15} />
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
@@ -418,6 +441,7 @@ function AdminDemandes() {
         onClose={() => setSelected(null)}
         onConvert={(d) => { void convertToTrajet(d); setSelected(null); }}
         onChanged={(updated) => { setSelected(updated); fetchDemandes(); }}
+        onRefuse={(d) => setRefusing(d)}
         onDelete={async (id) => {
           if (!(await confirmToast("Supprimer cette demande ?"))) return;
           await supabase.from("demandes_convoyage").delete().eq("id", id);
@@ -425,18 +449,28 @@ function AdminDemandes() {
           fetchDemandes();
         }}
       />
+
+      <RefusDialog
+        type="demande"
+        id={refusing?.id ?? ""}
+        label={refusing ? `${refusing.prenom} ${refusing.nom} · ${refusing.depart} → ${refusing.arrivee}` : undefined}
+        open={!!refusing}
+        onClose={() => setRefusing(null)}
+        onDone={() => { setSelected(null); fetchDemandes(); }}
+      />
     </div>
   );
 }
 
 function DemandeDrawer({
-  demande, onClose, onConvert, onChanged, onDelete,
+  demande, onClose, onConvert, onChanged, onDelete, onRefuse,
 }: {
   demande: Demande | null;
   onClose: () => void;
   onConvert: (d: Demande) => void;
   onChanged: (d: Demande) => void;
   onDelete: (id: string) => void;
+  onRefuse: (d: Demande) => void;
 }) {
   if (!demande) return null;
   const quote = quoteFromDemande(demande);
@@ -475,13 +509,18 @@ function DemandeDrawer({
       onClose={onClose}
       title={`${demande.depart} → ${demande.arrivee}`}
       subtitle={`${demande.prenom} ${demande.nom} · ${new Date(demande.created_at).toLocaleString("fr-FR")}`}
-      badge={<DrawerBadge tone="blue">{statutLabels[demande.statut] ?? demande.statut}</DrawerBadge>}
+      badge={<DrawerBadge tone={demande.statut === "annulee" ? "red" : "blue"}>{statutLabels[demande.statut] ?? demande.statut}</DrawerBadge>}
       footer={
         <div className="flex flex-wrap gap-2 items-center">
-          {demande.statut !== "convertie" && demande.statut !== "terminee" && (
-            <Button size="sm" onClick={() => onConvert(demande)} className="bg-emerald-500 hover:bg-emerald-600 text-white">
-              <ArrowRightCircle size={12} className="mr-1" /> Convertir en trajet
-            </Button>
+          {!isClosedStatut(demande.statut) && (
+            <>
+              <Button size="sm" onClick={() => onConvert(demande)} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                <ArrowRightCircle size={12} className="mr-1" /> Convertir en trajet
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => onRefuse(demande)}>
+                <XCircle size={12} className="mr-1" /> Refuser la demande
+              </Button>
+            </>
           )}
           <Button
             size="sm"
@@ -616,6 +655,15 @@ function DemandeDrawer({
         })()}
       </DrawerSection>
 
+
+      {demande.refus_motif && (
+        <DrawerSection title="Motif du refus" icon={<XCircle size={12} />}>
+          <p className="text-sm text-rose-300 whitespace-pre-wrap">{demande.refus_motif}</p>
+          {demande.refused_at && (
+            <p className="mt-1 text-xs text-white/50">Refusée le {new Date(demande.refused_at).toLocaleString("fr-FR")}</p>
+          )}
+        </DrawerSection>
+      )}
 
       {demande.message && (
         <DrawerSection title="Message client" icon={<Mail size={12} />}>

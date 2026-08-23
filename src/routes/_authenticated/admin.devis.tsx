@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet } from "lucide-react";
+import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
@@ -24,6 +24,7 @@ import { LogoLoader } from "@/components/brand/LogoLoader";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
+import { RefusDialog } from "@/components/admin/RefusDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
@@ -544,6 +545,11 @@ function AdminDevisPage() {
           setDevis((rows) => rows.map((row) => row.id === updated.id ? updated : row));
           setSelected(updated);
         }}
+        onRefused={(id) => {
+          const now = new Date().toISOString();
+          setDevis((rows) => rows.map((row) => row.id === id ? { ...row, statut: "refuse", refused_at: now } as DevisRow : row));
+          setSelected(null);
+        }}
         onValidated={(id) => {
           const now = new Date().toISOString();
           setDevis((rows) => rows.map((row) => row.id === id ? { ...row, statut: "accepte", locked_at: now } : row));
@@ -563,6 +569,7 @@ function DevisDrawer({
   onArchive,
   onPriceSaved,
   onValidated,
+  onRefused,
 }: {
   devis: DevisRow | null;
   acceptation: AcceptationInfo | null;
@@ -572,11 +579,13 @@ function DevisDrawer({
   onArchive: (d: DevisRow) => void;
   onPriceSaved: (d: DevisRow) => void;
   onValidated: (id: string) => void;
+  onRefused: (id: string) => void;
 }) {
   const [history, setHistory] = useState<HistoryRow[] | null>(null);
   const [proofUrls, setProofUrls] = useState<{ signature: string | null; pdf: string | null }>({ signature: null, pdf: null });
   const [priceInput, setPriceInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
+  const [refusOpen, setRefusOpen] = useState(false);
 
   useEffect(() => {
     if (!devis) return;
@@ -662,12 +671,26 @@ function DevisDrawer({
           <Button size="sm" onClick={() => onConvert(devis)} disabled={!!devis.mission_id} icon={<ArrowRightCircle size={12} />}>
             {devis.mission_id ? "Converti" : "→ Mission"}
           </Button>
+          {!devis.mission_id && devis.statut !== "refuse" && devis.statut !== "annule" && (
+            <Button size="sm" onClick={() => setRefusOpen(true)} className="bg-rose-600 hover:bg-rose-700 text-white" icon={<XCircle size={12} />}>
+              Refuser le devis
+            </Button>
+          )}
           <Button size="sm" onClick={() => onArchive(devis)} className="ml-auto" icon={devis.archived_at ? <ArchiveRestore size={12} /> : <Archive size={12} />}>
             {devis.archived_at ? "Restaurer" : "Archiver"}
           </Button>
         </div>
       }
     >
+      <RefusDialog
+        type="devis"
+        id={devis.id}
+        label={`${devis.numero} · ${devis.prenom} ${devis.nom}`}
+        open={refusOpen}
+        onClose={() => setRefusOpen(false)}
+        onDone={() => { setRefusOpen(false); onRefused(devis.id); }}
+      />
+
       <DrawerSection title="Client" icon={<User size={12} />}>
         <DrawerGrid>
           <DrawerField label="Nom" value={`${devis.prenom} ${devis.nom}`} />
