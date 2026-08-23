@@ -59,4 +59,25 @@ export interface UnifiedMission {
   /** Lot multi-plaques (une mission, plusieurs véhicules) */
   lotId?: string | null;
   lotRef?: string | null;
+  /** Mission archivée (terminée/annulée depuis plus de 60 jours) */
+  archived?: boolean;
 }
+
+/** Statuts considérés comme "activité en cours ou à venir". */
+export const ACTIVE_STATUSES: UnifiedStatus[] = ["nouvelle", "attribuer", "attribuee", "encours"];
+
+/**
+ * Tri par défaut : missions actives d'abord (date la plus proche en premier),
+ * puis missions terminées/annulées (date la plus récente en premier).
+ */
+export function compareDefaultOrder(a: UnifiedMission, b: UnifiedMission): number {
+  const aActive = ACTIVE_STATUSES.includes(a.status);
+  const bActive = ACTIVE_STATUSES.includes(b.status);
+  if (aActive !== bActive) return aActive ? -1 : 1;
+  const ta = new Date(a.date ?? a.createdAt).getTime();
+  const tb = new Date(b.date ?? b.createdAt).getTime();
+  if (ta !== tb) return aActive ? ta - tb : tb - ta;
+  if (a.groupId && a.groupId === b.groupId) return (a.legIndex ?? 1) - (b.legIndex ?? 1);
+  return 0;
+}
+
