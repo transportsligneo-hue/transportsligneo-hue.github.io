@@ -8346,6 +8346,25 @@ body .tln-bar .r4-nav-link {
 }
 .r4-page .v5-hero-quote > * { position: relative; }
 
+/* Dropdown de suggestions d'adresses dans l'estimateur hero — lisible dans les deux thèmes */
+.r4-page .v5-hero-quote .places-suggestion-list {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(47, 95, 255, 0.35) !important;
+  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.55) !important;
+}
+.r4-page .v5-hero-quote .places-suggestion-item {
+  color: #0f1526 !important;
+  border-color: rgba(47, 95, 255, 0.12) !important;
+}
+.r4-page .v5-hero-quote .places-suggestion-item:hover,
+.r4-page .v5-hero-quote .places-suggestion-item:focus {
+  background: rgba(47, 95, 255, 0.12) !important;
+  color: #2f5fff !important;
+}
+.r4-page .v5-hero-quote .places-suggestion-secondary {
+  color: #5a6482 !important;
+}
+
 /* Rendu sombre forcé (hero photo) même en thème clair */
 html.theme-light .r4-page .v5-hero-quote .dg-flat-field {
   background: rgba(255, 255, 255, 0.08) !important;
