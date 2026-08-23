@@ -129,3 +129,80 @@ export async function getAdminNotificationEmail(): Promise<string> {
     return FALLBACK
   }
 }
+
+/**
+ * Envoi d'un email HTML "brut" (campagnes, envoi direct) via la file Lovable.
+ * Utilise le domaine expéditeur vérifié (notify.transportsligneo.fr) au lieu
+ * d'un appel Resend direct sur un domaine non vérifié.
+ */
+export async function sendRawEmailServer(params: {
+  to: string
+  subject: string
+  html: string
+  text?: string
+  senderName?: string | null
+  label?: string
+  purpose?: 'transactional' | 'marketing'
+  idempotencyKey?: string
+}): Promise<{ success: boolean; reason?: string }> {
+  const to = params.to.trim()
+  const normalizedEmail = to.toLowerCase()
+  if (!normalizedEmail.includes('@')) return { success: false, reason: 'invalid_recipient' }
+
+  const messageId = crypto.randomUUID()
+
+  const { data: suppressed } = await supabaseAdmin
+    .from('suppressed_emails').select('id').eq('email', normalizedEmail).maybeSingle()
+  if (suppressed) return { success: false, reason: 'email_suppressed' }
+
+  let unsubscribeToken: string
+  const { data: existingToken } = await supabaseAdmin
+    .from('email_unsubscribe_tokens').select('token, used_at').eq('email', normalizedEmail).maybeSingle()
+  if (existingToken?.token) {
+    unsubscribeToken = existingToken.token
+  } else {
+    const newToken = generateToken()
+    await supabaseAdmin.from('email_unsubscribe_tokens')
+      .upsert({ token: newToken, email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true })
+    const { data: stored } = await supabaseAdmin
+      .from('email_unsubscribe_tokens').select('token').eq('email', normalizedEmail).maybeSingle()
+    unsubscribeToken = stored?.token ?? newToken
+  }
+
+  const label = params.label || 'direct_email'
+  await supabaseAdmin.from('email_send_log').insert({
+    message_id: messageId, template_name: label,
+    recipient_email: to, status: 'pending',
+  })
+
+  const senderName = (params.senderName || SITE_NAME).replace(/[<>"]/g, '').trim() || SITE_NAME
+
+  const { error: enqueueError } = await supabaseAdmin.rpc('enqueue_email', {
+    queue_name: 'transactional_emails',
+    payload: {
+      message_id: messageId,
+      to,
+      from: `${senderName} <noreply@${FROM_DOMAIN}>`,
+      sender_domain: SENDER_DOMAIN,
+      subject: params.subject,
+      html: params.html,
+      text: params.text ?? '',
+      purpose: params.purpose ?? 'marketing',
+      label,
+      idempotency_key: params.idempotencyKey || messageId,
+      unsubscribe_token: unsubscribeToken,
+      queued_at: new Date().toISOString(),
+    },
+  })
+
+  if (enqueueError) {
+    console.error('[email/server] raw enqueue failed', enqueueError)
+    await supabaseAdmin.from('email_send_log').insert({
+      message_id: messageId, template_name: label,
+      recipient_email: to, status: 'failed', error_message: 'Failed to enqueue email',
+    })
+    return { success: false, reason: 'enqueue_failed' }
+  }
+
+  return { success: true }
+}
