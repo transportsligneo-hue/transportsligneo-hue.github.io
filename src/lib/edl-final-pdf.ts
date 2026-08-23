@@ -525,35 +525,49 @@ const CSS = `
 
 // ---------- Rendu principal ----------
 
-export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
+export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfOptions = {}): Promise<Blob> {
+  // 0) Extraire les documents scannés des grilles photos : ils sont illisibles
+  //    en vignette et sont désormais rendus en pleine page.
+  const isDoc = (p: EdlFinalPdfPhoto) => isScannedDocumentVue(p.vue_type);
+  const extractedDocs: EdlFinalPdfDocument[] = [
+    ...m.photosDepart.filter(isDoc).map((p) => ({ label: `${p.label ?? labelOf(p.vue_type)} — départ`, url: p.url })),
+    ...m.photosArrivee.filter(isDoc).map((p) => ({ label: `${p.label ?? labelOf(p.vue_type)} — arrivée`, url: p.url })),
+  ];
+  const gridDepart = m.photosDepart.filter((p) => !isDoc(p));
+  const gridArrivee = m.photosArrivee.filter((p) => !isDoc(p));
+  const allDocsRaw = [...(m.documents ?? []), ...extractedDocs].filter((d) => !!d.url);
+
   // 1) Précharger images en dataURL
   const logoData = (await toDataUrl(logoLigneo)) ?? "";
   const dep = await Promise.all(
-    m.photosDepart.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
+    gridDepart.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
   );
   const arr = await Promise.all(
-    m.photosArrivee.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
+    gridArrivee.map(async (p) => ({ ...p, url: (await toDataUrl(p.url)) ?? p.url })),
   );
   const sigs = await Promise.all(
     (m.signatures ?? []).map(async (s) => ({ ...s, url: s.url ? ((await toDataUrl(s.url)) ?? s.url) : s.url })),
   );
-  const data: EdlFinalPdfData = { ...m, photosDepart: dep, photosArrivee: arr, signatures: sigs };
+  const docs = await Promise.all(
+    allDocsRaw.map(async (d) => ({ ...d, url: (await toDataUrl(d.url)) ?? d.url })),
+  );
+  const data: EdlFinalPdfData = { ...m, photosDepart: dep, photosArrivee: arr, signatures: sigs, documents: docs };
 
   const distance =
     data.kilometrage_depart != null && data.kilometrage_arrivee != null
       ? Math.max(0, data.kilometrage_arrivee - data.kilometrage_depart)
       : null;
 
-  const totalPages = 4;
+  const totalPages = 4 + docs.length;
 
-  // 2) Construction des 4 pages
+  // 2) Construction des pages
   const pagesHtml: string[] = [];
 
   // Page 1 : Couverture
   pagesHtml.push(`
     <div class="page">
       ${renderCoverHeader(logoData, data)}
-      ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length })}
+      ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length }, docs, !!opts.dossier)}
       ${renderFoot()}
     </div>`);
 
@@ -583,6 +597,21 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData): Promise<Blob> {
       ${renderSignatures(data.signatures)}
       ${renderFoot()}
     </div>`);
+
+  // Pages suivantes : documents scannés, un par page, en grand format
+  docs.forEach((d, i) => {
+    pagesHtml.push(`
+      <div class="page">
+        ${renderPageHeader(logoData, data, d.label, 5 + i, totalPages)}
+        ${renderSectionBand(d.label.toUpperCase(), "Document scanné")}
+        <div class="doc-frame">${
+          d.url ? `<img src="${d.url}" alt="${escape(d.label)}" crossorigin="anonymous" />` : `<div class="doc-empty">Document indisponible</div>`
+        }</div>
+        ${d.meta ? `<div class="doc-meta">${escape(d.meta)}</div>` : ""}
+        ${renderFoot()}
+      </div>`);
+  });
+
 
   // 3) Monter dans le DOM hors-écran
   const root = document.createElement("div");
