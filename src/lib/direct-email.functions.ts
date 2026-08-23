@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
-import { buildCampaignHtml, buildCampaignText, type CampaignContent } from '@/lib/campaigns/render'
+import type { CampaignContent } from '@/lib/campaigns/render'
 
 export interface DirectEmailInput extends CampaignContent {
   to: string
@@ -35,24 +35,21 @@ export const sendDirectEmail = createServerFn({ method: 'POST' })
       if (!isSuper) throw new Error('Forbidden')
     }
 
-    const vars = {
-      prenom: data.prenom ?? '',
-      nom: data.nom ?? '',
-      entreprise: data.entreprise ?? '',
-      solde_km: 0,
-    }
-
-    const html = buildCampaignHtml({ campaign: data, vars })
-    const text = buildCampaignText(data, vars)
-
-    const { sendRawEmailServer } = await import('@/server/email-send')
-    const res = await sendRawEmailServer({
-      to: data.to,
-      subject: String(data.subject ?? ''),
-      html,
-      text,
-      senderName: data.sender_name,
-      label: 'email_direct',
+    const { sendTransactionalEmailServer } = await import('@/server/email-send')
+    const res = await sendTransactionalEmailServer({
+      templateName: 'message-manuel',
+      recipientEmail: data.to,
+      idempotencyKey: `email-direct-${crypto.randomUUID()}`,
+      templateData: {
+        prenom: data.prenom ?? '',
+        subject: String(data.subject ?? '').trim(),
+        titre: String(data.title || data.subject || '').trim(),
+        message: String(data.message ?? '').trim(),
+        ctaLabel: String(data.cta_text ?? '').trim(),
+        ctaUrl: String(data.cta_url ?? '').trim(),
+        visualUrl: String(data.visual_url ?? '').trim(),
+        preheader: String(data.preheader ?? '').trim(),
+      },
     })
     if (!res.success) {
       throw new Error(
