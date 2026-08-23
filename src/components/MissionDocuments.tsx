@@ -230,14 +230,26 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
           </div>
           <p className="text-sm font-semibold text-slate-950">Déposez un fichier ici</p>
           <p className="mt-1 text-xs text-slate-500">PDF ou image, 10 Mo maximum</p>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 sm:w-auto"
-          >
-            {uploading ? "Envoi en cours…" : "Ajouter un document"}
-          </button>
+          <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 sm:w-auto"
+            >
+              {uploading ? "Envoi en cours…" : "Ajouter un document"}
+            </button>
+            <DocScanButton
+              label={`Scanner ${typeShort(selectedType)}`}
+              maxPages={4}
+              mergeToPdf
+              filenameBase={`${selectedType}-${attributionId.slice(0, 8)}`}
+              onFiles={async (files) => {
+                for (const f of files) await uploadFile(f, selectedType);
+              }}
+            />
+          </div>
+
         </div>
       )}
 
