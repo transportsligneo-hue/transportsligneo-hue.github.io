@@ -26,18 +26,33 @@ export type NativePushPayload = {
   image?: string;
 };
 
+/**
+ * Normalise une clé privée PEM : certains exports de compte de service ont des
+ * en-têtes traduits (ex. "-----FIN DE LA CLÉ PRIVÉE-----"), ce qui casse
+ * l'import de clé. On reconstruit un PEM canonique à partir du corps base64.
+ */
+function normalizePrivateKey(input: string): string {
+  const key = input.replace(/\\n/g, "\n").trim();
+  const lines = key.split("\n").filter((l) => !/^-{3,}.*-{3,}$/.test(l.trim()));
+  const body = lines.join("").replace(/\s+/g, "");
+  if (!body) return key;
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") ?? body;
+  return `-----BEGIN PRIVATE KEY-----\n${wrapped}\n-----END PRIVATE KEY-----\n`;
+}
+
 function readServiceAccount(): ServiceAccount | null {
   const raw = process.env["FIREBASE_SERVICE_ACCOUNT"];
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as ServiceAccount;
     if (!parsed.client_email || !parsed.private_key || !parsed.project_id) return null;
-    return { ...parsed, private_key: parsed.private_key.replace(/\\n/g, "\n") };
+    return { ...parsed, private_key: normalizePrivateKey(parsed.private_key) };
   } catch {
     console.warn("[fcm] FIREBASE_SERVICE_ACCOUNT n'est pas un JSON valide");
     return null;
   }
 }
+
 
 function b64url(input: ArrayBuffer | string): string {
   const bytes =
