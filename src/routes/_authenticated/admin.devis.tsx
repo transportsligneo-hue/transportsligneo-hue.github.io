@@ -68,7 +68,18 @@ interface DevisRow {
   expires_at: string | null;
   archived_at: string | null;
   paid_at: string | null;
+  vehicules?: Array<{
+    immatriculation?: string | null;
+    marque?: string | null;
+    modele?: string | null;
+    vin?: string | null;
+    arrivee?: string | null;
+    prix?: number | null;
+    note?: string | null;
+  }> | null;
+  options?: string[] | null;
 }
+
 
 interface AcceptationInfo {
   devis_id: string;
