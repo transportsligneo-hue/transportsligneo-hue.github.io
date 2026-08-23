@@ -288,18 +288,8 @@ export default function AssistantIaWidget() {
     };
   }, [pathname, profilAuto]);
 
-  /* Apparition proactive sur les pages tarifs / estimation */
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (proactiveOff) return;
-    if (!PROACTIVE_PATHS.some((p) => pathname.startsWith(p))) return;
-    if (window.sessionStorage.getItem("ligneo_vroomy_proactive") === "1") return;
-    const t = window.setTimeout(() => {
-      window.sessionStorage.setItem("ligneo_vroomy_proactive", "1");
-      setOpen(true);
-    }, 18000);
-    return () => window.clearTimeout(t);
-  }, [pathname, proactiveOff]);
+  /* Ouverture proactive désactivée : Vroomy ne s'ouvre plus tout seul,
+     uniquement au clic sur le lanceur ou via l'événement ligneo:assistant-open. */
 
   /* Clavier : Échap ferme le panneau et rend le focus au lanceur */
   useEffect(() => {

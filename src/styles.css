@@ -8497,3 +8497,29 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: rgba(255, 
 .dvx-leg { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:800; letter-spacing:.03em; border:1px solid transparent; }
 .dvx-leg.l { background:#eef2ff; color:#1c3fc4; border-color:#dce6fd; }
 .dvx-leg.r { background:#fdf3e7; color:#b45309; border-color:#f6e0c0; }
+
+
+/* === Suggestions d'adresses lisibles (estimateur Tarifs / Devis) === */
+.tln-places-menu.places-suggestion-list {
+  background: #ffffff;
+  border: 1px solid rgba(47, 95, 255, 0.22);
+  box-shadow: 0 25px 60px -18px rgba(6, 18, 56, 0.55);
+}
+.tln-places-menu .places-suggestion-item {
+  border-bottom-color: rgba(10, 22, 56, 0.08);
+}
+.tln-places-menu .places-suggestion-primary {
+  color: #0a1638;
+  font-weight: 700;
+}
+.tln-places-menu .places-suggestion-secondary {
+  color: #6b7280;
+}
+.tln-places-menu .places-suggestion-item:hover,
+.tln-places-menu .places-suggestion-item:focus {
+  background: rgba(47, 95, 255, 0.08);
+}
+.tln-places-menu .places-suggestion-item:hover .places-suggestion-primary,
+.tln-places-menu .places-suggestion-item:focus .places-suggestion-primary {
+  color: #1c3fc4;
+}
