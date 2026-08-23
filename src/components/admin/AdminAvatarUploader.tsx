@@ -1,52 +1,87 @@
 import { useRef, useState } from "react";
-import { Camera, Loader2, Trash2, UserRound } from "lucide-react";
+import { Camera, Crop, Loader2, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { AvatarCropDialog } from "@/components/admin/AvatarCropDialog";
 
-const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-const MAX_BYTES = 3 * 1024 * 1024;
+const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/heic", "image/heif"];
+const MAX_BYTES = 8 * 1024 * 1024;
 
 interface Props {
-  /** Utilisateur (auth) propriétaire de la photo. */
-  ownerUserId: string | null;
+  /** Utilisateur (auth) propriétaire de la photo — optionnel. */
+  ownerUserId?: string | null;
+  /** Convoyeur concerné : permet d'importer une photo même sans compte lié. */
+  convoyeurId?: string | null;
   value: string | null;
   onChange: (url: string | null) => void;
   label?: string;
 }
 
 /**
- * Permet à un admin d'importer / remplacer la photo de profil
+ * Permet à un admin d'importer / recadrer / remplacer la photo de profil
  * d'un convoyeur ou d'un client qui n'y arrive pas lui-même.
  */
-export function AdminAvatarUploader({ ownerUserId, value, onChange, label = "Photo de profil" }: Props) {
+export function AdminAvatarUploader({ ownerUserId, convoyeurId, value, onChange, label = "Photo de profil" }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
-  const disabled = !ownerUserId || busy;
+  const target = ownerUserId ?? convoyeurId ?? null;
+  const disabled = !target || busy;
 
-  const handleFile = async (file: File) => {
-    if (!ownerUserId) return;
-    if (!ACCEPTED.includes(file.type)) return toast.error("Format non supporté (PNG, JPG, WEBP)");
-    if (file.size > MAX_BYTES) return toast.error("Fichier trop volumineux (3 Mo max)");
+  const pickFile = (file: File) => {
+    if (file.type && !ACCEPTED.includes(file.type)) {
+      toast.error("Format non supporté (PNG, JPG, WEBP)");
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      toast.error("Fichier trop volumineux (8 Mo max)");
+      return;
+    }
+    setPendingFile(file);
+  };
+
+  const persistUrl = async (url: string | null) => {
+    let saved = false;
+    if (ownerUserId) {
+      const { error, data } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("user_id", ownerUserId)
+        .select("user_id");
+      if (error) throw error;
+      saved = (data?.length ?? 0) > 0;
+    }
+    if (convoyeurId) {
+      const { error, data } = await supabase
+        .from("convoyeurs")
+        .update({ avatar_url: url } as never)
+        .eq("id", convoyeurId)
+        .select("id");
+      if (error) throw error;
+      saved = saved || (data?.length ?? 0) > 0;
+    }
+    if (!saved) throw new Error("Aucune fiche mise à jour (droits insuffisants ?)");
+  };
+
+  const handleCropped = async (blob: Blob) => {
+    if (!target) return;
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-      const path = `${ownerUserId}/avatar-${Date.now()}.${ext}`;
+      const path = `${target}/avatar-${Date.now()}.jpg`;
       const { error } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, contentType: file.type });
+        .upload(path, blob, { upsert: true, contentType: "image/jpeg", cacheControl: "3600" });
       if (error) throw error;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const { error: upErr } = await supabase
-        .from("profiles")
-        .update({ avatar_url: data.publicUrl })
-        .eq("user_id", ownerUserId);
-      if (upErr) throw upErr;
+      await persistUrl(data.publicUrl);
       onChange(data.publicUrl);
       toast.success("Photo de profil mise à jour");
+      setPendingFile(null);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erreur lors de l'envoi");
+      console.error("[AdminAvatarUploader] upload failed", e);
+      toast.error(e instanceof Error ? e.message : "Erreur lors de l'envoi de la photo");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -54,18 +89,18 @@ export function AdminAvatarUploader({ ownerUserId, value, onChange, label = "Pho
   };
 
   const handleRemove = async () => {
-    if (!ownerUserId || !value) return;
+    if (!target || !value) return;
     if (!(await confirmToast("Supprimer la photo de profil ?"))) return;
     setBusy(true);
     try {
       const marker = "/avatars/";
       const idx = value.indexOf(marker);
       if (idx >= 0) await supabase.storage.from("avatars").remove([value.substring(idx + marker.length)]);
-      const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", ownerUserId);
-      if (error) throw error;
+      await persistUrl(null);
       onChange(null);
       toast.success("Photo supprimée");
     } catch (e) {
+      console.error("[AdminAvatarUploader] remove failed", e);
       toast.error(e instanceof Error ? e.message : "Erreur");
     } finally {
       setBusy(false);
@@ -84,18 +119,28 @@ export function AdminAvatarUploader({ ownerUserId, value, onChange, label = "Pho
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-slate-700">{label}</p>
         <p className="mt-0.5 text-xs text-slate-500">
-          {ownerUserId ? "PNG, JPG, WEBP · 3 Mo max" : "Aucun compte utilisateur lié"}
+          {target ? "PNG, JPG, WEBP · 8 Mo max · recadrage circulaire" : "Fiche non identifiée"}
         </p>
         <div className="mt-2.5 flex flex-wrap gap-2">
           <button
             type="button"
             disabled={disabled}
             onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-md bg-pro-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-pro-accent-hover disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-[#2F5FFF] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#2450e0] disabled:opacity-60"
           >
             {busy ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
             {value ? "Changer" : "Importer"}
           </button>
+          {value && (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => inputRef.current?.click()}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:border-slate-300 hover:bg-white disabled:opacity-60"
+            >
+              <Crop size={14} /> Recadrer
+            </button>
+          )}
           {value && (
             <button
               type="button"
@@ -111,12 +156,23 @@ export function AdminAvatarUploader({ ownerUserId, value, onChange, label = "Pho
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/webp"
+        accept="image/*"
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) void handleFile(f);
+          if (f) pickFile(f);
         }}
+      />
+
+      <AvatarCropDialog
+        open={!!pendingFile}
+        file={pendingFile}
+        busy={busy}
+        onCancel={() => {
+          setPendingFile(null);
+          if (inputRef.current) inputRef.current.value = "";
+        }}
+        onConfirm={handleCropped}
       />
     </div>
   );
