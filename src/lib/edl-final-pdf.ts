@@ -266,6 +266,7 @@ function renderCoverBody(
 
   return `
     <div class="cover-title">${dossier ? "Dossier complet de mission" : "État des lieux"}</div>
+    <div class="cover-accent"></div>
     <div class="cover-sub">${dossier ? "État des lieux, PV de livraison signé &amp; documents du véhicule" : "Dossier de convoyage complet — départ &amp; arrivée"}</div>
 
 
@@ -344,6 +345,9 @@ function renderSectionBand(title: string, right: string): string {
 function renderPhotoGrid(photos: EdlFinalPdfPhoto[], startIndex: number): string {
   // Grille dynamique : par défaut 4 colonnes. Si beaucoup de photos, augmenter le nb de lignes.
   const count = photos.length;
+  if (count === 0) {
+    return `<div class="photo-empty">Aucune photo d'état des lieux disponible pour cette étape.</div>`;
+  }
   const cols = count <= 4 ? Math.max(2, count) : 4;
   const rows = Math.ceil(count / cols);
   return `
@@ -495,6 +499,7 @@ const CSS = `
 
 /* ===== PHOTO GRID ===== */
 .edl-pdf-root .photo-grid{display:grid;gap:4mm;}
+.edl-pdf-root .photo-empty{border:1px dashed var(--panel-border);border-radius:8px;background:var(--panel);padding:24px;text-align:center;font-size:11px;color:var(--text-mute);}
 .edl-pdf-root .photo-card{border:1px solid var(--panel-border);border-radius:6px;overflow:hidden;background:#fff;display:flex;flex-direction:column;}
 .edl-pdf-root .photo-frame{flex:1;background:#F0F1F5;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:0;}
 .edl-pdf-root .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -571,7 +576,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
     <div class="page">
       ${renderCoverHeader(logoData, data)}
       ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length }, docs, !!opts.dossier)}
-      ${renderFoot()}
+      ${renderFoot(1, totalPages)}
     </div>`);
 
   // Page 2 : Photos départ
@@ -580,7 +585,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
       ${renderPageHeader(logoData, data, "État des lieux — Départ", 2, totalPages)}
       ${renderSectionBand("ÉTAT DES LIEUX — DÉPART", `${data.photosDepart.length} photos`)}
       ${renderPhotoGrid(data.photosDepart, 1)}
-      ${renderFoot()}
+      ${renderFoot(2, totalPages)}
     </div>`);
 
   // Page 3 : Photos arrivée
@@ -590,7 +595,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
       ${renderPageHeader(logoData, data, "État des lieux — Arrivée", 3, totalPages)}
       ${renderSectionBand("ÉTAT DES LIEUX — ARRIVÉE", `${data.photosArrivee.length} photos`)}
       ${renderPhotoGrid(data.photosArrivee, arrStart)}
-      ${renderFoot()}
+      ${renderFoot(3, totalPages)}
     </div>`);
 
   // Page 4 : Signatures
@@ -598,7 +603,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
     <div class="page">
       ${renderPageHeader(logoData, data, "Signatures", 4, totalPages)}
       ${renderSignatures(data.signatures)}
-      ${renderFoot()}
+      ${renderFoot(4, totalPages)}
     </div>`);
 
   // Pages suivantes : documents scannés, un par page, en grand format
@@ -611,7 +616,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
           d.url ? `<img src="${d.url}" alt="${escape(d.label)}" crossorigin="anonymous" />` : `<div class="doc-empty">Document indisponible</div>`
         }</div>
         ${d.meta ? `<div class="doc-meta">${escape(d.meta)}</div>` : ""}
-        ${renderFoot()}
+        ${renderFoot(5 + i, totalPages)}
       </div>`);
   });
 
