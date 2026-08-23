@@ -7192,6 +7192,22 @@ export type Database = {
         Returns: boolean
       }
       convoyeur_level_rank: { Args: { _n: string }; Returns: number }
+      convoyeurs_self_update_allowed: {
+        Args: {
+          _account_status: string
+          _email: string
+          _has_completed_training: boolean
+          _id: string
+          _missions_terminees: number
+          _niveau: string
+          _note_moyenne: number
+          _organization_id: string
+          _statut: string
+          _training_status: string
+          _type_convoyeur: string
+        }
+        Returns: boolean
+      }
       create_admin_notification: {
         Args: {
           _entity_id?: string
@@ -7499,6 +7515,19 @@ export type Database = {
         Returns: undefined
       }
       normalize_mission_numero: { Args: { p_numero: string }; Returns: string }
+      profiles_self_update_allowed: {
+        Args: {
+          _account_status: string
+          _exempte_acceptation_devis: boolean
+          _organization_id: string
+          _pricing_display_mode: string
+          _relances_disabled: boolean
+          _statut: string
+          _type_client: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       push_scan_handoff_extraction: {
         Args: { _extraction: Json; _token: string }
         Returns: string
