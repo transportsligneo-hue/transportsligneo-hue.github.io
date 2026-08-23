@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { getDemandesSeenAt, onDemandesSeen } from "@/lib/admin/demandes-seen";
 import {
   LayoutDashboard,
   FileText,
@@ -61,18 +62,21 @@ function AdminLayout() {
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
     const fetchDemandes = async () => {
-      const { count } = await supabase
+      const seenAt = getDemandesSeenAt();
+      let q = supabase
         .from("demandes_convoyage" as never)
-        .select("id", { count: "exact", head: true })
-        .in("statut" as never, ["nouvelle", "a_traiter"] as never);
+        .select("id", { count: "exact", head: true });
+      if (seenAt) q = q.gt("created_at" as never, seenAt as never);
+      const { count } = await q;
       setDemandesCount(count ?? 0);
     };
     fetchDemandes();
+    const off = onDemandesSeen(() => { void fetchDemandes(); });
     const channel = supabase
       .channel("admin-demandes-badge")
       .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, fetchDemandes)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { off(); supabase.removeChannel(channel); };
   }, [role]);
 
 

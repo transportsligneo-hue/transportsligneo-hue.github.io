@@ -8320,3 +8320,58 @@ body .tln-bar .r4-nav-link {
   padding-bottom: 8px !important;
   white-space: nowrap !important;
 }
+
+/* ============================================================
+   ESTIMATEUR DU HERO ACCUEIL — fusionné dans le fond (comme /tarifs)
+   Pas de carte : les champs sont posés directement sur la photo,
+   en version compacte. Le hero est sombre dans les deux thèmes,
+   on force donc le rendu "verre sombre".
+   ============================================================ */
+.r4-page .v5-hero-quote {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 520px;
+  margin-left: auto;
+  padding: 4px 0;
+}
+.r4-page .v5-hero-quote::before {
+  content: "";
+  position: absolute;
+  inset: -8% -6%;
+  border-radius: 40px;
+  background: radial-gradient(closest-side, rgba(6, 14, 40, 0.62), rgba(6, 14, 40, 0) 78%);
+  filter: blur(6px);
+  pointer-events: none;
+}
+.r4-page .v5-hero-quote > * { position: relative; }
+
+/* Rendu sombre forcé (hero photo) même en thème clair */
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field:hover,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
+  border-color: rgba(96, 165, 250, 0.6) !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #60a5fa !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
+html.theme-light .r4-page .v5-hero-quote .dg-estimator span,
+html.theme-light .r4-page .v5-hero-quote .dg-estimator label { color: #ffffff !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-input::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-input option { color: #0f1526 !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle.is-active {
+  background: #2f5fff !important;
+  border-color: #2f5fff !important;
+  color: #ffffff !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-flat-trust { border-top-color: rgba(255, 255, 255, 0.14) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: rgba(255, 255, 255, 0.8) !important; }
