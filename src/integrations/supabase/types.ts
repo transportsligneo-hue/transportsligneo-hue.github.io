@@ -2074,6 +2074,8 @@ export type Database = {
           prix_estime: number | null
           pv_digitalise: string
           recuperation_retour_identique: boolean
+          refus_motif: string | null
+          refused_at: string | null
           statut: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -2136,6 +2138,8 @@ export type Database = {
           prix_estime?: number | null
           pv_digitalise?: string
           recuperation_retour_identique?: boolean
+          refus_motif?: string | null
+          refused_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2198,6 +2202,8 @@ export type Database = {
           prix_estime?: number | null
           pv_digitalise?: string
           recuperation_retour_identique?: boolean
+          refus_motif?: string | null
+          refused_at?: string | null
           statut?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -5963,6 +5969,8 @@ export type Database = {
           proposal_expires_at: string | null
           published_at: string | null
           pv_digitalise: string | null
+          refus_motif: string | null
+          refused_at: string | null
           statut: string
           statut_publication: string
           tarif_convoyeur: number | null
@@ -6040,6 +6048,8 @@ export type Database = {
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
+          refus_motif?: string | null
+          refused_at?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
@@ -6117,6 +6127,8 @@ export type Database = {
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
+          refus_motif?: string | null
+          refused_at?: string | null
           statut?: string
           statut_publication?: string
           tarif_convoyeur?: number | null
