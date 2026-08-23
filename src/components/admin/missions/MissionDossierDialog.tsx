@@ -23,7 +23,7 @@ const blobToBase64 = (blob: Blob) =>
       const res = String(r.result ?? "");
       resolve(res.slice(res.indexOf(",") + 1));
     };
-    r.onerror = () => reject(new Error («Lecture du PDF impossible»));
+    r.onerror = () => reject(new Error("Lecture du PDF impossible"));
     r.readAsDataURL(blob);
   });
 
