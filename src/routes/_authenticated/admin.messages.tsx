@@ -79,6 +79,9 @@ function AdminMessages() {
   const [selected, setSelected] = useState<ContactMessage | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatut, setFilterStatut] = useState<string>("all");
+  const [composing, setComposing] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+
 
   const fetchMessages = useCallback(async () => {
     let q = supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
