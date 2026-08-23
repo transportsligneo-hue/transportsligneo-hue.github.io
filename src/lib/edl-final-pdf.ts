@@ -43,7 +43,27 @@ export interface EdlFinalPdfData {
   photosArrivee: EdlFinalPdfPhoto[];
   signatures?: { kind: string; url?: string | null }[];
   incidents?: { titre: string; description: string; gravite: string; created_at: string }[];
+  /** Documents scannés (PV de livraison, carte grise…) rendus en pleine page. */
+  documents?: EdlFinalPdfDocument[];
 }
+
+export interface EdlFinalPdfDocument {
+  /** Libellé affiché en bandeau (ex : « PV de livraison signé »). */
+  label: string;
+  url: string;
+  /** Sous-titre optionnel (date, origine…). */
+  meta?: string | null;
+}
+
+export interface EdlFinalPdfOptions {
+  /** Mode « dossier complet » : couverture + sommaire adaptés. */
+  dossier?: boolean;
+}
+
+/** Types de vues considérés comme des documents scannés (rendus en pleine page). */
+const DOC_VUE_RE = /(pv_livraison|pv_restitution|carte_grise|cpi|bon_commande|bon_livraison|mandat)/i;
+export const isScannedDocumentVue = (vueType: string) => DOC_VUE_RE.test(vueType);
+
 
 const VUE_LABELS: Record<string, string> = {
   face_avant: "Face avant",
