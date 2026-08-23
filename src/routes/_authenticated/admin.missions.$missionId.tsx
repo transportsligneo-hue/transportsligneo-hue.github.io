@@ -2148,6 +2148,20 @@ function AdminMissionDetail() {
           </div>
         </div>
       )}
+
+      {attribution && trajet && (
+        <MissionDossierDialog
+          open={dossierOpen}
+          onClose={() => setDossierOpen(false)}
+          numero={missionNumberOf(attribution)}
+          buildPdf={buildDossierBlob}
+          suggestions={[
+            ...(trajet.client_email ? [{ label: "Client", email: trajet.client_email }] : []),
+            ...(convoyeur?.email ? [{ label: "Convoyeur", email: convoyeur.email }] : []),
+          ]}
+        />
+      )}
     </div>
+
   );
 }
