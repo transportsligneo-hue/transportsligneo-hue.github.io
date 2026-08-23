@@ -768,6 +768,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attributions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       avis_clients: {
@@ -4131,6 +4138,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mission_offres_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mission_pv_digitaux: {
@@ -5641,6 +5655,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "remunerations_missions_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reviews: {
@@ -6136,6 +6157,13 @@ export type Database = {
             referencedRelation: "trajets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trajets_parent_trajet_id_fkey"
+            columns: ["parent_trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       trajets_admin_data: {
@@ -6169,6 +6197,13 @@ export type Database = {
             columns: ["trajet_id"]
             isOneToOne: true
             referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trajets_admin_data_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: true
+            referencedRelation: "trajets_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -6434,6 +6469,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vehicle_movements_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vehicle_movements_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -6687,6 +6729,75 @@ export type Database = {
           publisher_verifie: boolean | null
           statut_publication: string | null
           vehicule_energie: string | null
+        }
+        Relationships: []
+      }
+      trajets_safe: {
+        Row: {
+          arrivee: string | null
+          created_at: string | null
+          date_souhaitee: string | null
+          date_trajet: string | null
+          depart: string | null
+          group_reference: string | null
+          heure_trajet: string | null
+          id: string | null
+          immatriculation: string | null
+          leg_index: number | null
+          leg_type: string | null
+          lot_id: string | null
+          lot_reference: string | null
+          marque: string | null
+          mission_group_id: string | null
+          modele: string | null
+          numero_mission: string | null
+          statut: string | null
+          type_mission: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          arrivee?: string | null
+          created_at?: string | null
+          date_souhaitee?: string | null
+          date_trajet?: string | null
+          depart?: string | null
+          group_reference?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
+          lot_id?: string | null
+          lot_reference?: string | null
+          marque?: string | null
+          mission_group_id?: string | null
+          modele?: string | null
+          numero_mission?: string | null
+          statut?: string | null
+          type_mission?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          arrivee?: string | null
+          created_at?: string | null
+          date_souhaitee?: string | null
+          date_trajet?: string | null
+          depart?: string | null
+          group_reference?: string | null
+          heure_trajet?: string | null
+          id?: string | null
+          immatriculation?: string | null
+          leg_index?: number | null
+          leg_type?: string | null
+          lot_id?: string | null
+          lot_reference?: string | null
+          marque?: string | null
+          mission_group_id?: string | null
+          modele?: string | null
+          numero_mission?: string | null
+          statut?: string | null
+          type_mission?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
