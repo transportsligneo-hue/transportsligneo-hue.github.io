@@ -5,6 +5,8 @@ import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { FileText, Upload, Trash2, Download, Loader2, Eye, FileCheck2, FilePenLine, CarFront, MoreHorizontal, PenLine, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
+
 
 const DOC_TYPES = [
   { value: "pv_livraison", label: "PV de livraison / restitution", short: "PV", icon: FileCheck2 },
@@ -230,14 +232,26 @@ export function MissionDocuments({ attributionId, userId, isAdmin = false }: Pro
           </div>
           <p className="text-sm font-semibold text-slate-950">Déposez un fichier ici</p>
           <p className="mt-1 text-xs text-slate-500">PDF ou image, 10 Mo maximum</p>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 sm:w-auto"
-          >
-            {uploading ? "Envoi en cours…" : "Ajouter un document"}
-          </button>
+          <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 sm:w-auto"
+            >
+              {uploading ? "Envoi en cours…" : "Ajouter un document"}
+            </button>
+            <DocScanButton
+              label={`Scanner ${typeShort(selectedType)}`}
+              maxPages={4}
+              mergeToPdf
+              filenameBase={`${selectedType}-${attributionId.slice(0, 8)}`}
+              onFiles={async (files) => {
+                for (const f of files) await uploadFile(f, selectedType);
+              }}
+            />
+          </div>
+
         </div>
       )}
 

@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
+
 
 interface Props {
   devisId: string;
@@ -260,7 +262,21 @@ function UploadCard({
             </div>
           </label>
         )}
+        <div className="mt-3 flex justify-center">
+          <DocScanButton
+            label={`Scanner ${label.toLowerCase()}`}
+            maxPages={2}
+            filenameBase="carte-grise"
+            onFiles={(files) => {
+              if (files[0]) {
+                setPreviewUrl(null);
+                onFile(files[0]);
+              }
+            }}
+          />
+        </div>
       </div>
+
     </div>
   );
 }
