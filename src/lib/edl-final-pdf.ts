@@ -314,11 +314,20 @@ function renderCoverBody(
     </div>
 
     <div class="toc">
-      <div class="toc-row"><span class="toc-num">1</span><span class="toc-text">Informations &amp; équipements</span></div>
-      <div class="toc-row"><span class="toc-num">2</span><span class="toc-text">État des lieux — Départ (${totalPhotos.dep} photos)</span></div>
-      <div class="toc-row"><span class="toc-num">3</span><span class="toc-text">État des lieux — Arrivée (${totalPhotos.arr} photos)</span></div>
-      <div class="toc-row"><span class="toc-num">4</span><span class="toc-text">Signatures &amp; validation</span></div>
+      ${[
+        "Informations &amp; équipements",
+        `État des lieux — Départ (${totalPhotos.dep} photos)`,
+        `État des lieux — Arrivée (${totalPhotos.arr} photos)`,
+        "Signatures &amp; validation",
+        ...docs.map((d) => `${escape(d.label)} (document scanné)`),
+      ]
+        .map(
+          (t, i) =>
+            `<div class="toc-row"><span class="toc-num">${i + 1}</span><span class="toc-text">${t}</span></div>`,
+        )
+        .join("")}
     </div>
+
   `;
 }
 
