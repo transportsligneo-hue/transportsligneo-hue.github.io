@@ -34,6 +34,7 @@ import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
 import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
@@ -427,6 +428,7 @@ function AdminMissionsUnified() {
       _convoyeur_id: convoyeurId,
     });
     if (error) return toast.error(error.message);
+    notifyDriver({ convoyeurId, trajetId, event: "mission_attribuee" });
     toast.success("Convoyeur attribué");
     fetchAll();
   };
@@ -444,6 +446,7 @@ function AdminMissionsUnified() {
       _patch: { [key]: value || null } as never,
     } as never);
     if (error) return toast.error("Planning non enregistré", { description: error.message });
+    notifyDriver({ trajetId, event: "mission_modifiee", detail: key === "date_trajet" ? "Nouvelle date de mission" : "Nouvel horaire" });
     toast.success(key === "date_trajet" ? "Date de mission enregistrée" : "Heure enregistrée");
     fetchAll();
   };
@@ -496,7 +499,7 @@ function AdminMissionsUnified() {
     for (const id of ids) {
       const { error } = await supabase.rpc("admin_assign_convoyeur", { _trajet_id: id, _convoyeur_id: convoyeurId });
       if (error) toast.error("Attribution partielle", { description: error.message });
-      else ok += 1;
+      else { ok += 1; notifyDriver({ convoyeurId, trajetId: id, event: "mission_attribuee" }); }
     }
     setLotBusy(false);
     if (ok) toast.success(`${ok} mission${ok > 1 ? "s" : ""} attribuée${ok > 1 ? "s" : ""}`);
