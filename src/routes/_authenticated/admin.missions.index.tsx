@@ -5,12 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers, Archive } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
   UNIFIED_STATUS,
   trajetToUnified,
+  compareDefaultOrder,
   type UnifiedMission,
   type UnifiedStatus,
 } from "@/components/admin/missions/mission-unified-types";
@@ -54,6 +55,7 @@ interface TrajetRow {
   prix_convoyeur_fixe: number | null; prix_convoyeur_min: number | null; prix_convoyeur_max: number | null;
   marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
   lot_id: string | null; lot_reference: string | null;
+  archived_at: string | null;
 }
 
 interface DemandeRow {
@@ -154,6 +156,7 @@ function AdminMissionsUnified() {
   const [convoyeurs, setConvoyeurs] = useState<ConvoyeurOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
+  const [archivedView, setArchivedView] = useState(false);
   const [convFilter, setConvFilter] = useState("all");
   const [payFilter, setPayFilter] = useState("all");
   const [energyFilter, setEnergyFilter] = useState("all");
@@ -368,6 +371,7 @@ function AdminMissionsUnified() {
         rechargeSeule: isRechargeSeule(t),
         lotId: t.lot_id ?? null,
         lotRef: t.lot_reference ?? null,
+        archived: !!t.archived_at,
       };
     });
 
@@ -399,13 +403,7 @@ function AdminMissionsUnified() {
       }));
 
     setRows(
-      [...demandeMissions, ...trajetMissions].sort((a, b) => {
-        const ta = new Date(a.createdAt).getTime();
-        const tb = new Date(b.createdAt).getTime();
-        if (tb !== ta) return tb - ta;
-        if (a.groupId && a.groupId === b.groupId) return (a.legIndex ?? 1) - (b.legIndex ?? 1);
-        return 0;
-      }),
+      [...demandeMissions, ...trajetMissions].sort(compareDefaultOrder),
     );
 
     setLoading(false);
@@ -507,15 +505,20 @@ function AdminMissionsUnified() {
   };
 
   /* ---------------- Filtres / tri ---------------- */
+  const scopedRows = useMemo(
+    () => rows.filter((r) => (archivedView ? r.archived : !r.archived)),
+    [rows, archivedView],
+  );
+
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: rows.length };
-    UNIFIED_ORDER.forEach((s) => { c[s] = rows.filter((r) => r.status === s).length; });
+    const c: Record<string, number> = { all: scopedRows.length, archivees: rows.filter((r) => r.archived).length };
+    UNIFIED_ORDER.forEach((s) => { c[s] = scopedRows.filter((r) => r.status === s).length; });
     return c;
-  }, [rows]);
+  }, [rows, scopedRows]);
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const list = rows.filter((r) => {
+    const list = scopedRows.filter((r) => {
       if (filter !== "all" && r.status !== filter) return false;
       const m = meta.get(r.id);
       if (convFilter !== "all") {
@@ -533,11 +536,12 @@ function AdminMissionsUnified() {
     });
 
     const sorted = [...list];
-    if (sortBy === "prix") sorted.sort((a, b) => (b.prix ?? 0) - (a.prix ?? 0));
+    if (sortBy === "recent") sorted.sort(compareDefaultOrder);
+    else if (sortBy === "prix") sorted.sort((a, b) => (b.prix ?? 0) - (a.prix ?? 0));
     else if (sortBy === "date") sorted.sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime());
     else if (sortBy === "client") sorted.sort((a, b) => (a.clientNom ?? "").localeCompare(b.clientNom ?? ""));
     return sorted;
-  }, [rows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy]);
+  }, [scopedRows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy]);
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
@@ -664,6 +668,13 @@ function AdminMissionsUnified() {
             {UNIFIED_STATUS[s].label} · {counts[s] ?? 0}
           </button>
         ))}
+        <button
+          className={`a6-chip ${archivedView ? "active" : ""}`}
+          title="Missions terminées ou annulées depuis plus de 60 jours"
+          onClick={() => { setArchivedView((v) => !v); setFilter("all"); }}
+        >
+          <Archive size={12} className="mr-1 inline-block" /> Archivées · {counts.archivees ?? 0}
+        </button>
         <div className="relative ml-auto w-full sm:w-72">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--a6-dim)]" />
           <input
