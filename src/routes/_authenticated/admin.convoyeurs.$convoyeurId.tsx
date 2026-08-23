@@ -159,6 +159,20 @@ function AdminConvoyeurDetail() {
       setForm(init);
       setOriginal(init);
 
+      // Photo de profil : compte utilisateur si lié, sinon fiche convoyeur
+      const convAvatar = (cv as unknown as { avatar_url?: string | null }).avatar_url ?? null;
+      if (cv.user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("user_id", cv.user_id)
+          .maybeSingle();
+        setAvatarUrl((prof as { avatar_url: string | null } | null)?.avatar_url ?? convAvatar);
+      } else {
+        setAvatarUrl(convAvatar);
+      }
+
+
       const today = new Date().toISOString().slice(0, 10);
       const [{ data: d }, { data: a }, { data: dispo }, { data: lg }, { data: navRows }] = await Promise.all([
         supabase
