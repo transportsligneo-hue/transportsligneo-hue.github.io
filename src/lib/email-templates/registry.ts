@@ -66,6 +66,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'offre-refusee': offreRefusee,
   'nouvelle-offre-admin': nouvelleOffreAdmin,
   'document-mission-admin': documentMissionAdmin,
+  'dossier-mission': dossierMission,
   'mission-terminee-admin': missionTermineeAdmin,
   'b2b-paiement-admin': b2bPaiementAdmin,
   'b2b-lead-flotte-admin': b2bLeadFlotteAdmin,
