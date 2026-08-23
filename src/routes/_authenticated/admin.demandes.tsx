@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
+import { getDemandesSeenAt, markDemandesSeen } from "@/lib/admin/demandes-seen";
 
 export const Route = createFileRoute("/_authenticated/admin/demandes")({
   component: AdminDemandes,
