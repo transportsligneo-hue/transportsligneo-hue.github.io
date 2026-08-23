@@ -140,6 +140,31 @@ function AdminLayout() {
     { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
     { to: "/admin/test-notifications", label: "Test notifications", icon: Bell, group: "Pilotage" },
 
+    // Opérations
+    {
+      to: "/admin/demandes",
+      label: "Demandes de convoyage",
+      icon: Inbox,
+      group: "Opérations",
+      badge: demandesCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#2F5FFF] text-white">{demandesCount > 99 ? "99+" : demandesCount}</span>
+        : undefined,
+    },
+    { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
+    {
+      to: "/admin/alertes",
+      label: "Alertes opérationnelles",
+      icon: AlertTriangle,
+      group: "Opérations",
+      badge: alertCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white">{alertCount > 99 ? "99+" : alertCount}</span>
+        : undefined,
+    },
+    { to: "/admin/incidents", label: "Registre des incidents", icon: AlertTriangle, group: "Opérations" },
+    { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
+    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList, group: "Opérations" },
+    { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
+
 
     // Marketing
     { to: "/admin/campagnes", label: "Campagnes", icon: Megaphone, group: "Marketing" },
@@ -154,15 +179,6 @@ function AdminLayout() {
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Comptes" },
 
     // Activité commerciale
-    {
-      to: "/admin/demandes",
-      label: "Demandes de convoyage",
-      icon: Inbox,
-      group: "Activité",
-      badge: demandesCount > 0
-        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#2F5FFF] text-white">{demandesCount > 99 ? "99+" : demandesCount}</span>
-        : undefined,
-    },
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
 
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
@@ -170,22 +186,7 @@ function AdminLayout() {
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
     { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Activité" },
 
-    // Opérations
-    { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
-    {
-      to: "/admin/alertes",
-      label: "Alertes opérationnelles",
-      icon: AlertTriangle,
-      group: "Opérations",
-      badge: alertCount > 0
-        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white">{alertCount > 99 ? "99+" : alertCount}</span>
-        : undefined,
-    },
-    { to: "/admin/incidents", label: "Registre des incidents", icon: AlertTriangle, group: "Opérations" },
-    { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
 
-    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList, group: "Opérations" },
-    { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
 
 
     // Finance
