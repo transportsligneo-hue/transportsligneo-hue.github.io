@@ -267,6 +267,10 @@ export function QrHandoffButton({
                     <p className={`text-[11px] mt-1 ${expired ? "text-red-400" : "text-white/50"}`}>
                       {expired ? "Expirée" : `Expire dans ${mm}:${ss}`}
                     </p>
+                    <p className="text-[10px] mt-0.5 flex items-center gap-1.5 text-white/40">
+                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${live ? "bg-emerald-400" : "bg-amber-400"}`} />
+                      {live ? "Liaison temps réel active" : "Liaison en cours (secours actif)"}
+                    </p>
                   </div>
 
                   {/* Reçus */}
@@ -276,6 +280,7 @@ export function QrHandoffButton({
                         En attente d'un document depuis le téléphone…
                       </p>
                     ) : (
+
                       <ul className="space-y-1.5">
                         {received.map((d, i) => (
                           <li key={i} className="flex items-center gap-2 text-white/80 text-xs">
