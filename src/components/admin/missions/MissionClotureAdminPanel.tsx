@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { Card } from "@/components/ui/card";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { Loader2, Ban, AlertTriangle, RotateCcw, FileWarning } from "lucide-react";
 
 /**
@@ -334,6 +335,11 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
         _apply_group: isGroup ? applyGroup : false,
       } as never);
       if (error) throw error;
+      notifyDriver({
+        attributionId,
+        event: "mission_annulee",
+        detail: `${cat?.label ?? ""}${motif.trim() ? ` — ${motif.trim()}` : ""}`,
+      });
       toast.success("Mission annulée", { description: cat?.label });
       setOpen(false);
       setMotif("");

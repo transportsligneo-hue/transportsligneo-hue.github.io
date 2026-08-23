@@ -29,6 +29,7 @@ import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/trajets")({
@@ -281,6 +282,8 @@ function AdminTrajets() {
       toast.error(error.message);
       return;
     }
+
+    notifyDriver({ convoyeurId: offre.convoyeur_id ?? undefined, trajetId: selected.id, event: "mission_validee" });
 
     // Notifications email (best-effort)
     const dateFmt = selected.date_trajet

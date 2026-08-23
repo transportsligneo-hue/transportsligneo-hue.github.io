@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import {
   CONVOYEUR_DOC_TYPES,
   getConvoyeurDocLabel,
@@ -195,6 +196,15 @@ export function DocumentsValidationCenter({
         _metadata: { type_document: doc.type_document, motif: motif ?? null, convoyeur_id: convoyeurId } as never,
       } as never);
     } catch { /* ignore */ }
+
+    notifyDriver({
+      convoyeurId,
+      event: statut === "approuve" ? "document_valide" : "document_refuse",
+      detail:
+        statut === "approuve"
+          ? typeLabel
+          : `${typeLabel}${motif ? ` — ${motif}` : ""}${statut === "a_renvoyer" ? " (à renvoyer)" : ""}`,
+    });
 
     // Notification in-app (RPC SECURITY DEFINER).
     try {

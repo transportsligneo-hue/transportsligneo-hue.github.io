@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, Button, TextInput, Select } from "@/components/admin/AdminUI";
 import { Pencil, Loader2, Save, RotateCcw, CalendarClock, Car, MapPin, Users } from "lucide-react";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { toast } from "sonner";
 
 type FieldDef = {
@@ -263,6 +264,7 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
           _patch: patch as never,
         } as never);
         if (error) throw error;
+        notifyDriver({ trajetId, event: "mission_modifiee", detail: "Informations de mission mises à jour" });
       }
 
       if (vehDirty && devisId) {
