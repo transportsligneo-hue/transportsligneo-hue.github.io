@@ -112,12 +112,15 @@ export function buildCampaignHtml({
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light only" />
 <title>${escapeHtml(applyVariables(campaign.subject || 'Transports Ligneo', vars))}</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>body,table,td,p,h1,h2,h3,a,span,div{font-family:'Poppins','Segoe UI',Arial,sans-serif !important;}</style>
 </head>
-<body style="margin:0; padding:0; background:#eef0f5; -webkit-font-smoothing:antialiased;">
+<body style="margin:0; padding:0; background:#eef0f5; -webkit-font-smoothing:antialiased; font-family:'Poppins','Segoe UI',Arial,sans-serif;">
 <div style="display:none; max-height:0; overflow:hidden; opacity:0;">${escapeHtml(preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef0f5;">
 <tr><td align="center" style="padding:32px 16px;">
-  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px; background:#ffffff; border-radius:14px; overflow:hidden; font-family:'Inter','Segoe UI',Arial,sans-serif;">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px; background:#ffffff; border-radius:14px; overflow:hidden; font-family:'Poppins','Segoe UI',Arial,sans-serif;">
+
     <tr>
       <td style="background:#0a1638; padding:0; text-align:center;">
         <img src="${LIGNEO_BRAND_BANNER_URL}" width="600" alt="Transports Ligneo" style="display:block; width:100%; max-width:600px; border:0;" />
