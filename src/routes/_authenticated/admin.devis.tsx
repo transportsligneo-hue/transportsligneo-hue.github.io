@@ -319,6 +319,8 @@ function AdminDevisPage() {
   const totalAmount = filtered.reduce((s, d) => s + Number(d.prix_estime || 0), 0);
   const acceptes = filtered.filter((d) => d.statut === "accepte" || d.statut === "convertit").length;
   const signes = filtered.filter((d) => !!d.locked_at).length;
+  const tauxAcceptation = filtered.length ? Math.round((acceptes / filtered.length) * 100) : 0;
+
 
   return (
     <div>
