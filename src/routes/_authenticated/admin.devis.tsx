@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle } from "lucide-react";
+import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle, Euro, CheckCircle2, Search, Plus, Layers } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
@@ -68,7 +68,18 @@ interface DevisRow {
   expires_at: string | null;
   archived_at: string | null;
   paid_at: string | null;
+  vehicules?: Array<{
+    immatriculation?: string | null;
+    marque?: string | null;
+    modele?: string | null;
+    vin?: string | null;
+    arrivee?: string | null;
+    prix?: number | null;
+    note?: string | null;
+  }> | null;
+  options?: string[] | null;
 }
+
 
 interface AcceptationInfo {
   devis_id: string;
@@ -110,6 +121,21 @@ const SORTS = [
 function statutLabel(s: string): string {
   return STATUTS.find((x) => x.value === s)?.label ?? s;
 }
+
+/** Couleur du badge selon la valeur réelle du statut. */
+function statutBadgeTone(s: string): string {
+  switch (s) {
+    case "accepte": return "green";
+    case "convertit": return "grey";
+    case "refuse": return "red";
+    case "expire": return "red";
+    case "envoye":
+    case "en_attente": return "orange";
+    case "genere": return "blue";
+    default: return "grey";
+  }
+}
+
 
 function isExpired(d: DevisRow): boolean {
   if (d.statut === "expire") return true;
@@ -308,66 +334,95 @@ function AdminDevisPage() {
   const totalAmount = filtered.reduce((s, d) => s + Number(d.prix_estime || 0), 0);
   const acceptes = filtered.filter((d) => d.statut === "accepte" || d.statut === "convertit").length;
   const signes = filtered.filter((d) => !!d.locked_at).length;
+  const tauxAcceptation = filtered.length ? Math.round((acceptes / filtered.length) * 100) : 0;
+
 
   return (
     <div>
-      <PageHeader
-        title="Devis"
-        subtitle="Cycle de vie complet — les devis ne disparaissent jamais (archivage uniquement)."
-        actions={
-          <Link to="/admin/nouveau-devis">
-            <Button icon={<PenLine size={14} />}>Créer un devis</Button>
-          </Link>
-        }
-      />
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KpiCard label="Total" value={filtered.length} icon={FileText} />
-        <KpiCard
-          label="Montant cumulé"
-          value={`${totalAmount.toLocaleString("fr-FR")} €`}
-          tone="success"
-        />
-        <KpiCard label="Acceptés" value={acceptes} tone="success" />
-        <KpiCard label="Signés" value={signes} tone="info" />
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Devis</h1>
+          <p className="dvx-sub">
+            Cycle de vie complet — les devis ne disparaissent jamais (archivage uniquement).
+          </p>
+        </div>
+        <Link to="/admin/nouveau-devis" className="dvx-cta">
+          <Plus size={16} />
+          Créer un devis
+        </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-3 mb-3">
-        <SearchInput
-          value={search}
-          onChange={setSearch}
-          placeholder="Rechercher par numéro, client, email, ville..."
-        />
-        <Select value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)} className="lg:w-56">
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><FileText size={17} /></span>
+          <p className="dvx-stat-k">Total</p>
+          <p className="dvx-stat-v">{filtered.length}</p>
+          <p className="dvx-stat-t dim">{showArchived ? "Devis archivés" : "Devis actifs"}</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><Euro size={17} /></span>
+          <p className="dvx-stat-k">Montant cumulé</p>
+          <p className="dvx-stat-v">{totalAmount.toLocaleString("fr-FR")} €</p>
+          <p className="dvx-stat-t dim">TTC sur la sélection</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><CheckCircle2 size={17} /></span>
+          <p className="dvx-stat-k">Acceptés</p>
+          <p className="dvx-stat-v">{acceptes}</p>
+          <p className={`dvx-stat-t ${acceptes > 0 ? "up" : "warn"}`}>
+            {acceptes > 0 ? `${tauxAcceptation}% de conversion` : "À relancer"}
+          </p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic orange"><PenLine size={17} /></span>
+          <p className="dvx-stat-k">Signés</p>
+          <p className="dvx-stat-v">{signes}</p>
+          <p className={`dvx-stat-t ${signes > 0 ? "up" : "warn"}`}>
+            {signes > 0 ? "Signature électronique" : "Aucune signature"}
+          </p>
+        </div>
+      </div>
+
+      {/* ===== Barre de filtres unifiée ===== */}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un numéro, un client, un email…"
+          />
+        </div>
+        <select className="dvx-select" value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)}>
           <option value="">Tous les statuts</option>
           {STATUTS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
-        </Select>
-        <Select value={sort} onChange={(e) => setSort(e.target.value)} className="lg:w-44">
+        </select>
+        <select className="dvx-select" value={sort} onChange={(e) => setSort(e.target.value)}>
           {SORTS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
-        </Select>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 mb-5 text-xs">
-        <label className="flex items-center gap-2 text-pro-text-soft">
+        </select>
+        <label className="dvx-date">
           Du
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-transparent border border-pro-border rounded px-2 py-1.5 text-pro-text" />
+          <input type="date" className="dvx-input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         </label>
-        <label className="flex items-center gap-2 text-pro-text-soft">
+        <label className="dvx-date">
           Au
-          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-transparent border border-pro-border rounded px-2 py-1.5 text-pro-text" />
+          <input type="date" className="dvx-input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
         </label>
-        <label className="flex items-center gap-2 text-pro-text-soft cursor-pointer">
-          <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} className="accent-pro-accent" />
+        <label className="dvx-check">
+          <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
           Voir les archivés
         </label>
-        <Button size="sm" onClick={exportCsv} icon={<FileSpreadsheet size={12} />} className="ml-auto">
+        <button type="button" className="dvx-export" onClick={exportCsv}>
+          <FileSpreadsheet size={14} />
           Export CSV
-        </Button>
+        </button>
       </div>
 
       {loading ? (
@@ -377,162 +432,190 @@ function AdminDevisPage() {
       ) : filtered.length === 0 ? (
         <EmptyState icon={FileText} title="Aucun devis" description={showArchived ? "Aucun devis archivé." : "Aucun devis ne correspond à ces filtres."} />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {filtered.map((d) => {
             const effective = isExpired(d) ? "expire" : d.statut;
             const acc = acceptations[d.id];
+            const vehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.modele || v.marque));
+            const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
             return (
-              <Card key={d.id}>
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="font-mono text-pro-accent text-sm font-semibold">
-                        {d.numero}
-                      </span>
-                      {(d.version ?? 1) > 1 && <Badge tone="neutral">v{d.version}</Badge>}
-                      <Badge tone={devisStatutTone[effective] ?? "neutral"}>{statutLabel(effective)}</Badge>
-                      {d.locked_at && <Badge tone="success">✍ Signé</Badge>}
-                      {d.paid_at && <Badge tone="success">Payé</Badge>}
-                      {d.email_envoye && <Badge tone="info">Email envoyé</Badge>}
-                      {d.mission_id && <Badge tone="info">Mission créée</Badge>}
-                      {d.archived_at && <Badge tone="neutral">Archivé</Badge>}
-                      <span className="text-pro-text-soft text-xs">
-                        {new Date(d.created_at).toLocaleString("fr-FR", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-
-                    <p className="text-pro-text font-medium">
-                      {d.prenom} {d.nom}
-                    </p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-pro-text-soft mt-1">
-                      <span className="flex items-center gap-1">
-                        <Mail size={12} />
-                        {d.email}
-                      </span>
-                      {d.telephone && (
-                        <span className="flex items-center gap-1">
-                          <Phone size={12} />
-                          {d.telephone}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                      <div>
-                        <p className="text-pro-text-soft uppercase tracking-wider mb-0.5 text-[10px] font-semibold">
-                          Trajet
-                        </p>
-                        <p className="text-pro-text font-medium">
-                          {d.depart} → {d.arrivee}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-pro-text-soft uppercase tracking-wider mb-0.5 text-[10px] font-semibold">
-                          Distance
-                        </p>
-                        <p className="text-pro-text font-medium">{d.distance_km ?? "—"} km</p>
-                      </div>
-                      <div>
-                        <p className="text-pro-text-soft uppercase tracking-wider mb-0.5 text-[10px] font-semibold">
-                          Option
-                        </p>
-                        <p className="text-pro-text font-medium capitalize">{d.option_trajet}</p>
-                      </div>
-                      <div>
-                        <p className="text-pro-text-soft uppercase tracking-wider mb-0.5 text-[10px] font-semibold">
-                          Véhicule
-                        </p>
-                        <p className="text-pro-text font-medium">
-                          {[d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {acc && (
-                      <p className="mt-2 text-[11px] text-emerald-600 flex items-center gap-1.5">
-                        <PenLine size={11} />
-                        Signé le {new Date(acc.accepted_at).toLocaleString("fr-FR")} · IP {acc.ip_address ?? "—"} · {Number(acc.montant_accepte ?? d.prix_estime).toFixed(2)} € TTC
-                      </p>
-                    )}
-
-                    {d.message && (
-                      <p className="mt-3 text-xs italic text-pro-text-soft border-l-2 border-pro-accent/30 pl-3">
-                        "{d.message}"
-                      </p>
-                    )}
+              <div key={d.id} className={`dvx-card ${d.archived_at ? "is-archived" : ""}`}>
+                {/* En-tête de carte */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="dvx-ref">{d.numero}</span>
+                    {(d.version ?? 1) > 1 && <span className="dvx-badge grey">v{d.version}</span>}
+                    <span className={`dvx-badge ${statutBadgeTone(effective)}`}>{statutLabel(effective)}</span>
+                    {d.locked_at && <span className="dvx-badge green"><PenLine size={11} /> Signé</span>}
+                    {d.paid_at && <span className="dvx-badge green">Payé</span>}
+                    {d.email_envoye && <span className="dvx-badge blue">Email envoyé</span>}
+                    {d.mission_id && <span className="dvx-badge blue"><CheckCircle2 size={11} /> Mission créée</span>}
+                    {d.archived_at && <span className="dvx-badge grey">Archivé</span>}
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      {new Date(d.created_at).toLocaleString("fr-FR", {
+                        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+                      })}
+                    </span>
                   </div>
-
-                  <div className="flex flex-col items-end gap-3 shrink-0">
-                    <div className="text-right">
-                      <p className="text-2xl font-semibold text-pro-text">{d.prix_estime} €</p>
-                      <p className="text-[10px] text-pro-text-soft uppercase tracking-wider font-medium">TTC</p>
-                    </div>
-
-                    <Select
-                      value={d.statut}
-                      onChange={(e) => updateStatut(d.id, e.target.value)}
-                      className="text-xs py-1.5"
-                    >
-                      {STATUTS.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </Select>
-
-                    <div className="flex gap-2 flex-wrap justify-end">
-                      <IconButton title="Voir le détail" tone="primary" onClick={() => setSelected(d)}>
-                        <Eye size={14} />
-                      </IconButton>
-                      <Button
-                        size="sm"
-                        onClick={() => handleDownload(d)}
-                        disabled={generatingId === d.id}
-                        icon={
-                          generatingId === d.id ? (
-                            <Loader2 size={12} className="animate-spin" />
-                          ) : (
-                            <Download size={12} />
-                          )
-                        }
-                      >
-                        PDF
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleConvert(d)}
-                        disabled={convertingId === d.id || !!d.mission_id}
-                        icon={
-                          convertingId === d.id ? (
-                            <Loader2 size={12} className="animate-spin" />
-                          ) : (
-                            <ArrowRightCircle size={12} />
-                          )
-                        }
-                      >
-                        {d.mission_id ? "Converti" : "→ Mission"}
-                      </Button>
-                      <IconButton
-                        onClick={() => handleArchive(d)}
-                        title={d.archived_at ? "Restaurer" : "Archiver (jamais supprimé)"}
-                        tone={d.archived_at ? "primary" : "danger"}
-                      >
-                        {d.archived_at ? <ArchiveRestore size={14} /> : <Archive size={14} />}
-                      </IconButton>
-                    </div>
+                  <div className="text-right shrink-0">
+                    <p className="dvx-price">
+                      {Number(d.prix_estime).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      <small>TTC</small>
+                    </p>
                   </div>
                 </div>
-              </Card>
+
+                {/* Corps 4 colonnes */}
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="dvx-avatar">{initials}</span>
+                    <div className="min-w-0">
+                      <p className="text-[13.5px] font-bold text-[#14161c] truncate">{d.prenom} {d.nom}</p>
+                      <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d] truncate">
+                        <Mail size={11} className="shrink-0" />{d.email}
+                      </p>
+                      {d.telephone && (
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
+                          <Phone size={11} className="shrink-0" />{d.telephone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Trajet</p>
+                    <div className="flex items-start gap-2">
+                      <span className="dvx-dot start" />
+                      <p className="text-[12.5px] text-[#14161c] leading-snug">{d.depart}</p>
+                    </div>
+                    <div className="mt-1.5 flex items-start gap-2">
+                      <span className="dvx-dot end" />
+                      <p className="text-[12.5px] text-[#14161c] leading-snug">{d.arrivee}</p>
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-[#a3a4ac]">{d.distance_km ?? "—"} km</p>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Option choisie</p>
+                    <p className="text-[13px] font-semibold capitalize text-[#14161c]">
+                      {(d.option_trajet || "—").replaceAll("_", " ")}
+                    </p>
+                    <p className="mt-1 text-[11.5px] text-[#a3a4ac]">
+                      {d.prestation || d.tarif_label || "Prestation standard"}
+                    </p>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Véhicule</p>
+                    <span className="dvx-tag">
+                      <Car size={13} className="text-[#2f5fff]" />
+                      {[d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—"}
+                    </span>
+                    {(d as unknown as { immatriculation?: string }).immatriculation && (
+                      <p className="dvx-vin mt-1.5">{(d as unknown as { immatriculation?: string }).immatriculation}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Devis groupé */}
+                {vehicules.length > 1 && (
+                  <div className="dvx-group">
+                    <p className="dvx-group-t">
+                      <Layers size={13} /> Devis groupé · {vehicules.length} véhicules
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      {vehicules.map((v, i) => (
+                        <div key={i} className="dvx-veh">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-[12.5px] font-bold text-[#14161c] truncate">
+                                {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
+                                {v.immatriculation ? ` · ${v.immatriculation}` : ""}
+                              </p>
+                              {v.vin && <p className="dvx-vin mt-0.5">VIN {v.vin}</p>}
+                              {v.arrivee && (
+                                <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
+                                  <MapPin size={11} className="shrink-0 text-[#e0334f]" />{v.arrivee}
+                                </p>
+                              )}
+                            </div>
+                            {v.prix != null && (
+                              <span className="dvx-veh-price shrink-0">{Number(v.prix).toFixed(0)} €</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {(d.options?.length || d.message) && (
+                      <p className="mt-2.5 border-t border-[#eaeaee] pt-2.5 text-[11.5px] text-[#70727d]">
+                        {d.options?.length ? `Options : ${d.options.join(", ")}. ` : ""}
+                        {d.message ? `Notes : ${d.message}` : ""}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {acc && (
+                  <p className="mt-3 flex items-center gap-1.5 text-[11.5px] font-medium text-[#15803d]">
+                    <PenLine size={11} />
+                    Signé le {new Date(acc.accepted_at).toLocaleString("fr-FR")} · IP {acc.ip_address ?? "—"} · {Number(acc.montant_accepte ?? d.prix_estime).toFixed(2)} € TTC
+                  </p>
+                )}
+
+                {vehicules.length <= 1 && d.message && (
+                  <p className="mt-3 border-l-2 border-[#dce6fd] pl-3 text-[12px] italic text-[#70727d]">
+                    « {d.message} »
+                  </p>
+                )}
+
+                {/* Pied de carte */}
+                <div className="dvx-foot">
+                  <button type="button" className="dvx-ico" title="Aperçu du devis" onClick={() => setSelected(d)}>
+                    <Eye size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    className="dvx-btn solid"
+                    onClick={() => handleDownload(d)}
+                    disabled={generatingId === d.id}
+                  >
+                    {generatingId === d.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                    PDF
+                  </button>
+                  <button
+                    type="button"
+                    className="dvx-btn outline"
+                    onClick={() => handleConvert(d)}
+                    disabled={convertingId === d.id || !!d.mission_id}
+                  >
+                    {convertingId === d.id ? <Loader2 size={13} className="animate-spin" /> : <ArrowRightCircle size={13} />}
+                    {d.mission_id ? "Converti" : "Convertir"}
+                  </button>
+                  <button
+                    type="button"
+                    className={`dvx-ico ${d.archived_at ? "" : "danger"}`}
+                    title={d.archived_at ? "Restaurer" : "Archiver (jamais supprimé)"}
+                    onClick={() => handleArchive(d)}
+                  >
+                    {d.archived_at ? <ArchiveRestore size={15} /> : <Archive size={15} />}
+                  </button>
+
+                  <select
+                    className="dvx-select dvx-foot-select"
+                    value={d.statut}
+                    onChange={(e) => updateStatut(d.id, e.target.value)}
+                  >
+                    {STATUTS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
+
 
       <DevisDrawer
         devis={selected}
