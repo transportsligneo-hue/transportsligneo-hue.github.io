@@ -124,6 +124,9 @@ function AdminMessages() {
         subtitle={`${messages.length} message${messages.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <Button onClick={() => setComposing((v) => !v)}>
+              <Mail size={14} /> {composing ? "Fermer l'éditeur" : "Nouvel email direct"}
+            </Button>
             <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
               <option value="all">Tous statuts</option>
               {STATUTS.map((s) => (
@@ -138,6 +141,18 @@ function AdminMessages() {
           </>
         }
       />
+
+      {composing && (
+        <div className="mb-6">
+          <AdminSection
+            title="Envoi direct"
+            description="Même éditeur que les campagnes, avec aperçu en direct — envoi ponctuel à un destinataire choisi manuellement."
+          >
+            <DirectEmailComposer defaultTo={composeTo} />
+          </AdminSection>
+        </div>
+      )}
+
 
       {/* Type filter tabs */}
       <div className="flex flex-wrap gap-2 mb-5">
