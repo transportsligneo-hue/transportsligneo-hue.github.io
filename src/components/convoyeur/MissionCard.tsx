@@ -79,10 +79,14 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
             {meta.label}
           </span>
           {mission.numero_mission && (
-            <span className="rounded-md border border-white/15 bg-white/[0.06] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-white/90 truncate">
-              {displayNumero(mission.numero_mission)}
+            <span
+              title={displayNumero(mission.numero_mission)}
+              className="shrink-0 whitespace-nowrap rounded-md border border-white/15 bg-white/[0.06] px-2 py-0.5 text-[10.5px] font-bold tabular-nums text-white/90"
+            >
+              {displayNumero(mission.numero_mission).replace(/^MIS-TLG-/, "")}
             </span>
           )}
+
         </div>
 
         {t?.date_trajet && (
