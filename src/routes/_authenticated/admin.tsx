@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { getDemandesSeenAt, onDemandesSeen } from "@/lib/admin/demandes-seen";
 import {
   LayoutDashboard,
   FileText,
