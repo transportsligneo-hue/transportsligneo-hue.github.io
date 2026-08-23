@@ -370,8 +370,12 @@ function AdminDemandes() {
                       </td>
                       <td>
                         <div className="flex flex-wrap items-center gap-1">
-                          <AdminBadge label={statutLabels[d.statut] ?? d.statut} />
+                          <AdminBadge
+                            label={statutLabels[d.statut] ?? d.statut}
+                            tone={d.statut === "annulee" ? "danger" : d.statut === "terminee" ? "success" : undefined}
+                          />
                           {(() => {
+                            if (isClosedStatut(d.statut)) return null;
                             const marque = d.vehicule_marque ?? d.marque;
                             const modele = d.vehicule_modele ?? d.modele;
                             const plaque = d.vehicule_immatriculation ?? d.immatriculation;
@@ -381,6 +385,7 @@ function AdminDemandes() {
                           })()}
                         </div>
                       </td>
+
 
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
