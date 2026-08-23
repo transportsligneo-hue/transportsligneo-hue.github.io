@@ -732,11 +732,29 @@ export function EdlPremiumFlow({
 
   const triggerCapture = () => {
     if (currentStep.kind === "scan") {
+      // Scanner natif (détection de bords, capture auto/manuelle, flash) quand
+      // l'app Driver est utilisée · sinon fallback scanner web existant.
+      if (isNativeScannerAvailable()) {
+        void (async () => {
+          const res = await scanNativeDocument({
+            maxPages: 1,
+            filename: currentStep.id,
+          });
+          if (res.status === "success" && res.files[0]) {
+            processPhotoFile(res.files[0]);
+          } else if (res.status === "error") {
+            toast.error("Scanner indisponible", { description: res.message });
+            setOpenScanner(true);
+          }
+        })();
+        return;
+      }
       setOpenScanner(true);
     } else {
       fileRef.current?.click();
     }
   };
+
 
   /** Pour les étapes scan : prendre une simple photo sans recadrage/OCR. */
   const triggerSimpleCapture = () => {
