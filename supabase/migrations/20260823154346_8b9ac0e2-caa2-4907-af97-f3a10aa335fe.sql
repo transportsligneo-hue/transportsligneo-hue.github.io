@@ -1,0 +1,1 @@
+SELECT public.archive_missions_60d();
