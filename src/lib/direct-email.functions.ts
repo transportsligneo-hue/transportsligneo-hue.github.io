@@ -48,7 +48,7 @@ export const sendDirectEmail = createServerFn({ method: 'POST' })
     const { sendRawEmailServer } = await import('@/server/email-send')
     const res = await sendRawEmailServer({
       to: data.to,
-      subject: data.subject,
+      subject: String(data.subject ?? ''),
       html,
       text,
       senderName: data.sender_name,
