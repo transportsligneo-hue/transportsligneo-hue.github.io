@@ -404,6 +404,15 @@ export default function VehicleDetailPanel({
                             e.target.value = "";
                           }}
                         />
+                        <DocScanButton
+                          label="Scanner"
+                          maxPages={4}
+                          mergeToPdf
+                          filenameBase={docType}
+                          onFiles={async (files) => {
+                            for (const f of files) await uploadDoc(f);
+                          }}
+                        />
                         <button
                           disabled={busy}
                           onClick={() => fileRef.current?.click()}
@@ -411,6 +420,7 @@ export default function VehicleDetailPanel({
                         >
                           {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Ajouter
                         </button>
+
                       </div>
                     )}
                   </div>
