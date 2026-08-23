@@ -33,6 +33,7 @@ import {
   Fingerprint,
   Pencil,
   Eye,
+  FileArchive,
 } from "lucide-react";
 import {
   Card,
