@@ -115,8 +115,9 @@ export default function PlacesInput({
       {open && suggestions.length > 0 && (
         <div
           className={
-            dropdownClassName ||
-            "places-suggestion-list absolute z-40 left-0 right-0 top-full mt-1 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-64 overflow-y-auto shadow-2xl"
+            dropdownClassName
+              ? `places-suggestion-list ${dropdownClassName}`
+              : "places-suggestion-list absolute z-40 left-0 right-0 top-full mt-1 bg-[#0b1026] border border-[#5fb6ff]/25 rounded-xl max-h-64 overflow-y-auto shadow-2xl"
           }
         >
           {suggestions.map((s, i) => (
@@ -127,7 +128,7 @@ export default function PlacesInput({
               onClick={() => select(s)}
               className="places-suggestion-item w-full text-left px-4 py-3 text-sm font-semibold text-[#4d8dff] hover:bg-[#4d8dff]/12 hover:text-[#7db1ff] border-b border-[#4d8dff]/15 last:border-0 transition-colors"
             >
-              <p className="truncate">{s.label}</p>
+              <p className="places-suggestion-primary truncate">{s.label}</p>
               {s.secondary && <p className="places-suggestion-secondary text-[11px] font-normal text-[#4d8dff]/65 truncate">{s.secondary}</p>}
             </button>
           ))}
