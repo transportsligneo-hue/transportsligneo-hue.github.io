@@ -205,7 +205,13 @@ function renderFoot(): string {
   return `<div class="pg-foot">Transports Ligneo — Document confidentiel — Aucune valeur commerciale</div>`;
 }
 
-function renderCoverBody(m: EdlFinalPdfData, distance: number | null, totalPhotos: { dep: number; arr: number }): string {
+function renderCoverBody(
+  m: EdlFinalPdfData,
+  distance: number | null,
+  totalPhotos: { dep: number; arr: number },
+  docs: EdlFinalPdfDocument[] = [],
+  dossier = false,
+): string {
   const dep = splitAddress(m.depart);
   const arr = splitAddress(m.arrivee);
   const veh = [m.vehicule?.marque, m.vehicule?.modele].filter(Boolean).join(" ") || "—";
