@@ -32,6 +32,8 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { toastSignatureError } from "@/lib/signature-upload";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
+import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/document-scanner";
+
 
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
