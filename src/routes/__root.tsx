@@ -225,7 +225,6 @@ function PublicChrome() {
       <MobileNavbar />
       <AssistantIaWidget />
       <CookieBanner />
-      <BackToHome />
     </>
   );
 }
