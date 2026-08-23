@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { isNativeApp, nativePlatform, registerNativePush } from "@/lib/native/bridge";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Initialisation de la coquille native (Capacitor) :
@@ -9,6 +10,8 @@ import { isNativeApp, nativePlatform, registerNativePush } from "@/lib/native/br
  * Totalement inerte dans un navigateur classique.
  */
 export default function NativeAppInit() {
+  const { isAuthenticated, user } = useAuth();
+
   const navigate = useNavigate();
 
   // Filet de sécurité : masque le splash natif dès que le JS tourne, même si
