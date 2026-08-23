@@ -151,7 +151,7 @@ function AdminMessages() {
             title="Envoi direct"
             description="Même éditeur que les campagnes, avec aperçu en direct — envoi ponctuel à un destinataire choisi manuellement."
           >
-            <DirectEmailComposer defaultTo={composeTo} />
+            <DirectEmailComposer key={composeTo} defaultTo={composeTo} />
           </AdminSection>
         </div>
       )}
