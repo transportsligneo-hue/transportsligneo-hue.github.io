@@ -615,7 +615,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setDeparture}
                   placeholder="Adresse de départ complète"
                   className="dg-flat-input dg-flat-input--lg"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
               <div className="dg-flat-field dg-flat-field--lg relative">
@@ -627,7 +627,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée complète"
                   className="dg-flat-input dg-flat-input--lg"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
             </div>
@@ -723,7 +723,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setDeparture}
                   placeholder="Adresse de départ"
                   className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
@@ -735,7 +735,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée"
                   className="w-full bg-transparent text-white text-[15px] font-semibold placeholder:text-white/35 focus:outline-none h-7"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-64 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
             </div>
@@ -865,7 +865,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setDeparture}
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
 
@@ -894,7 +894,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={setArrival}
                   placeholder="Ville, rue, code postal…"
                   className="w-full bg-transparent text-cream text-base md:text-[15px] placeholder:text-cream/35 focus:outline-none h-9"
-                  dropdownClassName="absolute z-[70] left-0 right-0 top-full mt-2 bg-[#061238] border border-[#60a5fa]/30 rounded-xl max-h-72 overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)]"
+                  dropdownClassName="tln-places-menu absolute z-[70] left-0 right-0 top-full mt-2 rounded-xl max-h-72 overflow-y-auto"
                 />
               </div>
             </div>
