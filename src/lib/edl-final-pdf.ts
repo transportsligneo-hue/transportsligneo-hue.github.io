@@ -403,8 +403,10 @@ const CSS = `
 :root{
   --navy:#0B1338;
   --navy-2:#141c47;
-  --gold:#C9A227;
-  --gold-soft:#E6C86A;
+  --gold:#00BEFF;
+  --gold-soft:#7FE0FF;
+  --neon:#00BEFF;
+  --neon-deep:#2F5FFF;
   --bg:#ffffff;
   --panel:#F7F8FC;
   --panel-border:#E4E7F2;
@@ -420,39 +422,39 @@ const CSS = `
 .edl-pdf-root .page{
   width:210mm; min-height:297mm; position:relative;
   background:var(--bg);
-  padding:14mm 14mm 18mm;
+  padding:38mm 14mm 18mm;
   overflow:hidden;
 }
 
-/* ===== HEADERS ===== */
-.edl-pdf-root .cover-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.edl-pdf-root .brand{display:flex;align-items:center;gap:12px;}
-.edl-pdf-root .brand-logo{width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--navy);}
-.edl-pdf-root .brand-name{font-weight:800;font-size:15px;color:var(--navy);letter-spacing:.5px;}
-.edl-pdf-root .brand-tag{font-size:10px;color:var(--text-mute);margin-top:2px;}
+/* ===== HEADER PREMIUM (identique sur toutes les pages) ===== */
+.edl-pdf-root .pdf-head{
+  position:absolute;top:0;left:0;right:0;height:30mm;
+  background:#0A1638;border-bottom:1.2mm solid var(--neon);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12mm;
+}
+.edl-pdf-root .brand{display:flex;align-items:center;gap:10px;}
+.edl-pdf-root .brand-logo{width:16mm;height:16mm;border-radius:8px;object-fit:cover;background:#0A1638;}
+.edl-pdf-root .brand-name{font-weight:800;font-size:14px;letter-spacing:.6px;line-height:1.1;}
+.edl-pdf-root .bn-1{color:#ffffff;}
+.edl-pdf-root .bn-2{color:var(--neon);}
+.edl-pdf-root .brand-tag{font-size:9.5px;color:#C3CBE4;margin-top:3px;}
 .edl-pdf-root .ref-block{text-align:right;}
-.edl-pdf-root .ref-pill{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:11.5px;letter-spacing:.4px;padding:6px 14px;border-radius:20px;}
-.edl-pdf-root .ref-date{font-size:10px;color:var(--text-mute);margin-top:5px;}
+.edl-pdf-root .ref-pill{display:inline-block;background:var(--neon);color:#0A1638;font-weight:800;font-size:11px;letter-spacing:.4px;padding:5px 14px;border-radius:20px;}
+.edl-pdf-root .ref-date{font-size:9.5px;color:var(--neon);margin-top:5px;font-weight:600;}
 
-.edl-pdf-root .pg-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--panel-border);}
-.edl-pdf-root .pg-brand{display:flex;align-items:center;gap:8px;}
-.edl-pdf-root .pg-logo{width:26px;height:26px;border-radius:6px;object-fit:cover;background:var(--navy);}
-.edl-pdf-root .pg-brand-name{font-weight:800;font-size:11px;color:var(--navy);letter-spacing:.4px;}
-.edl-pdf-root .pg-section{text-align:center;font-weight:700;font-size:11px;color:var(--navy);letter-spacing:1px;text-transform:uppercase;}
-.edl-pdf-root .pg-ref{text-align:right;}
-.edl-pdf-root .pg-ref-num{font-size:11px;font-weight:700;color:var(--navy);}
-.edl-pdf-root .pg-ref-page{font-size:9.5px;color:var(--text-mute);margin-top:2px;}
-
-.edl-pdf-root .pg-foot{position:absolute;bottom:8mm;left:14mm;right:14mm;padding-top:8px;border-top:1px solid var(--panel-border);text-align:center;font-size:9px;color:var(--text-mute);}
+.edl-pdf-root .pg-foot{position:absolute;bottom:8mm;left:14mm;right:14mm;padding-top:8px;border-top:1px solid var(--panel-border);display:flex;justify-content:space-between;font-size:9px;color:var(--text-mute);}
+.edl-pdf-root .pg-foot-num{font-weight:700;color:var(--navy);}
 
 /* ===== COVER ===== */
+.edl-pdf-root .cover-accent{width:70px;height:3px;background:var(--neon);border-radius:3px;margin:10px 0 0;}
 .edl-pdf-root .cover-title{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-.5px;margin-top:4px;}
 .edl-pdf-root .cover-sub{font-size:11.5px;color:var(--text-mute);margin-top:2px;margin-bottom:14px;}
 
 .edl-pdf-root .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.edl-pdf-root .stat-card{background:var(--navy);color:#fff;border-radius:var(--radius);padding:12px 14px;border-left:3px solid var(--gold);}
-.edl-pdf-root .stat-label{font-size:8.5px;font-weight:700;letter-spacing:.6px;color:var(--gold-soft);margin-bottom:6px;}
-.edl-pdf-root .stat-value{font-size:13px;font-weight:700;color:#fff;line-height:1.15;}
+.edl-pdf-root .stat-card{background:#fff;color:var(--navy);border:1px solid var(--panel-border);border-left:3px solid var(--neon-deep);border-radius:var(--radius);padding:12px 14px;}
+.edl-pdf-root .stat-label{font-size:8.5px;font-weight:700;letter-spacing:.6px;color:var(--text-mute);margin-bottom:6px;}
+.edl-pdf-root .stat-value{font-size:13px;font-weight:700;color:var(--navy);line-height:1.15;}
 .edl-pdf-root .stat-value.mono{font-family:'Menlo','Consolas','Liberation Mono',monospace;font-size:12.5px;letter-spacing:.5px;}
 
 .edl-pdf-root .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
@@ -511,7 +513,7 @@ const CSS = `
 .edl-pdf-root .sig-caption b{font-weight:800;margin-right:6px;}
 .edl-pdf-root .sig-caption span{color:var(--text-mute);font-weight:600;}
 
-.edl-pdf-root .mention{background:#FBF8EC;border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
+.edl-pdf-root .mention{background:#EAF7FF;border-left:3px solid var(--neon-deep);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
 
 /* ===== DOCUMENTS SCANNÉS (pleine page) ===== */
 .edl-pdf-root .doc-frame{
