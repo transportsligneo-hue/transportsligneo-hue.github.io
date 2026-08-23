@@ -147,7 +147,9 @@ export async function sendRawEmailServer(params: {
 }): Promise<{ success: boolean; reason?: string }> {
   const to = params.to.trim()
   const normalizedEmail = to.toLowerCase()
-  if (!normalizedEmail.includes('@')) return { success: false, reason: 'invalid_recipient' }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(normalizedEmail)) {
+    return { success: false, reason: 'invalid_recipient' }
+  }
 
   const messageId = crypto.randomUUID()
 

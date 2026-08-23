@@ -47,7 +47,7 @@ export function DirectEmailComposer({ defaultTo = '', defaultPrenom = '', defaul
           entreprise: '',
         },
       })
-      toast.success(`Email envoyé à ${to.trim()}`)
+      toast.success(`Email mis en file pour ${to.trim()}`)
       setDraft({ ...EMPTY })
     } catch (e: any) {
       toast.error(e?.message ?? "Envoi impossible")
@@ -60,7 +60,7 @@ export function DirectEmailComposer({ defaultTo = '', defaultPrenom = '', defaul
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-3">
         <AdminField label="Destinataire (email)">
-          <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@exemple.fr" />
+          <Input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@exemple.fr" />
         </AdminField>
         <AdminField label="Prénom (variable {{prenom}})">
           <Input value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Morgane" />
