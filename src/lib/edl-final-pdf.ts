@@ -264,8 +264,9 @@ function renderCoverBody(
 
 
   return `
-    <div class="cover-title">État des lieux</div>
-    <div class="cover-sub">Dossier de convoyage complet — départ &amp; arrivée</div>
+    <div class="cover-title">${dossier ? "Dossier complet de mission" : "État des lieux"}</div>
+    <div class="cover-sub">${dossier ? "État des lieux, PV de livraison signé &amp; documents du véhicule" : "Dossier de convoyage complet — départ &amp; arrivée"}</div>
+
 
     <div class="stats-row">
       ${stats
