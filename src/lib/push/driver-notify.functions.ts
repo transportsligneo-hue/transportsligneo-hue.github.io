@@ -31,7 +31,9 @@ const inputSchema = z
     imageUrl: z.string().url().max(500).optional().nullable(),
     detail: z.string().max(300).optional().nullable(),
   })
-  .refine((v) => !!(v.convoyeurId || v.userId), { message: "Destinataire manquant" });
+  .refine((v) => !!(v.convoyeurId || v.userId || v.attributionId || v.trajetId), {
+    message: "Destinataire manquant",
+  });
 
 /**
  * Envoi centralisé d'une notification push à un convoyeur (admin / super admin).

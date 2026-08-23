@@ -197,13 +197,36 @@ async function buildPayload(input: DriverPushInput): Promise<Built> {
 
 async function resolveUserId(input: DriverPushInput): Promise<string | null> {
   if (input.userId) return input.userId;
-  if (!input.convoyeurId) return null;
-  const { data } = await supabaseAdmin
-    .from("convoyeurs")
-    .select("user_id")
-    .eq("id", input.convoyeurId)
-    .maybeSingle();
-  return ((data as any)?.user_id as string | undefined) ?? null;
+  if (input.convoyeurId) {
+    const { data } = await supabaseAdmin
+      .from("convoyeurs")
+      .select("user_id")
+      .eq("id", input.convoyeurId)
+      .maybeSingle();
+    const uid = ((data as any)?.user_id as string | undefined) ?? null;
+    if (uid) return uid;
+  }
+  // Repli : on remonte le convoyeur depuis l'attribution / le trajet.
+  const attributionId = input.attributionId ?? null;
+  if (attributionId) {
+    const { data } = await supabaseAdmin
+      .from("attributions")
+      .select("convoyeur:convoyeurs(user_id)")
+      .eq("id", attributionId)
+      .maybeSingle();
+    return ((data as any)?.convoyeur?.user_id as string | undefined) ?? null;
+  }
+  if (input.trajetId) {
+    const { data } = await supabaseAdmin
+      .from("attributions")
+      .select("convoyeur:convoyeurs(user_id)")
+      .eq("trajet_id", input.trajetId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return ((data as any)?.convoyeur?.user_id as string | undefined) ?? null;
+  }
+  return null;
 }
 
 /**
