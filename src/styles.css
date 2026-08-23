@@ -8356,10 +8356,19 @@ body .tln-bar .r4-nav-link {
   color: #0f1526 !important;
   border-color: rgba(47, 95, 255, 0.12) !important;
 }
+.r4-page .v5-hero-quote .places-suggestion-primary {
+  color: #0a1638 !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
 .r4-page .v5-hero-quote .places-suggestion-item:hover,
 .r4-page .v5-hero-quote .places-suggestion-item:focus {
   background: rgba(47, 95, 255, 0.12) !important;
   color: #2f5fff !important;
+}
+.r4-page .v5-hero-quote .places-suggestion-item:hover .places-suggestion-primary,
+.r4-page .v5-hero-quote .places-suggestion-item:focus .places-suggestion-primary {
+  color: #1c3fc4 !important;
 }
 .r4-page .v5-hero-quote .places-suggestion-secondary {
   color: #5a6482 !important;
