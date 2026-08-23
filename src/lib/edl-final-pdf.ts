@@ -514,7 +514,7 @@ const CSS = `
 
 /* ===== DOCUMENTS SCANNÉS (pleine page) ===== */
 .edl-pdf-root .doc-frame{
-  height:228mm;border:1px solid var(--panel-border);border-radius:8px;background:#fff;
+  height:222mm;border:1px solid var(--panel-border);border-radius:8px;background:#fff;
   display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4mm;
 }
 .edl-pdf-root .doc-frame img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;}
