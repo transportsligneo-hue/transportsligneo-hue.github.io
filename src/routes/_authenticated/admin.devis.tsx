@@ -545,6 +545,11 @@ function AdminDevisPage() {
           setDevis((rows) => rows.map((row) => row.id === updated.id ? updated : row));
           setSelected(updated);
         }}
+        onRefused={(id) => {
+          const now = new Date().toISOString();
+          setDevis((rows) => rows.map((row) => row.id === id ? { ...row, statut: "refuse", refused_at: now } as DevisRow : row));
+          setSelected(null);
+        }}
         onValidated={(id) => {
           const now = new Date().toISOString();
           setDevis((rows) => rows.map((row) => row.id === id ? { ...row, statut: "accepte", locked_at: now } : row));
@@ -564,6 +569,7 @@ function DevisDrawer({
   onArchive,
   onPriceSaved,
   onValidated,
+  onRefused,
 }: {
   devis: DevisRow | null;
   acceptation: AcceptationInfo | null;
@@ -573,6 +579,7 @@ function DevisDrawer({
   onArchive: (d: DevisRow) => void;
   onPriceSaved: (d: DevisRow) => void;
   onValidated: (id: string) => void;
+  onRefused: (id: string) => void;
 }) {
   const [history, setHistory] = useState<HistoryRow[] | null>(null);
   const [proofUrls, setProofUrls] = useState<{ signature: string | null; pdf: string | null }>({ signature: null, pdf: null });
@@ -681,7 +688,7 @@ function DevisDrawer({
         label={`${devis.numero} · ${devis.prenom} ${devis.nom}`}
         open={refusOpen}
         onClose={() => setRefusOpen(false)}
-        onDone={() => { setRefusOpen(false); onValidated(devis.id); onClose(); }}
+        onDone={() => { setRefusOpen(false); onRefused(devis.id); }}
       />
 
       <DrawerSection title="Client" icon={<User size={12} />}>
