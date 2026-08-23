@@ -187,7 +187,7 @@ export async function sendRawEmailServer(params: {
       subject: params.subject,
       html: params.html,
       text: params.text ?? '',
-      purpose: params.purpose ?? 'marketing',
+      purpose: 'transactional',
       label,
       idempotency_key: params.idempotencyKey || messageId,
       unsubscribe_token: unsubscribeToken,
