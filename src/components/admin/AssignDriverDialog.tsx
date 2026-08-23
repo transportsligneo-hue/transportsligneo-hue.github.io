@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, MapPin, CheckCircle2, Building2, User, Send, Star } from "lucide-react";
 import { Modal, Button, FormField, SearchInput, Badge } from "./AdminUI";
 import { confirmToast } from "@/lib/confirm-toast";
+import { notifyDriver } from "@/lib/push/driver-notify";
 import { sendTransactionalEmail } from "@/lib/email/send";
 
 interface Convoyeur {
@@ -256,6 +257,11 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
           type: "convoyeur",
           id: selected,
           label: convoyeurLabel,
+        });
+        notifyDriver({
+          convoyeurId: selected,
+          trajetId: trip.source === "trajet" ? trip.id : undefined,
+          event: "mission_proposee",
         });
         await notifyClientAssignment(convoyeurLabel);
       } else {
