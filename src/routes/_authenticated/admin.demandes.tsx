@@ -391,18 +391,28 @@ function AdminDemandes() {
                           >
                             <Eye size={15} />
                           </button>
-                          {d.statut !== "convertie" && d.statut !== "terminee" && (
-                            <button
-                              onClick={() => convertToTrajet(d)}
-                              disabled={converting === d.id}
-                              title="Convertir en trajet"
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
-                            >
-                              <ArrowRightCircle size={15} />
-                            </button>
+                          {!isClosedStatut(d.statut) && (
+                            <>
+                              <button
+                                onClick={() => convertToTrajet(d)}
+                                disabled={converting === d.id}
+                                title="Convertir en trajet"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
+                              >
+                                <ArrowRightCircle size={15} />
+                              </button>
+                              <button
+                                onClick={() => setRefusing(d)}
+                                title="Refuser la demande"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-rose-600 hover:bg-rose-50"
+                              >
+                                <XCircle size={15} />
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
