@@ -570,10 +570,12 @@ function AdminConvoyeurDetail() {
             <AdminField label="Photo de profil">
               <AdminAvatarUploader
                 ownerUserId={conv.user_id ?? null}
+                convoyeurId={conv.id}
                 value={avatarUrl}
                 onChange={setAvatarUrl}
               />
             </AdminField>
+
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
