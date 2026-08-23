@@ -1,0 +1,1 @@
+ALTER TABLE public.convoyeurs ADD COLUMN IF NOT EXISTS avatar_url text;

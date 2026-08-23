@@ -24,10 +24,10 @@ async function flush() {
 
   const { data: convs } = await supabase
     .from("convoyeurs")
-    .select("id, user_id")
+    .select("id, user_id, avatar_url")
     .in("id", ids);
 
-  const rows = (convs ?? []) as Array<{ id: string; user_id: string | null }>;
+  const rows = (convs ?? []) as Array<{ id: string; user_id: string | null; avatar_url?: string | null }>;
   const userIds = rows.map((r) => r.user_id).filter(Boolean) as string[];
 
   let avatars = new Map<string, string | null>();
@@ -46,10 +46,12 @@ async function flush() {
 
   ids.forEach((id) => {
     const row = rows.find((r) => r.id === id);
-    cache.set(id, (row?.user_id ? avatars.get(row.user_id) : null) ?? null);
+    const fromProfile = row?.user_id ? avatars.get(row.user_id) : null;
+    cache.set(id, fromProfile ?? row?.avatar_url ?? null);
   });
   notify();
 }
+
 
 function request(id: string) {
   if (cache.has(id)) return;

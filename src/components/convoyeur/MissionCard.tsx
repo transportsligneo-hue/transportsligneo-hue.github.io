@@ -59,9 +59,29 @@ const STATUS_META: Record<string, { label: string; tone: PillTone; live?: boolea
   incident:              { label: "Incident",         tone: "red",   Icon: AlertCircle },
 };
 
+/** Ordre d'avancement : on affiche toujours l'état le plus avancé connu
+ *  (le statut d'attribution ou l'étape en cours peuvent être désynchronisés). */
+const PROGRESS_RANK: Record<string, number> = {
+  propose: 1,
+  accepte: 2,
+  en_cours: 3,
+  en_attente_validation: 4,
+  validee: 5,
+  termine: 6,
+};
+
+export function resolveMissionStatus(statut: string, etape?: string | null): string {
+  if (!etape || !(etape in PROGRESS_RANK)) return statut;
+  const a = PROGRESS_RANK[statut] ?? 0;
+  const b = PROGRESS_RANK[etape] ?? 0;
+  return b > a ? etape : statut;
+}
+
 export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, isActive }: Props) {
-  const meta = STATUS_META[mission.statut] || { label: mission.statut, tone: "muted" as PillTone, Icon: ClipboardCheck };
+  const effectiveStatut = resolveMissionStatus(mission.statut, mission.etape_courante);
+  const meta = STATUS_META[effectiveStatut] || { label: effectiveStatut, tone: "muted" as PillTone, Icon: ClipboardCheck };
   const t = mission.trajet;
+
 
   const departQuery = t?.depart ? encodeURIComponent(t.depart) : "";
   const arriveeQuery = t?.arrivee ? encodeURIComponent(t.arrivee) : "";

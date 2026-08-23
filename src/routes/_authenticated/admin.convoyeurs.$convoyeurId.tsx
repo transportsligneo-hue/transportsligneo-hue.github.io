@@ -159,6 +159,20 @@ function AdminConvoyeurDetail() {
       setForm(init);
       setOriginal(init);
 
+      // Photo de profil : compte utilisateur si lié, sinon fiche convoyeur
+      const convAvatar = (cv as unknown as { avatar_url?: string | null }).avatar_url ?? null;
+      if (cv.user_id) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("user_id", cv.user_id)
+          .maybeSingle();
+        setAvatarUrl((prof as { avatar_url: string | null } | null)?.avatar_url ?? convAvatar);
+      } else {
+        setAvatarUrl(convAvatar);
+      }
+
+
       const today = new Date().toISOString().slice(0, 10);
       const [{ data: d }, { data: a }, { data: dispo }, { data: lg }, { data: navRows }] = await Promise.all([
         supabase
@@ -570,10 +584,12 @@ function AdminConvoyeurDetail() {
             <AdminField label="Photo de profil">
               <AdminAvatarUploader
                 ownerUserId={conv.user_id ?? null}
+                convoyeurId={conv.id}
                 value={avatarUrl}
                 onChange={setAvatarUrl}
               />
             </AdminField>
+
             <div className="grid grid-cols-2 gap-3">
               <AdminField label="Prénom">
                 <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
@@ -699,6 +715,19 @@ function AdminConvoyeurDetail() {
         </TabsContent>
 
         <TabsContent value="documents" className="mt-6">
+          <AdminSection
+            title="Photo de profil"
+            description="Importer et recadrer la photo du convoyeur (visible partout dans l'admin et l'app Driver)."
+          >
+            <AdminAvatarUploader
+              ownerUserId={conv.user_id ?? null}
+              convoyeurId={conv.id}
+              value={avatarUrl}
+              onChange={setAvatarUrl}
+            />
+          </AdminSection>
+
+
           <AdminSection
             title="Centre de validation des documents"
             description="Ouvrir, zoomer, télécharger, approuver, refuser, demander un nouveau document."

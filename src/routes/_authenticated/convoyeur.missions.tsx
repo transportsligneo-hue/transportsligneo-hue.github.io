@@ -153,6 +153,14 @@ function ConvoyeurMissions() {
     }
   }, [openMissionId, missions, setOpenMissionId, routeSearch.open]);
 
+  // Masque totalement la navigation basse tant qu'un détail de mission est ouvert
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("mission-detail-open", !!openMissionId);
+    return () => document.body.classList.remove("mission-detail-open");
+  }, [openMissionId]);
+
+
 
   // Sync inspection state to sessionStorage
   useEffect(() => {

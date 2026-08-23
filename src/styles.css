@@ -6322,6 +6322,9 @@ html.theme-light .driver-selfie-status { color: #47506e; }
   padding-bottom: max(env(safe-area-inset-bottom), 14px);
 }
 .ldock-zone > * { pointer-events: auto; }
+/* Détail de mission ouvert : la navigation basse disparaît complètement */
+body.mission-detail-open .ldock-zone { display: none !important; }
+
 .ldock-zone .ldock { transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
 .ldock-zone.is-collapsed .ldock { transform: translateY(140%); opacity: 0; pointer-events: none; }
 .ldock-toggle {

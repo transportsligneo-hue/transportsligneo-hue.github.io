@@ -19,6 +19,9 @@ import {
   Select,
 } from "@/components/admin/AdminUI";
 import { confirmToast } from "@/lib/confirm-toast";
+import { AdminSection } from "@/components/admin/ui";
+import { DirectEmailComposer } from "@/components/admin/DirectEmailComposer";
+
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
   component: AdminMessages,
@@ -76,6 +79,9 @@ function AdminMessages() {
   const [selected, setSelected] = useState<ContactMessage | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatut, setFilterStatut] = useState<string>("all");
+  const [composing, setComposing] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+
 
   const fetchMessages = useCallback(async () => {
     let q = supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
@@ -121,6 +127,9 @@ function AdminMessages() {
         subtitle={`${messages.length} message${messages.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <Button onClick={() => setComposing((v) => !v)}>
+              <Mail size={14} /> {composing ? "Fermer l'éditeur" : "Nouvel email direct"}
+            </Button>
             <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
               <option value="all">Tous statuts</option>
               {STATUTS.map((s) => (
@@ -135,6 +144,18 @@ function AdminMessages() {
           </>
         }
       />
+
+      {composing && (
+        <div className="mb-6">
+          <AdminSection
+            title="Envoi direct"
+            description="Même éditeur que les campagnes, avec aperçu en direct — envoi ponctuel à un destinataire choisi manuellement."
+          >
+            <DirectEmailComposer key={composeTo} defaultTo={composeTo} />
+          </AdminSection>
+        </div>
+      )}
+
 
       {/* Type filter tabs */}
       <div className="flex flex-wrap gap-2 mb-5">
@@ -206,9 +227,20 @@ function AdminMessages() {
                 </TD>
                 <TD>
                   <div className="flex items-center justify-end gap-1">
+                    <IconButton
+                      onClick={() => {
+                        setComposeTo(m.email);
+                        setComposing(true);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      title="Répondre par email"
+                    >
+                      <Mail size={15} />
+                    </IconButton>
                     <IconButton onClick={() => setSelected(m)} title="Voir" tone="primary">
                       <Eye size={15} />
                     </IconButton>
+
                   </div>
                 </TD>
               </TR>
