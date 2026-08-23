@@ -511,7 +511,17 @@ const CSS = `
 .edl-pdf-root .sig-caption span{color:var(--text-mute);font-weight:600;}
 
 .edl-pdf-root .mention{background:#FBF8EC;border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
+
+/* ===== DOCUMENTS SCANNÉS (pleine page) ===== */
+.edl-pdf-root .doc-frame{
+  height:228mm;border:1px solid var(--panel-border);border-radius:8px;background:#fff;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;padding:4mm;
+}
+.edl-pdf-root .doc-frame img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;}
+.edl-pdf-root .doc-empty{font-size:11px;color:var(--text-mute);font-style:italic;}
+.edl-pdf-root .doc-meta{margin-top:6px;font-size:9.5px;color:var(--text-mute);text-align:right;}
 `;
+
 
 // ---------- Rendu principal ----------
 
