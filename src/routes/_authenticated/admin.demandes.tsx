@@ -313,9 +313,19 @@ function AdminDemandes() {
                   const q = quoteFromDemande(d);
                   const fromOpts = extractFromOptions(d.options);
                   const ttc = d.prix_estime ?? fromOpts.prix ?? q?.priceTtc ?? null;
+                  const isNew = !!previousSeenAt && new Date(d.created_at) > new Date(previousSeenAt);
                   return (
-                    <tr key={d.id} className="cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40" onClick={() => setSelected(d)}>
+                    <tr
+                      key={d.id}
+                      className={`cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40${isNew ? " bg-[#2F5FFF]/[0.07]" : ""}`}
+                      onClick={() => setSelected(d)}
+                    >
                       <td>
+                        {isNew && (
+                          <span className="mr-1.5 inline-flex items-center rounded-full bg-[#2F5FFF] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white align-middle">
+                            Nouveau
+                          </span>
+                        )}
                         <span className="font-medium text-[color:var(--admin-text)]">
                           {d.prenom} {d.nom}
                         </span>
