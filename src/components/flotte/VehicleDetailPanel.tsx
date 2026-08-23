@@ -5,6 +5,8 @@ import {
   X, FileText, ShieldCheck, Wrench, Loader2, Gauge, MapPin,
   Upload, Trash2, Download, Plus, AlertCircle,
 } from "lucide-react";
+import { DocScanButton } from "@/components/scanner/DocScanButton";
+
 
 
 export type FleetVehicle = {
