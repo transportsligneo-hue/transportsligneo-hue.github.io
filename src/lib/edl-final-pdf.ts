@@ -169,41 +169,42 @@ async function toDataUrl(url: string): Promise<string | null> {
 
 // ---------- Blocs HTML ----------
 
-function renderCoverHeader(logoData: string, m: EdlFinalPdfData): string {
+/**
+ * En-tête premium identique sur TOUTES les pages :
+ * bande navy 30mm + liseré bleu électrique néon, logo + wordmark à gauche,
+ * badge de référence + contexte de page à droite.
+ */
+function renderHeader(logoData: string, m: EdlFinalPdfData, right: string): string {
   return `
-    <div class="cover-head">
+    <div class="pdf-head">
       <div class="brand">
-        <img class="brand-logo" src="${logoData}" alt="Transports Ligneo">
+        ${logoData ? `<img class="brand-logo" src="${logoData}" alt="Transports Ligneo">` : ""}
         <div>
-          <div class="brand-name">TRANSPORTS LIGNEO</div>
+          <div class="brand-name"><span class="bn-1">TRANSPORTS</span> <span class="bn-2">LIGNEO</span></div>
           <div class="brand-tag">Convoyage automobile</div>
         </div>
       </div>
       <div class="ref-block">
         <div class="ref-pill">${escape(m.numero)}</div>
-        <div class="ref-date">Édité le ${escape(fmtDate(m.date_mission ?? new Date().toISOString()))}</div>
+        <div class="ref-date">${escape(right)}</div>
       </div>
     </div>`;
 }
 
-function renderPageHeader(logoData: string, m: EdlFinalPdfData, section: string, pageNum: number, total: number): string {
-  return `
-    <div class="pg-head">
-      <div class="pg-brand">
-        <img class="pg-logo" src="${logoData}" alt="Transports Ligneo">
-        <div class="pg-brand-name">TRANSPORTS LIGNEO</div>
-      </div>
-      <div class="pg-section">${escape(section)}</div>
-      <div class="pg-ref">
-        <div class="pg-ref-num">${escape(m.numero)}</div>
-        <div class="pg-ref-page">Page ${pageNum}/${total}</div>
-      </div>
-    </div>`;
+function renderCoverHeader(logoData: string, m: EdlFinalPdfData): string {
+  return renderHeader(logoData, m, `Édité le ${fmtDate(m.date_mission ?? new Date().toISOString())}`);
 }
 
-function renderFoot(): string {
-  return `<div class="pg-foot">Transports Ligneo — Document confidentiel — Aucune valeur commerciale</div>`;
+function renderPageHeader(logoData: string, m: EdlFinalPdfData, section: string, _pageNum: number, _total: number): string {
+  return renderHeader(logoData, m, section);
 }
+
+function renderFoot(pageNum?: number, total?: number): string {
+  return `<div class="pg-foot"><span>Transports Ligneo — Document confidentiel — Aucune valeur commerciale</span>${
+    pageNum && total ? `<span class="pg-foot-num">Page ${pageNum}/${total}</span>` : ""
+  }</div>`;
+}
+
 
 function renderCoverBody(
   m: EdlFinalPdfData,
@@ -265,6 +266,7 @@ function renderCoverBody(
 
   return `
     <div class="cover-title">${dossier ? "Dossier complet de mission" : "État des lieux"}</div>
+    <div class="cover-accent"></div>
     <div class="cover-sub">${dossier ? "État des lieux, PV de livraison signé &amp; documents du véhicule" : "Dossier de convoyage complet — départ &amp; arrivée"}</div>
 
 
@@ -343,6 +345,9 @@ function renderSectionBand(title: string, right: string): string {
 function renderPhotoGrid(photos: EdlFinalPdfPhoto[], startIndex: number): string {
   // Grille dynamique : par défaut 4 colonnes. Si beaucoup de photos, augmenter le nb de lignes.
   const count = photos.length;
+  if (count === 0) {
+    return `<div class="photo-empty">Aucune photo d'état des lieux disponible pour cette étape.</div>`;
+  }
   const cols = count <= 4 ? Math.max(2, count) : 4;
   const rows = Math.ceil(count / cols);
   return `
@@ -402,8 +407,10 @@ const CSS = `
 :root{
   --navy:#0B1338;
   --navy-2:#141c47;
-  --gold:#C9A227;
-  --gold-soft:#E6C86A;
+  --gold:#00BEFF;
+  --gold-soft:#7FE0FF;
+  --neon:#00BEFF;
+  --neon-deep:#2F5FFF;
   --bg:#ffffff;
   --panel:#F7F8FC;
   --panel-border:#E4E7F2;
@@ -419,44 +426,44 @@ const CSS = `
 .edl-pdf-root .page{
   width:210mm; min-height:297mm; position:relative;
   background:var(--bg);
-  padding:14mm 14mm 18mm;
+  padding:38mm 14mm 18mm;
   overflow:hidden;
 }
 
-/* ===== HEADERS ===== */
-.edl-pdf-root .cover-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.edl-pdf-root .brand{display:flex;align-items:center;gap:12px;}
-.edl-pdf-root .brand-logo{width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--navy);}
-.edl-pdf-root .brand-name{font-weight:800;font-size:15px;color:var(--navy);letter-spacing:.5px;}
-.edl-pdf-root .brand-tag{font-size:10px;color:var(--text-mute);margin-top:2px;}
+/* ===== HEADER PREMIUM (identique sur toutes les pages) ===== */
+.edl-pdf-root .pdf-head{
+  position:absolute;top:0;left:0;right:0;height:30mm;
+  background:#0A1638;border-bottom:1.2mm solid var(--neon);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12mm;
+}
+.edl-pdf-root .brand{display:flex;align-items:center;gap:10px;}
+.edl-pdf-root .brand-logo{width:16mm;height:16mm;border-radius:8px;object-fit:cover;background:#0A1638;}
+.edl-pdf-root .brand-name{font-weight:800;font-size:14px;letter-spacing:.6px;line-height:1.1;}
+.edl-pdf-root .bn-1{color:#ffffff;}
+.edl-pdf-root .bn-2{color:var(--neon);}
+.edl-pdf-root .brand-tag{font-size:9.5px;color:#C3CBE4;margin-top:3px;}
 .edl-pdf-root .ref-block{text-align:right;}
-.edl-pdf-root .ref-pill{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:11.5px;letter-spacing:.4px;padding:6px 14px;border-radius:20px;}
-.edl-pdf-root .ref-date{font-size:10px;color:var(--text-mute);margin-top:5px;}
+.edl-pdf-root .ref-pill{display:inline-block;background:var(--neon);color:#0A1638;font-weight:800;font-size:11px;letter-spacing:.4px;padding:5px 14px;border-radius:20px;}
+.edl-pdf-root .ref-date{font-size:9.5px;color:var(--neon);margin-top:5px;font-weight:600;}
 
-.edl-pdf-root .pg-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--panel-border);}
-.edl-pdf-root .pg-brand{display:flex;align-items:center;gap:8px;}
-.edl-pdf-root .pg-logo{width:26px;height:26px;border-radius:6px;object-fit:cover;background:var(--navy);}
-.edl-pdf-root .pg-brand-name{font-weight:800;font-size:11px;color:var(--navy);letter-spacing:.4px;}
-.edl-pdf-root .pg-section{text-align:center;font-weight:700;font-size:11px;color:var(--navy);letter-spacing:1px;text-transform:uppercase;}
-.edl-pdf-root .pg-ref{text-align:right;}
-.edl-pdf-root .pg-ref-num{font-size:11px;font-weight:700;color:var(--navy);}
-.edl-pdf-root .pg-ref-page{font-size:9.5px;color:var(--text-mute);margin-top:2px;}
-
-.edl-pdf-root .pg-foot{position:absolute;bottom:8mm;left:14mm;right:14mm;padding-top:8px;border-top:1px solid var(--panel-border);text-align:center;font-size:9px;color:var(--text-mute);}
+.edl-pdf-root .pg-foot{position:absolute;bottom:8mm;left:14mm;right:14mm;padding-top:8px;border-top:1px solid var(--panel-border);display:flex;justify-content:space-between;font-size:9px;color:var(--text-mute);}
+.edl-pdf-root .pg-foot-num{font-weight:700;color:var(--navy);}
 
 /* ===== COVER ===== */
+.edl-pdf-root .cover-accent{width:70px;height:3px;background:var(--neon);border-radius:3px;margin:10px 0 0;}
 .edl-pdf-root .cover-title{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-.5px;margin-top:4px;}
 .edl-pdf-root .cover-sub{font-size:11.5px;color:var(--text-mute);margin-top:2px;margin-bottom:14px;}
 
 .edl-pdf-root .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
-.edl-pdf-root .stat-card{background:var(--navy);color:#fff;border-radius:var(--radius);padding:12px 14px;border-left:3px solid var(--gold);}
-.edl-pdf-root .stat-label{font-size:8.5px;font-weight:700;letter-spacing:.6px;color:var(--gold-soft);margin-bottom:6px;}
-.edl-pdf-root .stat-value{font-size:13px;font-weight:700;color:#fff;line-height:1.15;}
+.edl-pdf-root .stat-card{background:#fff;color:var(--navy);border:1px solid var(--panel-border);border-left:3px solid var(--neon-deep);border-radius:var(--radius);padding:12px 14px;}
+.edl-pdf-root .stat-label{font-size:8.5px;font-weight:700;letter-spacing:.6px;color:var(--text-mute);margin-bottom:6px;}
+.edl-pdf-root .stat-value{font-size:13px;font-weight:700;color:var(--navy);line-height:1.15;}
 .edl-pdf-root .stat-value.mono{font-family:'Menlo','Consolas','Liberation Mono',monospace;font-size:12.5px;letter-spacing:.5px;}
 
 .edl-pdf-root .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .edl-pdf-root .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:14px 16px;}
-.edl-pdf-root .panel-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--navy);text-transform:uppercase;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--panel-border);}
+.edl-pdf-root .panel-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--neon-deep);text-transform:uppercase;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--panel-border);}
 
 .edl-pdf-root .kv-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:6px 0;font-size:10.5px;border-bottom:1px dashed #E4E7F2;}
 .edl-pdf-root .kv-row:last-child{border-bottom:none;}
@@ -471,7 +478,7 @@ const CSS = `
 .edl-pdf-root .km-label{font-size:8.5px;font-weight:700;color:var(--text-mute);letter-spacing:.6px;}
 .edl-pdf-root .km-value{font-size:14px;font-weight:800;color:var(--navy);margin-top:3px;}
 
-.edl-pdf-root .equip-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--navy);margin-bottom:8px;}
+.edl-pdf-root .equip-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--neon-deep);margin-bottom:8px;}
 .edl-pdf-root .equip-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .edl-pdf-root .equip-item{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid var(--panel-border);border-radius:6px;padding:8px 10px;}
 .edl-pdf-root .equip-icon{width:16px;height:16px;border-radius:50%;color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
@@ -492,6 +499,7 @@ const CSS = `
 
 /* ===== PHOTO GRID ===== */
 .edl-pdf-root .photo-grid{display:grid;gap:4mm;}
+.edl-pdf-root .photo-empty{border:1px dashed var(--panel-border);border-radius:8px;background:var(--panel);padding:24px;text-align:center;font-size:11px;color:var(--text-mute);}
 .edl-pdf-root .photo-card{border:1px solid var(--panel-border);border-radius:6px;overflow:hidden;background:#fff;display:flex;flex-direction:column;}
 .edl-pdf-root .photo-frame{flex:1;background:#F0F1F5;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:0;}
 .edl-pdf-root .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -510,7 +518,7 @@ const CSS = `
 .edl-pdf-root .sig-caption b{font-weight:800;margin-right:6px;}
 .edl-pdf-root .sig-caption span{color:var(--text-mute);font-weight:600;}
 
-.edl-pdf-root .mention{background:#FBF8EC;border-left:3px solid var(--gold);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
+.edl-pdf-root .mention{background:#EAF7FF;border-left:3px solid var(--neon-deep);border-radius:4px;padding:12px 14px;font-size:10px;color:var(--text-soft);line-height:1.5;}
 
 /* ===== DOCUMENTS SCANNÉS (pleine page) ===== */
 .edl-pdf-root .doc-frame{
@@ -568,7 +576,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
     <div class="page">
       ${renderCoverHeader(logoData, data)}
       ${renderCoverBody(data, distance, { dep: data.photosDepart.length, arr: data.photosArrivee.length }, docs, !!opts.dossier)}
-      ${renderFoot()}
+      ${renderFoot(1, totalPages)}
     </div>`);
 
   // Page 2 : Photos départ
@@ -577,7 +585,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
       ${renderPageHeader(logoData, data, "État des lieux — Départ", 2, totalPages)}
       ${renderSectionBand("ÉTAT DES LIEUX — DÉPART", `${data.photosDepart.length} photos`)}
       ${renderPhotoGrid(data.photosDepart, 1)}
-      ${renderFoot()}
+      ${renderFoot(2, totalPages)}
     </div>`);
 
   // Page 3 : Photos arrivée
@@ -587,7 +595,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
       ${renderPageHeader(logoData, data, "État des lieux — Arrivée", 3, totalPages)}
       ${renderSectionBand("ÉTAT DES LIEUX — ARRIVÉE", `${data.photosArrivee.length} photos`)}
       ${renderPhotoGrid(data.photosArrivee, arrStart)}
-      ${renderFoot()}
+      ${renderFoot(3, totalPages)}
     </div>`);
 
   // Page 4 : Signatures
@@ -595,7 +603,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
     <div class="page">
       ${renderPageHeader(logoData, data, "Signatures", 4, totalPages)}
       ${renderSignatures(data.signatures)}
-      ${renderFoot()}
+      ${renderFoot(4, totalPages)}
     </div>`);
 
   // Pages suivantes : documents scannés, un par page, en grand format
@@ -608,7 +616,7 @@ export async function generateEdlFinalPdf(m: EdlFinalPdfData, opts: EdlFinalPdfO
           d.url ? `<img src="${d.url}" alt="${escape(d.label)}" crossorigin="anonymous" />` : `<div class="doc-empty">Document indisponible</div>`
         }</div>
         ${d.meta ? `<div class="doc-meta">${escape(d.meta)}</div>` : ""}
-        ${renderFoot()}
+        ${renderFoot(5 + i, totalPages)}
       </div>`);
   });
 
