@@ -44,38 +44,6 @@ export default function NativeAppInit() {
       } catch { /* noop */ }
 
       if (cancelled) return;
-
-      // Ne réenregistre automatiquement que les appareils déjà activés.
-      // La première demande de permission reste déclenchée explicitement par
-      // PushNotificationToggle, jamais au démarrage de l'application.
-      let pushAlreadyEnabled = false;
-      try {
-        pushAlreadyEnabled = Boolean(window.localStorage.getItem("ligneo:native-push"));
-      } catch { /* noop */ }
-      if (pushAlreadyEnabled) {
-        void registerNativePush(
-          async (token, platform) => {
-            try {
-              window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
-            } catch { /* noop */ }
-            try {
-              const { saveNativePushToken } = await import("@/lib/push.functions");
-              await saveNativePushToken({
-                data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
-              });
-            } catch { /* noop : utilisateur non connecté */ }
-          },
-          {
-            onReceived: (e) => {
-              if (e.title) toast(e.title, { description: e.body });
-            },
-            onAction: (e) => {
-              if (e.url && e.url.startsWith("/")) void navigate({ to: e.url });
-            },
-            onError: (m) => console.warn("[push natif]", m),
-          },
-        );
-      }
     })();
 
     let removeBack: (() => void) | undefined;
@@ -96,5 +64,53 @@ export default function NativeAppInit() {
     };
   }, [navigate]);
 
+  /**
+   * Enregistrement du token FCM à chaque connexion dans l'app native.
+   * Le token est ré-envoyé (upsert) à chaque session : un même convoyeur peut
+   * ainsi avoir plusieurs appareils actifs, et un token renouvelé est mis à jour.
+   */
+  useEffect(() => {
+    if (!isNativeApp() || !isAuthenticated || !user?.id) return;
+    let cancelled = false;
+
+    void registerNativePush(
+      async (token, platform) => {
+        if (cancelled) return;
+        try {
+          window.localStorage.setItem("ligneo:native-push", JSON.stringify({ token, platform }));
+        } catch { /* noop */ }
+        try {
+          const { saveNativePushToken } = await import("@/lib/push.functions");
+          await saveNativePushToken({
+            data: { token, platform, user_agent: navigator.userAgent.slice(0, 500) },
+          });
+        } catch (e) {
+          console.warn("[push natif] token non enregistré", e);
+        }
+      },
+      {
+        // App au premier plan : Android n'affiche pas la notification système,
+        // on montre donc une alerte in-app cohérente (pas de doublon).
+        onReceived: (e) => {
+          if (e.title) {
+            toast(e.title, {
+              description: e.body,
+              action: e.url?.startsWith("/")
+                ? { label: "Ouvrir", onClick: () => void navigate({ to: e.url as string }) }
+                : undefined,
+            });
+          }
+        },
+        onAction: (e) => {
+          if (e.url && e.url.startsWith("/")) void navigate({ to: e.url });
+        },
+        onError: (m) => console.warn("[push natif]", m),
+      },
+    );
+
+    return () => { cancelled = true; };
+  }, [isAuthenticated, user?.id, navigate]);
+
   return null;
+
 }
