@@ -463,7 +463,7 @@ const CSS = `
 
 .edl-pdf-root .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .edl-pdf-root .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:14px 16px;}
-.edl-pdf-root .panel-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--navy);text-transform:uppercase;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--panel-border);}
+.edl-pdf-root .panel-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--neon-deep);text-transform:uppercase;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--panel-border);}
 
 .edl-pdf-root .kv-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:6px 0;font-size:10.5px;border-bottom:1px dashed #E4E7F2;}
 .edl-pdf-root .kv-row:last-child{border-bottom:none;}
@@ -478,7 +478,7 @@ const CSS = `
 .edl-pdf-root .km-label{font-size:8.5px;font-weight:700;color:var(--text-mute);letter-spacing:.6px;}
 .edl-pdf-root .km-value{font-size:14px;font-weight:800;color:var(--navy);margin-top:3px;}
 
-.edl-pdf-root .equip-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--navy);margin-bottom:8px;}
+.edl-pdf-root .equip-title{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--neon-deep);margin-bottom:8px;}
 .edl-pdf-root .equip-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .edl-pdf-root .equip-item{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid var(--panel-border);border-radius:6px;padding:8px 10px;}
 .edl-pdf-root .equip-icon{width:16px;height:16px;border-radius:50%;color:#fff;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
