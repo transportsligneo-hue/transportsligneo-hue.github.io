@@ -1915,6 +1915,7 @@ export type Database = {
         Row: {
           account_status: string
           annees_experience: number | null
+          avatar_url: string | null
           bic: string | null
           created_at: string
           delai_paiement_defaut: string
@@ -1947,6 +1948,7 @@ export type Database = {
         Insert: {
           account_status?: string
           annees_experience?: number | null
+          avatar_url?: string | null
           bic?: string | null
           created_at?: string
           delai_paiement_defaut?: string
@@ -1979,6 +1981,7 @@ export type Database = {
         Update: {
           account_status?: string
           annees_experience?: number | null
+          avatar_url?: string | null
           bic?: string | null
           created_at?: string
           delai_paiement_defaut?: string
