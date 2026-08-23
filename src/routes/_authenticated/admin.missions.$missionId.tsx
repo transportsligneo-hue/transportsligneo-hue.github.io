@@ -68,6 +68,7 @@ import { logPoEvent } from "@/lib/po-history";
 import { MissionAvisGooglePanel } from "@/components/admin/missions/MissionAvisGooglePanel";
 import { MissionNotifAdminPanel } from "@/components/admin/missions/MissionNotifAdminPanel";
 import { MissionIncidentsPanel } from "@/components/admin/missions/MissionIncidentsPanel";
+import { MissionDossierDialog } from "@/components/admin/missions/MissionDossierDialog";
 import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditInfosPanel";
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
