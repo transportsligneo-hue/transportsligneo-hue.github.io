@@ -38,6 +38,10 @@ export interface DevisData {
   option_trajet?: string | null;
   /** Immatriculation du vehicule convoye */
   immatriculation?: string | null;
+  /** Aller-retour : vehicule restitue (souvent une autre plaque) */
+  marque_retour?: string | null;
+  modele_retour?: string | null;
+  immatriculation_retour?: string | null;
   /** Devis groupé : plusieurs véhicules sur un même devis */
   vehicules?: Array<{
     immatriculation?: string | null;
@@ -137,6 +141,9 @@ export function devisRowToPdfData(
     marque: g<string | null>("marque"),
     modele: g<string | null>("modele"),
     immatriculation: g<string | null>("immatriculation"),
+    marque_retour: g<string | null>("marque_retour"),
+    modele_retour: g<string | null>("modele_retour"),
+    immatriculation_retour: g<string | null>("immatriculation_retour"),
     vehicules,
     carburant: g<string | null>("carburant"),
     prestation: g<string | null>("prestation"),
@@ -395,8 +402,16 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setTextColor(...NAVY);
   doc.text(trajetLines, rx + (rechargeSeule ? 10 : 13), ry);
   ry += 5.2 * trajetLines.length;
-  labelValue(doc, rx, ry, "Véhicule : ", vehicule);
+  const vehiculeRetour = [d.marque_retour, d.modele_retour, d.immatriculation_retour]
+    .filter(Boolean)
+    .join(" ");
+  const hasRetour = !isGroupe && !!vehiculeRetour;
+  labelValue(doc, rx, ry, hasRetour ? "Véhicule aller : " : "Véhicule : ", vehicule);
   ry += 5.2;
+  if (hasRetour) {
+    labelValue(doc, rx, ry, "Véhicule retour : ", vehiculeRetour);
+    ry += 5.2;
+  }
   labelValue(doc, rx, ry, "Enlèvement souhaité : ", d.date_souhaitee ? fmtDate(d.date_souhaitee) : "—");
   ry += 5.2;
   labelValue(doc, rx, ry, "Contact commercial : ", "Olivier G.");
