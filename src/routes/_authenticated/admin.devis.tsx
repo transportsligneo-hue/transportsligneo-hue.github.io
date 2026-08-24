@@ -568,20 +568,36 @@ function AdminDevisPage() {
                             <span className="plate-tag plate-tag--sm">{dx.immatriculation}</span>
                           </div>
                         )}
-                        {hasRetourVeh && (
-                          <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
-                            <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Retour</span></div>
-                            <span className="dvx-tag">
-                              <Car size={13} className="text-[#a16207]" />
-                              {vehRetour || vehAller}
-                            </span>
-                            {dx.immatriculation_retour && (
-                              <div className="mt-1.5">
-                                <span className="plate-tag plate-tag--sm">{dx.immatriculation_retour}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {hasRetourVeh && (() => {
+                          const samePlate =
+                            !!dx.immatriculation &&
+                            !!dx.immatriculation_retour &&
+                            dx.immatriculation.replace(/[\s-]/g, "").toUpperCase() ===
+                              dx.immatriculation_retour.replace(/[\s-]/g, "").toUpperCase();
+                          const label = vehRetour || (samePlate ? vehAller : null);
+                          return (
+                            <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
+                              <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Retour</span></div>
+                              {label ? (
+                                <span className="dvx-tag">
+                                  <Car size={13} className="text-[#a16207]" />
+                                  {label}
+                                </span>
+                              ) : (
+                                <span className="dvx-tag opacity-70">
+                                  <Car size={13} className="text-[#a16207]" />
+                                  Modèle à préciser
+                                </span>
+                              )}
+                              {dx.immatriculation_retour && (
+                                <div className="mt-1.5">
+                                  <span className="plate-tag plate-tag--sm">{dx.immatriculation_retour}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                       </div>
                     );
                   })()}
