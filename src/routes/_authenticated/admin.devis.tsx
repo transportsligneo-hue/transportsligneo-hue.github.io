@@ -558,7 +558,7 @@ function AdminDevisPage() {
                     return (
                       <div className="min-w-0">
                         <p className="dvx-col-k">{hasRetourVeh ? "Véhicules (L + R)" : "Véhicule"}</p>
-                        {hasRetourVeh && <span className="dvx-leg l mb-1"><ArrowRight size={10} /> Aller</span>}
+                        {hasRetourVeh && <div className="mb-1"><span className="dvx-leg l"><ArrowRight size={10} /> Aller</span></div>}
                         <span className="dvx-tag">
                           <Car size={13} className="text-[#2f5fff]" />
                           {vehAller}
@@ -570,7 +570,7 @@ function AdminDevisPage() {
                         )}
                         {hasRetourVeh && (
                           <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
-                            <span className="dvx-leg r mb-1"><ArrowLeft size={10} /> Retour</span>
+                            <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Retour</span></div>
                             <span className="dvx-tag">
                               <Car size={13} className="text-[#a16207]" />
                               {vehRetour || vehAller}
