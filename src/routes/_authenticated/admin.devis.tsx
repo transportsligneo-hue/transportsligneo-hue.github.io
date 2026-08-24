@@ -545,20 +545,46 @@ function AdminDevisPage() {
                     </p>
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="dvx-col-k">Véhicule</p>
-                    <span className="dvx-tag">
-                      <Car size={13} className="text-[#2f5fff]" />
-                      {[d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—"}
-                    </span>
-                    {(d as unknown as { immatriculation?: string }).immatriculation && (
-                      <div className="mt-2">
-                        <span className="plate-tag plate-tag--sm">
-                          {(d as unknown as { immatriculation?: string }).immatriculation}
+                  {(() => {
+                    const dx = d as unknown as {
+                      immatriculation?: string | null;
+                      immatriculation_retour?: string | null;
+                      marque_retour?: string | null;
+                      modele_retour?: string | null;
+                    };
+                    const vehAller = [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—";
+                    const vehRetour = [dx.marque_retour, dx.modele_retour].filter(Boolean).join(" ");
+                    const hasRetourVeh = !!(dx.immatriculation_retour || vehRetour);
+                    return (
+                      <div className="min-w-0">
+                        <p className="dvx-col-k">{hasRetourVeh ? "Véhicules (L + R)" : "Véhicule"}</p>
+                        {hasRetourVeh && <span className="dvx-leg l mb-1"><ArrowRight size={10} /> Aller</span>}
+                        <span className="dvx-tag">
+                          <Car size={13} className="text-[#2f5fff]" />
+                          {vehAller}
                         </span>
+                        {dx.immatriculation && (
+                          <div className="mt-1.5">
+                            <span className="plate-tag plate-tag--sm">{dx.immatriculation}</span>
+                          </div>
+                        )}
+                        {hasRetourVeh && (
+                          <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
+                            <span className="dvx-leg r mb-1"><ArrowLeft size={10} /> Retour</span>
+                            <span className="dvx-tag">
+                              <Car size={13} className="text-[#a16207]" />
+                              {vehRetour || vehAller}
+                            </span>
+                            {dx.immatriculation_retour && (
+                              <div className="mt-1.5">
+                                <span className="plate-tag plate-tag--sm">{dx.immatriculation_retour}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Devis groupé */}
