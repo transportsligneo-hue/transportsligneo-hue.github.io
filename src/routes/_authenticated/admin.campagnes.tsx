@@ -322,6 +322,7 @@ function AdminCampagnesPage() {
                 tiers={tiersQuery.data ?? []}
                 selected={selected}
                 onSelectedChange={setSelected}
+                onAddManual={addManualContact}
               />
             )}
           </AdminSection>
