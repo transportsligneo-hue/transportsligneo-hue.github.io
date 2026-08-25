@@ -206,7 +206,9 @@ export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {c.key.startsWith('manual:') && <AdminBadge label="Hors base" tone="warning" />}
                 {c.tier && <AdminBadge label={c.tier} tone="info" />}
+
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {Math.round(c.totalKm).toLocaleString('fr-FR')} km
                 </span>
