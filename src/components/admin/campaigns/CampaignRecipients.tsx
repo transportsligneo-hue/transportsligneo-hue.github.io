@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AdminBadge, AdminEmpty } from '@/components/admin/ui'
 import type { AudienceContact } from '@/lib/campaigns.functions'
-import { Search, Users } from 'lucide-react'
+import { Search, Users, UserPlus, Plus } from 'lucide-react'
 
 interface Props {
   contacts: AudienceContact[]
   tiers: { name: string }[]
   selected: Set<string>
   onSelectedChange: (next: Set<string>) => void
+  onAddManual?: (contact: { email: string; prenom: string; nom: string; entreprise: string }) => void
 }
+
 
 const SEGMENTS = [
   { key: 'all', label: 'Tous' },
@@ -21,12 +23,38 @@ const SEGMENTS = [
   { key: 'particulier', label: 'Particuliers' },
 ] as const
 
-export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange }: Props) {
+export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange, onAddManual }: Props) {
   const [search, setSearch] = useState('')
   const [segment, setSegment] = useState<string>('all')
   const [tier, setTier] = useState<string>('all')
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualEmail, setManualEmail] = useState('')
+  const [manualPrenom, setManualPrenom] = useState('')
+  const [manualNom, setManualNom] = useState('')
+  const [manualEntreprise, setManualEntreprise] = useState('')
+  const [manualError, setManualError] = useState<string | null>(null)
+
+  const submitManual = () => {
+    const email = manualEmail.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      setManualError('Adresse email invalide')
+      return
+    }
+    setManualError(null)
+    onAddManual?.({
+      email,
+      prenom: manualPrenom.trim(),
+      nom: manualNom.trim(),
+      entreprise: manualEntreprise.trim(),
+    })
+    setManualEmail('')
+    setManualPrenom('')
+    setManualNom('')
+    setManualEntreprise('')
+  }
 
   const eligible = useMemo(() => contacts.filter((c) => !c.unsubscribed), [contacts])
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -74,7 +102,55 @@ export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange
         <Button type="button" variant="outline" size="sm" onClick={toggleAll}>
           {allFilteredSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
         </Button>
+        {onAddManual && (
+          <Button
+            type="button"
+            variant={manualOpen ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setManualOpen((v) => !v)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Email libre
+          </Button>
+        )}
       </div>
+
+      {onAddManual && manualOpen && (
+        <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+          <p className="text-sm font-medium">Ajouter un destinataire hors base</p>
+          <p className="text-xs text-muted-foreground">
+            Saisissez n'importe quelle adresse email, même si elle ne correspond à aucun compte
+            client. Le contact est ajouté uniquement à cet envoi.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-4">
+            <Input
+              type="email"
+              placeholder="email@exemple.fr"
+              value={manualEmail}
+              onChange={(e) => setManualEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  submitManual()
+                }
+              }}
+            />
+            <Input placeholder="Prénom" value={manualPrenom} onChange={(e) => setManualPrenom(e.target.value)} />
+            <Input placeholder="Nom" value={manualNom} onChange={(e) => setManualNom(e.target.value)} />
+            <Input
+              placeholder="Entreprise"
+              value={manualEntreprise}
+              onChange={(e) => setManualEntreprise(e.target.value)}
+            />
+          </div>
+          {manualError && <p className="text-xs text-destructive">{manualError}</p>}
+          <Button type="button" size="sm" onClick={submitManual}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter à la sélection
+          </Button>
+        </div>
+      )}
+
 
       <div className="flex flex-wrap gap-2">
         {SEGMENTS.map((s) => (
@@ -130,7 +206,9 @@ export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {c.key.startsWith('manual:') && <AdminBadge label="Hors base" tone="warning" />}
                 {c.tier && <AdminBadge label={c.tier} tone="info" />}
+
                 <span className="text-xs text-muted-foreground tabular-nums">
                   {Math.round(c.totalKm).toLocaleString('fr-FR')} km
                 </span>
