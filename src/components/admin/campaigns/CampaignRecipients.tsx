@@ -102,7 +102,55 @@ export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange
         <Button type="button" variant="outline" size="sm" onClick={toggleAll}>
           {allFilteredSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
         </Button>
+        {onAddManual && (
+          <Button
+            type="button"
+            variant={manualOpen ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setManualOpen((v) => !v)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Email libre
+          </Button>
+        )}
       </div>
+
+      {onAddManual && manualOpen && (
+        <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+          <p className="text-sm font-medium">Ajouter un destinataire hors base</p>
+          <p className="text-xs text-muted-foreground">
+            Saisissez n'importe quelle adresse email, même si elle ne correspond à aucun compte
+            client. Le contact est ajouté uniquement à cet envoi.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-4">
+            <Input
+              type="email"
+              placeholder="email@exemple.fr"
+              value={manualEmail}
+              onChange={(e) => setManualEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  submitManual()
+                }
+              }}
+            />
+            <Input placeholder="Prénom" value={manualPrenom} onChange={(e) => setManualPrenom(e.target.value)} />
+            <Input placeholder="Nom" value={manualNom} onChange={(e) => setManualNom(e.target.value)} />
+            <Input
+              placeholder="Entreprise"
+              value={manualEntreprise}
+              onChange={(e) => setManualEntreprise(e.target.value)}
+            />
+          </div>
+          {manualError && <p className="text-xs text-destructive">{manualError}</p>}
+          <Button type="button" size="sm" onClick={submitManual}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter à la sélection
+          </Button>
+        </div>
+      )}
+
 
       <div className="flex flex-wrap gap-2">
         {SEGMENTS.map((s) => (
