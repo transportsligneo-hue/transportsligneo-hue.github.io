@@ -23,12 +23,38 @@ const SEGMENTS = [
   { key: 'particulier', label: 'Particuliers' },
 ] as const
 
-export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange }: Props) {
+export function CampaignRecipients({ contacts, tiers, selected, onSelectedChange, onAddManual }: Props) {
   const [search, setSearch] = useState('')
   const [segment, setSegment] = useState<string>('all')
   const [tier, setTier] = useState<string>('all')
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualEmail, setManualEmail] = useState('')
+  const [manualPrenom, setManualPrenom] = useState('')
+  const [manualNom, setManualNom] = useState('')
+  const [manualEntreprise, setManualEntreprise] = useState('')
+  const [manualError, setManualError] = useState<string | null>(null)
+
+  const submitManual = () => {
+    const email = manualEmail.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      setManualError('Adresse email invalide')
+      return
+    }
+    setManualError(null)
+    onAddManual?.({
+      email,
+      prenom: manualPrenom.trim(),
+      nom: manualNom.trim(),
+      entreprise: manualEntreprise.trim(),
+    })
+    setManualEmail('')
+    setManualPrenom('')
+    setManualNom('')
+    setManualEntreprise('')
+  }
 
   const eligible = useMemo(() => contacts.filter((c) => !c.unsubscribed), [contacts])
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
