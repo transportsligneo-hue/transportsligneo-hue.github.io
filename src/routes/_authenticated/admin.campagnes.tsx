@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CampaignEditor, type CampaignDraft } from '@/components/admin/campaigns/CampaignEditor'
 import { CampaignRecipients } from '@/components/admin/campaigns/CampaignRecipients'
-import { listCampaignAudience, sendCampaign } from '@/lib/campaigns.functions'
+import { listCampaignAudience, sendCampaign, type AudienceContact } from '@/lib/campaigns.functions'
 import { Loader2, Mail, MousePointerClick, Send, Eye, Save, Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 
