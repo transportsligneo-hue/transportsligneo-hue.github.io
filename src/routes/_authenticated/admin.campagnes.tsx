@@ -47,6 +47,7 @@ function AdminCampagnesPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [sending, setSending] = useState(false)
+  const [manualContacts, setManualContacts] = useState<AudienceContact[]>([])
 
   const audienceQuery = useQuery({
     queryKey: ['campaign-audience'],
