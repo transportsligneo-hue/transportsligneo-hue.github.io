@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AdminBadge, AdminEmpty } from '@/components/admin/ui'
 import type { AudienceContact } from '@/lib/campaigns.functions'
-import { Search, Users } from 'lucide-react'
+import { Search, Users, UserPlus, Plus } from 'lucide-react'
 
 interface Props {
   contacts: AudienceContact[]
   tiers: { name: string }[]
   selected: Set<string>
   onSelectedChange: (next: Set<string>) => void
+  onAddManual?: (contact: { email: string; prenom: string; nom: string; entreprise: string }) => void
 }
+
 
 const SEGMENTS = [
   { key: 'all', label: 'Tous' },
