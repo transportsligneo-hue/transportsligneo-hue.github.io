@@ -95,11 +95,42 @@ function AdminCampagnesPage() {
     },
   })
 
-  const contacts = audienceQuery.data ?? []
+  const contacts = useMemo(
+    () => [...manualContacts, ...(audienceQuery.data ?? [])],
+    [manualContacts, audienceQuery.data],
+  )
   const selectedContacts = useMemo(
     () => contacts.filter((c) => selected.has(c.key)),
     [contacts, selected],
   )
+
+  const addManualContact = (input: { email: string; prenom: string; nom: string; entreprise: string }) => {
+    const key = `manual:${input.email}`
+    const existing = contacts.find((c) => c.email.toLowerCase() === input.email)
+    if (existing) {
+      setSelected((prev) => new Set(prev).add(existing.key))
+      toast.info('Ce contact est déjà dans la liste, il a été sélectionné.')
+      return
+    }
+    const contact: AudienceContact = {
+      key,
+      email: input.email,
+      prenom: input.prenom,
+      nom: input.nom,
+      entreprise: input.entreprise,
+      segment: 'particulier',
+      source: 'profil',
+      clientId: null,
+      organizationId: null,
+      totalKm: 0,
+      tier: null,
+      unsubscribed: false,
+    }
+    setManualContacts((prev) => [contact, ...prev])
+    setSelected((prev) => new Set(prev).add(key))
+    toast.success(`${input.email} ajouté aux destinataires`)
+  }
+
 
   useEffect(() => {
     if (audienceQuery.error) toast.error("Impossible de charger l'audience")
