@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { generateFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { stripLegSuffix } from "@/lib/mission-number";
+
 
 export interface FactureCandidate {
   /** trajet porteur (volet Livraison pour un duo) */
@@ -57,16 +59,23 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
 
   const rows = ((data ?? []) as unknown as AttrRow[]).filter((r) => !r.trajet?.is_test_data);
 
-  // Dé-doublonnage duo : on garde le volet Livraison (leg 1) comme porteur
+  // Dé-doublonnage duo : on garde le volet Livraison (leg 1) comme porteur.
+  // Clé : mission_group_id, sinon numéro de mission sans suffixe -L / -R.
+  const keyOf = (r: AttrRow) =>
+    r.trajet?.mission_group_id ??
+    (r.numero_mission ? `n:${stripLegSuffix(r.numero_mission)}` : r.id);
   const byGroup = new Map<string, AttrRow>();
   rows.forEach((r) => {
-    const key = r.trajet?.mission_group_id ?? r.id;
+    const key = keyOf(r);
     const prev = byGroup.get(key);
     if (!prev) return void byGroup.set(key, r);
     const legOf = (x: AttrRow) => x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1);
     if (legOf(r) < legOf(prev)) byGroup.set(key, r);
   });
-  const kept = Array.from(byGroup.values());
+  // Plus récentes en premier (date de mission, à défaut date de création)
+  const tsOf = (r: AttrRow) => new Date(r.trajet?.date_trajet ?? r.created_at).getTime();
+  const kept = Array.from(byGroup.values()).sort((a, b) => tsOf(b) - tsOf(a));
+
 
   const attrIds = kept.map((r) => r.id);
   const trajetIds = kept.map((r) => r.trajet_id);
@@ -85,12 +94,13 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
 
   return kept.map((r) => {
     const t = r.trajet;
-    const grouped = rows.filter((x) => t?.mission_group_id && x.trajet?.mission_group_id === t.mission_group_id);
+    const grouped = rows.filter((x) => keyOf(x) === keyOf(r));
     const fac = factures.get(`a:${r.id}`) ?? factures.get(`m:${r.trajet_id}`) ?? null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
-      numeroMission: r.numero_mission ?? t?.date_trajet ?? null,
+      numeroMission: r.numero_mission ? stripLegSuffix(r.numero_mission) : (t?.date_trajet ?? null),
+
       clientLabel: t?.client_nom || t?.client_email || "Client",
       clientEmail: t?.client_email ?? null,
       itineraire: `${t?.depart ?? "—"} → ${t?.arrivee ?? "—"}`,
