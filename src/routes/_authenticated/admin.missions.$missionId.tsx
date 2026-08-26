@@ -53,7 +53,7 @@ import { useMissionPv, pvOf, MissionPvBadges } from "@/components/admin/MissionP
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
-import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { missionNumberOf, displayTrajetRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 import { buildLegDossierPdf, mergeDossierParts } from "@/lib/dossier-mission";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { MissionPriceCard } from "@/components/admin/MissionPriceCard";
