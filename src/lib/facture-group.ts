@@ -9,6 +9,8 @@ export interface GroupInvoiceBasis {
   attributionIds: string[];
   /** trajet porteur de la facture (volet Livraison / leg 1) */
   primaryTrajetId: string;
+  /** id de la mission (table missions) référencée par la facture — null si absent */
+  primaryMissionId: string | null;
   /** attribution porteuse de la facture (volet Livraison / leg 1) — null si non attribué */
   primaryAttributionId: string | null;
   /** montant TTC global (jamais coupé par segment) */
@@ -32,6 +34,7 @@ interface LegRow {
   leg_index: number | null;
   mission_group_id: string | null;
   devis_id: string | null;
+  mission_id: string | null;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -44,7 +47,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupInvoiceBasis> {
   const { data: base } = await supabase
     .from("trajets")
-    .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id")
+    .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id, mission_id")
     .eq("id", trajetId)
     .maybeSingle();
 
@@ -54,7 +57,7 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
   if (current?.mission_group_id) {
     const { data: siblings } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id")
+      .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id, mission_id")
       .eq("mission_group_id", current.mission_group_id);
     let rows = ((siblings ?? []) as LegRow[]).slice();
     // Écarte les trajets "simple" résiduels quand les segments aller/retour existent
@@ -113,6 +116,9 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     .filter(Boolean) as { id: string; trajet_id: string }[];
   const attributionIds = orderedAttrs.map((a) => a.id);
   const primaryTrajetId = trajetIds[0] ?? trajetId;
+  // La facture pointe vers missions.id (contrainte FK) — jamais vers trajets.id
+  const primaryMissionId =
+    legs.find((l) => l.id === primaryTrajetId)?.mission_id ?? legs.find((l) => l.mission_id)?.mission_id ?? null;
   const primaryAttributionId = orderedAttrs[0]?.id ?? null;
 
   if (attributionIds.length) {
@@ -139,6 +145,7 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     trajetIds,
     attributionIds,
     primaryTrajetId,
+    primaryMissionId,
     primaryAttributionId,
     totalTtc,
 

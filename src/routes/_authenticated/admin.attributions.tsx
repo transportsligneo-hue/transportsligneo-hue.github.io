@@ -289,7 +289,7 @@ function AdminAttributions() {
           type_facture: isB2B ? "b2b" : "particulier",
           // Facture unique portée par le volet Livraison (duo aller-retour)
           attribution_id: basis.primaryAttributionId ?? a.id,
-          mission_id: basis.primaryTrajetId ?? trajet.id,
+          mission_id: basis.primaryMissionId,
 
           client_email: trajet.client_email,
           client_nom: nomFamille,

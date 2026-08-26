@@ -946,7 +946,7 @@ function AdminMissionDetail() {
           numero,
           // Toujours portée par le volet Livraison : une seule facture pour tout le duo
           attribution_id: basis.primaryAttributionId ?? attribution.id,
-          mission_id: basis.primaryTrajetId,
+          mission_id: basis.primaryMissionId,
           client_email: trajet.client_email ?? "",
           client_nom: nom || "Client",
           client_prenom: prenom || null,
