@@ -24,6 +24,21 @@ export function trajetToUnified(statut: string): UnifiedStatus {
   }
 }
 
+/**
+ * Statut canonique d'une mission : l'attribution (cycle de vie réel exécuté par
+ * le convoyeur / clôturé par l'admin) prime sur le statut du trajet.
+ * Évite qu'une mission affichée « Annulée » dans la liste soit « Terminée » sur la fiche.
+ */
+export function resolveUnifiedStatus(
+  trajetStatut: string,
+  attributionStatut?: string | null,
+): UnifiedStatus {
+  if (attributionStatut === "termine" || attributionStatut === "validee") return "terminee";
+  if (attributionStatut === "annule") return "annulee";
+  if (attributionStatut === "en_cours") return "encours";
+  return trajetToUnified(trajetStatut);
+}
+
 export interface UnifiedMission {
   kind: "demande" | "trajet";
   id: string;
