@@ -7503,6 +7503,8 @@ export type Database = {
         Args: { _statut: string }
         Returns: string
       }
+      mission_leg_suffix: { Args: { _trajet_id: string }; Returns: string }
+      mission_numero_base: { Args: { _numero: string }; Returns: string }
       mission_pickup_ts: {
         Args: { _date: string; _heure: string }
         Returns: string
