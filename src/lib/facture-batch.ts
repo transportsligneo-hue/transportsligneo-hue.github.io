@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { generateFacturePdf, type FactureData } from "@/lib/facture-pdf";
+import { stripLegSuffix } from "@/lib/mission-number";
+
 
 export interface FactureCandidate {
   /** trajet porteur (volet Livraison pour un duo) */
