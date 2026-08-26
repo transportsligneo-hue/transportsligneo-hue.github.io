@@ -92,12 +92,13 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
 
   return kept.map((r) => {
     const t = r.trajet;
-    const grouped = rows.filter((x) => t?.mission_group_id && x.trajet?.mission_group_id === t.mission_group_id);
+    const grouped = rows.filter((x) => keyOf(x) === keyOf(r));
     const fac = factures.get(`a:${r.id}`) ?? factures.get(`m:${r.trajet_id}`) ?? null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
-      numeroMission: r.numero_mission ?? t?.date_trajet ?? null,
+      numeroMission: r.numero_mission ? stripLegSuffix(r.numero_mission) : (t?.date_trajet ?? null),
+
       clientLabel: t?.client_nom || t?.client_email || "Client",
       clientEmail: t?.client_email ?? null,
       itineraire: `${t?.depart ?? "—"} → ${t?.arrivee ?? "—"}`,
