@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
+import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   validateSearch: (search: Record<string, unknown>) => ({
