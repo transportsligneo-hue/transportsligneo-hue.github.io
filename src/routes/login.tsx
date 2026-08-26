@@ -24,13 +24,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const {
     login,
-    logout,
     isAuthenticated,
     isLoading,
     isInitializing,
-    role,
-    convoyeurStatut,
-    typeClient,
     homeRoute,
   } = useAuth();
   const navigate = useNavigate();
@@ -53,7 +49,6 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
-  const submittedTabRef = useRef<Tab>("client");
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const userTypedRef = useRef(false);
@@ -63,28 +58,11 @@ function LoginPage() {
   useEffect(() => {
     if (isInitializing || isLoading || !isAuthenticated) return;
     if (!justLoggedInRef.current) { navigate({ to: homeRoute }); return; }
-    const usedTab = submittedTabRef.current;
     justLoggedInRef.current = false;
-
-    if (role === "admin" || role === "super_admin") { navigate({ to: "/admin" }); return; }
-    if (usedTab === "pro") {
-      if (role !== "convoyeur") {
-        setError("Cet email correspond à un compte client. Utilisez l'onglet « Espace Client ».");
-        void logout();
-        return;
-      }
-      if (convoyeurStatut === "valide" || convoyeurStatut === "actif") navigate({ to: "/convoyeur" });
-      else navigate({ to: "/attente-validation" });
-      return;
-    }
-    if (role === "convoyeur") {
-      setError("Cet email correspond à un compte convoyeur. Utilisez l'onglet « Espace Driver ».");
-      void logout();
-      return;
-    }
-    if (typeClient === "b2b") navigate({ to: "/dashboard-pro" });
-    else navigate({ to: "/dashboard-client" });
-  }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
+    // Le rôle et l'organisation font foi. L'onglet choisi ne doit jamais
+    // pouvoir envoyer un admin, une flotte ou un partenaire dans un autre espace.
+    navigate({ to: homeRoute });
+  }, [isAuthenticated, isLoading, isInitializing, homeRoute, navigate]);
 
   const handleSubmit = async (e?: FormEvent, override?: { email: string; password: string }) => {
     e?.preventDefault();
@@ -93,7 +71,6 @@ function LoginPage() {
 
     setError("");
     setSubmitting(true);
-    submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
       try {

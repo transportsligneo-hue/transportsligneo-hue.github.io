@@ -27,7 +27,7 @@ const navItems: ProSidebarItem[] = [
 ];
 
 function ClientLayout() {
-  const { isAuthenticated, role, roleActif, typeClient, isLoading, homeRoute, user, refresh } = useAuth();
+  const { isAuthenticated, roleActif, isLoading, homeRoute, user, refresh } = useAuth();
   const navigate = useNavigate();
   const [resending, setResending] = useState(false);
 
@@ -37,14 +37,10 @@ function ClientLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
-      navigate({ to: homeRoute });
-      return;
+    if (homeRoute !== "/dashboard-client") {
+      navigate({ to: homeRoute, replace: true });
     }
-    if (typeClient === "b2b" || typeClient === "flotte") {
-      navigate({ to: "/dashboard-pro" });
-    }
-  }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, homeRoute, navigate]);
 
   if (isLoading) {
     return (
@@ -116,7 +112,7 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "b2b" || typeClient === "flotte") {
+  if (!isAuthenticated || homeRoute !== "/dashboard-client") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />

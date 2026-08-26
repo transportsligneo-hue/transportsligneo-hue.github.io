@@ -39,7 +39,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
 }
 
 function ProLayout() {
-  const { isAuthenticated, role, typeClient, isLoading, homeRoute } = useAuth();
+  const { isAuthenticated, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
   const { data: orgInfo } = useCurrentOrgAccountType();
   const accountType = orgInfo?.accountType ?? "b2b_standard";
@@ -51,16 +51,12 @@ function ProLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
-      navigate({ to: homeRoute });
-      return;
+    if (homeRoute !== "/dashboard-pro") {
+      navigate({ to: homeRoute, replace: true });
     }
-    if (typeClient === "particulier") {
-      navigate({ to: "/dashboard-client" });
-    }
-  }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, homeRoute, navigate]);
 
-  if (isLoading || !isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "particulier") {
+  if (isLoading || !isAuthenticated || homeRoute !== "/dashboard-pro") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />

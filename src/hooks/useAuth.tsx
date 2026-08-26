@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const currentUserIdRef = useRef<string | null>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   /**
    * Charge en une seule passe rôle + profile + statut convoyeur (si applicable).
@@ -125,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (rolesRes.error) throw rolesRes.error;
+      if (profileRes.error) throw profileRes.error;
 
       const activeRoles = ((rolesRes.data as Array<{ role: string; actif?: boolean | null }> | null) ?? []);
       const role = getHighestActiveRole(activeRoles);
@@ -179,22 +181,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!userId) {
         setProfile({ role: null, roleActif: true, typeClient: null, convoyeurStatut: null, orgRole: null });
+        setProfileUserId(null);
         setIsLoading(false);
         return;
       }
+
+      // Ne jamais laisser le profil de l'utilisateur précédent piloter une redirection.
+      setIsLoading(true);
+      setProfileUserId(null);
 
       // 1) Cache local → l'app est utilisable immédiatement, même sans réseau.
       const cached = readCachedProfile(userId);
       if (cached) {
         setProfile(cached);
-        setIsLoading(false);
-      } else {
-        setIsLoading(true);
       }
 
       // 2) Hors ligne : on s'arrête là (le cache fait foi).
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        if (!cached) setIsLoading(false);
+        if (cached) setProfileUserId(userId);
+        setIsLoading(false);
         return;
       }
 
@@ -206,7 +211,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (resolved) {
         setProfile(resolved);
+        setProfileUserId(userId);
         writeCachedProfile(userId, resolved);
+      } else if (cached) {
+        // Tolérance réseau : le cache reste strictement rattaché à ce userId.
+        setProfileUserId(userId);
       }
       setIsLoading(false);
     },
@@ -222,6 +231,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       const nextUserId = newSession?.user?.id ?? null;
       if (nextUserId === currentUserIdRef.current) return;
+      // Ferme immédiatement la fenêtre où une nouvelle session pouvait être
+      // redirigée avec le rôle/type du compte précédent.
+      setIsLoading(true);
+      setProfileUserId(null);
       // IMPORTANT : ne jamais appeler Supabase dans le callback (verrou auth → blocage).
       const nextUser = newSession?.user ?? null;
       setTimeout(() => { void hydrateForUser(nextUser); }, 0);
@@ -287,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasAnyRole = useCallback((roles: string[]) => roles.includes(profile.role ?? ""), [profile.role]);
 
   const isAuthenticated = !!session;
+  const isProfilePending = !!user?.id && profileUserId !== user.id;
   const homeRoute = computeHomeRoute(profile, isAuthenticated);
 
   return (
@@ -299,7 +313,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         roleActif: profile.roleActif,
         typeClient: profile.typeClient,
         convoyeurStatut: profile.convoyeurStatut,
-        isLoading: isInitializing || isLoading,
+        isLoading: isInitializing || isLoading || isProfilePending,
         isInitializing,
         homeRoute,
         login,
