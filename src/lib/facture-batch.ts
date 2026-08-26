@@ -57,16 +57,23 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
 
   const rows = ((data ?? []) as unknown as AttrRow[]).filter((r) => !r.trajet?.is_test_data);
 
-  // Dé-doublonnage duo : on garde le volet Livraison (leg 1) comme porteur
+  // Dé-doublonnage duo : on garde le volet Livraison (leg 1) comme porteur.
+  // Clé : mission_group_id, sinon numéro de mission sans suffixe -L / -R.
+  const keyOf = (r: AttrRow) =>
+    r.trajet?.mission_group_id ??
+    (r.numero_mission ? `n:${stripLegSuffix(r.numero_mission)}` : r.id);
   const byGroup = new Map<string, AttrRow>();
   rows.forEach((r) => {
-    const key = r.trajet?.mission_group_id ?? r.id;
+    const key = keyOf(r);
     const prev = byGroup.get(key);
     if (!prev) return void byGroup.set(key, r);
     const legOf = (x: AttrRow) => x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1);
     if (legOf(r) < legOf(prev)) byGroup.set(key, r);
   });
-  const kept = Array.from(byGroup.values());
+  // Plus récentes en premier (date de mission, à défaut date de création)
+  const tsOf = (r: AttrRow) => new Date(r.trajet?.date_trajet ?? r.created_at).getTime();
+  const kept = Array.from(byGroup.values()).sort((a, b) => tsOf(b) - tsOf(a));
+
 
   const attrIds = kept.map((r) => r.id);
   const trajetIds = kept.map((r) => r.trajet_id);
