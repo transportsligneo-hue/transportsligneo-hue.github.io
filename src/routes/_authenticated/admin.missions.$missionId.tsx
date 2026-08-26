@@ -590,63 +590,6 @@ function AdminMissionDetail() {
   };
 
   /**
-   * Collecte les documents scannés de la mission (PV de livraison, carte grise…)
-   * pour les intégrer en pleine page dans le dossier complet.
-   * Les documents absents sont simplement ignorés.
-   */
-  const collectMissionDocuments = async (): Promise<{ label: string; url: string; meta?: string | null }[]> => {
-    const out: { label: string; url: string; meta?: string | null; rank: number }[] = [];
-    const isImage = (p: string) => /\.(jpe?g|png|webp|heic)$/i.test(p);
-
-    try {
-      const { data: docs } = await supabase
-        .from("mission_documents")
-        .select("type_document, nom_fichier, url_fichier, created_at")
-        .eq("attribution_id", attribution!.id)
-        .order("created_at", { ascending: false });
-      const rows = ((docs ?? []) as { type_document: string; nom_fichier: string | null; url_fichier: string; created_at: string }[])
-        .filter((d) => /pv_livraison|pv_restitution|carte_grise/i.test(d.type_document) && isImage(d.url_fichier));
-      const seen = new Set<string>();
-      const uniques = rows.filter((d) => (seen.has(d.type_document) ? false : (seen.add(d.type_document), true)));
-      if (uniques.length) {
-        const paths = uniques.map((d) => d.url_fichier);
-        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(paths, 3600);
-        uniques.forEach((d, i) => {
-          const url = signed?.[i]?.signedUrl;
-          if (!url) return;
-          const isCg = /carte_grise/i.test(d.type_document);
-          out.push({
-            label: isCg ? "Carte grise" : "PV de livraison signé",
-            url,
-            meta: d.nom_fichier ?? null,
-            rank: isCg ? 2 : 1,
-          });
-        });
-      }
-    } catch {
-      // documents optionnels : on n'échoue pas la génération
-    }
-
-    // Carte grise fournie à la commande (fallback)
-    if (!out.some((d) => d.rank === 2)) {
-      const t = trajet as unknown as { carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null };
-      for (const [face, raw] of [["recto", t?.carte_grise_recto_url], ["verso", t?.carte_grise_verso_url]] as const) {
-        if (!raw) continue;
-        let url = raw;
-        if (!/^https?:\/\//i.test(raw)) {
-          const { data: s } = await supabase.storage.from("devis-documents").createSignedUrl(raw, 3600);
-          if (!s?.signedUrl) continue;
-          url = s.signedUrl;
-        }
-        if (!isImage(url.split("?")[0])) continue;
-        out.push({ label: `Carte grise — ${face}`, url, meta: null, rank: 2 });
-      }
-    }
-
-    return out.sort((a, b) => a.rank - b.rank).map(({ rank: _rank, ...d }) => d);
-  };
-
-  /**
    * Compile le dossier complet de la mission en un seul PDF.
    * Sur un duo Livraison + Restitution, les DEUX volets sont inclus.
    * Les pièces jointes fournies par l'admin sont ajoutées à la fin.
