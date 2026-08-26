@@ -108,7 +108,7 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   const kept = Array.from(byGroup.values()).sort((a, b) => tsOf(b) - tsOf(a));
 
 
-  const attrIds = kept.map((r) => r.id);
+  const attrIds = rows.map((r) => r.id);
   const missionIds = kept.map((r) => r.trajet?.mission_id).filter((id): id is string => !!id);
   const factures = new Map<string, { id: string; numero: string; reference_client: string | null; reference_label: string | null }>();
   if (attrIds.length) {
@@ -139,7 +139,11 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
     const devis = t?.devis;
     const devisParts = Number(devis?.prix_aller ?? 0) + Number(devis?.prix_retour ?? 0);
     const devisTotal = Math.max(Number(devis?.prix_estime ?? 0), devisParts);
-    const fac = factures.get(`a:${r.id}`) ?? (t?.mission_id ? factures.get(`m:${t.mission_id}`) : null) ?? null;
+    const fac = billableLegs
+      .map((leg) => factures.get(`a:${leg.id}`))
+      .find((invoice) => !!invoice)
+      ?? (t?.mission_id ? factures.get(`m:${t.mission_id}`) : null)
+      ?? null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
@@ -233,14 +237,28 @@ export async function ensureFacture(
   const basis = await resolveGroupInvoiceBasis(trajetId);
   const refClient = (po.referenceClient ?? "").trim() || null;
   const refLabel = refClient ? (po.referenceLabel || "Référence client") : (po.referenceLabel ?? null);
+  const { regime, vatRate } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+  const basisTtc = Number(basis.totalTtc ?? 0);
+  const basisHt = micro ? basisTtc : basisTtc > 0 ? basisTtc / (1 + vatRate / 100) : 0;
+  const basisTva = +(basisTtc - basisHt).toFixed(2);
 
   if (basis.existing) {
+    const corrections: Record<string, string | number | null> = {
+      prix_ht: +basisHt.toFixed(2),
+      prix_tva: basisTva,
+      prix_ttc: basisTtc,
+      tva_taux: micro ? 0 : vatRate,
+    };
     if (refClient) {
-      await supabase
-        .from("factures")
-        .update({ reference_client: refClient, reference_label: refLabel })
-        .eq("id", basis.existing.id);
+      corrections.reference_client = refClient;
+      corrections.reference_label = refLabel;
     }
+    const { error: updateError } = await supabase
+      .from("factures")
+      .update(corrections)
+      .eq("id", basis.existing.id);
+    if (updateError) throw new Error(updateError.message);
     const { data, error } = await supabase.from("factures").select("*").eq("id", basis.existing.id).single();
     if (error || !data) throw new Error(error?.message || "Facture introuvable");
     return { row: data as unknown as FactureRow, created: false };
@@ -269,8 +287,6 @@ export async function ensureFacture(
   if (!clientEmail) throw new Error("Email client introuvable — renseignez l'email sur la mission");
 
   const prixTTC = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
-  const { regime, vatRate } = await fetchActiveRegime();
-  const micro = regime !== "societe";
   const prixHT = micro ? prixTTC : prixTTC > 0 ? prixTTC / (1 + vatRate / 100) : 0;
   const prixTVA = +(prixTTC - prixHT).toFixed(2);
 
