@@ -37,12 +37,8 @@ function ClientLayout() {
       navigate({ to: "/login" });
       return;
     }
-    if (role === "admin" || role === "super_admin" || role === "convoyeur") {
-      navigate({ to: homeRoute });
-      return;
-    }
-    if (typeClient === "b2b" || typeClient === "flotte") {
-      navigate({ to: "/dashboard-pro" });
+    if (homeRoute !== "/dashboard-client") {
+      navigate({ to: homeRoute, replace: true });
     }
   }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
 
@@ -116,7 +112,7 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated || role === "admin" || role === "super_admin" || role === "convoyeur" || typeClient === "b2b" || typeClient === "flotte") {
+  if (!isAuthenticated || homeRoute !== "/dashboard-client") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />
