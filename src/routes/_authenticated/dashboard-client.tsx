@@ -27,7 +27,7 @@ const navItems: ProSidebarItem[] = [
 ];
 
 function ClientLayout() {
-  const { isAuthenticated, role, roleActif, typeClient, isLoading, homeRoute, user, refresh } = useAuth();
+  const { isAuthenticated, roleActif, isLoading, homeRoute, user, refresh } = useAuth();
   const navigate = useNavigate();
   const [resending, setResending] = useState(false);
 

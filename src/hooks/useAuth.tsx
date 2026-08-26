@@ -213,6 +213,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(resolved);
         setProfileUserId(userId);
         writeCachedProfile(userId, resolved);
+      } else if (cached) {
+        // Tolérance réseau : le cache reste strictement rattaché à ce userId.
+        setProfileUserId(userId);
       }
       setIsLoading(false);
     },

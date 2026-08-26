@@ -39,7 +39,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
 }
 
 function ProLayout() {
-  const { isAuthenticated, role, typeClient, isLoading, homeRoute } = useAuth();
+  const { isAuthenticated, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
   const { data: orgInfo } = useCurrentOrgAccountType();
   const accountType = orgInfo?.accountType ?? "b2b_standard";
