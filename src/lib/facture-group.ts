@@ -30,6 +30,7 @@ interface LegRow {
   depart: string | null;
   arrivee: string | null;
   prix: number | null;
+  prix_client: number | null;
   leg_type: string | null;
   leg_index: number | null;
   mission_group_id: string | null;
@@ -47,7 +48,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupInvoiceBasis> {
   const { data: base } = await supabase
     .from("trajets")
-    .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id, mission_id")
+    .select("id, depart, arrivee, prix, prix_client, leg_type, leg_index, mission_group_id, devis_id, mission_id")
     .eq("id", trajetId)
     .maybeSingle();
 
@@ -57,7 +58,7 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
   if (current?.mission_group_id) {
     const { data: siblings } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, prix, leg_type, leg_index, mission_group_id, devis_id, mission_id")
+      .select("id, depart, arrivee, prix, prix_client, leg_type, leg_index, mission_group_id, devis_id, mission_id")
       .eq("mission_group_id", current.mission_group_id);
     let rows = ((siblings ?? []) as LegRow[]).slice();
     // Écarte les trajets "simple" résiduels quand les segments aller/retour existent
@@ -74,7 +75,7 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
   }
 
   const trajetIds = legs.map((l) => l.id);
-  const sumLegs = legs.reduce((s, l) => s + Number(l.prix ?? 0), 0);
+  const sumLegs = legs.reduce((s, l) => s + Number(l.prix_client ?? l.prix ?? 0), 0);
 
   // Tarif de base : le devis d'origine fait foi (il porte le prix global aller-retour)
   let devisTotal = 0;
@@ -91,8 +92,9 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
     }
   }
 
-  // Le devis prime (tarif de base global) ; à défaut, somme des segments
-  const totalTtc = round2(devisTotal > 0 ? devisTotal : sumLegs);
+  // Ne jamais sous-facturer : les segments réellement créés et le devis sont
+  // deux représentations du même prix, la valeur globale la plus haute fait foi.
+  const totalTtc = round2(Math.max(devisTotal, sumLegs));
 
   const points: string[] = [];
   legs.forEach((l, i) => {
@@ -129,11 +131,11 @@ export async function resolveGroupInvoiceBasis(trajetId: string): Promise<GroupI
       .limit(1);
     if (fac && fac.length) existing = { id: fac[0].id as string, numero: fac[0].numero as string };
   }
-  if (!existing && trajetIds.length) {
+  if (!existing && primaryMissionId) {
     const { data: fac2 } = await supabase
       .from("factures")
       .select("id, numero")
-      .in("mission_id", trajetIds)
+      .eq("mission_id", primaryMissionId)
       .limit(1);
     if (fac2 && fac2.length) existing = { id: fac2[0].id as string, numero: fac2[0].numero as string };
   }

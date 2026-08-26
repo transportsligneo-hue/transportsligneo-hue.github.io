@@ -66,7 +66,6 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   const { data, error } = await supabase
     .from("attributions")
     .select(
-      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, mission_group_id, leg_index, leg_type, is_test_data)"
       "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, devis:devis(numero, prix_estime, prix_aller, prix_retour))"
     )
     .in("statut", ["termine", "validee"])
@@ -110,11 +109,10 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
 
 
   const attrIds = kept.map((r) => r.id);
-  const trajetIds = kept.map((r) => r.trajet_id);
   const missionIds = kept.map((r) => r.trajet?.mission_id).filter((id): id is string => !!id);
   const factures = new Map<string, { id: string; numero: string; reference_client: string | null; reference_label: string | null }>();
   if (attrIds.length) {
-    let query = supabase
+    const query = supabase
       .from("factures")
       .select("id, numero, attribution_id, mission_id, reference_client, reference_label");
     const filters = [`attribution_id.in.(${attrIds.join(",")})`];
