@@ -689,6 +689,14 @@ function AdminDevisPage() {
                   >
                     {d.archived_at ? <ArchiveRestore size={15} /> : <Archive size={15} />}
                   </button>
+                  <AdminPurgeButton
+                    kind="devis"
+                    id={d.id}
+                    label={d.numero}
+                    compact
+                    onDeleted={() => setDevis((list) => list.filter((x) => x.id !== d.id))}
+                  />
+
 
                   <select
                     className="dvx-select dvx-foot-select"
