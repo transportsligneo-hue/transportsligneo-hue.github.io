@@ -77,6 +77,7 @@ interface Attribution {
     devis?: { vehicules?: DevisVehicule[] | null } | null;
     prix?: number | null;
     numero_mission?: string | null;
+    commande_ref?: string | null;
 
   };
   convoyeur?: { nom: string; prenom: string };
@@ -289,7 +290,7 @@ function AdminAttributions() {
           type_facture: isB2B ? "b2b" : "particulier",
           // Facture unique portée par le volet Livraison (duo aller-retour)
           attribution_id: basis.primaryAttributionId ?? a.id,
-          mission_id: basis.primaryTrajetId ?? trajet.id,
+          mission_id: basis.primaryMissionId,
 
           client_email: trajet.client_email,
           client_nom: nomFamille,
@@ -432,7 +433,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, archived_at, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, archived_at, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, commande_ref, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -753,6 +754,11 @@ function AdminAttributions() {
                   })()}
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
+                    {a.trajet?.commande_ref && (
+                      <span className="rounded-md border border-[#2F5FFF]/30 bg-[#2F5FFF]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2F5FFF]" title="Numéro de commande / PO">
+                        PO {a.trajet.commande_ref}
+                      </span>
+                    )}
 
                     <span className="font-semibold text-pro-text-soft">
                       {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}

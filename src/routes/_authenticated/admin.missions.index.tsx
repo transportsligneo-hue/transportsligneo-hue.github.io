@@ -57,6 +57,8 @@ interface TrajetRow {
   marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
   lot_id: string | null; lot_reference: string | null;
   archived_at: string | null;
+  commande_ref: string | null;
+
 }
 
 interface DemandeRow {
@@ -362,6 +364,7 @@ function AdminMissionsUnified() {
         groupId: t.mission_group_id,
         legIndex: t.leg_index,
         isTest: !!t.is_test_data,
+        commandeRef: t.commande_ref ?? null,
         createdAt: t.created_at,
         pricingMode: t.pricing_mode,
         prixClientTtc: t.prix_client_ttc,
@@ -938,6 +941,11 @@ function AdminMissionsUnified() {
                           <p className="font-semibold text-[var(--a6-text)] inline-flex items-center gap-1.5">
                             {r.m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {r.m.arrivee}
                           </p>
+                          {r.m.commandeRef && (
+                            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2F5FFF]" title="Numéro de commande / PO">
+                              PO {r.m.commandeRef}
+                            </p>
+                          )}
                         </td>
                       )}
 

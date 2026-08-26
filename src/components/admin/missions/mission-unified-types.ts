@@ -59,6 +59,8 @@ export interface UnifiedMission {
   /** Lot multi-plaques (une mission, plusieurs véhicules) */
   lotId?: string | null;
   lotRef?: string | null;
+  /** Numéro de commande / PO client */
+  commandeRef?: string | null;
   /** Mission archivée (terminée/annulée depuis plus de 60 jours) */
   archived?: boolean;
 }

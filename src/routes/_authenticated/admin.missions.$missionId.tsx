@@ -54,6 +54,7 @@ import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
 import { AdminStepOverridesPanel } from "@/components/admin/AdminStepOverridesPanel";
 import { missionNumberOf, displayTrajetRef, stripLegSuffix } from "@/lib/mission-number";
+import { buildLegDossierPdf, mergeDossierParts } from "@/lib/dossier-mission";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { MissionPriceCard } from "@/components/admin/MissionPriceCard";
 import { MissionPriceHistory } from "@/components/admin/MissionPriceHistory";
@@ -345,7 +346,7 @@ function AdminMissionDetail() {
       if (!ids.length) return;
       const { data: attrs } = await supabase
         .from("attributions")
-        .select("id, trajet_id, numero_mission")
+        .select("id, trajet_id, numero_mission, created_at")
         .in("trajet_id", ids);
       const legById = new Map((legs ?? []).map((l) => [l.id, l]));
       let base: string | null = null;
@@ -589,134 +590,46 @@ function AdminMissionDetail() {
   };
 
   /**
-   * Collecte les documents scannés de la mission (PV de livraison, carte grise…)
-   * pour les intégrer en pleine page dans le dossier complet.
-   * Les documents absents sont simplement ignorés.
+   * Compile le dossier complet de la mission en un seul PDF.
+   * Sur un duo Livraison + Restitution, les DEUX volets sont inclus.
+   * Les pièces jointes fournies par l'admin sont ajoutées à la fin.
    */
-  const collectMissionDocuments = async (): Promise<{ label: string; url: string; meta?: string | null }[]> => {
-    const out: { label: string; url: string; meta?: string | null; rank: number }[] = [];
-    const isImage = (p: string) => /\.(jpe?g|png|webp|heic)$/i.test(p);
-
-    try {
-      const { data: docs } = await supabase
-        .from("mission_documents")
-        .select("type_document, nom_fichier, url_fichier, created_at")
-        .eq("attribution_id", attribution!.id)
-        .order("created_at", { ascending: false });
-      const rows = ((docs ?? []) as { type_document: string; nom_fichier: string | null; url_fichier: string; created_at: string }[])
-        .filter((d) => /pv_livraison|pv_restitution|carte_grise/i.test(d.type_document) && isImage(d.url_fichier));
-      const seen = new Set<string>();
-      const uniques = rows.filter((d) => (seen.has(d.type_document) ? false : (seen.add(d.type_document), true)));
-      if (uniques.length) {
-        const paths = uniques.map((d) => d.url_fichier);
-        const { data: signed } = await supabase.storage.from("mission-documents").createSignedUrls(paths, 3600);
-        uniques.forEach((d, i) => {
-          const url = signed?.[i]?.signedUrl;
-          if (!url) return;
-          const isCg = /carte_grise/i.test(d.type_document);
-          out.push({
-            label: isCg ? "Carte grise" : "PV de livraison signé",
-            url,
-            meta: d.nom_fichier ?? null,
-            rank: isCg ? 2 : 1,
-          });
-        });
-      }
-    } catch {
-      // documents optionnels : on n'échoue pas la génération
-    }
-
-    // Carte grise fournie à la commande (fallback)
-    if (!out.some((d) => d.rank === 2)) {
-      const t = trajet as unknown as { carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null };
-      for (const [face, raw] of [["recto", t?.carte_grise_recto_url], ["verso", t?.carte_grise_verso_url]] as const) {
-        if (!raw) continue;
-        let url = raw;
-        if (!/^https?:\/\//i.test(raw)) {
-          const { data: s } = await supabase.storage.from("devis-documents").createSignedUrl(raw, 3600);
-          if (!s?.signedUrl) continue;
-          url = s.signedUrl;
-        }
-        if (!isImage(url.split("?")[0])) continue;
-        out.push({ label: `Carte grise — ${face}`, url, meta: null, rank: 2 });
-      }
-    }
-
-    return out.sort((a, b) => a.rank - b.rank).map(({ rank: _rank, ...d }) => d);
-  };
-
-  /** Compile le dossier complet de la mission en un seul PDF. */
-  const buildDossierBlob = async (): Promise<Blob> => {
+  const buildDossierBlob = async (attachments: File[] = []): Promise<Blob> => {
     if (!attribution || !trajet) throw new Error("Mission incomplète");
 
-    const { data: inspFull } = await supabase
-      .from("inspections")
-      .select("type, equipements, kilometrage_depart, kilometrage_arrivee")
-      .eq("attribution_id", attribution.id);
-    const inspDepart = inspFull?.find((i) => i.type === "depart");
-    const inspArrivee = inspFull?.find((i) => i.type === "arrivee");
+    // Volets du duo (ou volet unique)
+    const legs: { attributionId: string; numero: string }[] = [];
+    if (trajet.mission_group_id) {
+      const { data: sibTraj } = await supabase
+        .from("trajets")
+        .select("id, leg_type, leg_index")
+        .eq("mission_group_id", trajet.mission_group_id);
+      const rows = ((sibTraj ?? []) as { id: string; leg_type: string | null; leg_index: number | null }[]).sort(
+        (a, b) => (a.leg_index ?? (a.leg_type === "retour" ? 2 : 1)) - (b.leg_index ?? (b.leg_type === "retour" ? 2 : 1)),
+      );
+      const { data: sibAttrs } = await supabase
+        .from("attributions")
+        .select("id, trajet_id, numero_mission, created_at")
+        .in("trajet_id", rows.map((r) => r.id));
+      const attrRows = (sibAttrs ?? []) as { id: string; trajet_id: string; numero_mission: string | null; created_at: string }[];
+      for (const r of rows) {
+        const a = attrRows.find((x) => x.trajet_id === r.id);
+        if (!a) continue;
+        legs.push({ attributionId: a.id, numero: missionNumberOf(a) });
+      }
+    }
+    if (!legs.some((l) => l.attributionId === attribution.id)) {
+      legs.unshift({ attributionId: attribution.id, numero: missionNumberOf(attribution) });
+    }
 
-    const vin = (trajet as { vin?: string | null; vehicule_vin?: string | null }).vin
-      ?? (trajet as { vehicule_vin?: string | null }).vehicule_vin
-      ?? null;
-
-    const { data: sigsRaw } = await supabase
-      .from("mission_signatures")
-      .select("kind, signature_data")
-      .eq("attribution_id", attribution.id);
-    const signatures = ((sigsRaw ?? []) as { kind: string; signature_data: string | null }[])
-      .map((s) => ({ kind: s.kind, url: s.signature_data }));
-
-    const { data: incidents } = await supabase
-      .from("mission_incidents")
-      .select("titre, description, gravite, created_at")
-      .eq("attribution_id", attribution.id)
-      .order("created_at", { ascending: true });
-
-    const photosDepart = inspections
-      .filter((i) => i.type === "depart")
-      .flatMap((i) => i.photos)
-      .filter((p) => !p.vue_type.startsWith("signature"))
-      .map((p) => ({ vue_type: p.vue_type, url: p.url_photo }));
-    const photosArrivee = inspections
-      .filter((i) => i.type === "arrivee")
-      .flatMap((i) => i.photos)
-      .filter((p) => !p.vue_type.startsWith("signature"))
-      .map((p) => ({ vue_type: p.vue_type, url: p.url_photo }));
-
-    const docs = await collectMissionDocuments();
-
-    return generateEdlFinalPdf(
-      {
-        numero: missionNumberOf(attribution),
-        date_mission: trajet.date_trajet,
-        depart: trajet.depart,
-        arrivee: trajet.arrivee,
-        vehicule: {
-          marque: trajet.marque,
-          modele: trajet.modele,
-          immatriculation: trajet.immatriculation,
-          vin,
-        },
-        convoyeur: convoyeur
-          ? { prenom: convoyeur.prenom, nom: convoyeur.nom, telephone: convoyeur.telephone }
-          : null,
-        contactArrivee: {
-          nom: trajet.arrivee_contact_nom,
-          telephone: trajet.arrivee_contact_telephone,
-          instructions: trajet.arrivee_contact_instructions,
-        },
-        equipements: (inspDepart?.equipements ?? inspArrivee?.equipements ?? null) as Record<string, unknown> | null,
-        kilometrage_depart: inspDepart?.kilometrage_depart ?? null,
-        kilometrage_arrivee: inspArrivee?.kilometrage_arrivee ?? null,
-        photosDepart,
-        photosArrivee,
-        signatures,
-        incidents: incidents ?? [],
-        documents: docs,
-      },
-      { dossier: true },
-    );
+    const pdfs: Blob[] = [];
+    for (const leg of legs) {
+      const b = await buildLegDossierPdf(leg.attributionId, leg.numero);
+      if (b) pdfs.push(b);
+    }
+    if (!pdfs.length) throw new Error("Aucun volet exploitable pour ce dossier");
+    if (pdfs.length === 1 && !attachments.length) return pdfs[0];
+    return mergeDossierParts(pdfs, attachments);
   };
 
   const downloadEdlPdf = async (mode: "download" | "preview" = "download") => {
@@ -946,7 +859,7 @@ function AdminMissionDetail() {
           numero,
           // Toujours portée par le volet Livraison : une seule facture pour tout le duo
           attribution_id: basis.primaryAttributionId ?? attribution.id,
-          mission_id: basis.primaryTrajetId,
+          mission_id: basis.primaryMissionId,
           client_email: trajet.client_email ?? "",
           client_nom: nom || "Client",
           client_prenom: prenom || null,
