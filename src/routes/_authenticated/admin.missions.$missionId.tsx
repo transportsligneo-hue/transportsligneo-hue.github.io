@@ -340,7 +340,7 @@ function AdminMissionDetail() {
     (async () => {
       const { data: legs } = await supabase
         .from("trajets")
-        .select("id, leg_index, leg_type, created_at")
+        .select("id, leg_index, leg_type, created_at, numero_mission")
         .eq("mission_group_id", groupId);
       const ids = (legs ?? []).map((l) => l.id);
       if (!ids.length) return;
@@ -355,14 +355,21 @@ function AdminMissionDetail() {
         if (!a.trajet_id) return;
         const leg = legById.get(a.trajet_id);
         const isAller = (leg?.leg_index ?? 1) === 1 || leg?.leg_type === "aller";
-        tabs.push({ attributionId: a.id, isAller, numero: a.numero_mission ?? null });
-        if (!a.numero_mission) return;
-        const num = stripLegSuffix(a.numero_mission);
-        if (!base || isAller || num < base) base = isAller ? num : base ?? num;
+        // Le numéro du trajet est la source de vérité (celui saisi par l'admin)
+        const raw = leg?.numero_mission ?? a.numero_mission ?? null;
+        tabs.push({
+          attributionId: a.id,
+          isAller,
+          numero: raw ? `${displayNumero(stripLegSuffix(raw))}-${isAller ? "L" : "R"}` : null,
+        });
+        if (!raw) return;
+        const num = stripLegSuffix(raw);
+        if (!base || isAller) base = num;
       });
       tabs.sort((a, b) => Number(b.isAller) - Number(a.isAller));
       if (!cancelled) { setGroupBaseNumero(base); setLegTabs(tabs); }
     })();
+
     return () => { cancelled = true; };
   }, [groupId]);
 
