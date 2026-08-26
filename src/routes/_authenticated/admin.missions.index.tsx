@@ -28,6 +28,8 @@ import {
 } from "@/components/admin/missions/MissionsTableExtras";
 import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix } from "@/lib/mission-number";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
+import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
