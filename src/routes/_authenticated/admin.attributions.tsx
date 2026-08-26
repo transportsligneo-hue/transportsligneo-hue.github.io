@@ -39,6 +39,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+import { BulkFactureDialog } from "@/components/admin/BulkFactureDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
@@ -189,6 +190,7 @@ function AdminAttributions() {
   const [reportId, setReportId] = useState<string | null>(null);
   const [expandedDocs, setExpandedDocs] = useState<string | null>(null);
   const [invoicingId, setInvoicingId] = useState<string | null>(null);
+  const [bulkFactures, setBulkFactures] = useState(false);
   const [selectedAttr, setSelectedAttr] = useState<Attribution | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [attrDetail, setAttrDetail] = useState<{ vin?: string | null; carte_grise_recto_url?: string | null; carte_grise_verso_url?: string | null; marque?: string | null; modele?: string | null; immatriculation?: string | null; client_email?: string | null; client_telephone?: string | null; prix?: number | null; numero_mission?: string | null; etape_courante?: string | null; cgRectoSigned?: string | null; cgVersoSigned?: string | null } | null>(null);
@@ -1264,6 +1266,12 @@ function AdminAttributions() {
         devisId={prixDevisId ?? undefined}
         title="Prix par véhicule — dossier groupé"
         onSaved={() => void fetchAttributions()}
+      />
+
+      <BulkFactureDialog
+        open={bulkFactures}
+        onClose={() => setBulkFactures(false)}
+        onDone={() => void fetchAttributions()}
       />
     </div>
   );
