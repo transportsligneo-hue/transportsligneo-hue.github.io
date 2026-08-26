@@ -40,7 +40,7 @@ function ClientLayout() {
     if (homeRoute !== "/dashboard-client") {
       navigate({ to: homeRoute, replace: true });
     }
-  }, [isLoading, isAuthenticated, role, typeClient, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, homeRoute, navigate]);
 
   if (isLoading) {
     return (
