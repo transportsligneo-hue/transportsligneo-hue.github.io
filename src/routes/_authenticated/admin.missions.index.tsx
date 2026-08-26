@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Zap, Fuel, CalendarDays, Layers, Archive } from "lucide-react";
+import { RefreshCw, Search, Route as RouteIcon, ArrowRight, ArrowLeftRight, ClipboardList, Receipt, Zap, Fuel, CalendarDays, Layers, Archive } from "lucide-react";
 import { MissionUnifiedPanel } from "@/components/admin/missions/MissionUnifiedPanel";
 import {
   UNIFIED_ORDER,
@@ -32,6 +32,7 @@ import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
 
 import { CreateTestMissionButton } from "@/components/admin/TestMissionActions";
+import { BulkFactureDialog } from "@/components/admin/BulkFactureDialog";
 import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
@@ -163,6 +164,7 @@ function AdminMissionsUnified() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
   const [archivedView, setArchivedView] = useState(false);
+  const [bulkFactures, setBulkFactures] = useState(false);
   const [convFilter, setConvFilter] = useState("all");
   const [payFilter, setPayFilter] = useState("all");
   const [energyFilter, setEnergyFilter] = useState("all");
@@ -659,6 +661,12 @@ function AdminMissionsUnified() {
             >
               <ClipboardList size={15} /> Attributions
             </Link>
+            <button
+              onClick={() => setBulkFactures(true)}
+              className="h-9 px-3 rounded-lg border border-[#eaeaee] bg-white flex items-center gap-1.5 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
+            >
+              <Receipt size={15} /> Factures en lot
+            </button>
             <CreateTestMissionButton onCreated={fetchAll} />
             <button onClick={fetchAll} className="w-9 h-9 rounded-lg border border-[#eaeaee] bg-white flex items-center justify-center text-[#70727d] hover:text-[#2f5fff]">
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
@@ -1103,6 +1111,8 @@ function AdminMissionsUnified() {
         }
         onSaved={fetchAll}
       />
+
+      <BulkFactureDialog open={bulkFactures} onClose={() => setBulkFactures(false)} onDone={fetchAll} />
 
       <p className="mt-4 text-[11px] text-[var(--a6-dim)] inline-flex items-center gap-1.5">
         <RouteIcon size={12} /> Les statuts fusionnent demandes, trajets et attributions : Nouvelle → À attribuer → Attribuée → En cours → Terminée / Annulée.
