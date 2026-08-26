@@ -1065,7 +1065,17 @@ function AdminMissionsUnified() {
                             ))}
                           </select>
                         )}
+                        <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
+                          <AdminPurgeButton
+                            kind={r.m.kind === "demande" ? "demande" : "trajet"}
+                            id={r.m.id}
+                            label={r.m.ref}
+                            compact
+                            onDeleted={fetchAll}
+                          />
+                        </div>
                       </td>
+
                     </tr>
                   ),
                 )}
