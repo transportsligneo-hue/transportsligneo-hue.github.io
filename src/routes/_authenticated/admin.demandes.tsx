@@ -443,11 +443,14 @@ function AdminDemandes() {
         onChanged={(updated) => { setSelected(updated); fetchDemandes(); }}
         onRefuse={(d) => setRefusing(d)}
         onDelete={async (id) => {
-          if (!(await confirmToast("Supprimer cette demande ?"))) return;
-          await supabase.from("demandes_convoyage").delete().eq("id", id);
+          if (!(await confirmToast("Supprimer définitivement cette demande et tout ce qui en découle ?"))) return;
+          const { error } = await supabase.rpc("admin_purge_demande", { _demande_id: id });
+          if (error) { toast.error("Suppression impossible", { description: error.message }); return; }
+          toast.success("Demande supprimée");
           setSelected(null);
           fetchDemandes();
         }}
+
       />
 
       <RefusDialog

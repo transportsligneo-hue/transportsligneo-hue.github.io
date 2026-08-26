@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { AdminBadgeLegend } from "@/components/admin/AdminBadgeLegend";
+import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+
 
 export const Route = createFileRoute("/_authenticated/admin/attributions")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -588,18 +590,29 @@ function AdminAttributions() {
       buttons.push({ key: "reset", label: "Réinitialiser", icon: RotateCcw, variant: "secondary", onClick: () => void updateStatut(attribution, "propose", { resetStep: true, note: "Attribution réinitialisée par l'admin" }) });
     }
 
-    return buttons.map((action) => (
-      <Button
-        key={action.key}
-        size="sm"
-        variant={action.variant}
-        icon={<action.icon size={12} />}
-        onClick={action.onClick}
-        disabled={busyAction === `${attribution.id}-${action.key}` || busyAction === `${attribution.id}-${action.key === "confirm" ? "accepte" : action.key === "refuse" ? "refusee" : action.key === "cancel" ? "annule" : action.key === "validate" ? "validee" : action.key === "reset" ? "propose" : attribution.statut}`}
-      >
-        {action.label}
-      </Button>
-    ));
+    return (
+      <>
+        {buttons.map((action) => (
+          <Button
+            key={action.key}
+            size="sm"
+            variant={action.variant}
+            icon={<action.icon size={12} />}
+            onClick={action.onClick}
+            disabled={busyAction === `${attribution.id}-${action.key}` || busyAction === `${attribution.id}-${action.key === "confirm" ? "accepte" : action.key === "refuse" ? "refusee" : action.key === "cancel" ? "annule" : action.key === "validate" ? "validee" : action.key === "reset" ? "propose" : attribution.statut}`}
+          >
+            {action.label}
+          </Button>
+        ))}
+        <AdminPurgeButton
+          kind="trajet"
+          id={attribution.trajet_id}
+          label={attribution.trajet?.depart ?? undefined}
+          onDeleted={() => { void fetchAttributions(); }}
+        />
+      </>
+    );
+
   };
 
   const viewGps = async (attributionId: string) => {

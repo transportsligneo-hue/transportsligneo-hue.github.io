@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
+import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
@@ -689,6 +691,14 @@ function AdminDevisPage() {
                   >
                     {d.archived_at ? <ArchiveRestore size={15} /> : <Archive size={15} />}
                   </button>
+                  <AdminPurgeButton
+                    kind="devis"
+                    id={d.id}
+                    label={d.numero}
+                    compact
+                    onDeleted={() => setDevis((list) => list.filter((x) => x.id !== d.id))}
+                  />
+
 
                   <select
                     className="dvx-select dvx-foot-select"
