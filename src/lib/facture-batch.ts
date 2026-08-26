@@ -4,7 +4,6 @@ import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { generateFacturePdf, type FactureData } from "@/lib/facture-pdf";
 import { stripLegSuffix } from "@/lib/mission-number";
 
-
 export interface FactureCandidate {
   /** trajet porteur (volet Livraison pour un duo) */
   trajetId: string;
@@ -36,12 +35,27 @@ interface AttrRow {
     client_nom: string | null;
     client_email: string | null;
     prix: number | null;
+    prix_client: number | null;
     mission_group_id: string | null;
     leg_index: number | null;
     leg_type: string | null;
     is_test_data: boolean | null;
+    numero_mission: string | null;
+    mission_id: string | null;
+    devis_id: string | null;
+    devis: {
+      numero: string | null;
+      prix_estime: number | null;
+      prix_aller: number | null;
+      prix_retour: number | null;
+    } | null;
   } | null;
 }
+
+const numberRoot = (numero: string | null | undefined) => {
+  const match = numero?.match(/(\d+)(?:\.\d+)?(?:-[ARL])?$/i);
+  return match?.[1] ? String(Number(match[1])) : null;
+};
 
 /**
  * Missions terminées facturables (une seule entrée par duo Livraison + Restitution).
@@ -51,13 +65,34 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   const { data, error } = await supabase
     .from("attributions")
     .select(
-      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, mission_group_id, leg_index, leg_type, is_test_data)"
+      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, devis:devis(numero, prix_estime, prix_aller, prix_retour))",
     )
     .in("statut", ["termine", "validee"])
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
 
-  const rows = ((data ?? []) as unknown as AttrRow[]).filter((r) => !r.trajet?.is_test_data);
+  const allRows = ((data ?? []) as unknown as AttrRow[]).filter(
+    (r) => !r.trajet?.is_test_data,
+  );
+
+  // Un ancien trajet peut subsister après la recréation d'une mission depuis le même devis
+  // (#053 puis #083, par exemple). Quand le numéro canonique du devis existe, les anciennes
+  // copies décalées ne doivent jamais réapparaître dans la facturation en lot.
+  const canonicalDevisRoots = new Map<string, string>();
+  allRows.forEach((r) => {
+    const devisId = r.trajet?.devis_id;
+    const devisRoot = numberRoot(r.trajet?.devis?.numero);
+    const missionRoot = numberRoot(r.trajet?.numero_mission);
+    if (devisId && devisRoot && missionRoot === devisRoot)
+      canonicalDevisRoots.set(devisId, devisRoot);
+  });
+  const rows = allRows.filter((r) => {
+    const devisId = r.trajet?.devis_id;
+    const canonicalRoot = devisId ? canonicalDevisRoots.get(devisId) : null;
+    return (
+      !canonicalRoot || numberRoot(r.trajet?.numero_mission) === canonicalRoot
+    );
+  });
 
   // Dé-doublonnage duo : on garde le volet Livraison (leg 1) comme porteur.
   // Clé : mission_group_id, sinon numéro de mission sans suffixe -L / -R.
@@ -69,24 +104,45 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
     const key = keyOf(r);
     const prev = byGroup.get(key);
     if (!prev) return void byGroup.set(key, r);
-    const legOf = (x: AttrRow) => x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1);
+    const legOf = (x: AttrRow) =>
+      x.trajet?.leg_index ?? (x.trajet?.leg_type === "retour" ? 2 : 1);
     if (legOf(r) < legOf(prev)) byGroup.set(key, r);
   });
   // Plus récentes en premier (date de mission, à défaut date de création)
-  const tsOf = (r: AttrRow) => new Date(r.trajet?.date_trajet ?? r.created_at).getTime();
+  const tsOf = (r: AttrRow) =>
+    new Date(r.trajet?.date_trajet ?? r.created_at).getTime();
   const kept = Array.from(byGroup.values()).sort((a, b) => tsOf(b) - tsOf(a));
 
-
-  const attrIds = kept.map((r) => r.id);
-  const trajetIds = kept.map((r) => r.trajet_id);
-  const factures = new Map<string, { id: string; numero: string; reference_client: string | null; reference_label: string | null }>();
+  const attrIds = rows.map((r) => r.id);
+  const missionIds = kept
+    .map((r) => r.trajet?.mission_id)
+    .filter((id): id is string => !!id);
+  const factures = new Map<
+    string,
+    {
+      id: string;
+      numero: string;
+      reference_client: string | null;
+      reference_label: string | null;
+    }
+  >();
   if (attrIds.length) {
-    const { data: fac } = await supabase
+    const query = supabase
       .from("factures")
-      .select("id, numero, attribution_id, mission_id, reference_client, reference_label")
-      .or(`attribution_id.in.(${attrIds.join(",")}),mission_id.in.(${trajetIds.join(",")})`);
+      .select(
+        "id, numero, attribution_id, mission_id, reference_client, reference_label",
+      );
+    const filters = [`attribution_id.in.(${attrIds.join(",")})`];
+    if (missionIds.length)
+      filters.push(`mission_id.in.(${missionIds.join(",")})`);
+    const { data: fac } = await query.or(filters.join(","));
     (fac ?? []).forEach((f) => {
-      const rec = { id: f.id as string, numero: f.numero as string, reference_client: (f.reference_client as string) ?? null, reference_label: (f.reference_label as string) ?? null };
+      const rec = {
+        id: f.id as string,
+        numero: f.numero as string,
+        reference_client: (f.reference_client as string) ?? null,
+        reference_label: (f.reference_label as string) ?? null,
+      };
       if (f.attribution_id) factures.set(`a:${f.attribution_id}`, rec);
       if (f.mission_id) factures.set(`m:${f.mission_id}`, rec);
     });
@@ -95,18 +151,44 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   return kept.map((r) => {
     const t = r.trajet;
     const grouped = rows.filter((x) => keyOf(x) === keyOf(r));
-    const fac = factures.get(`a:${r.id}`) ?? factures.get(`m:${r.trajet_id}`) ?? null;
+    const hasLegs = grouped.some(
+      (x) => x.trajet?.leg_type === "aller" || x.trajet?.leg_type === "retour",
+    );
+    const billableLegs = hasLegs
+      ? grouped.filter(
+          (x) =>
+            x.trajet?.leg_type === "aller" || x.trajet?.leg_type === "retour",
+        )
+      : grouped;
+    const segmentTotal = billableLegs.reduce(
+      (sum, x) => sum + Number(x.trajet?.prix_client ?? x.trajet?.prix ?? 0),
+      0,
+    );
+    const devis = t?.devis;
+    const devisParts =
+      Number(devis?.prix_aller ?? 0) + Number(devis?.prix_retour ?? 0);
+    const devisTotal = Math.max(Number(devis?.prix_estime ?? 0), devisParts);
+    const fac =
+      billableLegs
+        .map((leg) => factures.get(`a:${leg.id}`))
+        .find((invoice) => !!invoice) ??
+      (t?.mission_id ? factures.get(`m:${t.mission_id}`) : null) ??
+      null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
-      numeroMission: r.numero_mission ? stripLegSuffix(r.numero_mission) : (t?.date_trajet ?? null),
+      numeroMission: t?.numero_mission
+        ? stripLegSuffix(t.numero_mission)
+        : r.numero_mission
+          ? stripLegSuffix(r.numero_mission)
+          : null,
 
       clientLabel: t?.client_nom || t?.client_email || "Client",
       clientEmail: t?.client_email ?? null,
       itineraire: `${t?.depart ?? "—"} → ${t?.arrivee ?? "—"}`,
       dateMission: t?.date_trajet ?? null,
-      montantTtc: Number(t?.prix ?? 0),
-      isGroup: grouped.length > 1,
+      montantTtc: Math.round(Math.max(devisTotal, segmentTotal) * 100) / 100,
+      isGroup: billableLegs.length > 1,
       factureId: fac?.id ?? null,
       factureNumero: fac?.numero ?? null,
       referenceClient: fac?.reference_client ?? null,
@@ -180,27 +262,57 @@ export function factureRowToPdfData(row: FactureRow): FactureData {
 export async function ensureFacture(
   trajetId: string,
   attributionId: string | null,
-  po: { referenceClient?: string | null; referenceLabel?: string | null } = {}
+  po: { referenceClient?: string | null; referenceLabel?: string | null } = {},
 ): Promise<{ row: FactureRow; created: boolean }> {
   const basis = await resolveGroupInvoiceBasis(trajetId);
   const refClient = (po.referenceClient ?? "").trim() || null;
-  const refLabel = refClient ? (po.referenceLabel || "Référence client") : (po.referenceLabel ?? null);
+  const refLabel = refClient
+    ? po.referenceLabel || "Référence client"
+    : (po.referenceLabel ?? null);
+  const { regime, vatRate } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+  const basisTtc = Number(basis.totalTtc ?? 0);
+  const basisHt = micro
+    ? basisTtc
+    : basisTtc > 0
+      ? basisTtc / (1 + vatRate / 100)
+      : 0;
+  const basisTva = +(basisTtc - basisHt).toFixed(2);
 
   if (basis.existing) {
-    if (refClient) {
-      await supabase
-        .from("factures")
-        .update({ reference_client: refClient, reference_label: refLabel })
-        .eq("id", basis.existing.id);
-    }
-    const { data, error } = await supabase.from("factures").select("*").eq("id", basis.existing.id).single();
-    if (error || !data) throw new Error(error?.message || "Facture introuvable");
+    const priceCorrections = {
+      prix_ht: +basisHt.toFixed(2),
+      prix_tva: basisTva,
+      prix_ttc: basisTtc,
+      tva_taux: micro ? 0 : vatRate,
+    };
+    const corrections = refClient
+      ? {
+          ...priceCorrections,
+          reference_client: refClient,
+          reference_label: refLabel,
+        }
+      : priceCorrections;
+    const { error: updateError } = await supabase
+      .from("factures")
+      .update(corrections)
+      .eq("id", basis.existing.id);
+    if (updateError) throw new Error(updateError.message);
+    const { data, error } = await supabase
+      .from("factures")
+      .select("*")
+      .eq("id", basis.existing.id)
+      .single();
+    if (error || !data)
+      throw new Error(error?.message || "Facture introuvable");
     return { row: data as unknown as FactureRow, created: false };
   }
 
   const { data: trajet, error: tErr } = await supabase
     .from("trajets")
-    .select("id, depart, arrivee, date_trajet, client_email, client_nom, prix, devis_id, demande_id")
+    .select(
+      "id, depart, arrivee, date_trajet, client_email, client_nom, prix, devis_id, demande_id",
+    )
     .eq("id", trajetId)
     .maybeSingle();
   if (tErr || !trajet) throw new Error("Trajet introuvable");
@@ -209,21 +321,37 @@ export async function ensureFacture(
   let clientEmail = (trajet.client_email ?? "").trim();
   let clientNom = trajet.client_nom ?? "";
   if (!clientEmail && trajet.devis_id) {
-    const { data: dv } = await supabase.from("devis").select("email, nom, prenom").eq("id", trajet.devis_id).maybeSingle();
+    const { data: dv } = await supabase
+      .from("devis")
+      .select("email, nom, prenom")
+      .eq("id", trajet.devis_id)
+      .maybeSingle();
     if (dv?.email) clientEmail = dv.email;
-    if (!clientNom && dv) clientNom = `${dv.prenom ?? ""} ${dv.nom ?? ""}`.trim();
+    if (!clientNom && dv)
+      clientNom = `${dv.prenom ?? ""} ${dv.nom ?? ""}`.trim();
   }
   if (!clientEmail && trajet.demande_id) {
-    const { data: dc } = await supabase.from("demandes_convoyage").select("email, nom, prenom").eq("id", trajet.demande_id).maybeSingle();
+    const { data: dc } = await supabase
+      .from("demandes_convoyage")
+      .select("email, nom, prenom")
+      .eq("id", trajet.demande_id)
+      .maybeSingle();
     if (dc?.email) clientEmail = dc.email;
-    if (!clientNom && dc) clientNom = `${dc.prenom ?? ""} ${dc.nom ?? ""}`.trim();
+    if (!clientNom && dc)
+      clientNom = `${dc.prenom ?? ""} ${dc.nom ?? ""}`.trim();
   }
-  if (!clientEmail) throw new Error("Email client introuvable — renseignez l'email sur la mission");
+  if (!clientEmail)
+    throw new Error(
+      "Email client introuvable — renseignez l'email sur la mission",
+    );
 
-  const prixTTC = basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
-  const { regime, vatRate } = await fetchActiveRegime();
-  const micro = regime !== "societe";
-  const prixHT = micro ? prixTTC : prixTTC > 0 ? prixTTC / (1 + vatRate / 100) : 0;
+  const prixTTC =
+    basis.totalTtc > 0 ? basis.totalTtc : Number(trajet.prix ?? 0);
+  const prixHT = micro
+    ? prixTTC
+    : prixTTC > 0
+      ? prixTTC / (1 + vatRate / 100)
+      : 0;
   const prixTVA = +(prixTTC - prixHT).toFixed(2);
 
   const today = new Date();
@@ -260,7 +388,8 @@ export async function ensureFacture(
     })
     .select("*")
     .single();
-  if (iErr || !inserted) throw new Error(iErr?.message || "Insertion impossible");
+  if (iErr || !inserted)
+    throw new Error(iErr?.message || "Insertion impossible");
   return { row: inserted as unknown as FactureRow, created: true };
 }
 
