@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
+import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
   component: AdminDevisPage,
