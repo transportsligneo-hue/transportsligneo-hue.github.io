@@ -983,8 +983,15 @@ function AdminMissionDetail() {
     );
   }
 
-  const missionNumber = attribution.numero_mission
-    ? attribution.numero_mission
+  // Source de vérité : le numéro porté par le trajet (dernier numéro saisi par l'admin),
+  // avec repli sur l'attribution puis sur la référence dérivée.
+  const canonicalNumero = trajet.numero_mission ?? attribution.numero_mission ?? null;
+  const missionNumber = canonicalNumero
+    ? trajet.mission_group_id
+      ? `${displayNumero(stripLegSuffix(canonicalNumero))}-${
+          trajet.leg_type === "retour" || trajet.leg_index === 2 ? "R" : "L"
+        }`
+      : displayNumero(canonicalNumero)
     : trajet.mission_group_id
     ? displayTrajetRef({
         id: trajet.id,
@@ -992,9 +999,10 @@ function AdminMissionDetail() {
         groupId: trajet.mission_group_id,
         isRoundTrip: true,
         legType: trajet.leg_type,
-        baseNumero: groupBaseNumero ?? attribution.numero_mission,
+        baseNumero: groupBaseNumero,
       })
     : missionNumberOf(attribution);
+
   const missionPv = pvOf(pvMap, attribution.id);
   const isB2B = !!trajet.client_nom && trajet.client_nom.length > 0; // simple heuristique
   const lastUpdate = new Date(attribution.updated_at).toLocaleString("fr-FR", {
