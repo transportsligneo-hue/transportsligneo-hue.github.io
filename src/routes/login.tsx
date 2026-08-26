@@ -24,13 +24,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const {
     login,
-    logout,
     isAuthenticated,
     isLoading,
     isInitializing,
-    role,
-    convoyeurStatut,
-    typeClient,
     homeRoute,
   } = useAuth();
   const navigate = useNavigate();
@@ -53,7 +49,6 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const justLoggedInRef = useRef(false);
-  const submittedTabRef = useRef<Tab>("client");
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const userTypedRef = useRef(false);
@@ -67,7 +62,7 @@ function LoginPage() {
     // Le rôle et l'organisation font foi. L'onglet choisi ne doit jamais
     // pouvoir envoyer un admin, une flotte ou un partenaire dans un autre espace.
     navigate({ to: homeRoute });
-  }, [isAuthenticated, isLoading, isInitializing, role, convoyeurStatut, typeClient, homeRoute, navigate, logout]);
+  }, [isAuthenticated, isLoading, isInitializing, homeRoute, navigate]);
 
   const handleSubmit = async (e?: FormEvent, override?: { email: string; password: string }) => {
     e?.preventDefault();
@@ -76,7 +71,6 @@ function LoginPage() {
 
     setError("");
     setSubmitting(true);
-    submittedTabRef.current = tab;
     justLoggedInRef.current = true;
     try {
       try {
