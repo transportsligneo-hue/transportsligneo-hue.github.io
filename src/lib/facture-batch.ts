@@ -280,16 +280,19 @@ export async function ensureFacture(
   const basisTva = +(basisTtc - basisHt).toFixed(2);
 
   if (basis.existing) {
-    const corrections: Record<string, string | number | null> = {
+    const priceCorrections = {
       prix_ht: +basisHt.toFixed(2),
       prix_tva: basisTva,
       prix_ttc: basisTtc,
       tva_taux: micro ? 0 : vatRate,
     };
-    if (refClient) {
-      corrections.reference_client = refClient;
-      corrections.reference_label = refLabel;
-    }
+    const corrections = refClient
+      ? {
+          ...priceCorrections,
+          reference_client: refClient,
+          reference_label: refLabel,
+        }
+      : priceCorrections;
     const { error: updateError } = await supabase
       .from("factures")
       .update(corrections)
