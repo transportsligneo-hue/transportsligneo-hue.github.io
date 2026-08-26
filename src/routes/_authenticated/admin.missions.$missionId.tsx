@@ -346,7 +346,7 @@ function AdminMissionDetail() {
       if (!ids.length) return;
       const { data: attrs } = await supabase
         .from("attributions")
-        .select("id, trajet_id, numero_mission")
+        .select("id, trajet_id, numero_mission, created_at")
         .in("trajet_id", ids);
       const legById = new Map((legs ?? []).map((l) => [l.id, l]));
       let base: string | null = null;
@@ -609,9 +609,9 @@ function AdminMissionDetail() {
       );
       const { data: sibAttrs } = await supabase
         .from("attributions")
-        .select("id, trajet_id, numero_mission")
+        .select("id, trajet_id, numero_mission, created_at")
         .in("trajet_id", rows.map((r) => r.id));
-      const attrRows = (sibAttrs ?? []) as { id: string; trajet_id: string; numero_mission: string | null }[];
+      const attrRows = (sibAttrs ?? []) as { id: string; trajet_id: string; numero_mission: string | null; created_at: string }[];
       for (const r of rows) {
         const a = attrRows.find((x) => x.trajet_id === r.id);
         if (!a) continue;
