@@ -99,6 +99,9 @@ interface AttributionFull {
 
 interface TrajetFull {
   id: string;
+  numero_mission?: string | null;
+  leg_index?: number | null;
+
   depart: string;
   arrivee: string;
   date_trajet: string | null;
