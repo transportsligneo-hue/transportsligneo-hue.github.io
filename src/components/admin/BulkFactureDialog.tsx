@@ -194,7 +194,7 @@ export function BulkFactureDialog({ open, onClose, onDone, preselectTrajetIds }:
                       />
                       <div className="min-w-[180px] flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[13px] font-semibold text-[#0b1026]">{r.numeroMission ?? "Mission"}</span>
+                          <span className="text-[13px] font-semibold text-[#0b1026]">{r.numeroMission ?? "Mission sans numéro"}</span>
                           {r.isGroup && <span className="rounded-full bg-[#eef3ff] px-2 py-0.5 text-[10px] font-semibold text-[#2F5FFF]">Duo L + R</span>}
                           {r.factureNumero && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">

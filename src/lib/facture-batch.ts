@@ -181,7 +181,7 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
         ? stripLegSuffix(t.numero_mission)
         : r.numero_mission
           ? stripLegSuffix(r.numero_mission)
-          : (t?.date_trajet ?? null),
+          : null,
 
       clientLabel: t?.client_nom || t?.client_email || "Client",
       clientEmail: t?.client_email ?? null,
