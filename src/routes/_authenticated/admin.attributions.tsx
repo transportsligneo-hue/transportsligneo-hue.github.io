@@ -858,7 +858,11 @@ function AdminAttributions() {
         actions={
           <>
             <CreateTestMissionButton onCreated={() => { fetchOptions(); fetchAttributions(); }} />
+            <Button icon={<Receipt size={14} />} onClick={() => setBulkFactures(true)}>
+              Factures en lot
+            </Button>
             <Button
+
               icon={<Plus size={14} />}
               onClick={() => {
                 fetchOptions();
