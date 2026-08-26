@@ -57,6 +57,8 @@ interface TrajetRow {
   marge_indicative_pct: number | null; type_mission: string | null; numero_mission: string | null;
   lot_id: string | null; lot_reference: string | null;
   archived_at: string | null;
+  commande_ref: string | null;
+
 }
 
 interface DemandeRow {
