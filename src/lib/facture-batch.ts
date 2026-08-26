@@ -177,10 +177,11 @@ export async function ensureFacture(
   const refLabel = refClient ? (po.referenceLabel || "Référence client") : (po.referenceLabel ?? null);
 
   if (basis.existing) {
-    const patch: Record<string, unknown> = {};
-    if (refClient) { patch.reference_client = refClient; patch.reference_label = refLabel; }
-    if (Object.keys(patch).length) {
-      await supabase.from("factures").update(patch).eq("id", basis.existing.id);
+    if (refClient) {
+      await supabase
+        .from("factures")
+        .update({ reference_client: refClient, reference_label: refLabel })
+        .eq("id", basis.existing.id);
     }
     const { data, error } = await supabase.from("factures").select("*").eq("id", basis.existing.id).single();
     if (error || !data) throw new Error(error?.message || "Facture introuvable");
