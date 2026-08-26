@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Download, Mail, FileArchive, X } from "lucide-react";
+import { Loader2, Download, Mail, FileArchive, X, Paperclip, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -10,8 +10,8 @@ interface Props {
   onClose: () => void;
   /** Numéro de mission affiché et utilisé pour le nom du fichier. */
   numero: string;
-  /** Construit le PDF compilé (couverture + EDL + PV + carte grise). */
-  buildPdf: () => Promise<Blob>;
+  /** Construit le PDF compilé (couverture + EDL + PV + carte grise + pièces jointes). */
+  buildPdf: (attachments: File[]) => Promise<Blob>;
   /** Adresses proposées en un clic. */
   suggestions?: { label: string; email: string }[];
 }
@@ -29,6 +29,7 @@ const blobToBase64 = (blob: Blob) =>
 
 export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggestions = [] }: Props) {
   const [blob, setBlob] = useState<Blob | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [building, setBuilding] = useState(false);
   const [sending, setSending] = useState(false);
   const [to, setTo] = useState("");
@@ -37,13 +38,15 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
     `Bonjour,\n\nVeuillez trouver ci-joint le dossier complet de la mission ${numero} : état des lieux départ et arrivée, PV de livraison signé et documents du véhicule.\n\nBien cordialement,\nTransports Ligneo`,
   );
 
+  const [rebuildKey, setRebuildKey] = useState(0);
+
   useEffect(() => {
     if (!open) return;
     setSubject(`Dossier complet — mission ${numero}`);
     let cancelled = false;
     setBuilding(true);
     setBlob(null);
-    buildPdf()
+    buildPdf(attachments)
       .then((b) => {
         if (!cancelled) setBlob(b);
       })
@@ -57,7 +60,7 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, numero]);
+  }, [open, numero, rebuildKey]);
 
   if (!open) return null;
 
@@ -119,7 +122,7 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
             <div>
               <h3 className="text-sm font-semibold">Dossier complet — {numero}</h3>
               <p className="text-xs text-white/50">
-                Couverture, état des lieux, PV de livraison signé et carte grise si disponible.
+                Couverture, état des lieux (aller + retour pour les duos), PV signé, carte grise et pièces jointes.
               </p>
             </div>
           </div>
@@ -138,6 +141,55 @@ export function MissionDossierDialog({ open, onClose, numero, buildPdf, suggesti
           ) : (
             <span className="text-red-400">Dossier indisponible.</span>
           )}
+        </div>
+
+        <div className="mb-4 rounded-xl border border-white/10 bg-white/5 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-white/50">
+              <Paperclip size={12} /> Pièces jointes (PV, PDF, photos)
+            </span>
+            <label className="cursor-pointer rounded-lg border border-white/15 px-2.5 py-1 text-[11px] text-white/80 hover:border-[#2F5FFF] hover:text-white">
+              Ajouter
+              <input
+                type="file"
+                multiple
+                accept="application/pdf,image/jpeg,image/png"
+                className="hidden"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (files.length) setAttachments((prev) => [...prev, ...files]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+          {attachments.length === 0 ? (
+            <p className="text-[11px] text-white/40">Aucune pièce jointe. Les PDF et images ajoutés seront placés à la fin du dossier.</p>
+          ) : (
+            <ul className="space-y-1">
+              {attachments.map((f, i) => (
+                <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2 py-1 text-[11px] text-white/80">
+                  <span className="truncate">{f.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachments((prev) => prev.filter((_, k) => k !== i))}
+                    className="rounded p-1 text-white/50 hover:bg-white/10 hover:text-red-300"
+                    aria-label={`Retirer ${f.name}`}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <button
+            type="button"
+            onClick={() => setRebuildKey((k) => k + 1)}
+            disabled={building}
+            className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[#2F5FFF]/50 px-2.5 py-1 text-[11px] font-semibold text-[#8fb0ff] hover:bg-[#2F5FFF]/10 disabled:opacity-50"
+          >
+            <RefreshCw size={12} className={building ? "animate-spin" : ""} /> Regénérer le dossier
+          </button>
         </div>
 
         <div className="space-y-3">
