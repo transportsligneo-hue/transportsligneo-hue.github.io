@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
+import { sendTransactionalEmailServer } from '@/server/email-send'
 
 /**
  * Alerte quotidienne "documents véhicules à renouveler" (espace Flotte).
@@ -93,7 +94,6 @@ export const Route = createFileRoute('/api/public/alertes-documents-vehicules')(
         }
 
         const today = new Date().toISOString().slice(0, 10)
-        const origin = new URL(request.url).origin
         let sent = 0
 
         for (const [orgId, documents] of byOrg) {
