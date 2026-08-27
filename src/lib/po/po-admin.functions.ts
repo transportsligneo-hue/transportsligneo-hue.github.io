@@ -87,13 +87,28 @@ export const linkPoToDevis = createServerFn({ method: "POST" })
       .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
       .eq("id", devis.id);
 
+    const { data: po } = await supabaseAdmin
+      .from("bons_commande").select("numero_po, vin").eq("id", data.poId).single();
+
+    let applied = { trajets: 0 };
+    if (po?.numero_po) {
+      const { applyPoToOperations } = await import("@/lib/po/po-sync.server");
+      applied = await applyPoToOperations(
+        supabaseAdmin,
+        po.numero_po as string,
+        devis.id as string,
+        (po.vin as string | null) ?? null,
+      );
+    }
+
     await supabaseAdmin.from("po_import_logs").insert({
-      numero_po: data.poId, resultat: "rapproche_manuel",
-      details: { devis: devis.numero },
+      numero_po: (po?.numero_po as string | null) ?? null, resultat: "rapproche_manuel",
+      details: { devis: devis.numero, missions_mises_a_jour: applied.trajets },
     } as never);
 
-    return { ok: true };
+    return { ok: true, missions: applied.trajets };
   });
+
 
 /** Détache un PO d'un devis (erreur de rapprochement). */
 export const unlinkPo = createServerFn({ method: "POST" })
