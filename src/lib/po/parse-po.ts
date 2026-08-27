@@ -17,6 +17,9 @@ export type ParsedPo = {
   date_livraison: string | null;
   destinataire: string | null;
   emetteur: string | null;
+  adresse_livraison?: string | null;
+  contact_livraison?: string | null;
+  designation?: string | null;
 };
 
 const PO_RE = /\b45\d{8}\b/;
