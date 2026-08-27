@@ -170,10 +170,14 @@ export const getPoForRecord = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PoRow | null> => {
     await verifyAdminAccess();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let query = supabaseAdmin.from("bons_commande").select("*").limit(1);
-    if (data.devisId) query = query.eq("devis_id", data.devisId);
-    else if (data.missionId) query = query.eq("mission_id", data.missionId);
-    else return null;
-    const { data: rows } = await query;
+    const filters: string[] = [];
+    if (data.devisId) filters.push(`devis_id.eq.${data.devisId}`);
+    if (data.missionId) filters.push(`mission_id.eq.${data.missionId}`);
+    if (!filters.length) return null;
+    const { data: rows } = await supabaseAdmin
+      .from("bons_commande")
+      .select("*")
+      .or(filters.join(","))
+      .limit(1);
     return ((rows ?? [])[0] as unknown as PoRow) ?? null;
   });

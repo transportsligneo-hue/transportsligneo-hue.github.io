@@ -1335,7 +1335,7 @@ function AdminMissionDetail() {
       />
 
       <div className="mb-4">
-        <PoLinkCard missionId={trajet.mission_id ?? undefined} />
+        <PoLinkCard missionId={trajet.mission_id ?? undefined} devisId={trajet.devis_id ?? undefined} />
       </div>
 
       <MissionPriceCard
