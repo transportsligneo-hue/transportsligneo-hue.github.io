@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
+import { isValidVinFormat, normalizeVin } from "@/lib/vin";
 import { lookupPlate } from "@/lib/plate.functions";
 import PlacesInput from "@/components/PlacesInput";
 import {
@@ -167,7 +168,7 @@ function GroupedMissionForm() {
       const patch: Partial<VehicleRow> = {};
       if (d.marque) patch.marque = d.marque;
       if (d.modele) patch.modele = d.modele;
-      if (d.vin) patch.vin = d.vin;
+      if (d.vin) patch.vin = normalizeVin(d.vin);
       if (d.carburant) {
         const c = d.carburant.toLowerCase();
         if (c.includes("élec") || c.includes("elec") || c.includes("ev")) patch.energie = "electrique";
@@ -242,7 +243,11 @@ function GroupedMissionForm() {
     !!heure &&
     filledRows.length > 0 &&
     rows.every((r) => (r.immat.trim() ? destFor(r).trim().length >= 2 : true)) &&
+    // VIN obligatoire et valide pour chaque véhicule (rapprochement automatique des bons de commande)
+    filledRows.every((r) => isValidVinFormat(r.vin)) &&
     !submitting;
+
+  const invalidVinRows = filledRows.filter((r) => !isValidVinFormat(r.vin));
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -259,7 +264,7 @@ function GroupedMissionForm() {
           vehicles: filledRows.map((r) => ({
             vehicleId: null,
             immatriculation: r.immat.trim().toUpperCase(),
-            vin: r.vin || null,
+            vin: normalizeVin(r.vin),
             marque: r.marque || null,
             modele: r.modele || null,
             energie: r.energie || null,
@@ -465,7 +470,18 @@ function GroupedMissionForm() {
                 {r.open && (
                   <div className="mt-3 border-t border-slate-200 pt-3 space-y-2.5">
                     <div className="grid gap-2.5 sm:grid-cols-3">
-                      <input className={fieldCls} value={r.vin} onChange={(e) => patchRow(r.key, { vin: e.target.value })} placeholder="VIN / Châssis" />
+                      <div>
+                        <input
+                          className={`${fieldCls} uppercase tracking-widest ${r.vin && !isValidVinFormat(r.vin) ? "border-red-400" : ""}`}
+                          value={r.vin}
+                          maxLength={17}
+                          onChange={(e) => patchRow(r.key, { vin: normalizeVin(e.target.value) })}
+                          placeholder="VIN / Châssis (obligatoire)"
+                        />
+                        {r.vin.length > 0 && !isValidVinFormat(r.vin) && (
+                          <p className="mt-1 text-[11px] text-red-500">VIN invalide — 17 caractères, hors I/O/Q</p>
+                        )}
+                      </div>
                       <input className={fieldCls} value={r.km} onChange={(e) => patchRow(r.key, { km: e.target.value.replace(/\D/g, "") })} placeholder="Kilométrage" inputMode="numeric" />
                       <input className={fieldCls} value={r.notes} onChange={(e) => patchRow(r.key, { notes: e.target.value })} placeholder="Notes véhicule" />
                     </div>
