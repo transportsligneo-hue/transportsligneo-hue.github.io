@@ -20,6 +20,7 @@ import { logPoEvent } from "@/lib/po-history";
 import { supabase } from "@/integrations/supabase/client";
 
 const PO_LABELS = [
+  "N° de PO",
   "Référence client",
   "N° de commande",
   "N° BC",
@@ -68,7 +69,7 @@ export function BulkFactureDialog({
         list.forEach((r) => {
           nextPo[r.trajetId] = {
             ref: r.referenceClient ?? "",
-            label: r.referenceLabel ?? "Référence client",
+            label: r.referenceLabel ?? "N° de PO",
           };
         });
         setPo(nextPo);
@@ -297,7 +298,7 @@ export function BulkFactureDialog({
                 const on = !!checked[r.trajetId];
                 const entry = po[r.trajetId] ?? {
                   ref: "",
-                  label: "Référence client",
+                  label: "N° de PO",
                 };
                 return (
                   <div

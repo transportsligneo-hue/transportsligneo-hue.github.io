@@ -245,7 +245,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCES", refX, blockTop + 8);
   const refs: [string, string][] = [];
-  if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° commande", f.reference_client.trim()]);
+  if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° de PO", f.reference_client.trim()]);
   if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}`]);
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   if (vehLabel) refs.push(["Véhicule", `${vehLabel}${f.vehicule_immatriculation ? ` (${f.vehicule_immatriculation})` : ""}`]);
@@ -341,7 +341,22 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
+
+  // N° de PO mis en avant, à gauche du bloc "TOTAL NET À PAYER"
+  const poRefMain = f.reference_client?.trim();
+  const poLabelMain = f.reference_label?.trim() || "N° de PO";
+  if (poRefMain) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text(poLabelMain.toUpperCase(), M, y + 4);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...NAVY);
+    doc.text(poRefMain, M, y + 11.5);
+  }
   y += 18;
+
 
   // ===== Statut / modalités / signature =====
   const fh = 22;
@@ -384,21 +399,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...(isPaid ? GREEN : GOLD));
   doc.text(isPaid ? "PAYÉE" : "À RÉGLER", M + sw, blockY);
 
-  // Rappel N° de PO (bloc règlement)
-  const poRef = f.reference_client?.trim();
-  const poLabel = f.reference_label?.trim() || "N° de PO";
-  let modY = blockY + 8;
-  if (poRef) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text(`${poLabel} : `, M, modY);
-    const pw = doc.getTextWidth(`${poLabel} : `);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...GOLD);
-    doc.text(poRef, M + pw, modY);
-    modY += 6;
-  }
+  const modY = blockY + 8;
+
 
   // Modalités
   doc.setFont("helvetica", "bold");
