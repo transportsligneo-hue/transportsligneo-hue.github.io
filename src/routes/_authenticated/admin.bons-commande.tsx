@@ -193,7 +193,11 @@ function PoCard({ po, onChanged }: { po: PoRow; onChanged: () => Promise<void> }
             {po.montant_ht != null && ` · ${po.montant_ht.toFixed(2)} € HT`}
             {po.date_livraison && ` · Livraison ${new Date(po.date_livraison).toLocaleDateString("fr-FR")}`}
           </p>
-          {po.destinataire && <p className="text-xs text-muted-foreground mt-0.5">{po.destinataire}</p>}
+          {po.designation && <p className="text-xs text-foreground/80 mt-1">{po.designation}</p>}
+          {po.adresse_livraison && (
+            <p className="text-xs text-muted-foreground mt-0.5">Livraison&nbsp;: {po.adresse_livraison}</p>
+          )}
+          {po.destinataire && <p className="text-[11px] text-muted-foreground/70 mt-0.5">Fournisseur&nbsp;: {po.destinataire}</p>}
           {po.email_subject && <p className="text-[11px] text-muted-foreground/70 mt-1">✉ {po.email_subject}</p>}
         </div>
         <div className="flex gap-2">
