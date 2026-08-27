@@ -341,7 +341,22 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(11);
   doc.setTextColor(...GOLD_SOFT);
   doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
+
+  // N° de PO mis en avant, à gauche du bloc "TOTAL NET À PAYER"
+  const poRefMain = f.reference_client?.trim();
+  const poLabelMain = f.reference_label?.trim() || "N° de PO";
+  if (poRefMain) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...MUTED);
+    doc.text(poLabelMain.toUpperCase(), M, y + 4);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...NAVY);
+    doc.text(poRefMain, M, y + 11.5);
+  }
   y += 18;
+
 
   // ===== Statut / modalités / signature =====
   const fh = 22;
