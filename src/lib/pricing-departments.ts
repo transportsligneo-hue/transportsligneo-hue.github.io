@@ -480,8 +480,12 @@ export function resolveLocalDeptTariff(
   if (!entry) return null;
 
   const bothAgglo = zDep.inAgglo && zArr.inAgglo;
-  const simple = bothAgglo ? 79 : 99;
-  const retour = 129;
+  // Indre-et-Loire (37) : grille dédiée — 70 € intra-agglo Tours / 120 € A-R,
+  // 90 € hors agglo / 130 € A-R. Autres départements : grille standard.
+  const isDept37 = zDep.dept === "37";
+  const simple = isDept37 ? (bothAgglo ? 70 : 90) : bothAgglo ? 79 : 99;
+  const retour = isDept37 ? (bothAgglo ? 120 : 130) : 129;
+
   const label = bothAgglo
     ? `Forfait ${entry.city} (agglomération)`
     : `Forfait département ${zDep.dept} — hors agglomération`;
