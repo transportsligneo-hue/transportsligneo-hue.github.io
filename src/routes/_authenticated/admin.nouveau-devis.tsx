@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { PageHeader, Card, Button } from "@/components/admin/AdminUI";
 import { generateDevisPdf, downloadDevisPdf, type DevisData } from "@/lib/devis-pdf";
+import { isValidVinFormat, normalizeVin, validateVin } from "@/lib/vin";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
@@ -343,7 +344,7 @@ function AdminNouveauDevisPage() {
         patchVeh(line.key, {
           marque: d.marque || line.marque,
           modele: d.modele || line.modele,
-          vin: d.vin ? d.vin.toUpperCase() : line.vin,
+          vin: d.vin ? normalizeVin(d.vin) : line.vin,
           msg: `Trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
         });
       }
@@ -393,7 +394,7 @@ function AdminNouveauDevisPage() {
     immatriculation: v.immat.trim().toUpperCase() || null,
     marque: v.marque.trim() || null,
     modele: v.modele.trim() || null,
-    vin: v.vin.trim().toUpperCase() || null,
+    vin: normalizeVin(v.vin) || null,
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
@@ -504,12 +505,12 @@ function AdminNouveauDevisPage() {
           marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
           modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
           immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,
-          vin: (isGroupe ? groupPayload[0]?.vin : vin.trim().toUpperCase()) || null,
+          vin: (isGroupe ? groupPayload[0]?.vin : normalizeVin(vin)) || null,
           vehicules: isGroupe ? groupPayload : null,
           marque_retour: isAllerRetour ? vehiculeRetour || null : null,
           modele_retour: isAllerRetour ? modeleRetour || null : null,
           immatriculation_retour: isAllerRetour ? immatRetour.trim().toUpperCase() || null : null,
-          vin_retour: isAllerRetour ? vinRetour.trim().toUpperCase() || null : null,
+          vin_retour: isAllerRetour ? normalizeVin(vinRetour) || null : null,
           depart_retour: isAllerRetour ? (departRetour.trim() || arrivee.trim()) : null,
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: optionTrajetLabel,
@@ -975,7 +976,7 @@ function AdminNouveauDevisPage() {
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="VIN" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: x.toUpperCase() })} placeholder="VF3XXXXXXXXXXXXXX" />
+                      <Field label="VIN *" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
                     {!isRechargeSeule && (
@@ -1057,7 +1058,7 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
-            <Field label="VIN (numéro de série)" value={vin} onChange={(v) => setVin(v.toUpperCase())} placeholder="VF3XXXXXXXXXXXXXX" />
+            <Field label="VIN (numéro de série) *" value={vin} onChange={(v) => setVin(normalizeVin(v))} placeholder="VF3XXXXXXXXXXXXXX" error={validateVin(vin, true).error} />
 
             {isAllerRetour && (
               <div className="space-y-4 border-t border-pro-border pt-4">
@@ -1097,7 +1098,7 @@ function AdminNouveauDevisPage() {
                   <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
                   <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
                 </div>
-                <Field label="VIN retour" value={vinRetour} onChange={(v) => setVinRetour(v.toUpperCase())} placeholder="VF1XXXXXXXXXXXXXX" />
+                <Field label="VIN retour *" value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, true).error} />
                 <AddressField
                   label="Adresse de départ (retour)"
                   value={departRetour}
