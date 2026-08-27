@@ -472,8 +472,21 @@ function AdminNouveauDevisPage() {
         return toast.error("Immatriculation manquante sur un véhicule");
       if (groupPayload.some((v) => v.prix <= 0))
         return toast.error("Montant TTC manquant sur un véhicule");
+      const badVin = groupPayload.find((v) => !isValidVinFormat(v.vin));
+      if (badVin)
+        return toast.error(
+          `VIN obligatoire et valide (17 caractères, hors I/O/Q) — véhicule ${badVin.immatriculation ?? ""}`,
+        );
+    } else {
+      const vinCheck = validateVin(vin, true);
+      if (!vinCheck.valid) return toast.error(vinCheck.error ?? "VIN invalide");
+      if (isAllerRetour) {
+        const vinRetourCheck = validateVin(vinRetour, true);
+        if (!vinRetourCheck.valid) return toast.error(`Retour : ${vinRetourCheck.error ?? "VIN invalide"}`);
+      }
     }
     if (!Number.isFinite(prix) || prix <= 0) return toast.error("Montant TTC invalide");
+
 
 
 
