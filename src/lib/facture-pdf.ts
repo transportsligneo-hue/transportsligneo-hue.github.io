@@ -245,7 +245,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...MUTED);
   doc.text("RÉFÉRENCES", refX, blockTop + 8);
   const refs: [string, string][] = [];
-  if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° commande", f.reference_client.trim()]);
+  if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° de PO", f.reference_client.trim()]);
   if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}`]);
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   if (vehLabel) refs.push(["Véhicule", `${vehLabel}${f.vehicule_immatriculation ? ` (${f.vehicule_immatriculation})` : ""}`]);

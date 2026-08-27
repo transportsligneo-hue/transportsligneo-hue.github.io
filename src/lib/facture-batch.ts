@@ -212,7 +212,7 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
       factureNumero: fac?.numero ?? null,
       referenceClient,
       referenceLabel:
-        fac?.reference_label ?? (referenceClient ? "Référence client" : null),
+        fac?.reference_label ?? (referenceClient ? "N° de PO" : null),
     };
   });
 }
@@ -306,7 +306,7 @@ export async function ensureFacture(
     }
   }
   const refLabel = refClient
-    ? po.referenceLabel || "Référence client"
+    ? po.referenceLabel || "N° de PO"
     : (po.referenceLabel ?? null);
   const { regime, vatRate } = await fetchActiveRegime();
   const micro = regime !== "societe";
