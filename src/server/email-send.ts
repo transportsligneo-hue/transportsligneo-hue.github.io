@@ -1,19 +1,39 @@
 // Server-side helper to send transactional emails WITHOUT requiring a user JWT.
 // Use this from webhooks, public server routes, and other trusted server contexts.
-// Mirrors the logic of /lovable/email/transactional/send but bypasses auth.
-import * as React from 'react'
-import { render } from '@react-email/components'
+// Delivery, retries, suppression and unsubscribe are handled by Lovable.
+import { EmailAPIError, sendLovableEmail } from '@lovable.dev/email-js'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { sendTemplateEmail } from '@/lib/email-templates/send-email'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 const SITE_NAME = "transportsligneo"
 const SENDER_DOMAIN = "notify.transportsligneo.fr"
 const FROM_DOMAIN = "notify.transportsligneo.fr"
 
-function generateToken(): string {
-  const bytes = new Uint8Array(32)
-  crypto.getRandomValues(bytes)
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+async function logSend(row: {
+  message_id: string
+  template_name: string
+  recipient_email: string
+  status: 'sent' | 'suppressed' | 'failed'
+  error_message?: string
+}) {
+  const { error } = await supabaseAdmin.from('email_send_log').insert(row)
+  if (error) {
+    console.error('[email/server] send log write failed', { code: error.code, message: error.message })
+  }
+}
+
+function isSuppressed(error: unknown): boolean {
+  return error instanceof EmailAPIError && error.code === 'recipient_suppressed'
+}
+
+async function waitForRateLimit(error: unknown): Promise<boolean> {
+  if (error instanceof EmailAPIError && error.status === 429) {
+    const seconds = error.retryAfterSeconds ?? 60
+    await new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+    return true
+  }
+  return false
 }
 
 interface Params {
@@ -37,77 +57,51 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
   }
 
   const messageId = crypto.randomUUID()
-  const idempotencyKey = params.idempotencyKey || messageId
-  const normalizedEmail = effectiveRecipient.toLowerCase()
 
-  // Suppression check
-  const { data: suppressed } = await supabaseAdmin
-    .from('suppressed_emails').select('id').eq('email', normalizedEmail).maybeSingle()
-  if (suppressed) {
-    await supabaseAdmin.from('email_send_log').insert({
-      message_id: messageId, template_name: params.templateName,
-      recipient_email: effectiveRecipient, status: 'suppressed',
+  const send = () =>
+    sendTemplateEmail(params.templateName, effectiveRecipient, {
+      templateData: params.templateData ?? {},
+      idempotencyKey: params.idempotencyKey || messageId,
     })
-    return { success: false, reason: 'email_suppressed' }
-  }
 
-  // Unsubscribe token (one per email)
-  let unsubscribeToken: string
-  const { data: existingToken } = await supabaseAdmin
-    .from('email_unsubscribe_tokens').select('token, used_at').eq('email', normalizedEmail).maybeSingle()
-  if (existingToken && !existingToken.used_at) {
-    unsubscribeToken = existingToken.token
-  } else if (!existingToken) {
-    const newToken = generateToken()
-    await supabaseAdmin.from('email_unsubscribe_tokens')
-      .upsert({ token: newToken, email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true })
-    const { data: stored } = await supabaseAdmin
-      .from('email_unsubscribe_tokens').select('token').eq('email', normalizedEmail).maybeSingle()
-    unsubscribeToken = stored?.token ?? newToken
-  } else {
-    return { success: false, reason: 'email_suppressed' }
-  }
+  try {
+    let result
+    try {
+      result = await send()
+    } catch (error) {
+      if (await waitForRateLimit(error)) result = await send()
+      else throw error
+    }
 
-  const data = params.templateData ?? {}
-  const element = React.createElement(template.component, data)
-  const html = await render(element)
-  const text = await render(element, { plainText: true })
-  const subject = typeof template.subject === 'function' ? template.subject(data) : template.subject
+    if (!result.sent) {
+      await logSend({
+        message_id: messageId,
+        template_name: params.templateName,
+        recipient_email: effectiveRecipient,
+        status: 'suppressed',
+      })
+      return { success: false, reason: 'email_suppressed' }
+    }
 
-  await supabaseAdmin.from('email_send_log').insert({
-    message_id: messageId, template_name: params.templateName,
-    recipient_email: effectiveRecipient, status: 'pending',
-  })
-
-  const { error: enqueueError } = await supabaseAdmin.rpc('enqueue_email', {
-    queue_name: 'transactional_emails',
-    payload: {
+    await logSend({
       message_id: messageId,
-      to: effectiveRecipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject,
-      html,
-      text,
-      purpose: 'transactional',
-      label: params.templateName,
-      idempotency_key: idempotencyKey,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-    },
-  })
-
-  if (enqueueError) {
-    console.error('[email/server] enqueue failed', enqueueError)
-    await supabaseAdmin.from('email_send_log').insert({
-      message_id: messageId, template_name: params.templateName,
-      recipient_email: effectiveRecipient, status: 'failed',
-      error_message: 'Failed to enqueue email',
+      template_name: params.templateName,
+      recipient_email: effectiveRecipient,
+      status: 'sent',
     })
-    return { success: false, reason: 'enqueue_failed' }
+    return { success: true }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'send failed'
+    console.error('[email/server] send failed', message)
+    await logSend({
+      message_id: messageId,
+      template_name: params.templateName,
+      recipient_email: effectiveRecipient,
+      status: 'failed',
+      error_message: message,
+    })
+    return { success: false, reason: 'send_failed' }
   }
-
-  return { success: true }
 }
 
 /** Resolve admin notification email: first active admin in user_roles, else fallback. */
@@ -131,9 +125,8 @@ export async function getAdminNotificationEmail(): Promise<string> {
 }
 
 /**
- * Envoi d'un email HTML "brut" (campagnes, envoi direct) via la file Lovable.
- * Utilise le domaine expéditeur vérifié (notify.transportsligneo.fr) au lieu
- * d'un appel Resend direct sur un domaine non vérifié.
+ * Envoi d'un email HTML "brut" (campagnes, envoi direct) via l'API email Lovable.
+ * Utilise le domaine expéditeur vérifié (notify.transportsligneo.fr).
  */
 export async function sendRawEmailServer(params: {
   to: string
@@ -151,60 +144,55 @@ export async function sendRawEmailServer(params: {
     return { success: false, reason: 'invalid_recipient' }
   }
 
-  const messageId = crypto.randomUUID()
-
-  const { data: suppressed } = await supabaseAdmin
-    .from('suppressed_emails').select('id').eq('email', normalizedEmail).maybeSingle()
-  if (suppressed) return { success: false, reason: 'email_suppressed' }
-
-  let unsubscribeToken: string
-  const { data: existingToken } = await supabaseAdmin
-    .from('email_unsubscribe_tokens').select('token, used_at').eq('email', normalizedEmail).maybeSingle()
-  if (existingToken?.token) {
-    unsubscribeToken = existingToken.token
-  } else {
-    const newToken = generateToken()
-    await supabaseAdmin.from('email_unsubscribe_tokens')
-      .upsert({ token: newToken, email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true })
-    const { data: stored } = await supabaseAdmin
-      .from('email_unsubscribe_tokens').select('token').eq('email', normalizedEmail).maybeSingle()
-    unsubscribeToken = stored?.token ?? newToken
+  const apiKey = process.env['LOVABLE_API_KEY']
+  if (!apiKey) {
+    console.error('[email/server] LOVABLE_API_KEY is not configured')
+    return { success: false, reason: 'send_failed' }
   }
 
+  const messageId = crypto.randomUUID()
   const label = params.label || 'direct_email'
-  await supabaseAdmin.from('email_send_log').insert({
-    message_id: messageId, template_name: label,
-    recipient_email: to, status: 'pending',
-  })
-
   const senderName = (params.senderName || SITE_NAME).replace(/[<>"]/g, '').trim() || SITE_NAME
 
-  const { error: enqueueError } = await supabaseAdmin.rpc('enqueue_email', {
-    queue_name: 'transactional_emails',
-    payload: {
+  const send = () =>
+    sendLovableEmail(
+      {
+        to,
+        from: `${senderName} <noreply@${FROM_DOMAIN}>`,
+        sender_domain: SENDER_DOMAIN,
+        subject: params.subject,
+        html: params.html,
+        text: params.text ?? '',
+        purpose: 'transactional',
+        label,
+        idempotency_key: params.idempotencyKey || messageId,
+      },
+      { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] }
+    )
+
+  try {
+    try {
+      await send()
+    } catch (error) {
+      if (await waitForRateLimit(error)) await send()
+      else throw error
+    }
+    await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'sent' })
+    return { success: true }
+  } catch (error) {
+    if (isSuppressed(error)) {
+      await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'suppressed' })
+      return { success: false, reason: 'email_suppressed' }
+    }
+    const message = error instanceof Error ? error.message : 'send failed'
+    console.error('[email/server] raw send failed', message)
+    await logSend({
       message_id: messageId,
-      to,
-      from: `${senderName} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject: params.subject,
-      html: params.html,
-      text: params.text ?? '',
-      purpose: 'transactional',
-      label,
-      idempotency_key: params.idempotencyKey || messageId,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-    },
-  })
-
-  if (enqueueError) {
-    console.error('[email/server] raw enqueue failed', enqueueError)
-    await supabaseAdmin.from('email_send_log').insert({
-      message_id: messageId, template_name: label,
-      recipient_email: to, status: 'failed', error_message: 'Failed to enqueue email',
+      template_name: label,
+      recipient_email: to,
+      status: 'failed',
+      error_message: message,
     })
-    return { success: false, reason: 'enqueue_failed' }
+    return { success: false, reason: 'send_failed' }
   }
-
-  return { success: true }
 }
