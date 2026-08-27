@@ -17,6 +17,7 @@ import {
 } from "@/lib/facture-batch";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { logPoEvent } from "@/lib/po-history";
+import { supabase } from "@/integrations/supabase/client";
 
 const PO_LABELS = [
   "Référence client",
@@ -141,6 +142,14 @@ export function BulkFactureDialog({
             oldPo: t.referenceClient ?? null,
             newPo,
           });
+          // Synchronise le PO sur la fiche mission (tous les volets du duo)
+          if (t.attributionId) {
+            await supabase.rpc("admin_set_mission_po" as never, {
+              _attribution_id: t.attributionId,
+              _po: newPo,
+              _apply_group: true,
+            } as never);
+          }
         }
         const blob = await generateFacturePdf(factureRowToPdfData(row));
         blobs.push({ numero: row.numero, blob });

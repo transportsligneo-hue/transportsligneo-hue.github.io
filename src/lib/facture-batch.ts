@@ -43,6 +43,7 @@ interface AttrRow {
     numero_mission: string | null;
     mission_id: string | null;
     devis_id: string | null;
+    commande_ref: string | null;
     devis: {
       numero: string | null;
       prix_estime: number | null;
@@ -65,7 +66,7 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   const { data, error } = await supabase
     .from("attributions")
     .select(
-      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, devis:devis(numero, prix_estime, prix_aller, prix_retour))",
+      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, commande_ref, devis:devis(numero, prix_estime, prix_aller, prix_retour))",
     )
     .in("statut", ["termine", "validee"])
     .order("created_at", { ascending: false });
@@ -174,6 +175,14 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
         .find((invoice) => !!invoice) ??
       (t?.mission_id ? factures.get(`m:${t.mission_id}`) : null) ??
       null;
+    // PO saisi côté fiche mission (trajets.commande_ref) : on le récupère sur
+    // n'importe quel volet du duo quand la facture n'en porte pas encore.
+    const missionPo =
+      grouped
+        .map((x) => (x.trajet?.commande_ref ?? "").trim())
+        .find((ref) => !!ref) ?? null;
+    const referenceClient =
+      (fac?.reference_client ?? "").trim() || missionPo || null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
@@ -191,8 +200,9 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
       isGroup: billableLegs.length > 1,
       factureId: fac?.id ?? null,
       factureNumero: fac?.numero ?? null,
-      referenceClient: fac?.reference_client ?? null,
-      referenceLabel: fac?.reference_label ?? null,
+      referenceClient,
+      referenceLabel:
+        fac?.reference_label ?? (referenceClient ? "Référence client" : null),
     };
   });
 }
@@ -265,7 +275,26 @@ export async function ensureFacture(
   po: { referenceClient?: string | null; referenceLabel?: string | null } = {},
 ): Promise<{ row: FactureRow; created: boolean }> {
   const basis = await resolveGroupInvoiceBasis(trajetId);
-  const refClient = (po.referenceClient ?? "").trim() || null;
+  let refClient = (po.referenceClient ?? "").trim() || null;
+  if (!refClient) {
+    // Aucun PO fourni : on reprend celui saisi sur la fiche mission.
+    const { data: poTrajet } = await supabase
+      .from("trajets")
+      .select("commande_ref, mission_group_id")
+      .eq("id", trajetId)
+      .maybeSingle();
+    refClient = (poTrajet?.commande_ref ?? "").trim() || null;
+    if (!refClient && poTrajet?.mission_group_id) {
+      const { data: legs } = await supabase
+        .from("trajets")
+        .select("commande_ref")
+        .eq("mission_group_id", poTrajet.mission_group_id);
+      refClient =
+        (legs ?? [])
+          .map((l) => (l.commande_ref ?? "").trim())
+          .find((v) => !!v) || null;
+    }
+  }
   const refLabel = refClient
     ? po.referenceLabel || "Référence client"
     : (po.referenceLabel ?? null);
