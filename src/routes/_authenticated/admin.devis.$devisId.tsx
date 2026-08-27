@@ -19,6 +19,7 @@ import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { PoLinkCard } from "@/components/admin/PoLinkCard";
 
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,
@@ -277,6 +278,10 @@ function AdminDevisDetailPage() {
         />
       </div>
 
+
+      <div className="mb-5">
+        <PoLinkCard devisId={devis.id} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: details */}
