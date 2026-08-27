@@ -54,8 +54,6 @@ async function lookupClientBranding(email: string): Promise<{
 }
 
 export async function sendTransactionalEmail(params: SendTransactionalEmailParams) {
-  const { data: { session } } = await supabase.auth.getSession()
-
   // Auto-lookup branding client si non fourni explicitement
   let { clientLogoUrl, clientName, accountType } = params
   if (
