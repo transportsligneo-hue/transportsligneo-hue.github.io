@@ -154,18 +154,20 @@ export function MissionConvertDuoPanel({
                 onChange={(e) => set("split", e.target.checked)}
                 className="accent-[color:var(--pro-accent,#2f5fff)]"
               />
-              Répartir le prix actuel {prix ? `(${prix} €)` : ""} en 2/3 Livraison – 1/3 Restitution
+              Ajouter la Restitution à 50 % du prix Livraison
+              {prix ? ` (${prix} € + ${Math.round(Number(prix) * 50) / 100} € = ${Math.round(Number(prix) * 150) / 100} €)` : ""}
             </label>
             <div>
               <label className={labelCls}>Ou prix du volet Restitution (€)</label>
               <input
                 className={inputCls}
                 inputMode="decimal"
-                placeholder="laisser vide pour la répartition automatique"
+                placeholder="laisser vide pour 50 % du prix Livraison"
                 value={form.prixRetour}
                 onChange={(e) => set("prixRetour", e.target.value)}
               />
             </div>
+
             <p className="flex items-start gap-1.5 text-[11px] text-pro-muted">
               <Info size={12} className="mt-0.5 shrink-0" />
               La facture reste unique pour le dossier : elle porte le montant global du duo.
