@@ -154,8 +154,9 @@ function extractDesignation(text: string): string | null {
   const cleaned = line
     .replace(/^\s*\d{3}\s*/, "")
     .replace(/\b[A-HJ-NPR-Z0-9]{14,17}\b/g, "")
-    .replace(/[\d\s.]*,\d{2}/g, "")
-    .replace(/\b\d+\s*U\b/gi, "")
+    .replace(/\d[\d\s.]*,\d{2,3}/g, "")
+    .replace(/\b\d+\s*(U|PCE|EA)\b/gi, "")
+    .replace(/\bU\b/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
   return cleaned || null;
