@@ -122,6 +122,42 @@ function extractMontantHt(text: string): number | null {
   return all?.length ? parseFrAmount(all[all.length - 1]!) : null;
 }
 
+/** Bloc « Adresse de livraison/Personne à contacter » (le vrai lieu de livraison CAT). */
+function extractAdresseLivraison(text: string): { adresse: string | null; contact: string | null } {
+  const m = text.match(/Adresse\s+de\s+livraison[^\n]*\n/i);
+  if (!m || m.index === undefined) return { adresse: null, contact: null };
+  const rest = text.slice(m.index + m[0].length);
+  const lines = rest
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter((l) => !/^_+$/.test(l))
+    .slice(0, 5);
+  const stopAt = lines.findIndex((l) =>
+    /^(Total|Destinataire|Num[ée]ro|R[ée]f|Emetteur|Émetteur|C\.Ordon)/i.test(l),
+  );
+  const block = (stopAt >= 0 ? lines.slice(0, stopAt) : lines).filter(Boolean);
+  if (!block.length) return { adresse: null, contact: null };
+  const contact = block[0] ?? null;
+  return { adresse: block.join(", ").slice(0, 300), contact };
+}
+
+/** Libellé de la prestation ("Recharge pour transport", "Convoyage", …). */
+function extractDesignation(text: string): string | null {
+  const line = text
+    .split("\n")
+    .find((l) => /recharge|transport|convoyage|prestation|livraison/i.test(l) && /\d+,\d{2}/.test(l));
+  if (!line) return null;
+  const cleaned = line
+    .replace(/^\s*\d{3}\s*/, "")
+    .replace(/\b[A-HJ-NPR-Z0-9]{14,17}\b/g, "")
+    .replace(/[\d\s.]*,\d{2}/g, "")
+    .replace(/\b\d+\s*U\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return cleaned || null;
+}
+
 /**
  * Parse le texte d'un PDF de bon de commande CAT / K2.
  * @param subject sujet de l'email (fallback pour le n° de PO)
@@ -137,6 +173,7 @@ export function parsePoDocument(
   const numeroFromDoc = afterLabel(text, /Num[ée]ro\s+de\s+commande\s*:?/i, 60);
   const numero_po =
     extractPoNumber(numeroFromDoc, subject, filename, text) ?? null;
+  const livraison = extractAdresseLivraison(text);
 
   return {
     numero_po,
@@ -146,5 +183,9 @@ export function parsePoDocument(
     date_livraison: parseFrDate(afterLabel(text, /Date\s+de\s+livraison\s*:?/i, 40)),
     destinataire: extractDestinataire(text),
     emetteur: afterLabel(text, /[ÉE]metteur\s*:?/i, 80),
+    adresse_livraison: livraison.adresse,
+    contact_livraison: livraison.contact,
+    designation: extractDesignation(text),
   };
 }
+
