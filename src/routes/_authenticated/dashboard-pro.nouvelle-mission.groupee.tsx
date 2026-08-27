@@ -622,10 +622,18 @@ function GroupedMissionForm() {
           </span>
         </div>
 
+        {invalidVinRows.length > 0 && (
+          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            VIN manquant ou invalide sur {invalidVinRows.length} véhicule(s) :{" "}
+            {invalidVinRows.map((r) => r.immat.toUpperCase() || "—").join(", ")} — ouvrez « Détails » pour le renseigner.
+          </p>
+        )}
+
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs text-slate-400">
             <Clock className="h-3.5 w-3.5" /> Votre demande sera traitée sous 24 h par notre équipe.
           </span>
+
           <button
             type="button"
             onClick={submit}
