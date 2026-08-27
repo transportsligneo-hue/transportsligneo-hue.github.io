@@ -275,7 +275,26 @@ export async function ensureFacture(
   po: { referenceClient?: string | null; referenceLabel?: string | null } = {},
 ): Promise<{ row: FactureRow; created: boolean }> {
   const basis = await resolveGroupInvoiceBasis(trajetId);
-  const refClient = (po.referenceClient ?? "").trim() || null;
+  let refClient = (po.referenceClient ?? "").trim() || null;
+  if (!refClient) {
+    // Aucun PO fourni : on reprend celui saisi sur la fiche mission.
+    const { data: poTrajet } = await supabase
+      .from("trajets")
+      .select("commande_ref, mission_group_id")
+      .eq("id", trajetId)
+      .maybeSingle();
+    refClient = (poTrajet?.commande_ref ?? "").trim() || null;
+    if (!refClient && poTrajet?.mission_group_id) {
+      const { data: legs } = await supabase
+        .from("trajets")
+        .select("commande_ref")
+        .eq("mission_group_id", poTrajet.mission_group_id);
+      refClient =
+        (legs ?? [])
+          .map((l) => (l.commande_ref ?? "").trim())
+          .find((v) => !!v) || null;
+    }
+  }
   const refLabel = refClient
     ? po.referenceLabel || "Référence client"
     : (po.referenceLabel ?? null);
