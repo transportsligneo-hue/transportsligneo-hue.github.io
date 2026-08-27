@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import { sendTemplateEmailFn } from './send.functions'
 
 interface SendTransactionalEmailParams {
   templateName: string
@@ -76,28 +77,12 @@ export async function sendTransactionalEmail(params: SendTransactionalEmailParam
     ...(clientName ? { clientName } : {}),
     ...(accountTheme ? { accountTheme } : {}),
   }
-  const response = await fetch('/lovable/email/transactional/send', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session?.access_token}`,
-    },
-    body: JSON.stringify({
+  return sendTemplateEmailFn({
+    data: {
       templateName: params.templateName,
       recipientEmail: params.recipientEmail,
       idempotencyKey: params.idempotencyKey,
       templateData: mergedData,
-    }),
+    },
   })
-  if (!response.ok) {
-    let detail = response.statusText
-    try {
-      const payload = (await response.json()) as { error?: string }
-      detail = payload.error || detail
-    } catch {
-      // A platform outage can return a non-JSON response.
-    }
-    throw new Error(`Failed to send email (${response.status}): ${detail}`)
-  }
-  return response.json()
 }
