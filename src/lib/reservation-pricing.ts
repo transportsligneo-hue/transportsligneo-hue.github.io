@@ -11,8 +11,8 @@ const CITY_DEPARTMENTS: Record<string, string> = {
 };
 
 const FIXED_TARIFFS: Record<string, [number, number]> = {
-  "37-intra": [79, 129],
-  "37-hors": [99, 129],
+  "37-intra": [70, 120],
+  "37-hors": [90, 130],
 };
 
 /** Extrait la première ville reconnue d'une adresse libre */

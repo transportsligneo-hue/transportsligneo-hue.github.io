@@ -370,7 +370,7 @@ const DEPT_AGGLO_COMMUNES: Record<string, string[]> = {
   ],
 };
 
-/** Communes connues du département mais hors zone agglo → forfait 99 € si l'autre point est dans le même dept. */
+/** Communes connues du département mais hors zone agglo → forfait local (90 € en 37) si l'autre point est dans le même dept. */
 const DEPT_OUTSIDE_COMMUNES: Record<string, string[]> = {
   "37": [
     "Loches", "Amboise", "Chinon", "Bléré", "Azay-le-Rideau", "Sainte-Maure-de-Touraine",
