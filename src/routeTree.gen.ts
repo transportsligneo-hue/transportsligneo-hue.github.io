@@ -67,6 +67,7 @@ import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PaiementFactureFactureIdRouteImport } from './routes/paiement.facture.$factureId'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
@@ -487,6 +488,11 @@ const PaiementFactureFactureIdRoute =
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const B2bTransportPonctuelRetourRoute =
@@ -1335,6 +1341,7 @@ export interface FileRoutesByFullPath {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1507,6 +1514,7 @@ export interface FileRoutesByTo {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1690,6 +1698,7 @@ export interface FileRoutesById {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1873,6 +1882,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/paiement/facture/$factureId'
     | '/admin/'
@@ -2045,6 +2055,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/paiement/facture/$factureId'
     | '/admin'
@@ -2227,6 +2238,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/paiement/facture/$factureId'
     | '/_authenticated/admin/'
@@ -2330,6 +2342,7 @@ export interface RootRouteChildren {
   ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
   ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   PaiementFactureFactureIdRoute: typeof PaiementFactureFactureIdRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
@@ -2764,6 +2777,13 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/b2b/transport-ponctuel/retour': {
@@ -4122,6 +4142,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
   ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   PaiementFactureFactureIdRoute: PaiementFactureFactureIdRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
