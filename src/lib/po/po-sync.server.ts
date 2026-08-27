@@ -331,9 +331,11 @@ export async function matchPoToDevis(
         .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
         .eq("id", devis.id);
     }
+    await applyPoToOperations(supabaseAdmin, numeroPo, devis.id as string, vin);
     console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero}`);
     return "rapproche";
   }
+
 
 
   if (candidates.length > 1) {
