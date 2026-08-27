@@ -1,7 +1,7 @@
 // Tarifs locaux par département — version basée sur les codes postaux.
 // Règle :
-//   - Départ ET arrivée dans la zone agglo de la ville principale  → 79 € / 129 € A/R
-//   - Même département mais l'un des deux hors zone agglo            → 99 € / 129 € A/R
+//   - Départ ET arrivée dans la zone agglo de la ville principale  → 79 € / 129 € A/R (37 : 70 € / 120 €)
+//   - Même département mais lun des deux hors zone agglo            → 99 € / 129 € A/R (37 : 90 € / 130 €)
 //   - Départements différents                                        → null (fallback km appelant)
 // Les tarifs FIXED_TARIFFS existants gardent leur priorité dans calculatePrice.
 
