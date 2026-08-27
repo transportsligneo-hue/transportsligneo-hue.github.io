@@ -105,9 +105,9 @@ export async function resolveGroupInvoiceBasis(
     }
   }
 
-  // Ne jamais sous-facturer : les segments réellement créés et le devis sont
-  // deux représentations du même prix, la valeur globale la plus haute fait foi.
-  const totalTtc = round2(Math.max(devisTotal, sumLegs));
+  // Les prix des segments font foi : ce sont eux que l'admin édite sur la fiche
+  // mission. Le devis ne sert que de repli quand aucun tarif n'est saisi.
+  const totalTtc = round2(sumLegs > 0 ? sumLegs : devisTotal);
 
   const points: string[] = [];
   legs.forEach((l, i) => {

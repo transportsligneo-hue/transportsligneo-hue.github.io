@@ -205,7 +205,8 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
       clientEmail: t?.client_email ?? null,
       itineraire: `${t?.depart ?? "—"} → ${t?.arrivee ?? "—"}`,
       dateMission: t?.date_trajet ?? null,
-      montantTtc: Math.round(Math.max(devisTotal, segmentTotal) * 100) / 100,
+      montantTtc:
+        Math.round((segmentTotal > 0 ? segmentTotal : devisTotal) * 100) / 100,
       isGroup: billableLegs.length > 1,
       factureId: fac?.id ?? null,
       factureNumero: fac?.numero ?? null,
