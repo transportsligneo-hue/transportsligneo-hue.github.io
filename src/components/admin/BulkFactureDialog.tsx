@@ -17,6 +17,7 @@ import {
 } from "@/lib/facture-batch";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { logPoEvent } from "@/lib/po-history";
+import { supabase } from "@/integrations/supabase/client";
 
 const PO_LABELS = [
   "Référence client",
