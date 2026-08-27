@@ -353,9 +353,88 @@ export async function matchPoToDevis(
     return "ambigu";
   }
 
+  // Aucun devis : la mission existe parfois sans devis (créée à la main).
+  // On tente le rattachement direct par VIN sur les missions.
+  const applied = await applyPoToOperations(supabaseAdmin, numeroPo, null, vin);
+  if (applied.missionId) {
+    await supabaseAdmin
+      .from("bons_commande")
+      .update({ statut: "rapproche", mission_id: applied.missionId, candidats: [] } as never)
+      .eq("id", poId);
+    return "rapproche";
+  }
+
   await supabaseAdmin
     .from("bons_commande")
     .update({ statut: "non_rapproche", candidats: [] } as never)
     .eq("id", poId);
   return "non_rapproche";
 }
+
+/**
+ * Écrit le n° de PO là où l'exploitation en a besoin :
+ *  - `trajets.commande_ref` (toutes les étapes du même groupe aller/retour)
+ *  - références des factures non payées liées à ces missions
+ * Recherche par devis rattaché, puis par VIN (loose match).
+ */
+export async function applyPoToOperations(
+  supabaseAdmin: AdminClient,
+  numeroPo: string,
+  devisId: string | null,
+  vin: string | null,
+): Promise<{ trajets: number; missionId: string | null }> {
+  const cols = "id, mission_group_id, vin, vehicule_vin, mission_id, devis_id";
+  const found = new Map<string, Record<string, unknown>>();
+
+  if (devisId) {
+    const { data } = await supabaseAdmin.from("trajets").select(cols).eq("devis_id", devisId);
+    for (const t of data ?? []) found.set(t.id as string, t);
+  }
+  if (!found.size && vin) {
+    const { data } = await supabaseAdmin
+      .from("trajets")
+      .select(cols)
+      .order("created_at", { ascending: false })
+      .limit(1500);
+    for (const t of data ?? []) {
+      if (
+        vinLooseMatch(t.vin as string | null, vin) ||
+        vinLooseMatch(t.vehicule_vin as string | null, vin)
+      ) {
+        found.set(t.id as string, t);
+      }
+    }
+  }
+  if (!found.size) return { trajets: 0, missionId: null };
+
+  const rows = [...found.values()];
+  const groupIds = [...new Set(rows.map((r) => r["mission_group_id"] as string | null).filter(Boolean))] as string[];
+  const trajetIds = [...found.keys()];
+
+  await supabaseAdmin.from("trajets").update({ commande_ref: numeroPo } as never).in("id", trajetIds);
+  if (groupIds.length) {
+    await supabaseAdmin
+      .from("trajets")
+      .update({ commande_ref: numeroPo } as never)
+      .in("mission_group_id", groupIds);
+  }
+
+  // Références des factures liées (via les attributions de ces missions)
+  const { data: attrs } = await supabaseAdmin
+    .from("attributions")
+    .select("id")
+    .in("trajet_id", trajetIds);
+  const attrIds = (attrs ?? []).map((a) => a.id as string);
+  if (attrIds.length) {
+    await supabaseAdmin
+      .from("factures")
+      .update({ reference_client: numeroPo, reference_label: "N° de PO" } as never)
+      .in("attribution_id", attrIds)
+      .not("statut", "in", "(payee,annulee)");
+  }
+
+  const missionIds = [...new Set(rows.map((r) => r["mission_id"] as string | null).filter(Boolean))] as string[];
+  console.log(`[PO] ${numeroPo} appliqué à ${trajetIds.length} mission(s)`);
+  return { trajets: trajetIds.length, missionId: missionIds.length === 1 ? missionIds[0]! : null };
+}
+
