@@ -158,6 +158,7 @@ import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
+import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/public/hooks/gmail-po-sync'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
@@ -1021,6 +1022,12 @@ const ApiPublicHooksGoogleReviewDispatchRoute =
     path: '/api/public/hooks/google-review-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksGmailPoSyncRoute =
+  ApiPublicHooksGmailPoSyncRouteImport.update({
+    id: '/api/public/hooks/gmail-po-sync',
+    path: '/api/public/hooks/gmail-po-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
   id: '/api/public/facture/webhook',
   path: '/api/public/facture/webhook',
@@ -1332,6 +1339,7 @@ export interface FileRoutesByFullPath {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1500,6 +1508,7 @@ export interface FileRoutesByTo {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1679,6 +1688,7 @@ export interface FileRoutesById {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1858,6 +1868,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -2026,6 +2037,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -2204,6 +2216,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -2286,6 +2299,7 @@ export interface RootRouteChildren {
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
+  ApiPublicHooksGmailPoSyncRoute: typeof ApiPublicHooksGmailPoSyncRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
@@ -3349,6 +3363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksGoogleReviewDispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/gmail-po-sync': {
+      id: '/api/public/hooks/gmail-po-sync'
+      path: '/api/public/hooks/gmail-po-sync'
+      fullPath: '/api/public/hooks/gmail-po-sync'
+      preLoaderRoute: typeof ApiPublicHooksGmailPoSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/facture/webhook': {
       id: '/api/public/facture/webhook'
       path: '/api/public/facture/webhook'
@@ -4046,6 +4067,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
+  ApiPublicHooksGmailPoSyncRoute: ApiPublicHooksGmailPoSyncRoute,
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,

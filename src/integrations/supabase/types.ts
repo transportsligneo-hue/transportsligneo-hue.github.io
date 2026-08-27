@@ -1109,6 +1109,87 @@ export type Database = {
           },
         ]
       }
+      bons_commande: {
+        Row: {
+          candidats: Json
+          created_at: string
+          date_commande: string | null
+          date_livraison: string | null
+          destinataire: string | null
+          devis_id: string | null
+          email_received_at: string | null
+          email_source_id: string | null
+          email_subject: string | null
+          extraction_error: string | null
+          id: string
+          mission_id: string | null
+          montant_ht: number | null
+          numero_po: string
+          pdf_path: string | null
+          raw_text: string | null
+          statut: string
+          updated_at: string
+          vin: string | null
+        }
+        Insert: {
+          candidats?: Json
+          created_at?: string
+          date_commande?: string | null
+          date_livraison?: string | null
+          destinataire?: string | null
+          devis_id?: string | null
+          email_received_at?: string | null
+          email_source_id?: string | null
+          email_subject?: string | null
+          extraction_error?: string | null
+          id?: string
+          mission_id?: string | null
+          montant_ht?: number | null
+          numero_po: string
+          pdf_path?: string | null
+          raw_text?: string | null
+          statut?: string
+          updated_at?: string
+          vin?: string | null
+        }
+        Update: {
+          candidats?: Json
+          created_at?: string
+          date_commande?: string | null
+          date_livraison?: string | null
+          destinataire?: string | null
+          devis_id?: string | null
+          email_received_at?: string | null
+          email_source_id?: string | null
+          email_subject?: string | null
+          extraction_error?: string | null
+          id?: string
+          mission_id?: string | null
+          montant_ht?: number | null
+          numero_po?: string
+          pdf_path?: string | null
+          raw_text?: string | null
+          statut?: string
+          updated_at?: string
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bons_commande_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bons_commande_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_events: {
         Row: {
           campaign_id: string
@@ -5143,6 +5224,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      po_import_logs: {
+        Row: {
+          created_at: string
+          details: Json
+          email_id: string | null
+          email_subject: string | null
+          id: string
+          numero_po: string | null
+          resultat: string
+          vin: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          email_id?: string | null
+          email_subject?: string | null
+          id?: string
+          numero_po?: string | null
+          resultat: string
+          vin?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          email_id?: string | null
+          email_subject?: string | null
+          id?: string
+          numero_po?: string | null
+          resultat?: string
+          vin?: string | null
+        }
+        Relationships: []
       }
       po_pdf_history: {
         Row: {
