@@ -122,21 +122,14 @@ export const Route = createFileRoute('/api/public/alertes-documents-vehicules')(
           for (const p of profiles ?? []) {
             if (!p.email) continue
             try {
-              const res = await fetch(`${origin}/lovable/email/transactional/send`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-ligneo-internal-key': serviceKey,
-                },
-                body: JSON.stringify({
-                  templateName: 'vehicule-document-expiration',
-                  recipientEmail: p.email,
-                  idempotencyKey: `veh-docs-${orgId}-${p.id}-${today}`,
-                  templateData: { prenom: p.prenom ?? null, societe, documents },
-                }),
+              const res = await sendTransactionalEmailServer({
+                templateName: 'vehicule-document-expiration',
+                recipientEmail: p.email,
+                idempotencyKey: `veh-docs-${orgId}-${p.id}-${today}`,
+                templateData: { prenom: p.prenom ?? null, societe, documents },
               })
-              if (res.ok) sent += 1
-              else console.error('vehicle doc alert: send failed', res.status)
+              if (res.success) sent += 1
+              else console.error('vehicle doc alert: send failed', res.reason)
             } catch (e) {
               console.error('vehicle doc alert: send error', (e as Error).message)
             }
