@@ -58,11 +58,13 @@ function Field({
   value,
   onChange,
   placeholder,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  error?: string;
 }) {
   return (
     <div>
@@ -73,11 +75,18 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+        aria-invalid={!!error}
+        className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:outline-none focus:ring-2 ${
+          error
+            ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
+            : "border-pro-border focus:border-pro-accent focus:ring-pro-accent/20"
+        }`}
       />
+      {error && <p className="mt-1 text-[11px] text-red-500">{error}</p>}
     </div>
   );
 }
+
 
 function AddressField({
   label,
