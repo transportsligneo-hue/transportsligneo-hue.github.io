@@ -29,6 +29,8 @@ import {
   Wallet,
   Gauge,
   Inbox,
+  FileCheck2,
+
 
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -58,6 +60,25 @@ function AdminLayout() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
   const [demandesCount, setDemandesCount] = useState(0);
+  const [poCount, setPoCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "super_admin") return;
+    const fetchPo = async () => {
+      const { count } = await supabase
+        .from("bons_commande" as never)
+        .select("id", { count: "exact", head: true })
+        .in("statut" as never, ["ambigu", "erreur_extraction"] as never);
+      setPoCount(count ?? 0);
+    };
+    fetchPo();
+    const channel = supabase
+      .channel("admin-po-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bons_commande" }, fetchPo)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [role]);
+
 
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
@@ -180,6 +201,16 @@ function AdminLayout() {
 
     // Activité commerciale
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
+    {
+      to: "/admin/bons-commande",
+      label: "Bons de commande",
+      icon: FileCheck2,
+      group: "Activité",
+      badge: poCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-[#0b1026]">{poCount > 99 ? "99+" : poCount}</span>
+        : undefined,
+    },
+
 
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },

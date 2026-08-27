@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { normalizeVin } from "@/lib/vin";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
@@ -159,7 +160,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       } else {
         if (r.data.marque) setMarqueRetour(r.data.marque);
         if (r.data.modele) setModeleRetour(r.data.modele);
-        if (r.data.vin) setVinRetour(r.data.vin);
+        if (r.data.vin) setVinRetour(normalizeVin(r.data.vin));
         setSivRetourMsg({ type: "ok", text: "Véhicule trouvé ✓" });
       }
     } catch {
@@ -201,7 +202,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         const d = r.data;
         if (d.marque) setMarque(d.marque);
         if (d.modele) setModele(d.modele);
-        if (d.vin) setVin(d.vin);
+        if (d.vin) setVin(normalizeVin(d.vin));
         if (d.annee) setAnnee(d.annee);
         if (d.puissance) setPuissance(d.puissance);
         if (d.finition) setFinition(d.finition);
@@ -1123,7 +1124,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     {(() => {
                       const applyScan = (f: ExtractedFields) => {
                         if (f.immatriculation && !immatriculation) setImmatriculation(f.immatriculation.toUpperCase());
-                        if (f.vin && !vin) setVin(f.vin.toUpperCase());
+                        if (f.vin && !vin) setVin(normalizeVin(f.vin));
                         if (f.marque && !marque) setMarque(f.marque);
                         if (f.modele && !modele) setModele(f.modele);
                         if (f.energie && !energy) setEnergy(f.energie.toLowerCase());
@@ -1192,7 +1193,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       </label>
                       <input
                         value={vin}
-                        onChange={e => setVin(e.target.value.toUpperCase())}
+                        onChange={e => setVin(normalizeVin(e.target.value))}
                         placeholder="Renseigné automatiquement via la plaque"
                         className={inputCard + " uppercase tracking-widest"}
                         maxLength={17}
@@ -1301,7 +1302,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         </div>
                         <div className="sm:col-span-2">
                           <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">VIN <span className="text-cream/40 normal-case">(optionnel)</span></label>
-                          <input value={vinRetour} onChange={e => setVinRetour(e.target.value.toUpperCase())} className={inputCard + " uppercase tracking-widest"} maxLength={17} />
+                          <input value={vinRetour} onChange={e => setVinRetour(normalizeVin(e.target.value))} className={inputCard + " uppercase tracking-widest"} maxLength={17} />
                         </div>
                       </div>
                     </div>

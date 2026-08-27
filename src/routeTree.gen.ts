@@ -140,6 +140,7 @@ import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
 import { Route as AuthenticatedAdminCampagnesRouteImport } from './routes/_authenticated/admin.campagnes'
+import { Route as AuthenticatedAdminBonsCommandeRouteImport } from './routes/_authenticated/admin.bons-commande'
 import { Route as AuthenticatedAdminB2bLeadsRouteImport } from './routes/_authenticated/admin.b2b-leads'
 import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_authenticated/admin.b2b-dispatch'
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
@@ -158,6 +159,7 @@ import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
+import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/public/hooks/gmail-po-sync'
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
@@ -916,6 +918,12 @@ const AuthenticatedAdminCampagnesRoute =
     path: '/campagnes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBonsCommandeRoute =
+  AuthenticatedAdminBonsCommandeRouteImport.update({
+    id: '/bons-commande',
+    path: '/bons-commande',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminB2bLeadsRoute =
   AuthenticatedAdminB2bLeadsRouteImport.update({
     id: '/b2b-leads',
@@ -1019,6 +1027,12 @@ const ApiPublicHooksGoogleReviewDispatchRoute =
   ApiPublicHooksGoogleReviewDispatchRouteImport.update({
     id: '/api/public/hooks/google-review-dispatch',
     path: '/api/public/hooks/google-review-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksGmailPoSyncRoute =
+  ApiPublicHooksGmailPoSyncRouteImport.update({
+    id: '/api/public/hooks/gmail-po-sync',
+    path: '/api/public/hooks/gmail-po-sync',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicFactureWebhookRoute = ApiPublicFactureWebhookRouteImport.update({
@@ -1232,6 +1246,7 @@ export interface FileRoutesByFullPath {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
@@ -1332,6 +1347,7 @@ export interface FileRoutesByFullPath {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1403,6 +1419,7 @@ export interface FileRoutesByTo {
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
@@ -1500,6 +1517,7 @@ export interface FileRoutesByTo {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1579,6 +1597,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
   '/_authenticated/admin/b2b-dispatch': typeof AuthenticatedAdminB2bDispatchRoute
   '/_authenticated/admin/b2b-leads': typeof AuthenticatedAdminB2bLeadsRoute
+  '/_authenticated/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/_authenticated/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
@@ -1679,6 +1698,7 @@ export interface FileRoutesById {
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
+  '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
@@ -1758,6 +1778,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
+    | '/admin/bons-commande'
     | '/admin/campagnes'
     | '/admin/candidatures'
     | '/admin/clients'
@@ -1858,6 +1879,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -1929,6 +1951,7 @@ export interface FileRouteTypes {
     | '/admin/attributions'
     | '/admin/b2b-dispatch'
     | '/admin/b2b-leads'
+    | '/admin/bons-commande'
     | '/admin/campagnes'
     | '/admin/candidatures'
     | '/admin/clients'
@@ -2026,6 +2049,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -2104,6 +2128,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/attributions'
     | '/_authenticated/admin/b2b-dispatch'
     | '/_authenticated/admin/b2b-leads'
+    | '/_authenticated/admin/bons-commande'
     | '/_authenticated/admin/campagnes'
     | '/_authenticated/admin/candidatures'
     | '/_authenticated/admin/clients'
@@ -2204,6 +2229,7 @@ export interface FileRouteTypes {
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
+    | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
@@ -2286,6 +2312,7 @@ export interface RootRouteChildren {
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
+  ApiPublicHooksGmailPoSyncRoute: typeof ApiPublicHooksGmailPoSyncRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
@@ -3223,6 +3250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCampagnesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/bons-commande': {
+      id: '/_authenticated/admin/bons-commande'
+      path: '/bons-commande'
+      fullPath: '/admin/bons-commande'
+      preLoaderRoute: typeof AuthenticatedAdminBonsCommandeRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/b2b-leads': {
       id: '/_authenticated/admin/b2b-leads'
       path: '/b2b-leads'
@@ -3347,6 +3381,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/google-review-dispatch'
       fullPath: '/api/public/hooks/google-review-dispatch'
       preLoaderRoute: typeof ApiPublicHooksGoogleReviewDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/gmail-po-sync': {
+      id: '/api/public/hooks/gmail-po-sync'
+      path: '/api/public/hooks/gmail-po-sync'
+      fullPath: '/api/public/hooks/gmail-po-sync'
+      preLoaderRoute: typeof ApiPublicHooksGmailPoSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/facture/webhook': {
@@ -3607,6 +3648,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
   AuthenticatedAdminB2bDispatchRoute: typeof AuthenticatedAdminB2bDispatchRoute
   AuthenticatedAdminB2bLeadsRoute: typeof AuthenticatedAdminB2bLeadsRoute
+  AuthenticatedAdminBonsCommandeRoute: typeof AuthenticatedAdminBonsCommandeRoute
   AuthenticatedAdminCampagnesRoute: typeof AuthenticatedAdminCampagnesRoute
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
@@ -3648,6 +3690,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
   AuthenticatedAdminB2bDispatchRoute: AuthenticatedAdminB2bDispatchRoute,
   AuthenticatedAdminB2bLeadsRoute: AuthenticatedAdminB2bLeadsRoute,
+  AuthenticatedAdminBonsCommandeRoute: AuthenticatedAdminBonsCommandeRoute,
   AuthenticatedAdminCampagnesRoute: AuthenticatedAdminCampagnesRoute,
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
@@ -4046,6 +4089,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
+  ApiPublicHooksGmailPoSyncRoute: ApiPublicHooksGmailPoSyncRoute,
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,

@@ -62,6 +62,7 @@ import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
@@ -99,8 +100,11 @@ interface AttributionFull {
 
 interface TrajetFull {
   id: string;
+  mission_id?: string | null;
+  devis_id?: string | null;
   numero_mission?: string | null;
   leg_index?: number | null;
+
 
   depart: string;
   arrivee: string;
@@ -1332,6 +1336,10 @@ function AdminMissionDetail() {
         baseNumero={missionNumber}
         onPricesSaved={fetchAll}
       />
+
+      <div className="mb-4">
+        <PoLinkCard missionId={trajet.mission_id ?? undefined} devisId={trajet.devis_id ?? undefined} />
+      </div>
 
       <MissionPriceCard
         trajetId={trajet.id}

@@ -55,6 +55,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.0.10",
     "@stripe/react-stripe-js": "^4.0.0",
     "@stripe/stripe-js": "7.9.0",
     "@supabase/supabase-js": "^2.103.0",
@@ -93,11 +94,11 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
     "tw-animate-css": "^1.3.4",
+    "unpdf": "^1.8.1",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
     "web-push": "^3.6.7",
-    "zod": "^3.24.2",
-    "@react-email/render": "^2.0.10"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
