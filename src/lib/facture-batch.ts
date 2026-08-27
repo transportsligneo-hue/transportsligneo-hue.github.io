@@ -43,6 +43,7 @@ interface AttrRow {
     numero_mission: string | null;
     mission_id: string | null;
     devis_id: string | null;
+    commande_ref: string | null;
     devis: {
       numero: string | null;
       prix_estime: number | null;
