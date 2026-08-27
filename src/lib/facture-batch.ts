@@ -175,6 +175,14 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
         .find((invoice) => !!invoice) ??
       (t?.mission_id ? factures.get(`m:${t.mission_id}`) : null) ??
       null;
+    // PO saisi côté fiche mission (trajets.commande_ref) : on le récupère sur
+    // n'importe quel volet du duo quand la facture n'en porte pas encore.
+    const missionPo =
+      grouped
+        .map((x) => (x.trajet?.commande_ref ?? "").trim())
+        .find((ref) => !!ref) ?? null;
+    const referenceClient =
+      (fac?.reference_client ?? "").trim() || missionPo || null;
     return {
       trajetId: r.trajet_id,
       attributionId: r.id,
@@ -192,8 +200,9 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
       isGroup: billableLegs.length > 1,
       factureId: fac?.id ?? null,
       factureNumero: fac?.numero ?? null,
-      referenceClient: fac?.reference_client ?? null,
-      referenceLabel: fac?.reference_label ?? null,
+      referenceClient,
+      referenceLabel:
+        fac?.reference_label ?? (referenceClient ? "Référence client" : null),
     };
   });
 }
