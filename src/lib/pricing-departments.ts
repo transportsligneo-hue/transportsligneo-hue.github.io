@@ -1,7 +1,7 @@
 // Tarifs locaux par département — version basée sur les codes postaux.
 // Règle :
-//   - Départ ET arrivée dans la zone agglo de la ville principale  → 79 € / 129 € A/R
-//   - Même département mais l'un des deux hors zone agglo            → 99 € / 129 € A/R
+//   - Départ ET arrivée dans la zone agglo de la ville principale  → 79 € / 129 € A/R (37 : 70 € / 120 €)
+//   - Même département mais lun des deux hors zone agglo            → 99 € / 129 € A/R (37 : 90 € / 130 €)
 //   - Départements différents                                        → null (fallback km appelant)
 // Les tarifs FIXED_TARIFFS existants gardent leur priorité dans calculatePrice.
 
@@ -370,7 +370,7 @@ const DEPT_AGGLO_COMMUNES: Record<string, string[]> = {
   ],
 };
 
-/** Communes connues du département mais hors zone agglo → forfait 99 € si l'autre point est dans le même dept. */
+/** Communes connues du département mais hors zone agglo → forfait local (90 € en 37) si l'autre point est dans le même dept. */
 const DEPT_OUTSIDE_COMMUNES: Record<string, string[]> = {
   "37": [
     "Loches", "Amboise", "Chinon", "Bléré", "Azay-le-Rideau", "Sainte-Maure-de-Touraine",
@@ -480,8 +480,12 @@ export function resolveLocalDeptTariff(
   if (!entry) return null;
 
   const bothAgglo = zDep.inAgglo && zArr.inAgglo;
-  const simple = bothAgglo ? 79 : 99;
-  const retour = 129;
+  // Indre-et-Loire (37) : grille dédiée — 70 € intra-agglo Tours / 120 € A-R,
+  // 90 € hors agglo / 130 € A-R. Autres départements : grille standard.
+  const isDept37 = zDep.dept === "37";
+  const simple = isDept37 ? (bothAgglo ? 70 : 90) : bothAgglo ? 79 : 99;
+  const retour = isDept37 ? (bothAgglo ? 120 : 130) : 129;
+
   const label = bothAgglo
     ? `Forfait ${entry.city} (agglomération)`
     : `Forfait département ${zDep.dept} — hors agglomération`;

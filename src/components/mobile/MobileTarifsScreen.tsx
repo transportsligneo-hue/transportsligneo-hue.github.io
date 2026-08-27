@@ -54,16 +54,16 @@ export default function MobileTarifsScreen() {
           <PriceCard
             title="Tours intra"
             lines={[
-              { l: "Livraison simple", p: "79 €" },
-              { l: "Livraison + Restitution", p: "129 €" },
+              { l: "Livraison simple", p: "70 €" },
+              { l: "Livraison + Restitution", p: "120 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />
           <PriceCard
             title="Hors agglomération (37)"
             lines={[
-              { l: "Livraison simple", p: "99 €" },
-              { l: "Livraison + Restitution", p: "129 €" },
+              { l: "Livraison simple", p: "90 €" },
+              { l: "Livraison + Restitution", p: "130 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />

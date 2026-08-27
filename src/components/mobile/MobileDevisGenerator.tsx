@@ -28,8 +28,8 @@ const CITY_DEPARTMENTS: Record<string, string> = {
   "Châteauroux": "37-hors",
 };
 const FIXED_TARIFFS: Record<string, [number, number]> = {
-  "37-intra": [79, 129],
-  "37-hors": [99, 129],
+  "37-intra": [70, 120],
+  "37-hors": [90, 130],
 };
 const DEPARTMENT_LABELS: Record<string, string> = {
   "37-intra": "Forfait Tours intra",
