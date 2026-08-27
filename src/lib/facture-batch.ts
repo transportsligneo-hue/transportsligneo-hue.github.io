@@ -66,7 +66,7 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
   const { data, error } = await supabase
     .from("attributions")
     .select(
-      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, devis:devis(numero, prix_estime, prix_aller, prix_retour))",
+      "id, trajet_id, statut, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, client_nom, client_email, prix, prix_client, mission_group_id, leg_index, leg_type, is_test_data, numero_mission, mission_id, devis_id, commande_ref, devis:devis(numero, prix_estime, prix_aller, prix_retour))",
     )
     .in("statut", ["termine", "validee"])
     .order("created_at", { ascending: false });
