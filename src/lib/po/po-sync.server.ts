@@ -9,7 +9,7 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
 export const PO_LABEL_NAME = "Devis CAT FRANCE et PO K2";
 
 /** Statuts de devis considérés « en attente de réponse » pour le rapprochement. */
-const PENDING_DEVIS_STATUTS = ["envoye", "brouillon", "en_attente"];
+const PENDING_DEVIS_STATUTS = ["envoye", "genere", "brouillon", "en_attente"];
 
 type GmailPart = {
   filename?: string;
