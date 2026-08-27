@@ -3,7 +3,7 @@
  * Serveur uniquement : jetons OAuth gérés par le connecteur Lovable (jamais côté client).
  */
 import { extractPoNumber, parsePoDocument, type ParsedPo } from "@/lib/po/parse-po";
-import { normalizeVin } from "@/lib/vin";
+import { normalizeVin, vinLooseMatch } from "@/lib/vin";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
 export const PO_LABEL_NAME = "Devis CAT FRANCE et PO K2";
@@ -195,7 +195,7 @@ async function processMessage(id: string, supabaseAdmin: AdminClient, result: Sy
   const vin = parsed.vin ? normalizeVin(parsed.vin) : null;
 
   // Champs obligatoires manquants → on classe en erreur d'extraction sans deviner.
-  const extractionOk = !!numero && !!vin;
+  const extractionOk = !!numero && !!vin && vin.length >= 14;
   const statutInitial = extractionOk ? "non_rapproche" : "erreur_extraction";
 
   if (!numero) {
@@ -289,7 +289,7 @@ export async function matchPoToDevis(
     .order("created_at", { ascending: false });
 
   const candidates = (devisRows ?? []).filter(
-    (d) => normalizeVin(d.vin as string | null) === vin || normalizeVin(d.vin_retour as string | null) === vin,
+    (d) => vinLooseMatch(d.vin as string | null, vin) || vinLooseMatch(d.vin_retour as string | null, vin),
   );
 
   if (candidates.length === 1) {

@@ -63,15 +63,22 @@ export function parseFrAmount(input: string | null | undefined): number | null {
 
 /** Cherche un VIN plausible (17 caractères valides) dans un texte libre. */
 export function findVinInText(text: string): string | null {
-  // 1. Ligne explicite VIN / DAI / n°DMS
-  const labelled = text.match(/VIN\s*(?:\/\s*DAI)?[^\n:]*[:\s]\s*([A-HJ-NPR-Z0-9]{17})/i);
-  if (labelled?.[1] && isValidVinFormat(labelled[1])) return normalizeVin(labelled[1]);
+  const upper = text.toUpperCase();
 
-  // 2. VIN collé à une désignation ("010 Recharge pour transport VF1...")
-  const candidates = text.toUpperCase().match(/\b[A-HJ-NPR-Z0-9]{17}\b/g) ?? [];
-  for (const c of candidates) {
-    // un VIN contient toujours au moins une lettre et au moins un chiffre
+  // 1. VIN parfaitement formé (17 caractères)
+  const strict = upper.match(/\b[A-HJ-NPR-Z0-9]{17}\b/g) ?? [];
+  for (const c of strict) {
     if (/[A-Z]/.test(c) && /\d/.test(c) && isValidVinFormat(c)) return c;
+  }
+
+  // 2. Ligne de désignation ("010 Recharge pour transport VF1RCB...") :
+  //    l'extraction de texte des PDF CAT perd parfois un caractère.
+  const designation = upper
+    .split("\n")
+    .find((l) => /RECHARGE|TRANSPORT|CONVOYAGE|VIN/.test(l) && /[A-HJ-NPR-Z]{2}\d/.test(l));
+  const loose = (designation ?? upper).match(/\b[A-HJ-NPR-Z0-9]{14,17}\b/g) ?? [];
+  for (const c of loose) {
+    if (/^[A-Z]{2,}/.test(c) && /\d{4,}/.test(c)) return normalizeVin(c);
   }
   return null;
 }

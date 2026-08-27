@@ -92,3 +92,30 @@ export function sameVin(a: string | null | undefined, b: string | null | undefin
   const y = normalizeVin(b);
   return !!x && x === y;
 }
+
+/**
+ * Comparaison tolérante utilisée pour le rapprochement des bons de commande :
+ * l'extraction de texte d'un PDF perd parfois un caractère du VIN.
+ * Accepte l'égalité stricte, le préfixe long (>= 14 caractères) ou une
+ * différence d'un seul caractère manquant.
+ */
+export function vinLooseMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+  const x = normalizeVin(a);
+  const y = normalizeVin(b);
+  if (!x || !y || x.length < 13 || y.length < 13) return false;
+  if (x === y) return true;
+
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  if (long.length - short.length > 1) return false;
+  if (long.startsWith(short) && short.length >= 14) return true;
+  if (long.length === short.length) return false;
+
+  // une seule suppression : le court doit être une sous-séquence du long
+  let i = 0;
+  let skipped = 0;
+  for (const c of long) {
+    if (short[i] === c) i++;
+    else if (++skipped > 1) return false;
+  }
+  return i === short.length;
+}
