@@ -282,15 +282,34 @@ export async function matchPoToDevis(
   numeroPo: string,
   vin: string,
 ): Promise<MatchOutcome> {
+  const selectCols =
+    "id, numero, created_at, prix_estime, nom, prenom, email, arrivee, statut, mission_id, vin, vin_retour";
+
   const { data: devisRows } = await supabaseAdmin
     .from("devis")
-    .select("id, numero, created_at, prix_estime, nom, prenom, email, arrivee, statut, mission_id, vin, vin_retour")
+    .select(selectCols)
     .in("statut", PENDING_DEVIS_STATUTS)
     .order("created_at", { ascending: false });
 
-  const candidates = (devisRows ?? []).filter(
-    (d) => vinLooseMatch(d.vin as string | null, vin) || vinLooseMatch(d.vin_retour as string | null, vin),
-  );
+  const byVin = (rows: typeof devisRows) =>
+    (rows ?? []).filter(
+      (d) => vinLooseMatch(d.vin as string | null, vin) || vinLooseMatch(d.vin_retour as string | null, vin),
+    );
+
+  let candidates = byVin(devisRows);
+  let alreadyAccepted = false;
+
+  // Le PO arrive parfois après la conversion du devis en mission : on rattache
+  // quand même le bon de commande, sans toucher au statut du devis.
+  if (candidates.length === 0) {
+    const { data: allRows } = await supabaseAdmin
+      .from("devis")
+      .select(selectCols)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    candidates = byVin(allRows);
+    alreadyAccepted = candidates.length > 0;
+  }
 
   if (candidates.length === 1) {
     const devis = candidates[0]!;
@@ -303,13 +322,16 @@ export async function matchPoToDevis(
         candidats: [],
       } as never)
       .eq("id", poId);
-    await supabaseAdmin
-      .from("devis")
-      .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
-      .eq("id", devis.id);
+    if (!alreadyAccepted) {
+      await supabaseAdmin
+        .from("devis")
+        .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
+        .eq("id", devis.id);
+    }
     console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero}`);
     return "rapproche";
   }
+
 
   if (candidates.length > 1) {
     await supabaseAdmin
