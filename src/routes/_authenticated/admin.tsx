@@ -60,6 +60,25 @@ function AdminLayout() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
   const [demandesCount, setDemandesCount] = useState(0);
+  const [poCount, setPoCount] = useState(0);
+
+  useEffect(() => {
+    if (role !== "admin" && role !== "super_admin") return;
+    const fetchPo = async () => {
+      const { count } = await supabase
+        .from("bons_commande" as never)
+        .select("id", { count: "exact", head: true })
+        .in("statut" as never, ["ambigu", "erreur_extraction"] as never);
+      setPoCount(count ?? 0);
+    };
+    fetchPo();
+    const channel = supabase
+      .channel("admin-po-badge")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bons_commande" }, fetchPo)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [role]);
+
 
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
