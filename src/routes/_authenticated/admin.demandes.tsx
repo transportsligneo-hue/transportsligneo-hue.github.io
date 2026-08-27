@@ -304,136 +304,170 @@ function AdminDemandes() {
             description="Les demandes du formulaire apparaîtront ici."
           />
         ) : (
-          <div className="overflow-x-auto -mx-1">
-            <table className="admin-table w-full">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th className="hidden sm:table-cell">Trajet</th>
-                  <th className="hidden md:table-cell">Date</th>
-                  <th>TTC</th>
-                  <th>Statut</th>
-                  <th className="text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((d) => {
-                  const q = quoteFromDemande(d);
-                  const fromOpts = extractFromOptions(d.options);
-                  const ttc = d.prix_estime ?? fromOpts.prix ?? q?.priceTtc ?? null;
-                  const isNew = !!previousSeenAt && new Date(d.created_at) > new Date(previousSeenAt);
-                  return (
-                    <tr
-                      key={d.id}
-                      className={`cursor-pointer hover:bg-[color:var(--admin-accent-soft)]/40${isNew ? " bg-[#2F5FFF]/[0.07]" : ""}`}
-                      onClick={() => setSelected(d)}
-                    >
-                      <td>
-                        {isNew && (
-                          <span className="mr-1.5 inline-flex items-center rounded-full bg-[#2F5FFF] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white align-middle">
-                            Nouveau
-                          </span>
+          <div className="space-y-3.5">
+            {filtered.map((d) => {
+              const q = quoteFromDemande(d);
+              const fromOpts = extractFromOptions(d.options);
+              const ttc = d.prix_estime ?? fromOpts.prix ?? q?.priceTtc ?? null;
+              const isNew = !!previousSeenAt && new Date(d.created_at) > new Date(previousSeenAt);
+              const tags = renderOptionsMeta(d.options_meta);
+              const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
+              const marque = d.vehicule_marque ?? d.marque;
+              const modele = d.vehicule_modele ?? d.modele;
+              const plaque = d.vehicule_immatriculation ?? d.immatriculation;
+              const isAR = !!(d.date_retour || d.immatriculation_retour || d.arrivee_retour);
+              const statutTone =
+                d.statut === "annulee" ? "red"
+                : d.statut === "terminee" ? "green"
+                : d.statut === "convertie" || d.statut === "attribuee" ? "blue"
+                : "orange";
+              return (
+                <div key={d.id} className={`dvx-card ${isClosedStatut(d.statut) ? "is-archived" : ""}`}>
+                  {/* En-tête */}
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
+                      {isNew && <span className="dvx-badge blue">Nouveau</span>}
+                      <span className={`dvx-badge ${statutTone}`}>{statutLabels[d.statut] ?? d.statut}</span>
+                      {isAR && (
+                        <span className="dvx-badge violet" title="Livraison + Restitution">
+                          <ArrowRight size={11} /> Duo L + R
+                        </span>
+                      )}
+                      {!isClosedStatut(d.statut) && (!marque || !modele) && (
+                        <span className="dvx-badge red">Infos véhicule incomplètes</span>
+                      )}
+                      {!isClosedStatut(d.statut) && marque && modele && !plaque && (
+                        <span className="dvx-badge orange">Plaque à confirmer</span>
+                      )}
+                      <span className="text-[11.5px] text-[#a3a4ac]">
+                        {new Date(d.created_at).toLocaleString("fr-FR", {
+                          day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="dvx-price">
+                        {ttc != null
+                          ? `${Number(ttc).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
+                          : "—"}
+                        <small>TTC</small>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Corps */}
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className="dvx-avatar">{initials}</span>
+                      <div className="min-w-0">
+                        <p className="text-[13.5px] font-bold text-[#14161c] truncate">
+                          {`${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "—"}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d] truncate">
+                          <Mail size={11} className="shrink-0" />{d.email}
+                        </p>
+                        {d.telephone && (
+                          <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
+                            <Phone size={11} className="shrink-0" />{d.telephone}
+                          </p>
                         )}
-                        <span className="font-medium text-[color:var(--admin-text)]">
-                          {d.prenom} {d.nom}
-                        </span>
-                        <p className="text-[color:var(--admin-muted)] text-xs truncate max-w-[180px]">
-                          {d.email}
-                        </p>
-                        <p className="text-[color:var(--admin-muted)] text-xs sm:hidden truncate max-w-[180px]">
-                          {d.depart} → {d.arrivee}
-                        </p>
-                        {(() => {
-                          const tags = renderOptionsMeta(d.options_meta);
-                          if (tags.length === 0) return null;
-                          return (
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {tags.slice(0, 3).map((t) => (
-                                <span key={t} className="text-[10px] bg-[#d4af37]/15 text-[#8a6a10] border border-[#d4af37]/30 rounded-full px-1.5 py-0.5">
-                                  {t}
-                                </span>
-                              ))}
-                              {tags.length > 3 && (
-                                <span className="text-[10px] text-[color:var(--admin-muted)]">+{tags.length - 3}</span>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </td>
+                      </div>
+                    </div>
 
-                      <td className="hidden sm:table-cell">
-                        <span className="inline-flex items-center gap-1.5 text-[color:var(--admin-text)]">
-                          {d.depart}
-                          <ArrowRight size={11} className="text-[color:var(--admin-muted)]" />
-                          {d.arrivee}
-                        </span>
-                      </td>
-                      <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
-                        {new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
-                      </td>
-                      <td>
-                        <span className="font-semibold text-[color:var(--admin-text)] tabular-nums whitespace-nowrap">
-                          {ttc != null ? `${Number(ttc).toFixed(0)} €` : "—"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="flex flex-wrap items-center gap-1">
-                          <AdminBadge
-                            label={statutLabels[d.statut] ?? d.statut}
-                            tone={d.statut === "annulee" ? "danger" : d.statut === "terminee" ? "success" : undefined}
-                          />
-                          {(() => {
-                            if (isClosedStatut(d.statut)) return null;
-                            const marque = d.vehicule_marque ?? d.marque;
-                            const modele = d.vehicule_modele ?? d.modele;
-                            const plaque = d.vehicule_immatriculation ?? d.immatriculation;
-                            if (!marque || !modele) return <AdminBadge label="Infos véhicule incomplètes" tone="danger" />;
-                            if (!plaque) return <AdminBadge label="Plaque à confirmer" tone="warning" />;
-                            return null;
-                          })()}
+                    <div className="min-w-0">
+                      <p className="dvx-col-k">Trajet</p>
+                      <div className="flex items-start gap-2">
+                        <span className="dvx-dot start" />
+                        <p className="text-[12.5px] text-[#14161c] leading-snug">{d.depart}</p>
+                      </div>
+                      <div className="mt-1.5 flex items-start gap-2">
+                        <span className="dvx-dot end" />
+                        <p className="text-[12.5px] text-[#14161c] leading-snug">{d.arrivee}</p>
+                      </div>
+                      <p className="mt-1.5 text-[11px] text-[#a3a4ac]">
+                        {(d.distance_km ?? fromOpts.distance) != null ? `${d.distance_km ?? fromOpts.distance} km` : "—"}
+                      </p>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="dvx-col-k">Souhait client</p>
+                      <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#14161c]">
+                        <Calendar size={12} className="text-[#2f5fff]" />
+                        {d.date_souhaitee
+                          ? new Date(d.date_souhaitee).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                          : "Date à définir"}
+                        {d.heure_souhaitee ? ` · ${d.heure_souhaitee.slice(0, 5)}` : ""}
+                      </p>
+                      {tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {tags.slice(0, 4).map((t) => (
+                            <span key={t} className="dvx-badge grey">{t}</span>
+                          ))}
+                          {tags.length > 4 && <span className="text-[11px] text-[#a3a4ac]">+{tags.length - 4}</span>}
                         </div>
-                      </td>
+                      )}
+                    </div>
 
-
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setSelected(d)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-[color:var(--admin-accent)] hover:bg-[color:var(--admin-accent-soft)]"
-                            title="Voir la fiche"
-                          >
-                            <Eye size={15} />
-                          </button>
-                          {!isClosedStatut(d.statut) && (
-                            <>
-                              <button
-                                onClick={() => convertToTrajet(d)}
-                                disabled={converting === d.id}
-                                title="Convertir en trajet"
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-700 hover:bg-[color:var(--admin-success-soft)] disabled:opacity-50"
-                              >
-                                <ArrowRightCircle size={15} />
-                              </button>
-                              <button
-                                onClick={() => setRefusing(d)}
-                                title="Refuser la demande"
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md text-rose-600 hover:bg-rose-50"
-                              >
-                                <XCircle size={15} />
-                              </button>
-                            </>
-                          )}
+                    <div className="min-w-0">
+                      <p className="dvx-col-k">Véhicule</p>
+                      <span className="dvx-tag">
+                        <Car size={13} className="text-[#2f5fff]" />
+                        {[marque, modele].filter(Boolean).join(" ") || d.vehicule_type || "—"}
+                      </span>
+                      {plaque && (
+                        <div className="mt-1.5">
+                          <span className="plate-tag plate-tag--sm">{plaque}</span>
                         </div>
-                      </td>
+                      )}
+                      {d.vehicule_vin && <p className="dvx-vin mt-1">VIN {d.vehicule_vin}</p>}
+                      {isAR && d.immatriculation_retour && (
+                        <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
+                          <p className="text-[11px] text-[#a3a4ac] mb-1">Restitution</p>
+                          <span className="plate-tag plate-tag--sm">{d.immatriculation_retour}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-                    </tr>
-                  );
-                })}
-              </tbody>
+                  {d.message && (
+                    <p className="mt-3 border-l-2 border-[#dce6fd] pl-3 text-[12px] italic text-[#70727d]">
+                      « {d.message} »
+                    </p>
+                  )}
 
-            </table>
+                  {/* Pied de carte */}
+                  <div className="dvx-foot">
+                    <button type="button" className="dvx-ico" title="Voir la fiche" onClick={() => setSelected(d)}>
+                      <Eye size={15} />
+                    </button>
+                    {!isClosedStatut(d.statut) && (
+                      <>
+                        <button
+                          type="button"
+                          className="dvx-btn solid"
+                          onClick={() => convertToTrajet(d)}
+                          disabled={converting === d.id}
+                        >
+                          <ArrowRightCircle size={13} />
+                          Convertir
+                        </button>
+                        <button
+                          type="button"
+                          className="dvx-ico danger"
+                          title="Refuser la demande"
+                          onClick={() => setRefusing(d)}
+                        >
+                          <XCircle size={15} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+
       </AdminSection>
 
       <DemandeDrawer
