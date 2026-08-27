@@ -155,16 +155,25 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
     const hasLegs = grouped.some(
       (x) => x.trajet?.leg_type === "aller" || x.trajet?.leg_type === "retour",
     );
-    const billableLegs = hasLegs
+    const legRows = hasLegs
       ? grouped.filter(
           (x) =>
             x.trajet?.leg_type === "aller" || x.trajet?.leg_type === "retour",
         )
       : grouped;
+    // Un même trajet peut porter plusieurs attributions (re-livraison quand le
+    // client était absent) : on ne facture qu'une fois chaque segment.
+    const seenTrajets = new Set<string>();
+    const billableLegs = legRows.filter((x) => {
+      if (seenTrajets.has(x.trajet_id)) return false;
+      seenTrajets.add(x.trajet_id);
+      return true;
+    });
     const segmentTotal = billableLegs.reduce(
       (sum, x) => sum + Number(x.trajet?.prix_client ?? x.trajet?.prix ?? 0),
       0,
     );
+
     const devis = t?.devis;
     const devisParts =
       Number(devis?.prix_aller ?? 0) + Number(devis?.prix_retour ?? 0);

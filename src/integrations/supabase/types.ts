@@ -7281,10 +7281,6 @@ export type Database = {
         }
         Returns: string
       }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       detect_mission_alerts: { Args: never; Returns: Json }
       devis_is_aller_retour: { Args: { _option: string }; Returns: boolean }
       driver_apply_to_mission: {
@@ -7298,11 +7294,6 @@ export type Database = {
       driver_respond_to_proposal: {
         Args: { _accept: boolean; _attribution_id: string; _reason?: string }
         Returns: undefined
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       expire_stale_proposals: { Args: never; Returns: undefined }
       find_or_create_company: {
@@ -7509,15 +7500,6 @@ export type Database = {
         Args: { _date: string; _heure: string }
         Returns: string
       }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       next_devis_numero: { Args: never; Returns: string }
       next_document_number: {
         Args: { _doc_prefix: string; _year?: number }
@@ -7549,14 +7531,6 @@ export type Database = {
       push_scan_handoff_extraction: {
         Args: { _extraction: Json; _token: string }
         Returns: string
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       recalculate_company_score: {
         Args: { _company_id: string }
