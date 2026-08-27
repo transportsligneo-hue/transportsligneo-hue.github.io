@@ -3,12 +3,13 @@ import { LigneoEmailShell, RecapCard } from './_ligneo-header'
 
 interface EmailChangeEmailProps {
   siteName: string
+  oldEmail?: string
   email: string
   newEmail: string
   confirmationUrl: string
 }
 
-export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
+export const EmailChangeEmail = ({ siteName, oldEmail, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
   <LigneoEmailShell
     preview="Un clic pour valider le changement."
     tagline="Sécurité du compte"
@@ -20,7 +21,7 @@ export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }:
   >
     <RecapCard
       rows={[
-        { label: 'Ancien email', value: email },
+        { label: 'Ancien email', value: oldEmail || email },
         { label: 'Nouvel email', value: newEmail },
       ]}
     />

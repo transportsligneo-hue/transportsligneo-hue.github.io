@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TestSmsRouteImport } from './routes/test-sms'
 import { Route as TarifsRouteImport } from './routes/tarifs'
 import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
@@ -45,7 +44,6 @@ import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certi
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
@@ -66,7 +64,7 @@ import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as PaiementFactureFactureIdRouteImport } from './routes/paiement.facture.$factureId'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.transport-ponctuel.retour'
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
@@ -153,9 +151,7 @@ import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './ro
 import { Route as AuthenticatedDashboardClientMissionsIndexRouteImport } from './routes/_authenticated/dashboard-client.missions.index'
 import { Route as AuthenticatedConvoyeurFormationIndexRouteImport } from './routes/_authenticated/convoyeur.formation.index'
 import { Route as AuthenticatedAdminMissionsIndexRouteImport } from './routes/_authenticated/admin.missions.index'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
@@ -190,11 +186,6 @@ import { Route as ApiPublicV1MissionsMissionIdIndexRouteImport } from './routes/
 import { Route as ApiPublicV1MissionsMissionIdTrackingRouteImport } from './routes/api/public/v1/missions/$missionId/tracking'
 import { Route as ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport } from './routes/api/public/v1/missions/$missionId/proof-of-delivery'
 
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TestSmsRoute = TestSmsRouteImport.update({
   id: '/test-sms',
   path: '/test-sms',
@@ -370,11 +361,6 @@ const InvitationConvoyeurTokenRoute =
     path: '/invitation-convoyeur/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -484,9 +470,9 @@ const PaiementFactureFactureIdRoute =
     path: '/paiement/facture/$factureId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const B2bTransportPonctuelRetourRoute =
@@ -996,22 +982,10 @@ const AuthenticatedAdminMissionsIndexRoute =
     path: '/missions/',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
     path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
 const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
@@ -1234,7 +1208,6 @@ export interface FileRoutesByFullPath {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -1248,7 +1221,6 @@ export interface FileRoutesByFullPath {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1335,7 +1307,7 @@ export interface FileRoutesByFullPath {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -1366,9 +1338,7 @@ export interface FileRoutesByFullPath {
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
   '/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
@@ -1415,7 +1385,6 @@ export interface FileRoutesByTo {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
@@ -1423,7 +1392,6 @@ export interface FileRoutesByTo {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1507,7 +1475,7 @@ export interface FileRoutesByTo {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/convoyeur': typeof AuthenticatedConvoyeurIndexRoute
@@ -1538,9 +1506,7 @@ export interface FileRoutesByTo {
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/admin/missions': typeof AuthenticatedAdminMissionsIndexRoute
   '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/dashboard-client/missions': typeof AuthenticatedDashboardClientMissionsIndexRoute
@@ -1589,7 +1555,6 @@ export interface FileRoutesById {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
-  '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -1603,7 +1568,6 @@ export interface FileRoutesById {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1690,7 +1654,7 @@ export interface FileRoutesById {
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
   '/b2b/transport-ponctuel/retour': typeof B2bTransportPonctuelRetourRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/paiement/facture/$factureId': typeof PaiementFactureFactureIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/convoyeur/': typeof AuthenticatedConvoyeurIndexRoute
@@ -1721,9 +1685,7 @@ export interface FileRoutesById {
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
   '/_authenticated/admin/missions/': typeof AuthenticatedAdminMissionsIndexRoute
   '/_authenticated/convoyeur/formation/': typeof AuthenticatedConvoyeurFormationIndexRoute
   '/_authenticated/dashboard-client/missions/': typeof AuthenticatedDashboardClientMissionsIndexRoute
@@ -1772,7 +1734,6 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
-    | '/unsubscribe'
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
@@ -1786,7 +1747,6 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
-    | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -1873,7 +1833,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/paiement/facture/$factureId'
     | '/admin/'
     | '/convoyeur/'
@@ -1904,9 +1864,7 @@ export interface FileRouteTypes {
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/missions/'
     | '/convoyeur/formation/'
     | '/dashboard-client/missions/'
@@ -1953,7 +1911,6 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
-    | '/unsubscribe'
     | '/notifications'
     | '/a/$code'
     | '/actualites/$slug'
@@ -1961,7 +1918,6 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
-    | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -2045,7 +2001,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/paiement/facture/$factureId'
     | '/admin'
     | '/convoyeur'
@@ -2076,9 +2032,7 @@ export interface FileRouteTypes {
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/admin/missions'
     | '/convoyeur/formation'
     | '/dashboard-client/missions'
@@ -2126,7 +2080,6 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
-    | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
@@ -2140,7 +2093,6 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
-    | '/email/unsubscribe'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -2227,7 +2179,7 @@ export interface FileRouteTypes {
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
     | '/b2b/transport-ponctuel/retour'
-    | '/lovable/email/suppression'
+    | '/lovable/email/events'
     | '/paiement/facture/$factureId'
     | '/_authenticated/admin/'
     | '/_authenticated/convoyeur/'
@@ -2258,9 +2210,7 @@ export interface FileRouteTypes {
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
     | '/_authenticated/admin/missions/'
     | '/_authenticated/convoyeur/formation/'
     | '/_authenticated/dashboard-client/missions/'
@@ -2309,11 +2259,9 @@ export interface RootRouteChildren {
   SuppressionCompteRoute: typeof SuppressionCompteRoute
   TarifsRoute: typeof TarifsRoute
   TestSmsRoute: typeof TestSmsRoute
-  UnsubscribeRoute: typeof UnsubscribeRoute
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
@@ -2330,7 +2278,7 @@ export interface RootRouteChildren {
   ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
   ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   PaiementFactureFactureIdRoute: typeof PaiementFactureFactureIdRoute
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
@@ -2344,9 +2292,7 @@ export interface RootRouteChildren {
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
   ApiPublicV1InternalMissionEventRoute: typeof ApiPublicV1InternalMissionEventRoute
   ApiPublicV1InvoicesInvoiceIdRoute: typeof ApiPublicV1InvoicesInvoiceIdRoute
   ApiPublicV1QuotesQuoteIdRoute: typeof ApiPublicV1QuotesQuoteIdRoute
@@ -2360,13 +2306,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/test-sms': {
       id: '/test-sms'
       path: '/test-sms'
@@ -2612,13 +2551,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationConvoyeurTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/$slug'
@@ -2759,11 +2691,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaiementFactureFactureIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/b2b/transport-ponctuel/retour': {
@@ -3368,25 +3300,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMissionsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/webhook': {
@@ -4100,11 +4018,9 @@ const rootRouteChildren: RootRouteChildren = {
   SuppressionCompteRoute: SuppressionCompteRoute,
   TarifsRoute: TarifsRoute,
   TestSmsRoute: TestSmsRoute,
-  UnsubscribeRoute: UnsubscribeRoute,
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
@@ -4122,7 +4038,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
   ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   PaiementFactureFactureIdRoute: PaiementFactureFactureIdRoute,
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
@@ -4137,9 +4053,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
   ApiPublicV1InternalMissionEventRoute: ApiPublicV1InternalMissionEventRoute,
   ApiPublicV1InvoicesInvoiceIdRoute: ApiPublicV1InvoicesInvoiceIdRoute,
   ApiPublicV1QuotesQuoteIdRoute: ApiPublicV1QuotesQuoteIdRoute,
