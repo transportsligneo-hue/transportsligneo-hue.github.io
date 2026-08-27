@@ -1111,10 +1111,13 @@ export type Database = {
       }
       bons_commande: {
         Row: {
+          adresse_livraison: string | null
           candidats: Json
+          contact_livraison: string | null
           created_at: string
           date_commande: string | null
           date_livraison: string | null
+          designation: string | null
           destinataire: string | null
           devis_id: string | null
           email_received_at: string | null
@@ -1132,10 +1135,13 @@ export type Database = {
           vin: string | null
         }
         Insert: {
+          adresse_livraison?: string | null
           candidats?: Json
+          contact_livraison?: string | null
           created_at?: string
           date_commande?: string | null
           date_livraison?: string | null
+          designation?: string | null
           destinataire?: string | null
           devis_id?: string | null
           email_received_at?: string | null
@@ -1153,10 +1159,13 @@ export type Database = {
           vin?: string | null
         }
         Update: {
+          adresse_livraison?: string | null
           candidats?: Json
+          contact_livraison?: string | null
           created_at?: string
           date_commande?: string | null
           date_livraison?: string | null
+          designation?: string | null
           destinataire?: string | null
           devis_id?: string | null
           email_received_at?: string | null
