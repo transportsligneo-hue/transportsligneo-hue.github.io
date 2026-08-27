@@ -399,21 +399,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...(isPaid ? GREEN : GOLD));
   doc.text(isPaid ? "PAYÉE" : "À RÉGLER", M + sw, blockY);
 
-  // Rappel N° de PO (bloc règlement)
-  const poRef = f.reference_client?.trim();
-  const poLabel = f.reference_label?.trim() || "N° de PO";
-  let modY = blockY + 8;
-  if (poRef) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text(`${poLabel} : `, M, modY);
-    const pw = doc.getTextWidth(`${poLabel} : `);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...GOLD);
-    doc.text(poRef, M + pw, modY);
-    modY += 6;
-  }
+  const modY = blockY + 8;
+
 
   // Modalités
   doc.setFont("helvetica", "bold");
