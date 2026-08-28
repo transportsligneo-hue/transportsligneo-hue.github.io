@@ -10,14 +10,12 @@ import {
   PageHeader,
   Card,
   KpiCard,
-  Badge,
   EmptyState,
   Button,
-  IconButton,
   Select,
   SearchInput,
-  factureStatutTone,
 } from "@/components/admin/AdminUI";
+
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
