@@ -264,80 +264,149 @@ function AdminFacturesPage() {
       ) : filtered.length === 0 ? (
         <EmptyState icon={FileText} title="Aucune facture" description="Les factures émises apparaîtront ici." />
       ) : (
-        <div className="space-y-3">
-          {filtered.map((f) => (
-            <Card key={f.id}>
-              <div className="flex items-start justify-between flex-wrap gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-pro-text font-medium">{f.numero}</p>
+        <div className="space-y-3.5">
+          {filtered.map((f) => {
+            const tone =
+              f.statut === "payee" ? "green"
+              : f.statut === "en_retard" ? "red"
+              : f.statut === "annulee" ? "grey"
+              : "orange";
+            const clientLabel = f.client_societe || `${f.client_prenom ?? ""} ${f.client_nom ?? ""}`.trim() || "—";
+            const initials = (f.client_societe
+              ? f.client_societe.slice(0, 2)
+              : `${(f.client_prenom || "").charAt(0)}${(f.client_nom || "").charAt(0)}`
+            ).toUpperCase() || "?";
+            return (
+              <div key={f.id} className={`dvx-card ${f.statut === "annulee" ? "is-archived" : ""}`}>
+                {/* En-tête */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="dvx-ref">{f.numero}</span>
                     <EditableNumero
                       table="factures"
                       id={f.id}
                       value={f.numero}
                       onSaved={(next: string) => setFactures((list) => list.map((x) => x.id === f.id ? { ...x, numero: next } : x))}
                     />
-                    <Badge tone={factureStatutTone[f.statut] ?? "neutral"}>
+                    <span className={`dvx-badge ${tone}`}>
                       {STATUTS.find(s => s.value === f.statut)?.label ?? f.statut}
-                    </Badge>
-                    <Badge tone={f.type_facture === "b2b" ? "primary" : "info"}>
+                    </span>
+                    <span className={`dvx-badge ${f.type_facture === "b2b" ? "violet" : "blue"}`}>
                       {f.type_facture === "b2b" ? "B2B" : "Particulier"}
-                    </Badge>
+                    </span>
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      {new Date(f.date_facture ?? f.created_at).toLocaleDateString("fr-FR", {
+                        day: "2-digit", month: "short", year: "numeric",
+                      })}
+                    </span>
                   </div>
-                  <p className="text-pro-muted text-xs mt-1">
-                    {f.client_societe || `${f.client_prenom ?? ""} ${f.client_nom ?? ""}`.trim() || "—"}
-                    {f.client_email && <> · {f.client_email}</>}
-                  </p>
-                  {(f.depart || f.arrivee) && (
-                    <p className="text-pro-text-soft text-xs mt-0.5">
-                      {f.depart} → {f.arrivee}
-                      {f.distance_km != null && <> · {f.distance_km} km</>}
+                  <div className="text-right shrink-0">
+                    <p className="dvx-price">
+                      {Number(f.prix_ttc).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                      <small>TTC · {eur(Number(f.prix_ht))} HT</small>
                     </p>
-                  )}
-                  <div className="mt-1.5">
-                    <ReferenceInline row={f} onSave={saveReference} />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="text-right">
-                    <p className="text-pro-text font-semibold">{eur(Number(f.prix_ttc))}</p>
-                    <p className="text-pro-muted text-[10px]">TTC ({eur(Number(f.prix_ht))} HT)</p>
+
+                {/* Corps */}
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="dvx-avatar">{initials}</span>
+                    <div className="min-w-0">
+                      <p className="text-[13.5px] font-bold text-[#14161c] truncate">{clientLabel}</p>
+                      {f.client_email && (
+                        <p className="mt-1 text-[11.5px] text-[#70727d] truncate">{f.client_email}</p>
+                      )}
+                    </div>
                   </div>
-                  <Select
-                    value={f.statut}
-                    onChange={(e) => handleStatut(f.id, e.target.value)}
-                    className="text-xs py-1.5"
-                  >
-                    {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </Select>
-                  <Select value={f.mode_paiement ?? "Carte bancaire"} onChange={(e) => handlePaymentMode(f.id, e.target.value)} className="text-xs py-1.5">
-                    <option value="Carte bancaire">Carte bancaire</option>
-                    <option value="Virement différé">Virement différé</option>
-                  </Select>
-                  <IconButton title="Voir détail" tone="neutral" onClick={() => setSelected(f)}>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Trajet</p>
+                    {f.depart || f.arrivee ? (
+                      <>
+                        <div className="flex items-start gap-2">
+                          <span className="dvx-dot start" />
+                          <p className="text-[12.5px] text-[#14161c] leading-snug">{f.depart ?? "—"}</p>
+                        </div>
+                        <div className="mt-1.5 flex items-start gap-2">
+                          <span className="dvx-dot end" />
+                          <p className="text-[12.5px] text-[#14161c] leading-snug">{f.arrivee ?? "—"}</p>
+                        </div>
+                        {f.distance_km != null && (
+                          <p className="mt-1.5 text-[11px] text-[#a3a4ac]">{f.distance_km} km</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-[12.5px] text-[#a3a4ac]">—</p>
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Référence / PO</p>
+                    <ReferenceInline row={f} onSave={saveReference} />
+                    {f.date_echeance && (
+                      <p className="mt-1.5 text-[11px] text-[#a3a4ac]">
+                        Échéance {new Date(f.date_echeance).toLocaleDateString("fr-FR")}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Statut & paiement</p>
+                    <div className="flex flex-col gap-1.5">
+                      <select
+                        value={f.statut}
+                        onChange={(e) => handleStatut(f.id, e.target.value)}
+                        className="dvx-select"
+                      >
+                        {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                      <select
+                        value={f.mode_paiement ?? "Carte bancaire"}
+                        onChange={(e) => handlePaymentMode(f.id, e.target.value)}
+                        className="dvx-select"
+                      >
+                        <option value="Carte bancaire">Carte bancaire</option>
+                        <option value="Virement différé">Virement différé</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pied de carte */}
+                <div className="dvx-foot">
+                  <button type="button" className="dvx-ico" title="Voir détail" onClick={() => setSelected(f)}>
                     <Eye size={15} />
-                  </IconButton>
-                  <IconButton title="Prévisualiser le PDF" tone="neutral" onClick={() => setPreviewRow(f)}>
+                  </button>
+                  <button type="button" className="dvx-ico" title="Prévisualiser le PDF" onClick={() => setPreviewRow(f)}>
                     <FileSearch size={15} />
-                  </IconButton>
-                  <IconButton
+                  </button>
+                  <button
+                    type="button"
+                    className="dvx-btn solid"
                     onClick={() => handleDownload(f)}
-                    title="Télécharger PDF"
-                    tone="primary"
                     disabled={generatingId === f.id}
                   >
-                    {generatingId === f.id ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
-                  </IconButton>
+                    {generatingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                    PDF
+                  </button>
                   {f.statut !== "payee" && (
-                    <IconButton onClick={() => handleStatut(f.id, "payee")} title="Marquer payée" tone="success">
-                      <CheckCircle2 size={15} />
-                    </IconButton>
+                    <button
+                      type="button"
+                      className="dvx-btn"
+                      onClick={() => handleStatut(f.id, "payee")}
+                      title="Marquer payée"
+                    >
+                      <CheckCircle2 size={13} />
+                      Marquer payée
+                    </button>
                   )}
                 </div>
               </div>
-            </Card>
-          ))}
+            );
+          })}
         </div>
+
       )}
 
       <PdfPreviewDialog
