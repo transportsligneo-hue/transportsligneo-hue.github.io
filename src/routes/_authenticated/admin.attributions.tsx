@@ -655,41 +655,79 @@ function AdminAttributions() {
     setPhotosView({ id: attributionId, type, photos: enriched });
   };
 
-  const renderAttributionCard = (a: Attribution) => (
-            <Card key={a.id}>
+  const renderAttributionCard = (a: Attribution) => {
+    const dvxTone =
+      ["annule", "refusee"].includes(a.statut) ? "red"
+      : ["termine", "validee"].includes(a.statut) ? "green"
+      : ["accepte", "en_cours"].includes(a.statut) ? "blue"
+      : "orange";
+    const isClosed = ["annule", "refusee"].includes(a.statut);
+    return (
+            <div key={a.id} className={`dvx-card ${isClosed ? "is-archived" : ""}`}>
               <div
                 role="button"
                 tabIndex={0}
                 onClick={() => navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } })}
                 onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/admin/missions/$missionId", params: { missionId: a.id } }); }}
-                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-pro-accent/40"
+                className="cursor-pointer -m-1 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2f5fff]/30"
                 title="Ouvrir le menu complet de la mission"
               >
-              <div className="flex items-start justify-between flex-wrap gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-pro-text font-semibold">
-                      {attributionRef(a, arBaseByGroup)}
+              {/* En-tête */}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <span className="dvx-ref">{attributionRef(a, arBaseByGroup)}</span>
+                  <span className={`dvx-badge ${dvxTone}`}>{statutLabels[a.statut] ?? a.statut}</span>
+                  {!a.trajet?.mission_group_id && hasLegSuffix(a.numero_mission) && (
+                    <span className="dvx-badge violet" title="Ces deux volets ont été dissociés">
+                      Ancien duo L + R
+                    </span>
+                  )}
+                  {isRechargeSeule(a.trajet) && <RechargeBadge />}
+                  {a.trajet?.is_test_data && <TestBadge />}
+                  {a.trajet?.commande_ref && (
+                    <span className="dvx-badge blue" title="Numéro de commande / PO">
+                      PO {a.trajet.commande_ref}
+                    </span>
+                  )}
+                  {a.trajet?.type_transport && (
+                    <span className="dvx-badge grey">{a.trajet.type_transport}</span>
+                  )}
+                </div>
+                {a.trajet?.prix != null && (
+                  <div className="text-right shrink-0">
+                    <p className="dvx-price">
+                      {Math.round(Number(a.trajet.prix))} €<small>Prix client</small>
                     </p>
-                    {!a.trajet?.mission_group_id && hasLegSuffix(a.numero_mission) && (
-                      <span className="text-[11px] text-indigo-700" title="Ces deux volets ont été dissociés">
-                        Ancien duo Livraison–Restitution
-                      </span>
-                    )}
-                    <Badge tone={attributionStatutTone[a.statut] ?? "neutral"}>
-                      {statutLabels[a.statut] ?? a.statut}
-                    </Badge>
-                    {isRechargeSeule(a.trajet) && <RechargeBadge />}
-                    {a.trajet?.is_test_data && <TestBadge />}
-                    {a.trajet?.type_transport && (
-                      <span className="text-[10px] uppercase tracking-wider text-pro-muted">
-                        {a.trajet.type_transport}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-pro-text-soft text-sm mt-1">
-                    {a.trajet ? `${a.trajet.depart} → ${a.trajet.arrivee}` : "Trajet non renseigné"}
+                )}
+              </div>
+
+              {/* Corps */}
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="min-w-0">
+                  <p className="dvx-col-k">Trajet</p>
+                  {a.trajet ? (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <span className="dvx-dot start" />
+                        <p className="text-[12.5px] text-[#14161c] leading-snug">{a.trajet.depart}</p>
+                      </div>
+                      <div className="mt-1.5 flex items-start gap-2">
+                        <span className="dvx-dot end" />
+                        <p className="text-[12.5px] text-[#14161c] leading-snug">{a.trajet.arrivee}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-[12.5px] text-[#a3a4ac]">Trajet non renseigné</p>
+                  )}
+                  <p className="mt-1.5 text-[11px] text-[#a3a4ac]">
+                    {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
+                    {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
                   </p>
+                </div>
+
+                <div className="min-w-0 xl:col-span-2">
+                  <p className="dvx-col-k">Véhicule(s)</p>
                   {(() => {
                     const ownPlate = a.trajet?.immatriculation || a.trajet?.vehicule_immatriculation;
                     const embedded = a.trajet?.devis?.vehicules ?? undefined;
@@ -715,49 +753,43 @@ function AdminAttributions() {
 
 
                     return (
-                      <div className="mt-2 space-y-1">
+                      <div className="space-y-1.5">
                         {list.map((v, i) => {
                           const e = (v.energie ?? "").toLowerCase();
                           return (
                             <div key={`${v.immatriculation ?? i}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                               {v.immatriculation ? (
-                                <span className="plate-tag text-[11px]">{v.immatriculation}</span>
+                                <span className="plate-tag plate-tag--sm">{v.immatriculation}</span>
                               ) : (
                                 <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
                                   Plaque à renseigner
                                 </span>
                               )}
                               {(v.marque || v.modele) && (
-                                <span className="text-xs font-semibold text-pro-text">
+                                <span className="text-[12px] font-semibold text-[#14161c]">
                                   {[v.marque, v.modele].filter(Boolean).join(" ")}
                                 </span>
                               )}
-                              {v.type && (
-                                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
-                                  {v.type}
-                                </span>
-                              )}
+                              {v.type && <span className="dvx-badge grey">{v.type}</span>}
                               {(e.includes("lec") || e === "ev") && (
-                                <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                                  Électrique
-                                </span>
+                                <span className="dvx-badge green">Électrique</span>
                               )}
                               {v.vin && (
-                                <span className="font-mono text-[10px] text-pro-muted" title="VIN">VIN {v.vin.slice(-8)}</span>
+                                <span className="dvx-vin" title="VIN">VIN {v.vin.slice(-8)}</span>
                               )}
                             </div>
                           );
                         })}
                         {list.length > 1 && (
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-[10px] uppercase tracking-wider text-pro-muted">
+                            <p className="text-[10px] uppercase tracking-wider text-[#a3a4ac]">
                               {list.length} véhicules sur ce dossier
                             </p>
                             {a.trajet?.devis_id && (
                               <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); setPrixDevisId(a.trajet!.devis_id!); }}
-                                className="rounded-md border border-pro-border bg-white px-2 py-0.5 text-[10px] font-semibold text-pro-text hover:bg-pro-bg-soft"
+                                className="dvx-btn outline"
                               >
                                 Prix par véhicule
                               </button>
@@ -767,32 +799,28 @@ function AdminAttributions() {
                       </div>
                     );
                   })()}
-
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-pro-muted text-xs">
-                    {a.trajet?.commande_ref && (
-                      <span className="rounded-md border border-[#2F5FFF]/30 bg-[#2F5FFF]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2F5FFF]" title="Numéro de commande / PO">
-                        PO {a.trajet.commande_ref}
-                      </span>
-                    )}
-
-                    <span className="font-semibold text-pro-text-soft">
-                      {a.trajet?.date_trajet ? new Date(a.trajet.date_trajet).toLocaleDateString("fr-FR") : "Date à planifier"}
-                      {a.trajet?.date_trajet && a.trajet?.heure_trajet ? ` · ${a.trajet.heure_trajet.slice(0, 5)}` : ""}
-                    </span>
-                    <span>·</span>
-                    <ClientBrand
-                      brand={clientBrandOf(clientBrands, a.trajet?.client_email)}
-                      fallbackName={a.trajet?.client_nom}
-                      size={22}
-                      pv={pvOf(pvMap, a.id)}
-                    />
-                    {a.trajet?.client_telephone && <span className="text-pro-text-soft">· {a.trajet.client_telephone}</span>}
-                    <span>· Convoyeur : <span className="text-pro-text-soft">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span></span>
-                    {a.trajet?.prix != null && <span>· <span className="font-semibold text-pro-text">{Math.round(Number(a.trajet.prix))} €</span></span>}
-                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                <div className="min-w-0">
+                  <p className="dvx-col-k">Client & convoyeur</p>
+                  <ClientBrand
+                    brand={clientBrandOf(clientBrands, a.trajet?.client_email)}
+                    fallbackName={a.trajet?.client_nom}
+                    size={22}
+                    pv={pvOf(pvMap, a.id)}
+                  />
+                  {a.trajet?.client_telephone && (
+                    <p className="mt-1 text-[11.5px] text-[#70727d]">{a.trajet.client_telephone}</p>
+                  )}
+                  <p className="mt-1.5 text-[12px] text-[#14161c]">
+                    Convoyeur : <span className="font-semibold">{a.convoyeur ? `${a.convoyeur.prenom} ${a.convoyeur.nom}` : "Non renseigné"}</span>
+                  </p>
+                </div>
+              </div>
+              </div>
+
+              {/* Pied de carte */}
+              <div className="dvx-foot" onClick={(e) => e.stopPropagation()}>
                   {renderAttributionActions(a)}
                   <IconButton
                     onClick={() => setSelectedAttr(a)}
@@ -830,14 +858,12 @@ function AdminAttributions() {
                       onDeleted={() => { fetchAttributions(); fetchOptions(); }}
                     />
                   )}
-                </div>
-              </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-pro-border" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-3 pt-3 border-t border-[#eaeaee]" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setExpandedDocs(expandedDocs === a.id ? null : a.id)}
-                  className="flex items-center gap-1.5 text-xs text-pro-text-soft hover:text-pro-accent transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[#70727d] hover:text-[#2f5fff] transition-colors"
                 >
                   <FileText size={12} />
                   Documents
@@ -849,8 +875,10 @@ function AdminAttributions() {
                   </div>
                 )}
               </div>
-            </Card>
-  );
+            </div>
+    );
+  };
+
 
   return (
     <div>
