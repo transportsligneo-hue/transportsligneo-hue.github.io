@@ -396,11 +396,37 @@ function AdminNouveauDevisPage() {
     [groupLines],
   );
 
-  const prix = useMemo(() => {
-    if (isGroupe) return totalGroupe > 0 ? Math.round(totalGroupe * 100) / 100 : NaN;
+  /** Suppléments cochés, valorisés. */
+  const supplements = useMemo(
+    () =>
+      SUPPLEMENTS_LIST.filter((s) => s.id in supp)
+        .map((s) => ({ label: s.label, montant: Math.round(parseEur(supp[s.id]) * 100) / 100 }))
+        .filter((s) => s.montant > 0),
+    [supp],
+  );
+  const totalSupplements = useMemo(
+    () => supplements.reduce((s, x) => s + x.montant, 0),
+    [supplements],
+  );
+
+  /** Base transport saisie (avant doublement plateau). */
+  const baseSaisie = useMemo(() => {
+    if (isGroupe) return totalGroupe;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
   }, [montant, isGroupe, totalGroupe]);
+
+  /** Base transport après application du tarif plateau (x2). */
+  const baseTransport = useMemo(
+    () => (Number.isFinite(baseSaisie) ? Math.round(baseSaisie * (plateau ? 2 : 1) * 100) / 100 : NaN),
+    [baseSaisie, plateau],
+  );
+
+  const prix = useMemo(() => {
+    if (!Number.isFinite(baseTransport) || baseTransport <= 0) return NaN;
+    return Math.round((baseTransport + totalSupplements) * 100) / 100;
+  }, [baseTransport, totalSupplements]);
+
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
