@@ -483,6 +483,8 @@ function AdminNouveauDevisPage() {
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     plateau ? "Transport sur plateau : oui (véhicule non roulant)" : null,
+    dateADeterminer ? "Date d'enlèvement : à déterminer avec le client" : null,
+    isAllerRetour && dateRetourADeterminer ? "Date de restitution : à déterminer avec le client" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
@@ -508,7 +510,7 @@ function AdminNouveauDevisPage() {
     immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
     vehicules: isGroupe ? groupPayload : null,
     option_trajet: optionTrajetLabel,
-    date_souhaitee: dateSouhaitee || null,
+    date_souhaitee: dateADeterminer ? null : dateSouhaitee || null,
 
     options,
     plateau,
@@ -583,10 +585,13 @@ function AdminNouveauDevisPage() {
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: optionTrajetLabel,
 
-          date_souhaitee: dateSouhaitee || null,
+          date_souhaitee: dateADeterminer ? null : dateSouhaitee || null,
           heure_souhaitee: dateADeterminer ? null : heureSouhaitee || null,
-          date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
-          heure_retour: isAllerRetour ? (heureRetourInput || null) : null,
+          date_retour:
+            isAllerRetour && !dateRetourADeterminer
+              ? dateRetourInput || (dateADeterminer ? null : dateSouhaitee) || null
+              : null,
+          heure_retour: isAllerRetour && !dateRetourADeterminer ? heureRetourInput || null : null,
 
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
