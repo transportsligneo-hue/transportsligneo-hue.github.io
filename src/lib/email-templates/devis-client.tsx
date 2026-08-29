@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Section, Text } from '@react-email/components'
 import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, SimpleCard, AmountRow } from './_ligneo-header'
 
@@ -15,6 +16,8 @@ interface Props {
   optionTrajet?: string
   clientLogoUrl?: string
   clientName?: string
+  /** Mot personnalisé rédigé par l'équipe Ligneo. */
+  message?: string
   /** Lien de téléchargement direct du devis PDF (URL signée). */
   pdfUrl?: string
   /** Lien public tokenisé permettant de signer le devis (code SMS/email). */
@@ -23,7 +26,7 @@ interface Props {
   payUrl?: string
 }
 
-const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, pdfUrl, signUrl, payUrl }: Props) => (
+const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, message, pdfUrl, signUrl, payUrl }: Props) => (
   <LigneoEmailShell
     googleReview={avisUrl || true}
     preview={`Devis ${prix ? `${prix} € ` : ''}— valable 15 jours.`}
@@ -31,6 +34,7 @@ const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optio
     title="Votre devis est prêt"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro="Voici le récapitulatif de votre demande de convoyage. Ce devis est valable 15 jours à compter d'aujourd'hui."
+
     primaryCta={
       signUrl
         ? { label: 'Accepter et signer le devis', href: signUrl }
