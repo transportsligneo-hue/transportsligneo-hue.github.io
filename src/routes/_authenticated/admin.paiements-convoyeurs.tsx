@@ -9,6 +9,7 @@ import {
 import {
   Card, Badge, Button, EmptyState, Select,
   Table, THead, TH, TR, TD, Modal, TextInput, FormField,
+  PageHeader, SearchInput, KpiCard,
 } from "@/components/admin/AdminUI";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { ConvoyeurFinancesPanel } from "@/components/admin/finances/ConvoyeurFinancesPanel";
