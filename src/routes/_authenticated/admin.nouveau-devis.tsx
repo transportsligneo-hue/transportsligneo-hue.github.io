@@ -609,7 +609,7 @@ function AdminNouveauDevisPage() {
           email: client.email.trim().toLowerCase(),
           telephone: client.telephone?.trim() || null,
           depart: depart.trim(),
-          arrivee: arrivee.trim(),
+          arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
           marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
           modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
           immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,
