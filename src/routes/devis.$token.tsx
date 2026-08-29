@@ -24,6 +24,7 @@ type PublicDevis = {
   expiresAt: string | null;
   maskedEmail: string | null;
   maskedPhone: string | null;
+  lienPaiementExterne?: string | null;
 };
 
 export const Route = createFileRoute("/devis/$token")({
@@ -274,7 +275,23 @@ function DevisPublicPage() {
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
               <CreditCard size={18} className="text-primary" /> Paiement sécurisé
             </h2>
-            <DevisEmbeddedCheckout token={token} returnUrl={returnUrl} />
+            {devis.lienPaiementExterne ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Réglez votre convoyage via notre lien bancaire sécurisé (paiement par carte ou virement).
+                </p>
+                <a
+                  href={devis.lienPaiementExterne}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+                >
+                  <CreditCard size={16} /> Payer {devis.aRegler.toFixed(2)} €
+                </a>
+              </div>
+            ) : (
+              <DevisEmbeddedCheckout token={token} returnUrl={returnUrl} />
+            )}
           </section>
         ) : null}
 

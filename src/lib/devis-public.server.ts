@@ -56,7 +56,7 @@ export function devisPublicUrl(token: string): string {
 }
 
 const DEVIS_FIELDS =
-  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token'
+  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token, lien_paiement_externe'
 
 export type PublicDevis = {
   id: string
@@ -81,6 +81,7 @@ export type PublicDevis = {
   contact_arrivee_tel: string | null
   version: number | null
   public_token: string
+  lien_paiement_externe?: string | null
 }
 
 export async function loadDevisByToken(token: string): Promise<PublicDevis | null> {
@@ -116,6 +117,18 @@ export function toPublicView(d: PublicDevis) {
     expiresAt: d.expires_at,
     maskedEmail: d.email ? maskEmail(d.email) : null,
     maskedPhone: isValidPhone(d.contact_depart_tel) ? maskPhone(d.contact_depart_tel!) : null,
+    lienPaiementExterne: sanitizePaymentLink(d.lien_paiement_externe),
+  }
+}
+
+/** N'accepte qu'une URL https (Qonto, Revolut, banque…) pour éviter toute injection de lien. */
+export function sanitizePaymentLink(input?: string | null): string | null {
+  if (!input) return null
+  try {
+    const u = new URL(String(input).trim())
+    return u.protocol === 'https:' ? u.toString() : null
+  } catch {
+    return null
   }
 }
 

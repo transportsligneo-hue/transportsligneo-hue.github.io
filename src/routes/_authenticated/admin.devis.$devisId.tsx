@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
-  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock,
+  MapPin, Car, FileText, Calendar, PenLine, ShieldCheck, Eye, XCircle, KeyRound, Clock, Link2,
 } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
@@ -47,6 +47,8 @@ function AdminDevisDetailPage() {
   const [priceInput, setPriceInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [prixVehiculesOpen, setPrixVehiculesOpen] = useState(false);
+  const [lienPaiement, setLienPaiement] = useState("");
+  const [savingLien, setSavingLien] = useState(false);
 
 
   const buildDevisData = (row: any): DevisData =>
@@ -87,6 +89,7 @@ function AdminDevisDetailPage() {
     const enriched = { ...data, _profile: profile };
     setDevis(enriched);
     setPriceInput(enriched.prix_estime != null ? String(enriched.prix_estime) : "");
+    setLienPaiement((enriched as any).lien_paiement_externe ?? "");
 
 
     // Load acceptance signature / signed PDF if available
@@ -201,6 +204,33 @@ function AdminDevisDetailPage() {
       toast.error("Impossible de modifier le prix", { description: e instanceof Error ? e.message : "" });
     } finally {
       setSavingPrice(false);
+    }
+  };
+
+  const handleSaveLienPaiement = async () => {
+    if (!devis) return;
+    const raw = lienPaiement.trim();
+    if (raw) {
+      let ok = false;
+      try { ok = new URL(raw).protocol === "https:"; } catch { ok = false; }
+      if (!ok) {
+        toast.error("Lien invalide", { description: "Collez une URL https (Qonto, Revolut, SumUp…)" });
+        return;
+      }
+    }
+    setSavingLien(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ lien_paiement_externe: raw || null } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      setDevis({ ...devis, lien_paiement_externe: raw || null });
+      toast.success(raw ? "Lien de paiement enregistré" : "Lien de paiement retiré");
+    } catch (e) {
+      toast.error("Enregistrement impossible", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingLien(false);
     }
   };
 
@@ -384,6 +414,42 @@ function AdminDevisDetailPage() {
               </div>
             )}
           </Card>
+
+          <Card>
+            <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2 flex items-center gap-2">
+              <Link2 size={12} /> Lien de paiement externe
+            </p>
+            <p className="text-[11px] text-pro-muted mb-3">
+              Collez un lien Qonto, Revolut, SumUp… Il remplace le paiement par carte intégré, dans l'email de devis
+              et sur la page client.
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={lienPaiement}
+                onChange={(e) => setLienPaiement(e.target.value)}
+                placeholder="https://pay.qonto.com/..."
+                className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+              />
+              <Button
+                onClick={handleSaveLienPaiement}
+                disabled={savingLien}
+                icon={savingLien ? <Loader2 size={12} className="animate-spin" /> : <Link2 size={12} />}
+              >
+                Enregistrer
+              </Button>
+            </div>
+            {devis.lien_paiement_externe ? (
+              <a
+                href={devis.lien_paiement_externe}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-[11px] text-pro-accent underline break-all"
+              >
+                Tester le lien actuel
+              </a>
+            ) : null}
+          </Card>
+
 
 
           {acceptation && (

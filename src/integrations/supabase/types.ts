@@ -2358,6 +2358,7 @@ export type Database = {
           id: string
           immatriculation: string | null
           immatriculation_retour: string | null
+          lien_paiement_externe: string | null
           locked_at: string | null
           marque: string | null
           marque_retour: string | null
@@ -2441,6 +2442,7 @@ export type Database = {
           id?: string
           immatriculation?: string | null
           immatriculation_retour?: string | null
+          lien_paiement_externe?: string | null
           locked_at?: string | null
           marque?: string | null
           marque_retour?: string | null
@@ -2524,6 +2526,7 @@ export type Database = {
           id?: string
           immatriculation?: string | null
           immatriculation_retour?: string | null
+          lien_paiement_externe?: string | null
           locked_at?: string | null
           marque?: string | null
           marque_retour?: string | null
@@ -2943,6 +2946,7 @@ export type Database = {
           designation: string | null
           distance_km: number | null
           id: string
+          lien_paiement_externe: string | null
           metadata: Json
           mission_id: string | null
           mode_paiement: string | null
@@ -2987,6 +2991,7 @@ export type Database = {
           designation?: string | null
           distance_km?: number | null
           id?: string
+          lien_paiement_externe?: string | null
           metadata?: Json
           mission_id?: string | null
           mode_paiement?: string | null
@@ -3031,6 +3036,7 @@ export type Database = {
           designation?: string | null
           distance_km?: number | null
           id?: string
+          lien_paiement_externe?: string | null
           metadata?: Json
           mission_id?: string | null
           mode_paiement?: string | null
