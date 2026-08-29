@@ -473,43 +473,44 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const trajetH = 21;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
-  badge(doc, M + 5, y + 5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE);
+  badge(doc, M + 5, y + 4.5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(9.2);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 16);
+  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 14);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  doc.setFontSize(6.4);
   doc.setTextColor(...MUTED);
-  doc.text("Adresse d'enlèvement à confirmer", M + 5, y + 21);
+  doc.text("Adresse d'enlèvement à confirmer", M + 5, y + 18);
 
   if (!rechargeSeule) {
     const cxm = pageW / 2;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
-    doc.setTextColor(...INK);
-    doc.text(d.distance_km ? `≈${Math.round(d.distance_km)}` : "—", cxm, y + 13, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(5.8);
-    doc.setTextColor(...FAINT);
-    doc.text("KM", cxm, y + 17, { align: "center" });
-    doc.setFontSize(9);
-    doc.setTextColor(...FAINT);
-    doc.text("→", cxm - 16, y + 13.5, { align: "center" });
-    doc.text("→", cxm + 16, y + 13.5, { align: "center" });
-
-    const ax = pageW / 2 + 18;
-    badge(doc, ax, y + 5, "LIVRAISON", AMBER_SOFT, AMBER_INK);
-    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 16);
+    doc.text(d.distance_km ? `≈${Math.round(d.distance_km)}` : "—", cxm, y + 11.5, { align: "center" });
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(5.6);
+    doc.setTextColor(...FAINT);
+    doc.text("KM", cxm, y + 15, { align: "center" });
+    doc.setFontSize(9);
+    doc.setTextColor(...FAINT);
+    doc.text("→", cxm - 16, y + 12, { align: "center" });
+    doc.text("→", cxm + 16, y + 12, { align: "center" });
+
+    const ax = pageW / 2 + 18;
+    badge(doc, ax, y + 4.5, "LIVRAISON", AMBER_SOFT, AMBER_INK);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.2);
+    doc.setTextColor(...INK);
+    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 14);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.4);
     doc.setTextColor(...MUTED);
-    doc.text("Adresse de livraison à confirmer", ax, y + 21);
+    doc.text("Adresse de livraison à confirmer", ax, y + 18);
   }
-  y += trajetH + 8;
+  y += trajetH + 5;
+
 
   // ===== Véhicule / Type de prestation =====
   const multiVehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.marque || v.modele));
