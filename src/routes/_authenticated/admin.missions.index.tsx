@@ -932,7 +932,7 @@ function AdminMissionsUnified() {
                         )}
                       </td>
                       <td className={r.inGroup ? "pl-5" : ""}>
-                        <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
+                        <p className="dvx-ref inline-flex items-center gap-1.5">
                           {alertsByTrajet.get(r.m.id) && (
                             <span
                               title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
