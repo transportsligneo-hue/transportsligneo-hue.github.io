@@ -125,7 +125,18 @@ const OPTIONS_LIST = [
 ] as const;
 
 
+/** Suppléments facturables affichés en lignes distinctes sur le devis PDF. */
+const SUPPLEMENTS_LIST = [
+  { id: "chargement", label: "Chargement et déchargement", defaut: 150 },
+  { id: "peages", label: "Péages et frais de route", defaut: 120 },
+  { id: "assurance", label: "Assurance transport tous risques", defaut: 75 },
+  { id: "dossier", label: "Frais de dossier et suivi", defaut: 50 },
+  { id: "international", label: "Majoration trajet international", defaut: 200 },
+  { id: "treuillage", label: "Treuillage véhicule non roulant", defaut: 90 },
+] as const;
+
 const RECHARGE_SEULE = "Recharge uniquement (sans livraison)";
+
 
 const TRAJET_TYPES = [
   "Livraison simple",
