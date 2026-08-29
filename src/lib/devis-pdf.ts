@@ -112,6 +112,33 @@ export function parseDevisOptions(message?: string | null): { options: string[];
   return out;
 }
 
+/**
+ * Relit le mode « transport sur plateau » et les suppléments facturés
+ * (assurance, péages, chargement…) depuis le récapitulatif `message`.
+ */
+export function parseDevisSupplements(message?: string | null): {
+  plateau: boolean;
+  supplements: Array<{ label: string; montant: number }>;
+} {
+  const out = { plateau: false, supplements: [] as Array<{ label: string; montant: number }> };
+  if (!message) return out;
+  for (const raw of message.split("\n")) {
+    const line = raw.trim();
+    if (/^Transport sur plateau\s*:/i.test(line)) {
+      out.plateau = /oui/i.test(line);
+      continue;
+    }
+    const m = line.match(/^Suppl[ée]ment\s*:\s*(.+?)\s*=\s*([\d.,\s]+)\s*€/i);
+    if (m) {
+      const montant = parseFloat(m[2].replace(/\s/g, "").replace(",", "."));
+      if (Number.isFinite(montant)) out.supplements.push({ label: m[1].trim(), montant });
+    }
+  }
+  return out;
+}
+
+
+
 /** Détecte un devis « recharge uniquement, sans livraison ». */
 export function isDevisRechargeSeule(d: { option_trajet?: string | null; prestation?: string | null }): boolean {
   const t = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
