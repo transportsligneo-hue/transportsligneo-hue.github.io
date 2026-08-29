@@ -479,9 +479,12 @@ function AdminNouveauDevisPage() {
     isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
+    plateau ? "Transport sur plateau : oui (véhicule non roulant, tarif x2)" : null,
+    ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
     destNote ? `Note livraison : ${destNote}` : null,
+
   ]
     .filter(Boolean)
     .join("\n");
