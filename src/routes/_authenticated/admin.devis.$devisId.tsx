@@ -88,6 +88,7 @@ function AdminDevisDetailPage() {
     }
     const enriched = { ...data, _profile: profile };
     setDevis(enriched);
+    setPriceInput(enriched.prix_estime != null ? String(enriched.prix_estime) : "");
     setLienPaiement((enriched as any).lien_paiement_externe ?? "");
 
 
