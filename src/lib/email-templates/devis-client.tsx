@@ -39,12 +39,15 @@ const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optio
           : { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
     }
     secondaryCta={
-      payUrl
-        ? { label: 'Payer en ligne en sécurité', href: payUrl }
-        : pdfUrl
-          ? { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
-          : null
+      signUrl && pdfUrl
+        ? { label: 'Télécharger mon devis (PDF)', href: pdfUrl }
+        : payUrl
+          ? { label: 'Payer en ligne en sécurité', href: payUrl }
+          : pdfUrl
+            ? { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
+            : null
     }
+
     clientLogoUrl={clientLogoUrl}
     clientName={clientName}
     footnote="Ce prix inclut l'assurance tous risques, les péages et le suivi GPS en temps réel."
