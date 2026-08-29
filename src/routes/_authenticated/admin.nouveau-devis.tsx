@@ -409,18 +409,15 @@ function AdminNouveauDevisPage() {
     [supplements],
   );
 
-  /** Base transport saisie (avant doublement plateau). */
+  /** Base transport saisie manuellement (montant admin = prix final, jamais doublé). */
   const baseSaisie = useMemo(() => {
     if (isGroupe) return totalGroupe;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
   }, [montant, isGroupe, totalGroupe]);
 
-  /** Base transport après application du tarif plateau (x2). */
-  const baseTransport = useMemo(
-    () => (Number.isFinite(baseSaisie) ? Math.round(baseSaisie * (plateau ? 2 : 1) * 100) / 100 : NaN),
-    [baseSaisie, plateau],
-  );
+  /** Le tarif plateau est une mention : le montant saisi reste prioritaire. */
+  const baseTransport = baseSaisie;
 
   const prix = useMemo(() => {
     if (!Number.isFinite(baseTransport) || baseTransport <= 0) return NaN;
