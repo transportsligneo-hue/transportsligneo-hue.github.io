@@ -415,6 +415,42 @@ function AdminDevisDetailPage() {
             )}
           </Card>
 
+          <Card>
+            <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2 flex items-center gap-2">
+              <Link2 size={12} /> Lien de paiement externe
+            </p>
+            <p className="text-[11px] text-pro-muted mb-3">
+              Collez un lien Qonto, Revolut, SumUp… Il remplace le paiement par carte intégré, dans l'email de devis
+              et sur la page client.
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={lienPaiement}
+                onChange={(e) => setLienPaiement(e.target.value)}
+                placeholder="https://pay.qonto.com/..."
+                className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+              />
+              <Button
+                onClick={handleSaveLienPaiement}
+                disabled={savingLien}
+                icon={savingLien ? <Loader2 size={12} className="animate-spin" /> : <Link2 size={12} />}
+              >
+                Enregistrer
+              </Button>
+            </div>
+            {devis.lien_paiement_externe ? (
+              <a
+                href={devis.lien_paiement_externe}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-[11px] text-pro-accent underline break-all"
+              >
+                Tester le lien actuel
+              </a>
+            ) : null}
+          </Card>
+
+
 
           {acceptation && (
             <Card>
