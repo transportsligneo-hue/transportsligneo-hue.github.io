@@ -1,19 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, Building2, Plus, Trash2, UserCircle2 } from "lucide-react";
+import { Loader2, Search, Building2, Plus, Trash2, UserCircle2, Mail, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -32,6 +22,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { EmptyState } from "@/components/admin/AdminUI";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations")({
   component: AdminOrganisations,
@@ -57,12 +49,12 @@ type Row = {
   profileUserId?: string;
 };
 
-const roleStyles: Record<string, string> = {
-  client_b2b: "bg-blue-100 text-blue-700 border-blue-200",
-  flotte_partenaire: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  sous_traitant: "bg-orange-100 text-orange-700 border-orange-200",
-  client_particulier: "bg-slate-100 text-slate-700 border-slate-200",
-  prospect: "bg-amber-100 text-amber-700 border-amber-200",
+const roleBadgeTone: Record<string, string> = {
+  client_b2b: "blue",
+  flotte_partenaire: "green",
+  sous_traitant: "orange",
+  client_particulier: "grey",
+  prospect: "violet",
 };
 
 const roleLabels: Record<string, string> = {
@@ -71,6 +63,19 @@ const roleLabels: Record<string, string> = {
   sous_traitant: "Sous-traitant",
   client_particulier: "Client particulier",
   prospect: "Prospect",
+};
+
+const statusBadgeTone: Record<string, string> = {
+  active: "green",
+  pending: "orange",
+  suspended: "red",
+  archived: "grey",
+};
+
+const scoreBadgeTone: Record<string, string> = {
+  hot: "red",
+  warm: "orange",
+  cold: "grey",
 };
 
 function AdminOrganisations() {
@@ -219,30 +224,63 @@ function AdminOrganisations() {
     }
   }
 
+  const orgsCount = rows.filter((r) => r.kind === "org").length;
+  const flottesCount = rows.filter((r) => r.roles.includes("flotte_partenaire")).length;
+  const hotCount = rows.filter((r) => r.score_category === "hot").length;
+
   return (
-    <div className="space-y-6">
-      <AdminSectionHeader
-        breadcrumb="Organisations"
-        eyebrow="Comptes professionnels"
-        title="Organisations &"
-        highlight="clients"
-        subtitle="Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro."
-        actions={
-          <Button onClick={() => setCreateOpen(true)} className="gap-2 admin-btn-blue text-white border-transparent hover:text-white">
-            <Plus size={16} /> Nouvelle organisation
-          </Button>
-        }
-      />
+    <div>
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Organisations & clients</h1>
+          <p className="dvx-sub">
+            Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro.
+          </p>
+        </div>
+        <button type="button" className="dvx-cta" onClick={() => setCreateOpen(true)}>
+          <Plus size={16} />
+          Nouvelle organisation
+        </button>
+      </div>
 
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><Building2 size={17} /></span>
+          <p className="dvx-stat-k">Total</p>
+          <p className="dvx-stat-v">{rows.length}</p>
+          <p className="dvx-stat-t dim">Organisations & clients pro</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><Building2 size={17} /></span>
+          <p className="dvx-stat-k">Organisations</p>
+          <p className="dvx-stat-v">{orgsCount}</p>
+          <p className="dvx-stat-t dim">Comptes rattachés</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><UserCircle2 size={17} /></span>
+          <p className="dvx-stat-k">Flottes partenaires</p>
+          <p className="dvx-stat-v">{flottesCount}</p>
+          <p className={`dvx-stat-t ${flottesCount > 0 ? "up" : "dim"}`}>Rôle flotte actif</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic orange"><Building2 size={17} /></span>
+          <p className="dvx-stat-k">Score chaud</p>
+          <p className="dvx-stat-v">{hotCount}</p>
+          <p className={`dvx-stat-t ${hotCount > 0 ? "up" : "dim"}`}>{hotCount > 0 ? "À relancer en priorité" : "Aucun compte chaud"}</p>
+        </div>
+      </div>
 
-      <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" size={16} />
-          <Input
+      {/* ===== Barre de filtres unifiée ===== */}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher (nom, SIRET, email)…"
-            className="pl-9"
           />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
@@ -267,122 +305,96 @@ function AdminOrganisations() {
         </Select>
       </div>
 
-      <div className="bg-white border border-pro-border rounded-xl overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-pro-accent" size={24} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-pro-muted text-sm">Aucune organisation trouvée.</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Organisation / Client</TableHead>
-                <TableHead>Rôles</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((o) => (
-                <TableRow key={o.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <ClientLogo
-                        src={o.logo_url}
-                        name={o.legal_name}
-                        isCompany
-                        kind={o.account_type === "flotte" ? "flotte" : "b2b"}
-                        size="sm"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <div className="font-medium text-pro-text">{o.legal_name}</div>
-                          {o.kind === "org" && o.account_type === "flotte" ? (
-                            <Badge className="bg-purple-100 text-purple-700 border-purple-200" variant="outline">Flotte</Badge>
-                          ) : o.kind === "org" ? (
-                            <Badge className="bg-blue-100 text-blue-700 border-blue-200" variant="outline">B2B</Badge>
-                          ) : null}
-                        </div>
-                        <div className="text-xs text-pro-muted">
-                          {o.commercial_name ? `${o.commercial_name} · ` : ""}
-                          {o.siret ?? (o.kind === "profile" ? "Compte client" : "Sans SIRET")}
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {o.roles.length === 0 ? (
-                        <span className="text-xs text-pro-muted">—</span>
-                      ) : (
-                        o.roles.map((r) => (
-                          <Badge key={r} variant="outline" className={roleStyles[r] ?? ""}>
-                            {roleLabels[r] ?? r}
-                          </Badge>
-                        ))
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    <div>{o.primary_contact_email ?? "—"}</div>
-                    <div className="text-xs text-pro-muted">{o.primary_contact_phone ?? ""}</div>
-                  </TableCell>
-                  <TableCell>
-                    {o.kind === "org" ? (
-                      <Badge variant="outline" className={
-                        o.score_category === "hot" ? "bg-red-100 text-red-700 border-red-200"
-                        : o.score_category === "warm" ? "bg-amber-100 text-amber-700 border-amber-200"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
-                      }>
-                        {o.score} · {o.score_category}
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-pro-muted">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{o.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {o.kind === "org" ? (
-                        <Link
-                          to="/admin/organisations/$orgId"
-                          params={{ orgId: o.id }}
-                          className="text-xs text-pro-accent hover:underline"
-                        >
-                          Voir →
-                        </Link>
-                      ) : (
-                        <Link
-                          to="/admin/clients/$clientId"
-                          params={{ clientId: o.profileUserId! }}
-                          className="text-xs text-pro-accent hover:underline"
-                        >
-                          Voir →
-                        </Link>
-                      )}
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => setToDelete(o)}
-                        title={o.kind === "org" ? "Supprimer l'organisation" : "Archiver le client"}
-                      >
-                        <Trash2 size={15} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <LogoLoader label="Chargement des organisations…" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={Building2} title="Aucune organisation" description="Aucune organisation ne correspond à ces filtres." />
+      ) : (
+        <div className="space-y-3.5">
+          {filtered.map((o) => (
+            <div key={o.id} className={`dvx-card ${o.status === "archived" ? "is-archived" : ""}`}>
+              {/* En-tête de carte */}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <span className={`dvx-badge ${statusBadgeTone[o.status] ?? "grey"}`}>{o.status}</span>
+                  {o.kind === "org" && o.account_type === "flotte" ? (
+                    <span className="dvx-badge violet">Flotte</span>
+                  ) : o.kind === "org" ? (
+                    <span className="dvx-badge blue">B2B</span>
+                  ) : null}
+                  {o.roles.map((r) => (
+                    <span key={r} className={`dvx-badge ${roleBadgeTone[r] ?? "grey"}`}>{roleLabels[r] ?? r}</span>
+                  ))}
+                  <span className="text-[11.5px] text-[#a3a4ac]">
+                    {new Date(o.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
+                  </span>
+                </div>
+                {o.kind === "org" && (
+                  <div className="text-right shrink-0">
+                    <span className={`dvx-badge ${scoreBadgeTone[o.score_category] ?? "grey"}`}>
+                      {o.score} · {o.score_category}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Corps */}
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <ClientLogo
+                    src={o.logo_url}
+                    name={o.legal_name}
+                    isCompany
+                    kind={o.account_type === "flotte" ? "flotte" : "b2b"}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-[13.5px] font-bold text-[#14161c] truncate">{o.legal_name}</p>
+                    <p className="mt-1 text-[11.5px] text-[#70727d] truncate">
+                      {o.commercial_name ? `${o.commercial_name} · ` : ""}
+                      {o.siret ?? (o.kind === "profile" ? "Compte client" : "Sans SIRET")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="dvx-col-k">Contact</p>
+                  {o.primary_contact_email && (
+                    <p className="text-[12.5px] text-[#14161c] flex items-center gap-1.5 truncate"><Mail size={12} className="text-[#a3a4ac] shrink-0" />{o.primary_contact_email}</p>
+                  )}
+                  {o.primary_contact_phone && (
+                    <p className="mt-1.5 text-[12.5px] text-[#14161c] flex items-center gap-1.5"><Phone size={12} className="text-[#a3a4ac] shrink-0" />{o.primary_contact_phone}</p>
+                  )}
+                  {!o.primary_contact_email && !o.primary_contact_phone && <p className="text-[12.5px] text-[#a3a4ac]">—</p>}
+                </div>
+              </div>
+
+              {/* Pied de carte */}
+              <div className="dvx-foot">
+                {o.kind === "org" ? (
+                  <Link to="/admin/organisations/$orgId" params={{ orgId: o.id }} className="dvx-btn solid">
+                    Voir →
+                  </Link>
+                ) : (
+                  <Link to="/admin/clients/$clientId" params={{ clientId: o.profileUserId! }} className="dvx-btn solid">
+                    Voir →
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  className="dvx-ico"
+                  title={o.kind === "org" ? "Supprimer l'organisation" : "Archiver le client"}
+                  onClick={() => setToDelete(o)}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <CreateOrgDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={load} />
 

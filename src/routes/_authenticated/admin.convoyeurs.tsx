@@ -630,99 +630,97 @@ function AdminConvoyeurs() {
       {filtered.length === 0 ? (
         <EmptyState icon={IdCard} title="Aucun convoyeur" description="Aucun résultat pour ce filtre." />
       ) : (
-        <Table>
-          <THead>
-            <TH>Convoyeur</TH>
-            <TH className="hidden sm:table-cell">Contact</TH>
-            <TH className="hidden md:table-cell">Type</TH>
-            <TH className="hidden lg:table-cell">Docs</TH>
-            <TH>Statut</TH>
-            <TH className="text-right">Actions</TH>
-          </THead>
-          <tbody>
-            {filtered.map((c) => (
-              <TR key={c.id} onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: c.id } })} className="cursor-pointer">
-                <TD>
-                  <div className="flex items-center gap-2">
-                    <DriverAvatar convoyeurId={c.id} name={`${c.prenom ?? ""} ${c.nom ?? ""}`.trim()} size="sm" />
-                    <div className="min-w-0">
-                      <p className="font-medium text-pro-text truncate">
-                        {c.prenom} {c.nom}
-                      </p>
-                      <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
-                    </div>
-                  </div>
-                </TD>
-                <TD className="hidden sm:table-cell text-pro-text-soft">
-                  <p className="text-sm">{c.email}</p>
-                  {c.telephone && <p className="text-xs text-pro-muted">{c.telephone}</p>}
-                </TD>
-                <TD className="hidden md:table-cell">
-                  <Badge tone={c.type_convoyeur === "independant" ? "purple" : "info"}>
-                    Indépendant
-                  </Badge>
-                </TD>
-                <TD className="hidden lg:table-cell">
-                  <span className="text-xs text-pro-text-soft tabular-nums">
-                    {c.docsApprouves}<span className="text-pro-muted">/{c.type_convoyeur === "independant" ? 6 : c.docsCount || 0}</span>
-                  </span>
-                </TD>
-                <TD>
+        <div className="space-y-3.5">
+          {filtered.map((c) => (
+            <div
+              key={c.id}
+              className={`dvx-card cursor-pointer ${c.statutUnifie === "suspendu" ? "is-archived" : ""}`}
+              onClick={() => navigate({ to: "/admin/convoyeurs/$convoyeurId", params: { convoyeurId: c.id } })}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <StatutConvoyeurBadge statut={c.statutUnifie} />
-                </TD>
-                <TD onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
-                    <IconButton onClick={() => setSelected(c)} title="Aperçu rapide" tone="neutral">
-                      <Eye size={15} />
-                    </IconButton>
-                    {c.statutUnifie !== "valide" && c.statutUnifie !== "suspendu" && (
-                      <>
-                        <IconButton
-                          onClick={() => updateStatut(c.id, "valide")}
-                          title="Valider"
-                          tone="success"
-                        >
-                          <CheckCircle size={15} />
-                        </IconButton>
-                        <IconButton
-                          onClick={async () => {
-                            const motif = window.prompt("Motif du refus (optionnel) :") ?? undefined;
-                            if (motif === null) return;
-                            await updateStatut(c.id, "refuse", motif || undefined);
-                          }}
-                          title="Refuser"
-                          tone="danger"
-                        >
-                          <XCircle size={15} />
-                        </IconButton>
-                      </>
-                    )}
-                    {c.statutUnifie !== "suspendu" && c.user_id && (
-                      <IconButton
-                        onClick={() => suspendConvoyeur(c)}
-                        title="Suspendre"
-                        tone="danger"
-                        disabled={busy === c.id}
+                  <span className="dvx-badge violet">Indépendant</span>
+                  <span className="text-[11.5px] text-[#a3a4ac]">
+                    Inscrit le {new Date(c.created_at).toLocaleDateString("fr-FR")}
+                  </span>
+                </div>
+                <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 shrink-0">
+                  <button type="button" className="dvx-ico" title="Aperçu rapide" onClick={() => setSelected(c)}>
+                    <Eye size={15} />
+                  </button>
+                  {c.statutUnifie !== "valide" && c.statutUnifie !== "suspendu" && (
+                    <>
+                      <button type="button" className="dvx-ico" title="Valider" onClick={() => updateStatut(c.id, "valide")}>
+                        <CheckCircle size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        className="dvx-ico danger"
+                        title="Refuser"
+                        onClick={async () => {
+                          const motif = window.prompt("Motif du refus (optionnel) :") ?? undefined;
+                          if (motif === null) return;
+                          await updateStatut(c.id, "refuse", motif || undefined);
+                        }}
                       >
-                        <Ban size={15} />
-                      </IconButton>
-                    )}
-                    {c.statutUnifie === "suspendu" && c.user_id && (
-                      <IconButton
-                        onClick={() => reactivateConvoyeur(c)}
-                        title="Réactiver"
-                        tone="success"
-                        disabled={busy === c.id}
-                      >
-                        <RotateCcw size={15} />
-                      </IconButton>
-                    )}
+                        <XCircle size={15} />
+                      </button>
+                    </>
+                  )}
+                  {c.statutUnifie !== "suspendu" && c.user_id && (
+                    <button
+                      type="button"
+                      className="dvx-ico danger"
+                      title="Suspendre"
+                      disabled={busy === c.id}
+                      onClick={() => suspendConvoyeur(c)}
+                    >
+                      <Ban size={15} />
+                    </button>
+                  )}
+                  {c.statutUnifie === "suspendu" && c.user_id && (
+                    <button
+                      type="button"
+                      className="dvx-ico"
+                      title="Réactiver"
+                      disabled={busy === c.id}
+                      onClick={() => reactivateConvoyeur(c)}
+                    >
+                      <RotateCcw size={15} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <DriverAvatar convoyeurId={c.id} name={`${c.prenom ?? ""} ${c.nom ?? ""}`.trim()} size="sm" />
+                  <div className="min-w-0">
+                    <p className="text-[13.5px] font-bold text-[#14161c] truncate">
+                      {c.prenom} {c.nom}
+                    </p>
+                    <p className="mt-1 text-[11.5px] text-[#70727d] truncate">{c.email}</p>
                   </div>
-                </TD>
-              </TR>
-            ))}
-          </tbody>
-        </Table>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="dvx-col-k">Contact</p>
+                  <p className="text-[12.5px] text-[#14161c]">{c.email}</p>
+                  {c.telephone && <p className="mt-0.5 text-[11.5px] text-[#70727d]">{c.telephone}</p>}
+                  {c.ville && <p className="mt-0.5 text-[11.5px] text-[#a3a4ac]">{c.ville}</p>}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="dvx-col-k">Documents</p>
+                  <span className="dvx-tag">
+                    {c.docsApprouves}/{c.type_convoyeur === "independant" ? 6 : c.docsCount || 0} approuvés
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
 
