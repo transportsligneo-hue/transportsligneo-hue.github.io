@@ -4631,6 +4631,9 @@ body.is-driver-app .closed-link svg {
 .a6-table th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--a6-dim); padding: 12px 14px; border-bottom: 1px solid var(--a6-border); background: var(--a6-surface-2); }
 .a6-table td { padding: 13px 14px; border-bottom: 1px solid var(--a6-border-soft); font-size: 12.8px; vertical-align: middle; }
 .a6-table tr.row:hover { background: var(--a6-surface-2); cursor: pointer; }
+/* Accent latéral bleu façon fiches Devis (dvx-card) */
+.a6-table tr.row td:first-child { box-shadow: inset 3px 0 0 0 transparent; transition: box-shadow .15s ease; }
+.a6-table tr.row:hover td:first-child { box-shadow: inset 3px 0 0 0 #2f5fff; }
 
 /* --- Photos EDL --- */
 .a6-photo { overflow: hidden; border-radius: 12px; border: 1px solid var(--a6-border); }
