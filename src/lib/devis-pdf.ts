@@ -630,26 +630,43 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 5.5;
 
   const descW = innerW - 34;
+  // Compression automatique : le devis doit tenir sur une seule page.
+  const measure = (subFs: number, gap: number, keepSub: boolean) =>
+    lignes.reduce((acc, l) => {
+      const s = l.sub && keepSub ? (doc.setFontSize(subFs), (doc.splitTextToSize(l.sub, descW) as string[]).length) : 0;
+      return acc + 4.2 + s * (subFs * 0.5) + 2 + gap;
+    }, 0);
+  const sigBlockH = 24;
+  const availableForLines = pageH - 24 - sigBlockH - 6 - 46 - y; // conditions ~46mm réservés
+  doc.setFont("helvetica", "normal");
+  let subFs = 6.6;
+  let gap = 4;
+  let keepSub = true;
+  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6; gap = 3.2; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2.8; }
+
   lignes.forEach((l) => {
-    const sub = l.sub ? (doc.setFont("helvetica", "normal"), doc.setFontSize(6.8), doc.splitTextToSize(l.sub, descW) as string[]) : [];
-    const h = 6 + sub.length * 3.6 + 4;
-    if (y + h > bottomLimit) y = newPage();
+    const sub = l.sub && keepSub
+      ? (doc.setFont("helvetica", "normal"), doc.setFontSize(subFs), doc.splitTextToSize(l.sub, descW) as string[])
+      : [];
+    const lh = subFs * 0.52;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
+    doc.setFontSize(8.2);
     doc.setTextColor(...INK);
     doc.text((doc.splitTextToSize(l.title, descW) as string[])[0], M, y);
     doc.text(l.amount === null ? "Inclus" : eur(l.amount), right, y, { align: "right" });
-    let sy = y + 4.4;
+    let sy = y + 4;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(subFs);
     doc.setTextColor(...MUTED);
-    sub.forEach((s) => { doc.text(s, M, sy); sy += 3.6; });
-    y = sy + 2.5;
+    sub.forEach((s) => { doc.text(s, M, sy); sy += lh; });
+    y = sy + 1.8;
     doc.setDrawColor(...LINE);
     doc.setLineWidth(0.2);
     doc.line(M, y, right, y);
-    y += 5;
+    y += gap;
   });
+
 
   // ===== Totaux =====
   if (y + 30 > bottomLimit) y = newPage();
