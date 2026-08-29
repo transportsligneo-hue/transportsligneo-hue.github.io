@@ -121,15 +121,9 @@ export function toPublicView(d: PublicDevis) {
   }
 }
 
-/** N'accepte qu'une URL https (Qonto, Revolut, banque…) pour éviter toute injection de lien. */
+/** Validation stricte (https, pas d'identifiants, domaine prestataire autorisé). */
 export function sanitizePaymentLink(input?: string | null): string | null {
-  if (!input) return null
-  try {
-    const u = new URL(String(input).trim())
-    return u.protocol === 'https:' ? u.toString() : null
-  } catch {
-    return null
-  }
+  return sanitizePaymentUrl(input)
 }
 
 export function pickPhone(d: PublicDevis): string | null {
