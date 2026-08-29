@@ -54,12 +54,17 @@ export interface DevisData {
 
   /** Options additionnelles cochees (recharge, lavage, mise en main...) */
   options?: string[] | null;
+  /** Transport sur plateau porte-voiture (vehicule non roulant) */
+  plateau?: boolean | null;
+  /** Suppléments facturés en lignes distinctes (assurance, péages, dossier...) */
+  supplements?: Array<{ label: string; montant: number }> | null;
   /** PV de livraison digitalise (WelcomeAuto / Model) */
   pv_digital?: string | null;
   /** Destinataire / client livre */
   destinataire_nom?: string | null;
   destinataire_tel?: string | null;
   destinataire_note?: string | null;
+
   date_souhaitee?: string | null;
   heure_souhaitee?: string | null;
   prix_estime: number;
