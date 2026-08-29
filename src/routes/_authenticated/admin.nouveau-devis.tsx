@@ -1023,17 +1023,29 @@ function AdminNouveauDevisPage() {
 
 
             <div className="border-t border-pro-border pt-4">
-              <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
-                Planning {isAllerRetour ? "· livraison" : ""}
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                  Planning {isAllerRetour ? "· livraison" : ""}
+                </p>
+                <label className="flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-pro-text">
+                  <input
+                    type="checkbox"
+                    checked={dateADeterminer}
+                    onChange={(e) => setDateADeterminer(e.target.checked)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  Date et heure à déterminer
+                </label>
+              </div>
+              <div className={`grid gap-4 sm:grid-cols-2 ${dateADeterminer ? "opacity-40" : ""}`}>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    {isRechargeSeule ? "Date d'intervention *" : "Date d'enlèvement *"}
+                    {isRechargeSeule ? "Date d'intervention" : "Date d'enlèvement"}
+                    {dateADeterminer ? "" : " *"}
                   </label>
                   <input
                     type="date"
-                    required
+                    disabled={dateADeterminer}
                     value={dateSouhaitee}
                     onChange={(e) => setDateSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1041,11 +1053,11 @@ function AdminNouveauDevisPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Heure *
+                    Heure{dateADeterminer ? "" : " *"}
                   </label>
                   <input
                     type="time"
-                    required
+                    disabled={dateADeterminer}
                     value={heureSouhaitee}
                     onChange={(e) => setHeureSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1053,14 +1065,24 @@ function AdminNouveauDevisPage() {
                 </div>
               </div>
               {isAllerRetour && (
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <>
+                <label className="mt-4 flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-pro-text">
+                  <input
+                    type="checkbox"
+                    checked={dateRetourADeterminer}
+                    onChange={(e) => setDateRetourADeterminer(e.target.checked)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  Restitution à déterminer
+                </label>
+                <div className={`mt-3 grid gap-4 sm:grid-cols-2 ${dateRetourADeterminer ? "opacity-40" : ""}`}>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Date restitution *
+                      Date restitution{dateRetourADeterminer ? "" : " *"}
                     </label>
                     <input
                       type="date"
-                      required
+                      disabled={dateRetourADeterminer}
                       value={dateRetourInput}
                       onChange={(e) => setDateRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1068,17 +1090,18 @@ function AdminNouveauDevisPage() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Heure restitution *
+                      Heure restitution{dateRetourADeterminer ? "" : " *"}
                     </label>
                     <input
                       type="time"
-                      required
+                      disabled={dateRetourADeterminer}
                       value={heureRetourInput}
                       onChange={(e) => setHeureRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
                     />
                   </div>
                 </div>
+                </>
               )}
               <p className="mt-2 text-[11.5px] text-pro-muted">
                 Ces dates sont reportées automatiquement sur les missions créées à la conversion du devis.
@@ -1379,7 +1402,7 @@ function AdminNouveauDevisPage() {
           </Button>
           {planningIncomplet && (
             <p className="mt-3 text-[12px] font-medium text-red-600">
-              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""} pour générer le devis.
+              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""}, ou cochez « À déterminer », pour générer le devis.
             </p>
           )}
         </Card>
