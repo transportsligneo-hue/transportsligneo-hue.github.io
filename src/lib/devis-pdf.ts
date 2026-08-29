@@ -521,30 +521,31 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const vehiculeLabel = isGroupe
     ? `${multiVehicules.length} véhicules (devis groupé)`
     : [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "À préciser (marque / modèle)";
-  const vehH = 26;
+  const vehH = 21;
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(vehiculeLabel, colW - 10) as string[])[0], M + 5, y + 13.5);
+  doc.text((doc.splitTextToSize(vehiculeLabel, colW - 10) as string[])[0], M + 5, y + 12);
   let bx = M + 5;
   if (plateau) {
-    bx += badge(doc, bx, y + 17, "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
-    badge(doc, bx, y + 17, "Livraison sur plateau", BLUE_SOFT, BLUE, 6);
+    bx += badge(doc, bx, y + 14.6, "Non roulant", PINK_SOFT, PINK_INK, 5.8, true) + 2.5;
+    badge(doc, bx, y + 14.6, "Livraison sur plateau", BLUE_SOFT, BLUE, 5.8);
   } else if (d.immatriculation) {
-    badge(doc, bx, y + 17, d.immatriculation, BLUE_SOFT, BLUE, 6);
+    badge(doc, bx, y + 14.6, d.immatriculation, BLUE_SOFT, BLUE, 5.8);
   }
   const prestationLabel =
     d.prestation?.trim() ||
     [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
   (doc.splitTextToSize(prestationLabel || "Livraison simple", colW - 10) as string[])
     .slice(0, 2)
-    .forEach((l, i) => doc.text(l, M + colW + 11, y + 13.5 + i * 5));
-  y += vehH + 9;
+    .forEach((l, i) => doc.text(l, M + colW + 11, y + 12 + i * 4.4));
+  y += vehH + 6;
+
 
   // ===== Lignes de prestation =====
   const ttc = d.prix_estime;
