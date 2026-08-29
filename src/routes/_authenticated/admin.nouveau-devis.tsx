@@ -249,6 +249,8 @@ function AdminNouveauDevisPage() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailTo, setEmailTo] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
 
