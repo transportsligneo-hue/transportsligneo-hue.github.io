@@ -539,6 +539,16 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     lignes.push({ desc: s.label, qty: "1", unit: eur(htLigne), total: eur(htLigne) });
   });
 
+  // Mention explicite du plateau (visible même si la ligne principale est générique)
+  if (plateau && !rechargeSeule) {
+    lignes.push({
+      desc: "Mode de transport : plateau porte-voiture — véhicule non roulant (non conduit)",
+      qty: "1",
+      unit: "Inclus",
+      total: eur(0),
+    });
+  }
+
   const qtyVeh = isGroupe ? String(multiVehicules.length) : "1";
   lignes.push(
     rechargeSeule
@@ -609,16 +619,21 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.text(eur(tva), colTotalR, y, { align: "right" });
   }
 
-  y += 4;
+  // Barre de total : élargie pour contenir le libellé complet + filet doré
+  y += 5;
+  const totalBoxX = M + 58;
   doc.setFillColor(...NAVY);
-  doc.rect(sepQty, y, right - sepQty, 12, "F");
+  doc.rect(totalBoxX, y, right - totalBoxX, 13, "F");
+  doc.setFillColor(...GOLD);
+  doc.rect(totalBoxX, y, 1.4, 13, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(...WHITE);
-  doc.text(micro ? "TOTAL NET À PAYER" : "TOTAL TTC", labelR, y + 7.8, { align: "right" });
-  doc.setFontSize(10.5);
-  doc.text(eur(ttc), colTotalR, y + 7.8, { align: "right" });
-  y += 14;
+  doc.text(micro ? "TOTAL NET À PAYER" : "TOTAL TTC", totalBoxX + 5, y + 8.2);
+  doc.setFontSize(12);
+  doc.setTextColor(...GOLD_SOFT);
+  doc.text(eur(ttc), colTotalR, y + 8.6, { align: "right" });
+  y += 15;
 
   // ===== Conditions =====
   const conditions = [
