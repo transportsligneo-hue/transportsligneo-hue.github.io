@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck, PenLine, CreditCard } from "lucide-react";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { sanitizePaymentUrl } from "@/lib/payment-link";
 
 type PublicDevis = {
   numero: string;

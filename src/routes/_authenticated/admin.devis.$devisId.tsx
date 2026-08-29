@@ -20,6 +20,7 @@ import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
+import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
 
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,
@@ -439,9 +440,9 @@ function AdminDevisDetailPage() {
                 Enregistrer
               </Button>
             </div>
-            {devis.lien_paiement_externe ? (
+            {sanitizePaymentUrl(devis.lien_paiement_externe) ? (
               <a
-                href={devis.lien_paiement_externe}
+                href={sanitizePaymentUrl(devis.lien_paiement_externe)!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-block text-[11px] text-pro-accent underline break-all"
