@@ -209,14 +209,14 @@ function AdminDevisDetailPage() {
 
   const handleSaveLienPaiement = async () => {
     if (!devis) return;
-    const raw = lienPaiement.trim();
+    let raw = lienPaiement.trim();
     if (raw) {
-      let ok = false;
-      try { ok = new URL(raw).protocol === "https:"; } catch { ok = false; }
-      if (!ok) {
-        toast.error("Lien invalide", { description: "Collez une URL https (Qonto, Revolut, SumUp…)" });
+      const check = checkPaymentLink(raw);
+      if (!check.ok) {
+        toast.error("Lien de paiement refusé", { description: check.reason });
         return;
       }
+      raw = check.url;
     }
     setSavingLien(true);
     try {
@@ -225,6 +225,7 @@ function AdminDevisDetailPage() {
         .update({ lien_paiement_externe: raw || null } as never)
         .eq("id", devis.id);
       if (error) throw error;
+      setLienPaiement(raw);
       setDevis({ ...devis, lien_paiement_externe: raw || null });
       toast.success(raw ? "Lien de paiement enregistré" : "Lien de paiement retiré");
     } catch (e) {
