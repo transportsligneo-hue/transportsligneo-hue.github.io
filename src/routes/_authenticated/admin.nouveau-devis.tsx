@@ -510,6 +510,8 @@ function AdminNouveauDevisPage() {
     options,
     plateau,
     supplements,
+    pv_digital: pvLabel,
+
 
     destinataire_nom: destNom || null,
     destinataire_tel: destTel || null,
