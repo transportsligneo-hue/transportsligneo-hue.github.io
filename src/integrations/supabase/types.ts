@@ -5377,6 +5377,7 @@ export type Database = {
           type_client: string
           updated_at: string
           user_id: string
+          vin_obligatoire: boolean
         }
         Insert: {
           account_status?: string
@@ -5406,6 +5407,7 @@ export type Database = {
           type_client?: string
           updated_at?: string
           user_id: string
+          vin_obligatoire?: boolean
         }
         Update: {
           account_status?: string
@@ -5435,6 +5437,7 @@ export type Database = {
           type_client?: string
           updated_at?: string
           user_id?: string
+          vin_obligatoire?: boolean
         }
         Relationships: [
           {
