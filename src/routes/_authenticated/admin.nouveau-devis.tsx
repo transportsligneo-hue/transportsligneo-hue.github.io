@@ -23,11 +23,21 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 
 export const Route = createFileRoute("/_authenticated/admin/nouveau-devis")({
+  head: () => ({
+    meta: [
+      { title: "Créer un devis | Admin Transports Ligneo" },
+      { name: "description", content: "Création manuelle d'un devis de transport automobile." },
+      { property: "og:title", content: "Créer un devis | Transports Ligneo" },
+      { property: "og:description", content: "Création manuelle d'un devis de transport automobile." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: AdminNouveauDevisPage,
 });
 
 interface ClientRow {
-  user_id: string;
+  user_id: string | null;
   email: string | null;
   prenom: string;
   nom: string;
