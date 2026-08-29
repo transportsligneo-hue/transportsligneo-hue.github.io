@@ -570,7 +570,7 @@ function AdminNouveauDevisPage() {
     if (!client.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email.trim()))
       return toast.error("Adresse email du contact invalide");
     if (!depart.trim()) return toast.error("Adresse requise");
-    if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
+    if (!isRechargeSeule && !arrivee.trim()) return toast.error("Départ et arrivée requis");
     if (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee))
       return toast.error("Date et heure d'enlèvement obligatoires (ou cochez « À déterminer »)");
     if (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput))
