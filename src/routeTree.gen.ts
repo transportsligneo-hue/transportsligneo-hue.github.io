@@ -163,6 +163,7 @@ import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicFactureWebhookRouteImport } from './routes/api/public/facture/webhook'
 import { Route as ApiPublicFactureStatutRouteImport } from './routes/api/public/facture/statut'
 import { Route as ApiPublicDevisWebhookRouteImport } from './routes/api/public/devis/webhook'
+import { Route as ApiPublicDevisSignRouteImport } from './routes/api/public/devis/sign'
 import { Route as ApiPublicB2bWebhookRouteImport } from './routes/api/public/b2b/webhook'
 import { Route as ApiPublicB2bSessionStatusRouteImport } from './routes/api/public/b2b/session-status'
 import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public/b2b/lead-created'
@@ -1050,6 +1051,11 @@ const ApiPublicDevisWebhookRoute = ApiPublicDevisWebhookRouteImport.update({
   path: '/api/public/devis/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDevisSignRoute = ApiPublicDevisSignRouteImport.update({
+  id: '/api/public/devis/sign',
+  path: '/api/public/devis/sign',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicB2bWebhookRoute = ApiPublicB2bWebhookRouteImport.update({
   id: '/api/public/b2b/webhook',
   path: '/api/public/b2b/webhook',
@@ -1344,6 +1350,7 @@ export interface FileRoutesByFullPath {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/sign': typeof ApiPublicDevisSignRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
@@ -1514,6 +1521,7 @@ export interface FileRoutesByTo {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/sign': typeof ApiPublicDevisSignRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
@@ -1695,6 +1703,7 @@ export interface FileRoutesById {
   '/api/public/b2b/lead-created': typeof ApiPublicB2bLeadCreatedRoute
   '/api/public/b2b/session-status': typeof ApiPublicB2bSessionStatusRoute
   '/api/public/b2b/webhook': typeof ApiPublicB2bWebhookRoute
+  '/api/public/devis/sign': typeof ApiPublicDevisSignRoute
   '/api/public/devis/webhook': typeof ApiPublicDevisWebhookRoute
   '/api/public/facture/statut': typeof ApiPublicFactureStatutRoute
   '/api/public/facture/webhook': typeof ApiPublicFactureWebhookRoute
@@ -1876,6 +1885,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/sign'
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
@@ -2046,6 +2056,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/sign'
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
@@ -2226,6 +2237,7 @@ export interface FileRouteTypes {
     | '/api/public/b2b/lead-created'
     | '/api/public/b2b/session-status'
     | '/api/public/b2b/webhook'
+    | '/api/public/devis/sign'
     | '/api/public/devis/webhook'
     | '/api/public/facture/statut'
     | '/api/public/facture/webhook'
@@ -2309,6 +2321,7 @@ export interface RootRouteChildren {
   ApiPublicB2bLeadCreatedRoute: typeof ApiPublicB2bLeadCreatedRoute
   ApiPublicB2bSessionStatusRoute: typeof ApiPublicB2bSessionStatusRoute
   ApiPublicB2bWebhookRoute: typeof ApiPublicB2bWebhookRoute
+  ApiPublicDevisSignRoute: typeof ApiPublicDevisSignRoute
   ApiPublicDevisWebhookRoute: typeof ApiPublicDevisWebhookRoute
   ApiPublicFactureStatutRoute: typeof ApiPublicFactureStatutRoute
   ApiPublicFactureWebhookRoute: typeof ApiPublicFactureWebhookRoute
@@ -3411,6 +3424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDevisWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/devis/sign': {
+      id: '/api/public/devis/sign'
+      path: '/api/public/devis/sign'
+      fullPath: '/api/public/devis/sign'
+      preLoaderRoute: typeof ApiPublicDevisSignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/b2b/webhook': {
       id: '/api/public/b2b/webhook'
       path: '/api/public/b2b/webhook'
@@ -4086,6 +4106,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicB2bLeadCreatedRoute: ApiPublicB2bLeadCreatedRoute,
   ApiPublicB2bSessionStatusRoute: ApiPublicB2bSessionStatusRoute,
   ApiPublicB2bWebhookRoute: ApiPublicB2bWebhookRoute,
+  ApiPublicDevisSignRoute: ApiPublicDevisSignRoute,
   ApiPublicDevisWebhookRoute: ApiPublicDevisWebhookRoute,
   ApiPublicFactureStatutRoute: ApiPublicFactureStatutRoute,
   ApiPublicFactureWebhookRoute: ApiPublicFactureWebhookRoute,
