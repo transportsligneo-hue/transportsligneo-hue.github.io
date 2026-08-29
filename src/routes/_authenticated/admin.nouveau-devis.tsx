@@ -36,6 +36,7 @@ interface ClientRow {
   logo_url: string | null;
   adresse: string | null;
   type_client: string;
+  vin_obligatoire?: boolean | null;
 }
 
 interface CreatedDevis {
@@ -207,6 +208,9 @@ function AdminNouveauDevisPage() {
   const [heureSouhaitee, setHeureSouhaitee] = useState("");
   const [dateRetourInput, setDateRetourInput] = useState("");
   const [heureRetourInput, setHeureRetourInput] = useState("");
+  /** « Date à déterminer » : le planning sera fixé plus tard avec le client. */
+  const [dateADeterminer, setDateADeterminer] = useState(false);
+  const [dateRetourADeterminer, setDateRetourADeterminer] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [plateau, setPlateau] = useState(false);
   const [supp, setSupp] = useState<Record<string, string>>({});
@@ -246,7 +250,7 @@ function AdminNouveauDevisPage() {
       setSearching(true);
       let query = supabase
         .from("profiles")
-        .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client")
+        .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client, vin_obligatoire")
         .in("type_client", ["flotte", "b2b", "particulier"])
         .order("created_at", { ascending: false })
         .limit(q.length >= 2 ? 12 : 50);
@@ -439,10 +443,12 @@ function AdminNouveauDevisPage() {
     ? `${typeTrajet} — devis groupé (${groupLines.length} véhicule${groupLines.length > 1 ? "s" : ""})`
     : typeTrajet;
 
+  /** VIN exigé uniquement si la fiche client a l'option « VIN obligatoire ». */
+  const vinRequis = Boolean(client?.vin_obligatoire);
+
   const planningIncomplet =
-    !dateSouhaitee ||
-    !heureSouhaitee ||
-    (isAllerRetour && (!dateRetourInput || !heureRetourInput));
+    (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee)) ||
+    (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput));
 
 
   const groupPayload = groupLines.map((v) => ({
@@ -525,26 +531,26 @@ function AdminNouveauDevisPage() {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim()) return toast.error("Adresse requise");
     if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
-    if (!dateSouhaitee || !heureSouhaitee)
-      return toast.error("Date et heure d'enlèvement obligatoires");
-    if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
-      return toast.error("Date et heure de restitution obligatoires");
+    if (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee))
+      return toast.error("Date et heure d'enlèvement obligatoires (ou cochez « À déterminer »)");
+    if (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput))
+      return toast.error("Date et heure de restitution obligatoires (ou cochez « À déterminer »)");
     if (isGroupe) {
       if (groupLines.length < 2) return toast.error("Ajoutez au moins 2 véhicules");
       if (groupPayload.some((v) => !v.immatriculation))
         return toast.error("Immatriculation manquante sur un véhicule");
       if (groupPayload.some((v) => v.prix <= 0))
         return toast.error("Montant TTC manquant sur un véhicule");
-      const badVin = groupPayload.find((v) => !isValidVinFormat(v.vin));
+      const badVin = vinRequis ? groupPayload.find((v) => !isValidVinFormat(v.vin)) : undefined;
       if (badVin)
         return toast.error(
           `VIN obligatoire et valide (17 caractères, hors I/O/Q) — véhicule ${badVin.immatriculation ?? ""}`,
         );
     } else {
-      const vinCheck = validateVin(vin, true);
+      const vinCheck = validateVin(vin, vinRequis);
       if (!vinCheck.valid) return toast.error(vinCheck.error ?? "VIN invalide");
       if (isAllerRetour) {
-        const vinRetourCheck = validateVin(vinRetour, true);
+        const vinRetourCheck = validateVin(vinRetour, vinRequis);
         if (!vinRetourCheck.valid) return toast.error(`Retour : ${vinRetourCheck.error ?? "VIN invalide"}`);
       }
     }
@@ -578,7 +584,7 @@ function AdminNouveauDevisPage() {
           option_trajet: optionTrajetLabel,
 
           date_souhaitee: dateSouhaitee || null,
-          heure_souhaitee: heureSouhaitee || null,
+          heure_souhaitee: dateADeterminer ? null : heureSouhaitee || null,
           date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
           heure_retour: isAllerRetour ? (heureRetourInput || null) : null,
 
@@ -1130,7 +1136,7 @@ function AdminNouveauDevisPage() {
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="VIN *" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
+                      <Field label={vinRequis ? "VIN *" : "VIN"} value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
                     {!isRechargeSeule && (
@@ -1212,7 +1218,7 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
-            <Field label="VIN (numéro de série) *" value={vin} onChange={(v) => setVin(normalizeVin(v))} placeholder="VF3XXXXXXXXXXXXXX" error={validateVin(vin, true).error} />
+            <Field label={vinRequis ? "VIN (numéro de série) *" : "VIN (numéro de série)"} value={vin} onChange={(v) => setVin(normalizeVin(v))} placeholder="VF3XXXXXXXXXXXXXX" error={validateVin(vin, vinRequis).error} />
 
             {isAllerRetour && (
               <div className="space-y-4 border-t border-pro-border pt-4">
@@ -1252,7 +1258,7 @@ function AdminNouveauDevisPage() {
                   <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
                   <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
                 </div>
-                <Field label="VIN retour *" value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, true).error} />
+                <Field label={vinRequis ? "VIN retour *" : "VIN retour"} value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, vinRequis).error} />
                 <AddressField
                   label="Adresse de départ (retour)"
                   value={departRetour}
