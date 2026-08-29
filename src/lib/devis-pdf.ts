@@ -418,38 +418,38 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   };
 
   // ===== Émetteur / Destinataire =====
-  let y = 42;
+  let y = 41;
   const colW = (innerW - 6) / 2;
-  const boxH = 30;
+  const boxH = 24;
   card(doc, M, y, colW, boxH, "Émetteur");
   card(doc, M + colW + 6, y, colW, boxH, "Destinataire");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text(co?.raison_sociale || "Transports Ligneo", M + 5, y + 13);
+  doc.text(co?.raison_sociale || "Transports Ligneo", M + 5, y + 11.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   ["contact@transportsligneo.fr", "07 82 45 61 81", "www.transportsligneo.fr"].forEach((l, i) => {
-    doc.text(l, M + 5, y + 18.5 + i * 4.3);
+    doc.text(l, M + 5, y + 15.8 + i * 3.5);
   });
 
   const dx = M + colW + 6;
   const clientName = d.societe?.trim() || `${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "Client";
   if (clientLogoData) {
-    try { doc.addImage(clientLogoData, "PNG", dx + colW - 18, y + 4, 13, 13); } catch { /* optionnel */ }
+    try { doc.addImage(clientLogoData, "PNG", dx + colW - 16, y + 3.5, 11, 11); } catch { /* optionnel */ }
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
   doc.text(
-    (doc.splitTextToSize(clientName, colW - (clientLogoData ? 26 : 10)) as string[])[0],
+    (doc.splitTextToSize(clientName, colW - (clientLogoData ? 24 : 10)) as string[])[0],
     dx + 5,
-    y + 13,
+    y + 11.5,
   );
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   const destLines = [
     d.adresse || "Adresse à compléter",
@@ -457,58 +457,60 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     d.telephone || null,
     [d.siret ? `SIRET ${d.siret}` : null, d.tva_intra ? `TVA ${d.tva_intra}` : null].filter(Boolean).join(" · ") || null,
   ].filter(Boolean) as string[];
-  let dy = y + 18.5;
+  let dy = y + 15.8;
   destLines.slice(0, 3).forEach((l) => {
     doc.text((doc.splitTextToSize(l, colW - 10) as string[])[0], dx + 5, dy);
-    dy += 4.3;
+    dy += 3.5;
   });
 
-  y += boxH + 8;
+  y += boxH + 5;
+
 
   // ===== Trajet =====
   const rechargeSeule = isDevisRechargeSeule(d);
   sectionLabel(doc, M, y, "Trajet");
   y += 3;
-  const trajetH = 26;
+  const trajetH = 21;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
-  badge(doc, M + 5, y + 5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE);
+  badge(doc, M + 5, y + 4.5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(9.2);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 16);
+  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 14);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  doc.setFontSize(6.4);
   doc.setTextColor(...MUTED);
-  doc.text("Adresse d'enlèvement à confirmer", M + 5, y + 21);
+  doc.text("Adresse d'enlèvement à confirmer", M + 5, y + 18);
 
   if (!rechargeSeule) {
     const cxm = pageW / 2;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10.5);
-    doc.setTextColor(...INK);
-    doc.text(d.distance_km ? `≈${Math.round(d.distance_km)}` : "—", cxm, y + 13, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(5.8);
-    doc.setTextColor(...FAINT);
-    doc.text("KM", cxm, y + 17, { align: "center" });
-    doc.setFontSize(9);
-    doc.setTextColor(...FAINT);
-    doc.text("→", cxm - 16, y + 13.5, { align: "center" });
-    doc.text("→", cxm + 16, y + 13.5, { align: "center" });
-
-    const ax = pageW / 2 + 18;
-    badge(doc, ax, y + 5, "LIVRAISON", AMBER_SOFT, AMBER_INK);
-    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...INK);
-    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 16);
+    doc.text(d.distance_km ? `≈${Math.round(d.distance_km)}` : "—", cxm, y + 11.5, { align: "center" });
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(5.6);
+    doc.setTextColor(...FAINT);
+    doc.text("KM", cxm, y + 15, { align: "center" });
+    doc.setFontSize(9);
+    doc.setTextColor(...FAINT);
+    doc.text("→", cxm - 16, y + 12, { align: "center" });
+    doc.text("→", cxm + 16, y + 12, { align: "center" });
+
+    const ax = pageW / 2 + 18;
+    badge(doc, ax, y + 4.5, "LIVRAISON", AMBER_SOFT, AMBER_INK);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.2);
+    doc.setTextColor(...INK);
+    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 14);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.4);
     doc.setTextColor(...MUTED);
-    doc.text("Adresse de livraison à confirmer", ax, y + 21);
+    doc.text("Adresse de livraison à confirmer", ax, y + 18);
   }
-  y += trajetH + 8;
+  y += trajetH + 5;
+
 
   // ===== Véhicule / Type de prestation =====
   const multiVehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.marque || v.modele));
@@ -519,30 +521,31 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const vehiculeLabel = isGroupe
     ? `${multiVehicules.length} véhicules (devis groupé)`
     : [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "À préciser (marque / modèle)";
-  const vehH = 26;
+  const vehH = 21;
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(vehiculeLabel, colW - 10) as string[])[0], M + 5, y + 13.5);
+  doc.text((doc.splitTextToSize(vehiculeLabel, colW - 10) as string[])[0], M + 5, y + 12);
   let bx = M + 5;
   if (plateau) {
-    bx += badge(doc, bx, y + 17, "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
-    badge(doc, bx, y + 17, "Livraison sur plateau", BLUE_SOFT, BLUE, 6);
+    bx += badge(doc, bx, y + 14.6, "Non roulant", PINK_SOFT, PINK_INK, 5.8, true) + 2.5;
+    badge(doc, bx, y + 14.6, "Livraison sur plateau", BLUE_SOFT, BLUE, 5.8);
   } else if (d.immatriculation) {
-    badge(doc, bx, y + 17, d.immatriculation, BLUE_SOFT, BLUE, 6);
+    badge(doc, bx, y + 14.6, d.immatriculation, BLUE_SOFT, BLUE, 5.8);
   }
   const prestationLabel =
     d.prestation?.trim() ||
     [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
   (doc.splitTextToSize(prestationLabel || "Livraison simple", colW - 10) as string[])
     .slice(0, 2)
-    .forEach((l, i) => doc.text(l, M + colW + 11, y + 13.5 + i * 5));
-  y += vehH + 9;
+    .forEach((l, i) => doc.text(l, M + colW + 11, y + 12 + i * 4.4));
+  y += vehH + 6;
+
 
   // ===== Lignes de prestation =====
   const ttc = d.prix_estime;
@@ -627,37 +630,53 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 5.5;
 
   const descW = innerW - 34;
+  // Compression automatique : le devis doit tenir sur une seule page.
+  const measure = (subFs: number, gap: number, keepSub: boolean) =>
+    lignes.reduce((acc, l) => {
+      const s = l.sub && keepSub ? (doc.setFontSize(subFs), (doc.splitTextToSize(l.sub, descW) as string[]).length) : 0;
+      return acc + 4.2 + s * (subFs * 0.5) + 2 + gap;
+    }, 0);
+  const sigBlockH = 24;
+  const availableForLines = pageH - 24 - sigBlockH - 6 - 46 - y; // conditions ~46mm réservés
+  doc.setFont("helvetica", "normal");
+  let subFs = 6.6;
+  let gap = 4;
+  let keepSub = true;
+  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6; gap = 3.2; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2.8; }
+
   lignes.forEach((l) => {
-    const sub = l.sub ? (doc.setFont("helvetica", "normal"), doc.setFontSize(6.8), doc.splitTextToSize(l.sub, descW) as string[]) : [];
-    const h = 6 + sub.length * 3.6 + 4;
-    if (y + h > bottomLimit) y = newPage();
+    const sub = l.sub && keepSub
+      ? (doc.setFont("helvetica", "normal"), doc.setFontSize(subFs), doc.splitTextToSize(l.sub, descW) as string[])
+      : [];
+    const lh = subFs * 0.52;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.6);
+    doc.setFontSize(8.2);
     doc.setTextColor(...INK);
     doc.text((doc.splitTextToSize(l.title, descW) as string[])[0], M, y);
     doc.text(l.amount === null ? "Inclus" : eur(l.amount), right, y, { align: "right" });
-    let sy = y + 4.4;
+    let sy = y + 4;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(subFs);
     doc.setTextColor(...MUTED);
-    sub.forEach((s) => { doc.text(s, M, sy); sy += 3.6; });
-    y = sy + 2.5;
+    sub.forEach((s) => { doc.text(s, M, sy); sy += lh; });
+    y = sy + 1.8;
     doc.setDrawColor(...LINE);
     doc.setLineWidth(0.2);
     doc.line(M, y, right, y);
-    y += 5;
+    y += gap;
   });
 
+
   // ===== Totaux =====
-  if (y + 30 > bottomLimit) y = newPage();
   const totX = pageW / 2 + 10;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
+  doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(micro ? "Total" : "Total HT", totX, y);
   doc.setTextColor(...INK);
   doc.text(eur(ht), right, y, { align: "right" });
-  y += 6;
+  y += 5;
   doc.setTextColor(...MUTED);
   if (micro) {
     doc.text("TVA", totX, y);
@@ -668,18 +687,18 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.setTextColor(...INK);
     doc.text(eur(tva), right, y, { align: "right" });
   }
-  y += 4.5;
+  y += 3.6;
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
   doc.line(totX, y, right, y);
-  y += 6.5;
+  y += 5.6;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(...INK);
   doc.text(micro ? "Total net à payer" : "Total TTC", totX, y);
   doc.setTextColor(...BLUE);
   doc.text(eur(ttc), right, y, { align: "right" });
-  y += 10;
+  y += 7;
 
   // ===== Conditions et précisions =====
   const conditions: Array<[string, string]> = [
@@ -694,28 +713,44 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ["CGV", "prestation soumise aux conditions générales de vente (www.transportsligneo.fr/cgv)."],
   ];
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  const sigH = 24;
+  const sigTop = pageH - 24 - sigH;
   const condW = innerW - 14;
-  const condWrapped = conditions.map(([k, v]) => doc.splitTextToSize(`${k} : ${v}`, condW - 4) as string[]);
-  const condH = 10 + condWrapped.reduce((a, w) => a + w.length * 3.4 + 1.4, 0) + 3;
-  if (y + condH > bottomLimit) y = newPage();
+  let condFs = 6.4;
+  let condLh = 3.1;
+  const wrapConds = (fs: number) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(fs);
+    return conditions.map(([k, v]) => doc.splitTextToSize(`${k} : ${v}`, condW - 4) as string[]);
+  };
+  let condWrapped = wrapConds(condFs);
+  const condHeight = (w: string[][], lh: number) => 9 + w.reduce((a, x) => a + x.length * lh + 1.1, 0) + 2.5;
+  let condH = condHeight(condWrapped, condLh);
+  if (y + condH + 5 > sigTop) {
+    condFs = 5.8;
+    condLh = 2.8;
+    condWrapped = wrapConds(condFs);
+    condH = condHeight(condWrapped, condLh);
+  }
+  if (y + condH + 5 > sigTop) condH = Math.max(20, sigTop - 5 - y);
   card(doc, M, y, innerW, condH, "Conditions et précisions");
-  let cy2 = y + 12;
+  let cy2 = y + 11;
   condWrapped.forEach((w, i) => {
+    if (cy2 + w.length * condLh > y + condH - 1) return;
     doc.setFillColor(...FAINT);
     doc.circle(M + 6, cy2 - 1.1, 0.5, "F");
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(condFs);
     doc.setTextColor(...MUTED);
     doc.text(w, M + 9, cy2);
     // Mise en avant du terme en gras
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...INK);
     doc.text(`${conditions[i][0]} `, M + 9, cy2);
-    cy2 += w.length * 3.4 + 1.4;
+    cy2 += w.length * condLh + 1.1;
   });
-  y += condH + 9;
+  y = sigTop;
+
 
   // ===== Signatures =====
   const sigH = 30;
