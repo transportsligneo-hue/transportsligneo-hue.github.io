@@ -56,15 +56,22 @@ async function withDevisPublicLinks(params: Params): Promise<Record<string, any>
   try {
     const { data: row } = await supabaseAdmin
       .from('devis')
-      .select('public_token')
+      .select('public_token, lien_paiement_externe')
       .eq('numero', String(numero))
       .maybeSingle()
     const token = (row as { public_token?: string } | null)?.public_token
-    if (!token) return data
-    const { devisPublicUrl } = await import('@/lib/devis-public.server')
-    const url = devisPublicUrl(token)
+    const mod = await import('@/lib/devis-public.server')
+    const externe = mod.sanitizePaymentLink(
+      (row as { lien_paiement_externe?: string | null } | null)?.lien_paiement_externe,
+    )
+    if (!token) {
+      // Lien bancaire externe utilisable même sans lien de signature.
+      if (externe) data['payUrl'] = externe
+      return data
+    }
+    const url = mod.devisPublicUrl(token)
     data['signUrl'] = url
-    data['payUrl'] = `${url}#paiement`
+    data['payUrl'] = externe ?? `${url}#paiement`
   } catch (e) {
     console.error('[email/server] devis public link lookup failed')
   }
