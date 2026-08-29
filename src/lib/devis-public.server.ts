@@ -316,7 +316,10 @@ export async function verifyPublicDevisOtp(
       _type: 'devis',
       _titre: `Signature reçue — devis ${d.numero}`,
       _message: `${note} — ${Number(d.prix_estime).toFixed(2)} € TTC`,
-      _lien: `/admin/devis/${d.id}`,
+      _link: `/admin/devis/${d.id}`,
+      _entity_type: 'devis',
+      _entity_id: d.id,
+
     } as never)
   } catch (e) {
     console.error('[devis-public] admin notification failed')
