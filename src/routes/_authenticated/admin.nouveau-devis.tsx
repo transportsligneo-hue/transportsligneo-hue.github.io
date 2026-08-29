@@ -625,8 +625,9 @@ function AdminNouveauDevisPage() {
 
   const handleUpdatePrice = async () => {
     if (!created) return;
-    const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
+    const n = prix;
     if (!Number.isFinite(n) || n <= 0) return toast.error("Montant TTC invalide");
+
     setGenerating(true);
     try {
       const { error } = await supabase
