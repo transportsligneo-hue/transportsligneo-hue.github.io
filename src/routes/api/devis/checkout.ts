@@ -31,8 +31,9 @@ export const Route = createFileRoute("/api/devis/checkout")({
         try { body = await request.json(); } catch {
           return Response.json({ error: "Invalid JSON" }, { status: 400 });
         }
-        const { devisId, returnUrl, environment } = body ?? {};
-        if (!devisId || !UUID_RE.test(String(devisId))) {
+        const { devisId, token, returnUrl, environment } = body ?? {};
+        const hasToken = typeof token === "string" && /^[0-9a-f]{16,128}$/i.test(token);
+        if (!hasToken && (!devisId || !UUID_RE.test(String(devisId)))) {
           return Response.json({ error: "Invalid devisId" }, { status: 400 });
         }
         if (!returnUrl || typeof returnUrl !== "string") {
@@ -44,11 +45,14 @@ export const Route = createFileRoute("/api/devis/checkout")({
         }
         const env: StripeEnv = environment === "live" ? "live" : "sandbox";
 
-        const { data: devis, error } = await supabaseAdmin
+        const query = supabaseAdmin
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, avoir_applique, statut, email, nom, prenom, stripe_session_id, paid_at")
-          .eq("id", devisId)
-          .maybeSingle();
+          .select("id, numero, depart, arrivee, prix_estime, avoir_applique, statut, email, nom, prenom, stripe_session_id, paid_at");
+        const { data: devis, error } = await (hasToken
+          ? query.eq("public_token", token)
+          : query.eq("id", devisId)
+        ).maybeSingle();
+
         if (error || !devis) {
           return Response.json({ error: "Devis introuvable" }, { status: 404 });
         }

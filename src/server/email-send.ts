@@ -43,6 +43,34 @@ interface Params {
   templateData?: Record<string, any>
 }
 
+/**
+ * Injecte le lien public sécurisé (signature + paiement) dans les emails de devis.
+ * Le token est non devinable : il remplace l'ID du devis dans l'URL.
+ */
+async function withDevisPublicLinks(params: Params): Promise<Record<string, any>> {
+  const data = { ...(params.templateData ?? {}) }
+  if (params.templateName !== 'devis-client') return data
+  if (data['signUrl']) return data
+  const numero = data['numero']
+  if (!numero) return data
+  try {
+    const { data: row } = await supabaseAdmin
+      .from('devis')
+      .select('public_token')
+      .eq('numero', String(numero))
+      .maybeSingle()
+    const token = (row as { public_token?: string } | null)?.public_token
+    if (!token) return data
+    const { devisPublicUrl } = await import('@/lib/devis-public.server')
+    const url = devisPublicUrl(token)
+    data['signUrl'] = url
+    data['payUrl'] = `${url}#paiement`
+  } catch (e) {
+    console.error('[email/server] devis public link lookup failed')
+  }
+  return data
+}
+
 export async function sendTransactionalEmailServer(params: Params): Promise<{ success: boolean; reason?: string }> {
   const template = TEMPLATES[params.templateName]
   if (!template) {
@@ -56,13 +84,16 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
     return { success: false, reason: 'no_recipient' }
   }
 
+  const templateData = await withDevisPublicLinks(params)
+
   const messageId = crypto.randomUUID()
 
   const send = () =>
     sendTemplateEmail(params.templateName, effectiveRecipient, {
-      templateData: params.templateData ?? {},
+      templateData,
       idempotencyKey: params.idempotencyKey || messageId,
     })
+
 
   try {
     let result
