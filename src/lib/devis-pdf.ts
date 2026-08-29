@@ -669,15 +669,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Totaux =====
-  if (y + 30 > bottomLimit) y = newPage();
   const totX = pageW / 2 + 10;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.4);
+  doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(micro ? "Total" : "Total HT", totX, y);
   doc.setTextColor(...INK);
   doc.text(eur(ht), right, y, { align: "right" });
-  y += 6;
+  y += 5;
   doc.setTextColor(...MUTED);
   if (micro) {
     doc.text("TVA", totX, y);
@@ -688,18 +687,18 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.setTextColor(...INK);
     doc.text(eur(tva), right, y, { align: "right" });
   }
-  y += 4.5;
+  y += 3.6;
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
   doc.line(totX, y, right, y);
-  y += 6.5;
+  y += 5.6;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(...INK);
   doc.text(micro ? "Total net à payer" : "Total TTC", totX, y);
   doc.setTextColor(...BLUE);
   doc.text(eur(ttc), right, y, { align: "right" });
-  y += 10;
+  y += 7;
 
   // ===== Conditions et précisions =====
   const conditions: Array<[string, string]> = [
@@ -714,28 +713,44 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ["CGV", "prestation soumise aux conditions générales de vente (www.transportsligneo.fr/cgv)."],
   ];
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  const sigH = 24;
+  const sigTop = pageH - 24 - sigH;
   const condW = innerW - 14;
-  const condWrapped = conditions.map(([k, v]) => doc.splitTextToSize(`${k} : ${v}`, condW - 4) as string[]);
-  const condH = 10 + condWrapped.reduce((a, w) => a + w.length * 3.4 + 1.4, 0) + 3;
-  if (y + condH > bottomLimit) y = newPage();
+  let condFs = 6.4;
+  let condLh = 3.1;
+  const wrapConds = (fs: number) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(fs);
+    return conditions.map(([k, v]) => doc.splitTextToSize(`${k} : ${v}`, condW - 4) as string[]);
+  };
+  let condWrapped = wrapConds(condFs);
+  const condHeight = (w: string[][], lh: number) => 9 + w.reduce((a, x) => a + x.length * lh + 1.1, 0) + 2.5;
+  let condH = condHeight(condWrapped, condLh);
+  if (y + condH + 5 > sigTop) {
+    condFs = 5.8;
+    condLh = 2.8;
+    condWrapped = wrapConds(condFs);
+    condH = condHeight(condWrapped, condLh);
+  }
+  if (y + condH + 5 > sigTop) condH = Math.max(20, sigTop - 5 - y);
   card(doc, M, y, innerW, condH, "Conditions et précisions");
-  let cy2 = y + 12;
+  let cy2 = y + 11;
   condWrapped.forEach((w, i) => {
+    if (cy2 + w.length * condLh > y + condH - 1) return;
     doc.setFillColor(...FAINT);
     doc.circle(M + 6, cy2 - 1.1, 0.5, "F");
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.8);
+    doc.setFontSize(condFs);
     doc.setTextColor(...MUTED);
     doc.text(w, M + 9, cy2);
     // Mise en avant du terme en gras
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...INK);
     doc.text(`${conditions[i][0]} `, M + 9, cy2);
-    cy2 += w.length * 3.4 + 1.4;
+    cy2 += w.length * condLh + 1.1;
   });
-  y += condH + 9;
+  y = sigTop;
+
 
   // ===== Signatures =====
   const sigH = 30;
