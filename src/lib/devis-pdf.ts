@@ -54,12 +54,17 @@ export interface DevisData {
 
   /** Options additionnelles cochees (recharge, lavage, mise en main...) */
   options?: string[] | null;
+  /** Transport sur plateau porte-voiture (vehicule non roulant) */
+  plateau?: boolean | null;
+  /** Suppléments facturés en lignes distinctes (assurance, péages, dossier...) */
+  supplements?: Array<{ label: string; montant: number }> | null;
   /** PV de livraison digitalise (WelcomeAuto / Model) */
   pv_digital?: string | null;
   /** Destinataire / client livre */
   destinataire_nom?: string | null;
   destinataire_tel?: string | null;
   destinataire_note?: string | null;
+
   date_souhaitee?: string | null;
   heure_souhaitee?: string | null;
   prix_estime: number;
@@ -106,6 +111,33 @@ export function parseDevisOptions(message?: string | null): { options: string[];
   }
   return out;
 }
+
+/**
+ * Relit le mode « transport sur plateau » et les suppléments facturés
+ * (assurance, péages, chargement…) depuis le récapitulatif `message`.
+ */
+export function parseDevisSupplements(message?: string | null): {
+  plateau: boolean;
+  supplements: Array<{ label: string; montant: number }>;
+} {
+  const out = { plateau: false, supplements: [] as Array<{ label: string; montant: number }> };
+  if (!message) return out;
+  for (const raw of message.split("\n")) {
+    const line = raw.trim();
+    if (/^Transport sur plateau\s*:/i.test(line)) {
+      out.plateau = /oui/i.test(line);
+      continue;
+    }
+    const m = line.match(/^Suppl[ée]ment\s*:\s*(.+?)\s*=\s*([\d.,\s]+)\s*€/i);
+    if (m) {
+      const montant = parseFloat(m[2].replace(/\s/g, "").replace(",", "."));
+      if (Number.isFinite(montant)) out.supplements.push({ label: m[1].trim(), montant });
+    }
+  }
+  return out;
+}
+
+
 
 /** Détecte un devis « recharge uniquement, sans livraison ». */
 export function isDevisRechargeSeule(d: { option_trajet?: string | null; prestation?: string | null }): boolean {
@@ -458,6 +490,17 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
   const pvDigital = d.pv_digital ?? parsedFromMessage.pv;
 
+  // Plateau + suppléments facturés (lignes distinctes)
+  const parsedSupp = parseDevisSupplements(d.message);
+  const plateau = d.plateau ?? parsedSupp.plateau;
+  const supplements = (d.supplements?.length ? d.supplements : parsedSupp.supplements).filter(
+    (s) => s && Number(s.montant) > 0,
+  );
+  const supplementsTtc = supplements.reduce((s, x) => s + Number(x.montant), 0);
+  const baseTtc = Math.max(0, +(ttc - supplementsTtc).toFixed(2));
+  const toHt = (v: number) => (micro ? v : +(v / (1 + vatRate / 100)).toFixed(2));
+  const baseHt = toHt(baseTtc);
+
   const lignes: Array<{ desc: string; qty: string; unit: string; total: string }> = isGroupe
     ? multiVehicules.map((v, i) => {
         const ttcLigne = Number(v.prix ?? 0);
@@ -467,7 +510,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         const plaque = v.immatriculation ? ` — ${v.immatriculation}` : "";
         const desc = rechargeSeule
           ? `Véhicule ${i + 1} : ${ident}${plaque} — Recharge électrique sur place (sans livraison), ${d.depart}. Inclus : branchement, surveillance, contrôle photo`
-          : `Véhicule ${i + 1} : ${ident}${plaque} — Convoyage ${d.depart} -> ${dest}. Inclus : carburant, péages, assurance tous risques`;
+          : plateau
+            ? `Véhicule ${i + 1} : ${ident}${plaque} — Transport sur plateau porte-voiture ${d.depart} -> ${dest} (véhicule non roulant, non conduit)`
+            : `Véhicule ${i + 1} : ${ident}${plaque} — Convoyage ${d.depart} -> ${dest}. Inclus : carburant, péages, assurance tous risques`;
         return {
           desc,
           qty: "1",
@@ -479,12 +524,21 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         {
           desc: rechargeSeule
             ? `Recharge électrique sur place (sans livraison) — ${d.depart}. Inclus : branchement, surveillance, contrôle photo`
-            : `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
+            : plateau
+              ? `Transport sur plateau porte-voiture — ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Véhicule non roulant transporté sur plateau (non conduit).`
+              : `Convoyage routier ${d.depart} -> ${d.arrivee}${distance ? ` (${distance} km)` : ""}. Inclus : carburant, péages, assurance tous risques`,
           qty: "1",
-          unit: eur(ht),
-          total: eur(ht),
+          unit: eur(baseHt),
+          total: eur(baseHt),
         },
       ];
+
+  // Suppléments facturés (assurance tous risques, péages, chargement…)
+  supplements.forEach((s) => {
+    const htLigne = toHt(Number(s.montant));
+    lignes.push({ desc: s.label, qty: "1", unit: eur(htLigne), total: eur(htLigne) });
+  });
+
   const qtyVeh = isGroupe ? String(multiVehicules.length) : "1";
   lignes.push(
     rechargeSeule
@@ -570,6 +624,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
     "Aucun acompte demandé à la réservation.",
+    ...(plateau
+      ? [
+          "Véhicule non roulant : transport exclusivement sur plateau porte-voiture. Prévoir un accès dégagé et une zone plane pour le chargement et le déchargement.",
+        ]
+      : []),
+
     ...(micro ? [exemptionNote] : []),
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
 

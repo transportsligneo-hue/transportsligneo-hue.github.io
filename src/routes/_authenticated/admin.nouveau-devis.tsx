@@ -125,7 +125,18 @@ const OPTIONS_LIST = [
 ] as const;
 
 
+/** Suppléments facturables affichés en lignes distinctes sur le devis PDF. */
+const SUPPLEMENTS_LIST = [
+  { id: "chargement", label: "Chargement et déchargement", defaut: 150 },
+  { id: "peages", label: "Péages et frais de route", defaut: 120 },
+  { id: "assurance", label: "Assurance transport tous risques", defaut: 75 },
+  { id: "dossier", label: "Frais de dossier et suivi", defaut: 50 },
+  { id: "international", label: "Majoration trajet international", defaut: 200 },
+  { id: "treuillage", label: "Treuillage véhicule non roulant", defaut: 90 },
+] as const;
+
 const RECHARGE_SEULE = "Recharge uniquement (sans livraison)";
+
 
 const TRAJET_TYPES = [
   "Livraison simple",
@@ -197,6 +208,8 @@ function AdminNouveauDevisPage() {
   const [dateRetourInput, setDateRetourInput] = useState("");
   const [heureRetourInput, setHeureRetourInput] = useState("");
   const [options, setOptions] = useState<string[]>([]);
+  const [plateau, setPlateau] = useState(false);
+  const [supp, setSupp] = useState<Record<string, string>>({});
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
   const [destTel, setDestTel] = useState("");
@@ -206,6 +219,16 @@ function AdminNouveauDevisPage() {
     setOptions((prev) =>
       prev.includes(label) ? prev.filter((o) => o !== label) : [...prev, label],
     );
+
+  const toggleSupp = (id: string, defaut: number) =>
+    setSupp((prev) => {
+      const next = { ...prev };
+      if (id in next) delete next[id];
+      else next[id] = String(defaut);
+      return next;
+    });
+
+
 
   const [generating, setGenerating] = useState(false);
   const [created, setCreated] = useState<CreatedDevis | null>(null);
@@ -373,11 +396,37 @@ function AdminNouveauDevisPage() {
     [groupLines],
   );
 
-  const prix = useMemo(() => {
-    if (isGroupe) return totalGroupe > 0 ? Math.round(totalGroupe * 100) / 100 : NaN;
+  /** Suppléments cochés, valorisés. */
+  const supplements = useMemo(
+    () =>
+      SUPPLEMENTS_LIST.filter((s) => s.id in supp)
+        .map((s) => ({ label: s.label, montant: Math.round(parseEur(supp[s.id]) * 100) / 100 }))
+        .filter((s) => s.montant > 0),
+    [supp],
+  );
+  const totalSupplements = useMemo(
+    () => supplements.reduce((s, x) => s + x.montant, 0),
+    [supplements],
+  );
+
+  /** Base transport saisie (avant doublement plateau). */
+  const baseSaisie = useMemo(() => {
+    if (isGroupe) return totalGroupe;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
   }, [montant, isGroupe, totalGroupe]);
+
+  /** Base transport après application du tarif plateau (x2). */
+  const baseTransport = useMemo(
+    () => (Number.isFinite(baseSaisie) ? Math.round(baseSaisie * (plateau ? 2 : 1) * 100) / 100 : NaN),
+    [baseSaisie, plateau],
+  );
+
+  const prix = useMemo(() => {
+    if (!Number.isFinite(baseTransport) || baseTransport <= 0) return NaN;
+    return Math.round((baseTransport + totalSupplements) * 100) / 100;
+  }, [baseTransport, totalSupplements]);
+
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
@@ -430,9 +479,12 @@ function AdminNouveauDevisPage() {
     isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
+    plateau ? "Transport sur plateau : oui (véhicule non roulant, tarif x2)" : null,
+    ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
     destNote ? `Note livraison : ${destNote}` : null,
+
   ]
     .filter(Boolean)
     .join("\n");
@@ -456,7 +508,11 @@ function AdminNouveauDevisPage() {
     date_souhaitee: dateSouhaitee || null,
 
     options,
+    plateau,
+    supplements,
     pv_digital: pvLabel,
+
+
     destinataire_nom: destNom || null,
     destinataire_tel: destTel || null,
     destinataire_note: destNote || null,
@@ -569,13 +625,14 @@ function AdminNouveauDevisPage() {
 
   const handleUpdatePrice = async () => {
     if (!created) return;
-    const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
+    const n = prix;
     if (!Number.isFinite(n) || n <= 0) return toast.error("Montant TTC invalide");
+
     setGenerating(true);
     try {
       const { error } = await supabase
         .from("devis")
-        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null, message: recapMessage || null } as never)
         .eq("id", created.id);
       if (error) throw error;
       const blob = await generateDevisPdf({ ...buildPdfData(created.numero), prix_estime: n });
@@ -862,8 +919,99 @@ function AdminNouveauDevisPage() {
                 </span>
               </div>
             ) : (
-              <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+              <Field
+                label={plateau ? "Montant transport TTC (€) — avant tarif plateau" : "Montant TTC (€)"}
+                value={montant}
+                onChange={setMontant}
+                placeholder="120,00"
+              />
             )}
+
+            {/* Transport sur plateau + suppléments facturés */}
+            <div className="space-y-3 rounded-xl border border-pro-border bg-pro-bg-soft p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={plateau}
+                  onChange={(e) => setPlateau(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-pro-accent"
+                />
+                <span>
+                  <span className="block text-[13px] font-bold text-pro-text">
+                    Transport sur plateau porte-voiture (véhicule non roulant)
+                  </span>
+                  <span className="block text-[11.5px] text-pro-muted">
+                    Double automatiquement le tarif de transport (×2) et adapte le libellé du devis.
+                  </span>
+                </span>
+              </label>
+
+              <div className="border-t border-pro-border pt-3">
+                <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                  Suppléments facturés (lignes détaillées sur le devis)
+                </p>
+                <div className="space-y-2">
+                  {SUPPLEMENTS_LIST.map((s) => {
+                    const checked = s.id in supp;
+                    return (
+                      <div key={s.id} className="flex items-center gap-3">
+                        <label className="flex flex-1 cursor-pointer items-center gap-2.5">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleSupp(s.id, s.defaut)}
+                            className="h-4 w-4 accent-pro-accent"
+                          />
+                          <span className={`text-[12.5px] ${checked ? "font-semibold text-pro-text" : "text-pro-muted"}`}>
+                            {s.label}
+                          </span>
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            value={checked ? supp[s.id] : ""}
+                            onChange={(e) => setSupp((p) => ({ ...p, [s.id]: e.target.value }))}
+                            disabled={!checked}
+                            placeholder={String(s.defaut)}
+                            inputMode="decimal"
+                            className="w-24 rounded-lg border border-pro-border bg-white px-2.5 py-1.5 text-right text-[12.5px] text-pro-text disabled:opacity-40 focus:border-pro-accent focus:outline-none"
+                          />
+                          <span className="text-[12px] text-pro-muted">€</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-1 border-t border-pro-border pt-3 text-[12.5px]">
+                <div className="flex justify-between text-pro-muted">
+                  <span>
+                    Transport{plateau ? " sur plateau (×2)" : ""}
+                  </span>
+                  <span className="font-semibold text-pro-text">
+                    {Number.isFinite(baseTransport)
+                      ? baseTransport.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                      : "—"}
+                  </span>
+                </div>
+                {supplements.map((s) => (
+                  <div key={s.label} className="flex justify-between text-pro-muted">
+                    <span>{s.label}</span>
+                    <span>{s.montant.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between border-t border-pro-border pt-2 text-[14px] font-extrabold text-pro-text">
+                  <span>Total TTC du devis</span>
+                  <span>
+                    {Number.isFinite(prix)
+                      ? prix.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+
 
 
             <div className="border-t border-pro-border pt-4">
