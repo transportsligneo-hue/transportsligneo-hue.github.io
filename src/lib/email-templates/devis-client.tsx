@@ -17,9 +17,13 @@ interface Props {
   clientName?: string
   /** Lien de téléchargement direct du devis PDF (URL signée). */
   pdfUrl?: string
+  /** Lien public tokenisé permettant de signer le devis (code SMS/email). */
+  signUrl?: string
+  /** Lien de paiement sécurisé (Stripe) sans connexion préalable. */
+  payUrl?: string
 }
 
-const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, pdfUrl }: Props) => (
+const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optionTrajet, clientLogoUrl, clientName, pdfUrl, signUrl, payUrl }: Props) => (
   <LigneoEmailShell
     googleReview={avisUrl || true}
     preview={`Devis ${prix ? `${prix} € ` : ''}— valable 15 jours.`}
@@ -28,19 +32,24 @@ const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optio
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro="Voici le récapitulatif de votre demande de convoyage. Ce devis est valable 15 jours à compter d'aujourd'hui."
     primaryCta={
-      pdfUrl
-        ? { label: 'Télécharger mon devis (PDF)', href: pdfUrl }
-        : { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
+      signUrl
+        ? { label: 'Accepter et signer le devis', href: signUrl }
+        : pdfUrl
+          ? { label: 'Télécharger mon devis (PDF)', href: pdfUrl }
+          : { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
     }
     secondaryCta={
-      pdfUrl
-        ? { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
-        : null
+      payUrl
+        ? { label: 'Payer en ligne en sécurité', href: payUrl }
+        : pdfUrl
+          ? { label: 'Confirmer ma mission', href: 'https://transportsligneo.fr/dashboard-client/devis' }
+          : null
     }
     clientLogoUrl={clientLogoUrl}
     clientName={clientName}
     footnote="Ce prix inclut l'assurance tous risques, les péages et le suivi GPS en temps réel."
   >
+
     <SimpleCard
       title={depart && arrivee ? `${depart} → ${arrivee}` : 'Convoyage automobile'}
       subtitle={[numero && `Référence ${numero}`, optionTrajet, distance && `${distance} km`].filter(Boolean).join(' · ')}
