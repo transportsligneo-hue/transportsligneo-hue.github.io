@@ -2,16 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, Ban } from "lucide-react";
+import { RefreshCw, Plus, Edit2, Save, Route as RouteIcon, Send, CheckCircle2, XCircle, Gavel, FileText, Ban, Search, Mail, Phone, Calendar, Eye, Layers } from "lucide-react";
 import {
-  PageHeader,
   Card,
   Badge,
-  Table,
-  THead,
-  TH,
-  TR,
-  TD,
   EmptyState,
   Modal,
   DetailRow,
@@ -20,7 +14,6 @@ import {
   Select,
   TextInput,
   FormField,
-  trajetStatutTone,
 } from "@/components/admin/AdminUI";
 import { PricingModeBlock } from "@/components/admin/PricingModeBlock";
 import { PublishToCatalogueButton } from "@/components/admin/PublishToCatalogueButton";
@@ -128,6 +121,7 @@ const emptyTrajet = {
 function AdminTrajets() {
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Trajet | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState(emptyTrajet);
@@ -518,37 +512,101 @@ function AdminTrajets() {
 
   const isFormOpen = showCreate || (selected && editing);
 
+  const filteredTrajets = trajets.filter((t) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      t.depart.toLowerCase().includes(q) ||
+      t.arrivee.toLowerCase().includes(q) ||
+      (t.client_nom ?? "").toLowerCase().includes(q) ||
+      (t.marque ?? "").toLowerCase().includes(q) ||
+      (t.modele ?? "").toLowerCase().includes(q) ||
+      (t.immatriculation ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const enAttente = trajets.filter((t) => t.statut === "en_attente").length;
+  const enCours = trajets.filter((t) => t.statut === "en_cours" || t.statut === "accepte" || t.statut === "attribue").length;
+  const termines = trajets.filter((t) => t.statut === "termine").length;
+
   return (
     <div>
-      <PageHeader
-        title="Trajets"
-        subtitle={`${trajets.length} trajet${trajets.length > 1 ? "s" : ""}`}
-        actions={
-          <>
-            <CreateTestMissionButton onCreated={fetchTrajets} />
-            <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
-              <option value="all">Tous</option>
-              {statuts.map((s) => (
-                <option key={s} value={s}>
-                  {statutLabels[s]}
-                </option>
-              ))}
-            </Select>
-            <Button
-              icon={<Plus size={14} />}
-              onClick={() => {
-                setForm(emptyTrajet);
-                setShowCreate(true);
-              }}
-            >
-              Nouveau
-            </Button>
-            <IconButton onClick={fetchTrajets} title="Actualiser">
-              <RefreshCw size={15} />
-            </IconButton>
-          </>
-        }
-      />
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Trajets</h1>
+          <p className="dvx-sub">
+            Pipeline complet des missions — édition, diffusion et attribution aux convoyeurs.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <CreateTestMissionButton onCreated={fetchTrajets} />
+          <button
+            type="button"
+            className="dvx-cta"
+            onClick={() => {
+              setForm(emptyTrajet);
+              setShowCreate(true);
+            }}
+          >
+            <Plus size={16} />
+            Nouveau trajet
+          </button>
+        </div>
+      </div>
+
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><RouteIcon size={17} /></span>
+          <p className="dvx-stat-k">Total</p>
+          <p className="dvx-stat-v">{trajets.length}</p>
+          <p className="dvx-stat-t dim">Trajets suivis</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic orange"><Send size={17} /></span>
+          <p className="dvx-stat-k">En attente</p>
+          <p className="dvx-stat-v">{enAttente}</p>
+          <p className={`dvx-stat-t ${enAttente > 0 ? "warn" : "dim"}`}>
+            {enAttente > 0 ? "À diffuser / attribuer" : "Rien en attente"}
+          </p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><Layers size={17} /></span>
+          <p className="dvx-stat-k">En cours</p>
+          <p className="dvx-stat-v">{enCours}</p>
+          <p className="dvx-stat-t dim">Attribués ou en exécution</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><CheckCircle2 size={17} /></span>
+          <p className="dvx-stat-k">Terminés</p>
+          <p className="dvx-stat-v">{termines}</p>
+          <p className={`dvx-stat-t ${termines > 0 ? "up" : "dim"}`}>Missions livrées</p>
+        </div>
+      </div>
+
+      {/* ===== Barre de filtres ===== */}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un trajet, un client, une plaque…"
+          />
+        </div>
+        <select className="dvx-select" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
+          <option value="all">Tous les statuts</option>
+          {statuts.map((s) => (
+            <option key={s} value={s}>{statutLabels[s]}</option>
+          ))}
+        </select>
+        <button type="button" className="dvx-export" onClick={fetchTrajets}>
+          <RefreshCw size={14} />
+          Actualiser
+        </button>
+      </div>
 
       {typeof window !== "undefined" && localStorage.getItem("admin.trajets.dismissB2BBanner") !== "1" && (
         <div className="mb-4 flex items-start gap-3 rounded-lg border border-pro-border/60 bg-pro-bg-soft/40 px-3 py-2 text-xs">
@@ -573,73 +631,112 @@ function AdminTrajets() {
         </div>
       )}
 
-      {trajets.length === 0 ? (
+      {filteredTrajets.length === 0 ? (
         <EmptyState icon={RouteIcon} title="Aucun trajet" description="Créez un trajet ou convertissez une demande." />
       ) : (
-        <Table>
-          <THead>
-            <TH>Trajet</TH>
-            <TH className="hidden sm:table-cell">Client</TH>
-            <TH className="hidden md:table-cell">Date</TH>
-            <TH className="hidden md:table-cell">Prix</TH>
-            <TH>Statut</TH>
-            <TH className="text-right">Actions</TH>
-          </THead>
-          <tbody>
-            {trajets.map((t) => (
-              <TR key={t.id} onClick={() => { setSelected(t); setEditing(false); }}>
-                <TD>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-pro-text">
-                      {t.depart} → {t.arrivee}
-                    </p>
+        <div className="space-y-3.5">
+          {filteredTrajets.map((t) => {
+            const tone =
+              t.statut === "annule" ? "red"
+              : t.statut === "termine" ? "green"
+              : t.statut === "en_cours" ? "violet"
+              : t.statut === "attribue" || t.statut === "accepte" ? "blue"
+              : "orange";
+            const initials = (t.client_nom || "—").slice(0, 2).toUpperCase();
+            return (
+              <div key={t.id} className={`dvx-card ${t.statut === "annule" ? "is-archived" : ""}`}>
+                {/* En-tête */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className={`dvx-badge ${tone}`}>{statutLabels[t.statut] ?? t.statut}</span>
                     {t.is_test_data && <TestBadge />}
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      {new Date(t.created_at).toLocaleDateString("fr-FR", {
+                        day: "2-digit", month: "short", year: "numeric",
+                      })}
+                    </span>
                   </div>
-                  {t.marque && (
-                    <p className="text-pro-muted text-xs">
-                      {t.marque} {t.modele}
+                  <div className="text-right shrink-0">
+                    <p className="dvx-price">
+                      {t.prix ? `${Number(t.prix).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : "—"}
+                      <small>CLIENT</small>
                     </p>
-                  )}
-                </TD>
-                <TD className="hidden sm:table-cell text-pro-text-soft">{t.client_nom || "—"}</TD>
-                <TD className="hidden md:table-cell text-pro-muted text-xs">
-                  {t.date_trajet ? new Date(t.date_trajet).toLocaleDateString("fr-FR") : "—"}
-                </TD>
-                <TD className="hidden md:table-cell text-pro-text-soft">
-                  {t.prix ? `${t.prix} €` : "—"}
-                </TD>
-                <TD>
-                  <Badge tone={trajetStatutTone[t.statut] ?? "neutral"}>
-                    {statutLabels[t.statut] ?? t.statut}
-                  </Badge>
-                </TD>
-                <TD>
-                  <div className="flex items-center justify-end gap-1">
-                    <IconButton
-                      onClick={(e) => { e.stopPropagation(); openEdit(t); }}
-                      title="Modifier"
-                      tone="primary"
-                    >
-                      <Edit2 size={15} />
-                    </IconButton>
-                    {t.statut !== "annule" && t.statut !== "termine" && (
-                      <IconButton
-                        onClick={(e) => { e.stopPropagation(); void cancelTrajet(t); }}
-                        title="Annuler la mission"
-                        tone="danger"
-                      >
-                        <Ban size={15} />
-                      </IconButton>
-                    )}
-                    {t.is_test_data && (
-                      <DeleteTestMissionButton trajetId={t.id} compact onDeleted={fetchTrajets} />
-                    )}
                   </div>
-                </TD>
-              </TR>
-            ))}
-          </tbody>
-        </Table>
+                </div>
+
+                {/* Corps */}
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="dvx-avatar">{initials}</span>
+                    <div className="min-w-0">
+                      <p className="text-[13.5px] font-bold text-[#14161c] truncate">{t.client_nom || "—"}</p>
+                      {t.client_email && (
+                        <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d] truncate">
+                          <Mail size={11} className="shrink-0" />{t.client_email}
+                        </p>
+                      )}
+                      {t.client_telephone && (
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
+                          <Phone size={11} className="shrink-0" />{t.client_telephone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Trajet</p>
+                    <div className="flex items-start gap-2">
+                      <span className="dvx-dot start" />
+                      <p className="text-[12.5px] text-[#14161c] leading-snug">{t.depart}</p>
+                    </div>
+                    <div className="mt-1.5 flex items-start gap-2">
+                      <span className="dvx-dot end" />
+                      <p className="text-[12.5px] text-[#14161c] leading-snug">{t.arrivee}</p>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Véhicule</p>
+                    <p className="text-[12.5px] text-[#14161c]">
+                      {[t.marque, t.modele].filter(Boolean).join(" ") || "—"}
+                    </p>
+                    {t.immatriculation && <p className="dvx-vin mt-1">{t.immatriculation}</p>}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Date souhaitée</p>
+                    <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#14161c]">
+                      <Calendar size={12} className="text-[#2f5fff]" />
+                      {t.date_trajet
+                        ? new Date(t.date_trajet).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+                        : "Date à définir"}
+                      {t.heure_trajet ? ` · ${t.heure_trajet.slice(0, 5)}` : ""}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pied de carte */}
+                <div className="dvx-foot">
+                  <button type="button" className="dvx-ico" title="Voir / éditer" onClick={() => { setSelected(t); setEditing(false); }}>
+                    <Eye size={15} />
+                  </button>
+                  <button type="button" className="dvx-btn" onClick={() => openEdit(t)}>
+                    <Edit2 size={13} />
+                    Modifier
+                  </button>
+                  {t.statut !== "annule" && t.statut !== "termine" && (
+                    <button type="button" className="dvx-ico danger" title="Annuler la mission" onClick={() => void cancelTrajet(t)}>
+                      <Ban size={15} />
+                    </button>
+                  )}
+                  {t.is_test_data && (
+                    <DeleteTestMissionButton trajetId={t.id} compact onDeleted={fetchTrajets} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* Modal création / édition */}

@@ -94,6 +94,24 @@ function flatten(r: RawIncident): IncidentRow {
   };
 }
 
+function graviteBadgeTone(g: string | null | undefined): string {
+  switch (g) {
+    case "critique": return "red";
+    case "grave": return "orange";
+    case "moyen": return "orange";
+    default: return "blue";
+  }
+}
+
+function statutBadgeTone(s: string | null | undefined): string {
+  switch (s) {
+    case "ouvert": return "red";
+    case "en_cours": return "orange";
+    case "resolu": return "green";
+    default: return "grey";
+  }
+}
+
 function IncidentsRegistryPage() {
   const [rows, setRows] = useState<IncidentRow[]>([]);
   const [admins, setAdmins] = useState<AdminOption[]>([]);
@@ -218,123 +236,138 @@ function IncidentsRegistryPage() {
   const current = rows.find((r) => r.id === selected) ?? null;
 
   return (
-    <div className="mx-auto max-w-[1180px] px-4 py-6">
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-[20px] font-bold text-[#14161c]">
-            <AlertTriangle size={19} className="text-[#2f5fff]" /> Registre des incidents
-          </h1>
-          <p className="text-[12.5px] text-[#70727d]">
+    <div>
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Registre des incidents</h1>
+          <p className="dvx-sub">
             {filtered.length} incident{filtered.length > 1 ? "s" : ""} affiché{filtered.length > 1 ? "s" : ""} · archive complète des signalements convoyeur
           </p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowStats((v) => !v)} className="inline-flex items-center gap-1.5 rounded-lg border border-[#eaeaee] px-3 py-2 text-[12.5px] font-semibold text-[#14161c] hover:bg-[#f7f8fb]">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowStats((v) => !v)} className="dvx-btn outline">
             <BarChart3 size={14} /> Statistiques
           </button>
-          <button onClick={exportCsv} disabled={filtered.length === 0} className="inline-flex items-center gap-1.5 rounded-lg border border-[#eaeaee] px-3 py-2 text-[12.5px] font-semibold text-[#14161c] hover:bg-[#f7f8fb] disabled:opacity-50">
+          <button onClick={exportCsv} disabled={filtered.length === 0} className="dvx-btn outline">
             <Download size={14} /> Export CSV
           </button>
-          <button onClick={fetchAll} className="inline-flex items-center gap-1.5 rounded-lg bg-[#2f5fff] px-3 py-2 text-[12.5px] font-semibold text-white">
-            <RefreshCw size={14} /> Actualiser
+          <button onClick={fetchAll} className="dvx-cta">
+            <RefreshCw size={16} /> Actualiser
           </button>
         </div>
-      </header>
+      </div>
 
       {showStats && (
-        <section className="mb-5 grid gap-3 md:grid-cols-4">
-          {[
-            { label: "Incidents", value: String(stats.total) },
-            { label: "En traitement", value: String(stats.open) },
-            { label: "Critiques", value: String(stats.critiques) },
-            { label: "Délai moyen de résolution", value: formatDuration(stats.avgResolution) },
-          ].map((k) => (
-            <div key={k.label} className="rounded-xl border border-[#eaeaee] bg-white p-3.5">
-              <p className="text-[10.5px] font-semibold uppercase tracking-wider text-[#9598a4]">{k.label}</p>
-              <p className="mt-1 text-[22px] font-bold text-[#14161c]">{k.value}</p>
+        <>
+          <div className="dvx-stats">
+            <div className="dvx-stat">
+              <span className="dvx-stat-ic blue"><AlertTriangle size={17} /></span>
+              <p className="dvx-stat-k">Incidents</p>
+              <p className="dvx-stat-v">{stats.total}</p>
+              <p className="dvx-stat-t dim">Sur la période sélectionnée</p>
             </div>
-          ))}
-          <div className="rounded-xl border border-[#eaeaee] bg-white p-3.5 md:col-span-2">
-            <p className="mb-2 text-[10.5px] font-semibold uppercase tracking-wider text-[#9598a4]">Types les plus fréquents</p>
-            {stats.topTypes.length === 0 ? <p className="text-[12px] text-[#9598a4]">Aucune donnée</p> : (
-              <ul className="space-y-1.5">
-                {stats.topTypes.map(([label, n]) => (
-                  <li key={label} className="flex items-center gap-2 text-[12.5px]">
-                    <span className="w-40 shrink-0 truncate text-[#4a4d59]">{label}</span>
-                    <span className="h-1.5 flex-1 rounded-full bg-[#eef1f8]">
-                      <span className="block h-1.5 rounded-full bg-[#2f5fff]" style={{ width: `${(n / stats.topTypes[0][1]) * 100}%` }} />
-                    </span>
-                    <strong className="w-6 text-right text-[#14161c]">{n}</strong>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="dvx-stat">
+              <span className="dvx-stat-ic orange"><Filter size={17} /></span>
+              <p className="dvx-stat-k">En traitement</p>
+              <p className="dvx-stat-v">{stats.open}</p>
+              <p className={`dvx-stat-t ${stats.open > 0 ? "warn" : "dim"}`}>Ouverts ou en cours</p>
+            </div>
+            <div className="dvx-stat">
+              <span className="dvx-stat-ic violet"><AlertTriangle size={17} /></span>
+              <p className="dvx-stat-k">Critiques</p>
+              <p className="dvx-stat-v">{stats.critiques}</p>
+              <p className={`dvx-stat-t ${stats.critiques > 0 ? "warn" : "dim"}`}>Niveau de gravité maximal</p>
+            </div>
+            <div className="dvx-stat">
+              <span className="dvx-stat-ic green"><BarChart3 size={17} /></span>
+              <p className="dvx-stat-k">Délai moyen de résolution</p>
+              <p className="dvx-stat-v">{formatDuration(stats.avgResolution)}</p>
+              <p className="dvx-stat-t dim">Incidents résolus</p>
+            </div>
           </div>
-          <div className="rounded-xl border border-[#eaeaee] bg-white p-3.5 md:col-span-2">
-            <p className="mb-2 text-[10.5px] font-semibold uppercase tracking-wider text-[#9598a4]">Convoyeurs les plus concernés</p>
-            {stats.topConvoyeurs.length === 0 ? <p className="text-[12px] text-[#9598a4]">Aucune donnée</p> : (
-              <ul className="space-y-1.5">
-                {stats.topConvoyeurs.map(([label, n]) => (
-                  <li key={label} className="flex items-center gap-2 text-[12.5px]">
-                    <span className="w-40 shrink-0 truncate text-[#4a4d59]">{label}</span>
-                    <span className="h-1.5 flex-1 rounded-full bg-[#eef1f8]">
-                      <span className="block h-1.5 rounded-full bg-[#b8862a]" style={{ width: `${(n / stats.topConvoyeurs[0][1]) * 100}%` }} />
-                    </span>
-                    <strong className="w-6 text-right text-[#14161c]">{n}</strong>
-                  </li>
-                ))}
-              </ul>
-            )}
+
+          <div className="mb-5 grid gap-3 md:grid-cols-2">
+            <div className="dvx-group">
+              <p className="dvx-group-t">Types les plus fréquents</p>
+              {stats.topTypes.length === 0 ? <p className="text-[12px] text-[#9598a4]">Aucune donnée</p> : (
+                <ul className="space-y-1.5">
+                  {stats.topTypes.map(([label, n]) => (
+                    <li key={label} className="flex items-center gap-2 text-[12.5px]">
+                      <span className="w-40 shrink-0 truncate text-[#4a4d59]">{label}</span>
+                      <span className="h-1.5 flex-1 rounded-full bg-[#eef1f8]">
+                        <span className="block h-1.5 rounded-full bg-[#2f5fff]" style={{ width: `${(n / stats.topTypes[0][1]) * 100}%` }} />
+                      </span>
+                      <strong className="w-6 text-right text-[#14161c]">{n}</strong>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="dvx-group">
+              <p className="dvx-group-t">Convoyeurs les plus concernés</p>
+              {stats.topConvoyeurs.length === 0 ? <p className="text-[12px] text-[#9598a4]">Aucune donnée</p> : (
+                <ul className="space-y-1.5">
+                  {stats.topConvoyeurs.map(([label, n]) => (
+                    <li key={label} className="flex items-center gap-2 text-[12.5px]">
+                      <span className="w-40 shrink-0 truncate text-[#4a4d59]">{label}</span>
+                      <span className="h-1.5 flex-1 rounded-full bg-[#eef1f8]">
+                        <span className="block h-1.5 rounded-full bg-[#b8862a]" style={{ width: `${(n / stats.topConvoyeurs[0][1]) * 100}%` }} />
+                      </span>
+                      <strong className="w-6 text-right text-[#14161c]">{n}</strong>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </section>
+        </>
       )}
 
       {/* Filtres */}
-      <section className="mb-4 rounded-xl border border-[#eaeaee] bg-white p-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[220px] flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9598a4]" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Rechercher (mission, convoyeur, client, mot-clé)…"
-              className="w-full rounded-lg border border-[#eaeaee] py-2 pl-9 pr-3 text-[12.5px] outline-none focus:border-[#2f5fff]"
-            />
-          </div>
-          <select value={fType} onChange={(e) => setFType(e.target.value)} className="rounded-lg border border-[#eaeaee] px-2.5 py-2 text-[12.5px]">
-            <option value="">Tous les types</option>
-            {Object.entries(INCIDENT_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <select value={fGravite} onChange={(e) => setFGravite(e.target.value)} className="rounded-lg border border-[#eaeaee] px-2.5 py-2 text-[12.5px]">
-            <option value="">Toutes gravités</option>
-            {["critique", "grave", "moyen", "mineur"].map((g) => <option key={g} value={g}>{graviteMeta(g).label}</option>)}
-          </select>
-          <select value={fStatut} onChange={(e) => setFStatut(e.target.value)} className="rounded-lg border border-[#eaeaee] px-2.5 py-2 text-[12.5px]">
-            <option value="">Tous les statuts</option>
-            {["ouvert", "en_cours", "resolu", "annule"].map((s) => <option key={s} value={s}>{statutMeta(s).label}</option>)}
-          </select>
-          <select value={fConvoyeur} onChange={(e) => setFConvoyeur(e.target.value)} className="max-w-[180px] rounded-lg border border-[#eaeaee] px-2.5 py-2 text-[12.5px]">
-            <option value="">Tous les convoyeurs</option>
-            {convoyeurs.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-          </select>
-          <div className="flex overflow-hidden rounded-lg border border-[#eaeaee]">
-            {PERIODS.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => setPeriod(p.key)}
-                className={`px-2.5 py-2 text-[11.5px] font-semibold ${period === p.key ? "bg-[#2f5fff] text-white" : "text-[#4a4d59] hover:bg-[#f7f8fb]"}`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-          {activeFilters > 0 && (
-            <button onClick={resetFilters} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-[#2f5fff] hover:bg-[#f0f4ff]">
-              <X size={13} /> Réinitialiser
-            </button>
-          )}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Rechercher (mission, convoyeur, client, mot-clé)…"
+          />
         </div>
-      </section>
+        <select value={fType} onChange={(e) => setFType(e.target.value)} className="dvx-select">
+          <option value="">Tous les types</option>
+          {Object.entries(INCIDENT_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+        <select value={fGravite} onChange={(e) => setFGravite(e.target.value)} className="dvx-select">
+          <option value="">Toutes gravités</option>
+          {["critique", "grave", "moyen", "mineur"].map((g) => <option key={g} value={g}>{graviteMeta(g).label}</option>)}
+        </select>
+        <select value={fStatut} onChange={(e) => setFStatut(e.target.value)} className="dvx-select">
+          <option value="">Tous les statuts</option>
+          {["ouvert", "en_cours", "resolu", "annule"].map((s) => <option key={s} value={s}>{statutMeta(s).label}</option>)}
+        </select>
+        <select value={fConvoyeur} onChange={(e) => setFConvoyeur(e.target.value)} className="dvx-select max-w-[180px]">
+          <option value="">Tous les convoyeurs</option>
+          {convoyeurs.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+        </select>
+        <div className="flex overflow-hidden rounded-lg border border-[#eaeaee]">
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setPeriod(p.key)}
+              className={`px-2.5 py-2 text-[11.5px] font-semibold ${period === p.key ? "bg-[#2f5fff] text-white" : "text-[#4a4d59] hover:bg-[#f7f8fb]"}`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        {activeFilters > 0 && (
+          <button onClick={resetFilters} className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-[#2f5fff] hover:bg-[#f0f4ff]">
+            <X size={13} /> Réinitialiser
+          </button>
+        )}
+      </div>
 
       {/* Liste */}
       {loading ? (
@@ -345,40 +378,41 @@ function IncidentsRegistryPage() {
           <p className="text-[13px] text-[#70727d]">Aucun incident ne correspond à ces filtres.</p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <div className="space-y-3.5">
           {filtered.map((r) => {
             const gm = graviteMeta(r.gravite);
             const sm = statutMeta(r.statut);
             return (
-              <li key={r.id}>
-                <button
-                  onClick={() => setSelected(r.id)}
-                  className="flex w-full items-start gap-3 rounded-xl border border-[#eaeaee] bg-white p-3.5 text-left transition hover:border-[#2f5fff]/40 hover:shadow-sm"
-                >
-                  <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${gm.dot}`} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[13.5px] font-semibold text-[#14161c]">{r.titre}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${sm.chip}`}>{sm.label}</span>
-                      <span className="rounded-full border border-[#eaeaee] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#70727d]">
-                        {incidentTypeLabel(r.type_incident)}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 line-clamp-1 text-[12px] text-[#70727d]">{r.description}</p>
-                    <p className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11.5px] text-[#9598a4]">
-                      <span>{new Date(r.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span>
-                      {r.numero_mission && <span>{r.numero_mission}</span>}
-                      {r.convoyeur_nom && <span>{r.convoyeur_nom}</span>}
-                      {r.client_nom && <span>{r.client_nom}</span>}
-                      {r.resolu_at && <span>Résolu en {formatDuration(resolutionMinutes(r.created_at, r.resolu_at))}</span>}
-                    </p>
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setSelected(r.id)}
+                className={`dvx-card w-full text-left ${r.statut === "annule" ? "is-archived" : ""}`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className={`dvx-badge ${graviteBadgeTone(r.gravite)}`}>{gm.label}</span>
+                    <span className={`dvx-badge ${statutBadgeTone(r.statut)}`}>{sm.label}</span>
+                    <span className="dvx-badge grey">{incidentTypeLabel(r.type_incident)}</span>
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      {new Date(r.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                    </span>
                   </div>
                   <ChevronRight size={16} className="mt-1 shrink-0 text-[#9598a4]" />
-                </button>
-              </li>
+                </div>
+
+                <p className="mt-3 text-[13.5px] font-bold text-[#14161c]">{r.titre}</p>
+                <p className="mt-0.5 line-clamp-1 text-[12.5px] text-[#70727d]">{r.description}</p>
+                <p className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[11.5px] text-[#a3a4ac]">
+                  {r.numero_mission && <span>{r.numero_mission}</span>}
+                  {r.convoyeur_nom && <span>{r.convoyeur_nom}</span>}
+                  {r.client_nom && <span>{r.client_nom}</span>}
+                  {r.resolu_at && <span>Résolu en {formatDuration(resolutionMinutes(r.created_at, r.resolu_at))}</span>}
+                </p>
+              </button>
             );
           })}
-        </ul>
+        </div>
       )}
 
       {current && (

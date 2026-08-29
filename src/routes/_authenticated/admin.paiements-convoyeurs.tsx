@@ -4,10 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Loader2, Wallet, Users, AlertTriangle, CalendarClock, FileDown, Banknote,
-  Gavel, Settings2, Plus, Check, X, Search, Pencil, Trash2,
+  Gavel, Settings2, Plus, Check, X, Search, Pencil, Trash2, Euro,
 } from "lucide-react";
 import {
-  PageHeader, Card, KpiCard, Badge, Button, EmptyState, Select, SearchInput,
+  Card, Badge, Button, EmptyState, Select,
   Table, THead, TH, TR, TD, Modal, TextInput, FormField,
 } from "@/components/admin/AdminUI";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";

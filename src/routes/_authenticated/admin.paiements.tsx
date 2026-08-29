@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CreditCard, TrendingUp, Wallet, AlertTriangle, BarChart3 } from "lucide-react";
-import { PageHeader, Card, KpiCard, Badge, EmptyState, Select, SearchInput } from "@/components/admin/AdminUI";
+import { CreditCard, TrendingUp, Wallet, AlertTriangle, BarChart3, Search, Plus } from "lucide-react";
+import { EmptyState } from "@/components/admin/AdminUI";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 
 export const Route = createFileRoute("/_authenticated/admin/paiements")({
   component: AdminPaiements,
@@ -125,47 +126,77 @@ function AdminPaiements() {
     return true;
   });
 
+  const stripeStatutTone = (s: string) => (s === "paye" ? "green" : s === "expire" ? "red" : "orange");
+  const b2bStatutTone = (s: string) => (s === "paid" ? "green" : s === "pending" ? "orange" : "red");
+  const factStatutTone = (s: string) => (s === "payee" ? "green" : s === "en_retard" ? "red" : s === "annulee" ? "grey" : "orange");
+
   return (
     <div>
-      <PageHeader
-        title="Paiements & facturation"
-        subtitle="Cockpit financier — Stripe, B2B, factures émises"
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="CA TTC encaissé" value={eur(kpis.caTTC)} icon={TrendingUp} tone="success" />
-        <KpiCard label="CA HT" value={eur(kpis.caHT)} icon={BarChart3} />
-        <KpiCard label="TVA collectée" value={eur(kpis.tva)} icon={Wallet} />
-        <KpiCard label="Encours à percevoir" value={eur(kpis.encours)} icon={AlertTriangle} tone={kpis.encours > 0 ? "warning" : "default"} />
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Paiements & facturation</h1>
+          <p className="dvx-sub">Cockpit financier — Stripe, B2B, factures émises</p>
+        </div>
       </div>
 
-      {/* Mini chart 12 mois */}
-      <Card className="mb-6">
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><TrendingUp size={17} /></span>
+          <p className="dvx-stat-k">CA TTC encaissé</p>
+          <p className="dvx-stat-v">{eur(kpis.caTTC)}</p>
+          <p className="dvx-stat-t dim">Factures payées</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><BarChart3 size={17} /></span>
+          <p className="dvx-stat-k">CA HT</p>
+          <p className="dvx-stat-v">{eur(kpis.caHT)}</p>
+          <p className="dvx-stat-t dim">Hors taxes</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><Wallet size={17} /></span>
+          <p className="dvx-stat-k">TVA collectée</p>
+          <p className="dvx-stat-v">{eur(kpis.tva)}</p>
+          <p className="dvx-stat-t dim">Sur factures payées</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic orange"><AlertTriangle size={17} /></span>
+          <p className="dvx-stat-k">Encours à percevoir</p>
+          <p className="dvx-stat-v">{eur(kpis.encours)}</p>
+          <p className={`dvx-stat-t ${kpis.encours > 0 ? "warn" : "dim"}`}>
+            {kpis.encours > 0 ? "Factures émises / en retard" : "Aucun encours"}
+          </p>
+        </div>
+      </div>
+
+      {/* ===== Mini chart 12 mois ===== */}
+      <div className="dvx-card mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-pro-text">Revenus facturés (12 derniers mois)</h3>
-            <p className="text-xs text-pro-muted">Factures au statut payée</p>
+            <h3 className="text-[13.5px] font-bold text-[#14161c]">Revenus facturés (12 derniers mois)</h3>
+            <p className="dvx-col-k mb-0">Factures au statut payée</p>
           </div>
-          <Badge tone="info">{eur(chart.months.reduce((s, m) => s + m.total, 0))}</Badge>
+          <span className="dvx-badge blue">{eur(chart.months.reduce((s, m) => s + m.total, 0))}</span>
         </div>
         <div className="flex items-end gap-2 h-32">
           {chart.months.map((m) => (
             <div key={m.key} className="flex-1 flex flex-col items-center gap-1 group">
-              <div className="text-[10px] text-pro-muted opacity-0 group-hover:opacity-100 transition">
+              <div className="text-[10px] text-[#a3a4ac] opacity-0 group-hover:opacity-100 transition">
                 {m.total > 0 ? eur(m.total) : ""}
               </div>
               <div
-                className="w-full rounded-t bg-gradient-to-t from-pro-accent/30 to-pro-accent transition-all"
+                className="w-full rounded-t bg-gradient-to-t from-[#2f5fff]/30 to-[#2f5fff] transition-all"
                 style={{ height: `${(m.total / chart.max) * 100}%`, minHeight: m.total > 0 ? 4 : 2 }}
               />
-              <div className="text-[10px] text-pro-muted">{m.label}</div>
+              <div className="text-[10px] text-[#a3a4ac]">{m.label}</div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-pro-border">
+      {/* ===== Onglets ===== */}
+      <div className="dvx-filters">
         {([
           ["stripe", `Stripe B2C (${devis.filter(d => d.statut === "paye" || d.amount_paid_cents).length})`],
           ["b2b", `B2B (${b2b.length})`],
@@ -173,160 +204,152 @@ function AdminPaiements() {
         ] as [Tab, string][]).map(([k, lbl]) => (
           <button
             key={k}
+            type="button"
             onClick={() => { setTab(k); setStatutFilter(""); }}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${tab === k ? "text-pro-accent border-pro-accent" : "text-pro-muted border-transparent hover:text-pro-text"}`}
+            className={`dvx-btn ${tab === k ? "solid" : "outline"}`}
           >
             {lbl}
           </button>
         ))}
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher…"
+          />
+        </div>
+        <select className="dvx-select" value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)}>
+          <option value="">Tous statuts</option>
+          {tab === "stripe" && <>
+            <option value="paye">Payé</option>
+            <option value="envoye">En attente</option>
+            <option value="expire">Expiré</option>
+          </>}
+          {tab === "b2b" && <>
+            <option value="paid">Payé</option>
+            <option value="pending">En attente</option>
+            <option value="failed">Échoué</option>
+          </>}
+          {tab === "factures" && <>
+            <option value="payee">Payée</option>
+            <option value="emise">Émise</option>
+            <option value="en_retard">En retard</option>
+            <option value="annulee">Annulée</option>
+          </>}
+        </select>
       </div>
 
-      <Card className="mb-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex-1 min-w-[200px]">
-            <SearchInput value={search} onChange={setSearch} placeholder="Rechercher…" />
-          </div>
-          <Select value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)} className="text-sm">
-            <option value="">Tous statuts</option>
-            {tab === "stripe" && <>
-              <option value="paye">Payé</option>
-              <option value="envoye">En attente</option>
-              <option value="expire">Expiré</option>
-            </>}
-            {tab === "b2b" && <>
-              <option value="paid">Payé</option>
-              <option value="pending">En attente</option>
-              <option value="failed">Échoué</option>
-            </>}
-            {tab === "factures" && <>
-              <option value="payee">Payée</option>
-              <option value="emise">Émise</option>
-              <option value="en_retard">En retard</option>
-              <option value="annulee">Annulée</option>
-            </>}
-          </Select>
-        </div>
-      </Card>
-
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="animate-spin text-pro-muted" size={28} />
+        <div className="flex justify-center py-12">
+          <LogoLoader label="Chargement des paiements…" />
         </div>
       ) : tab === "stripe" ? (
         filterStripe.length === 0 ? (
           <EmptyState icon={CreditCard} title="Aucun paiement Stripe" description="Les devis payés par les clients apparaîtront ici." />
         ) : (
-          <Card className="overflow-hidden p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-pro-surface-2 text-pro-muted text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="text-left px-4 py-3">N° devis</th>
-                  <th className="text-left px-4 py-3">Client</th>
-                  <th className="text-left px-4 py-3">Trajet</th>
-                  <th className="text-right px-4 py-3">Montant</th>
-                  <th className="text-left px-4 py-3">Statut</th>
-                  <th className="text-left px-4 py-3">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filterStripe.map(d => (
-                  <tr key={d.id} className="border-t border-pro-border hover:bg-pro-surface-2/50">
-                    <td className="px-4 py-3 font-medium text-pro-text">{d.numero}</td>
-                    <td className="px-4 py-3 text-pro-text-soft">
-                      {`${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "—"}
-                      <div className="text-xs text-pro-muted">{d.email}</div>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-pro-muted">{d.depart} → {d.arrivee}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-pro-text">
-                      {eur((d.amount_paid_cents ?? 0) / 100 || Number(d.prix_estime))}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge tone={d.statut === "paye" ? "success" : d.statut === "expire" ? "danger" : "warning"}>
-                        {d.statut}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-pro-muted">
+          <div className="space-y-3.5">
+            {filterStripe.map(d => (
+              <div key={d.id} className="dvx-card">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="dvx-ref">{d.numero}</span>
+                    <span className={`dvx-badge ${stripeStatutTone(d.statut)}`}>{d.statut}</span>
+                    <span className="text-[11.5px] text-[#a3a4ac]">
                       {new Date(d.paid_at ?? d.created_at).toLocaleDateString("fr-FR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
+                    </span>
+                  </div>
+                  <p className="dvx-price">
+                    {eur((d.amount_paid_cents ?? 0) / 100 || Number(d.prix_estime))}
+                    <small>TTC</small>
+                  </p>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Client</p>
+                    <p className="text-[13px] font-semibold text-[#14161c] truncate">
+                      {`${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "—"}
+                    </p>
+                    <p className="text-[11.5px] text-[#70727d] truncate">{d.email}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Trajet</p>
+                    <p className="text-[12.5px] text-[#14161c]">{d.depart} → {d.arrivee}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )
       ) : tab === "b2b" ? (
         filterB2B.length === 0 ? (
           <EmptyState icon={CreditCard} title="Aucune demande B2B" />
         ) : (
-          <Card className="overflow-hidden p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-pro-surface-2 text-pro-muted text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="text-left px-4 py-3">N°</th>
-                  <th className="text-left px-4 py-3">Trajet</th>
-                  <th className="text-right px-4 py-3">TTC</th>
-                  <th className="text-left px-4 py-3">Statut</th>
-                  <th className="text-left px-4 py-3">Stripe</th>
-                  <th className="text-left px-4 py-3">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filterB2B.map(r => (
-                  <tr key={r.id} className="border-t border-pro-border hover:bg-pro-surface-2/50">
-                    <td className="px-4 py-3 font-medium text-pro-text">{r.numero}</td>
-                    <td className="px-4 py-3 text-xs text-pro-muted">{r.pickup_address} → {r.dropoff_address}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{r.estimated_price_ttc ? eur(Number(r.estimated_price_ttc)) : "—"}</td>
-                    <td className="px-4 py-3">
-                      <Badge tone={r.payment_status === "paid" ? "success" : r.payment_status === "pending" ? "warning" : "danger"}>
-                        {r.payment_status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-xs font-mono text-pro-muted">{r.stripe_payment_intent_id?.slice(0, 18) ?? "—"}</td>
-                    <td className="px-4 py-3 text-xs text-pro-muted">{new Date(r.created_at).toLocaleDateString("fr-FR")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
+          <div className="space-y-3.5">
+            {filterB2B.map(r => (
+              <div key={r.id} className="dvx-card">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="dvx-ref">{r.numero}</span>
+                    <span className={`dvx-badge ${b2bStatutTone(r.payment_status)}`}>{r.payment_status}</span>
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                    </span>
+                  </div>
+                  <p className="dvx-price">
+                    {r.estimated_price_ttc ? eur(Number(r.estimated_price_ttc)) : "—"}
+                    <small>TTC</small>
+                  </p>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Trajet</p>
+                    <p className="text-[12.5px] text-[#14161c]">{r.pickup_address} → {r.dropoff_address}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Stripe</p>
+                    <p className="dvx-vin">{r.stripe_payment_intent_id?.slice(0, 24) ?? "—"}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )
       ) : (
         filterFact.length === 0 ? (
           <EmptyState icon={CreditCard} title="Aucune facture" />
         ) : (
-          <Card className="overflow-hidden p-0">
-            <table className="w-full text-sm">
-              <thead className="bg-pro-surface-2 text-pro-muted text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="text-left px-4 py-3">N°</th>
-                  <th className="text-left px-4 py-3">Type</th>
-                  <th className="text-right px-4 py-3">HT</th>
-                  <th className="text-right px-4 py-3">TVA</th>
-                  <th className="text-right px-4 py-3">TTC</th>
-                  <th className="text-left px-4 py-3">Statut</th>
-                  <th className="text-left px-4 py-3">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filterFact.map(f => (
-                  <tr key={f.id} className="border-t border-pro-border hover:bg-pro-surface-2/50">
-                    <td className="px-4 py-3 font-medium text-pro-text">{f.numero}</td>
-                    <td className="px-4 py-3"><Badge tone={f.type_facture === "b2b" ? "primary" : "info"}>{f.type_facture}</Badge></td>
-                    <td className="px-4 py-3 text-right">{eur(Number(f.prix_ht))}</td>
-                    <td className="px-4 py-3 text-right text-pro-muted">{eur(Number(f.prix_tva))}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{eur(Number(f.prix_ttc))}</td>
-                    <td className="px-4 py-3">
-                      <Badge tone={f.statut === "payee" ? "success" : f.statut === "en_retard" ? "danger" : f.statut === "annulee" ? "neutral" : "warning"}>
-                        {f.statut}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-pro-muted">
+          <div className="space-y-3.5">
+            {filterFact.map(f => (
+              <div key={f.id} className="dvx-card">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="dvx-ref">{f.numero}</span>
+                    <span className={`dvx-badge ${f.type_facture === "b2b" ? "violet" : "blue"}`}>{f.type_facture}</span>
+                    <span className={`dvx-badge ${factStatutTone(f.statut)}`}>{f.statut}</span>
+                    <span className="text-[11.5px] text-[#a3a4ac]">
                       {new Date(f.date_facture ?? f.created_at).toLocaleDateString("fr-FR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
+                    </span>
+                  </div>
+                  <p className="dvx-price">
+                    {eur(Number(f.prix_ttc))}
+                    <small>TTC</small>
+                  </p>
+                </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">HT</p>
+                    <p className="text-[12.5px] text-[#14161c]">{eur(Number(f.prix_ht))}</p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">TVA</p>
+                    <p className="text-[12.5px] text-[#14161c]">{eur(Number(f.prix_tva))}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )
       )}
     </div>
