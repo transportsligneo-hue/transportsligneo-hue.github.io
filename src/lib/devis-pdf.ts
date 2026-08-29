@@ -470,7 +470,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const rechargeSeule = isDevisRechargeSeule(d);
   sectionLabel(doc, M, y, "Trajet");
   y += 3;
-  const trajetH = 26;
+  const trajetH = 21;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
   badge(doc, M + 5, y + 5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE);
