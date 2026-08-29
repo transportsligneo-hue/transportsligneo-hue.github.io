@@ -476,7 +476,7 @@ function AdminNouveauDevisPage() {
     isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
-    plateau ? "Transport sur plateau : oui (véhicule non roulant, tarif x2)" : null,
+    plateau ? "Transport sur plateau : oui (véhicule non roulant)" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
@@ -917,7 +917,7 @@ function AdminNouveauDevisPage() {
               </div>
             ) : (
               <Field
-                label={plateau ? "Montant transport TTC (€) — avant tarif plateau" : "Montant TTC (€)"}
+                label="Montant TTC (€)"
                 value={montant}
                 onChange={setMontant}
                 placeholder="120,00"
@@ -938,7 +938,7 @@ function AdminNouveauDevisPage() {
                     Transport sur plateau porte-voiture (véhicule non roulant)
                   </span>
                   <span className="block text-[11.5px] text-pro-muted">
-                    Double automatiquement le tarif de transport (×2) et adapte le libellé du devis.
+                    Mention portée sur le devis. Le montant TTC saisi reste le prix final (aucun ×2 automatique).
                   </span>
                 </span>
               </label>
@@ -983,7 +983,7 @@ function AdminNouveauDevisPage() {
               <div className="space-y-1 border-t border-pro-border pt-3 text-[12.5px]">
                 <div className="flex justify-between text-pro-muted">
                   <span>
-                    Transport{plateau ? " sur plateau (×2)" : ""}
+                    Transport{plateau ? " sur plateau" : ""}
                   </span>
                   <span className="font-semibold text-pro-text">
                     {Number.isFinite(baseTransport)
