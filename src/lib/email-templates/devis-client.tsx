@@ -57,11 +57,56 @@ const Email = ({ avisUrl, prenom, numero, depart, arrivee, distance, prix, optio
     footnote="Ce prix inclut l'assurance tous risques, les péages et le suivi GPS en temps réel."
   >
 
+    {message ? (
+      <Section
+        style={{
+          backgroundColor: '#f5f7fc',
+          border: '1px solid #dbe3f5',
+          borderLeft: '3px solid #2F5FFF',
+          borderRadius: '12px',
+          padding: '16px 20px',
+          margin: '0 0 20px',
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: "'Poppins','Helvetica Neue',Arial,sans-serif",
+            fontSize: '10.5px',
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: '#1c3fc4',
+            margin: '0 0 6px',
+          }}
+        >
+          Message de l'équipe Ligneo
+        </Text>
+        {String(message)
+          .split(/\n+/)
+          .filter(Boolean)
+          .map((line, i) => (
+            <Text
+              key={i}
+              style={{
+                fontFamily: "'Poppins','Helvetica Neue',Arial,sans-serif",
+                fontSize: '14px',
+                lineHeight: '1.6',
+                color: '#2c3550',
+                margin: i === 0 ? 0 : '8px 0 0',
+              }}
+            >
+              {line}
+            </Text>
+          ))}
+      </Section>
+    ) : null}
+
     <SimpleCard
       title={depart && arrivee ? `${depart} → ${arrivee}` : 'Convoyage automobile'}
       subtitle={[numero && `Référence ${numero}`, optionTrajet, distance && `${distance} km`].filter(Boolean).join(' · ')}
     />
     {prix ? <AmountRow amount={`${prix} €`} /> : null}
+
   </LigneoEmailShell>
 )
 
