@@ -44,6 +44,7 @@ import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certi
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
+import { Route as DevisTokenRouteImport } from './routes/devis.$token'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
@@ -365,6 +366,11 @@ const InvitationConvoyeurTokenRoute =
     path: '/invitation-convoyeur/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DevisTokenRoute = DevisTokenRouteImport.update({
+  id: '/devis/$token',
+  path: '/devis/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -1247,6 +1253,7 @@ export interface FileRoutesByFullPath {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1422,6 +1429,7 @@ export interface FileRoutesByTo {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1602,6 +1610,7 @@ export interface FileRoutesById {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
@@ -1785,6 +1794,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -1960,6 +1970,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -2139,6 +2150,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
@@ -2312,6 +2324,7 @@ export interface RootRouteChildren {
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
+  DevisTokenRoute: typeof DevisTokenRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
@@ -2602,6 +2615,13 @@ declare module '@tanstack/react-router' {
       path: '/invitation-convoyeur/$token'
       fullPath: '/invitation-convoyeur/$token'
       preLoaderRoute: typeof InvitationConvoyeurTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devis/$token': {
+      id: '/devis/$token'
+      path: '/devis/$token'
+      fullPath: '/devis/$token'
+      preLoaderRoute: typeof DevisTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -4104,6 +4124,7 @@ const rootRouteChildren: RootRouteChildren = {
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
+  DevisTokenRoute: DevisTokenRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
