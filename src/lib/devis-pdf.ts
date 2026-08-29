@@ -624,6 +624,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const conditions = [
     `Devis valable ${validite} jours à compter de la date d'émission. Prix révisable au-delà.`,
     "Aucun acompte demandé à la réservation.",
+    ...(plateau
+      ? [
+          "Véhicule non roulant : transport exclusivement sur plateau porte-voiture. Prévoir un accès dégagé et une zone plane pour le chargement et le déchargement.",
+        ]
+      : []),
+
     ...(micro ? [exemptionNote] : []),
     "Convoyeur assuré et vérifié (permis, casier judiciaire, RC Pro convoyage).",
 
