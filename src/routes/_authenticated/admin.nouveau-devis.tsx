@@ -208,6 +208,8 @@ function AdminNouveauDevisPage() {
   const [dateRetourInput, setDateRetourInput] = useState("");
   const [heureRetourInput, setHeureRetourInput] = useState("");
   const [options, setOptions] = useState<string[]>([]);
+  const [plateau, setPlateau] = useState(false);
+  const [supp, setSupp] = useState<Record<string, string>>({});
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
   const [destTel, setDestTel] = useState("");
@@ -217,6 +219,16 @@ function AdminNouveauDevisPage() {
     setOptions((prev) =>
       prev.includes(label) ? prev.filter((o) => o !== label) : [...prev, label],
     );
+
+  const toggleSupp = (id: string, defaut: number) =>
+    setSupp((prev) => {
+      const next = { ...prev };
+      if (id in next) delete next[id];
+      else next[id] = String(defaut);
+      return next;
+    });
+
+
 
   const [generating, setGenerating] = useState(false);
   const [created, setCreated] = useState<CreatedDevis | null>(null);
