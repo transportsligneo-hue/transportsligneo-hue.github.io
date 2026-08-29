@@ -81,6 +81,7 @@ export type PublicDevis = {
   contact_arrivee_tel: string | null
   version: number | null
   public_token: string
+  lien_paiement_externe?: string | null
 }
 
 export async function loadDevisByToken(token: string): Promise<PublicDevis | null> {
