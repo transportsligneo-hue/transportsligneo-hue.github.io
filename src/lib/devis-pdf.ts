@@ -418,38 +418,38 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   };
 
   // ===== Émetteur / Destinataire =====
-  let y = 42;
+  let y = 41;
   const colW = (innerW - 6) / 2;
-  const boxH = 30;
+  const boxH = 24;
   card(doc, M, y, colW, boxH, "Émetteur");
   card(doc, M + colW + 6, y, colW, boxH, "Destinataire");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text(co?.raison_sociale || "Transports Ligneo", M + 5, y + 13);
+  doc.text(co?.raison_sociale || "Transports Ligneo", M + 5, y + 11.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   ["contact@transportsligneo.fr", "07 82 45 61 81", "www.transportsligneo.fr"].forEach((l, i) => {
-    doc.text(l, M + 5, y + 18.5 + i * 4.3);
+    doc.text(l, M + 5, y + 15.8 + i * 3.5);
   });
 
   const dx = M + colW + 6;
   const clientName = d.societe?.trim() || `${d.prenom ?? ""} ${d.nom ?? ""}`.trim() || "Client";
   if (clientLogoData) {
-    try { doc.addImage(clientLogoData, "PNG", dx + colW - 18, y + 4, 13, 13); } catch { /* optionnel */ }
+    try { doc.addImage(clientLogoData, "PNG", dx + colW - 16, y + 3.5, 11, 11); } catch { /* optionnel */ }
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
   doc.text(
-    (doc.splitTextToSize(clientName, colW - (clientLogoData ? 26 : 10)) as string[])[0],
+    (doc.splitTextToSize(clientName, colW - (clientLogoData ? 24 : 10)) as string[])[0],
     dx + 5,
-    y + 13,
+    y + 11.5,
   );
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7);
   doc.setTextColor(...MUTED);
   const destLines = [
     d.adresse || "Adresse à compléter",
@@ -457,13 +457,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     d.telephone || null,
     [d.siret ? `SIRET ${d.siret}` : null, d.tva_intra ? `TVA ${d.tva_intra}` : null].filter(Boolean).join(" · ") || null,
   ].filter(Boolean) as string[];
-  let dy = y + 18.5;
+  let dy = y + 15.8;
   destLines.slice(0, 3).forEach((l) => {
     doc.text((doc.splitTextToSize(l, colW - 10) as string[])[0], dx + 5, dy);
-    dy += 4.3;
+    dy += 3.5;
   });
 
-  y += boxH + 8;
+  y += boxH + 5;
+
 
   // ===== Trajet =====
   const rechargeSeule = isDevisRechargeSeule(d);
