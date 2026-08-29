@@ -35,7 +35,7 @@ const PROFILE_ALLOWED = new Set([
   "adresse", "adresse_facturation", "tva_intra", "type_client", "logo_url",
   "pricing_display_mode", "tva_exemption_note",
   "facture_mention_legale", "facture_mention_active",
-  "relances_disabled", "exempte_acceptation_devis",
+  "relances_disabled", "exempte_acceptation_devis", "vin_obligatoire",
 ]);
 
 Deno.serve(async (req) => {
