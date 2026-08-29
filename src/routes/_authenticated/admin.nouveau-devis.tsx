@@ -508,7 +508,9 @@ function AdminNouveauDevisPage() {
     date_souhaitee: dateSouhaitee || null,
 
     options,
-    pv_digital: pvLabel,
+    plateau,
+    supplements,
+
     destinataire_nom: destNom || null,
     destinataire_tel: destTel || null,
     destinataire_note: destNote || null,
