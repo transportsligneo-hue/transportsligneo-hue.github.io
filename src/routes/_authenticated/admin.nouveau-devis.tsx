@@ -252,6 +252,29 @@ function AdminNouveauDevisPage() {
   const [sending, setSending] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const startManualClient = () => {
+    setClient({
+      user_id: null,
+      email: search.trim().includes("@") ? search.trim() : "",
+      prenom: "",
+      nom: "",
+      societe: null,
+      telephone: null,
+      logo_url: null,
+      adresse: null,
+      type_client: "particulier",
+      vin_obligatoire: false,
+    });
+    setEmailTo(search.trim().includes("@") ? search.trim() : "");
+    setSearch("");
+    setResults([]);
+    setAutofillNote(null);
+  };
+
+  const updateManualClient = (patch: Partial<ClientRow>) => {
+    setClient((current) => current ? { ...current, ...patch } : current);
+  };
+
   // Chargement de la liste des clients (affichée par défaut) + recherche
   useEffect(() => {
     if (client) return;
@@ -540,7 +563,10 @@ function AdminNouveauDevisPage() {
 
 
   const handleGenerate = async () => {
-    if (!client) return toast.error("Sélectionnez un client");
+    if (!client) return toast.error("Sélectionnez un client ou saisissez un contact");
+    if (!client.societe?.trim() && !client.nom.trim()) return toast.error("Renseignez le nom du contact ou la société");
+    if (!client.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email.trim()))
+      return toast.error("Adresse email du contact invalide");
     if (!depart.trim()) return toast.error("Adresse requise");
     if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
     if (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee))
@@ -576,10 +602,10 @@ function AdminNouveauDevisPage() {
       const { data, error } = await supabase
         .from("devis")
         .insert({
-          nom: client.nom,
-          prenom: client.prenom,
-          email: client.email ?? "",
-          telephone: client.telephone,
+          nom: client.nom.trim(),
+          prenom: client.prenom.trim(),
+          email: client.email.trim().toLowerCase(),
+          telephone: client.telephone?.trim() || null,
           depart: depart.trim(),
           arrivee: arrivee.trim(),
           marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
@@ -690,7 +716,7 @@ function AdminNouveauDevisPage() {
       // 1. Dépose du PDF pour un téléchargement direct depuis l'email
       let pdfUrl: string | undefined;
       if (pdfBlob) {
-        const path = `${client.user_id}/devis-${created.numero}.pdf`;
+        const path = `${client.user_id ?? `contact-${created.id}`}/devis-${created.numero}.pdf`;
         const { error: upErr } = await supabase.storage
           .from("devis-acceptes")
           .upload(path, pdfBlob, { contentType: "application/pdf", upsert: true });
@@ -737,7 +763,7 @@ function AdminNouveauDevisPage() {
       <PageHeader
         title="Créer un devis"
         eyebrow="Devis"
-        subtitle="Sélectionnez un client existant pour préremplir automatiquement ses informations."
+        subtitle="Sélectionnez un client existant ou saisissez librement un contact sans compte."
         actions={
           <Link to="/admin/devis">
             <Button variant="secondary" icon={<ArrowLeft size={14} />}>
@@ -787,7 +813,33 @@ function AdminNouveauDevisPage() {
             <h3 className="text-[15px] font-bold text-pro-text">Client</h3>
           </div>
 
-          {client ? (
+          {client?.user_id === null ? (
+            <div className="space-y-4 rounded-xl border border-pro-accent/40 bg-pro-accent/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-pro-text">Contact saisi manuellement</p>
+                  <p className="text-[11.5px] text-pro-muted">Aucun compte client ne sera créé.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setClient(null)}
+                  className="text-[11.5px] font-semibold text-pro-accent"
+                >
+                  Rechercher un client
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Prénom" value={client.prenom} onChange={(value) => updateManualClient({ prenom: value.slice(0, 100) })} placeholder="Jean" />
+                <Field label="Nom du contact *" value={client.nom} onChange={(value) => updateManualClient({ nom: value.slice(0, 100) })} placeholder="Dupont" />
+              </div>
+              <Field label="Société (facultatif)" value={client.societe ?? ""} onChange={(value) => updateManualClient({ societe: value.slice(0, 150) || null })} placeholder="Nom de l'entreprise" />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Adresse email *" value={client.email ?? ""} onChange={(value) => { const email = value.slice(0, 255); updateManualClient({ email }); setEmailTo(email); }} placeholder="contact@exemple.fr" />
+                <Field label="Téléphone" value={client.telephone ?? ""} onChange={(value) => updateManualClient({ telephone: value.slice(0, 30) || null })} placeholder="06 00 00 00 00" />
+              </div>
+              <AddressField label="Adresse postale du contact" value={client.adresse ?? ""} onChange={(value) => updateManualClient({ adresse: value.slice(0, 500) || null })} placeholder="Adresse de facturation ou de contact" />
+            </div>
+          ) : client ? (
             <div className="rounded-xl border border-pro-border bg-pro-bg-soft p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pro-accent/10 text-[13px] font-bold text-pro-accent">
@@ -825,20 +877,22 @@ function AdminNouveauDevisPage() {
               )}
             </div>
           ) : (
-            <div className="relative">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted"
-              />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un client (nom, société, email)…"
-                className="w-full rounded-lg border border-pro-border bg-white py-2.5 pl-9 pr-3 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-              />
-              {searching && (
-                <Loader2 size={15} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-pro-muted" />
-              )}
+            <div>
+              <div className="relative">
+                <Search
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted"
+                />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value.slice(0, 255))}
+                  placeholder="Rechercher un client (nom, société, email)…"
+                  className="w-full rounded-lg border border-pro-border bg-white py-2.5 pl-9 pr-3 text-sm focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                />
+                {searching && (
+                  <Loader2 size={15} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-pro-muted" />
+                )}
+              </div>
               {results.length > 0 && (
                 <ul className="mt-2 max-h-72 divide-y divide-pro-border overflow-y-auto overflow-x-hidden rounded-xl border border-pro-border bg-white shadow-sm">
                   {results.map((c) => (
@@ -865,6 +919,17 @@ function AdminNouveauDevisPage() {
                   ))}
                 </ul>
               )}
+              <div className="mt-3 flex items-center gap-3">
+                <span className="h-px flex-1 bg-pro-border" />
+                <span className="text-[10px] font-semibold uppercase text-pro-muted">ou</span>
+                <span className="h-px flex-1 bg-pro-border" />
+              </div>
+              <Button type="button" variant="secondary" onClick={startManualClient} className="mt-3 w-full" icon={<Mail size={14} />}>
+                Saisir un contact manuellement
+              </Button>
+              <p className="mt-2 text-center text-[11.5px] text-pro-muted">
+                Pour un particulier ou une entreprise qui ne possède pas encore de compte.
+              </p>
             </div>
           )}
         </Card>
