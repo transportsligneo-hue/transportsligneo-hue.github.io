@@ -2380,6 +2380,7 @@ export type Database = {
           prix_estime: number
           prix_manuel: boolean
           prix_retour: number | null
+          public_token: string
           pv_digitalise: string | null
           recuperation_retour_identique: boolean
           refus_motif: string | null
@@ -2462,6 +2463,7 @@ export type Database = {
           prix_estime: number
           prix_manuel?: boolean
           prix_retour?: number | null
+          public_token?: string
           pv_digitalise?: string | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
@@ -2544,6 +2546,7 @@ export type Database = {
           prix_estime?: number
           prix_manuel?: boolean
           prix_retour?: number | null
+          public_token?: string
           pv_digitalise?: string | null
           recuperation_retour_identique?: boolean
           refus_motif?: string | null
@@ -2652,47 +2655,50 @@ export type Database = {
       devis_otp_challenges: {
         Row: {
           attempts: number
-          client_user_id: string
+          client_user_id: string | null
           code_hash: string
           consumed_at: string | null
           created_at: string
           devis_id: string
-          email: string
+          email: string | null
           expires_at: string
           id: string
           ip_address: string | null
           max_attempts: number
           method: string
+          phone: string | null
           user_agent: string | null
         }
         Insert: {
           attempts?: number
-          client_user_id: string
+          client_user_id?: string | null
           code_hash: string
           consumed_at?: string | null
           created_at?: string
           devis_id: string
-          email: string
+          email?: string | null
           expires_at: string
           id?: string
           ip_address?: string | null
           max_attempts?: number
           method?: string
+          phone?: string | null
           user_agent?: string | null
         }
         Update: {
           attempts?: number
-          client_user_id?: string
+          client_user_id?: string | null
           code_hash?: string
           consumed_at?: string | null
           created_at?: string
           devis_id?: string
-          email?: string
+          email?: string | null
           expires_at?: string
           id?: string
           ip_address?: string | null
           max_attempts?: number
           method?: string
+          phone?: string | null
           user_agent?: string | null
         }
         Relationships: [
