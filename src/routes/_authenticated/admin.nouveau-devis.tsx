@@ -539,7 +539,7 @@ function AdminNouveauDevisPage() {
     societe: client?.societe ?? null,
     logo_url: client?.logo_url ?? null,
     depart,
-    arrivee,
+    arrivee: isRechargeSeule ? depart : arrivee,
     marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
     modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
     immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
@@ -570,7 +570,7 @@ function AdminNouveauDevisPage() {
     if (!client.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email.trim()))
       return toast.error("Adresse email du contact invalide");
     if (!depart.trim()) return toast.error("Adresse requise");
-    if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
+    if (!isRechargeSeule && !arrivee.trim()) return toast.error("Départ et arrivée requis");
     if (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee))
       return toast.error("Date et heure d'enlèvement obligatoires (ou cochez « À déterminer »)");
     if (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput))
@@ -609,7 +609,7 @@ function AdminNouveauDevisPage() {
           email: client.email.trim().toLowerCase(),
           telephone: client.telephone?.trim() || null,
           depart: depart.trim(),
-          arrivee: arrivee.trim(),
+          arrivee: isRechargeSeule ? depart.trim() : arrivee.trim(),
           marque: (isGroupe ? groupPayload[0]?.marque : vehicule) || null,
           modele: (isGroupe ? groupPayload[0]?.modele : modele) || null,
           immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat.trim().toUpperCase()) || null,
@@ -738,7 +738,7 @@ function AdminNouveauDevisPage() {
           nom: client.nom,
           numero: created.numero,
           depart,
-          arrivee,
+          arrivee: isRechargeSeule ? depart : arrivee,
           prix: created.prix,
           optionTrajet: typeTrajet,
           ...(emailMessage.trim() ? { message: emailMessage.trim() } : {}),
