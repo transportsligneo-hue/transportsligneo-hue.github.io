@@ -919,8 +919,99 @@ function AdminNouveauDevisPage() {
                 </span>
               </div>
             ) : (
-              <Field label="Montant TTC (€)" value={montant} onChange={setMontant} placeholder="120,00" />
+              <Field
+                label={plateau ? "Montant transport TTC (€) — avant tarif plateau" : "Montant TTC (€)"}
+                value={montant}
+                onChange={setMontant}
+                placeholder="120,00"
+              />
             )}
+
+            {/* Transport sur plateau + suppléments facturés */}
+            <div className="space-y-3 rounded-xl border border-pro-border bg-pro-bg-soft p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={plateau}
+                  onChange={(e) => setPlateau(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-pro-accent"
+                />
+                <span>
+                  <span className="block text-[13px] font-bold text-pro-text">
+                    Transport sur plateau porte-voiture (véhicule non roulant)
+                  </span>
+                  <span className="block text-[11.5px] text-pro-muted">
+                    Double automatiquement le tarif de transport (×2) et adapte le libellé du devis.
+                  </span>
+                </span>
+              </label>
+
+              <div className="border-t border-pro-border pt-3">
+                <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                  Suppléments facturés (lignes détaillées sur le devis)
+                </p>
+                <div className="space-y-2">
+                  {SUPPLEMENTS_LIST.map((s) => {
+                    const checked = s.id in supp;
+                    return (
+                      <div key={s.id} className="flex items-center gap-3">
+                        <label className="flex flex-1 cursor-pointer items-center gap-2.5">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleSupp(s.id, s.defaut)}
+                            className="h-4 w-4 accent-pro-accent"
+                          />
+                          <span className={`text-[12.5px] ${checked ? "font-semibold text-pro-text" : "text-pro-muted"}`}>
+                            {s.label}
+                          </span>
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            value={checked ? supp[s.id] : ""}
+                            onChange={(e) => setSupp((p) => ({ ...p, [s.id]: e.target.value }))}
+                            disabled={!checked}
+                            placeholder={String(s.defaut)}
+                            inputMode="decimal"
+                            className="w-24 rounded-lg border border-pro-border bg-white px-2.5 py-1.5 text-right text-[12.5px] text-pro-text disabled:opacity-40 focus:border-pro-accent focus:outline-none"
+                          />
+                          <span className="text-[12px] text-pro-muted">€</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-1 border-t border-pro-border pt-3 text-[12.5px]">
+                <div className="flex justify-between text-pro-muted">
+                  <span>
+                    Transport{plateau ? " sur plateau (×2)" : ""}
+                  </span>
+                  <span className="font-semibold text-pro-text">
+                    {Number.isFinite(baseTransport)
+                      ? baseTransport.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                      : "—"}
+                  </span>
+                </div>
+                {supplements.map((s) => (
+                  <div key={s.label} className="flex justify-between text-pro-muted">
+                    <span>{s.label}</span>
+                    <span>{s.montant.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between border-t border-pro-border pt-2 text-[14px] font-extrabold text-pro-text">
+                  <span>Total TTC du devis</span>
+                  <span>
+                    {Number.isFinite(prix)
+                      ? prix.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                      : "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+
 
 
             <div className="border-t border-pro-border pt-4">
