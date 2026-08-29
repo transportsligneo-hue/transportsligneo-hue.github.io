@@ -63,6 +63,7 @@ interface Profile {
   facture_mention_active: boolean | null;
   relances_disabled: boolean | null;
   exempte_acceptation_devis: boolean | null;
+  vin_obligatoire?: boolean | null;
 }
 
 interface MissionItem {
@@ -115,6 +116,7 @@ type Editable = {
   facture_mention_active: boolean;
   relances_disabled: boolean;
   exempte_acceptation_devis: boolean;
+  vin_obligatoire: boolean;
 };
 
 const EMPTY: Editable = {
@@ -133,6 +135,7 @@ const EMPTY: Editable = {
   facture_mention_active: false,
   relances_disabled: false,
   exempte_acceptation_devis: false,
+  vin_obligatoire: false,
 };
 
 function AdminClientDetail() {
@@ -207,6 +210,7 @@ function AdminClientDetail() {
         facture_mention_active: !!prof.facture_mention_active,
         relances_disabled: !!prof.relances_disabled,
         exempte_acceptation_devis: !!prof.exempte_acceptation_devis,
+        vin_obligatoire: !!prof.vin_obligatoire,
       };
       setForm(init);
       setOriginal(init);
@@ -661,6 +665,22 @@ function AdminClientDetail() {
                     Permet à ce client de valider directement ses demandes sans étape
                     d'acceptation devis + CGV. Recommandé pour les clients professionnels,
                     partenaires ou récurrents.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={form.vin_obligatoire}
+                  onChange={(e) => setForm({ ...form, vin_obligatoire: e.target.checked })}
+                />
+                <span>
+                  <span className="font-medium">VIN obligatoire pour ce client</span>
+                  <span className="block text-xs text-[color:var(--admin-muted)]">
+                    Exige le numéro de série (17 caractères) sur les devis de ce client.
+                    Décoché, le VIN reste facultatif.
                   </span>
                 </span>
               </label>

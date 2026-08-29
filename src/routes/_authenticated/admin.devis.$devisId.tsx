@@ -20,6 +20,7 @@ import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
+import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
 
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,
@@ -209,14 +210,14 @@ function AdminDevisDetailPage() {
 
   const handleSaveLienPaiement = async () => {
     if (!devis) return;
-    const raw = lienPaiement.trim();
+    let raw = lienPaiement.trim();
     if (raw) {
-      let ok = false;
-      try { ok = new URL(raw).protocol === "https:"; } catch { ok = false; }
-      if (!ok) {
-        toast.error("Lien invalide", { description: "Collez une URL https (Qonto, Revolut, SumUp…)" });
+      const check = checkPaymentLink(raw);
+      if (!check.ok) {
+        toast.error("Lien de paiement refusé", { description: check.reason });
         return;
       }
+      raw = check.url;
     }
     setSavingLien(true);
     try {
@@ -225,6 +226,7 @@ function AdminDevisDetailPage() {
         .update({ lien_paiement_externe: raw || null } as never)
         .eq("id", devis.id);
       if (error) throw error;
+      setLienPaiement(raw);
       setDevis({ ...devis, lien_paiement_externe: raw || null });
       toast.success(raw ? "Lien de paiement enregistré" : "Lien de paiement retiré");
     } catch (e) {
@@ -438,9 +440,9 @@ function AdminDevisDetailPage() {
                 Enregistrer
               </Button>
             </div>
-            {devis.lien_paiement_externe ? (
+            {sanitizePaymentUrl(devis.lien_paiement_externe) ? (
               <a
-                href={devis.lien_paiement_externe}
+                href={sanitizePaymentUrl(devis.lien_paiement_externe)!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-block text-[11px] text-pro-accent underline break-all"

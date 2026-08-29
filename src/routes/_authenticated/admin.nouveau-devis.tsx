@@ -36,6 +36,7 @@ interface ClientRow {
   logo_url: string | null;
   adresse: string | null;
   type_client: string;
+  vin_obligatoire?: boolean | null;
 }
 
 interface CreatedDevis {
@@ -207,6 +208,9 @@ function AdminNouveauDevisPage() {
   const [heureSouhaitee, setHeureSouhaitee] = useState("");
   const [dateRetourInput, setDateRetourInput] = useState("");
   const [heureRetourInput, setHeureRetourInput] = useState("");
+  /** « Date à déterminer » : le planning sera fixé plus tard avec le client. */
+  const [dateADeterminer, setDateADeterminer] = useState(false);
+  const [dateRetourADeterminer, setDateRetourADeterminer] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [plateau, setPlateau] = useState(false);
   const [supp, setSupp] = useState<Record<string, string>>({});
@@ -246,7 +250,7 @@ function AdminNouveauDevisPage() {
       setSearching(true);
       let query = supabase
         .from("profiles")
-        .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client")
+        .select("user_id, email, prenom, nom, societe, telephone, logo_url, adresse, type_client, vin_obligatoire")
         .in("type_client", ["flotte", "b2b", "particulier"])
         .order("created_at", { ascending: false })
         .limit(q.length >= 2 ? 12 : 50);
@@ -409,18 +413,15 @@ function AdminNouveauDevisPage() {
     [supplements],
   );
 
-  /** Base transport saisie (avant doublement plateau). */
+  /** Base transport saisie manuellement (montant admin = prix final, jamais doublé). */
   const baseSaisie = useMemo(() => {
     if (isGroupe) return totalGroupe;
     const n = parseFloat(montant.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : NaN;
   }, [montant, isGroupe, totalGroupe]);
 
-  /** Base transport après application du tarif plateau (x2). */
-  const baseTransport = useMemo(
-    () => (Number.isFinite(baseSaisie) ? Math.round(baseSaisie * (plateau ? 2 : 1) * 100) / 100 : NaN),
-    [baseSaisie, plateau],
-  );
+  /** Le tarif plateau est une mention : le montant saisi reste prioritaire. */
+  const baseTransport = baseSaisie;
 
   const prix = useMemo(() => {
     if (!Number.isFinite(baseTransport) || baseTransport <= 0) return NaN;
@@ -442,10 +443,12 @@ function AdminNouveauDevisPage() {
     ? `${typeTrajet} — devis groupé (${groupLines.length} véhicule${groupLines.length > 1 ? "s" : ""})`
     : typeTrajet;
 
+  /** VIN exigé uniquement si la fiche client a l'option « VIN obligatoire ». */
+  const vinRequis = Boolean(client?.vin_obligatoire);
+
   const planningIncomplet =
-    !dateSouhaitee ||
-    !heureSouhaitee ||
-    (isAllerRetour && (!dateRetourInput || !heureRetourInput));
+    (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee)) ||
+    (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput));
 
 
   const groupPayload = groupLines.map((v) => ({
@@ -479,7 +482,9 @@ function AdminNouveauDevisPage() {
     isAllerRetour && departRetour ? `Départ retour : ${departRetour}` : null,
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
-    plateau ? "Transport sur plateau : oui (véhicule non roulant, tarif x2)" : null,
+    plateau ? "Transport sur plateau : oui (véhicule non roulant)" : null,
+    dateADeterminer ? "Date d'enlèvement : à déterminer avec le client" : null,
+    isAllerRetour && dateRetourADeterminer ? "Date de restitution : à déterminer avec le client" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
     destNom ? `Destinataire : ${[destNom, destTel].filter(Boolean).join(" - ")}` : null,
@@ -505,7 +510,7 @@ function AdminNouveauDevisPage() {
     immatriculation: (isGroupe ? groupPayload[0]?.immatriculation : immat) || null,
     vehicules: isGroupe ? groupPayload : null,
     option_trajet: optionTrajetLabel,
-    date_souhaitee: dateSouhaitee || null,
+    date_souhaitee: dateADeterminer ? null : dateSouhaitee || null,
 
     options,
     plateau,
@@ -528,26 +533,26 @@ function AdminNouveauDevisPage() {
     if (!client) return toast.error("Sélectionnez un client");
     if (!depart.trim()) return toast.error("Adresse requise");
     if (!arrivee.trim()) return toast.error(isRechargeSeule ? "Le point de chargement est requis" : "Départ et arrivée requis");
-    if (!dateSouhaitee || !heureSouhaitee)
-      return toast.error("Date et heure d'enlèvement obligatoires");
-    if (isAllerRetour && (!dateRetourInput || !heureRetourInput))
-      return toast.error("Date et heure de restitution obligatoires");
+    if (!dateADeterminer && (!dateSouhaitee || !heureSouhaitee))
+      return toast.error("Date et heure d'enlèvement obligatoires (ou cochez « À déterminer »)");
+    if (isAllerRetour && !dateRetourADeterminer && (!dateRetourInput || !heureRetourInput))
+      return toast.error("Date et heure de restitution obligatoires (ou cochez « À déterminer »)");
     if (isGroupe) {
       if (groupLines.length < 2) return toast.error("Ajoutez au moins 2 véhicules");
       if (groupPayload.some((v) => !v.immatriculation))
         return toast.error("Immatriculation manquante sur un véhicule");
       if (groupPayload.some((v) => v.prix <= 0))
         return toast.error("Montant TTC manquant sur un véhicule");
-      const badVin = groupPayload.find((v) => !isValidVinFormat(v.vin));
+      const badVin = vinRequis ? groupPayload.find((v) => !isValidVinFormat(v.vin)) : undefined;
       if (badVin)
         return toast.error(
           `VIN obligatoire et valide (17 caractères, hors I/O/Q) — véhicule ${badVin.immatriculation ?? ""}`,
         );
     } else {
-      const vinCheck = validateVin(vin, true);
+      const vinCheck = validateVin(vin, vinRequis);
       if (!vinCheck.valid) return toast.error(vinCheck.error ?? "VIN invalide");
       if (isAllerRetour) {
-        const vinRetourCheck = validateVin(vinRetour, true);
+        const vinRetourCheck = validateVin(vinRetour, vinRequis);
         if (!vinRetourCheck.valid) return toast.error(`Retour : ${vinRetourCheck.error ?? "VIN invalide"}`);
       }
     }
@@ -580,10 +585,13 @@ function AdminNouveauDevisPage() {
           arrivee_retour: isAllerRetour ? (arriveeRetour.trim() || depart.trim()) : null,
           option_trajet: optionTrajetLabel,
 
-          date_souhaitee: dateSouhaitee || null,
-          heure_souhaitee: heureSouhaitee || null,
-          date_retour: isAllerRetour ? (dateRetourInput || dateSouhaitee || null) : null,
-          heure_retour: isAllerRetour ? (heureRetourInput || null) : null,
+          date_souhaitee: dateADeterminer ? null : dateSouhaitee || null,
+          heure_souhaitee: dateADeterminer ? null : heureSouhaitee || null,
+          date_retour:
+            isAllerRetour && !dateRetourADeterminer
+              ? dateRetourInput || (dateADeterminer ? null : dateSouhaitee) || null
+              : null,
+          heure_retour: isAllerRetour && !dateRetourADeterminer ? heureRetourInput || null : null,
 
           contact_arrivee_nom: destNom || null,
           contact_arrivee_tel: destTel || null,
@@ -920,7 +928,7 @@ function AdminNouveauDevisPage() {
               </div>
             ) : (
               <Field
-                label={plateau ? "Montant transport TTC (€) — avant tarif plateau" : "Montant TTC (€)"}
+                label="Montant TTC (€)"
                 value={montant}
                 onChange={setMontant}
                 placeholder="120,00"
@@ -941,7 +949,7 @@ function AdminNouveauDevisPage() {
                     Transport sur plateau porte-voiture (véhicule non roulant)
                   </span>
                   <span className="block text-[11.5px] text-pro-muted">
-                    Double automatiquement le tarif de transport (×2) et adapte le libellé du devis.
+                    Mention portée sur le devis. Le montant TTC saisi reste le prix final (aucun ×2 automatique).
                   </span>
                 </span>
               </label>
@@ -986,7 +994,7 @@ function AdminNouveauDevisPage() {
               <div className="space-y-1 border-t border-pro-border pt-3 text-[12.5px]">
                 <div className="flex justify-between text-pro-muted">
                   <span>
-                    Transport{plateau ? " sur plateau (×2)" : ""}
+                    Transport{plateau ? " sur plateau" : ""}
                   </span>
                   <span className="font-semibold text-pro-text">
                     {Number.isFinite(baseTransport)
@@ -1015,17 +1023,29 @@ function AdminNouveauDevisPage() {
 
 
             <div className="border-t border-pro-border pt-4">
-              <p className="mb-3 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
-                Planning {isAllerRetour ? "· livraison" : ""}
-              </p>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
+                  Planning {isAllerRetour ? "· livraison" : ""}
+                </p>
+                <label className="flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-pro-text">
+                  <input
+                    type="checkbox"
+                    checked={dateADeterminer}
+                    onChange={(e) => setDateADeterminer(e.target.checked)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  Date et heure à déterminer
+                </label>
+              </div>
+              <div className={`grid gap-4 sm:grid-cols-2 ${dateADeterminer ? "opacity-40" : ""}`}>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    {isRechargeSeule ? "Date d'intervention *" : "Date d'enlèvement *"}
+                    {isRechargeSeule ? "Date d'intervention" : "Date d'enlèvement"}
+                    {dateADeterminer ? "" : " *"}
                   </label>
                   <input
                     type="date"
-                    required
+                    disabled={dateADeterminer}
                     value={dateSouhaitee}
                     onChange={(e) => setDateSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1033,11 +1053,11 @@ function AdminNouveauDevisPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                    Heure *
+                    Heure{dateADeterminer ? "" : " *"}
                   </label>
                   <input
                     type="time"
-                    required
+                    disabled={dateADeterminer}
                     value={heureSouhaitee}
                     onChange={(e) => setHeureSouhaitee(e.target.value)}
                     className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1045,14 +1065,24 @@ function AdminNouveauDevisPage() {
                 </div>
               </div>
               {isAllerRetour && (
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <>
+                <label className="mt-4 flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-pro-text">
+                  <input
+                    type="checkbox"
+                    checked={dateRetourADeterminer}
+                    onChange={(e) => setDateRetourADeterminer(e.target.checked)}
+                    className="h-4 w-4 accent-pro-accent"
+                  />
+                  Restitution à déterminer
+                </label>
+                <div className={`mt-3 grid gap-4 sm:grid-cols-2 ${dateRetourADeterminer ? "opacity-40" : ""}`}>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Date restitution *
+                      Date restitution{dateRetourADeterminer ? "" : " *"}
                     </label>
                     <input
                       type="date"
-                      required
+                      disabled={dateRetourADeterminer}
                       value={dateRetourInput}
                       onChange={(e) => setDateRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
@@ -1060,17 +1090,18 @@ function AdminNouveauDevisPage() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                      Heure restitution *
+                      Heure restitution{dateRetourADeterminer ? "" : " *"}
                     </label>
                     <input
                       type="time"
-                      required
+                      disabled={dateRetourADeterminer}
                       value={heureRetourInput}
                       onChange={(e) => setHeureRetourInput(e.target.value)}
                       className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
                     />
                   </div>
                 </div>
+                </>
               )}
               <p className="mt-2 text-[11.5px] text-pro-muted">
                 Ces dates sont reportées automatiquement sur les missions créées à la conversion du devis.
@@ -1133,7 +1164,7 @@ function AdminNouveauDevisPage() {
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="VIN *" value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
+                      <Field label={vinRequis ? "VIN *" : "VIN"} value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
                     {!isRechargeSeule && (
@@ -1215,7 +1246,7 @@ function AdminNouveauDevisPage() {
               <Field label="Marque" value={vehicule} onChange={setVehicule} placeholder="Ex : Peugeot" />
               <Field label="Modèle" value={modele} onChange={setModele} placeholder="Ex : 208 GT" />
             </div>
-            <Field label="VIN (numéro de série) *" value={vin} onChange={(v) => setVin(normalizeVin(v))} placeholder="VF3XXXXXXXXXXXXXX" error={validateVin(vin, true).error} />
+            <Field label={vinRequis ? "VIN (numéro de série) *" : "VIN (numéro de série)"} value={vin} onChange={(v) => setVin(normalizeVin(v))} placeholder="VF3XXXXXXXXXXXXXX" error={validateVin(vin, vinRequis).error} />
 
             {isAllerRetour && (
               <div className="space-y-4 border-t border-pro-border pt-4">
@@ -1255,7 +1286,7 @@ function AdminNouveauDevisPage() {
                   <Field label="Marque retour" value={vehiculeRetour} onChange={setVehiculeRetour} placeholder="Ex : Renault" />
                   <Field label="Modèle retour" value={modeleRetour} onChange={setModeleRetour} placeholder="Ex : Clio V" />
                 </div>
-                <Field label="VIN retour *" value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, true).error} />
+                <Field label={vinRequis ? "VIN retour *" : "VIN retour"} value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, vinRequis).error} />
                 <AddressField
                   label="Adresse de départ (retour)"
                   value={departRetour}
@@ -1371,7 +1402,7 @@ function AdminNouveauDevisPage() {
           </Button>
           {planningIncomplet && (
             <p className="mt-3 text-[12px] font-medium text-red-600">
-              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""} pour générer le devis.
+              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""}, ou cochez « À déterminer », pour générer le devis.
             </p>
           )}
         </Card>

@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS vin_obligatoire boolean NOT NULL DEFAULT false;
+COMMENT ON COLUMN public.profiles.vin_obligatoire IS 'Si true, le VIN est exige pour les devis/missions de ce client.';

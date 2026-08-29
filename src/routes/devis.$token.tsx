@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck, PenLine, CreditCard } from "lucide-react";
 import { DevisEmbeddedCheckout } from "@/components/devis/DevisEmbeddedCheckout";
+import { sanitizePaymentUrl } from "@/lib/payment-link";
 
 type PublicDevis = {
   numero: string;
@@ -275,15 +276,15 @@ function DevisPublicPage() {
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
               <CreditCard size={18} className="text-primary" /> Paiement sécurisé
             </h2>
-            {devis.lienPaiementExterne ? (
+            {sanitizePaymentUrl(devis.lienPaiementExterne) ? (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Réglez votre convoyage via notre lien bancaire sécurisé (paiement par carte ou virement).
                 </p>
                 <a
-                  href={devis.lienPaiementExterne}
+                  href={sanitizePaymentUrl(devis.lienPaiementExterne)!}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener noreferrer nofollow"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
                 >
                   <CreditCard size={16} /> Payer {devis.aRegler.toFixed(2)} €

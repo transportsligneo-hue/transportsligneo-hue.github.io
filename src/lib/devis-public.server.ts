@@ -8,6 +8,7 @@
  *  - 10 minutes de validité, usage unique, 5 tentatives, 3 renvois / 10 min.
  */
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { sanitizePaymentUrl } from '@/lib/payment-link'
 
 export const CGV_VERSION = 'v1-2026-01'
 export const CODE_TTL_MINUTES = 10
@@ -121,15 +122,9 @@ export function toPublicView(d: PublicDevis) {
   }
 }
 
-/** N'accepte qu'une URL https (Qonto, Revolut, banque…) pour éviter toute injection de lien. */
+/** Validation stricte (https, pas d'identifiants, domaine prestataire autorisé). */
 export function sanitizePaymentLink(input?: string | null): string | null {
-  if (!input) return null
-  try {
-    const u = new URL(String(input).trim())
-    return u.protocol === 'https:' ? u.toString() : null
-  } catch {
-    return null
-  }
+  return sanitizePaymentUrl(input)
 }
 
 export function pickPhone(d: PublicDevis): string | null {
