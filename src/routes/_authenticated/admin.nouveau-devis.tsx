@@ -1574,9 +1574,21 @@ function AdminNouveauDevisPage() {
                       Envoyer
                     </Button>
                   </div>
+
+                  <label className="mb-1.5 mt-3.5 block text-[11.5px] font-semibold text-pro-text">
+                    Message personnalisé (optionnel)
+                  </label>
+                  <textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    rows={4}
+                    placeholder="Bonjour, suite à notre échange, voici votre devis…"
+                    className="w-full resize-y rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm leading-relaxed focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                  />
                   <p className="mt-2 text-[11.5px] text-pro-muted">
-                    Le client reçoit le template Ligneo avec un bouton de téléchargement direct du devis PDF (lien valable 30 jours).
+                    Le client reçoit le template Ligneo (police et mise en page identiques aux autres emails) avec votre mot en encadré bleu, et un bouton de téléchargement direct du devis PDF (lien valable 30 jours).
                   </p>
+
                 </div>
               )}
 
