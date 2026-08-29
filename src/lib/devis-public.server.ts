@@ -56,7 +56,7 @@ export function devisPublicUrl(token: string): string {
 }
 
 const DEVIS_FIELDS =
-  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token'
+  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token, lien_paiement_externe'
 
 export type PublicDevis = {
   id: string
