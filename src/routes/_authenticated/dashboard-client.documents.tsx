@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Loader2 } from "lucide-react";
+import ClientVehicleDocsCard from "@/components/dashboard/ClientVehicleDocsCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/documents")({
   component: ClientDocuments,
@@ -56,6 +57,8 @@ function ClientDocuments() {
         highlight="documents"
         subtitle="Factures, attestations et photos d'état des lieux de vos convoyages."
       />
+
+      {user ? <ClientVehicleDocsCard userId={user.id} /> : null}
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
