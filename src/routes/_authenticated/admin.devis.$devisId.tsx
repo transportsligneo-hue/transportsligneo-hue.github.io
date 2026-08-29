@@ -207,6 +207,33 @@ function AdminDevisDetailPage() {
     }
   };
 
+  const handleSaveLienPaiement = async () => {
+    if (!devis) return;
+    const raw = lienPaiement.trim();
+    if (raw) {
+      let ok = false;
+      try { ok = new URL(raw).protocol === "https:"; } catch { ok = false; }
+      if (!ok) {
+        toast.error("Lien invalide", { description: "Collez une URL https (Qonto, Revolut, SumUp…)" });
+        return;
+      }
+    }
+    setSavingLien(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ lien_paiement_externe: raw || null } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      setDevis({ ...devis, lien_paiement_externe: raw || null });
+      toast.success(raw ? "Lien de paiement enregistré" : "Lien de paiement retiré");
+    } catch (e) {
+      toast.error("Enregistrement impossible", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingLien(false);
+    }
+  };
+
 
   const handleConvert = async () => {
     if (!devis || devis.mission_id) return;
