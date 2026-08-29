@@ -47,6 +47,8 @@ function AdminDevisDetailPage() {
   const [priceInput, setPriceInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [prixVehiculesOpen, setPrixVehiculesOpen] = useState(false);
+  const [lienPaiement, setLienPaiement] = useState("");
+  const [savingLien, setSavingLien] = useState(false);
 
 
   const buildDevisData = (row: any): DevisData =>
