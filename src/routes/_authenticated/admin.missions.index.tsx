@@ -94,6 +94,16 @@ function isElectric(energie: string | null | undefined) {
   return e.includes("elec") || e.includes("élec") || e === "ev";
 }
 
+/* Tons de badges alignés sur le design system Devis (dvx-*) */
+const DVX_TONE: Record<UnifiedStatus, string> = {
+  nouvelle: "blue",
+  attribuer: "orange",
+  attribuee: "violet",
+  encours: "orange",
+  terminee: "green",
+  annulee: "red",
+};
+
 function MissionDateCell({
   refLabel,
   date,
@@ -922,7 +932,7 @@ function AdminMissionsUnified() {
                         )}
                       </td>
                       <td className={r.inGroup ? "pl-5" : ""}>
-                        <p className="a6-mono text-[11px] text-[var(--a6-blue-deep)] font-semibold inline-flex items-center gap-1.5">
+                        <p className="dvx-ref inline-flex items-center gap-1.5">
                           {alertsByTrajet.get(r.m.id) && (
                             <span
                               title={`Alerte ${SEVERITY_META[alertsByTrajet.get(r.m.id)!].label}`}
@@ -934,13 +944,13 @@ function AdminMissionsUnified() {
                         <div className="flex gap-1.5 mt-1 flex-wrap">
                           {r.m.rechargeSeule && <RechargeBadge compact />}
                           {r.m.isRoundTrip ? (
-                            <span className="a6-badge attribuee" title="L = Livraison · R = Restitution">
+                            <span className="dvx-badge violet" title="L = Livraison · R = Restitution">
                               {r.m.legType === "retour" || r.m.legIndex === 2 ? "Restitution (R)" : "Livraison (L)"}
                             </span>
                           ) : (
-                            !r.m.rechargeSeule && <span className="a6-badge">Livraison simple</span>
+                            !r.m.rechargeSeule && <span className="dvx-badge blue">Livraison simple</span>
                           )}
-                          {r.m.isTest && <span className="a6-badge annulee">Test</span>}
+                          {r.m.isTest && <span className="dvx-badge red">Test</span>}
                         </div>
                         {!r.inGroup && hasLegSuffix(r.m.ref) && (
                           <p className="mt-1 text-[10.5px] text-[#4f46e5]">Ancien duo Livraison–Restitution</p>
@@ -1062,7 +1072,7 @@ function AdminMissionsUnified() {
                       )}
 
                       <td>
-                        <span className={`a6-badge ${UNIFIED_STATUS[r.m.status].cls}`}>{UNIFIED_STATUS[r.m.status].label}</span>
+                        <span className={`dvx-badge ${DVX_TONE[r.m.status]}`}>{UNIFIED_STATUS[r.m.status].label}</span>
                         {r.m.kind === "trajet" && (
                           <select
                             value=""
