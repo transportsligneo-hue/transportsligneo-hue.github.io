@@ -18,6 +18,8 @@ interface Props {
   buildPdf: () => Promise<Blob>;
   /** Données additionnelles passées au template email. */
   templateData?: Record<string, unknown>;
+  /** Message personnalisé prérempli (éditable). */
+  defaultMessage?: string | null;
   /** Rendu clair (cartes admin) ou sombre (tiroirs). */
   variant?: "light" | "dark";
   onSent?: (email: string) => void;
@@ -30,12 +32,14 @@ export function SendDocumentByEmail({
   numero,
   documentId,
   defaultEmail,
+  defaultMessage,
   buildPdf,
   templateData,
   variant = "light",
   onSent,
 }: Props) {
   const [email, setEmail] = useState(defaultEmail ?? "");
+  const [message, setMessage] = useState(defaultMessage ?? "");
   const [sending, setSending] = useState(false);
   const dark = variant === "dark";
 
@@ -70,6 +74,7 @@ export function SendDocumentByEmail({
         templateData: {
           numero,
           ...(templateData ?? {}),
+          ...(message.trim() ? { message: message.trim() } : {}),
           ...(pdfUrl ? { pdfUrl } : {}),
         },
       });
@@ -131,6 +136,17 @@ export function SendDocumentByEmail({
           Envoyer
         </button>
       </div>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={4}
+        placeholder="Message personnalisé pour le client (facultatif) — affiché dans l'email avant le récapitulatif."
+        className={
+          dark
+            ? "w-full rounded-md border border-white/15 bg-white/5 px-2.5 py-2 text-xs leading-relaxed text-white placeholder:text-white/40 focus:border-blue-400 focus:outline-none"
+            : "w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-xs leading-relaxed text-pro-text placeholder:text-pro-muted focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+        }
+      />
       <p className={`text-[10px] ${dark ? "text-white/40" : "text-pro-muted"}`}>
         Template Ligneo + bouton de téléchargement du PDF (lien valable 30 jours).
       </p>
