@@ -741,7 +741,9 @@ function AdminNouveauDevisPage() {
           arrivee,
           prix: created.prix,
           optionTrajet: typeTrajet,
+          ...(emailMessage.trim() ? { message: emailMessage.trim() } : {}),
           ...(pdfUrl ? { pdfUrl } : {}),
+
         },
       });
       await supabase
