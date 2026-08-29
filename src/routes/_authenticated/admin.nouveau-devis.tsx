@@ -632,7 +632,7 @@ function AdminNouveauDevisPage() {
     try {
       const { error } = await supabase
         .from("devis")
-        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null } as never)
+        .update({ prix_estime: n, prix_manuel: true, prix_aller: null, prix_retour: null, message: recapMessage || null } as never)
         .eq("id", created.id);
       if (error) throw error;
       const blob = await generateDevisPdf({ ...buildPdfData(created.numero), prix_estime: n });
