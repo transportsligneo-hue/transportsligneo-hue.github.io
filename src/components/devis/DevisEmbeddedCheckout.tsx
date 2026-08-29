@@ -3,16 +3,18 @@ import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe
 import { getStripe, getStripeEnvironment } from "@/lib/stripe-client";
 
 interface Props {
-  devisId: string;
+  devisId?: string;
+  /** Token public du devis (paiement sans connexion). */
+  token?: string;
   returnUrl: string;
 }
 
-export function DevisEmbeddedCheckout({ devisId, returnUrl }: Props) {
+export function DevisEmbeddedCheckout({ devisId, token, returnUrl }: Props) {
   const fetchClientSecret = useCallback(async (): Promise<string> => {
     const res = await fetch("/api/devis/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ devisId, returnUrl, environment: getStripeEnvironment() }),
+      body: JSON.stringify({ devisId, token, returnUrl, environment: getStripeEnvironment() }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -21,7 +23,8 @@ export function DevisEmbeddedCheckout({ devisId, returnUrl }: Props) {
     const data = await res.json();
     if (!data?.clientSecret) throw new Error("clientSecret manquant");
     return data.clientSecret as string;
-  }, [devisId, returnUrl]);
+  }, [devisId, token, returnUrl]);
+
 
   return (
     <div id="devis-checkout" className="rounded-xl border border-cream/10 bg-white p-2 shadow-sm">
