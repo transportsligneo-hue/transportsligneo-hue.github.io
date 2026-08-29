@@ -1,26 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro } from "lucide-react";
+import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro, Search, Phone, Mail } from "lucide-react";
 
 import {
-  PageHeader,
-  Card,
-  Badge,
-  Table,
-  THead,
-  TH,
-  TR,
-  TD,
   EmptyState,
   IconButton,
-  SearchInput,
 } from "@/components/admin/AdminUI";
 import { getHighestActiveRole } from "@/lib/roles";
 import { AdminDetailDrawer, DrawerSection, DrawerField, DrawerGrid, DrawerBadge } from "@/components/admin/AdminDetailDrawer";
 import { Button } from "@/components/ui/button";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { LogoLoader } from "@/components/brand/LogoLoader";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
@@ -188,23 +180,73 @@ function AdminClients() {
     );
   });
 
+  const actifsCount = clients.filter((c) => c.actif).length;
+  const suspendusCount = clients.filter((c) => !c.actif).length;
+  const totalMissions = clients.reduce((s, c) => s + c.missions_count, 0);
+
   return (
     <div>
-      <PageHeader
-        title="Clients"
-        subtitle={`${clients.length} client${clients.length > 1 ? "s" : ""} inscrit${clients.length > 1 ? "s" : ""}`}
-        actions={
-          <>
-            <SearchInput value={search} onChange={setSearch} placeholder="Rechercher un client..." />
-            <IconButton onClick={fetchClients} title="Actualiser">
-              <RefreshCw size={15} />
-            </IconButton>
-          </>
-        }
-      />
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Clients</h1>
+          <p className="dvx-sub">
+            {clients.length} client{clients.length > 1 ? "s" : ""} inscrit{clients.length > 1 ? "s" : ""}.
+          </p>
+        </div>
+        <button type="button" className="dvx-cta" onClick={fetchClients}>
+          <RefreshCw size={16} />
+          Actualiser
+        </button>
+      </div>
+
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><UserRound size={17} /></span>
+          <p className="dvx-stat-k">Total</p>
+          <p className="dvx-stat-v">{clients.length}</p>
+          <p className="dvx-stat-t dim">Clients inscrits</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><CheckCircle size={17} /></span>
+          <p className="dvx-stat-k">Actifs</p>
+          <p className="dvx-stat-v">{actifsCount}</p>
+          <p className={`dvx-stat-t ${actifsCount > 0 ? "up" : "warn"}`}>Comptes en service</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic red"><Ban size={17} /></span>
+          <p className="dvx-stat-k">Suspendus</p>
+          <p className="dvx-stat-v">{suspendusCount}</p>
+          <p className={`dvx-stat-t ${suspendusCount > 0 ? "warn" : "dim"}`}>
+            {suspendusCount > 0 ? "À examiner" : "Aucun compte suspendu"}
+          </p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><Truck size={17} /></span>
+          <p className="dvx-stat-k">Missions</p>
+          <p className="dvx-stat-v">{totalMissions}</p>
+          <p className="dvx-stat-t dim">Total réalisées / en cours</p>
+        </div>
+      </div>
+
+      {/* ===== Barre de filtres unifiée ===== */}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <Search size={15} />
+          <input
+            className="dvx-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un client, un email, un téléphone…"
+          />
+        </div>
+      </div>
 
       {loading ? (
-        <Card className="text-center text-pro-muted py-12">Chargement…</Card>
+        <div className="flex justify-center py-12">
+          <LogoLoader label="Chargement des clients…" />
+        </div>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={UserRound}
@@ -212,79 +254,93 @@ function AdminClients() {
           description={search ? "Essayez une autre recherche." : "Les clients inscrits apparaîtront ici."}
         />
       ) : (
-        <Table>
-          <THead>
-            <TH>Client</TH>
-            <TH className="hidden sm:table-cell">Contact</TH>
-            <TH className="hidden md:table-cell">Missions</TH>
-            <TH className="hidden md:table-cell">Inscrit le</TH>
-            <TH>Statut</TH>
-            <TH className="text-right">Actions</TH>
-          </THead>
-          <tbody>
-            {filtered.map((c) => (
-              <TR key={c.user_id} className="cursor-pointer" onClick={() => setSelected(c)}>
-                <TD>
-                  <div className="flex items-center gap-2">
+        <div className="space-y-3.5">
+          {filtered.map((c) => {
+            const isCompany = !!c.societe || !!c.org_name || c.type_client === "b2b" || c.type_client === "flotte";
+            const name = `${c.prenom} ${c.nom}`.trim() || "—";
+            const initials = `${(c.prenom || "").charAt(0)}${(c.nom || "").charAt(0)}`.toUpperCase() || "?";
+            return (
+              <div key={c.user_id} className={`dvx-card ${!c.actif ? "is-archived" : ""}`}>
+                {/* En-tête de carte */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className={`dvx-badge ${c.actif ? "green" : "red"}`}>{c.actif ? "Actif" : "Suspendu"}</span>
+                    {c.societe && <span className="dvx-badge blue">{c.societe}</span>}
+                    <span className="text-[11.5px] text-[#a3a4ac]">
+                      Inscrit le {new Date(c.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Corps */}
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="flex items-start gap-3 min-w-0">
                     <ClientLogo
                       src={c.avatar_url || c.org_logo_url}
-                      name={c.org_name || c.societe || `${c.prenom} ${c.nom}`.trim()}
-                      isCompany={!!c.societe || !!c.org_name || c.type_client === "b2b" || c.type_client === "flotte"}
+                      name={c.org_name || c.societe || name}
+                      isCompany={isCompany}
                       kind={c.org_logo_url || c.type_client === "flotte" ? "flotte" : c.type_client === "b2b" ? "b2b" : "particulier"}
                       size="sm"
                     />
                     <div className="min-w-0">
-                      <p className="font-medium text-pro-text truncate">{c.prenom} {c.nom}</p>
-                      {c.societe && <p className="text-pro-muted text-xs truncate">{c.societe}</p>}
-                      <p className="text-pro-muted text-xs sm:hidden truncate">{c.email}</p>
+                      <p className="text-[13.5px] font-bold text-[#14161c] truncate">{name}</p>
+                      {c.societe && <p className="mt-1 text-[11.5px] text-[#70727d] truncate">{c.societe}</p>}
                     </div>
                   </div>
-                </TD>
-                <TD className="hidden sm:table-cell text-pro-text-soft">
-                  <p className="text-sm">{c.email}</p>
-                  {c.telephone && <p className="text-xs text-pro-muted">{c.telephone}</p>}
-                </TD>
-                <TD className="hidden md:table-cell text-pro-text-soft">
-                  <span className="font-medium">{c.missions_count}</span>
-                </TD>
-                <TD className="hidden md:table-cell text-pro-muted text-xs">
-                  {new Date(c.created_at).toLocaleDateString("fr-FR")}
-                </TD>
-                <TD>
-                  <Badge tone={c.actif ? "success" : "danger"}>{c.actif ? "Actif" : "Suspendu"}</Badge>
-                </TD>
-                <TD onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setPricingClient(c);
-                      }}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-emerald-600 hover:bg-emerald-50"
-                      title="Gérer les tarifs personnalisés (estimateur)"
-                    >
-                      <Euro size={15} />
-                    </button>
-                    <button
-                      onClick={() => setSelected(c)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md text-pro-accent hover:bg-pro-accent/10"
-                      title="Voir la fiche"
-                    >
-                      <Eye size={15} />
-                    </button>
-                    {c.actif ? (
-                      <IconButton onClick={() => toggleActif(c.user_id, false)} title="Suspendre" tone="danger"><Ban size={15} /></IconButton>
-                    ) : (
-                      <IconButton onClick={() => toggleActif(c.user_id, true)} title="Réactiver" tone="success"><CheckCircle size={15} /></IconButton>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Contact</p>
+                    {c.email && (
+                      <p className="text-[12.5px] text-[#14161c] flex items-center gap-1.5 truncate"><Mail size={12} className="text-[#a3a4ac] shrink-0" />{c.email}</p>
                     )}
+                    {c.telephone && (
+                      <p className="mt-1.5 text-[12.5px] text-[#14161c] flex items-center gap-1.5"><Phone size={12} className="text-[#a3a4ac] shrink-0" />{c.telephone}</p>
+                    )}
+                    {!c.email && !c.telephone && <p className="text-[12.5px] text-[#a3a4ac]">—</p>}
                   </div>
 
-                </TD>
-              </TR>
-            ))}
-          </tbody>
-        </Table>
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Missions</p>
+                    <p className="text-[13.5px] font-bold text-[#14161c]">{c.missions_count}</p>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="dvx-col-k">Type de compte</p>
+                    <p className="text-[12.5px] text-[#14161c]">
+                      {c.type_client === "flotte" ? "Flotte partenaire" : c.type_client === "b2b" ? "B2B" : "Particulier"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pied de carte */}
+                <div className="dvx-foot">
+                  <button
+                    type="button"
+                    className="dvx-ico"
+                    title="Gérer les tarifs personnalisés (estimateur)"
+                    onClick={() => setPricingClient(c)}
+                  >
+                    <Euro size={15} />
+                  </button>
+                  <button type="button" className="dvx-ico" title="Voir la fiche" onClick={() => setSelected(c)}>
+                    <Eye size={15} />
+                  </button>
+                  {c.actif ? (
+                    <button type="button" className="dvx-btn" onClick={() => toggleActif(c.user_id, false)}>
+                      <Ban size={13} />
+                      Suspendre
+                    </button>
+                  ) : (
+                    <button type="button" className="dvx-btn solid" onClick={() => toggleActif(c.user_id, true)}>
+                      <CheckCircle size={13} />
+                      Réactiver
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {selected && (

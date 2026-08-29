@@ -478,72 +478,73 @@ function AdminConvoyeurs() {
 
   return (
     <div>
-      <PageHeader
-        title="Convoyeurs"
-        subtitle={`${enriched.length} convoyeur${enriched.length > 1 ? "s" : ""} · ${kpis.aVerifier} à vérifier`}
-        actions={
-          <>
-            <Button icon={<Send size={14} />} onClick={() => setShowInvite(true)}>
-              Inviter un convoyeur (email)
-            </Button>
-
-            <Button variant="secondary" icon={<UserPlus size={14} />} onClick={() => setShowCreate(true)}>
-              Créer directement
-            </Button>
-            <IconButton onClick={fetchAll} title="Actualiser">
-              <RefreshCw size={15} />
-            </IconButton>
-          </>
-        }
-      />
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <KpiCard
-          label="À vérifier"
-          value={kpis.aVerifier}
-          icon={Clock}
-          tone={kpis.aVerifier > 0 ? "warning" : "default"}
-          hint="En attente / en vérif. / à corriger"
-        />
-        <KpiCard
-          label="Documents à valider"
-          value={kpis.docsAValider}
-          icon={FileText}
-          tone={kpis.docsAValider > 0 ? "info" : "default"}
-          hint="Documents en attente"
-        />
-        <KpiCard
-          label="Convoyeurs validés"
-          value={kpis.validated}
-          icon={ShieldCheck}
-          tone="success"
-        />
-        <KpiCard
-          label="Suspendus / refusés"
-          value={kpis.suspendus + kpis.refuses}
-          icon={AlertTriangle}
-          tone={kpis.suspendus + kpis.refuses > 0 ? "danger" : "default"}
-          hint={`${kpis.suspendus} suspendu(s) · ${kpis.refuses} refusé(s)`}
-        />
+      {/* ===== En-tête ===== */}
+      <div className="dvx-head">
+        <div className="min-w-0">
+          <h1 className="dvx-title">Convoyeurs</h1>
+          <p className="dvx-sub">
+            {enriched.length} convoyeur{enriched.length > 1 ? "s" : ""} · {kpis.aVerifier} à vérifier
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="dvx-btn outline" onClick={() => setShowCreate(true)}>
+            <UserPlus size={14} /> Créer directement
+          </button>
+          <button type="button" className="dvx-btn outline" onClick={fetchAll} title="Actualiser">
+            <RefreshCw size={14} />
+          </button>
+          <button type="button" className="dvx-cta" onClick={() => setShowInvite(true)}>
+            <Send size={16} /> Inviter un convoyeur (email)
+          </button>
+        </div>
       </div>
 
-      {/* Filtres */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
-        <div className="relative flex-1">
-          <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
-          <TextInput
+      {/* ===== Statistiques ===== */}
+      <div className="dvx-stats">
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic orange"><Clock size={17} /></span>
+          <p className="dvx-stat-k">À vérifier</p>
+          <p className="dvx-stat-v">{kpis.aVerifier}</p>
+          <p className={`dvx-stat-t ${kpis.aVerifier > 0 ? "warn" : "dim"}`}>En attente / en vérif. / à corriger</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic blue"><FileText size={17} /></span>
+          <p className="dvx-stat-k">Documents à valider</p>
+          <p className="dvx-stat-v">{kpis.docsAValider}</p>
+          <p className={`dvx-stat-t ${kpis.docsAValider > 0 ? "warn" : "dim"}`}>Documents en attente</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic green"><ShieldCheck size={17} /></span>
+          <p className="dvx-stat-k">Convoyeurs validés</p>
+          <p className="dvx-stat-v">{kpis.validated}</p>
+          <p className="dvx-stat-t up">Profils actifs</p>
+        </div>
+        <div className="dvx-stat">
+          <span className="dvx-stat-ic violet"><AlertTriangle size={17} /></span>
+          <p className="dvx-stat-k">Suspendus / refusés</p>
+          <p className="dvx-stat-v">{kpis.suspendus + kpis.refuses}</p>
+          <p className={`dvx-stat-t ${kpis.suspendus + kpis.refuses > 0 ? "warn" : "dim"}`}>
+            {kpis.suspendus} suspendu(s) · {kpis.refuses} refusé(s)
+          </p>
+        </div>
+      </div>
+
+      {/* ===== Filtres ===== */}
+      <div className="dvx-filters">
+        <div className="dvx-search">
+          <SearchIcon size={15} />
+          <input
+            className="dvx-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher nom, email, ville…"
-            className="!pl-9"
           />
         </div>
-        <Select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)} className="sm:w-56">
+        <select className="dvx-select" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
           {STATUT_FILTERS.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
-        </Select>
+        </select>
       </div>
 
       {invitations.filter((i) => i.status === "pending" || i.status === "accepted").length > 0 && (
