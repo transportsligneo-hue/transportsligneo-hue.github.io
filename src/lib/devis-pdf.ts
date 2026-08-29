@@ -695,29 +695,54 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y = Math.max(ly, ry2);
 
   // ===== Signatures =====
-  y += 4;
+  // Si la place manque au-dessus du pied de page, on bascule sur une nouvelle page.
+  if (y + 34 > bottomLimit) {
+    doc.addPage();
+    applyLigneoFonts(doc);
+    drawHeader(doc, pageW, logoData);
+    y = 50;
+  } else {
+    y += 4;
+  }
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...TEXT);
-  doc.text("Bon pour accord, le : ________________", M + 5, y);
-  doc.text("Pour Transports Ligneo", right, y, { align: "right" });
+  const sigBoxW = (innerW - 10) / 2;
+  const sigBoxH = 26;
+  // Cadre client (gauche)
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.3);
+  doc.setFillColor(...WHITE);
+  doc.rect(M, y, sigBoxW, sigBoxH, "FD");
+  doc.setFillColor(...GOLD);
+  doc.rect(M, y, sigBoxW, 0.9, "F");
+  // Cadre Ligneo (droite)
+  doc.setDrawColor(...LINE);
+  doc.rect(M + sigBoxW + 10, y, sigBoxW, sigBoxH, "FD");
+  doc.setFillColor(...GOLD);
+  doc.rect(M + sigBoxW + 10, y, sigBoxW, 0.9, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.2);
+  doc.setTextColor(...NAVY);
+  doc.text("Bon pour accord, le : ____ / ____ / ______", M + 4, y + 6.5);
+  doc.text("Pour Transports Ligneo", M + sigBoxW + 14, y + 6.5);
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 2, 34, 12); } catch { /* optionnel */ }
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 4, y + 9, 34, 12); } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", right - 34, y + 2, 30, 12); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", M + sigBoxW + 14, y + 9, 30, 12); } catch { /* optionnel */ }
   }
 
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(7.8);
+  doc.setFontSize(7.6);
   doc.setTextColor(...MUTED);
-  doc.text("Signature et cachet client", M + 5, y + 16.5);
-  doc.text("Olivier G. — Fondateur", right, y + 16.5, { align: "right" });
+  doc.text("Signature et cachet client", M + 4, y + sigBoxH - 2.5);
+  doc.text("Olivier G. — Fondateur", right - 4, y + sigBoxH - 2.5, { align: "right" });
+  y += sigBoxH;
   if (d.acceptedAtLabel) {
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 5, y + 22);
+    doc.text(`Signé électroniquement le ${d.acceptedAtLabel}`, M + 4, y + 4.5);
   }
 
 
