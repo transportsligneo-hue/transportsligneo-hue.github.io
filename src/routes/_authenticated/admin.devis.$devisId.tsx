@@ -552,9 +552,12 @@ function AdminDevisDetailPage() {
           {devis.message && (
             <Card>
               <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2">Message client</p>
-              <p className="text-sm italic text-pro-text-soft">"{devis.message}"</p>
+              <p className="text-sm text-pro-text whitespace-pre-wrap rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2">
+                {devis.message}
+              </p>
             </Card>
           )}
+
 
           {/* Actions */}
           <Card>
