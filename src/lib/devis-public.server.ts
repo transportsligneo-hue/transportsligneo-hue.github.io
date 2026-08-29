@@ -8,6 +8,7 @@
  *  - 10 minutes de validité, usage unique, 5 tentatives, 3 renvois / 10 min.
  */
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { sanitizePaymentUrl } from '@/lib/payment-link'
 
 export const CGV_VERSION = 'v1-2026-01'
 export const CODE_TTL_MINUTES = 10
