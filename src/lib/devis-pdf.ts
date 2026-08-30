@@ -486,7 +486,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Émetteur / Destinataire =====
   let y = 41;
   const colW = (innerW - 6) / 2;
-  const boxH = 27;
+  const boxH = 33;
   card(doc, M, y, colW, boxH, "Émetteur");
   card(doc, M + colW + 6, y, colW, boxH, "Destinataire");
 
@@ -502,6 +502,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     "contact@transportsligneo.fr",
     "07 82 45 61 81",
     sirenLigneo ? `SIREN ${sirenLigneo}` : "www.transportsligneo.fr",
+    "www.transportsligneo.fr",
   ].forEach((l, i) => {
     doc.text(l, M + 5, y + 16.4 + i * 3.9);
   });
@@ -520,18 +521,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     y + 11.8,
   );
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7.4);
   doc.setTextColor(...MUTED);
+  // Adresse complète (2 lignes max) puis email, téléphone et SIRET du client.
+  const destAddr = (doc.splitTextToSize(d.adresse || "Adresse à compléter", colW - 10) as string[]).slice(0, 2);
   const destLines = [
-    d.adresse || "Adresse à compléter",
+    ...destAddr,
     d.email || null,
     d.telephone || null,
-    [d.siret ? `SIRET ${d.siret}` : null, d.tva_intra ? `TVA ${d.tva_intra}` : null].filter(Boolean).join(" · ") || null,
+    d.siret ? `SIRET ${d.siret}${d.tva_intra ? ` · TVA ${d.tva_intra}` : ""}` : null,
   ].filter(Boolean) as string[];
   let dy = y + 16.4;
-  destLines.slice(0, 3).forEach((l) => {
+  destLines.slice(0, 5).forEach((l) => {
     doc.text((doc.splitTextToSize(l, colW - 10) as string[])[0], dx + 5, dy);
-    dy += 3.9;
+    dy += 3.6;
   });
 
   y += boxH + 5;
