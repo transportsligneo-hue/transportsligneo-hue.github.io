@@ -615,17 +615,23 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const identRetour =
     [d.marque_retour ?? d.marque, d.modele_retour ?? d.modele].filter(Boolean).join(" ") || identAller;
 
-  type VehLine = { tag?: string; label: string; plate?: string | null };
+  type VehLine = { tag?: "Aller" | "Retour"; label: string; plate?: string | null; vin?: string | null };
   const vehLines: VehLine[] = isGroupe
     ? [{ label: `${multiVehicules.length} véhicules (devis groupé)` }]
     : isAllerRetour
       ? [
-          { tag: "Aller", label: identAller, plate: formatPlate(d.immatriculation) },
-          { tag: "Retour", label: identRetour, plate: formatPlate(d.immatriculation_retour ?? d.immatriculation) },
+          { tag: "Aller", label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin },
+          {
+            tag: "Retour",
+            label: identRetour,
+            plate: formatPlate(d.immatriculation_retour ?? d.immatriculation),
+            vin: d.vin_retour ?? d.vin,
+          },
         ]
-      : [{ label: identAller, plate: formatPlate(d.immatriculation) }];
+      : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
-  const vehH = isAllerRetour ? 27 : 23;
+  const lineH = 11.6;
+  const vehH = Math.max(23, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
 
@@ -633,23 +639,37 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   vehLines.forEach((v) => {
     let vx = M + 5;
     if (v.tag) {
-      vx += badge(doc, vx, vy - 3.1, v.tag.toUpperCase(), BLUE_SOFT, BLUE, 5.8) + 2.2;
+      // Aller en bleu électrique, Retour en ambre : distinction immédiate.
+      const isRetour = v.tag === "Retour";
+      vx += badge(
+        doc,
+        vx,
+        vy - 3.3,
+        v.tag.toUpperCase(),
+        isRetour ? AMBER_SOFT : BLUE_SOFT,
+        isRetour ? AMBER_INK : BLUE,
+        5.8,
+      ) + 2.2;
     }
+    // Plaque AVANT la marque, style Missions / Attributions.
+    if (v.plate) vx += plateBadge(doc, vx, vy - 3.6, v.plate, 7) + 2.4;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.8);
+    doc.setFontSize(8.6);
     doc.setTextColor(...INK);
-    const maxW = colW - (vx - M) - 5;
-    doc.text((doc.splitTextToSize(v.label, maxW) as string[])[0], vx, vy);
-    if (v.plate) {
-      badge(doc, M + 5, vy + 2.4, v.plate, BLUE_SOFT, BLUE, 6.2);
-      vy += 6.4;
+    const maxW = M + colW - 5 - vx;
+    doc.text((doc.splitTextToSize(v.label, Math.max(12, maxW)) as string[])[0], vx, vy);
+    if (v.vin) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.6);
+      doc.setTextColor(...MUTED);
+      doc.text(`VIN ${v.vin.toUpperCase()}`, M + 5, vy + 4.4);
     }
-    vy += 6.6;
+    vy += lineH;
   });
   if (plateau) {
     let bx = M + 5;
-    bx += badge(doc, bx, Math.min(vy - 2, y + vehH - 5), "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
-    badge(doc, bx, Math.min(vy - 2, y + vehH - 5), "Plateau", BLUE_SOFT, BLUE, 6);
+    bx += badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
+    badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Plateau", BLUE_SOFT, BLUE, 6);
   }
 
   const prestationLabel =
