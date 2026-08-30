@@ -319,33 +319,34 @@ function drawHeader(
   }
   const tx = M + 17;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11.5);
+  doc.setFontSize(12.8);
   doc.setTextColor(...INK);
   doc.text("TRANSPORTS ", tx, 20.5);
   const w1 = doc.getTextWidth("TRANSPORTS ");
   doc.setTextColor(...BLUE);
   doc.text("LIGNEO", tx + w1, 20.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.9);
   doc.setTextColor(...MUTED);
-  doc.text("Convoyage automobile B2B · Tours (37), France", tx, 25.2);
+  doc.text("Convoyage automobile B2B · Tours (37), France", tx, 25.4);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(19);
+  doc.setFontSize(20.5);
   doc.setTextColor(...INK);
   doc.text("DEVIS", right, 21, { align: "right" });
-  doc.setFontSize(8.6);
+  doc.setFontSize(9.6);
   doc.setTextColor(...BLUE);
-  doc.text(opts.numero, right, 26.6, { align: "right" });
+  doc.text(opts.numero, right, 26.8, { align: "right" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.9);
   doc.setTextColor(...MUTED);
   doc.text(
     `Émis le ${fmtDate(opts.emission)} · Valable ${opts.validite} jours`,
     right,
-    31.4,
+    31.6,
     { align: "right" },
   );
+
 
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
