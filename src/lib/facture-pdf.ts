@@ -249,7 +249,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° de PO", f.reference_client.trim()]);
   if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}`]);
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
-  if (vehLabel) refs.push(["Véhicule", `${vehLabel}${f.vehicule_immatriculation ? ` (${f.vehicule_immatriculation})` : ""}`]);
+  const plaque = f.vehicule_immatriculation?.trim() || "";
+  if (vehLabel || plaque) refs.push(["Véhicule", vehLabel || "Véhicule"]);
   if (f.date_mission) refs.push(["Livré le", fmtDate(f.date_mission)]);
   refs.push(["Mode de règlement", f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire")]);
   let ry = blockTop + 16;
@@ -262,8 +263,14 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "bold");
     const val = (doc.splitTextToSize(v, pageW - M - refX - kw) as string[])[0];
     doc.text(val, refX + kw, ry);
+    if (k === "Véhicule" && plaque) {
+      // Plaque au format exact du badge Missions / Attributions.
+      drawPlateTag(doc, refX + kw + doc.getTextWidth(val) + 2.6, ry - 5.6, plaque, 8.4);
+      ry += 2.4;
+    }
     ry += 5.2;
   }
+
 
   // ===== Tableau prestation =====
   let y = Math.max(blockTop + boxH, ry) + 7;
