@@ -47,10 +47,12 @@ export function MissionConvertDuoPanel({
     depart: arrivee ?? "",
     arrivee: depart ?? "",
     date: date ?? "",
-    immatriculation: immatriculation ?? "",
-    vin: vin ?? "",
-    marque: marque ?? "",
-    modele: modele ?? "",
+    // Le retour peut concerner un autre véhicule : ne jamais recopier
+    // implicitement l'identité du véhicule aller dans les champs retour.
+    immatriculation: "",
+    vin: "",
+    marque: "",
+    modele: "",
     prixRetour: "",
     split: true,
   });
