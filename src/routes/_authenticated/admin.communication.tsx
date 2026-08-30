@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AdminManualCommunication } from '@/components/admin/AdminManualCommunication'
+import { AdminEmailHistory } from '@/components/admin/AdminEmailHistory'
 import { AdminAlertSettings } from '@/components/admin/AdminAlertSettings'
 import { AdminSection } from '@/components/admin/ui'
 import { PageHeader } from '@/components/admin/AdminUI'
@@ -24,6 +25,12 @@ function AdminCommunicationPage() {
       </AdminSection>
       <AdminSection title="Nouvel envoi" description="Les emails restent individuels. Les notifications peuvent cibler un utilisateur, tous les convoyeurs ou tous les clients.">
         <AdminManualCommunication />
+      </AdminSection>
+      <AdminSection
+        title="Historique des emails envoyés"
+        description="Tous les emails partis depuis la plateforme : devis, documents, envois directs et alertes."
+      >
+        <AdminEmailHistory />
       </AdminSection>
     </div>
   )

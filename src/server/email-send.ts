@@ -16,8 +16,9 @@ async function logSend(row: {
   recipient_email: string
   status: 'sent' | 'suppressed' | 'failed'
   error_message?: string
+  metadata?: Record<string, unknown>
 }) {
-  const { error } = await supabaseAdmin.from('email_send_log').insert(row)
+  const { error } = await supabaseAdmin.from('email_send_log').insert(row as never)
   if (error) {
     console.error('[email/server] send log write failed', { code: error.code, message: error.message })
   }
@@ -94,6 +95,13 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
   const templateData = await withDevisPublicLinks(params)
 
   const messageId = crypto.randomUUID()
+  const meta: Record<string, unknown> = {
+    subject: template.subject ?? null,
+    display_name: template.displayName ?? null,
+    numero: templateData['numero'] ?? null,
+    message: templateData['message'] ?? templateData['customMessage'] ?? null,
+    doc_url: templateData['pdfUrl'] ?? templateData['signUrl'] ?? null,
+  }
 
   const send = () =>
     sendTemplateEmail(params.templateName, effectiveRecipient, {
@@ -117,6 +125,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
         template_name: params.templateName,
         recipient_email: effectiveRecipient,
         status: 'suppressed',
+        metadata: meta,
       })
       return { success: false, reason: 'email_suppressed' }
     }
@@ -126,6 +135,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
       template_name: params.templateName,
       recipient_email: effectiveRecipient,
       status: 'sent',
+      metadata: meta,
     })
     return { success: true }
   } catch (error) {
@@ -137,6 +147,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
       recipient_email: effectiveRecipient,
       status: 'failed',
       error_message: message,
+      metadata: meta,
     })
     return { success: false, reason: 'send_failed' }
   }
@@ -191,6 +202,12 @@ export async function sendRawEmailServer(params: {
   const messageId = crypto.randomUUID()
   const label = params.label || 'direct_email'
   const senderName = (params.senderName || SITE_NAME).replace(/[<>"]/g, '').trim() || SITE_NAME
+  const rawMeta = {
+    subject: params.subject,
+    sender_name: senderName,
+    html: params.html?.slice(0, 20000) ?? null,
+    kind: 'direct',
+  }
 
   const send = () =>
     sendLovableEmail(
@@ -215,11 +232,11 @@ export async function sendRawEmailServer(params: {
       if (await waitForRateLimit(error)) await send()
       else throw error
     }
-    await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'sent' })
+    await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'sent', metadata: rawMeta })
     return { success: true }
   } catch (error) {
     if (isSuppressed(error)) {
-      await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'suppressed' })
+      await logSend({ message_id: messageId, template_name: label, recipient_email: to, status: 'suppressed', metadata: rawMeta })
       return { success: false, reason: 'email_suppressed' }
     }
     const message = error instanceof Error ? error.message : 'send failed'
@@ -230,6 +247,7 @@ export async function sendRawEmailServer(params: {
       recipient_email: to,
       status: 'failed',
       error_message: message,
+      metadata: rawMeta,
     })
     return { success: false, reason: 'send_failed' }
   }
