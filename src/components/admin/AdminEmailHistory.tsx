@@ -82,7 +82,7 @@ export function AdminEmailHistory() {
             <TH>Destinataire</TH>
             <TH className="hidden md:table-cell">Sujet / Type</TH>
             <TH>Statut</TH>
-            <TH></TH>
+            <TH>{" "}</TH>
           </THead>
           <tbody>
             {filtered.map((r) => {

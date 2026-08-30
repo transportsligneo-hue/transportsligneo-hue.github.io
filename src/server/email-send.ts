@@ -18,7 +18,7 @@ async function logSend(row: {
   error_message?: string
   metadata?: Record<string, unknown>
 }) {
-  const { error } = await supabaseAdmin.from('email_send_log').insert(row)
+  const { error } = await supabaseAdmin.from('email_send_log').insert(row as never)
   if (error) {
     console.error('[email/server] send log write failed', { code: error.code, message: error.message })
   }
