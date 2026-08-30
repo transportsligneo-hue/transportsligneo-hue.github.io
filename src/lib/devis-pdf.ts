@@ -313,6 +313,32 @@ function badge(
   return w;
 }
 
+/**
+ * Plaque d'immatriculation façon Missions / Attributions :
+ * pastille blanche bordée, barre bleu nuit à gauche, texte monospace majuscule.
+ */
+function plateBadge(doc: jsPDF, x: number, y: number, text: string, fs = 7.2): number {
+  doc.setFont("courier", "bold");
+  doc.setFontSize(fs);
+  const padX = 2.2;
+  const barW = 1.9;
+  const w = doc.getTextWidth(text) + padX * 2 + barW + 1.4;
+  const h = fs * 0.62 + 3;
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(x, y, w, h, 1.2, 1.2, "FD");
+  doc.setFillColor(...INK);
+  doc.roundedRect(x, y, barW, h, 1.2, 1.2, "F");
+  doc.rect(x + barW / 2, y, barW / 2, h, "F");
+  doc.setTextColor(...INK);
+  doc.text(text, x + barW + padX, y + h / 2 + fs * 0.3);
+  doc.setFont("helvetica", "normal");
+  return w;
+}
+
+
+
 /** En-tête clair : logo + identité à gauche, bloc DEVIS à droite. */
 function drawHeader(
   doc: jsPDF,
