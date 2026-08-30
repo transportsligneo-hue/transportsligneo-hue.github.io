@@ -94,8 +94,8 @@ export default function ServicesContent({
         <>
           <div className="v4-hero">
             <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
-            <h1 className="v4-h1">Le convoyage, <span className="v4-accent">réinventé</span>.</h1>
-            <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un service de convoyage complet, transparent et assuré, pensé pour les particuliers.</p>
+<h1 className="v4-h1">Votre convoyage, <span className="v4-accent">de bout en bout</span>.</h1>
+            <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : nous assurons le déplacement de votre véhicule de bout en bout, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
           <div className="v4-section">
