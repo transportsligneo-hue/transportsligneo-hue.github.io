@@ -3599,10 +3599,10 @@ body.is-driver-app .closed-link svg {
     background: linear-gradient(180deg, transparent, rgba(122,163,255,0.42), transparent);
   }
 
-  .tln-links {
+.tln-links {
     flex: 1 1 auto; min-width: 0;
     display: flex; align-items: center; justify-content: center;
-    gap: 2px; margin: 0; padding: 0; list-style: none;
+    gap: 5px; margin: 0; padding: 0 6px; list-style: none;
     overflow-x: auto; scrollbar-width: none;
   }
   .tln-links::-webkit-scrollbar { display: none; }
@@ -3610,13 +3610,14 @@ body.is-driver-app .closed-link svg {
   .tln-links > li::marker { content: none; }
 
   .tln-bar .r4-nav-link {
-    min-height: 36px; padding: 0 11px;
-    font-size: 12.4px; font-weight: 600; letter-spacing: 0.012em;
+    min-height: 40px; padding: 0 16px;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.012em;
+    white-space: nowrap;
   }
   .tln-bar .r4-nav-link.is-active {
     box-shadow: 0 4px 14px rgba(47,95,255,0.45), 0 0 18px rgba(79,140,255,0.4);
   }
-  .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 32px; font-size: 12px; }
+  .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 34px; font-size: 12.6px; padding: 0 13px; }
 
   .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
   .tln-bar .tln-phone { padding: 5px 12px 5px 6px; }
