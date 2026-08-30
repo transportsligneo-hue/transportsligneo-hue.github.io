@@ -243,6 +243,10 @@ export interface FactureRow {
   prix_ttc: number;
   reference_client: string | null;
   reference_label: string | null;
+  vehicule_marque: string | null;
+  vehicule_modele: string | null;
+  vehicule_immatriculation: string | null;
+  vehicule_vin: string | null;
   [k: string]: unknown;
 }
 
@@ -272,6 +276,10 @@ export function factureRowToPdfData(row: FactureRow): FactureData {
     prix_ttc: Number(row.prix_ttc),
     reference_client: row.reference_client,
     reference_label: row.reference_label,
+    vehicule_marque: row.vehicule_marque,
+    vehicule_modele: row.vehicule_modele,
+    vehicule_immatriculation: row.vehicule_immatriculation,
+    vehicule_vin: row.vehicule_vin,
   } as FactureData;
 }
 
@@ -350,7 +358,7 @@ export async function ensureFacture(
   const { data: trajet, error: tErr } = await supabase
     .from("trajets")
     .select(
-      "id, depart, arrivee, date_trajet, client_email, client_nom, prix, devis_id, demande_id",
+      "id, depart, arrivee, date_trajet, client_email, client_nom, prix, devis_id, demande_id, marque, modele, immatriculation, vin, vehicule_immatriculation, vehicule_vin",
     )
     .eq("id", trajetId)
     .maybeSingle();
@@ -424,6 +432,11 @@ export async function ensureFacture(
       statut: "emise",
       reference_client: refClient,
       reference_label: refLabel,
+      vehicule_marque: trajet.marque,
+      vehicule_modele: trajet.modele,
+      vehicule_immatriculation:
+        trajet.immatriculation ?? trajet.vehicule_immatriculation,
+      vehicule_vin: trajet.vin ?? trajet.vehicule_vin,
     })
     .select("*")
     .single();
