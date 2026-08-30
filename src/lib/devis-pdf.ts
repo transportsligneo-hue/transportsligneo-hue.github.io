@@ -623,7 +623,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         ]
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
-  const lineH = 11.6;
+  const lineH = 12.8;
   const vehH = Math.max(23, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
@@ -651,7 +651,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
     doc.text(label, vx, vy);
     vx += doc.getTextWidth(label) + 2.6;
-    if (v.plate) plateBadge(doc, vx, vy - 3.1, v.plate, 6.2);
+    if (v.plate) plateBadge(doc, vx, vy - 5.6, v.plate, 8.4);
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);
