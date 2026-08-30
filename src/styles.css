@@ -8327,11 +8327,8 @@ body .tln-bar .r4-nav-link {
 
 /* Navbar : liens élargis qui occupent toute la largeur utile, jamais rognés */
 body .tln-links > li { flex: 0 0 auto !important; }
-body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; }
+body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; justify-content: space-between !important; }
 body .tln-links::-webkit-scrollbar { display: none !important; }
-@media (min-width: 1720px) {
-  body .tln-links { justify-content: space-between !important; }
-}
 @media (max-width: 1700px) {
   body .tln-bar .r4-nav-link { font-size: 13px !important; padding: 7px 12px !important; min-height: 40px !important; }
   body .tln-shell.is-scrolled .tln-bar .r4-nav-link { font-size: 12.6px !important; padding: 6px 11px !important; min-height: 36px !important; }
