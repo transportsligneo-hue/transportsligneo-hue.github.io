@@ -548,47 +548,49 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     : "Date et heure à déterminer";
   sectionLabel(doc, M, y, "Trajet");
   y += 3.4;
-  const trajetH = 23;
+  const trajetH = 27;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
+  const addrLines = (txt: string, w: number) =>
+    (doc.splitTextToSize(txt || "—", w) as string[]).slice(0, 2);
   badge(doc, M + 5, y + 4.5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE, 6.2);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.9);
+  doc.setFontSize(9.2);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 15);
+  addrLines(d.depart, halfCol).forEach((l, i) => doc.text(l, M + 5, y + 14.6 + i * 4.2));
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.9);
   doc.setTextColor(...MUTED);
-  doc.text(`Enlèvement souhaité : ${dateLine}`, M + 5, y + 19.4);
+  doc.text(`Enlèvement souhaité : ${dateLine}`, M + 5, y + 23.4);
 
   if (!rechargeSeule) {
     const cxm = pageW / 2;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11.5);
     doc.setTextColor(...INK);
-    doc.text(distanceKm != null ? `≈${distanceKm}` : "—", cxm, y + 12, { align: "center" });
+    doc.text(distanceKm != null ? `≈${distanceKm}` : "—", cxm, y + 13, { align: "center" });
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.4);
     doc.setTextColor(...FAINT);
-    doc.text("KM", cxm, y + 16, { align: "center" });
+    doc.text("KM", cxm, y + 17, { align: "center" });
     doc.setFontSize(9.5);
     doc.setTextColor(...FAINT);
-    doc.text("→", cxm - 17, y + 12.5, { align: "center" });
-    doc.text("→", cxm + 17, y + 12.5, { align: "center" });
+    doc.text("→", cxm - 17, y + 13.5, { align: "center" });
+    doc.text("→", cxm + 17, y + 13.5, { align: "center" });
 
     const ax = pageW / 2 + 19;
     badge(doc, ax, y + 4.5, "LIVRAISON", AMBER_SOFT, AMBER_INK, 6.2);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.9);
+    doc.setFontSize(9.2);
     doc.setTextColor(...INK);
-    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 15);
+    addrLines(d.arrivee, right - ax - 5).forEach((l, i) => doc.text(l, ax, y + 14.6 + i * 4.2));
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.9);
     doc.setTextColor(...MUTED);
     doc.text(
       d.duree_estimee ? `Durée estimée : ${d.duree_estimee}` : `Livraison souhaitée : ${dateLine}`,
       ax,
-      y + 19.4,
+      y + 23.4,
     );
   }
   y += trajetH + 5;
