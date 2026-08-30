@@ -834,7 +834,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 7;
 
   // ===== Conditions et précisions =====
-  const conditions: Array<[string, string]> = [
+  let conditions: Array<[string, string]> = [
     ...(plateau
       ? ([["Véhicule non roulant", "transport exclusivement sur plateau porte-voiture. Prévoir un accès dégagé (zone plane et accessible)."]] as Array<[string, string]>)
       : []),
@@ -859,29 +859,38 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   let condWrapped = wrapConds(condFs);
   const condHeight = (w: string[][], lh: number) => 9 + w.reduce((a, x) => a + x.length * lh + 1.1, 0) + 2.5;
   let condH = condHeight(condWrapped, condLh);
-  if (y + condH + 5 > sigTop) {
+  // Rétrécit la police puis retire les dernières lignes (moins critiques)
+  // jusqu'à ce que tout tienne AU-DESSUS des signatures. Jamais de chevauchement.
+  const condBudget = () => sigTop - 6 - y;
+  if (condH > condBudget()) {
     condFs = 6.2;
     condLh = 3.0;
     condWrapped = wrapConds(condFs);
     condH = condHeight(condWrapped, condLh);
   }
-  if (y + condH + 5 > sigTop) condH = Math.max(20, sigTop - 5 - y);
-  card(doc, M, y, innerW, condH, "Conditions et précisions");
-  let cy2 = y + 11;
-  condWrapped.forEach((w, i) => {
-    if (cy2 + w.length * condLh > y + condH - 1) return;
-    doc.setFillColor(...FAINT);
-    doc.circle(M + 6, cy2 - 1.1, 0.5, "F");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(condFs);
-    doc.setTextColor(...MUTED);
-    doc.text(w, M + 9, cy2);
-    // Mise en avant du terme en gras
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...INK);
-    doc.text(`${conditions[i][0]} `, M + 9, cy2);
-    cy2 += w.length * condLh + 1.1;
-  });
+  while (condH > condBudget() && conditions.length > 1) {
+    conditions = conditions.slice(0, -1);
+    condWrapped = wrapConds(condFs);
+    condH = condHeight(condWrapped, condLh);
+  }
+  if (condBudget() >= 13 && condH <= condBudget()) {
+    card(doc, M, y, innerW, condH, "Conditions et précisions");
+    let cy2 = y + 11;
+    condWrapped.forEach((w, i) => {
+      if (cy2 + w.length * condLh > y + condH - 1) return;
+      doc.setFillColor(...FAINT);
+      doc.circle(M + 6, cy2 - 1.1, 0.5, "F");
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(condFs);
+      doc.setTextColor(...MUTED);
+      doc.text(w, M + 9, cy2);
+      // Mise en avant du terme en gras
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...INK);
+      doc.text(`${conditions[i][0]} `, M + 9, cy2);
+      cy2 += w.length * condLh + 1.1;
+    });
+  }
   y = sigTop;
 
 
