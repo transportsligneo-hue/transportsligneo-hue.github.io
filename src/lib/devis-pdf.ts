@@ -40,10 +40,13 @@ export interface DevisData {
   option_trajet?: string | null;
   /** Immatriculation du vehicule convoye */
   immatriculation?: string | null;
+  /** Numéro de série (VIN) du véhicule convoyé */
+  vin?: string | null;
   /** Aller-retour : vehicule restitue (souvent une autre plaque) */
   marque_retour?: string | null;
   modele_retour?: string | null;
   immatriculation_retour?: string | null;
+  vin_retour?: string | null;
   /** Devis groupé : plusieurs véhicules sur un même devis */
   vehicules?: Array<{
     immatriculation?: string | null;
