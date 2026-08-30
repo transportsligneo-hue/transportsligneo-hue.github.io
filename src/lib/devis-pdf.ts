@@ -408,14 +408,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
 
-  const bottomLimit = pageH - 26;
-  const newPage = () => {
-    drawFooter(doc, pageW, pageH, co, validite);
-    doc.addPage();
-    applyLigneoFonts(doc);
-    drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
-    return 44;
-  };
+
+
 
   // ===== Émetteur / Destinataire =====
   let y = 41;
@@ -753,8 +747,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Signatures =====
-  const sigH = 30;
-  if (y + sigH > bottomLimit) y = newPage();
+
   const sigW = (innerW - 6) / 2;
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
@@ -767,11 +760,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("POUR TRANSPORTS LIGNEO", M + sigW + 11, y + 6);
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 8.5, 34, 13); } catch { /* optionnel */ }
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 8.5, 32, 13); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 7, 32, 11); } catch { /* optionnel */ }
   }
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.8);
   doc.setTextColor(...MUTED);
@@ -780,11 +774,11 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       ? `Signé électroniquement le ${d.acceptedAtLabel}`
       : "Signature et cachet du client — date : ____ / ____ / ______",
     M + 5,
-    y + sigH - 4,
+    y + sigH - 3.5,
   );
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...INK);
-  doc.text("Olivier G. — Fondateur", M + sigW + 11, y + sigH - 4);
+  doc.text("Olivier G. — Fondateur", M + sigW + 11, y + sigH - 3.5);
 
   drawFooter(doc, pageW, pageH, co, validite);
 
