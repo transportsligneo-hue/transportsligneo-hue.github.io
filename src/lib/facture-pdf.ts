@@ -11,6 +11,7 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
+import { drawPlateTag } from "@/lib/pdf-plate";
 
 
 

@@ -13,6 +13,7 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { drawPlateTag } from "@/lib/pdf-plate";
 
 
 export interface DevisData {
