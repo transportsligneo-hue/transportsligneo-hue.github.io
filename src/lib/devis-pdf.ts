@@ -509,6 +509,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Trajet =====
   const rechargeSeule = isDevisRechargeSeule(d);
   const distanceKm = await resolveDistanceKm(d);
+  const dateLine = d.date_souhaitee
+    ? `${fmtDate(d.date_souhaitee)}${d.heure_souhaitee ? ` à ${d.heure_souhaitee}` : ""}`
+    : "Date et heure à déterminer";
   sectionLabel(doc, M, y, "Trajet");
   y += 3.4;
   const trajetH = 23;
@@ -522,7 +525,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.9);
   doc.setTextColor(...MUTED);
-  doc.text("Adresse d'enlèvement à confirmer", M + 5, y + 19.4);
+  doc.text(`Enlèvement souhaité : ${dateLine}`, M + 5, y + 19.4);
 
   if (!rechargeSeule) {
     const cxm = pageW / 2;
@@ -548,7 +551,11 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.9);
     doc.setTextColor(...MUTED);
-    doc.text("Adresse de livraison à confirmer", ax, y + 19.4);
+    doc.text(
+      d.duree_estimee ? `Durée estimée : ${d.duree_estimee}` : `Livraison souhaitée : ${dateLine}`,
+      ax,
+      y + 19.4,
+    );
   }
   y += trajetH + 5;
 
