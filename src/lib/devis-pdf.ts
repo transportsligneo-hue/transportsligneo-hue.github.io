@@ -626,7 +626,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const ttc = d.prix_estime;
   const ht = micro ? ttc : +(ttc / (1 + vatRate / 100)).toFixed(2);
   const tva = +(ttc - ht).toFixed(2);
-  const distance = d.distance_km ?? 0;
+  const distance = distanceKm ?? d.distance_km ?? 0;
 
   const parsedFromMessage = parseDevisOptions(d.message);
   const optionsList = (d.options?.length ? d.options : parsedFromMessage.options).filter(Boolean);
