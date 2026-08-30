@@ -363,24 +363,25 @@ function drawFooter(
 ) {
   const right = pageW - M;
   const y = pageH - 16;
+  const siren = toSiren(company?.siret);
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
   doc.line(M, y - 6, right, y - 6);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  doc.setFontSize(7.2);
   doc.setTextColor(...FAINT);
   doc.text(
-    `${company?.raison_sociale || "Transports Ligneo"} · Tours (37) · contact@transportsligneo.fr`,
+    `${company?.raison_sociale || "Transports Ligneo"}${siren ? ` · SIREN ${siren}` : ""} · Tours (37) · contact@transportsligneo.fr`,
     M,
     y,
   );
   const label = `Devis valable ${validite} jours`;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.8);
+  doc.setFontSize(7);
   const bw = doc.getTextWidth(label) + 8;
-  badge(doc, pageW / 2 - bw / 2, y - 3.6, label, GREEN_SOFT, GREEN_INK, 6.8, true);
+  badge(doc, pageW / 2 - bw / 2, y - 3.8, label, GREEN_SOFT, GREEN_INK, 7, true);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.8);
+  doc.setFontSize(7.2);
   doc.setTextColor(...BLUE);
   doc.text("www.transportsligneo.fr", right, y, { align: "right" });
 }
@@ -391,7 +392,7 @@ function card(doc: jsPDF, x: number, y: number, w: number, h: number, label?: st
   doc.roundedRect(x, y, w, h, 2.4, 2.4, "F");
   if (label) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(6);
+    doc.setFontSize(6.6);
     doc.setTextColor(...FAINT);
     doc.text(label.toUpperCase(), x + 5, y + 6);
   }
@@ -399,10 +400,11 @@ function card(doc: jsPDF, x: number, y: number, w: number, h: number, label?: st
 
 function sectionLabel(doc: jsPDF, x: number, y: number, text: string) {
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
+  doc.setFontSize(6.6);
   doc.setTextColor(...FAINT);
   doc.text(text.toUpperCase(), x, y);
 }
+
 
 export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
