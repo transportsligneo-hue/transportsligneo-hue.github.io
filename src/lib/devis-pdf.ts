@@ -501,10 +501,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   [
     "contact@transportsligneo.fr",
     "07 82 45 61 81",
-    sirenLigneo ? `SIREN ${sirenLigneo}` : "www.transportsligneo.fr",
+    sirenLigneo ? `SIREN ${sirenLigneo}` : null,
     "www.transportsligneo.fr",
-  ].forEach((l, i) => {
-    doc.text(l, M + 5, y + 16.4 + i * 3.9);
+  ].filter(Boolean).forEach((l, i) => {
+    doc.text(l as string, M + 5, y + 16.4 + i * 3.9);
   });
 
   const dx = M + colW + 6;
