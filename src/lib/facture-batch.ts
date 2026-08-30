@@ -243,14 +243,21 @@ export interface FactureRow {
   prix_ttc: number;
   reference_client: string | null;
   reference_label: string | null;
-  vehicule_marque: string | null;
-  vehicule_modele: string | null;
-  vehicule_immatriculation: string | null;
-  vehicule_vin: string | null;
+  metadata?: unknown;
   [k: string]: unknown;
 }
 
 export function factureRowToPdfData(row: FactureRow): FactureData {
+  const metadata =
+    row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+      ? (row.metadata as Record<string, unknown>)
+      : {};
+  const vehicle =
+    metadata.vehicle && typeof metadata.vehicle === "object" && !Array.isArray(metadata.vehicle)
+      ? (metadata.vehicle as Record<string, unknown>)
+      : {};
+  const vehicleText = (key: string) =>
+    typeof vehicle[key] === "string" ? (vehicle[key] as string) : null;
   return {
     numero: row.numero,
     type_facture: (row.type_facture as "particulier" | "b2b") ?? "particulier",
@@ -276,10 +283,10 @@ export function factureRowToPdfData(row: FactureRow): FactureData {
     prix_ttc: Number(row.prix_ttc),
     reference_client: row.reference_client,
     reference_label: row.reference_label,
-    vehicule_marque: row.vehicule_marque,
-    vehicule_modele: row.vehicule_modele,
-    vehicule_immatriculation: row.vehicule_immatriculation,
-    vehicule_vin: row.vehicule_vin,
+    vehicule_marque: vehicleText("marque"),
+    vehicule_modele: vehicleText("modele"),
+    vehicule_immatriculation: vehicleText("immatriculation"),
+    vehicule_vin: vehicleText("vin"),
   } as FactureData;
 }
 
@@ -334,27 +341,38 @@ export async function ensureFacture(
       .select("marque, modele, immatriculation, vin, vehicule_immatriculation, vehicule_vin")
       .eq("id", basis.primaryTrajetId)
       .maybeSingle();
+    const { data: currentInvoice } = await supabase
+      .from("factures")
+      .select("metadata")
+      .eq("id", basis.existing.id)
+      .maybeSingle();
+    const currentMetadata =
+      currentInvoice?.metadata &&
+      typeof currentInvoice.metadata === "object" &&
+      !Array.isArray(currentInvoice.metadata)
+        ? currentInvoice.metadata
+        : {};
     const priceCorrections = {
       prix_ht: +basisHt.toFixed(2),
       prix_tva: basisTva,
       prix_ttc: basisTtc,
       tva_taux: micro ? 0 : vatRate,
-      vehicule_marque: vehicle?.marque ?? null,
-      vehicule_modele: vehicle?.modele ?? null,
-      vehicule_immatriculation:
-        vehicle?.immatriculation ?? vehicle?.vehicule_immatriculation ?? null,
-      vehicule_vin: vehicle?.vin ?? vehicle?.vehicule_vin ?? null,
+      metadata: {
+        ...currentMetadata,
+        vehicle: {
+          marque: vehicle?.marque ?? null,
+          modele: vehicle?.modele ?? null,
+          immatriculation:
+            vehicle?.immatriculation ?? vehicle?.vehicule_immatriculation ?? null,
+          vin: vehicle?.vin ?? vehicle?.vehicule_vin ?? null,
+        },
+      },
+      reference_client: refClient ?? undefined,
+      reference_label: refClient ? refLabel : undefined,
     };
-    const corrections = refClient
-      ? {
-          ...priceCorrections,
-          reference_client: refClient,
-          reference_label: refLabel,
-        }
-      : priceCorrections;
     const { error: updateError } = await supabase
       .from("factures")
-      .update(corrections)
+      .update(priceCorrections)
       .eq("id", basis.existing.id);
     if (updateError) throw new Error(updateError.message);
     const { data, error } = await supabase
@@ -444,11 +462,15 @@ export async function ensureFacture(
       statut: "emise",
       reference_client: refClient,
       reference_label: refLabel,
-      vehicule_marque: trajet.marque,
-      vehicule_modele: trajet.modele,
-      vehicule_immatriculation:
-        trajet.immatriculation ?? trajet.vehicule_immatriculation,
-      vehicule_vin: trajet.vin ?? trajet.vehicule_vin,
+      metadata: {
+        vehicle: {
+          marque: trajet.marque,
+          modele: trajet.modele,
+          immatriculation:
+            trajet.immatriculation ?? trajet.vehicule_immatriculation,
+          vin: trajet.vin ?? trajet.vehicule_vin,
+        },
+      },
     })
     .select("*")
     .single();
