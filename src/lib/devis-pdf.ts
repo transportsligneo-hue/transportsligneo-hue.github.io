@@ -753,8 +753,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Signatures =====
-  const sigH = 30;
-  if (y + sigH > bottomLimit) y = newPage();
+
   const sigW = (innerW - 6) / 2;
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.3);
