@@ -13,6 +13,7 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { drawPlateTag } from "@/lib/pdf-plate";
 
 
 export interface DevisData {
@@ -314,28 +315,13 @@ function badge(
 }
 
 /**
- * Plaque d'immatriculation façon Missions / Attributions :
- * pastille blanche bordée, barre bleu nuit à gauche, texte monospace majuscule.
+ * Plaque d'immatriculation : rendu strictement identique au badge
+ * `.plate-tag` utilisé dans Missions / Attributions.
  */
-function plateBadge(doc: jsPDF, x: number, y: number, text: string, fs = 7.2): number {
-  doc.setFont("courier", "bold");
-  doc.setFontSize(fs);
-  const padX = 2.2;
-  const barW = 1.9;
-  const w = doc.getTextWidth(text) + padX * 2 + barW + 1.4;
-  const h = fs * 0.62 + 3;
-  doc.setFillColor(...WHITE);
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(x, y, w, h, 1.2, 1.2, "FD");
-  doc.setFillColor(...INK);
-  doc.roundedRect(x, y, barW, h, 1.2, 1.2, "F");
-  doc.rect(x + barW / 2, y, barW / 2, h, "F");
-  doc.setTextColor(...INK);
-  doc.text(text, x + barW + padX, y + h / 2 + fs * 0.3);
-  doc.setFont("helvetica", "normal");
-  return w;
+function plateBadge(doc: jsPDF, x: number, y: number, text: string, fs = 8.4): number {
+  return drawPlateTag(doc, x, y, text, fs);
 }
+
 
 
 
@@ -637,7 +623,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         ]
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
-  const lineH = 11.6;
+  const lineH = 12.8;
   const vehH = Math.max(23, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
@@ -665,7 +651,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
     doc.text(label, vx, vy);
     vx += doc.getTextWidth(label) + 2.6;
-    if (v.plate) plateBadge(doc, vx, vy - 3.1, v.plate, 6.2);
+    if (v.plate) plateBadge(doc, vx, vy - 5.6, v.plate, 8.4);
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);
