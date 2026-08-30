@@ -774,11 +774,11 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       ? `Signé électroniquement le ${d.acceptedAtLabel}`
       : "Signature et cachet du client — date : ____ / ____ / ______",
     M + 5,
-    y + sigH - 4,
+    y + sigH - 3.5,
   );
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...INK);
-  doc.text("Olivier G. — Fondateur", M + sigW + 11, y + sigH - 4);
+  doc.text("Olivier G. — Fondateur", M + sigW + 11, y + sigH - 3.5);
 
   drawFooter(doc, pageW, pageH, co, validite);
 
