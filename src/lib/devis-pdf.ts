@@ -714,10 +714,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const sigBlockH = 24;
   const availableForLines = pageH - 24 - sigBlockH - 6 - 46 - y; // conditions ~46mm réservés
   doc.setFont("helvetica", "normal");
-  let subFs = 6.6;
-  let gap = 4;
+  let subFs = 7.1;
+  let gap = 4.2;
   let keepSub = true;
-  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6; gap = 3.2; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6.4; gap = 3.4; }
   if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2.8; }
 
   lignes.forEach((l) => {
@@ -726,7 +726,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [];
     const lh = subFs * 0.52;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.2);
+    doc.setFontSize(8.9);
     doc.setTextColor(...INK);
     doc.text((doc.splitTextToSize(l.title, descW) as string[])[0], M, y);
     doc.text(l.amount === null ? "Inclus" : eur(l.amount), right, y, { align: "right" });
@@ -746,7 +746,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Totaux =====
   const totX = pageW / 2 + 10;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(8.7);
   doc.setTextColor(...MUTED);
   doc.text(micro ? "Total" : "Total HT", totX, y);
   doc.setTextColor(...INK);
@@ -768,7 +768,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.line(totX, y, right, y);
   y += 5.6;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10.5);
+  doc.setFontSize(11.6);
   doc.setTextColor(...INK);
   doc.text(micro ? "Total net à payer" : "Total TTC", totX, y);
   doc.setTextColor(...BLUE);
@@ -791,8 +791,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const sigH = 24;
   const sigTop = pageH - 24 - sigH;
   const condW = innerW - 14;
-  let condFs = 6.4;
-  let condLh = 3.1;
+  let condFs = 6.9;
+  let condLh = 3.3;
   const wrapConds = (fs: number) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(fs);
@@ -802,8 +802,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const condHeight = (w: string[][], lh: number) => 9 + w.reduce((a, x) => a + x.length * lh + 1.1, 0) + 2.5;
   let condH = condHeight(condWrapped, condLh);
   if (y + condH + 5 > sigTop) {
-    condFs = 5.8;
-    condLh = 2.8;
+    condFs = 6.2;
+    condLh = 3.0;
     condWrapped = wrapConds(condFs);
     condH = condHeight(condWrapped, condLh);
   }
@@ -835,7 +835,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.roundedRect(M, y, sigW, sigH, 2.4, 2.4, "S");
   doc.roundedRect(M + sigW + 6, y, sigW, sigH, 2.4, 2.4, "S");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
+  doc.setFontSize(6.6);
   doc.setTextColor(...FAINT);
   doc.text("BON POUR ACCORD — CLIENT", M + 5, y + 6);
   doc.text("POUR TRANSPORTS LIGNEO", M + sigW + 11, y + 6);
@@ -848,7 +848,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   }
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
+  doc.setFontSize(7.3);
   doc.setTextColor(...MUTED);
   doc.text(
     d.acceptedAtLabel
