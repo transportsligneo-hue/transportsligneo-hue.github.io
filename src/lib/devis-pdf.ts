@@ -760,11 +760,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("POUR TRANSPORTS LIGNEO", M + sigW + 11, y + 6);
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 8.5, 34, 13); } catch { /* optionnel */ }
+    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 8.5, 32, 13); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 7, 32, 11); } catch { /* optionnel */ }
   }
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.8);
   doc.setTextColor(...MUTED);
