@@ -229,6 +229,41 @@ async function loadImageAsDataUrl(src: string): Promise<string | null> {
 const eur = (n: number) =>
   `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)} €`;
 
+/** Plaque au format administratif AA-123-AA (comme dans Missions / Attributions). */
+export function formatPlate(v?: string | null): string | null {
+  const raw = (v ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!raw) return null;
+  const m = raw.match(/^([A-Z]{2})(\d{3})([A-Z]{2})$/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  return (v ?? "").toUpperCase().trim();
+}
+
+/**
+ * Kilométrage du devis : valeur enregistrée, sinon table des distances villes,
+ * sinon géocodage + distance routière estimée. Le devis doit TOUJOURS afficher un km.
+ */
+async function resolveDistanceKm(d: DevisData): Promise<number | null> {
+  if (d.distance_km && Number(d.distance_km) > 0) return Math.round(Number(d.distance_km));
+  const from = (d.depart ?? "").trim();
+  const to = (d.arrivee ?? "").trim();
+  if (!from || !to) return null;
+  if (from.toLowerCase() === to.toLowerCase()) return 0;
+  try {
+    const { getDistance } = await import("@/lib/reservation-pricing");
+    const local = getDistance(from, to);
+    if (local != null && local > 0) return Math.round(local);
+  } catch { /* table indisponible */ }
+  try {
+    const { geocodeAddress, haversineKm } = await import("@/lib/geocode");
+    const [a, b] = await Promise.all([geocodeAddress(from), geocodeAddress(to)]);
+    if (a && b) {
+      const km = haversineKm(a, b) * 1.22; // facteur routier
+      if (km > 0) return Math.round(km);
+    }
+  } catch { /* réseau indisponible */ }
+  return null;
+}
+
 const fmtDate = (d?: string | null) => {
   if (!d) return "—";
   try {
@@ -241,6 +276,7 @@ const addDays = (iso: string | undefined, days: number) => {
   base.setDate(base.getDate() + days);
   return base.toISOString();
 };
+
 
 /** Pastille arrondie type "badge" (ENLÈVEMENT, Non roulant…). */
 function badge(
