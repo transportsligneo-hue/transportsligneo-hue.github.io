@@ -26,6 +26,12 @@ function AdminCommunicationPage() {
       <AdminSection title="Nouvel envoi" description="Les emails restent individuels. Les notifications peuvent cibler un utilisateur, tous les convoyeurs ou tous les clients.">
         <AdminManualCommunication />
       </AdminSection>
+      <AdminSection
+        title="Historique des emails envoyés"
+        description="Tous les emails partis depuis la plateforme : devis, documents, envois directs et alertes."
+      >
+        <AdminEmailHistory />
+      </AdminSection>
     </div>
   )
 }
