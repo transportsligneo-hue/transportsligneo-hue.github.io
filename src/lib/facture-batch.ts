@@ -327,11 +327,23 @@ export async function ensureFacture(
   const basisTva = +(basisTtc - basisHt).toFixed(2);
 
   if (basis.existing) {
+    // Une facture déjà créée doit rester alignée sur le véhicule canonique
+    // du volet porteur, notamment après correction depuis la fiche mission.
+    const { data: vehicle } = await supabase
+      .from("trajets")
+      .select("marque, modele, immatriculation, vin, vehicule_immatriculation, vehicule_vin")
+      .eq("id", basis.primaryTrajetId)
+      .maybeSingle();
     const priceCorrections = {
       prix_ht: +basisHt.toFixed(2),
       prix_tva: basisTva,
       prix_ttc: basisTtc,
       tva_taux: micro ? 0 : vatRate,
+      vehicule_marque: vehicle?.marque ?? null,
+      vehicule_modele: vehicle?.modele ?? null,
+      vehicule_immatriculation:
+        vehicle?.immatriculation ?? vehicle?.vehicule_immatriculation ?? null,
+      vehicule_vin: vehicle?.vin ?? vehicle?.vehicule_vin ?? null,
     };
     const corrections = refClient
       ? {
