@@ -408,14 +408,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
 
-  const bottomLimit = pageH - 26;
-  const newPage = () => {
-    drawFooter(doc, pageW, pageH, co, validite);
-    doc.addPage();
-    applyLigneoFonts(doc);
-    drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
-    return 44;
-  };
+
+
 
   // ===== Émetteur / Destinataire =====
   let y = 41;
