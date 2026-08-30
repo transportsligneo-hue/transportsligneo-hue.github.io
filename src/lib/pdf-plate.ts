@@ -40,7 +40,7 @@ export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs 
   const barW = 2.4;
   const textW = doc.getTextWidth(label) + track * Math.max(0, label.length - 1);
   const w = textW + padX * 2 + barW + 1.2;
-  const h = fs * 0.62 + 3.4;
+  const h = fs * 0.5 + 2.6;
   const r = 1.2;
 
   doc.setFillColor(...PLATE_BG);
