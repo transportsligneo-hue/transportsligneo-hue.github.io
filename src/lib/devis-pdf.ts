@@ -578,7 +578,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     : isAllerRetour
       ? [
           { tag: "Aller", label: identAller, plate: formatPlate(d.immatriculation) },
-          { tag: "Retour", label: identRetour, plate: formatPlate(d.immatriculation_retour) },
+          { tag: "Retour", label: identRetour, plate: formatPlate(d.immatriculation_retour ?? d.immatriculation) },
         ]
       : [{ label: identAller, plate: formatPlate(d.immatriculation) }];
 
