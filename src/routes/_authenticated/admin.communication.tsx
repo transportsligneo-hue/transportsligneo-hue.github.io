@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AdminManualCommunication } from '@/components/admin/AdminManualCommunication'
+import { AdminEmailHistory } from '@/components/admin/AdminEmailHistory'
 import { AdminAlertSettings } from '@/components/admin/AdminAlertSettings'
 import { AdminSection } from '@/components/admin/ui'
 import { PageHeader } from '@/components/admin/AdminUI'
