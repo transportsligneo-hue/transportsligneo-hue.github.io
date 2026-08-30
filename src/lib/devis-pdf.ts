@@ -40,10 +40,13 @@ export interface DevisData {
   option_trajet?: string | null;
   /** Immatriculation du vehicule convoye */
   immatriculation?: string | null;
+  /** Numéro de série (VIN) du véhicule convoyé */
+  vin?: string | null;
   /** Aller-retour : vehicule restitue (souvent une autre plaque) */
   marque_retour?: string | null;
   modele_retour?: string | null;
   immatriculation_retour?: string | null;
+  vin_retour?: string | null;
   /** Devis groupé : plusieurs véhicules sur un même devis */
   vehicules?: Array<{
     immatriculation?: string | null;
@@ -175,9 +178,11 @@ export function devisRowToPdfData(
     marque: g<string | null>("marque"),
     modele: g<string | null>("modele"),
     immatriculation: g<string | null>("immatriculation"),
+    vin: g<string | null>("vin"),
     marque_retour: g<string | null>("marque_retour"),
     modele_retour: g<string | null>("modele_retour"),
     immatriculation_retour: g<string | null>("immatriculation_retour"),
+    vin_retour: g<string | null>("vin_retour"),
     vehicules,
     carburant: g<string | null>("carburant"),
     prestation: g<string | null>("prestation"),
@@ -307,6 +312,32 @@ function badge(
   }
   return w;
 }
+
+/**
+ * Plaque d'immatriculation façon Missions / Attributions :
+ * pastille blanche bordée, barre bleu nuit à gauche, texte monospace majuscule.
+ */
+function plateBadge(doc: jsPDF, x: number, y: number, text: string, fs = 7.2): number {
+  doc.setFont("courier", "bold");
+  doc.setFontSize(fs);
+  const padX = 2.2;
+  const barW = 1.9;
+  const w = doc.getTextWidth(text) + padX * 2 + barW + 1.4;
+  const h = fs * 0.62 + 3;
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(x, y, w, h, 1.2, 1.2, "FD");
+  doc.setFillColor(...INK);
+  doc.roundedRect(x, y, barW, h, 1.2, 1.2, "F");
+  doc.rect(x + barW / 2, y, barW / 2, h, "F");
+  doc.setTextColor(...INK);
+  doc.text(text, x + barW + padX, y + h / 2 + fs * 0.3);
+  doc.setFont("helvetica", "normal");
+  return w;
+}
+
+
 
 /** En-tête clair : logo + identité à gauche, bloc DEVIS à droite. */
 function drawHeader(
@@ -455,7 +486,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Émetteur / Destinataire =====
   let y = 41;
   const colW = (innerW - 6) / 2;
-  const boxH = 27;
+  const boxH = 33;
   card(doc, M, y, colW, boxH, "Émetteur");
   card(doc, M + colW + 6, y, colW, boxH, "Destinataire");
 
@@ -470,9 +501,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   [
     "contact@transportsligneo.fr",
     "07 82 45 61 81",
-    sirenLigneo ? `SIREN ${sirenLigneo}` : "www.transportsligneo.fr",
-  ].forEach((l, i) => {
-    doc.text(l, M + 5, y + 16.4 + i * 3.9);
+    sirenLigneo ? `SIREN ${sirenLigneo}` : null,
+    "www.transportsligneo.fr",
+  ].filter(Boolean).forEach((l, i) => {
+    doc.text(l as string, M + 5, y + 16.4 + i * 3.9);
   });
 
   const dx = M + colW + 6;
@@ -489,18 +521,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     y + 11.8,
   );
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.6);
+  doc.setFontSize(7.4);
   doc.setTextColor(...MUTED);
+  // Adresse complète (2 lignes max) puis email, téléphone et SIRET du client.
+  const destAddr = (doc.splitTextToSize(d.adresse || "Adresse à compléter", colW - 10) as string[]).slice(0, 2);
   const destLines = [
-    d.adresse || "Adresse à compléter",
+    ...destAddr,
     d.email || null,
     d.telephone || null,
-    [d.siret ? `SIRET ${d.siret}` : null, d.tva_intra ? `TVA ${d.tva_intra}` : null].filter(Boolean).join(" · ") || null,
+    d.siret ? `SIRET ${d.siret}${d.tva_intra ? ` · TVA ${d.tva_intra}` : ""}` : null,
   ].filter(Boolean) as string[];
   let dy = y + 16.4;
-  destLines.slice(0, 3).forEach((l) => {
+  destLines.slice(0, 5).forEach((l) => {
     doc.text((doc.splitTextToSize(l, colW - 10) as string[])[0], dx + 5, dy);
-    dy += 3.9;
+    dy += 3.6;
   });
 
   y += boxH + 5;
@@ -514,47 +548,49 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     : "Date et heure à déterminer";
   sectionLabel(doc, M, y, "Trajet");
   y += 3.4;
-  const trajetH = 23;
+  const trajetH = 27;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
+  const addrLines = (txt: string, w: number) =>
+    (doc.splitTextToSize(txt || "—", w) as string[]).slice(0, 2);
   badge(doc, M + 5, y + 4.5, rechargeSeule ? "RECHARGE" : "ENLÈVEMENT", BLUE_SOFT, BLUE, 6.2);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.9);
+  doc.setFontSize(9.2);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(d.depart || "—", halfCol) as string[])[0], M + 5, y + 15);
+  addrLines(d.depart, halfCol).forEach((l, i) => doc.text(l, M + 5, y + 14.6 + i * 4.2));
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.9);
   doc.setTextColor(...MUTED);
-  doc.text(`Enlèvement souhaité : ${dateLine}`, M + 5, y + 19.4);
+  doc.text(`Enlèvement souhaité : ${dateLine}`, M + 5, y + 23.4);
 
   if (!rechargeSeule) {
     const cxm = pageW / 2;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11.5);
     doc.setTextColor(...INK);
-    doc.text(distanceKm != null ? `≈${distanceKm}` : "—", cxm, y + 12, { align: "center" });
+    doc.text(distanceKm != null ? `≈${distanceKm}` : "—", cxm, y + 13, { align: "center" });
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.4);
     doc.setTextColor(...FAINT);
-    doc.text("KM", cxm, y + 16, { align: "center" });
+    doc.text("KM", cxm, y + 17, { align: "center" });
     doc.setFontSize(9.5);
     doc.setTextColor(...FAINT);
-    doc.text("→", cxm - 17, y + 12.5, { align: "center" });
-    doc.text("→", cxm + 17, y + 12.5, { align: "center" });
+    doc.text("→", cxm - 17, y + 13.5, { align: "center" });
+    doc.text("→", cxm + 17, y + 13.5, { align: "center" });
 
     const ax = pageW / 2 + 19;
     badge(doc, ax, y + 4.5, "LIVRAISON", AMBER_SOFT, AMBER_INK, 6.2);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.9);
+    doc.setFontSize(9.2);
     doc.setTextColor(...INK);
-    doc.text((doc.splitTextToSize(d.arrivee || "—", right - ax - 5) as string[])[0], ax, y + 15);
+    addrLines(d.arrivee, right - ax - 5).forEach((l, i) => doc.text(l, ax, y + 14.6 + i * 4.2));
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.9);
     doc.setTextColor(...MUTED);
     doc.text(
       d.duree_estimee ? `Durée estimée : ${d.duree_estimee}` : `Livraison souhaitée : ${dateLine}`,
       ax,
-      y + 19.4,
+      y + 23.4,
     );
   }
   y += trajetH + 5;
@@ -579,17 +615,23 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const identRetour =
     [d.marque_retour ?? d.marque, d.modele_retour ?? d.modele].filter(Boolean).join(" ") || identAller;
 
-  type VehLine = { tag?: string; label: string; plate?: string | null };
+  type VehLine = { tag?: "Aller" | "Retour"; label: string; plate?: string | null; vin?: string | null };
   const vehLines: VehLine[] = isGroupe
     ? [{ label: `${multiVehicules.length} véhicules (devis groupé)` }]
     : isAllerRetour
       ? [
-          { tag: "Aller", label: identAller, plate: formatPlate(d.immatriculation) },
-          { tag: "Retour", label: identRetour, plate: formatPlate(d.immatriculation_retour ?? d.immatriculation) },
+          { tag: "Aller", label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin },
+          {
+            tag: "Retour",
+            label: identRetour,
+            plate: formatPlate(d.immatriculation_retour ?? d.immatriculation),
+            vin: d.vin_retour ?? d.vin,
+          },
         ]
-      : [{ label: identAller, plate: formatPlate(d.immatriculation) }];
+      : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
-  const vehH = isAllerRetour ? 27 : 23;
+  const lineH = 11.6;
+  const vehH = Math.max(23, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
 
@@ -597,23 +639,37 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   vehLines.forEach((v) => {
     let vx = M + 5;
     if (v.tag) {
-      vx += badge(doc, vx, vy - 3.1, v.tag.toUpperCase(), BLUE_SOFT, BLUE, 5.8) + 2.2;
+      // Aller en bleu électrique, Retour en ambre : distinction immédiate.
+      const isRetour = v.tag === "Retour";
+      vx += badge(
+        doc,
+        vx,
+        vy - 3.3,
+        v.tag.toUpperCase(),
+        isRetour ? AMBER_SOFT : BLUE_SOFT,
+        isRetour ? AMBER_INK : BLUE,
+        5.8,
+      ) + 2.2;
     }
+    // Plaque AVANT la marque, style Missions / Attributions.
+    if (v.plate) vx += plateBadge(doc, vx, vy - 3.6, v.plate, 7) + 2.4;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.8);
+    doc.setFontSize(8.6);
     doc.setTextColor(...INK);
-    const maxW = colW - (vx - M) - 5;
-    doc.text((doc.splitTextToSize(v.label, maxW) as string[])[0], vx, vy);
-    if (v.plate) {
-      badge(doc, M + 5, vy + 2.4, v.plate, BLUE_SOFT, BLUE, 6.2);
-      vy += 6.4;
+    const maxW = M + colW - 5 - vx;
+    doc.text((doc.splitTextToSize(v.label, Math.max(12, maxW)) as string[])[0], vx, vy);
+    if (v.vin) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.6);
+      doc.setTextColor(...MUTED);
+      doc.text(`VIN ${v.vin.toUpperCase()}`, M + 5, vy + 4.4);
     }
-    vy += 6.6;
+    vy += lineH;
   });
   if (plateau) {
     let bx = M + 5;
-    bx += badge(doc, bx, Math.min(vy - 2, y + vehH - 5), "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
-    badge(doc, bx, Math.min(vy - 2, y + vehH - 5), "Plateau", BLUE_SOFT, BLUE, 6);
+    bx += badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
+    badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Plateau", BLUE_SOFT, BLUE, 6);
   }
 
   const prestationLabel =
