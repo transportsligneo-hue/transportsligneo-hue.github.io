@@ -651,7 +651,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
     doc.text(label, vx, vy);
     vx += doc.getTextWidth(label) + 2.6;
-    if (v.plate) plateBadge(doc, vx, vy - 4.9, v.plate, 7.6);
+    if (v.plate) plateBadge(doc, vx, vy - 5.1, v.plate, 8.4);
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);
