@@ -612,8 +612,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       optTxt.includes("restitution"));
   const identAller =
     [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "À préciser (marque / modèle)";
-  const identRetour =
-    [d.marque_retour ?? d.marque, d.modele_retour ?? d.modele].filter(Boolean).join(" ") || identAller;
+  // Même plaque = même véhicule : on ne recopie la marque de l'aller que dans ce cas,
+  // sinon on affiche « Modèle à préciser » (évite deux fois la même marque à tort).
+  const norm = (p?: string | null) => (p ?? "").replace(/[\s-]/g, "").toUpperCase();
+  const samePlate =
+    !!norm(d.immatriculation) && norm(d.immatriculation) === norm(d.immatriculation_retour);
+  const identRetourRaw = [d.marque_retour, d.modele_retour].filter(Boolean).join(" ");
+  const identRetour = identRetourRaw || (samePlate ? identAller : "Modèle à préciser");
 
   type VehLine = { tag?: "Aller" | "Retour"; label: string; plate?: string | null; vin?: string | null };
   const vehLines: VehLine[] = isGroupe
@@ -625,7 +630,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
             tag: "Retour",
             label: identRetour,
             plate: formatPlate(d.immatriculation_retour ?? d.immatriculation),
-            vin: d.vin_retour ?? d.vin,
+            vin: samePlate ? d.vin_retour ?? d.vin : d.vin_retour,
           },
         ]
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
@@ -651,21 +656,23 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         5.8,
       ) + 2.2;
     }
-    // Plaque AVANT la marque, style Missions / Attributions.
-    if (v.plate) vx += plateBadge(doc, vx, vy - 3.6, v.plate, 7) + 2.4;
+    // Marque / modèle d'abord, puis la plaque.
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.6);
     doc.setTextColor(...INK);
-    const maxW = M + colW - 5 - vx;
-    doc.text((doc.splitTextToSize(v.label, Math.max(12, maxW)) as string[])[0], vx, vy);
+    const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
+    doc.text(label, vx, vy);
+    vx += doc.getTextWidth(label) + 2.6;
+    if (v.plate) plateBadge(doc, vx, vy - 3.1, v.plate, 6.2);
     if (v.vin) {
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(6.6);
+      doc.setFontSize(6.4);
       doc.setTextColor(...MUTED);
-      doc.text(`VIN ${v.vin.toUpperCase()}`, M + 5, vy + 4.4);
+      doc.text(`VIN ${v.vin.toUpperCase()}`, M + 5, vy + 5.2);
     }
     vy += lineH;
   });
+
   if (plateau) {
     let bx = M + 5;
     bx += badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Non roulant", PINK_SOFT, PINK_INK, 6, true) + 2.5;
