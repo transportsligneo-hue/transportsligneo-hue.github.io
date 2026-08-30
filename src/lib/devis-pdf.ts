@@ -629,7 +629,9 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
           {
             tag: "Retour",
             label: identRetour,
-            plate: formatPlate(d.immatriculation_retour ?? d.immatriculation),
+            // Une plaque retour absente ne signifie pas « même véhicule ».
+            // Évite d'imprimer silencieusement deux fois la plaque aller.
+            plate: d.immatriculation_retour ? formatPlate(d.immatriculation_retour) : null,
             vin: samePlate ? d.vin_retour ?? d.vin : d.vin_retour,
           },
         ]
