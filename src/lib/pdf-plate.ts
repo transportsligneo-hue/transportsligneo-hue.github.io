@@ -41,7 +41,7 @@ export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs 
   const textW = doc.getTextWidth(label) + track * Math.max(0, label.length - 1);
   const w = textW + padX * 2 + barW + 1.2;
   const h = fs * 0.62 + 3.4;
-  const r = 1.5;
+  const r = 1.2;
 
   doc.setFillColor(...PLATE_BG);
   doc.setDrawColor(...PLATE_BORDER);
@@ -50,8 +50,8 @@ export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs 
 
   // Bande bleu nuit à gauche (coins arrondis côté gauche uniquement)
   doc.setFillColor(...PLATE_BAR);
-  doc.roundedRect(x, y, barW + r, h, r, r, "F");
-  doc.rect(x + barW / 2, y, barW / 2, h, "F");
+  doc.roundedRect(x, y, barW, h, r, r, "F");
+  doc.rect(x + r, y, barW - r, h, "F");
 
   // Texte avec interlettrage
   doc.setTextColor(...PLATE_INK);
