@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import filmParcoursMission from "@/assets/film-parcours-mission.mp4.asset.json";
+
 const STEPS = [
   {
     title: "Estimation & devis en ligne",
@@ -38,6 +41,28 @@ const STEPS = [
 ];
 
 export default function ProTimeline() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Lecture automatique dès que la vidéo entre dans le viewport
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="v4-section">
       <div className="v4-section-head">
@@ -48,29 +73,42 @@ export default function ProTimeline() {
         <p>Un process industrialisé et traçable, conçu pour les volumes professionnels.</p>
       </div>
 
-      <ol className="pro-tl">
-        {STEPS.map((s, i) => (
-          <li key={s.title} className="pro-tl-item">
-            <div className="pro-tl-marker">
-              <span className="pro-tl-num">{String(i + 1).padStart(2, "0")}</span>
-            </div>
-            <div className="pro-tl-body">
-              <h4>{s.title}</h4>
-              <p>{s.desc}</p>
-              <ul>
-                {s.points.map((p) => (
-                  <li key={p}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true">
-                      <path d="m5 13 4 4L19 7" />
-                    </svg>
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div className="pro-tl-split">
+        <ol className="pro-tl">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="pro-tl-item">
+              <div className="pro-tl-marker">
+                <span className="pro-tl-num">{String(i + 1).padStart(2, "0")}</span>
+              </div>
+              <div className="pro-tl-body">
+                <h4>{s.title}</h4>
+                <p>{s.desc}</p>
+                <ul>
+                  {s.points.map((p) => (
+                    <li key={p}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true">
+                        <path d="m5 13 4 4L19 7" />
+                      </svg>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className="pro-tl-video">
+          <video
+            ref={videoRef}
+            src={filmParcoursMission.url}
+            controls
+            muted
+            playsInline
+            preload="auto"
+          />
+        </div>
+      </div>
     </div>
   );
 }
