@@ -155,6 +155,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       <div className="relative">
         {showMap && (
           <LiveMissionMap
+            hideOverlay
             points={displayedPoints}
             origin={origin}
             destination={destination}
