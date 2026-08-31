@@ -25,6 +25,8 @@ export interface LiveMissionMapProps {
   hideOverlay?: boolean;
   /** Libellé affiché dans l'overlay */
   title?: string;
+  /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
+  fleet?: Array<{ lat: number; lng: number; label?: string }>;
 }
 
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -122,6 +124,7 @@ export function LeafletLiveMap({
   className = "",
   hideOverlay = false,
   title,
+  fleet,
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
