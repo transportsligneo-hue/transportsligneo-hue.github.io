@@ -17,12 +17,15 @@ const REST = "#c9d2e3";
 
 const CSS_ID = "ligneo-mapbox-css";
 const MAP_CSS = `
+.ligneo-mbx, .ligneo-mbx .mapboxgl-map{ width:100%; height:100%; }
+.ligneo-mbx .mapboxgl-canvas-container, .ligneo-mbx .mapboxgl-canvas{ width:100% !important; height:100% !important; }
 .ligneo-mbx .mapboxgl-ctrl-logo{ opacity:.55; transform:scale(.8); transform-origin:left bottom; }
 .ligneo-mbx .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib{ font-size:9px; background:rgba(255,255,255,.75); }
 .ligneo-mbx-car{ will-change:transform; }
 .ligneo-mbx-car .halo{ position:absolute; inset:-14px; border-radius:50%; background:radial-gradient(circle, rgba(47,95,255,.35) 0%, rgba(47,95,255,0) 70%); animation:ligneo-mbx-halo 2s ease-out infinite; }
 @keyframes ligneo-mbx-halo{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{opacity:0}}
 `;
+
 
 const CAR_SVG = `<svg viewBox="0 0 44 44" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -278,14 +281,36 @@ export function MapboxLiveMap({
       });
       readyRef.current = true;
       setReady(true);
+      map.resize();
     });
+
+    // Certains conteneurs (onglets, panneaux, dialogs) n'ont pas encore leur
+    // taille finale au montage : on force plusieurs recalculs.
+    const timers = [0, 120, 400, 900, 1600].map((d) => window.setTimeout(() => map.resize(), d));
+    const onWinResize = () => map.resize();
+    window.addEventListener("resize", onWinResize);
+    // Resize uniquement si la taille réelle a changé (évite toute boucle de rendu)
+    const syncSize = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const c = map.getCanvas();
+      if (Math.abs(c.clientWidth - el.clientWidth) > 1 || Math.abs(c.clientHeight - el.clientHeight) > 1) {
+        map.resize();
+      }
+    };
+    map.on("idle", syncSize);
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(containerRef.current);
+    if (containerRef.current.parentElement) ro.observe(containerRef.current.parentElement);
+
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
+      timers.forEach((t) => window.clearTimeout(t));
+      window.removeEventListener("resize", onWinResize);
       ro.disconnect();
+
       map.remove();
       mapRef.current = null;
       readyRef.current = false;
