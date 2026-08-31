@@ -157,6 +157,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
+import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
@@ -1019,6 +1020,12 @@ const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
   path: '/api/public/signup/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicScanHandoffSessionRoute =
+  ApiPublicScanHandoffSessionRouteImport.update({
+    id: '/api/public/scan/handoff-session',
+    path: '/api/public/scan/handoff-session',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
@@ -1372,6 +1379,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1545,6 +1553,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1729,6 +1738,7 @@ export interface FileRoutesById {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1913,6 +1923,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2086,6 +2097,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2269,6 +2281,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2355,6 +2368,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
+  ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -3408,6 +3422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/scan/handoff-session': {
+      id: '/api/public/scan/handoff-session'
+      path: '/api/public/scan/handoff-session'
+      fullPath: '/api/public/scan/handoff-session'
+      preLoaderRoute: typeof ApiPublicScanHandoffSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-extract': {
       id: '/api/public/scan/handoff-extract'
       path: '/api/public/scan/handoff-extract'
@@ -4157,6 +4178,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
+  ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
