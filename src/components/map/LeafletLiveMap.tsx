@@ -115,7 +115,7 @@ async function fetchRoute(a: LL, b: LL): Promise<Array<[number, number]>> {
   }
 }
 
-export function LiveMissionMap({
+export function LeafletLiveMap({
   points,
   origin,
   destination,
@@ -445,4 +445,4 @@ export function LiveMissionMap({
   );
 }
 
-export default LiveMissionMap;
+export default LeafletLiveMap;
