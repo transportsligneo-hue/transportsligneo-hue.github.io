@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
-import { GpsMapView } from "@/components/GpsMapView";
+import { LiveMissionMap } from "@/components/map/LiveMissionMap";
 import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck } from "lucide-react";
 import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
 
@@ -154,7 +154,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       {/* Carte immersive + carte flottante Uber-style */}
       <div className="relative">
         {showMap && (
-          <GpsMapView
+          <LiveMissionMap
             points={displayedPoints}
             origin={origin}
             destination={destination}

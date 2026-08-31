@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
 
 const GpsMapView = lazy(() =>
-  import("@/components/GpsMapView").then((m) => ({ default: m.GpsMapView })),
+  import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })),
 );
 
 export const Route = createFileRoute("/suivi")({
