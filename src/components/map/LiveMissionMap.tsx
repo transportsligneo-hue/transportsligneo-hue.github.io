@@ -418,7 +418,7 @@ export function LiveMissionMap({
               </div>
             </div>
 
-            <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-150 bg-slate-100">
+            <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{ width: `${metrics.progress}%`, background: `linear-gradient(90deg, ${BRAND}, ${BRAND_DARK})` }}
