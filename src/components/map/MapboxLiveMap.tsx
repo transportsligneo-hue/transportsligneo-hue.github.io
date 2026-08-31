@@ -350,6 +350,36 @@ export function MapboxLiveMap({
     }
   }, [places, ready]);
 
+  // ——— Mode flotte : un marqueur voiture par mission active
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !fleet) return;
+    const seen = new Set<number>();
+    fleet.forEach((f, i) => {
+      seen.add(i);
+      const existing = fleetRef.current.get(i);
+      if (existing) {
+        existing.setLngLat([f.lng, f.lat]);
+      } else {
+        const { wrap } = carEl(0, 52);
+        if (f.label) wrap.title = f.label;
+        fleetRef.current.set(i, new mapboxgl.Marker({ element: wrap }).setLngLat([f.lng, f.lat]).addTo(map));
+      }
+    });
+    fleetRef.current.forEach((m, i) => {
+      if (!seen.has(i)) {
+        m.remove();
+        fleetRef.current.delete(i);
+      }
+    });
+    if (!fittedRef.current && fleet.length) {
+      fittedRef.current = true;
+      const b = new mapboxgl.LngLatBounds();
+      fleet.forEach((f) => b.extend([f.lng, f.lat]));
+      map.fitBounds(b, { padding: 70, duration: 0, maxZoom: 12 });
+    }
+  }, [fleet, ready]);
+
   // ——— Tracés parcouru / restant + zoom automatique
   useEffect(() => {
     const map = mapRef.current;
