@@ -1,5 +1,5 @@
 import { User, Users2, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
-import ServicesGarantiesCarousel from "@/components/ServicesGarantiesCarousel";
+import filmParcoursMission from "@/assets/film-parcours-mission.mp4.asset.json";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
 
@@ -113,7 +113,35 @@ export default function ServicesContent({
             </div>
           </div>
 
-          <ServicesGarantiesCarousel />
+          <section className="v4-section" style={{ textAlign: "center" }}>
+            <div className="v4-section-head">
+              <div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
+                <span className="dot" />Nos garanties
+              </div>
+              <h2>
+                Un convoyage suivi, <em style={{ color: "var(--v4-accent, #d4af37)", fontStyle: "normal" }}>de bout en bout</em>
+              </h2>
+            </div>
+            <div
+              className="v4-video-wrap"
+              style={{
+                maxWidth: 980,
+                margin: "0 auto",
+                borderRadius: 24,
+                overflow: "hidden",
+                border: "1px solid rgba(212,175,55,0.25)",
+                boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
+              }}
+            >
+              <video
+                src={filmParcoursMission.url}
+                controls
+                playsInline
+                preload="metadata"
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+            </div>
+          </section>
 
           <ServicesPlateforme />
         </>
