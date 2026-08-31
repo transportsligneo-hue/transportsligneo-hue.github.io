@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
 
-const GpsMapView = lazy(() =>
+const LiveMissionMap = lazy(() =>
   import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })),
 );
 
@@ -164,7 +164,7 @@ function SuiviPage() {
                   </p>
                   <ClientOnly fallback={<div className="h-[280px] rounded-xl bg-white/[0.04]" />}>
                     <Suspense fallback={<div className="h-[280px] rounded-xl bg-white/[0.04]" />}>
-                      <GpsMapView
+                      <LiveMissionMap
                         className="h-[280px] w-full overflow-hidden rounded-xl"
                         points={[
                           {

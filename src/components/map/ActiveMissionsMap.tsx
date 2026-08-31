@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Radio } from "lucide-react";
 
-const GpsMapView = lazy(() => import("@/components/GpsMapView").then((m) => ({ default: m.GpsMapView })));
 const LiveMissionMap = lazy(() => import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })));
 
 interface ActiveMission {
@@ -160,7 +159,7 @@ export function ActiveMissionsMap({
                 className="absolute inset-0 !rounded-none"
               />
             ) : (
-              <GpsMapView points={gpsPoints} className="absolute inset-0 !rounded-none" />
+              <LiveMissionMap points={gpsPoints} hideOverlay className="absolute inset-0 !rounded-none" />
             )}
           </Suspense>
         )}
