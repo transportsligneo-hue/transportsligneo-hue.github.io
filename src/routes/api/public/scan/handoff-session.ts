@@ -169,9 +169,11 @@ export const Route = createFileRoute("/api/public/scan/handoff-session")({
             return json({
               ok: true,
               status: session.status,
+              context: session.context,
               expires_at: session.expires_at,
               extractions: rows ?? [],
             });
+
           }
 
           return json({ ok: false, error: "Action inconnue" }, 400);
