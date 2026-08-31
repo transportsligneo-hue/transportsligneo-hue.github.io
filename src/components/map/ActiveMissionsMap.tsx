@@ -151,7 +151,17 @@ export function ActiveMissionsMap({
         )}
         {mounted && !loading && missions.length > 0 && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-50" />}>
-            <GpsMapView points={gpsPoints} className="absolute inset-0 !rounded-none" />
+            {missions.length === 1 ? (
+              <LiveMissionMap
+                points={gpsPoints}
+                origin={missions[0].depart}
+                destination={missions[0].arrivee}
+                title={missions[0].numero ?? undefined}
+                className="absolute inset-0 !rounded-none"
+              />
+            ) : (
+              <GpsMapView points={gpsPoints} className="absolute inset-0 !rounded-none" />
+            )}
           </Suspense>
         )}
       </div>
