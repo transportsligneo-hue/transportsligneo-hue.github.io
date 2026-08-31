@@ -115,9 +115,11 @@ export default function ServicesContent({
 
           <section className="v4-section" style={{ textAlign: "center" }}>
             <div className="v4-section-head">
-              <span className="v4-eyebrow">Nos garanties</span>
-              <h2 className="v4-title">
-                Un convoyage suivi, <em>de bout en bout</em>
+              <div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
+                <span className="dot" />Nos garanties
+              </div>
+              <h2>
+                Un convoyage suivi, <em style={{ color: "var(--v4-accent, #d4af37)", fontStyle: "normal" }}>de bout en bout</em>
               </h2>
             </div>
             <div
