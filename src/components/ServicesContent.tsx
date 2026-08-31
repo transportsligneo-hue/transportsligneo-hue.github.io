@@ -65,6 +65,28 @@ export default function ServicesContent({
   audience?: Audience;
   onAudienceChange?: (a: Audience) => void;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Lecture automatique dès que la vidéo entre dans le viewport
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [audience]);
+
   return (
     <div className="r4-page">
       {/* Toggle Particuliers / Professionnels */}
