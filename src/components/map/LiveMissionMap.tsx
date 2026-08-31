@@ -3,9 +3,8 @@ import type { LiveMissionMapProps } from "./types";
 
 export type { LiveGpsPoint, LiveMissionMapProps } from "./types";
 
-/** Clé publique Mapbox — fournie via la variable d'environnement VITE_MAPBOX_TOKEN. */
-export const MAPBOX_TOKEN: string = (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined) ?? "";
-export const hasMapbox = MAPBOX_TOKEN.length > 0;
+export { MAPBOX_TOKEN, hasMapbox } from "@/lib/mapbox-token";
+import { hasMapbox } from "@/lib/mapbox-token";
 
 const MapboxImpl = lazy(() => import("./MapboxLiveMap").then((m) => ({ default: m.MapboxLiveMap })));
 const LeafletImpl = lazy(() => import("./LeafletLiveMap").then((m) => ({ default: m.LeafletLiveMap })));

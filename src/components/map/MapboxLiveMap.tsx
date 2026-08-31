@@ -6,8 +6,8 @@ import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
 
-export const MAPBOX_TOKEN: string =
-  (import.meta.env.VITE_MAPBOX_TOKEN as string | undefined) ?? "";
+import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
+export { MAPBOX_TOKEN };
 
 const STYLE_URL = "mapbox://styles/mapbox/light-v11";
 const BRAND = "#2F5FFF";
