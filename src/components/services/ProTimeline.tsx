@@ -73,41 +73,41 @@ export default function ProTimeline() {
         <p>Un process industrialisé et traçable, conçu pour les volumes professionnels.</p>
       </div>
 
-      <div className="pro-tl-split">
-        <ol className="pro-tl">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="pro-tl-item">
-              <div className="pro-tl-marker">
-                <span className="pro-tl-num">{String(i + 1).padStart(2, "0")}</span>
-              </div>
-              <div className="pro-tl-body">
-                <h4>{s.title}</h4>
-                <p>{s.desc}</p>
-                <ul>
-                  {s.points.map((p) => (
-                    <li key={p}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true">
-                        <path d="m5 13 4 4L19 7" />
-                      </svg>
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          ))}
-        </ol>
+      <ol className="pro-tl">
+        {STEPS.map((s, i) => (
+          <li key={s.title} className="pro-tl-item">
+            <div className="pro-tl-marker">
+              <span className="pro-tl-num">{String(i + 1).padStart(2, "0")}</span>
+            </div>
+            <div className="pro-tl-body">
+              <h4>{s.title}</h4>
+              <p>{s.desc}</p>
+              <ul>
+                {s.points.map((p) => (
+                  <li key={p}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true">
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ol>
 
-        <div className="pro-tl-video">
-          <video
-            ref={videoRef}
-            src={filmParcoursMission.url}
-            controls
-            muted
-            playsInline
-            preload="auto"
-          />
-        </div>
+      <div
+        className="pro-tl-video pro-tl-video-wide"
+      >
+        <video
+          ref={videoRef}
+          src={filmParcoursMission.url}
+          controls
+          muted
+          playsInline
+          preload="auto"
+        />
       </div>
     </div>
   );
