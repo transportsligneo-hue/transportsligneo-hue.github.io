@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Radio } from "lucide-react";
 
 const GpsMapView = lazy(() => import("@/components/GpsMapView").then((m) => ({ default: m.GpsMapView })));
+const LiveMissionMap = lazy(() => import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })));
 
 interface ActiveMission {
   attributionId: string;
