@@ -122,6 +122,16 @@ export function ActiveMissionsMap({
     [missions],
   );
 
+  const fleetPoints = useMemo(
+    () =>
+      missions.map((m) => ({
+        lat: m.latitude,
+        lng: m.longitude,
+        label: [m.numero, m.depart && m.arrivee ? `${m.depart} → ${m.arrivee}` : null].filter(Boolean).join(" · ") || undefined,
+      })),
+    [missions],
+  );
+
   return (
     <section className={`rounded-2xl bg-white border border-pro-border shadow-pro-card overflow-hidden ${className}`}>
       <header className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-pro-border">
