@@ -5,7 +5,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
-import vehicleMarkerAsset from "@/assets/ligneo-gps-vehicle.png.asset.json";
+import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
 import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
 export { MAPBOX_TOKEN };
@@ -23,8 +23,8 @@ const MAP_CSS = `
 .ligneo-mbx .mapboxgl-ctrl-logo{ opacity:.55; transform:scale(.8); transform-origin:left bottom; }
 .ligneo-mbx .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib{ font-size:9px; background:rgba(255,255,255,.75); }
 .ligneo-mbx-car{ will-change:transform; }
-.ligneo-mbx-car .halo{ position:absolute; inset:-14px; border-radius:50%; background:radial-gradient(circle, rgba(47,95,255,.35) 0%, rgba(47,95,255,0) 70%); animation:ligneo-mbx-halo 2s ease-out infinite; }
-@keyframes ligneo-mbx-halo{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{opacity:0}}
+.ligneo-mbx-car .halo{ position:absolute; inset:-8px; border-radius:50%; background:radial-gradient(circle, rgba(47,95,255,.22) 0%, rgba(47,95,255,0) 65%); animation:ligneo-mbx-halo 2.2s ease-out infinite; }
+@keyframes ligneo-mbx-halo{0%{transform:scale(.7);opacity:.8}70%{transform:scale(1.35);opacity:0}100%{opacity:0}}
 `;
 
 
@@ -354,18 +354,18 @@ export function MapboxLiveMap({
     }
 
     if (!carRef.current) {
-      const wrap = document.createElement("div");
+const wrap = document.createElement("div");
       wrap.className = "ligneo-mbx-car";
-      wrap.style.cssText = "position:relative;width:76px;height:76px";
+      wrap.style.cssText = "position:relative;width:62px;height:62px";
       const halo = document.createElement("span");
       halo.className = "halo";
       const inner = document.createElement("div");
-      inner.style.cssText = "width:76px;height:76px;transform-origin:center;transition:transform 700ms ease-out";
+      inner.style.cssText = "width:62px;height:62px;transform-origin:center;transition:transform 700ms ease-out";
       const image = document.createElement("img");
-      image.src = vehicleMarkerAsset.url;
+      image.src = vehicleMarkerImg;
       image.alt = "";
       image.draggable = false;
-      image.style.cssText = "display:block;width:76px;height:76px;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 5px 8px rgba(11,16,38,.35));pointer-events:none;user-select:none";
+      image.style.cssText = "display:block;width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none";
       inner.appendChild(image);
       wrap.append(halo, inner);
       carInnerRef.current = inner;
