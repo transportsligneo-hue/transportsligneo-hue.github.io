@@ -1164,6 +1164,15 @@ function AdminMissionDetail() {
                 <span className="truncate">MAJ {lastUpdate}</span>
               </div>
             </div>
+            <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[430px] sm:min-h-[430px]">
+              <LiveMissionMap
+                points={gpsPoints}
+                origin={trajet.depart}
+                destination={trajet.arrivee}
+                title={missionNumber}
+                className="h-full min-h-full w-full !rounded-none"
+              />
+            </div>
             </div>
 
           </div>
@@ -1318,19 +1327,6 @@ function AdminMissionDetail() {
 
         </div>
       </Card>
-
-      {/* === Carte GPS live — en haut de la fiche === */}
-      <Card className="p-0 overflow-hidden">
-        <LiveMissionMap
-          points={gpsPoints}
-          origin={trajet.depart}
-          destination={trajet.arrivee}
-          title={missionNumber}
-          className="h-[320px] sm:h-[420px] !rounded-none"
-        />
-      </Card>
-
-
 
       <AdminMissionARBanner
         trajetId={trajet.id}
@@ -1961,44 +1957,6 @@ function AdminMissionDetail() {
             </div>
           </Card>
 
-
-          {/* GPS live */}
-          <Card>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <MapPin size={15} className="text-pro-accent" />
-                <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
-                  Suivi GPS
-                </h3>
-              </div>
-              {gpsPoints.length > 0 && (
-                <Badge tone="info">{gpsPoints.length} pts</Badge>
-              )}
-            </div>
-            {gpsPoints.length === 0 ? (
-              <p className="text-pro-muted text-sm">Pas de position enregistrée.</p>
-            ) : (
-              <div className="space-y-2">
-                <LiveMissionMap points={gpsPoints} origin={trajet.depart} destination={trajet.arrivee} hideOverlay className="h-44 rounded-md overflow-hidden" />
-                {lastGps && (
-                  <p className="text-pro-muted text-xs flex items-center gap-1.5">
-                    <Clock size={11} />
-                    Dernier point : {new Date(lastGps.recorded_at).toLocaleTimeString("fr-FR")}
-                  </p>
-                )}
-                <a
-                  href={`https://www.google.com/maps/dir/${gpsPoints
-                    .map((p) => `${p.latitude},${p.longitude}`)
-                    .join("/")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-pro-accent hover:underline"
-                >
-                  <ExternalLink size={11} /> Ouvrir dans Google Maps
-                </a>
-              </div>
-            )}
-          </Card>
 
           {/* Activité live */}
           <Card>
