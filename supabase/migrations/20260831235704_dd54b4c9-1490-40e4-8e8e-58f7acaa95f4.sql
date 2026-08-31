@@ -1,0 +1,1 @@
+ALTER TABLE public.scan_handoff_sessions ALTER COLUMN created_by DROP NOT NULL;
