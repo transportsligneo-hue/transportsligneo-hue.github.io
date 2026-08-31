@@ -281,10 +281,20 @@ export function MapboxLiveMap({
       });
       readyRef.current = true;
       setReady(true);
+      map.resize();
     });
+
+    // Certains conteneurs (onglets, panneaux, dialogs) n'ont pas encore leur
+    // taille finale au montage : on force plusieurs recalculs.
+    const timers = [0, 120, 400, 900, 1600].map((d) => window.setTimeout(() => map.resize(), d));
+    const onWinResize = () => map.resize();
+    window.addEventListener("resize", onWinResize);
+    map.on("idle", () => map.resize());
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(containerRef.current);
+    if (containerRef.current.parentElement) ro.observe(containerRef.current.parentElement);
+
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
