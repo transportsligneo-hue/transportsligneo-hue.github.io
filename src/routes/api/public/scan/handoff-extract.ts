@@ -181,7 +181,12 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             warnings,
           };
 
-          // 3. Push vers la DB (rate limit + TTL SQL-side)
+          // 3. Un seul document actif par session : on remplace le précédent.
+          await supabaseAdmin
+            .from("scan_handoff_extractions")
+            .delete()
+            .eq("session_id", row.id);
+
           const { error: pErr } = await supabaseAdmin.rpc("push_scan_handoff_extraction", {
             _token: body.token,
             _extraction: extraction as never,
@@ -191,7 +196,14 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             return jsonResponse({ ok: false, error: pErr.message }, 400);
           }
 
-          return jsonResponse({ ok: true, extraction });
+          await supabaseAdmin
+            .from("scan_handoff_sessions")
+            .update({ status: "received", consumed_at: new Date().toISOString() })
+            .eq("id", row.id);
+
+          const fieldsCount = Object.keys(fields).length;
+          return jsonResponse({ ok: true, extraction, fields_count: fieldsCount });
+
         } catch (err) {
           console.error("[handoff-extract] unexpected", err);
           return jsonResponse({ ok: false, error: "Erreur interne" }, 500);
