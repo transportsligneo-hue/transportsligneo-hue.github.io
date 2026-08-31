@@ -44,7 +44,7 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { RoleBadge } from "@/components/brand/LigneoBrand";
-import { GpsMapView } from "@/components/GpsMapView";
+import { LiveMissionMap } from "@/components/map/LiveMissionMap";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
@@ -1419,7 +1419,16 @@ function AdminMissionDetail() {
                 Trajet
               </h3>
             </div>
+            <LiveMissionMap
+
+              points={gpsPoints}
+              origin={trajet.depart}
+              destination={trajet.arrivee}
+              title={missionNumber}
+              className="h-[300px] sm:h-[360px] mb-4"
+            />
             <div className="space-y-3">
+
               <div className="flex items-start gap-3">
                 <div className="flex flex-col items-center pt-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-pro-accent" />
@@ -1964,7 +1973,7 @@ function AdminMissionDetail() {
               <p className="text-pro-muted text-sm">Pas de position enregistrée.</p>
             ) : (
               <div className="space-y-2">
-                <GpsMapView points={gpsPoints} className="h-44 rounded-md overflow-hidden" />
+                <LiveMissionMap points={gpsPoints} origin={trajet.depart} destination={trajet.arrivee} hideOverlay className="h-44 rounded-md overflow-hidden" />
                 {lastGps && (
                   <p className="text-pro-muted text-xs flex items-center gap-1.5">
                     <Clock size={11} />
