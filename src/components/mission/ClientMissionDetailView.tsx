@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Calendar, Car, User, Phone, Mail, FileText, Loader2,
 import { toast } from "sonner";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { MissionTrackingPanel } from "@/components/mission/MissionTrackingPanel";
+import { MissionLiveTracker } from "@/components/mission/MissionLiveTracker";
 import { generateFacturePdf, downloadFacturePdf } from "@/lib/facture-pdf";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
@@ -352,6 +353,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </span>
           <span className="font-heading mission-text text-2xl font-semibold">{Number(mission.prix_total).toFixed(2)} €</span>
         </div>
+        {attributionId && (
+          <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border mission-divider sm:h-[430px] sm:min-h-[430px]">
+            <MissionLiveTracker attributionId={attributionId} />
+          </div>
+        )}
       </div>
 
       {attributionId && (
@@ -360,6 +366,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           trajetId={trajetId}
           convoyeurId={convoyeurId}
           onProofsAvailable={setHasProofs}
+          hideLiveTracker
         />
       )}
 
