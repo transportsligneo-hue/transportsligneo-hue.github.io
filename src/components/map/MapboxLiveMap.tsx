@@ -323,6 +323,8 @@ export function MapboxLiveMap({
       readyRef.current = false;
       carRef.current = null;
       carInnerRef.current = null;
+      fleetRef.current.forEach((m) => m.remove());
+      fleetRef.current.clear();
       startRef.current = null;
       endRef.current = null;
       fittedRef.current = false;
@@ -439,6 +441,10 @@ export function MapboxLiveMap({
       const b = new mapboxgl.LngLatBounds();
       route.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60 });
+    } else if (fleet?.length) {
+      const b = new mapboxgl.LngLatBounds();
+      fleet.forEach((f) => b.extend([f.lng, f.lat]));
+      map.fitBounds(b, { padding: 70, maxZoom: 12 });
     } else if (posRef.current) {
       map.easeTo({ center: [posRef.current.lng, posRef.current.lat], zoom: 13 });
     }
