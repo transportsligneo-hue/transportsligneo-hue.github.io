@@ -133,6 +133,7 @@ export function LeafletLiveMap({
   const restLineRef = useRef<L.Polyline | null>(null);
   const startRef = useRef<L.Marker | null>(null);
   const endRef = useRef<L.Marker | null>(null);
+  const fleetRef = useRef<Map<number, L.Marker>>(new Map());
   const animRef = useRef<number | null>(null);
   const posRef = useRef<L.LatLng | null>(null);
   const headingRef = useRef(0);
@@ -257,6 +258,7 @@ export function LeafletLiveMap({
       restLineRef.current = null;
       startRef.current = null;
       endRef.current = null;
+      fleetRef.current.clear();
       fittedRef.current = false;
     };
   }, []);
