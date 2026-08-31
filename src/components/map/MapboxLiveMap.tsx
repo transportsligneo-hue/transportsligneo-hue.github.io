@@ -113,6 +113,26 @@ function dotEl(color: string, label?: string) {
   return el;
 }
 
+/** Marqueur véhicule (icône voiture Ligneo + halo pulsé), réutilisé en mode flotte. */
+function carEl(heading: number, size = 62) {
+  const wrap = document.createElement("div");
+  wrap.className = "ligneo-mbx-car";
+  wrap.style.cssText = `position:relative;width:${size}px;height:${size}px`;
+  const halo = document.createElement("span");
+  halo.className = "halo";
+  const inner = document.createElement("div");
+  inner.style.cssText = `width:${size}px;height:${size}px;transform-origin:center;transition:transform 700ms ease-out`;
+  const image = document.createElement("img");
+  image.src = vehicleMarkerImg;
+  image.alt = "";
+  image.draggable = false;
+  image.style.cssText = `display:block;width:${size}px;height:${size}px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none`;
+  inner.appendChild(image);
+  inner.style.transform = `rotate(${heading}deg)`;
+  wrap.append(halo, inner);
+  return { wrap, inner };
+}
+
 export function MapboxLiveMap({
   points,
   origin,
@@ -120,6 +140,7 @@ export function MapboxLiveMap({
   className = "",
   hideOverlay = false,
   title,
+  fleet,
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
