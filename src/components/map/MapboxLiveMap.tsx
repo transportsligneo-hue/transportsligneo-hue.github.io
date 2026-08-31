@@ -147,6 +147,7 @@ export function MapboxLiveMap({
   const readyRef = useRef(false);
   const carRef = useRef<mapboxgl.Marker | null>(null);
   const carInnerRef = useRef<HTMLDivElement | null>(null);
+  const fleetRef = useRef<Map<number, mapboxgl.Marker>>(new Map());
   const startRef = useRef<mapboxgl.Marker | null>(null);
   const endRef = useRef<mapboxgl.Marker | null>(null);
   const animRef = useRef<number | null>(null);
@@ -375,22 +376,8 @@ export function MapboxLiveMap({
     }
 
     if (!carRef.current) {
-const wrap = document.createElement("div");
-      wrap.className = "ligneo-mbx-car";
-      wrap.style.cssText = "position:relative;width:62px;height:62px";
-      const halo = document.createElement("span");
-      halo.className = "halo";
-      const inner = document.createElement("div");
-      inner.style.cssText = "width:62px;height:62px;transform-origin:center;transition:transform 700ms ease-out";
-      const image = document.createElement("img");
-      image.src = vehicleMarkerImg;
-      image.alt = "";
-      image.draggable = false;
-      image.style.cssText = "display:block;width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none";
-      inner.appendChild(image);
-      wrap.append(halo, inner);
+      const { wrap, inner } = carEl(headingRef.current);
       carInnerRef.current = inner;
-      inner.style.transform = `rotate(${headingRef.current}deg)`;
       carRef.current = new mapboxgl.Marker({ element: wrap }).setLngLat([target.lng, target.lat]).addTo(map);
       posRef.current = target;
       if (!route.length && !fittedRef.current) {
