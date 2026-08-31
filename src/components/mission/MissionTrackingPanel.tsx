@@ -99,8 +99,8 @@ export function MissionTrackingPanel({ attributionId, trajetId, convoyeurId, onP
         </div>
       )}
 
-      {/* Suivi temps réel : GPS + timeline + ETA */}
-      <MissionLiveTracker attributionId={attributionId} />
+
+
 
       {/* Photos / signatures / docs / carte grise */}
       <MissionClientGallery
