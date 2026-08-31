@@ -6,7 +6,7 @@ type AvisRow = {
   id: string;
   note: number;
   commentaire: string;
-  nom_affiche: string;
+  nom_affiche_public: string | null;
   ville: string | null;
   type_client: string | null;
   date_avis: string;
@@ -24,7 +24,7 @@ export default function AvisSection() {
     (async () => {
       const { data } = await supabase
         .from("avis_clients")
-        .select("id, note, commentaire, nom_affiche, ville, type_client, date_avis")
+        .select("id, note, commentaire, nom_affiche_public, ville, type_client, date_avis")
         .eq("statut", "publie")
         .order("date_avis", { ascending: false })
         .limit(6);
@@ -65,7 +65,7 @@ export default function AvisSection() {
               ))}
             </div>
             <p className="mb-4 text-[13.5px] leading-relaxed text-[#c7d0e8]">{a.commentaire}</p>
-            <p className="text-[12.5px] font-bold text-white">{a.nom_affiche}</p>
+            <p className="text-[12.5px] font-bold text-white">{a.nom_affiche_public}</p>
             <p className="text-[12px] text-[#9aa6c9]">
               {[a.ville, a.type_client].filter(Boolean).join(" · ")}
               {a.date_avis && (

@@ -785,6 +785,7 @@ export type Database = {
           id: string
           mission_id: string | null
           nom_affiche: string
+          nom_affiche_public: string | null
           note: number
           statut: string
           type_client: string | null
@@ -798,6 +799,7 @@ export type Database = {
           id?: string
           mission_id?: string | null
           nom_affiche: string
+          nom_affiche_public?: string | null
           note?: number
           statut?: string
           type_client?: string | null
@@ -811,6 +813,7 @@ export type Database = {
           id?: string
           mission_id?: string | null
           nom_affiche?: string
+          nom_affiche_public?: string | null
           note?: number
           statut?: string
           type_client?: string | null
