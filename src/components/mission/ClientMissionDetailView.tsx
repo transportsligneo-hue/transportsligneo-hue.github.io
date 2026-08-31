@@ -355,7 +355,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
         {attributionId && (
           <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border mission-divider sm:h-[430px] sm:min-h-[430px]">
-            <MissionLiveTracker attributionId={attributionId} />
+            <MissionLiveTracker attributionId={attributionId} mapOnly />
           </div>
         )}
       </div>

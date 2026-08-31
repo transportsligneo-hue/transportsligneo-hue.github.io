@@ -8,6 +8,7 @@ import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
 interface MissionLiveTrackerProps {
   attributionId: string;
   showMap?: boolean;
+  mapOnly?: boolean;
 }
 
 const STATUT_LABEL: Record<string, string> = {
@@ -56,7 +57,7 @@ interface VehicleInfo {
   immatriculation: string | null;
 }
 
-export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiveTrackerProps) {
+export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = false }: MissionLiveTrackerProps) {
   const rt = useMissionRealtime(attributionId);
   const [allPoints, setAllPoints] = useState<{ latitude: number; longitude: number; recorded_at: string; accuracy: number | null }[]>([]);
   const [origin, setOrigin] = useState<GeoPoint | null>(null);
@@ -150,16 +151,16 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
   })();
 
   return (
-    <div className="space-y-4">
+    <div className={mapOnly ? "h-full" : "space-y-4"}>
       {/* Carte immersive + carte flottante Uber-style */}
-      <div className="relative">
+      <div className={mapOnly ? "relative h-full" : "relative"}>
         {showMap && (
           <LiveMissionMap
             hideOverlay
             points={displayedPoints}
             origin={origin}
             destination={destination}
-            className="h-[320px] sm:h-[480px]"
+            className={mapOnly ? "h-full min-h-full !rounded-none" : "h-[320px] sm:h-[480px]"}
           />
         )}
 
@@ -250,7 +251,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
       </div>
 
       {/* Timeline étapes · sous la carte, mise en page premium */}
-      <div className="mission-surface rounded-2xl p-4 sm:p-5">
+      {!mapOnly && <div className="mission-surface rounded-2xl p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
           <Navigation size={14} className="mission-accent" />
           <h3 className="font-heading text-sm mission-text tracking-wider uppercase">Progression de la mission</h3>
@@ -287,7 +288,7 @@ export function MissionLiveTracker({ attributionId, showMap = true }: MissionLiv
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }
