@@ -48,8 +48,12 @@ export function MissionTrackingPanel({ attributionId, trajetId, convoyeurId, onP
 
   return (
     <div className="space-y-5">
+      {/* Suivi temps réel : GPS + timeline + ETA — en haut */}
+      <MissionLiveTracker attributionId={attributionId} />
+
       {/* Convoyeur */}
       {convoyeur && (convoyeur.prenom || convoyeur.nom) && (
+
         <div className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <Truck size={16} /> Intervenant
@@ -95,8 +99,8 @@ export function MissionTrackingPanel({ attributionId, trajetId, convoyeurId, onP
         </div>
       )}
 
-      {/* Suivi temps réel : GPS + timeline + ETA */}
-      <MissionLiveTracker attributionId={attributionId} />
+
+
 
       {/* Photos / signatures / docs / carte grise */}
       <MissionClientGallery
