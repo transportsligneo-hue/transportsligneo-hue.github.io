@@ -138,11 +138,11 @@ export default function ServicesContent({
 
           <section className="v4-section" style={{ textAlign: "center" }}>
             <div className="v4-section-head">
-              <div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
-                <span className="dot" />Nos garanties
+<div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
+                <span className="dot" />Comment ça marche&nbsp;?
               </div>
               <h2>
-                Un convoyage suivi, <em style={{ color: "var(--v4-accent, #d4af37)", fontStyle: "normal" }}>de bout en bout</em>
+                Un convoyage suivi, <em className="v4-accent" style={{ fontStyle: "normal" }}>de bout en bout</em>
               </h2>
             </div>
             <div
@@ -152,15 +152,17 @@ export default function ServicesContent({
                 margin: "0 auto",
                 borderRadius: 24,
                 overflow: "hidden",
-                border: "1px solid rgba(212,175,55,0.25)",
+                border: "1px solid rgba(122,163,255,0.25)",
                 boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
               }}
             >
               <video
+                ref={videoRef}
                 src={filmParcoursMission.url}
                 controls
+                muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 style={{ display: "block", width: "100%", height: "auto" }}
               />
             </div>
