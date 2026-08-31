@@ -147,18 +147,7 @@ export function ActiveMissionsMap({
         </span>
       </header>
       <div className="relative" style={{ height: 380 }}>
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-50 text-pro-muted">
-            <Loader2 className="animate-spin" size={22} />
-          </div>
-        )}
-        {!loading && missions.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 text-pro-muted text-sm gap-1">
-            <Radio size={22} className="opacity-40" />
-            {emptyMessage}
-          </div>
-        )}
-        {mounted && !loading && missions.length > 0 && (
+        {mounted && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-50" />}>
             {missions.length === 1 ? (
               <LiveMissionMap
@@ -169,9 +158,22 @@ export function ActiveMissionsMap({
                 className="absolute inset-0 !rounded-none"
               />
             ) : (
-              <LiveMissionMap points={gpsPoints} hideOverlay className="absolute inset-0 !rounded-none" />
+              <LiveMissionMap points={[]} fleet={fleetPoints} hideOverlay className="absolute inset-0 !rounded-none" />
             )}
           </Suspense>
+        )}
+        {loading && (
+          <div className="absolute inset-0 z-[401] flex items-center justify-center bg-white/60 text-pro-muted backdrop-blur-sm">
+            <Loader2 className="animate-spin" size={22} />
+          </div>
+        )}
+        {!loading && missions.length === 0 && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[401] flex justify-center">
+            <div className="flex items-center gap-1.5 rounded-2xl border border-white/70 bg-white/92 px-4 py-3 text-sm text-pro-text-soft shadow-2xl backdrop-blur-xl">
+              <Radio size={16} className="opacity-40" />
+              {emptyMessage}
+            </div>
+          </div>
         )}
       </div>
     </section>
