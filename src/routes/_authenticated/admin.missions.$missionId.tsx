@@ -1179,71 +1179,147 @@ function AdminMissionDetail() {
 
 
 
-          <div className="w-full lg:w-[360px] shrink-0 flex flex-col items-stretch lg:items-end gap-2">
-            <Select
-              value={attribution.statut}
-              onChange={(e) => updateStatut(e.target.value)}
-              className="text-xs py-1.5"
-            >
-              {Object.entries(statutLabels).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </Select>
-            <Button
-              variant="secondary"
-              icon={<FileText size={14} />}
-              onClick={() => setReportOpen(true)}
-            >
-              Rapport complet
-            </Button>
-            <Button
-              variant="secondary"
-              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
-              onClick={() => downloadEdlPdf("preview")}
-              disabled={generatingEdlPdf}
-            >
-              Aperçu état des lieux
-            </Button>
-            <Button
-              variant="secondary"
-              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-              onClick={() => downloadEdlPdf("download")}
-              disabled={generatingEdlPdf}
-            >
-              PDF état des lieux
-            </Button>
-            <Button
-              icon={<FileArchive size={14} />}
-              onClick={() => setDossierOpen(true)}
-            >
-              Générer le dossier complet
-            </Button>
-            <button
-              type="button"
-              onClick={async () => {
-                if (!attribution) return;
-                const next = !attribution.pdf_share_client;
-                const { error } = await supabase
-                  .from("attributions")
-                  .update({ pdf_share_client: next } as never)
-                  .eq("id", attribution.id);
-                if (error) {
-                  toast.error("Erreur", { description: error.message });
-                  return;
-                }
-                setAttribution({ ...attribution, pdf_share_client: next });
-                toast.success(next ? "PDF partagé au client" : "Partage client désactivé");
-              }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border transition-colors ${
-                attribution.pdf_share_client
-                  ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
-                  : "border-white/15 text-white/70 hover:bg-white/5"
-              }`}
-            >
-              {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager PDF au client"}
-            </button>
+          <div className="w-full lg:w-[380px] shrink-0 flex flex-col items-stretch gap-3">
+            {/* --- Infos principales --- */}
+            <div className="rounded-2xl border border-pro-border bg-pro-surface-2/60 p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-pro-muted mb-3">
+                Infos principales
+              </p>
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center pt-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-pro-accent" />
+                  <span className="w-px flex-1 bg-pro-border min-h-[22px]" />
+                  <span className="w-2.5 h-2.5 rounded-full role-driver-bg" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-pro-muted">Départ</p>
+                    <p className="text-sm text-pro-text leading-snug">{trajet.depart || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-pro-muted">Arrivée</p>
+                    <p className="text-sm text-pro-text leading-snug">{trajet.arrivee || "—"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 pt-3 border-t border-pro-border grid grid-cols-2 gap-3">
+                <div className="col-span-2 flex items-center gap-2 flex-wrap">
+                  {trajet.immatriculation ? (
+                    <span className="plate-tag">{trajet.immatriculation}</span>
+                  ) : (
+                    <span className="text-sm text-pro-muted">Plaque —</span>
+                  )}
+                  <span className="text-xs text-pro-text-soft truncate">
+                    {`${trajet.marque ?? ""} ${trajet.modele ?? ""}`.trim() || "Véhicule —"}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Date</p>
+                  <p className="text-sm text-pro-text">
+                    {trajet.date_trajet
+                      ? new Date(trajet.date_trajet).toLocaleDateString("fr-FR")
+                      : "—"}
+                    {trajet.heure_trajet ? ` · ${trajet.heure_trajet}` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Prix client</p>
+                  <p className="text-sm font-semibold text-pro-text">
+                    {trajet.prix != null ? `${trajet.prix} €` : "—"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Convoyeur</p>
+                  <p className="text-sm text-pro-text truncate">
+                    {convoyeur ? `${convoyeur.prenom} ${convoyeur.nom}` : "Non attribué"}
+                    {convoyeur?.telephone ? (
+                      <span className="text-pro-muted"> · {convoyeur.telephone}</span>
+                    ) : null}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Contact client</p>
+                  <p className="text-sm text-pro-text truncate">
+                    {trajet.client_nom || clientSociete || "—"}
+                    {trajet.client_telephone ? (
+                      <span className="text-pro-muted"> · {trajet.client_telephone}</span>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* --- Actions --- */}
+            <div className="rounded-2xl border border-pro-border bg-pro-surface p-3 shadow-sm space-y-2">
+              <Select
+                value={attribution.statut}
+                onChange={(e) => updateStatut(e.target.value)}
+                className="text-xs py-2 rounded-xl"
+              >
+                {Object.entries(statutLabels).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="secondary"
+                  icon={<FileText size={14} />}
+                  onClick={() => setReportOpen(true)}
+                >
+                  Rapport
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+                  onClick={() => downloadEdlPdf("preview")}
+                  disabled={generatingEdlPdf}
+                >
+                  Aperçu EDL
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  onClick={() => downloadEdlPdf("download")}
+                  disabled={generatingEdlPdf}
+                >
+                  PDF EDL
+                </Button>
+                <Button icon={<FileArchive size={14} />} onClick={() => setDossierOpen(true)}>
+                  Dossier complet
+                </Button>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!attribution) return;
+                  const next = !attribution.pdf_share_client;
+                  const { error } = await supabase
+                    .from("attributions")
+                    .update({ pdf_share_client: next } as never)
+                    .eq("id", attribution.id);
+                  if (error) {
+                    toast.error("Erreur", { description: error.message });
+                    return;
+                  }
+                  setAttribution({ ...attribution, pdf_share_client: next });
+                  toast.success(next ? "PDF partagé au client" : "Partage client désactivé");
+                }}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-colors ${
+                  attribution.pdf_share_client
+                    ? "border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10"
+                    : "border-pro-border text-pro-text-soft hover:bg-pro-surface-2"
+                }`}
+              >
+                {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager le PDF au client"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
             {linkedFactureId ? (
               <div className="w-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
                 <div className="flex-1 min-w-[220px]">
