@@ -93,16 +93,21 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
           // l'exposition publique tout en conservant leur logique TTL/rate-limit.
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-          // 1. Valider le token
-          const { data: sess, error: sErr } = await supabaseAdmin.rpc("resolve_scan_handoff_token", {
-            _token: body.token,
-          });
+          // 1. Valider le token (session existante + non expirée)
+          const { data: row, error: sErr } = await supabaseAdmin
+            .from("scan_handoff_sessions")
+            .select("id, expires_at, context")
+            .eq("token", body.token)
+            .maybeSingle();
           if (sErr) {
             console.error("[handoff-extract] resolve error", sErr);
             return jsonResponse({ ok: false, error: "Token invalide" }, 401);
           }
-          const row = Array.isArray(sess) ? sess[0] : sess;
-          if (!row) return jsonResponse({ ok: false, error: "Session expirée" }, 410);
+          if (!row) return jsonResponse({ ok: false, error: "Session introuvable" }, 401);
+          if (new Date(row.expires_at).getTime() <= Date.now()) {
+            return jsonResponse({ ok: false, error: "Session expirée", expired: true }, 410);
+          }
+
 
           // 2. AI Gateway
           const apiKey = process.env.LOVABLE_API_KEY;
