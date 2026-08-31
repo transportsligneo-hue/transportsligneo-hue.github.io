@@ -113,7 +113,33 @@ export default function ServicesContent({
             </div>
           </div>
 
-          <ServicesGarantiesCarousel />
+          <section className="v4-section" style={{ textAlign: "center" }}>
+            <div className="v4-section-head">
+              <span className="v4-eyebrow">Nos garanties</span>
+              <h2 className="v4-title">
+                Un convoyage suivi, <em>de bout en bout</em>
+              </h2>
+            </div>
+            <div
+              className="v4-video-wrap"
+              style={{
+                maxWidth: 980,
+                margin: "0 auto",
+                borderRadius: 24,
+                overflow: "hidden",
+                border: "1px solid rgba(212,175,55,0.25)",
+                boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
+              }}
+            >
+              <video
+                src={filmParcoursMission.url}
+                controls
+                playsInline
+                preload="metadata"
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+            </div>
+          </section>
 
           <ServicesPlateforme />
         </>
