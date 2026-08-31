@@ -5,6 +5,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
+import vehicleMarkerAsset from "@/assets/ligneo-gps-vehicle.png.asset.json";
 
 import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
 export { MAPBOX_TOKEN };
@@ -26,22 +27,6 @@ const MAP_CSS = `
 @keyframes ligneo-mbx-halo{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{opacity:0}}
 `;
 
-
-const CAR_SVG = `<svg viewBox="0 0 44 44" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="lgmbxcar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#5b86ff"/><stop offset="100%" stop-color="#1c3fc4"/>
-    </linearGradient>
-    <filter id="lgmbxsh" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2.4" flood-color="#0b1026" flood-opacity="0.35"/>
-    </filter>
-  </defs>
-  <g filter="url(#lgmbxsh)">
-    <circle cx="22" cy="22" r="16" fill="url(#lgmbxcar)" stroke="#fff" stroke-width="3"/>
-    <path d="M16 27.4v-3l1.3-4.1a2 2 0 0 1 1.9-1.4h5.6a2 2 0 0 1 1.9 1.4l1.3 4.1v3a1 1 0 0 1-1 1h-1.1a1 1 0 0 1-1-1v-.8h-6.8v.8a1 1 0 0 1-1 1H16.9a1 1 0 0 1-.9-1z" fill="#fff"/>
-    <path d="M22 11.6l2.6 3.5h-5.2z" fill="#fff" opacity=".95"/>
-  </g>
-</svg>`;
 
 function bearing(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -371,12 +356,17 @@ export function MapboxLiveMap({
     if (!carRef.current) {
       const wrap = document.createElement("div");
       wrap.className = "ligneo-mbx-car";
-      wrap.style.cssText = "position:relative;width:36px;height:36px";
+      wrap.style.cssText = "position:relative;width:76px;height:76px";
       const halo = document.createElement("span");
       halo.className = "halo";
       const inner = document.createElement("div");
-      inner.style.cssText = "transform-origin:center;transition:transform 700ms ease-out";
-      inner.innerHTML = CAR_SVG;
+      inner.style.cssText = "width:76px;height:76px;transform-origin:center;transition:transform 700ms ease-out";
+      const image = document.createElement("img");
+      image.src = vehicleMarkerAsset.url;
+      image.alt = "";
+      image.draggable = false;
+      image.style.cssText = "display:block;width:76px;height:76px;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 5px 8px rgba(11,16,38,.35));pointer-events:none;user-select:none";
+      inner.appendChild(image);
       wrap.append(halo, inner);
       carInnerRef.current = inner;
       inner.style.transform = `rotate(${headingRef.current}deg)`;

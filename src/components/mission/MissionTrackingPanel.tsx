@@ -20,6 +20,7 @@ interface Props {
   trajetId: string | null;
   convoyeurId: string | null;
   onProofsAvailable?: (has: boolean) => void;
+  hideLiveTracker?: boolean;
 }
 
 const ETAPE_LABELS: Record<string, string> = {
@@ -43,13 +44,13 @@ const GRAVITE_TONE: Record<string, string> = {
   critique: "bg-red-600/20 text-red-200 border-red-600/40",
 };
 
-export function MissionTrackingPanel({ attributionId, trajetId, convoyeurId, onProofsAvailable }: Props) {
+export function MissionTrackingPanel({ attributionId, trajetId, convoyeurId, onProofsAvailable, hideLiveTracker = false }: Props) {
   const { convoyeur, history, incidents, startedAt, endedAt } = useMissionTrackingData(attributionId, convoyeurId);
 
   return (
     <div className="space-y-5">
       {/* Suivi temps réel : GPS + timeline + ETA — en haut */}
-      <MissionLiveTracker attributionId={attributionId} />
+      {!hideLiveTracker && <MissionLiveTracker attributionId={attributionId} />}
 
       {/* Convoyeur */}
       {convoyeur && (convoyeur.prenom || convoyeur.nom) && (
