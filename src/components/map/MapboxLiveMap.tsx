@@ -113,6 +113,26 @@ function dotEl(color: string, label?: string) {
   return el;
 }
 
+/** Marqueur véhicule (icône voiture Ligneo + halo pulsé), réutilisé en mode flotte. */
+function carEl(heading: number, size = 62) {
+  const wrap = document.createElement("div");
+  wrap.className = "ligneo-mbx-car";
+  wrap.style.cssText = `position:relative;width:${size}px;height:${size}px`;
+  const halo = document.createElement("span");
+  halo.className = "halo";
+  const inner = document.createElement("div");
+  inner.style.cssText = `width:${size}px;height:${size}px;transform-origin:center;transition:transform 700ms ease-out`;
+  const image = document.createElement("img");
+  image.src = vehicleMarkerImg;
+  image.alt = "";
+  image.draggable = false;
+  image.style.cssText = `display:block;width:${size}px;height:${size}px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none`;
+  inner.appendChild(image);
+  inner.style.transform = `rotate(${heading}deg)`;
+  wrap.append(halo, inner);
+  return { wrap, inner };
+}
+
 export function MapboxLiveMap({
   points,
   origin,
@@ -120,12 +140,14 @@ export function MapboxLiveMap({
   className = "",
   hideOverlay = false,
   title,
+  fleet,
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const readyRef = useRef(false);
   const carRef = useRef<mapboxgl.Marker | null>(null);
   const carInnerRef = useRef<HTMLDivElement | null>(null);
+  const fleetRef = useRef<Map<number, mapboxgl.Marker>>(new Map());
   const startRef = useRef<mapboxgl.Marker | null>(null);
   const endRef = useRef<mapboxgl.Marker | null>(null);
   const animRef = useRef<number | null>(null);
@@ -301,6 +323,8 @@ export function MapboxLiveMap({
       readyRef.current = false;
       carRef.current = null;
       carInnerRef.current = null;
+      fleetRef.current.forEach((m) => m.remove());
+      fleetRef.current.clear();
       startRef.current = null;
       endRef.current = null;
       fittedRef.current = false;
@@ -328,6 +352,36 @@ export function MapboxLiveMap({
     }
   }, [places, ready]);
 
+  // ——— Mode flotte : un marqueur voiture par mission active
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !fleet) return;
+    const seen = new Set<number>();
+    fleet.forEach((f, i) => {
+      seen.add(i);
+      const existing = fleetRef.current.get(i);
+      if (existing) {
+        existing.setLngLat([f.lng, f.lat]);
+      } else {
+        const { wrap } = carEl(0, 52);
+        if (f.label) wrap.title = f.label;
+        fleetRef.current.set(i, new mapboxgl.Marker({ element: wrap }).setLngLat([f.lng, f.lat]).addTo(map));
+      }
+    });
+    fleetRef.current.forEach((m, i) => {
+      if (!seen.has(i)) {
+        m.remove();
+        fleetRef.current.delete(i);
+      }
+    });
+    if (!fittedRef.current && fleet.length) {
+      fittedRef.current = true;
+      const b = new mapboxgl.LngLatBounds();
+      fleet.forEach((f) => b.extend([f.lng, f.lat]));
+      map.fitBounds(b, { padding: 70, duration: 0, maxZoom: 12 });
+    }
+  }, [fleet, ready]);
+
   // ——— Tracés parcouru / restant + zoom automatique
   useEffect(() => {
     const map = mapRef.current;
@@ -354,22 +408,8 @@ export function MapboxLiveMap({
     }
 
     if (!carRef.current) {
-const wrap = document.createElement("div");
-      wrap.className = "ligneo-mbx-car";
-      wrap.style.cssText = "position:relative;width:62px;height:62px";
-      const halo = document.createElement("span");
-      halo.className = "halo";
-      const inner = document.createElement("div");
-      inner.style.cssText = "width:62px;height:62px;transform-origin:center;transition:transform 700ms ease-out";
-      const image = document.createElement("img");
-      image.src = vehicleMarkerImg;
-      image.alt = "";
-      image.draggable = false;
-      image.style.cssText = "display:block;width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none";
-      inner.appendChild(image);
-      wrap.append(halo, inner);
+      const { wrap, inner } = carEl(headingRef.current);
       carInnerRef.current = inner;
-      inner.style.transform = `rotate(${headingRef.current}deg)`;
       carRef.current = new mapboxgl.Marker({ element: wrap }).setLngLat([target.lng, target.lat]).addTo(map);
       posRef.current = target;
       if (!route.length && !fittedRef.current) {
@@ -401,6 +441,10 @@ const wrap = document.createElement("div");
       const b = new mapboxgl.LngLatBounds();
       route.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60 });
+    } else if (fleet?.length) {
+      const b = new mapboxgl.LngLatBounds();
+      fleet.forEach((f) => b.extend([f.lng, f.lat]));
+      map.fitBounds(b, { padding: 70, maxZoom: 12 });
     } else if (posRef.current) {
       map.easeTo({ center: [posRef.current.lng, posRef.current.lat], zoom: 13 });
     }

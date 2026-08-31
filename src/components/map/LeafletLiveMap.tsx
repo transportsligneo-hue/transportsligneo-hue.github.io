@@ -25,6 +25,8 @@ export interface LiveMissionMapProps {
   hideOverlay?: boolean;
   /** Libellé affiché dans l'overlay */
   title?: string;
+  /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
+  fleet?: Array<{ lat: number; lng: number; label?: string }>;
 }
 
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -122,6 +124,7 @@ export function LeafletLiveMap({
   className = "",
   hideOverlay = false,
   title,
+  fleet,
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -130,6 +133,7 @@ export function LeafletLiveMap({
   const restLineRef = useRef<L.Polyline | null>(null);
   const startRef = useRef<L.Marker | null>(null);
   const endRef = useRef<L.Marker | null>(null);
+  const fleetRef = useRef<Map<number, L.Marker>>(new Map());
   const animRef = useRef<number | null>(null);
   const posRef = useRef<L.LatLng | null>(null);
   const headingRef = useRef(0);
@@ -254,6 +258,7 @@ export function LeafletLiveMap({
       restLineRef.current = null;
       startRef.current = null;
       endRef.current = null;
+      fleetRef.current.clear();
       fittedRef.current = false;
     };
   }, []);
@@ -283,6 +288,34 @@ export function LeafletLiveMap({
       }
     }
   }, [places]);
+
+  // ——— Mode flotte : un marqueur voiture par mission active
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !fleet) return;
+    const seen = new Set<number>();
+    fleet.forEach((f, i) => {
+      seen.add(i);
+      const existing = fleetRef.current.get(i);
+      if (existing) {
+        existing.setLatLng([f.lat, f.lng]);
+      } else {
+        const m = L.marker([f.lat, f.lng], { icon: carIcon(0), zIndexOffset: 900 }).addTo(map);
+        if (f.label) m.bindTooltip(f.label, { direction: "top", offset: [0, -14] });
+        fleetRef.current.set(i, m);
+      }
+    });
+    fleetRef.current.forEach((m, i) => {
+      if (!seen.has(i)) {
+        m.remove();
+        fleetRef.current.delete(i);
+      }
+    });
+    if (!fittedRef.current && fleet.length) {
+      fittedRef.current = true;
+      map.fitBounds(L.latLngBounds(fleet.map((f) => [f.lat, f.lng] as L.LatLngExpression)).pad(0.2), { animate: false });
+    }
+  }, [fleet]);
 
   // ——— Polylignes parcouru / restant
   useEffect(() => {
@@ -361,6 +394,7 @@ export function LeafletLiveMap({
     const map = mapRef.current;
     if (!map) return;
     if (route.length) map.fitBounds(L.latLngBounds(route as L.LatLngExpression[]).pad(0.15));
+    else if (fleet?.length) map.fitBounds(L.latLngBounds(fleet.map((f) => [f.lat, f.lng] as L.LatLngExpression)).pad(0.2));
     else if (posRef.current) map.setView(posRef.current, 13);
   };
 

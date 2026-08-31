@@ -20,4 +20,6 @@ export interface LiveMissionMapProps {
   hideOverlay?: boolean;
   /** Libellé affiché dans l'overlay */
   title?: string;
+  /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
+  fleet?: Array<{ lat: number; lng: number; label?: string }>;
 }

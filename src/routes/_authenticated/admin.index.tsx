@@ -29,7 +29,6 @@ import {
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
-import { RadarEmptyV6 } from "@/components/admin/dashboard/RadarEmptyV6";
 import { PageHeader } from "@/components/admin/AdminUI";
 import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
 
@@ -327,16 +326,7 @@ function AdminDashboard() {
       <MissionsAtRiskWidget />
 
       {/* === Carte trajets en cours === */}
-      {stats.trajetsActifs > 0 ? (
-        <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
-      ) : (
-        <div className="a6-card a6-card-hover p-5">
-          <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
-            <RouteIcon size={16} className="text-[var(--a6-blue)]" /> Trajets en cours (temps réel)
-          </p>
-          <RadarEmptyV6 />
-        </div>
-      )}
+      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
 
 
       {/* === ALERTES === */}
