@@ -14,7 +14,7 @@ import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
-import { GpsMapView } from "@/components/GpsMapView";
+import { LiveMissionMap } from "@/components/map/LiveMissionMap";
 import { MissionCard, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCockpit";
@@ -685,7 +685,7 @@ function ConvoyeurMissions() {
             </button>
             {showMap && (
               <div className="mt-2 space-y-2">
-                <GpsMapView points={gpsPoints} className="h-[280px] md:h-[400px] rounded-xl overflow-hidden" />
+                <LiveMissionMap points={gpsPoints} className="h-[280px] md:h-[400px] rounded-xl overflow-hidden" />
                 {lastPoint && (
                   <div className="flex items-center justify-between text-[10px] text-white/50 px-1">
                     <span className="flex items-center gap-1">

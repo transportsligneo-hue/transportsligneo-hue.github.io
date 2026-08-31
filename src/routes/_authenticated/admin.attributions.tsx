@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
 
 import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2, ExternalLink, Shield } from "lucide-react";
-import { GpsMapView } from "@/components/GpsMapView";
+import { LiveMissionMap } from "@/components/map/LiveMissionMap";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import {
@@ -1121,7 +1121,7 @@ function AdminAttributions() {
           <p className="text-pro-muted text-sm">Aucune position enregistrée.</p>
         ) : gpsView ? (
           <div className="space-y-3">
-            <GpsMapView points={gpsView.points} className="h-[400px]" />
+            <LiveMissionMap points={gpsView.points} className="h-[400px]" />
             <div className="flex items-center justify-between text-xs text-pro-text-soft">
               <span>{gpsView.points.length} position(s) enregistrée(s)</span>
               <a
