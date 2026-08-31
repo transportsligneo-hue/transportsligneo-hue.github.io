@@ -7096,37 +7096,37 @@ html.theme-light .r4-page .v4-tab:hover { color:#0f1526; }
 html.theme-light .r4-page .v4-tab.is-active,
 html.theme-light .r4-page .v4-tab.pro.is-active { color:#ffffff; }
 
-/* Timeline PRO 4 étapes */
-.r4-page .pro-tl { max-width:900px; margin:0 auto; padding:0 24px; list-style:none; position:relative; }
-.r4-page .pro-tl-item { display:grid; grid-template-columns:56px 1fr; gap:18px; position:relative; padding-bottom:26px; }
-.r4-page .pro-tl-item:last-child { padding-bottom:0; }
-.r4-page .pro-tl-item::before { content:''; position:absolute; left:27px; top:52px; bottom:0; width:2px;
-  background:linear-gradient(180deg, rgba(124,92,255,0.7), rgba(124,92,255,0.08)); }
-.r4-page .pro-tl-item:last-child::before { display:none; }
+/* Timeline PRO 4 étapes — horizontale, vidéo en grand en dessous */
+.r4-page .pro-tl { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:22px;
+  max-width:1180px; margin:0 auto; padding:0 24px; list-style:none; position:relative; }
+.r4-page .pro-tl-item { display:flex; flex-direction:column; gap:14px; position:relative; padding-bottom:0; }
+.r4-page .pro-tl-item:not(:last-child)::after { content:''; position:absolute; top:27px; left:60px; right:-22px; height:2px;
+  background:linear-gradient(90deg, rgba(124,92,255,0.7), rgba(124,92,255,0.08)); }
 .r4-page .pro-tl-marker { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   background:rgba(124,92,255,0.14); border:1px solid rgba(124,92,255,0.45); box-shadow:0 0 22px rgba(124,92,255,0.25); }
 .r4-page .pro-tl-num { font-family:'Poppins',sans-serif; font-weight:800; font-size:15px; color:#a794ff; }
-.r4-page .pro-tl-body { background:rgba(255,255,255,0.03); border:1px solid var(--v4-border); border-radius:18px; padding:18px 22px; }
-.r4-page .pro-tl-body h4 { font-family:'Poppins',sans-serif; font-size:16px; font-weight:700; color:#fff; margin-bottom:6px; }
-.r4-page .pro-tl-body > p { color:var(--v4-text-muted); font-size:13.5px; line-height:1.6; margin-bottom:12px; }
+.r4-page .pro-tl-body { background:rgba(255,255,255,0.03); border:1px solid var(--v4-border); border-radius:18px; padding:18px 20px; flex:1; }
+.r4-page .pro-tl-body h4 { font-family:'Poppins',sans-serif; font-size:15.5px; font-weight:700; color:#fff; margin-bottom:6px; }
+.r4-page .pro-tl-body > p { color:var(--v4-text-muted); font-size:13px; line-height:1.6; margin-bottom:12px; }
 .r4-page .pro-tl-body ul { list-style:none; display:grid; gap:8px; }
-.r4-page .pro-tl-body ul li { display:flex; gap:9px; align-items:flex-start; color:var(--v4-text-muted); font-size:13px; line-height:1.5; }
+.r4-page .pro-tl-body ul li { display:flex; gap:9px; align-items:flex-start; color:var(--v4-text-muted); font-size:12.5px; line-height:1.5; }
 .r4-page .pro-tl-body ul li svg { width:15px; height:15px; flex:0 0 15px; margin-top:2px; color:#a794ff; }
 html.theme-light .r4-page .pro-tl-body { background:#ffffff; border-color:rgba(15,21,38,0.10); }
 html.theme-light .r4-page .pro-tl-body h4 { color:#0f1526; }
 html.theme-light .r4-page .pro-tl-body > p,
 html.theme-light .r4-page .pro-tl-body ul li { color:#4a5470; }
 
-/* Timeline PRO — étapes à gauche + vidéo à côté */
-.r4-page .pro-tl-split { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr); gap:44px;
-  align-items:start; max-width:1180px; margin:0 auto; padding:0 24px; }
-.r4-page .pro-tl-split .pro-tl { max-width:none; margin:0; padding:0; }
-.r4-page .pro-tl-video { position:sticky; top:28px; border-radius:22px; overflow:hidden;
+/* Vidéo PRO — pleine largeur, collée sous les étapes */
+.r4-page .pro-tl-video { max-width:1180px; margin:34px auto 0; padding:0 24px; }
+.r4-page .pro-tl-video-wide { border-radius:24px; }
+.r4-page .pro-tl-video video { display:block; width:100%; height:auto; border-radius:24px; overflow:hidden;
   border:1px solid rgba(167,148,255,0.35); box-shadow:0 24px 60px -24px rgba(11,16,38,0.55); }
-.r4-page .pro-tl-video video { display:block; width:100%; height:auto; }
-@media (max-width:960px) {
-  .r4-page .pro-tl-split { grid-template-columns:1fr; gap:28px; }
-  .r4-page .pro-tl-video { position:static; }
+@media (max-width:1024px) {
+  .r4-page .pro-tl { grid-template-columns:repeat(2, minmax(0,1fr)); gap:26px; }
+  .r4-page .pro-tl-item::after { display:none !important; }
+}
+@media (max-width:560px) {
+  .r4-page .pro-tl { grid-template-columns:1fr; }
 }
 
 /* Cartes solutions PRO */
