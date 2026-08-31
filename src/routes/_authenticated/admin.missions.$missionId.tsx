@@ -1319,6 +1319,19 @@ function AdminMissionDetail() {
         </div>
       </Card>
 
+      {/* === Carte GPS live — en haut de la fiche === */}
+      <Card className="p-0 overflow-hidden">
+        <LiveMissionMap
+          points={gpsPoints}
+          origin={trajet.depart}
+          destination={trajet.arrivee}
+          title={missionNumber}
+          className="h-[320px] sm:h-[420px] !rounded-none"
+        />
+      </Card>
+
+
+
       <AdminMissionARBanner
         trajetId={trajet.id}
         groupId={trajet.mission_group_id}
