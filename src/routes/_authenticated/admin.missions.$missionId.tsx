@@ -1419,15 +1419,8 @@ function AdminMissionDetail() {
                 Trajet
               </h3>
             </div>
-            <LiveMissionMap
-
-              points={gpsPoints}
-              origin={trajet.depart}
-              destination={trajet.arrivee}
-              title={missionNumber}
-              className="h-[300px] sm:h-[360px] mb-4"
-            />
             <div className="space-y-3">
+
 
               <div className="flex items-start gap-3">
                 <div className="flex flex-col items-center pt-1">
