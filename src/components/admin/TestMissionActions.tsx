@@ -115,17 +115,18 @@ export function CreateTestMissionButton({ onCreated }: { onCreated?: (trajetId: 
   );
 }
 
-/** Badge visuel "TEST" à afficher sur toute ligne de mission is_test_data=true */
+/** Marqueur discret "test" — la mission doit ressembler à une vraie mission */
 export function TestBadge() {
   return (
     <span
       title="Mission de test · invisible côté client"
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border border-amber-400 bg-amber-100 text-amber-900 tracking-wider"
+      className="inline-flex items-center align-middle text-[8.5px] font-semibold uppercase tracking-[0.12em] text-amber-600/70 leading-none"
     >
-      <FlaskConical size={9} /> TEST
+      test
     </span>
   );
 }
+
 
 /** Bouton de suppression en un clic, garde-fou côté RPC (is_test_data=true requis) */
 export function DeleteTestMissionButton({
