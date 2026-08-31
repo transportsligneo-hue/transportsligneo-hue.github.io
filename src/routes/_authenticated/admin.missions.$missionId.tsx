@@ -1179,154 +1179,148 @@ function AdminMissionDetail() {
 
 
 
-          <div className="w-full lg:w-[360px] shrink-0 flex flex-col items-stretch lg:items-end gap-2">
-            <Select
-              value={attribution.statut}
-              onChange={(e) => updateStatut(e.target.value)}
-              className="text-xs py-1.5"
-            >
-              {Object.entries(statutLabels).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </Select>
-            <Button
-              variant="secondary"
-              icon={<FileText size={14} />}
-              onClick={() => setReportOpen(true)}
-            >
-              Rapport complet
-            </Button>
-            <Button
-              variant="secondary"
-              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
-              onClick={() => downloadEdlPdf("preview")}
-              disabled={generatingEdlPdf}
-            >
-              Aperçu état des lieux
-            </Button>
-            <Button
-              variant="secondary"
-              icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-              onClick={() => downloadEdlPdf("download")}
-              disabled={generatingEdlPdf}
-            >
-              PDF état des lieux
-            </Button>
-            <Button
-              icon={<FileArchive size={14} />}
-              onClick={() => setDossierOpen(true)}
-            >
-              Générer le dossier complet
-            </Button>
-            <button
-              type="button"
-              onClick={async () => {
-                if (!attribution) return;
-                const next = !attribution.pdf_share_client;
-                const { error } = await supabase
-                  .from("attributions")
-                  .update({ pdf_share_client: next } as never)
-                  .eq("id", attribution.id);
-                if (error) {
-                  toast.error("Erreur", { description: error.message });
-                  return;
-                }
-                setAttribution({ ...attribution, pdf_share_client: next });
-                toast.success(next ? "PDF partagé au client" : "Partage client désactivé");
-              }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border transition-colors ${
-                attribution.pdf_share_client
-                  ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
-                  : "border-white/15 text-white/70 hover:bg-white/5"
-              }`}
-            >
-              {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager PDF au client"}
-            </button>
-            {linkedFactureId ? (
-              <div className="w-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
-                <div className="flex-1 min-w-[220px]">
-                  <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-300 mb-1.5">
-                    <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
-                    {savingPo && <Loader2 size={11} className="animate-spin" />}
-                  </label>
-                  <input
-                    id="po-number-emise"
-                    value={poNumber}
-                    onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
-                    onBlur={(e) => void savePo(e.target.value)}
-                    maxLength={60}
-                    placeholder="Ex. PO-2026-0042"
-                    className="w-full rounded-md border border-emerald-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-300/50"
-                  />
-                  <p className="mt-1 text-[11px] text-white/50">
-                    Le PO est reporté sur la facture existante, puis le PDF est régénéré.
-                    {trajet.mission_group_id ? " Facture unique pour le duo Livraison + Restitution (montant global)." : ""}
-
-                  </p>
+          <div className="w-full lg:w-[380px] shrink-0 flex flex-col items-stretch gap-3">
+            {/* --- Infos principales --- */}
+            <div className="rounded-2xl border border-pro-border bg-pro-surface-2/60 p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-pro-muted mb-3">
+                Infos principales
+              </p>
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center pt-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-pro-accent" />
+                  <span className="w-px flex-1 bg-pro-border min-h-[22px]" />
+                  <span className="w-2.5 h-2.5 rounded-full role-driver-bg" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
-                    onClick={regenerateFacturePdf}
-                    disabled={regeneratingFacturePdf}
-                  >
-                    Régénérer le PDF
-                  </Button>
-                  <Link
-                    to="/admin/factures"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-                  >
-                    Voir les factures
-                  </Link>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-pro-muted">Départ</p>
+                    <p className="text-sm text-pro-text leading-snug">{trajet.depart || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-pro-muted">Arrivée</p>
+                    <p className="text-sm text-pro-text leading-snug">{trajet.arrivee || "—"}</p>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="w-full rounded-lg border border-amber-400/40 bg-amber-400/[0.07] p-3 flex flex-col sm:flex-row sm:items-end gap-3">
-                <div className="flex-1 min-w-[220px]">
-                  <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300 mb-1.5">
-                    <Receipt size={12} /> N° de PO / commande client
-                    {savingPo && <Loader2 size={11} className="animate-spin" />}
-                  </label>
-                  <input
-                    id="po-number"
-                    value={poNumber}
-                    onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
-                    onBlur={(e) => void savePo(e.target.value)}
-                    maxLength={60}
-                    placeholder="Ex. PO-2026-0042"
-                    className="w-full rounded-md border border-amber-400/40 bg-[#0b1026]/70 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-amber-300 focus:ring-1 focus:ring-amber-300/50"
-                  />
-                  <p className="mt-1 text-[11px] text-white/50">
-                    {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
-                    {trajet.mission_group_id
-                      ? " Un seul PO et UNE seule facture pour le duo Livraison + Restitution (montant global)."
-                      : ""}
-                    {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
-                  </p>
 
-
+              <div className="mt-3 pt-3 border-t border-pro-border grid grid-cols-2 gap-3">
+                <div className="col-span-2 flex items-center gap-2 flex-wrap">
+                  {trajet.immatriculation ? (
+                    <span className="plate-tag">{trajet.immatriculation}</span>
+                  ) : (
+                    <span className="text-sm text-pro-muted">Plaque —</span>
+                  )}
+                  <span className="text-xs text-pro-text-soft truncate">
+                    {`${trajet.marque ?? ""} ${trajet.modele ?? ""}`.trim() || "Véhicule —"}
+                  </span>
                 </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Date</p>
+                  <p className="text-sm text-pro-text">
+                    {trajet.date_trajet
+                      ? new Date(trajet.date_trajet).toLocaleDateString("fr-FR")
+                      : "—"}
+                    {trajet.heure_trajet ? ` · ${trajet.heure_trajet}` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Prix client</p>
+                  <p className="text-sm font-semibold text-pro-text">
+                    {trajet.prix != null ? `${trajet.prix} €` : "—"}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Convoyeur</p>
+                  <p className="text-sm text-pro-text truncate">
+                    {convoyeur ? `${convoyeur.prenom} ${convoyeur.nom}` : "Non attribué"}
+                    {convoyeur?.telephone ? (
+                      <span className="text-pro-muted"> · {convoyeur.telephone}</span>
+                    ) : null}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] uppercase tracking-wider text-pro-muted">Contact client</p>
+                  <p className="text-sm text-pro-text truncate">
+                    {trajet.client_nom || clientSociete || "—"}
+                    {trajet.client_telephone ? (
+                      <span className="text-pro-muted"> · {trajet.client_telephone}</span>
+                    ) : null}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* --- Actions --- */}
+            <div className="rounded-2xl border border-pro-border bg-pro-surface p-3 shadow-sm space-y-2">
+              <Select
+                value={attribution.statut}
+                onChange={(e) => updateStatut(e.target.value)}
+                className="text-xs py-2 rounded-xl"
+              >
+                {Object.entries(statutLabels).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </Select>
+              <div className="grid grid-cols-2 gap-2">
                 <Button
-                  icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
-                  onClick={generateFacture}
-                  disabled={generatingFacture || !trajet?.prix}
+                  variant="secondary"
+                  icon={<FileText size={14} />}
+                  onClick={() => setReportOpen(true)}
                 >
-                  Générer facture
+                  Rapport
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+                  onClick={() => downloadEdlPdf("preview")}
+                  disabled={generatingEdlPdf}
+                >
+                  Aperçu EDL
+                </Button>
+                <Button
+                  variant="secondary"
+                  icon={generatingEdlPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  onClick={() => downloadEdlPdf("download")}
+                  disabled={generatingEdlPdf}
+                >
+                  PDF EDL
+                </Button>
+                <Button icon={<FileArchive size={14} />} onClick={() => setDossierOpen(true)}>
+                  Dossier complet
                 </Button>
               </div>
-            )}
-            <PoHistoryPanel
-              attributionId={attribution.id}
-              refreshKey={poHistoryKey}
-              className="w-full text-left"
-            />
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!attribution) return;
+                  const next = !attribution.pdf_share_client;
+                  const { error } = await supabase
+                    .from("attributions")
+                    .update({ pdf_share_client: next } as never)
+                    .eq("id", attribution.id);
+                  if (error) {
+                    toast.error("Erreur", { description: error.message });
+                    return;
+                  }
+                  setAttribution({ ...attribution, pdf_share_client: next });
+                  toast.success(next ? "PDF partagé au client" : "Partage client désactivé");
+                }}
+                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-colors ${
+                  attribution.pdf_share_client
+                    ? "border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10"
+                    : "border-pro-border text-pro-text-soft hover:bg-pro-surface-2"
+                }`}
+              >
+                {attribution.pdf_share_client ? "✓ PDF partagé au client" : "Partager le PDF au client"}
+              </button>
+            </div>
           </div>
-
-
         </div>
       </Card>
+
+
 
       <AdminMissionARBanner
         trajetId={trajet.id}
@@ -1360,6 +1354,93 @@ function AdminMissionDetail() {
           setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
         }
       />
+
+      {/* === PO & facturation === */}
+      <Card>
+        <div className="flex items-center gap-2 mb-3">
+          <Receipt size={15} className="text-pro-accent" />
+          <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+            PO &amp; facturation
+          </h3>
+        </div>
+        {linkedFactureId ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300 mb-1.5">
+                <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
+                {savingPo && <Loader2 size={11} className="animate-spin" />}
+              </label>
+              <input
+                id="po-number-emise"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                onBlur={(e) => void savePo(e.target.value)}
+                maxLength={60}
+                placeholder="Ex. PO-2026-0042"
+                className="w-full rounded-xl border border-emerald-500/40 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40"
+              />
+              <p className="mt-1.5 text-[11px] text-pro-muted">
+                Le PO est reporté sur la facture existante, puis le PDF est régénéré.
+                {trajet.mission_group_id ? " Facture unique pour le duo Livraison + Restitution (montant global)." : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                onClick={regenerateFacturePdf}
+                disabled={regeneratingFacturePdf}
+              >
+                Régénérer le PDF
+              </Button>
+              <Link
+                to="/admin/factures"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+              >
+                Voir les factures
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/[0.07] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 mb-1.5">
+                <Receipt size={12} /> N° de PO / commande client
+                {savingPo && <Loader2 size={11} className="animate-spin" />}
+              </label>
+              <input
+                id="po-number"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                onBlur={(e) => void savePo(e.target.value)}
+                maxLength={60}
+                placeholder="Ex. PO-2026-0042"
+                className="w-full rounded-xl border border-amber-400/50 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-400/40"
+              />
+              <p className="mt-1.5 text-[11px] text-pro-muted">
+                {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
+                {trajet.mission_group_id
+                  ? " Un seul PO et UNE seule facture pour le duo Livraison + Restitution (montant global)."
+                  : ""}
+                {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
+              </p>
+            </div>
+            <Button
+              icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+              onClick={generateFacture}
+              disabled={generatingFacture || !trajet?.prix}
+            >
+              Générer facture
+            </Button>
+          </div>
+        )}
+        <PoHistoryPanel
+          attributionId={attribution.id}
+          refreshKey={poHistoryKey}
+          className="w-full text-left mt-3"
+        />
+      </Card>
+
+
 
 
 
