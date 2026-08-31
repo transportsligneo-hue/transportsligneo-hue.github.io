@@ -289,7 +289,16 @@ export function MapboxLiveMap({
     const timers = [0, 120, 400, 900, 1600].map((d) => window.setTimeout(() => map.resize(), d));
     const onWinResize = () => map.resize();
     window.addEventListener("resize", onWinResize);
-    map.on("idle", () => map.resize());
+    // Resize uniquement si la taille réelle a changé (évite toute boucle de rendu)
+    const syncSize = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const c = map.getCanvas();
+      if (Math.abs(c.clientWidth - el.clientWidth) > 1 || Math.abs(c.clientHeight - el.clientHeight) > 1) {
+        map.resize();
+      }
+    };
+    map.on("idle", syncSize);
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(containerRef.current);
@@ -298,7 +307,10 @@ export function MapboxLiveMap({
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
+      timers.forEach((t) => window.clearTimeout(t));
+      window.removeEventListener("resize", onWinResize);
       ro.disconnect();
+
       map.remove();
       mapRef.current = null;
       readyRef.current = false;
