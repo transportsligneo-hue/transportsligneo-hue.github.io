@@ -1418,7 +1418,9 @@ function AdminMissionDetail() {
               <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
                 Trajet
               </h3>
+            </div>
             <LiveMissionMap
+
               points={gpsPoints}
               origin={trajet.depart}
               destination={trajet.arrivee}
