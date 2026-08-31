@@ -6732,6 +6732,36 @@ export type Database = {
       }
     }
     Views: {
+      avis_publies: {
+        Row: {
+          commentaire: string | null
+          date_avis: string | null
+          id: string | null
+          nom_affiche: string | null
+          note: number | null
+          type_client: string | null
+          ville: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          date_avis?: string | null
+          id?: string | null
+          nom_affiche?: never
+          note?: number | null
+          type_client?: string | null
+          ville?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          date_avis?: string | null
+          id?: string | null
+          nom_affiche?: never
+          note?: number | null
+          type_client?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
       trajets_assigned_safe: {
         Row: {
           arrivee: string | null
