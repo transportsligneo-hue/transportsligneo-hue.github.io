@@ -1087,12 +1087,22 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         <div>
                           <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée restitution</label>
                           {sameDestination ? (
-                            <input
-                              value={departure}
-                              disabled
-                              className={inputCard + " opacity-70 cursor-not-allowed"}
-                            />
+                            <div className="relative">
+                              <input
+                                value={departure}
+                                readOnly
+                                aria-readonly="true"
+                                title="Repris automatiquement de l'adresse de départ"
+                                className={inputCard + " pr-9 opacity-80 cursor-default"}
+                              />
+                              <Lock
+                                size={13}
+                                aria-hidden="true"
+                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-cream/40"
+                              />
+                            </div>
                           ) : (
+
                             <PlacesInput
                               value={arriveeRetour}
                               onChange={setArriveeRetour}
