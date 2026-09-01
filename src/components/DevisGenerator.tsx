@@ -1149,14 +1149,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         }
                         if (f.client_email && !email) setEmail(f.client_email);
                         if (f.client_telephone && !telephone) setTelephone(f.client_telephone);
-                        toast.success("Véhicule pré-rempli depuis le document");
+                        const n = Object.values(f).filter((v) => typeof v === "string" && v.trim()).length;
+                        toast.success(`Formulaire pré-rempli · ${n} champ${n > 1 ? "s" : ""} détecté${n > 1 ? "s" : ""}`);
                       };
                       return (
                         <div className="flex flex-wrap gap-2">
-                          <ScanToPrefill label="Scanner" multiPage onExtracted={applyScan} />
                           <QrHandoffButton context="client_reservation" onExtracted={applyScan} />
                         </div>
                       );
+
                     })()}
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
