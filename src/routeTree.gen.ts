@@ -39,6 +39,7 @@ import { Route as AttenteValidationRouteImport } from './routes/attente-validati
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
@@ -157,6 +158,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
+import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
@@ -338,6 +340,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanIndexRoute = ScanIndexRouteImport.update({
+  id: '/scan/',
+  path: '/scan/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
@@ -1019,6 +1026,12 @@ const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
   path: '/api/public/signup/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicScanHandoffSessionRoute =
+  ApiPublicScanHandoffSessionRouteImport.update({
+    id: '/api/public/scan/handoff-session',
+    path: '/api/public/scan/handoff-session',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
@@ -1259,6 +1272,7 @@ export interface FileRoutesByFullPath {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/scan/': typeof ScanIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1372,6 +1386,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1435,6 +1450,7 @@ export interface FileRoutesByTo {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
+  '/scan': typeof ScanIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1545,6 +1561,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1616,6 +1633,7 @@ export interface FileRoutesById {
   '/scan/$token': typeof ScanTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/scan/': typeof ScanIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1729,6 +1747,7 @@ export interface FileRoutesById {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
+  '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1800,6 +1819,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
+    | '/scan/'
     | '/admin/acceptations'
     | '/admin/alertes'
     | '/admin/assistant-ia'
@@ -1913,6 +1933,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1976,6 +1997,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/actualites'
+    | '/scan'
     | '/admin/acceptations'
     | '/admin/alertes'
     | '/admin/assistant-ia'
@@ -2086,6 +2108,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2156,6 +2179,7 @@ export interface FileRouteTypes {
     | '/scan/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
+    | '/scan/'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/alertes'
     | '/_authenticated/admin/assistant-ia'
@@ -2269,6 +2293,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
+    | '/api/public/scan/handoff-session'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2330,6 +2355,7 @@ export interface RootRouteChildren {
   ScanTokenRoute: typeof ScanTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
+  ScanIndexRoute: typeof ScanIndexRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
@@ -2355,6 +2381,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
+  ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2580,6 +2607,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/': {
+      id: '/scan/'
+      path: '/scan'
+      fullPath: '/scan/'
+      preLoaderRoute: typeof ScanIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actualites/': {
@@ -3408,6 +3442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/scan/handoff-session': {
+      id: '/api/public/scan/handoff-session'
+      path: '/api/public/scan/handoff-session'
+      fullPath: '/api/public/scan/handoff-session'
+      preLoaderRoute: typeof ApiPublicScanHandoffSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-extract': {
       id: '/api/public/scan/handoff-extract'
       path: '/api/public/scan/handoff-extract'
@@ -4130,6 +4171,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScanTokenRoute: ScanTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
+  ScanIndexRoute: ScanIndexRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
@@ -4157,6 +4199,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
+  ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

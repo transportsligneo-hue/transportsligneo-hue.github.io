@@ -5913,7 +5913,7 @@ export type Database = {
           consumed_at: string | null
           context: string
           created_at: string
-          created_by: string
+          created_by: string | null
           expires_at: string
           id: string
           short_code: string
@@ -5924,7 +5924,7 @@ export type Database = {
           consumed_at?: string | null
           context?: string
           created_at?: string
-          created_by: string
+          created_by?: string | null
           expires_at?: string
           id?: string
           short_code: string
@@ -5935,7 +5935,7 @@ export type Database = {
           consumed_at?: string | null
           context?: string
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           expires_at?: string
           id?: string
           short_code?: string

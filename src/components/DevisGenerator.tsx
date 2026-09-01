@@ -18,7 +18,7 @@ import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
-import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
@@ -1087,12 +1087,22 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         <div>
                           <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée restitution</label>
                           {sameDestination ? (
-                            <input
-                              value={departure}
-                              disabled
-                              className={inputCard + " opacity-70 cursor-not-allowed"}
-                            />
+                            <div className="relative">
+                              <input
+                                value={departure}
+                                readOnly
+                                aria-readonly="true"
+                                title="Repris automatiquement de l'adresse de départ"
+                                className={inputCard + " pr-9 opacity-80 cursor-default"}
+                              />
+                              <Lock
+                                size={13}
+                                aria-hidden="true"
+                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-cream/40"
+                              />
+                            </div>
                           ) : (
+
                             <PlacesInput
                               value={arriveeRetour}
                               onChange={setArriveeRetour}
@@ -1139,14 +1149,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         }
                         if (f.client_email && !email) setEmail(f.client_email);
                         if (f.client_telephone && !telephone) setTelephone(f.client_telephone);
-                        toast.success("Véhicule pré-rempli depuis le document");
+                        const n = Object.values(f).filter((v) => typeof v === "string" && v.trim()).length;
+                        toast.success(`Formulaire pré-rempli · ${n} champ${n > 1 ? "s" : ""} détecté${n > 1 ? "s" : ""}`);
                       };
                       return (
                         <div className="flex flex-wrap gap-2">
-                          <ScanToPrefill label="Scanner" multiPage onExtracted={applyScan} />
                           <QrHandoffButton context="client_reservation" onExtracted={applyScan} />
                         </div>
                       );
+
                     })()}
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
