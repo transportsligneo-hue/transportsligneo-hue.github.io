@@ -3287,6 +3287,13 @@ export type Database = {
             referencedRelation: "formation_exams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "formation_exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "formation_exams_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       formation_exams: {
@@ -3437,6 +3444,13 @@ export type Database = {
             referencedRelation: "formation_modules"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "formation_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "formation_modules_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       formation_quiz_attempts: {
@@ -3480,6 +3494,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "formation_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "formation_quiz_attempts_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "formation_modules_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -6735,6 +6756,99 @@ export type Database = {
       }
     }
     Views: {
+      formation_exams_safe: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          minimum_score: number | null
+          question_count: number | null
+          time_limit_minutes: number | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          minimum_score?: number | null
+          question_count?: number | null
+          time_limit_minutes?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          minimum_score?: number | null
+          question_count?: number | null
+          time_limit_minutes?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      formation_modules_safe: {
+        Row: {
+          category: string | null
+          content_body: string | null
+          content_type: string | null
+          content_url: string | null
+          created_at: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string | null
+          is_active: boolean | null
+          is_required: boolean | null
+          minimum_score: number | null
+          sections: Json | null
+          slug: string | null
+          sort_order: number | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content_body?: string | null
+          content_type?: string | null
+          content_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_required?: boolean | null
+          minimum_score?: number | null
+          sections?: Json | null
+          slug?: string | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content_body?: string | null
+          content_type?: string | null
+          content_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          is_required?: boolean | null
+          minimum_score?: number | null
+          sections?: Json | null
+          slug?: string | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trajets_assigned_safe: {
         Row: {
           arrivee: string | null
