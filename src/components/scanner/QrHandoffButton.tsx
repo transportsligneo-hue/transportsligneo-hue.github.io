@@ -1,21 +1,20 @@
 /**
  * QrHandoffButton · bouton "Scanner depuis mon téléphone".
  *
- * Ouvre une modale premium contenant un QR code + code court. L'utilisateur
- * scanne le QR avec l'appareil photo natif de son téléphone → il arrive sur
- * `/scan/$token` (page publique), photographie ses documents, et chaque
- * extraction remonte au PC en temps réel via Supabase Realtime.
+ * Ouvre une modale premium contenant un QR code + un code court à 6 caractères.
+ * Le téléphone arrive sur `/scan/$token` (ou saisit le code sur `/scan`),
+ * photographie SON document avec le scanner Driver, et l'extraction remonte au
+ * PC par polling de la route publique `/api/public/scan/handoff-session`.
  *
- * Contrat identique à `ScanToPrefill` : `onExtracted(fields, docs)` · donc
- * branchement zéro-friction sur tout formulaire qui utilise déjà ScanToPrefill.
+ * Fonctionne pour un visiteur non connecté (devis public) comme pour un admin :
+ * tout passe par la route publique, le token étant le seul secret.
+ *
+ * Contrat identique à `ScanToPrefill` : `onExtracted(fields, docs)`.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QrCode, X, Loader2, Smartphone, Check, RefreshCw, Copy } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
-import { createHandoffSession, closeHandoffSession } from "@/lib/scanner/handoff.functions";
 import {
   mergeExtractions, DOCUMENT_LABEL,
   type ExtractedFields, type ExtractionResult,
@@ -35,6 +34,10 @@ interface Session {
   url: string;
 }
 
+const API = "/api/public/scan/handoff-session";
+
+type Phase = "waiting" | "scanning" | "received";
+
 export function QrHandoffButton({
   context = "admin_mission",
   onExtracted,
@@ -46,25 +49,34 @@ export function QrHandoffButton({
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [received, setReceived] = useState<ExtractionResult[]>([]);
   const [remaining, setRemaining] = useState<number>(1800);
-  const [live, setLive] = useState(false);
-  const create = useServerFn(createHandoffSession);
-  const close = useServerFn(closeHandoffSession);
-  const receivedRef = useRef<ExtractionResult[]>([]);
+  const [phase, setPhase] = useState<Phase>("waiting");
   const seenIdsRef = useRef<Set<string>>(new Set());
+  const receivedRef = useRef<ExtractionResult[]>([]);
 
   // `onExtracted` est souvent une closure recréée à chaque rendu : on la garde
-  // dans une ref pour ne JAMAIS relancer la souscription Realtime (sinon le
-  // canal se détruit/recrée en boucle et n'a jamais le temps de se connecter).
+  // dans une ref pour ne jamais relancer la boucle de polling.
   const onExtractedRef = useRef(onExtracted);
   useEffect(() => { onExtractedRef.current = onExtracted; }, [onExtracted]);
+
+  const post = useCallback(async (payload: Record<string, unknown>) => {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json().catch(() => null);
+    return { ok: res.ok && json?.ok === true, status: res.status, json } as const;
+  }, []);
 
   // ─── Créer la session ────────────────────────────────────────────────────
   const startSession = useCallback(async () => {
     setCreating(true);
     try {
-      const s = await create({ data: { context } });
-      // Le téléphone doit atterrir sur un domaine public accessible : les URLs
-      // de preview / localhost ne sont pas joignables depuis le mobile.
+      const { ok, json } = await post({ action: "create", context });
+      if (!ok || !json?.session) throw new Error(json?.error ?? "create failed");
+      const s = json.session as Omit<Session, "url">;
+      // Le téléphone doit atterrir sur un domaine public joignable : les URLs
+      // de preview / localhost ne le sont pas.
       const host = window.location.hostname;
       const isPublic =
         !/localhost|127\.0\.0\.1|(^|\.)id-preview|lovableproject\.com|\.sandbox\./i.test(host);
@@ -80,6 +92,7 @@ export function QrHandoffButton({
       setReceived([]);
       receivedRef.current = [];
       seenIdsRef.current = new Set();
+      setPhase("waiting");
       setRemaining(Math.max(0, Math.floor((new Date(s.expires_at).getTime() - Date.now()) / 1000)));
     } catch (err) {
       console.error(err);
@@ -88,7 +101,7 @@ export function QrHandoffButton({
     } finally {
       setCreating(false);
     }
-  }, [create, context]);
+  }, [post, context]);
 
   useEffect(() => {
     if (open && !session && !creating) void startSession();
@@ -107,10 +120,10 @@ export function QrHandoffButton({
     return () => clearInterval(iv);
   }, [expiresAt]);
 
-  // ─── Réception des extractions (Realtime + polling de secours) ───────────
-  const sessionId = session?.id ?? null;
+  // ─── Réception des extractions (polling de la route publique) ────────────
+  const token = session?.token ?? null;
   useEffect(() => {
-    if (!sessionId) return;
+    if (!token) return;
     let stopped = false;
 
     const ingest = (rows: { id: string; extraction: ExtractionResult }[]) => {
@@ -120,74 +133,58 @@ export function QrHandoffButton({
       const next = [...receivedRef.current, ...fresh.map((r) => r.extraction)];
       receivedRef.current = next;
       setReceived(next);
+      setPhase("received");
       onExtractedRef.current(mergeExtractions(next), next);
       fresh.forEach((r) => {
-        toast.success(`📱 Reçu : ${DOCUMENT_LABEL[r.extraction.document_type] ?? "Document"}`);
+        const n = Object.keys(r.extraction.fields ?? {}).length;
+        toast.success(
+          `📱 ${DOCUMENT_LABEL[r.extraction.document_type] ?? "Document"} reçu · ${n} champ${n > 1 ? "s" : ""} pré-rempli${n > 1 ? "s" : ""}`,
+        );
       });
     };
 
-    const channel = supabase
-      .channel(`scan-handoff-${sessionId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "scan_handoff_extractions",
-          filter: `session_id=eq.${sessionId}`,
-        },
-        (payload) => {
-          const row = payload.new as { id: string; extraction: ExtractionResult };
-          ingest([row]);
-        },
-      )
-      .subscribe((status) => {
-        if (stopped) return;
-        setLive(status === "SUBSCRIBED");
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          console.warn("[handoff] realtime status", status);
-        }
-      });
-
-    // Filet de sécurité : certains réseaux/navigateurs (Safari iOS en
-    // arrière-plan, proxys d'entreprise) coupent le WebSocket. On interroge
-    // la table toutes les 3 s : le parcours fonctionne même sans Realtime.
-    const poll = setInterval(async () => {
-      const { data, error } = await supabase
-        .from("scan_handoff_extractions")
-        .select("id, extraction")
-        .eq("session_id", sessionId)
-        .order("created_at", { ascending: true });
-      if (error || !data || stopped) return;
-      ingest(data as unknown as { id: string; extraction: ExtractionResult }[]);
-    }, 3000);
-
-    return () => {
-      stopped = true;
-      clearInterval(poll);
-      setLive(false);
-      supabase.removeChannel(channel);
+    const poll = async () => {
+      const { ok, status, json } = await post({ action: "poll", token });
+      if (stopped) return;
+      if (!ok) {
+        if (status === 410 || status === 404) setRemaining(0);
+        return;
+      }
+      if (json.status === "scanning" && receivedRef.current.length === 0) setPhase("scanning");
+      ingest((json.extractions ?? []) as { id: string; extraction: ExtractionResult }[]);
     };
-  }, [sessionId]);
 
+    void poll();
+    const iv = setInterval(() => { void poll(); }, 2000);
+    return () => { stopped = true; clearInterval(iv); };
+  }, [token, post]);
+
+  // ─── Fermeture automatique après réception ──────────────────────────────
+  useEffect(() => {
+    if (received.length === 0) return;
+    const t = setTimeout(() => { void handleCloseRef.current(); }, 1600);
+    return () => clearTimeout(t);
+  }, [received.length]);
 
   // ─── Fermeture / cleanup ─────────────────────────────────────────────────
   const handleClose = useCallback(async () => {
-    if (session) {
-      try { await close({ data: { id: session.id } }); } catch { /* ignore */ }
-    }
+    if (session) { void post({ action: "close", token: session.token }); }
     setOpen(false);
     setSession(null);
     setQrDataUrl(null);
     setReceived([]);
     receivedRef.current = [];
-  }, [session, close]);
+    setPhase("waiting");
+  }, [session, post]);
+
+  const handleCloseRef = useRef(handleClose);
+  useEffect(() => { handleCloseRef.current = handleClose; }, [handleClose]);
 
   const handleRegenerate = useCallback(async () => {
-    if (session) { try { await close({ data: { id: session.id } }); } catch { /* ignore */ } }
+    if (session) { void post({ action: "close", token: session.token }); }
     setSession(null); setQrDataUrl(null); setReceived([]); receivedRef.current = [];
     await startSession();
-  }, [session, close, startSession]);
+  }, [session, post, startSession]);
 
   const copyLink = () => {
     if (!session) return;
@@ -248,10 +245,18 @@ export function QrHandoffButton({
                         </button>
                       </div>
                     )}
+                    {phase === "received" && (
+                      <div className="absolute inset-0 bg-emerald-500/85 rounded-xl flex flex-col items-center justify-center text-white gap-2">
+                        <Check size={40} />
+                        <p className="text-sm font-semibold">Document reçu</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-center gap-1 text-center">
-                    <p className="text-white/70 text-xs">Scannez avec votre téléphone, ou entrez le code :</p>
+                    <p className="text-white/70 text-xs">
+                      Scannez le QR, ou allez sur <span className="text-[#e7c76a]">transportsligneo.fr/scan</span> et entrez le code :
+                    </p>
                     <div className="flex items-center gap-2">
                       <span className="px-3 py-1.5 rounded-md bg-white/10 text-[#e7c76a] font-mono tracking-[0.35em] text-lg">
                         {session?.short_code}
@@ -267,26 +272,31 @@ export function QrHandoffButton({
                     <p className={`text-[11px] mt-1 ${expired ? "text-red-400" : "text-white/50"}`}>
                       {expired ? "Expirée" : `Expire dans ${mm}:${ss}`}
                     </p>
-                    <p className="text-[10px] mt-0.5 flex items-center gap-1.5 text-white/40">
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${live ? "bg-emerald-400" : "bg-amber-400"}`} />
-                      {live ? "Liaison temps réel active" : "Liaison en cours (secours actif)"}
-                    </p>
                   </div>
 
-                  {/* Reçus */}
+                  {/* Statut */}
                   <div className="w-full mt-2 border-t border-white/10 pt-3">
                     {received.length === 0 ? (
-                      <p className="text-white/50 text-xs text-center">
-                        En attente d'un document depuis le téléphone…
+                      <p className="text-white/50 text-xs text-center flex items-center justify-center gap-2">
+                        {phase === "scanning" ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin text-[#e7c76a]" />
+                            Téléphone connecté · scan en cours…
+                          </>
+                        ) : (
+                          <>
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            En attente du téléphone…
+                          </>
+                        )}
                       </p>
                     ) : (
-
                       <ul className="space-y-1.5">
                         {received.map((d, i) => (
                           <li key={i} className="flex items-center gap-2 text-white/80 text-xs">
-                            <Check size={14} className="text-[#e7c76a]" />
+                            <Check size={14} className="text-emerald-400" />
                             <span className="flex-1">
-                              {DOCUMENT_LABEL[d.document_type] ?? "Document"} · {Object.keys(d.fields).length} champs
+                              {DOCUMENT_LABEL[d.document_type] ?? "Document"} · {Object.keys(d.fields).length} champs pré-remplis
                             </span>
                           </li>
                         ))}
