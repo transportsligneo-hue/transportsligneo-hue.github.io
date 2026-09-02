@@ -7369,9 +7369,16 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 }
 .dg-flat-trust span {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  font-size: 12.5px; color: rgba(255,255,255,0.8); text-align: center;
+  font-size: 12.5px; text-align: center;
+  /* Informations statiques : jamais d'état "sélectionné" (pas de fond bleu plein) */
+  background: #f7f7f9 !important;
+  border: 1px solid rgba(15,21,38,0.08) !important;
+  color: #3d4355 !important;
+  border-radius: 999px;
+  padding: 7px 12px;
+  box-shadow: none !important;
 }
-.dg-flat-trust svg { color: #60a5fa; flex: 0 0 auto; }
+.dg-flat-trust svg { color: #16a34a !important; flex: 0 0 auto; }
 @media (max-width: 720px) {
   .dg-flat-trust { grid-template-columns: repeat(2, 1fr); }
   .dg-flat-input--lg { font-size: 18px; }
