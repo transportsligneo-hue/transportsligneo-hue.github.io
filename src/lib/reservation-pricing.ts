@@ -27,10 +27,13 @@ function extractCity(address: string): string {
 }
 
 export function getDistance(from: string, to: string): number | null {
+  if (!from || !to) return null;
+  if (normalizeAddress(from) === normalizeAddress(to)) return 0;
   const cFrom = extractCity(from);
   const cTo = extractCity(to);
   if (!cFrom || !cTo) return null;
-  if (cFrom === cTo) return 0;
+  // Même ville, adresses différentes : distance réelle requise (pas 0 km)
+  if (cFrom === cTo) return null;
   if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
   if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
   const dFromTours = CITY_DISTANCES.Tours?.[cFrom] ?? CITY_DISTANCES[cFrom]?.Tours;
@@ -42,6 +45,7 @@ export function getDistance(from: string, to: string): number | null {
 export type TripType = "aller_simple" | "aller_retour" | "express";
 
 import { resolveLocalDeptTariff } from "./pricing-departments";
+import { normalizeAddress } from "./distance-fallback";
 
 export function calculateBasePrice(
   depart: string,

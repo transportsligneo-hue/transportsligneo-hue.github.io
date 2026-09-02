@@ -14,6 +14,7 @@ import {
 } from "@/lib/google-places";
 import PlacesInput from "@/components/PlacesInput";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
+import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { lookupPlate } from "@/lib/plate.functions";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
@@ -72,9 +73,12 @@ function extractCity(addr: string): string {
 }
 
 function getDistance(from: string, to: string): number | null {
+  if (!from || !to) return null;
+  if (normalizeAddress(from) === normalizeAddress(to)) return 0;
   const cFrom = extractCity(from) || from;
   const cTo = extractCity(to) || to;
-  if (cFrom === cTo) return 0;
+  // Même ville mais adresses différentes → distance réelle à calculer
+  if (cFrom === cTo) return null;
   if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
   if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
   const dFromTours = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
@@ -170,12 +174,16 @@ export default function MobileDevisGenerator() {
     setGoogleDistance(null);
     if (!departure || !arrival) return;
     if (localDistance !== null) return;
-    if (!isGoogleAvailable()) return;
     let cancelled = false;
     setDistanceLoading(true);
-    getGoogleDistanceKm(departure, arrival)
-      .then((km) => { if (!cancelled) setGoogleDistance(km); })
-      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    (async () => {
+      let km: number | null = null;
+      if (isGoogleAvailable()) {
+        try { km = await getGoogleDistanceKm(departure, arrival); } catch { km = null; }
+      }
+      if (km == null) km = await geocodeDistanceKm(departure, arrival);
+      if (!cancelled) { setGoogleDistance(km); setDistanceLoading(false); }
+    })();
     return () => { cancelled = true; };
   }, [departure, arrival, localDistance]);
 
