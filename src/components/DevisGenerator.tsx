@@ -299,13 +299,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   useEffect(() => {
     setGoogleDistance(null);
     if (!departure || !arrival) return;
-    if (localDistance !== null) return; // pas besoin de Google
-    if (!isGoogleAvailable()) return;
+    if (localDistance !== null) return; // pas besoin de calcul distant
     let cancelled = false;
     setDistanceLoading(true);
-    getGoogleDistanceKm(departure, arrival)
-      .then((km) => { if (!cancelled) setGoogleDistance(km); })
-      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    (async () => {
+      let km: number | null = null;
+      if (isGoogleAvailable()) {
+        try { km = await getGoogleDistanceKm(departure, arrival); } catch { km = null; }
+      }
+      if (km == null) km = await geocodeDistanceKm(departure, arrival);
+      if (!cancelled) { setGoogleDistance(km); setDistanceLoading(false); }
+    })();
     return () => { cancelled = true; };
   }, [departure, arrival, localDistance]);
 
