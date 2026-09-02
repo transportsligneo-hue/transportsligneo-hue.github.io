@@ -15,6 +15,7 @@ import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
+import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
