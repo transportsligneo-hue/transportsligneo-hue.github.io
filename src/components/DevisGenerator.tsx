@@ -1414,27 +1414,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Récapitulatif</h4>
                   <div className="rounded-2xl border border-[#5fb6ff]/20 bg-white/[0.03] p-5 space-y-3 text-sm">
-                    <div className="grid grid-cols-2 gap-3 text-cream/80">
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</p>{departure} → {arrival}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</p>{distance} km · {distance ? estimateDuration(distance) : ""}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</p>{[marque, modele].filter(Boolean).join(" ") || vehicleType || " · "}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</p>{plaqueInconnue ? "À confirmer" : (immatriculation || " · ")}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</p>{date || " · "} {heure}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</p>{prenom} {nom}</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</em><strong className="font-normal text-[13px] text-white/90">{departure || "—"} → {arrival || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</em><strong className="font-normal text-[13px] text-white/90">{distance != null ? `${distance} km${distance > 0 ? ` · ${estimateDuration(distance)}` : ""}` : "À confirmer"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
                     </div>
                     {pricing && (
                       <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</p><p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
-
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</em><strong className="font-heading font-normal text-xl gold-gradient-text">{priceHT} €</strong></div>
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</em><strong className="font-heading font-normal text-base text-white/85">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="font-heading font-normal text-xl text-[#e7c76a]">{priceTTC} €</strong></div>
                       </div>
                     )}
-                    <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-cream/65">
-                      <span className="inline-flex items-center gap-1.5"><RouteIcon size={11} className="text-[#5fb6ff]" /> Péages inclus</span>
-                      <span className="inline-flex items-center gap-1.5"><Fuel size={11} className="text-[#5fb6ff]" /> Carburant inclus</span>
-                      <span className="inline-flex items-center gap-1.5"><Shield size={11} className="text-[#5fb6ff]" /> Assurance incluse</span>
+                    <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><RouteIcon size={11} className="text-emerald-600" /> Péages inclus</strong>
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Fuel size={11} className="text-emerald-600" /> Carburant inclus</strong>
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Shield size={11} className="text-emerald-600" /> Assurance incluse</strong>
                     </div>
+                  </div>
                   </div>
                 </div>
               )}
