@@ -50,9 +50,13 @@ function extractCity(addr: string): string {
 }
 
 function getDistance(from: string, to: string): number | null {
+  if (!from || !to) return null;
+  // 0 km uniquement si les deux adresses sont strictement identiques
+  if (normalizeAddress(from) === normalizeAddress(to)) return 0;
   const cFrom = extractCity(from) || from;
   const cTo = extractCity(to) || to;
-  if (cFrom === cTo) return 0;
+  // Même ville mais adresses différentes → distance réelle à calculer
+  if (cFrom === cTo) return null;
   if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
   if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
   const a = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
