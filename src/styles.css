@@ -7406,8 +7406,8 @@ html.theme-light .dg-estimator--flat .dg-flat-toggle.is-active {
   box-shadow: 0 16px 34px -18px rgba(47,95,255,0.9) !important;
 }
 html.theme-light .dg-estimator--flat .dg-flat-trust { border-top-color: rgba(15,21,38,0.12); }
-html.theme-light .dg-estimator--flat .dg-flat-trust span { color: #4a5474 !important; }
-html.theme-light .dg-estimator--flat .dg-flat-trust svg { color: #2f5fff !important; }
+html.theme-light .dg-estimator--flat .dg-flat-trust span { color: #3d4355 !important; background: #f7f7f9 !important; }
+html.theme-light .dg-estimator--flat .dg-flat-trust svg { color: #16a34a !important; }
 
 /* ============================================================
    HARMONISATION PREMIUM LIGNEO — badges, bordures, navbar claire,
@@ -8418,7 +8418,7 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
 html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg,
-html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #60a5fa !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #16a34a !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator span,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator label { color: #ffffff !important; }
@@ -8435,7 +8435,7 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle.is-active {
   color: #ffffff !important;
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust { border-top-color: rgba(255, 255, 255, 0.14) !important; }
-html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: rgba(255, 255, 255, 0.8) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !important; background: #f7f7f9 !important; }
 
 /* ============================================================
    ADMIN · Page Devis (zone de contenu uniquement) — préfixe .dvx
