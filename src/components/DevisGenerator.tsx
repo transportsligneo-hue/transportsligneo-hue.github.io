@@ -15,6 +15,7 @@ import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
+import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
@@ -50,9 +51,13 @@ function extractCity(addr: string): string {
 }
 
 function getDistance(from: string, to: string): number | null {
+  if (!from || !to) return null;
+  // 0 km uniquement si les deux adresses sont strictement identiques
+  if (normalizeAddress(from) === normalizeAddress(to)) return 0;
   const cFrom = extractCity(from) || from;
   const cTo = extractCity(to) || to;
-  if (cFrom === cTo) return 0;
+  // Même ville mais adresses différentes → distance réelle à calculer
+  if (cFrom === cTo) return null;
   if (CITY_DISTANCES[cFrom]?.[cTo]) return CITY_DISTANCES[cFrom][cTo];
   if (CITY_DISTANCES[cTo]?.[cFrom]) return CITY_DISTANCES[cTo][cFrom];
   const a = CITY_DISTANCES["Tours"]?.[cFrom] ?? CITY_DISTANCES[cFrom]?.["Tours"];
@@ -294,13 +299,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   useEffect(() => {
     setGoogleDistance(null);
     if (!departure || !arrival) return;
-    if (localDistance !== null) return; // pas besoin de Google
-    if (!isGoogleAvailable()) return;
+    if (localDistance !== null) return; // pas besoin de calcul distant
     let cancelled = false;
     setDistanceLoading(true);
-    getGoogleDistanceKm(departure, arrival)
-      .then((km) => { if (!cancelled) setGoogleDistance(km); })
-      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+    (async () => {
+      let km: number | null = null;
+      if (isGoogleAvailable()) {
+        try { km = await getGoogleDistanceKm(departure, arrival); } catch { km = null; }
+      }
+      if (km == null) km = await geocodeDistanceKm(departure, arrival);
+      if (!cancelled) { setGoogleDistance(km); setDistanceLoading(false); }
+    })();
     return () => { cancelled = true; };
   }, [departure, arrival, localDistance]);
 
@@ -973,12 +982,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <p className="font-heading text-base text-cream/85">{pricing.label}</p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-x-5 gap-y-1.5 text-[11px] text-cream/65">
-              <span className="inline-flex items-center gap-1.5"><RouteIcon size={11} className="text-[#5fb6ff]" /> Péages inclus</span>
-              <span className="inline-flex items-center gap-1.5"><Fuel size={11} className="text-[#5fb6ff]" /> Carburant inclus</span>
-              <span className="inline-flex items-center gap-1.5"><Shield size={11} className="text-[#5fb6ff]" /> Assurance incluse</span>
-              <span className="inline-flex items-center gap-1.5"><User size={11} className="text-[#5fb6ff]" /> Convoyeur professionnel</span>
-              <span className="inline-flex items-center gap-1.5"><Sparkles size={11} className="text-[#e7c76a]" /> Suivi temps réel</span>
+            <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
+              {[
+                { Icon: RouteIcon, label: "Péages inclus" },
+                { Icon: Fuel, label: "Carburant inclus" },
+                { Icon: Shield, label: "Assurance incluse" },
+                { Icon: User, label: "Convoyeur professionnel" },
+                { Icon: Sparkles, label: "Suivi temps réel" },
+              ].map(({ Icon, label }) => (
+                <strong key={label} className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]">
+                  <Icon size={11} className="text-emerald-600" /> {label}
+                </strong>
+              ))}
             </div>
             <p className="mt-3 pt-3 border-t border-white/10 text-[12px] text-cream/75 leading-relaxed">
               <Sparkles size={11} className="inline mr-1.5 text-[#e7c76a]" />
@@ -1405,27 +1420,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <div className="space-y-5 animate-fade-in">
                   <h4 className="font-heading text-lg text-cream tracking-wide">Récapitulatif</h4>
                   <div className="rounded-2xl border border-[#5fb6ff]/20 bg-white/[0.03] p-5 space-y-3 text-sm">
-                    <div className="grid grid-cols-2 gap-3 text-cream/80">
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</p>{departure} → {arrival}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</p>{distance} km · {distance ? estimateDuration(distance) : ""}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</p>{[marque, modele].filter(Boolean).join(" ") || vehicleType || " · "}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</p>{plaqueInconnue ? "À confirmer" : (immatriculation || " · ")}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</p>{date || " · "} {heure}</div>
-                      <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</p>{prenom} {nom}</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</em><strong className="font-normal text-[13px] text-white/90">{departure || "—"} → {arrival || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</em><strong className="font-normal text-[13px] text-white/90">{distance != null ? `${distance} km${distance > 0 ? ` · ${estimateDuration(distance)}` : ""}` : "À confirmer"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
                     </div>
                     {pricing && (
                       <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p><p className="font-heading text-xl gold-gradient-text">{priceHT} €</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</p><p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p></div>
-                        <div><p className="text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p><p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p></div>
-
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</em><strong className="font-heading font-normal text-xl gold-gradient-text">{priceHT} €</strong></div>
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</em><strong className="font-heading font-normal text-base text-white/85">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
+                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="font-heading font-normal text-xl text-[#e7c76a]">{priceTTC} €</strong></div>
                       </div>
                     )}
-                    <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-cream/65">
-                      <span className="inline-flex items-center gap-1.5"><RouteIcon size={11} className="text-[#5fb6ff]" /> Péages inclus</span>
-                      <span className="inline-flex items-center gap-1.5"><Fuel size={11} className="text-[#5fb6ff]" /> Carburant inclus</span>
-                      <span className="inline-flex items-center gap-1.5"><Shield size={11} className="text-[#5fb6ff]" /> Assurance incluse</span>
+                    <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><RouteIcon size={11} className="text-emerald-600" /> Péages inclus</strong>
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Fuel size={11} className="text-emerald-600" /> Carburant inclus</strong>
+                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Shield size={11} className="text-emerald-600" /> Assurance incluse</strong>
                     </div>
+                  </div>
                   </div>
                 </div>
               )}
