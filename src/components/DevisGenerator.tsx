@@ -982,12 +982,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <p className="font-heading text-base text-cream/85">{pricing.label}</p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-x-5 gap-y-1.5 text-[11px] text-cream/65">
-              <span className="inline-flex items-center gap-1.5"><RouteIcon size={11} className="text-[#5fb6ff]" /> Péages inclus</span>
-              <span className="inline-flex items-center gap-1.5"><Fuel size={11} className="text-[#5fb6ff]" /> Carburant inclus</span>
-              <span className="inline-flex items-center gap-1.5"><Shield size={11} className="text-[#5fb6ff]" /> Assurance incluse</span>
-              <span className="inline-flex items-center gap-1.5"><User size={11} className="text-[#5fb6ff]" /> Convoyeur professionnel</span>
-              <span className="inline-flex items-center gap-1.5"><Sparkles size={11} className="text-[#e7c76a]" /> Suivi temps réel</span>
+            <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
+              {[
+                { Icon: RouteIcon, label: "Péages inclus" },
+                { Icon: Fuel, label: "Carburant inclus" },
+                { Icon: Shield, label: "Assurance incluse" },
+                { Icon: User, label: "Convoyeur professionnel" },
+                { Icon: Sparkles, label: "Suivi temps réel" },
+              ].map(({ Icon, label }) => (
+                <strong key={label} className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]">
+                  <Icon size={11} className="text-emerald-600" /> {label}
+                </strong>
+              ))}
             </div>
             <p className="mt-3 pt-3 border-t border-white/10 text-[12px] text-cream/75 leading-relaxed">
               <Sparkles size={11} className="inline mr-1.5 text-[#e7c76a]" />
