@@ -1,3 +1,4 @@
+import { buildAlertDetails } from '@/lib/admin-alert-details'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
@@ -104,10 +105,7 @@ export const runAdminAlertDispatch = createServerFn({ method: 'POST' })
     let sent = 0
     for (const notif of (pending ?? []) as Array<Record<string, any>>) {
       const meta = (notif.metadata ?? {}) as Record<string, unknown>
-      const details = Object.entries(meta)
-        .filter(([, v]) => v != null && String(v).trim() !== '')
-        .slice(0, 8)
-        .map(([k, v]) => ({ label: k.charAt(0).toUpperCase() + k.slice(1), value: String(v) }))
+      const details = buildAlertDetails(meta)
 
       for (const to of recipients) {
         await sendTransactionalEmailServer({
