@@ -32,6 +32,7 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { toastSignatureError } from "@/lib/signature-upload";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
+import { PlateCheckGate } from "@/components/inspection/PlateCheckGate";
 import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/document-scanner";
 
 
