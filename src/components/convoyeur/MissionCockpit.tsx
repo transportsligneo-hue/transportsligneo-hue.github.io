@@ -34,6 +34,7 @@ import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 import { ArriveeSignatureSheet } from "@/components/inspection/ArriveeSignatureSheet";
 import { DepartureChecklistSheet } from "@/components/mission/DepartureChecklistSheet";
 import { MissionContactsBlock } from "@/components/mission/MissionContactsBlock";
+import { NavigationChoiceSheet } from "@/components/mission/NavigationChoiceSheet";
 
 type ActionKind =
   | "selfie"
@@ -88,6 +89,8 @@ interface Props {
   missionNumber?: string | null;
   departVille?: string | null;
   arriveeVille?: string | null;
+  /** Adresse complète de livraison, utilisée pour lancer Waze / Google Maps. */
+  arriveeAdresse?: string | null;
   activeTab?: "action" | "info" | "docs";
   onTabChange?: (tab: "action" | "info" | "docs") => void;
   infoSlot?: ReactNode;
@@ -111,6 +114,7 @@ export function MissionCockpit({
   missionNumber,
   departVille,
   arriveeVille,
+  arriveeAdresse,
   activeTab = "action",
   onTabChange,
   infoSlot,
@@ -126,6 +130,7 @@ export function MissionCockpit({
   // Checklist sécurité bloquante avant "En route pour récupérer le véhicule".
   const [checklistDone, setChecklistDone] = useState(false);
   const [openChecklist, setOpenChecklist] = useState(false);
+  const [openNavChoice, setOpenNavChoice] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
   // l'UI sans attendre la propagation Supabase / fetch parent.
@@ -353,6 +358,8 @@ export function MissionCockpit({
         case "demarrer_livraison":
           await persistEtape("en_livraison");
           await Promise.resolve(onUpdated());
+          // Choix du GPS (Waze / Google Maps) avec l'adresse de livraison pré-remplie.
+          if (arriveeAdresse || arriveeVille) setOpenNavChoice(true);
           break;
         case "arrive_livraison":
           await persistEtape("arrive_destination");
@@ -786,6 +793,14 @@ export function MissionCockpit({
           )}
         </div>
       </div>
+
+      {openNavChoice && (arriveeAdresse || arriveeVille) && (
+        <NavigationChoiceSheet
+          destination={(arriveeAdresse || arriveeVille) as string}
+          title="Naviguer vers la livraison"
+          onClose={() => setOpenNavChoice(false)}
+        />
+      )}
 
       {openSelfie && (
         <DriverSelfieCapture
