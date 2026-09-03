@@ -864,6 +864,7 @@ function ConvoyeurMissions() {
             missionNumber={openMission.numero_mission ?? null}
             departVille={dep.ville}
             arriveeVille={arr.ville}
+            arriveeAdresse={t?.arrivee ?? null}
             activeTab={detailTab}
             onTabChange={setDetailTab}
             infoSlot={infoSlot}
