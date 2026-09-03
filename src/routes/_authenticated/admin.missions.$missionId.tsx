@@ -1589,15 +1589,31 @@ function AdminMissionDetail() {
               <button
                 type="button"
                 onClick={() => void copyValue(plaquePrincipale, "Plaque copiée")}
-                title="Copier la plaque"
-                className="group inline-flex items-center gap-2 rounded-lg border-2 border-pro-text/70 bg-white px-3 py-1.5 shadow-sm hover:border-pro-accent transition-colors"
+                title={plateCheck
+                  ? `Plaque vérifiée par scan le ${new Date(plateCheck.created_at).toLocaleString("fr-FR")}`
+                  : "Copier la plaque"}
+                className={`group inline-flex items-center gap-2 rounded-lg border-2 px-3 py-1.5 shadow-sm transition-colors ${
+                  plateCheck
+                    ? "border-emerald-500 bg-emerald-50 hover:border-emerald-600"
+                    : "border-pro-text/70 bg-white hover:border-pro-accent"
+                }`}
               >
-                <span className="text-[9px] font-bold tracking-[0.12em] text-pro-accent leading-none">F</span>
-                <span className="font-mono text-base sm:text-lg font-bold tracking-[0.14em] text-pro-text leading-none">
+                <span className={`text-[9px] font-bold tracking-[0.12em] leading-none ${plateCheck ? "text-emerald-600" : "text-pro-accent"}`}>F</span>
+                <span className={`font-mono text-base sm:text-lg font-bold tracking-[0.14em] leading-none ${plateCheck ? "text-emerald-700" : "text-pro-text"}`}>
                   {plaquePrincipale || "—"}
                 </span>
-                <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+                {plateCheck ? (
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                ) : (
+                  <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+                )}
               </button>
+              {plateCheck && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                  <CheckCircle2 size={11} />
+                  Plaque vérifiée · {new Date(plateCheck.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })} {new Date(plateCheck.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-pro-text truncate">
                   {[trajet.marque ?? trajet.vehicule_marque, trajet.modele ?? trajet.vehicule_modele]
