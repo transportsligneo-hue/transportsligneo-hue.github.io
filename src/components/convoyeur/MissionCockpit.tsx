@@ -769,6 +769,10 @@ export function MissionCockpit({
             </div>
           </div>
 
+          {nextLegSlot ? <div className="mv3-slot">{nextLegSlot}</div> : null}
+
+
+
           {!isDone && (
             <div className="mv3-contacts-wrap">
               {(() => {
