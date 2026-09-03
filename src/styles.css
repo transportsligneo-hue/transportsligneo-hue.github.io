@@ -8122,10 +8122,11 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  /* Aucun fondu blanc au sommet : la section reprend directement la
-     couleur de la carte dès la limite sous la bande chiffres. Seul le
-     bas garde un fondu vers "Ils nous font confiance". */
-  padding: 60px 24px 170px;
+  /* Les dégradés blancs restent collés aux limites des sections :
+     le fondu démarre à la jonction avec la bande chiffres (pas plus
+     haut) et le noir remonte à la jonction avec "Ils nous font
+     confiance" (pas plus haut non plus). */
+  padding: 150px 24px 170px;
   margin-top: -1px;
   margin-bottom: -1px;
   background: transparent;
@@ -8139,7 +8140,17 @@ html.theme-light .r4-page .ligneo-map::before {
   background:
     radial-gradient(120% 60% at 50% 50%, rgba(47,95,255,0.18), transparent 72%),
     linear-gradient(180deg,
-      #0b1026 0%,
+      #f5f7fc 0%,
+      #eef1f9 2.5%,
+      #dce1f0 5%,
+      #bdc6dd 7.5%,
+      #97a3c5 10%,
+      #717da6 12.5%,
+      #4d5988 15%,
+      #313c6a 17%,
+      #1c2752 18.5%,
+      #101a3d 19.5%,
+      #0b1026 20%,
       #0b1026 85%,
       #101a3d 87%,
       #1c2752 89%,
