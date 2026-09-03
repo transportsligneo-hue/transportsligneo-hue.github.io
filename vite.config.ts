@@ -7,8 +7,15 @@ import { VitePWA } from "vite-plugin-pwa";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Load server env vars so process.env has SUPABASE_SERVICE_ROLE_KEY etc.
+// VITE_* keys are deliberately excluded: they must come from Vite's
+// mode-based env loading (.env.development in dev, .env.production in
+// production). Injecting them here leaks the LIVE Stripe token into
+// dev/preview client bundles, routing preview payments to the live account.
 const serverEnv = loadEnv("production", process.cwd(), "");
-Object.assign(process.env, serverEnv);
+const serverOnlyEnv = Object.fromEntries(
+  Object.entries(serverEnv).filter(([key]) => !key.startsWith("VITE_")),
+);
+Object.assign(process.env, serverOnlyEnv);
 
 export default defineConfig({
   vite: {

@@ -92,7 +92,7 @@ export const Route = createFileRoute("/api/facture/checkout")({
               quantity: 1,
             }],
             mode: "payment",
-            ui_mode: "embedded",
+            ui_mode: "embedded_page",
             payment_method_types: ["card"],
             return_url: returnUrl,
             ...(facture.client_email && { customer_email: facture.client_email }),
