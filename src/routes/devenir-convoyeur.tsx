@@ -17,7 +17,9 @@ export const Route = createFileRoute("/devenir-convoyeur")({
       { property: "og:description", content: "Le réseau de convoyeurs Transports Ligneo est actuellement complet. Laissez votre email pour être prévenu en priorité." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://transportsligneo.fr/devenir-convoyeur" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/devenir-convoyeur" }],
   }),
 });
 

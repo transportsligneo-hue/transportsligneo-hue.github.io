@@ -20,6 +20,8 @@ export const Route = createFileRoute("/b2b/transport-ponctuel")({
     meta: [
       { title: "Transport ponctuel B2B · Devis et paiement | Transports Ligneo" },
       { name: "description", content: "Commandez un transport ponctuel B2B en 3 étapes avec devis instantané et paiement en ligne sécurisé." },
+      { property: "og:title", content: "Transport ponctuel B2B · Devis et paiement | Transports Ligneo" },
+      { property: "og:description", content: "Commandez un transport ponctuel B2B en 3 étapes avec devis instantané et paiement sécurisé." },
     ],
   }),
 });

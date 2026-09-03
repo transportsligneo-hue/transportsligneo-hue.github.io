@@ -39,6 +39,7 @@ export const Route = createFileRoute("/actualites/$slug")({
             "@context": "https://schema.org",
             "@type": "Article",
             headline: article.titre,
+            image: [`https://transportsligneo.fr${article.cover}`],
             datePublished: article.date,
             author: { "@type": "Organization", name: "Transports Ligneo" },
             publisher: { "@type": "Organization", name: "Transports Ligneo" },

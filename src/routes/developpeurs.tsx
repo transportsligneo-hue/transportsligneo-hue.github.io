@@ -19,7 +19,9 @@ export const Route = createFileRoute("/developpeurs")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://transportsligneo.fr/developpeurs" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/developpeurs" }],
   }),
 });
 

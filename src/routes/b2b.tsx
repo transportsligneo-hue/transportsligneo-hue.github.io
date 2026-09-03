@@ -9,6 +9,8 @@ export const Route = createFileRoute("/b2b")({
     meta: [
       { title: "Solutions B2B convoyage automobile · Transports Ligneo" },
       { name: "description", content: "Deux solutions B2B : transport ponctuel avec paiement en ligne, ou partenariat flotte sur-mesure pour grands comptes, concessions et loueurs." },
+      { property: "og:title", content: "Solutions B2B convoyage automobile · Transports Ligneo" },
+      { property: "og:description", content: "Deux solutions B2B : transport ponctuel avec paiement en ligne, ou partenariat flotte sur-mesure." },
     ],
   }),
 });
