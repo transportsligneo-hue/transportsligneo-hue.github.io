@@ -47,7 +47,7 @@ export const Route = createFileRoute("/api/devis/checkout")({
 
         const query = supabaseAdmin
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, avoir_applique, statut, email, nom, prenom, stripe_session_id, paid_at");
+          .select("id, numero, depart, arrivee, prix_estime, avoir_applique, statut, email, nom, prenom, stripe_session_id, paid_at, paiement_immediat");
         const { data: devis, error } = await (hasToken
           ? query.eq("public_token", token)
           : query.eq("id", devisId)
@@ -55,6 +55,9 @@ export const Route = createFileRoute("/api/devis/checkout")({
 
         if (error || !devis) {
           return Response.json({ error: "Devis introuvable" }, { status: 404 });
+        }
+        if ((devis as { paiement_immediat?: boolean | null }).paiement_immediat === false) {
+          return Response.json({ error: "Paiement en ligne désactivé pour ce devis (facturation différée)" }, { status: 409 });
         }
         if (devis.paid_at) {
           return Response.json({ error: "Devis déjà payé" }, { status: 409 });

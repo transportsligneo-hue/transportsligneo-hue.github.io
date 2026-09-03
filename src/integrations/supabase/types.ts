@@ -2337,6 +2337,7 @@ export type Database = {
           carte_grise_recto_url: string | null
           carte_grise_verso_url: string | null
           client_pricing_rule_id: string | null
+          client_type: string
           contact_arrivee_nom: string | null
           contact_arrivee_note: string | null
           contact_arrivee_tel: string | null
@@ -2376,6 +2377,7 @@ export type Database = {
           option_trajet: string | null
           origine: string
           paid_at: string | null
+          paiement_immediat: boolean
           pdf_url: string | null
           prenom: string
           prestation: string | null
@@ -2421,6 +2423,7 @@ export type Database = {
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_pricing_rule_id?: string | null
+          client_type?: string
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -2460,6 +2463,7 @@ export type Database = {
           option_trajet?: string | null
           origine?: string
           paid_at?: string | null
+          paiement_immediat?: boolean
           pdf_url?: string | null
           prenom: string
           prestation?: string | null
@@ -2505,6 +2509,7 @@ export type Database = {
           carte_grise_recto_url?: string | null
           carte_grise_verso_url?: string | null
           client_pricing_rule_id?: string | null
+          client_type?: string
           contact_arrivee_nom?: string | null
           contact_arrivee_note?: string | null
           contact_arrivee_tel?: string | null
@@ -2544,6 +2549,7 @@ export type Database = {
           option_trajet?: string | null
           origine?: string
           paid_at?: string | null
+          paiement_immediat?: boolean
           pdf_url?: string | null
           prenom?: string
           prestation?: string | null

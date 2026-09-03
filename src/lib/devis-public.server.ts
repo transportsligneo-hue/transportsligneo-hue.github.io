@@ -57,7 +57,7 @@ export function devisPublicUrl(token: string): string {
 }
 
 const DEVIS_FIELDS =
-  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token, lien_paiement_externe'
+  'id, numero, statut, prenom, nom, email, depart, arrivee, distance_km, prix_estime, avoir_applique, option_trajet, date_souhaitee, locked_at, accepted_at, paid_at, expires_at, refused_at, contact_depart_tel, contact_arrivee_tel, version, public_token, lien_paiement_externe, client_type, paiement_immediat'
 
 export type PublicDevis = {
   id: string
@@ -83,6 +83,8 @@ export type PublicDevis = {
   version: number | null
   public_token: string
   lien_paiement_externe?: string | null
+  client_type?: string | null
+  paiement_immediat?: boolean | null
 }
 
 export async function loadDevisByToken(token: string): Promise<PublicDevis | null> {
@@ -119,6 +121,8 @@ export function toPublicView(d: PublicDevis) {
     maskedEmail: d.email ? maskEmail(d.email) : null,
     maskedPhone: isValidPhone(d.contact_depart_tel) ? maskPhone(d.contact_depart_tel!) : null,
     lienPaiementExterne: sanitizePaymentLink(d.lien_paiement_externe),
+    clientType: d.client_type ?? 'particulier',
+    paiementImmediat: d.paiement_immediat !== false,
   }
 }
 
@@ -234,7 +238,7 @@ export async function verifyPublicDevisOtp(
   meta: { ip: string | null; userAgent: string | null },
 ): Promise<{ ok: true; alreadySigned?: boolean; signedAt: string; requiresPayment: boolean }> {
   if (d.locked_at) {
-    return { ok: true, alreadySigned: true, signedAt: d.locked_at, requiresPayment: !d.paid_at }
+    return { ok: true, alreadySigned: true, signedAt: d.locked_at, requiresPayment: d.paiement_immediat !== false && !d.paid_at }
   }
   const gate = isSignable(d)
   if (!gate.ok) throw new Error(gate.reason!)
@@ -336,6 +340,6 @@ export async function verifyPublicDevisOtp(
   return {
     ok: true,
     signedAt: nowIso,
-    requiresPayment: !d.paid_at && Math.max(Number(d.prix_estime) - Number(d.avoir_applique ?? 0), 0) >= 1,
+    requiresPayment: d.paiement_immediat !== false && !d.paid_at && Math.max(Number(d.prix_estime) - Number(d.avoir_applique ?? 0), 0) >= 1,
   }
 }
