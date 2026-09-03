@@ -32,6 +32,7 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { toastSignatureError } from "@/lib/signature-upload";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
+import { PlateCheckGate } from "@/components/inspection/PlateCheckGate";
 import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/document-scanner";
 
 
@@ -288,6 +289,19 @@ export function EdlPremiumFlow({
 
 
   const [askExit, setAskExit] = useState(false);
+
+  // Vérification de plaque : une fois validée, elle n'est plus redemandée pour
+  // cette phase de mission (reprise EDL après fermeture de l'app incluse).
+  const PLATE_KEY = `edl-plate-check:${attributionId}:${type}`;
+  const [plateChecked, setPlateChecked] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try { return localStorage.getItem(PLATE_KEY) === "1"; } catch { return false; }
+  });
+  const markPlateChecked = useCallback(() => {
+    try { localStorage.setItem(PLATE_KEY, "1"); } catch { /* ignore */ }
+    setPlateChecked(true);
+  }, [PLATE_KEY]);
+
   const [completing, setCompleting] = useState(false);
   const [finalError, setFinalError] = useState<string | null>(null);
   const [openScanner, setOpenScanner] = useState(false);
@@ -1432,6 +1446,25 @@ export function EdlPremiumFlow({
 
   // La checklist sécurité (gilet, tenue…) est validée une seule fois,
   // au moment du départ vers le véhicule (cockpit mission).
+
+  // Vérification de plaque OBLIGATOIRE avant la première photo de l'EDL.
+  if (!plateChecked) {
+    if (typeof document === "undefined") return null;
+    return createPortal(
+      <PlateCheckGate
+        attributionId={attributionId}
+        userId={userId}
+        phase={type}
+        expectedPlate={vehicule?.immatriculation ?? null}
+        driverName={driverName}
+        onValidated={markPlateChecked}
+        onClose={onClose}
+      />,
+      document.body,
+    );
+  }
+
+
 
 
   const overlay = (
