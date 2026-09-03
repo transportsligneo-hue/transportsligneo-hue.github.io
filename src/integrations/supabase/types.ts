@@ -4267,6 +4267,59 @@ export type Database = {
           },
         ]
       }
+      mission_plate_checks: {
+        Row: {
+          attribution_id: string
+          confidence: number | null
+          created_at: string
+          expected_plate: string | null
+          id: string
+          method: string
+          phase: string
+          photo_path: string | null
+          raw_response: Json | null
+          result: string
+          scanned_plate: string | null
+          user_id: string
+        }
+        Insert: {
+          attribution_id: string
+          confidence?: number | null
+          created_at?: string
+          expected_plate?: string | null
+          id?: string
+          method?: string
+          phase?: string
+          photo_path?: string | null
+          raw_response?: Json | null
+          result: string
+          scanned_plate?: string | null
+          user_id: string
+        }
+        Update: {
+          attribution_id?: string
+          confidence?: number | null
+          created_at?: string
+          expected_plate?: string | null
+          id?: string
+          method?: string
+          phase?: string
+          photo_path?: string | null
+          raw_response?: Json | null
+          result?: string
+          scanned_plate?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_plate_checks_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_pv_digitaux: {
         Row: {
           actif: boolean
