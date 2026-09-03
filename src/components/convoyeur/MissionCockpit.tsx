@@ -183,6 +183,11 @@ export function MissionCockpit({
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
   // Selfie final = 2e selfie pris (après EDL arrivée) · count BDD.
   const finalSelfieOK = gates.selfies.length >= 2 || gates.isDisabled("selfie_final");
+  // Bypass admin : une étape désactivée/ignorée compte comme faite.
+  const edlDepartOK = inspectionDepartDone || gates.isDisabled("edl_depart");
+  const edlArriveeOK = inspectionArriveeDone || gates.isDisabled("edl_arrivee");
+  const signaturesArriveeOK =
+    signaturesArriveeDone || (gates.isDisabled("driver_end") && gates.isDisabled("client_end"));
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
