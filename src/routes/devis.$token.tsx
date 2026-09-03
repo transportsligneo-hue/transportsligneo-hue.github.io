@@ -26,6 +26,8 @@ type PublicDevis = {
   maskedEmail: string | null;
   maskedPhone: string | null;
   lienPaiementExterne?: string | null;
+  clientType?: string | null;
+  paiementImmediat?: boolean;
 };
 
 export const Route = createFileRoute("/devis/$token")({
