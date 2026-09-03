@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   MapPin, Loader2, FileText, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter,
-  Check, X,
+  Check, X, ChevronRight,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
