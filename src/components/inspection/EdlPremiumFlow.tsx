@@ -289,6 +289,19 @@ export function EdlPremiumFlow({
 
 
   const [askExit, setAskExit] = useState(false);
+
+  // Vérification de plaque : une fois validée, elle n'est plus redemandée pour
+  // cette phase de mission (reprise EDL après fermeture de l'app incluse).
+  const PLATE_KEY = `edl-plate-check:${attributionId}:${type}`;
+  const [plateChecked, setPlateChecked] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try { return localStorage.getItem(PLATE_KEY) === "1"; } catch { return false; }
+  });
+  const markPlateChecked = useCallback(() => {
+    try { localStorage.setItem(PLATE_KEY, "1"); } catch { /* ignore */ }
+    setPlateChecked(true);
+  }, [PLATE_KEY]);
+
   const [completing, setCompleting] = useState(false);
   const [finalError, setFinalError] = useState<string | null>(null);
   const [openScanner, setOpenScanner] = useState(false);
