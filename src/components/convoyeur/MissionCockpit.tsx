@@ -356,7 +356,7 @@ export function MissionCockpit({
           // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
           if (!selfieOK) {
             setOpenSelfie(true);
-          } else if (!inspectionDepartDone) {
+          } else if (!edlDepartOK) {
             onStartInspection("depart");
           }
           break;
@@ -383,17 +383,17 @@ export function MissionCockpit({
             setOpenSelfie(true);
             break;
           }
-          if (!inspectionDepartDone) {
+          if (!edlDepartOK) {
             toast.error("Inspection d'enlèvement incomplète");
             onStartInspection("depart");
             break;
           }
-          if (!inspectionArriveeDone) {
+          if (!edlArriveeOK) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
             break;
           }
-          if (!signaturesArriveeDone) {
+          if (!signaturesArriveeOK) {
             toast.error("Signatures d'arrivée manquantes");
             setOpenSignatureArrivee(true);
             break;
