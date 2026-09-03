@@ -350,8 +350,14 @@ export async function matchPoToDevis(
         .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
         .eq("id", devis.id);
     }
-    await applyPoToOperations(supabaseAdmin, numeroPo, devis.id as string, vin);
-    console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero}`);
+    const applied = await applyPoToOperations(supabaseAdmin, numeroPo, devis.id as string, vin);
+    if (applied.missionId) {
+      await supabaseAdmin
+        .from("bons_commande")
+        .update({ mission_id: applied.missionId } as never)
+        .eq("id", poId);
+    }
+    console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero} (${applied.trajets} mission(s))`);
     return "rapproche";
   }
 
