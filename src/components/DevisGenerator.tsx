@@ -1441,8 +1441,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Shield size={11} className="text-emerald-600" /> Assurance incluse</strong>
                     </div>
                   </div>
-                  </div>
                 </div>
+
               )}
             </div>
 
