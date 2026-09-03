@@ -98,7 +98,15 @@ export default function ProTimeline() {
       </ol>
 
       <div
-        className="pro-tl-video pro-tl-video-wide"
+        className="pro-tl-video pro-tl-video-wide v4-video-wrap"
+        style={{
+          maxWidth: 980,
+          margin: "0 auto",
+          borderRadius: 24,
+          overflow: "hidden",
+          border: "1px solid rgba(122,163,255,0.25)",
+          boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
+        }}
       >
         <video
           ref={videoRef}
@@ -107,6 +115,7 @@ export default function ProTimeline() {
           muted
           playsInline
           preload="auto"
+          style={{ display: "block", width: "100%", height: "auto" }}
         />
       </div>
     </div>
