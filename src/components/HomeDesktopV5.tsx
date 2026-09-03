@@ -119,7 +119,7 @@ export default function HomeDesktopV5() {
               <div className="v5-feat-ic">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2"><path d={c.p} /></svg>
               </div>
-              <h4>{c.t}</h4>
+              <h3>{c.t}</h3>
               <p>{c.d}</p>
             </div>
           ))}
@@ -137,17 +137,17 @@ export default function HomeDesktopV5() {
         <div className="v5-teaser-grid">
           <div className="v5-teaser-card">
             <div className="v5-teaser-num">01</div>
-            <h4>Estimez votre trajet</h4>
+            <h3>Estimez votre trajet</h3>
             <p>Départ, arrivée, véhicule et date. Recevez un tarif clair en quelques secondes.</p>
           </div>
           <div className="v5-teaser-card">
             <div className="v5-teaser-num">02</div>
-            <h4>Validez votre demande</h4>
+            <h3>Validez votre demande</h3>
             <p>Tarif tout inclus, sans engagement. Confirmez en quelques clics.</p>
           </div>
           <div className="v5-teaser-card">
             <div className="v5-teaser-num">03</div>
-            <h4>Votre véhicule est livré</h4>
+            <h3>Votre véhicule est livré</h3>
             <p>Un convoyeur professionnel prend en charge votre véhicule et vous informe jusqu'à la livraison.</p>
           </div>
         </div>

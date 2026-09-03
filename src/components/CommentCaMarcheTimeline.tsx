@@ -105,7 +105,7 @@ export default function CommentCaMarcheTimeline() {
             </div>
             <div className="v5-step-body">
               <div className="v5-phase-tag">{phase.tag}</div>
-              <h3>{phase.title}</h3>
+              <h2>{phase.title}</h2>
               <p>{phase.p}</p>
               <div className="v5-substeps">
                 {phase.subs.map((s, i) => (
@@ -144,7 +144,7 @@ export default function CommentCaMarcheTimeline() {
               <div className="v5-feat-ic">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#8fb4ff" strokeWidth="2">{f.svg}</svg>
               </div>
-              <h4>{f.t}</h4>
+              <h3>{f.t}</h3>
               <p>{f.d}</p>
             </div>
           ))}

@@ -20,7 +20,9 @@ export const Route = createFileRoute("/b2b/partenariat-flotte")({
       { name: "description", content: "Étude flotte sur-mesure pour entreprises, loueurs, concessions et grands comptes. Tarifs négociés, account manager dédié, facturation centralisée." },
       { property: "og:title", content: "Partenariat flotte B2B · Transports Ligneo" },
       { property: "og:description", content: "Solution récurrente avec tarifs négociés et account manager dédié pour grands comptes." },
+      { property: "og:url", content: "https://transportsligneo.fr/b2b/partenariat-flotte" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/b2b/partenariat-flotte" }],
   }),
 });
 

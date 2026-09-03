@@ -56,7 +56,7 @@ export default function AProposContent() {
           {valeurs.map(({ Icon, title, desc }) => (
             <div key={title} className="v4-value-card">
               <div className="v4-value-ic"><Icon size={20} strokeWidth={2} /></div>
-              <h4>{title}</h4>
+              <h3>{title}</h3>
               <p>{desc}</p>
             </div>
           ))}
@@ -84,7 +84,7 @@ export default function AProposContent() {
               <div className="v4-tl-connector" aria-hidden="true" />
               <div className="v4-tl-body">
                 <div className="v4-tl-body-shine" aria-hidden="true" />
-                <h4>{it.title}</h4>
+                <h3>{it.title}</h3>
                 <p>{it.desc}</p>
               </div>
             </div>

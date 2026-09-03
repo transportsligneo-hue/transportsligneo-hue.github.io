@@ -25,7 +25,9 @@ export const Route = createFileRoute("/suivi")({
         property: "og:description",
         content: "Statut en temps réel de votre convoyage, sans connexion, avec votre numéro de mission.",
       },
+      { property: "og:url", content: "https://transportsligneo.fr/suivi" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/suivi" }],
   }),
 });
 

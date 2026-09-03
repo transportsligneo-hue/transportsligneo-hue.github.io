@@ -126,7 +126,7 @@ export default function ServicesContent({
               {services.map(({ Icon, title, desc, tags }) => (
                 <div key={title} className="v4-svc-card">
                   <div className="v4-svc-ic"><Icon size={22} strokeWidth={2} /></div>
-                  <h3>{title}</h3>
+                  <h2>{title}</h2>
                   <p>{desc}</p>
                   <div className="v4-svc-tags">
                     {tags.map((t) => <span key={t} className="v4-svc-tag">{t}</span>)}

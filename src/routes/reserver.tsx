@@ -11,7 +11,9 @@ export const Route = createFileRoute("/reserver")({
       { name: "description", content: "Réservez votre convoyage automobile en 5 étapes : trajet, options, véhicule, coordonnées, confirmation. Prix transparent, péages inclus." },
       { property: "og:title", content: "Réserver un convoyage · Transports Ligneo" },
       { property: "og:description", content: "Tunnel de réservation en ligne pour votre convoyage." },
+      { property: "og:url", content: "https://transportsligneo.fr/reserver" },
     ],
+    links: [{ rel: "canonical", href: "https://transportsligneo.fr/reserver" }],
   }),
 });
 
