@@ -183,6 +183,11 @@ export function MissionCockpit({
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie") || selfieJustDone;
   // Selfie final = 2e selfie pris (après EDL arrivée) · count BDD.
   const finalSelfieOK = gates.selfies.length >= 2 || gates.isDisabled("selfie_final");
+  // Bypass admin : une étape désactivée/ignorée compte comme faite.
+  const edlDepartOK = inspectionDepartDone || gates.isDisabled("edl_depart");
+  const edlArriveeOK = inspectionArriveeDone || gates.isDisabled("edl_arrivee");
+  const signaturesArriveeOK =
+    signaturesArriveeDone || (gates.isDisabled("driver_end") && gates.isDisabled("client_end"));
 
   // Si la base confirme désormais le selfie, on garde aussi le flag local cohérent.
   useEffect(() => {
@@ -224,31 +229,31 @@ export function MissionCockpit({
     // 3. Sur place enlèvement → selfie obligatoire avant EDL
     if (e === "sur_place" || e === "vehicule_recupere") {
       if (!selfieOK) return "selfie";
-      if (!inspectionDepartDone) return "edl_depart";
+      if (!edlDepartOK) return "edl_depart";
       return "demarrer_livraison";
     }
     if (e === "edl_depart_fait") {
       if (!selfieOK) return "selfie";
-      if (!inspectionDepartDone) return "edl_depart";
+      if (!edlDepartOK) return "edl_depart";
       return "demarrer_livraison";
     }
     // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
     // 5. Sur place livraison → EDL arrivée → signatures → selfie final → envoi admin
     if (e === "arrive_destination") {
-      if (!inspectionArriveeDone) return "edl_arrivee";
-      if (!signaturesArriveeDone) return "signature_arrivee";
+      if (!edlArriveeOK) return "edl_arrivee";
+      if (!signaturesArriveeOK) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
-      if (!inspectionArriveeDone) return "edl_arrivee";
-      if (!signaturesArriveeDone) return "signature_arrivee";
+      if (!edlArriveeOK) return "edl_arrivee";
+      if (!signaturesArriveeOK) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, signaturesArriveeDone, statut]);
+  }, [finalSelfieOK, edlArriveeOK, edlDepartOK, normalizedEtape, selfieOK, signaturesArriveeOK, statut]);
 
   useEffect(() => {
     if (!forceOpenSelfie) {
@@ -351,7 +356,7 @@ export function MissionCockpit({
           // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
           if (!selfieOK) {
             setOpenSelfie(true);
-          } else if (!inspectionDepartDone) {
+          } else if (!edlDepartOK) {
             onStartInspection("depart");
           }
           break;
@@ -378,17 +383,17 @@ export function MissionCockpit({
             setOpenSelfie(true);
             break;
           }
-          if (!inspectionDepartDone) {
+          if (!edlDepartOK) {
             toast.error("Inspection d'enlèvement incomplète");
             onStartInspection("depart");
             break;
           }
-          if (!inspectionArriveeDone) {
+          if (!edlArriveeOK) {
             toast.error("Inspection d'arrivée incomplète");
             onStartInspection("arrivee");
             break;
           }
-          if (!signaturesArriveeDone) {
+          if (!signaturesArriveeOK) {
             toast.error("Signatures d'arrivée manquantes");
             setOpenSignatureArrivee(true);
             break;
@@ -879,6 +884,8 @@ export function MissionCockpitStickyCTA({
 }) {
   const gates = useMissionGates(attributionId);
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
+  const edlDepartOK = inspectionDepartDone || gates.isDisabled("edl_depart");
+  const edlArriveeOK = inspectionArriveeDone || gates.isDisabled("edl_arrivee");
 
   let label = "Continuer";
   if (["validee", "termine"].includes(statut)) label = "Mission validée";
@@ -886,11 +893,11 @@ export function MissionCockpitStickyCTA({
   else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "En route pour récupérer le véhicule";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
   else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
-  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
-  else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && inspectionDepartDone)) label = "Prendre la route";
+  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !edlDepartOK) label = "Inspection départ";
+  else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && edlDepartOK)) label = "Prendre la route";
   else if (currentEtape === "en_livraison") label = "Je suis arrivé";
-  else if (currentEtape === "arrive_destination" && !inspectionArriveeDone) label = "Inspection arrivée";
-  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && inspectionArriveeDone)) label = "Envoyer";
+  else if (currentEtape === "arrive_destination" && !edlArriveeOK) label = "Inspection arrivée";
+  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && edlArriveeOK)) label = "Envoyer";
 
   const isDone = ["en_attente_validation", "validee", "termine"].includes(statut);
 
