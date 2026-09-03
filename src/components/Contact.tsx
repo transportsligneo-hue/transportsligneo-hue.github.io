@@ -100,7 +100,7 @@ ${form.message}`;
       <div className="v4-split">
         <div className="v4-glass v4-contact-card">
           <span className="v4-status-badge"><span className="d" />Disponible 7j/7</span>
-          <h3>Nous joindre</h3>
+          <h2>Nous joindre</h2>
           <p>Un interlocuteur dédié, joignable directement. Réponse rapide et personnalisée.</p>
 
           <a href="tel:0782456181" className="v4-contact-row">

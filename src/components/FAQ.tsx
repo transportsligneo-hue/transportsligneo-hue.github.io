@@ -36,7 +36,7 @@ export default function FAQ() {
       <div className="v4-cta-strip">
         <div className="v4-cta-inner">
           <div>
-            <h4>Vous avez une autre question ?</h4>
+            <h3>Vous avez une autre question ?</h3>
             <p>Notre équipe répond 7j/7, sans robot ni attente.</p>
           </div>
           <a href="tel:0782456181" className="v4-call-btn" style={{ margin: 0 }}>

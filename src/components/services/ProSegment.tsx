@@ -68,7 +68,7 @@ export default function ProSegment() {
           {audiences.map(({ Icon, title, desc }) => (
             <div key={title} className="v4-aud-card">
               <div className="v4-aud-ic v"><Icon size={21} /></div>
-              <h4>{title}</h4>
+<h3>{title}</h3>
               <p>{desc}</p>
             </div>
           ))}
@@ -87,7 +87,7 @@ export default function ProSegment() {
           {features.map(({ Icon, title, desc }) => (
             <div key={title} className="v4-feat-card">
               <div className="v4-feat-ic v"><Icon size={19} /></div>
-              <h4>{title}</h4>
+              <h3>{title}</h3>
               <p>{desc}</p>
             </div>
           ))}
