@@ -11,8 +11,6 @@ export const Route = createFileRoute("/pro")({
       { name: "description", content: "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace." },
       { property: "og:title", content: "Solutions B2B convoyage · Concessions, loueurs, flottes | Transports Ligneo" },
       { property: "og:description", content: "Une plateforme dédiée aux pros pour piloter vos convoyages, votre facturation et vos équipes." },
-      { property: "og:url", content: "https://transportsligneo.fr/pro" },
     ],
-    links: [{ rel: "canonical", href: "https://transportsligneo.fr/pro" }],
   }),
 });
