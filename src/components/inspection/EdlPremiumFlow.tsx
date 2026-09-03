@@ -1433,6 +1433,25 @@ export function EdlPremiumFlow({
   // La checklist sécurité (gilet, tenue…) est validée une seule fois,
   // au moment du départ vers le véhicule (cockpit mission).
 
+  // Vérification de plaque OBLIGATOIRE avant la première photo de l'EDL.
+  if (!plateChecked) {
+    if (typeof document === "undefined") return null;
+    return createPortal(
+      <PlateCheckGate
+        attributionId={attributionId}
+        userId={userId}
+        phase={type}
+        expectedPlate={vehicule?.immatriculation ?? null}
+        driverName={driverName}
+        onValidated={markPlateChecked}
+        onClose={onClose}
+      />,
+      document.body,
+    );
+  }
+
+
+
 
   const overlay = (
 
