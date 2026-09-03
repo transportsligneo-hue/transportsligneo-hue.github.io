@@ -98,7 +98,8 @@ export default function ProTimeline() {
       </ol>
 
       <div
-        className="pro-tl-video pro-tl-video-wide v4-video-wrap"
+        className="v4-video-wrap"
+
         style={{
           maxWidth: 980,
           margin: "0 auto",
