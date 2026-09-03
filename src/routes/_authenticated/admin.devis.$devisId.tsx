@@ -22,6 +22,13 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
 
+const CLIENT_TYPE_LABELS: Record<string, string> = {
+  particulier: "Particulier",
+  pro_ponctuel: "Professionnel ponctuel",
+  pro_recurrent: "Professionnel récurrent",
+  flotte: "Gestionnaire de flotte",
+};
+
 export const Route = createFileRoute("/_authenticated/admin/devis/$devisId")({
   component: AdminDevisDetailPage,
 });
@@ -50,6 +57,7 @@ function AdminDevisDetailPage() {
   const [prixVehiculesOpen, setPrixVehiculesOpen] = useState(false);
   const [lienPaiement, setLienPaiement] = useState("");
   const [savingLien, setSavingLien] = useState(false);
+  const [savingPaiement, setSavingPaiement] = useState(false);
 
 
   const buildDevisData = (row: any): DevisData =>
@@ -237,6 +245,24 @@ function AdminDevisDetailPage() {
   };
 
 
+  const handleTogglePaiement = async (next: boolean) => {
+    if (!devis) return;
+    setSavingPaiement(true);
+    try {
+      const { error } = await supabase
+        .from("devis")
+        .update({ paiement_immediat: next } as never)
+        .eq("id", devis.id);
+      if (error) throw error;
+      setDevis({ ...devis, paiement_immediat: next });
+      toast.success(next ? "Paiement en ligne activé" : "Facturation différée activée");
+    } catch (e) {
+      toast.error("Mise à jour impossible", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingPaiement(false);
+    }
+  };
+
   const handleConvert = async () => {
     if (!devis || devis.mission_id) return;
     if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
@@ -415,6 +441,26 @@ function AdminDevisDetailPage() {
                 <p className="mt-2 text-[11px] text-pro-muted">Le PDF est régénéré avec le nouveau montant.</p>
               </div>
             )}
+          </Card>
+
+          <Card>
+            <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-2 flex items-center gap-2">
+              <CreditCard size={12} /> Paiement en ligne
+            </p>
+            <p className="text-[11px] text-pro-muted mb-3">
+              Type de client : <span className="font-medium text-pro-text">{CLIENT_TYPE_LABELS[String((devis as { client_type?: string }).client_type ?? "particulier")] ?? "Particulier"}</span>.
+              Désactivez pour un client en facturation différée (flotte, professionnel récurrent).
+            </p>
+            <label className="flex items-center gap-2 text-xs text-pro-text cursor-pointer">
+              <input
+                type="checkbox"
+                checked={(devis as { paiement_immediat?: boolean }).paiement_immediat !== false}
+                disabled={savingPaiement}
+                onChange={(e) => handleTogglePaiement(e.target.checked)}
+                className="accent-pro-accent"
+              />
+              Exiger le règlement en ligne avant la mission
+            </label>
           </Card>
 
           <Card>
