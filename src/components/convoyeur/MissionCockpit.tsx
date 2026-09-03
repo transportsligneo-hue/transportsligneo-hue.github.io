@@ -229,31 +229,31 @@ export function MissionCockpit({
     // 3. Sur place enlèvement → selfie obligatoire avant EDL
     if (e === "sur_place" || e === "vehicule_recupere") {
       if (!selfieOK) return "selfie";
-      if (!inspectionDepartDone) return "edl_depart";
+      if (!edlDepartOK) return "edl_depart";
       return "demarrer_livraison";
     }
     if (e === "edl_depart_fait") {
       if (!selfieOK) return "selfie";
-      if (!inspectionDepartDone) return "edl_depart";
+      if (!edlDepartOK) return "edl_depart";
       return "demarrer_livraison";
     }
     // 4. Trajet vers livraison
     if (e === "en_livraison") return "arrive_livraison";
     // 5. Sur place livraison → EDL arrivée → signatures → selfie final → envoi admin
     if (e === "arrive_destination") {
-      if (!inspectionArriveeDone) return "edl_arrivee";
-      if (!signaturesArriveeDone) return "signature_arrivee";
+      if (!edlArriveeOK) return "edl_arrivee";
+      if (!signaturesArriveeOK) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     if (e === "edl_arrivee_fait") {
-      if (!inspectionArriveeDone) return "edl_arrivee";
-      if (!signaturesArriveeDone) return "signature_arrivee";
+      if (!edlArriveeOK) return "edl_arrivee";
+      if (!signaturesArriveeOK) return "signature_arrivee";
       if (!finalSelfieOK) return "selfie_final";
       return "cloturer";
     }
     return "demarrer";
-  }, [finalSelfieOK, inspectionArriveeDone, inspectionDepartDone, normalizedEtape, selfieOK, signaturesArriveeDone, statut]);
+  }, [finalSelfieOK, edlArriveeOK, edlDepartOK, normalizedEtape, selfieOK, signaturesArriveeOK, statut]);
 
   useEffect(() => {
     if (!forceOpenSelfie) {
