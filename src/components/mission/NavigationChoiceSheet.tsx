@@ -3,9 +3,10 @@
  * ouverte au démarrage du trajet de livraison, pré-remplie avec l'adresse
  * de destination de la mission.
  */
-import { Navigation, MapPin, X, Copy, Check } from "lucide-react";
+import { X, Copy, Check, MapPin } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { GoogleMapsLogo, WazeLogo } from "./BrandLogoIcons";
 
 interface Props {
   destination: string;
@@ -60,7 +61,7 @@ export function NavigationChoiceSheet({ destination, title = "Lancer la navigati
               onClick={onClose}
               className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-[rgba(51,204,255,0.45)] bg-[rgba(51,204,255,0.14)] p-4 text-white active:scale-[0.98] transition"
             >
-              <Navigation size={22} className="text-[#33ccff]" />
+<WazeLogo size={22} />
               <span className="text-[13px] font-semibold">Waze</span>
             </a>
             <a
@@ -70,7 +71,7 @@ export function NavigationChoiceSheet({ destination, title = "Lancer la navigati
               onClick={onClose}
               className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-[rgba(110,231,183,0.45)] bg-[rgba(110,231,183,0.14)] p-4 text-white active:scale-[0.98] transition"
             >
-              <MapPin size={22} className="text-[#6ee7b7]" />
+<GoogleMapsLogo size={22} />
               <span className="text-[13px] font-semibold">Google Maps</span>
             </a>
           </div>

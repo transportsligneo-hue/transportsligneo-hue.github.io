@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestSmsRouteImport } from './routes/test-sms'
+import { Route as TestNavSheetRouteImport } from './routes/test-nav-sheet'
 import { Route as TarifsRouteImport } from './routes/tarifs'
 import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
 import { Route as SuiviRouteImport } from './routes/suivi'
@@ -197,6 +198,11 @@ import { Route as ApiPublicV1MissionsMissionIdProofOfDeliveryRouteImport } from 
 const TestSmsRoute = TestSmsRouteImport.update({
   id: '/test-sms',
   path: '/test-sms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestNavSheetRoute = TestNavSheetRouteImport.update({
+  id: '/test-nav-sheet',
+  path: '/test-nav-sheet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TarifsRoute = TarifsRouteImport.update({
@@ -1258,6 +1264,7 @@ export interface FileRoutesByFullPath {
   '/suivi': typeof SuiviRoute
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
+  '/test-nav-sheet': typeof TestNavSheetRoute
   '/test-sms': typeof TestSmsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -1443,6 +1450,7 @@ export interface FileRoutesByTo {
   '/suivi': typeof SuiviRoute
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
+  '/test-nav-sheet': typeof TestNavSheetRoute
   '/test-sms': typeof TestSmsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
@@ -1621,6 +1629,7 @@ export interface FileRoutesById {
   '/suivi': typeof SuiviRoute
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
+  '/test-nav-sheet': typeof TestNavSheetRoute
   '/test-sms': typeof TestSmsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
@@ -1808,6 +1817,7 @@ export interface FileRouteTypes {
     | '/suivi'
     | '/suppression-compte'
     | '/tarifs'
+    | '/test-nav-sheet'
     | '/test-sms'
     | '/admin'
     | '/convoyeur'
@@ -1993,6 +2003,7 @@ export interface FileRouteTypes {
     | '/suivi'
     | '/suppression-compte'
     | '/tarifs'
+    | '/test-nav-sheet'
     | '/test-sms'
     | '/notifications'
     | '/a/$code'
@@ -2170,6 +2181,7 @@ export interface FileRouteTypes {
     | '/suivi'
     | '/suppression-compte'
     | '/tarifs'
+    | '/test-nav-sheet'
     | '/test-sms'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
@@ -2357,6 +2369,7 @@ export interface RootRouteChildren {
   SuiviRoute: typeof SuiviRoute
   SuppressionCompteRoute: typeof SuppressionCompteRoute
   TarifsRoute: typeof TarifsRoute
+  TestNavSheetRoute: typeof TestNavSheetRoute
   TestSmsRoute: typeof TestSmsRoute
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
@@ -2417,6 +2430,13 @@ declare module '@tanstack/react-router' {
       path: '/test-sms'
       fullPath: '/test-sms'
       preLoaderRoute: typeof TestSmsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-nav-sheet': {
+      id: '/test-nav-sheet'
+      path: '/test-nav-sheet'
+      fullPath: '/test-nav-sheet'
+      preLoaderRoute: typeof TestNavSheetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tarifs': {
@@ -4181,6 +4201,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuiviRoute: SuiviRoute,
   SuppressionCompteRoute: SuppressionCompteRoute,
   TarifsRoute: TarifsRoute,
+  TestNavSheetRoute: TestNavSheetRoute,
   TestSmsRoute: TestSmsRoute,
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
