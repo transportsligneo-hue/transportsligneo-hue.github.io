@@ -288,6 +288,25 @@ export async function matchPoToDevis(
   const selectCols =
     "id, numero, created_at, prix_estime, nom, prenom, email, arrivee, statut, mission_id, vin, vin_retour";
 
+  // 0) Le n° de PO est peut-être déjà saisi à la main sur une mission / attribution :
+  //    dans ce cas le bon de commande est considéré comme rapproché sans ambiguïté.
+  const existing = await findOperationsByPoNumber(supabaseAdmin, numeroPo);
+  if (existing.trajetIds.length) {
+    await supabaseAdmin
+      .from("bons_commande")
+      .update({
+        statut: "rapproche",
+        candidats: [],
+        ...(existing.devisId ? { devis_id: existing.devisId } : {}),
+        ...(existing.missionId ? { mission_id: existing.missionId } : {}),
+      } as never)
+      .eq("id", poId);
+    await applyPoToOperations(supabaseAdmin, numeroPo, existing.devisId, vin);
+    console.log(`[PO] ${numeroPo} déjà présent sur ${existing.trajetIds.length} mission(s) → rapproché`);
+    return "rapproche";
+  }
+
+
   const { data: devisRows } = await supabaseAdmin
     .from("devis")
     .select(selectCols)
