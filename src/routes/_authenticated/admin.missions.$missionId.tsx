@@ -245,6 +245,7 @@ function AdminMissionDetail() {
   const [trajet, setTrajet] = useState<TrajetFull | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurFull | null>(null);
   const [inspections, setInspections] = useState<InspectionRow[]>([]);
+  const [plateCheck, setPlateCheck] = useState<{ phase: string; result: string; scanned_plate: string | null; method: string | null; created_at: string } | null>(null);
   const [selfies, setSelfies] = useState<{ id: string; url: string; taken_at: string; latitude: number | null; longitude: number | null }[]>([]);
   const [gpsPoints, setGpsPoints] = useState<GpsPoint[]>([]);
   const [documents, setDocuments] = useState<DocRow[]>([]);
@@ -431,6 +432,19 @@ function AdminMissionDetail() {
     if (gpsRes.data) setGpsPoints(gpsRes.data as GpsPoint[]);
     if (docsRes.data) setDocuments(docsRes.data as DocRow[]);
     if (histRes.data) setHistory(histRes.data as EtapeHistoryRow[]);
+    // Vérification de plaque (scan convoyeur avant l'état des lieux)
+    const { data: plateRows } = await supabase
+      .from("mission_plate_checks" as never)
+      .select("phase, result, scanned_plate, method, created_at")
+      .eq("attribution_id" as never, missionId as never)
+      .order("created_at", { ascending: false });
+    const plateList = (plateRows ?? []) as Array<{ phase: string; result: string; scanned_plate: string | null; method: string | null; created_at: string }>;
+    setPlateCheck(
+      plateList.find((r) => r.phase === "depart" && r.result === "match")
+      ?? plateList.find((r) => r.result === "match")
+      ?? null
+    );
+
     if (trajRes.data?.id) {
       const { data: adminData } = await supabase
         .from("trajets_admin_data" as never)
@@ -1575,15 +1589,31 @@ function AdminMissionDetail() {
               <button
                 type="button"
                 onClick={() => void copyValue(plaquePrincipale, "Plaque copiée")}
-                title="Copier la plaque"
-                className="group inline-flex items-center gap-2 rounded-lg border-2 border-pro-text/70 bg-white px-3 py-1.5 shadow-sm hover:border-pro-accent transition-colors"
+                title={plateCheck
+                  ? `Plaque vérifiée par scan le ${new Date(plateCheck.created_at).toLocaleString("fr-FR")}`
+                  : "Copier la plaque"}
+                className={`group inline-flex items-center gap-2 rounded-lg border-2 px-3 py-1.5 shadow-sm transition-colors ${
+                  plateCheck
+                    ? "border-emerald-500 bg-emerald-50 hover:border-emerald-600"
+                    : "border-pro-text/70 bg-white hover:border-pro-accent"
+                }`}
               >
-                <span className="text-[9px] font-bold tracking-[0.12em] text-pro-accent leading-none">F</span>
-                <span className="font-mono text-base sm:text-lg font-bold tracking-[0.14em] text-pro-text leading-none">
+                <span className={`text-[9px] font-bold tracking-[0.12em] leading-none ${plateCheck ? "text-emerald-600" : "text-pro-accent"}`}>F</span>
+                <span className={`font-mono text-base sm:text-lg font-bold tracking-[0.14em] leading-none ${plateCheck ? "text-emerald-700" : "text-pro-text"}`}>
                   {plaquePrincipale || "—"}
                 </span>
-                <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+                {plateCheck ? (
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                ) : (
+                  <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+                )}
               </button>
+              {plateCheck && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                  <CheckCircle2 size={11} />
+                  Plaque vérifiée · {new Date(plateCheck.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })} {new Date(plateCheck.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-pro-text truncate">
                   {[trajet.marque ?? trajet.vehicule_marque, trajet.modele ?? trajet.vehicule_modele]
