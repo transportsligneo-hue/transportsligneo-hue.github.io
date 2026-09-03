@@ -95,6 +95,8 @@ interface Props {
   onTabChange?: (tab: "action" | "info" | "docs") => void;
   infoSlot?: ReactNode;
   docsSlot?: ReactNode;
+  /** Encart affiché sous la barre d'étapes (ex : passage direct à la restitution d'un duo). */
+  nextLegSlot?: ReactNode;
 }
 
 export function MissionCockpit({
@@ -119,6 +121,7 @@ export function MissionCockpit({
   onTabChange,
   infoSlot,
   docsSlot,
+  nextLegSlot,
 }: Props) {
   const gates = useMissionGates(attributionId);
   const notifyDeliveryDoneFn = useServerFn(notifyDeliveryDone);
@@ -768,6 +771,10 @@ export function MissionCockpit({
               })}
             </div>
           </div>
+
+          {nextLegSlot ? <div className="mv3-slot">{nextLegSlot}</div> : null}
+
+
 
           {!isDone && (
             <div className="mv3-contacts-wrap">

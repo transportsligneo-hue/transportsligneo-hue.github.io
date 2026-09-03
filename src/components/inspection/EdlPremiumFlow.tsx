@@ -290,10 +290,11 @@ export function EdlPremiumFlow({
 
   const [askExit, setAskExit] = useState(false);
 
-  // Vérification de plaque : une fois validée, elle n'est plus redemandée pour
-  // cette phase de mission (reprise EDL après fermeture de l'app incluse).
+  // Vérification de plaque : uniquement AVANT l'EDL de départ. À l'arrivée, le
+  // véhicule est déjà identifié, on ne redemande pas de scanner la plaque.
   const PLATE_KEY = `edl-plate-check:${attributionId}:${type}`;
   const [plateChecked, setPlateChecked] = useState<boolean>(() => {
+    if (type !== "depart") return true;
     if (typeof window === "undefined") return false;
     try { return localStorage.getItem(PLATE_KEY) === "1"; } catch { return false; }
   });
@@ -301,6 +302,7 @@ export function EdlPremiumFlow({
     try { localStorage.setItem(PLATE_KEY, "1"); } catch { /* ignore */ }
     setPlateChecked(true);
   }, [PLATE_KEY]);
+
 
   const [completing, setCompleting] = useState(false);
   const [finalError, setFinalError] = useState<string | null>(null);

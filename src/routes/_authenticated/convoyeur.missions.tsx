@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   MapPin, Loader2, FileText, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter,
-  Check, X,
+  Check, X, ChevronRight,
 } from "lucide-react";
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
@@ -38,6 +38,9 @@ interface Mission extends MissionCardData {
   trajet_id: string;
   numero_mission?: string | null;
   options_completion?: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null;
+  /** Duo Livraison + Restitution : identifiant du groupe et rôle du volet. */
+  mission_group_id?: string | null;
+  leg_type?: string | null;
 }
 
 
@@ -213,7 +216,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -234,6 +237,8 @@ function ConvoyeurMissions() {
           numero_mission: attr.numero_mission,
           options_completion: attr.options_completion ?? {},
           trajet,
+          mission_group_id: (trajetRes.data as { mission_group_id?: string | null } | null)?.mission_group_id ?? null,
+          leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
         };
@@ -740,7 +745,49 @@ function ConvoyeurMissions() {
       />
     ) : null;
 
+    // === Duo Livraison + Restitution : enchaînement direct sans repasser par la liste
+    const twinMission = openMission.mission_group_id
+      ? missions.find(
+          (m) => m.id !== openMission.id && m.mission_group_id === openMission.mission_group_id,
+        ) ?? null
+      : null;
+    const legReachedArrival =
+      DONE_STATUTS.has(openMission.statut) ||
+      ["arrive_destination", "edl_arrivee_fait", "en_attente_validation", "termine"].includes(
+        openMission.etape_courante ?? "",
+      );
+    const twinIsRestitution = (twinMission?.leg_type ?? "") === "retour";
+    const nextLegSlot =
+      twinMission && legReachedArrival && !DONE_STATUTS.has(twinMission.statut) ? (
+        <div className="mv3-docs-card" style={{ borderColor: "rgba(52,211,153,0.35)" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-300/80">
+            {twinIsRestitution ? "Restitution liée" : "Volet lié"}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-white">
+            {twinMission.numero_mission ? displayNumero(twinMission.numero_mission) : "Second volet"}
+            {twinMission.trajet ? ` · ${twinMission.trajet.depart} → ${twinMission.trajet.arrivee}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-white/60">
+            Enchaînez directement {twinIsRestitution ? "la restitution" : "le second volet"} sans revenir à la liste des missions.
+          </p>
+          <button
+            onClick={() => {
+              setDetailTab("action");
+              setOpenMissionId(twinMission.id);
+              if (twinMission.statut === "accepte" || twinMission.statut === "propose") {
+                toast.info("Second volet ouvert", { description: "Démarrez-le quand vous êtes prêt." });
+              }
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98]"
+          >
+            {twinIsRestitution ? "Passer à la restitution" : "Ouvrir le second volet"} <ChevronRight size={16} />
+          </button>
+        </div>
+      ) : null;
+
     return (
+
       <>
       {inspectionOverlay}
       <div className="mv3-fullscreen">
@@ -869,6 +916,7 @@ function ConvoyeurMissions() {
             onTabChange={setDetailTab}
             infoSlot={infoSlot}
             docsSlot={docsSlot}
+            nextLegSlot={nextLegSlot}
           />
         )}
       </div>
