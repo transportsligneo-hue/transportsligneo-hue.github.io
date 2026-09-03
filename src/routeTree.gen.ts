@@ -71,6 +71,7 @@ import { Route as B2bTransportPonctuelRetourRouteImport } from './routes/b2b.tra
 import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public/yousign-webhook'
 import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
 import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/track-click'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
@@ -511,6 +512,11 @@ const ApiPublicTrackOpenRoute = ApiPublicTrackOpenRouteImport.update({
 const ApiPublicTrackClickRoute = ApiPublicTrackClickRouteImport.update({
   id: '/api/public/track-click',
   path: '/api/public/track-click',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCampaignUnsubscribeRoute =
@@ -1351,6 +1357,7 @@ export interface FileRoutesByFullPath {
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1526,6 +1533,7 @@ export interface FileRoutesByTo {
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1712,6 +1720,7 @@ export interface FileRoutesById {
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
   '/api/public/yousign-webhook': typeof ApiPublicYousignWebhookRoute
@@ -1898,6 +1907,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
@@ -2073,6 +2083,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
@@ -2258,6 +2269,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
     | '/api/public/yousign-webhook'
@@ -2364,6 +2376,7 @@ export interface RootRouteChildren {
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
   ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
   ApiPublicYousignWebhookRoute: typeof ApiPublicYousignWebhookRoute
@@ -2831,6 +2844,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/track-click'
       fullPath: '/api/public/track-click'
       preLoaderRoute: typeof ApiPublicTrackClickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/campaign-unsubscribe': {
@@ -4181,6 +4201,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicAlertesDocumentsVehiculesRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   ApiPublicCampaignUnsubscribeRoute: ApiPublicCampaignUnsubscribeRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
   ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
   ApiPublicYousignWebhookRoute: ApiPublicYousignWebhookRoute,
