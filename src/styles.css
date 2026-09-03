@@ -8126,7 +8126,7 @@ html.theme-light .r4-page .ligneo-map {
      le fondu démarre à la jonction avec la bande chiffres (pas plus
      haut) et le noir remonte à la jonction avec "Ils nous font
      confiance" (pas plus haut non plus). */
-  padding: 150px 24px 170px;
+  padding: 132px 24px 140px;
   margin-top: -1px;
   margin-bottom: -1px;
   background: transparent;
@@ -8140,27 +8140,27 @@ html.theme-light .r4-page .ligneo-map::before {
   background:
     radial-gradient(120% 60% at 50% 50%, rgba(47,95,255,0.18), transparent 72%),
     linear-gradient(180deg,
-      #f5f7fc 0%,
-      #eef1f9 2.5%,
-      #dce1f0 5%,
-      #bdc6dd 7.5%,
-      #97a3c5 10%,
-      #717da6 12.5%,
-      #4d5988 15%,
-      #313c6a 17%,
-      #1c2752 18.5%,
-      #101a3d 19.5%,
-      #0b1026 20%,
-      #0b1026 85%,
-      #101a3d 87%,
-      #1c2752 89%,
-      #313c6a 91%,
-      #4d5988 93%,
-      #717da6 95%,
-      #97a3c5 96.5%,
-      #bdc6dd 98%,
-      #e4e9f4 99.2%,
-      #fbfcfe 99.8%,
+      #f5f7fc 0px,
+      #eef1f9 12px,
+      #dce1f0 26px,
+      #bdc6dd 42px,
+      #97a3c5 58px,
+      #717da6 74px,
+      #4d5988 88px,
+      #313c6a 100px,
+      #1c2752 110px,
+      #101a3d 118px,
+      #0b1026 124px,
+      #0b1026 calc(100% - 124px),
+      #101a3d calc(100% - 118px),
+      #1c2752 calc(100% - 110px),
+      #313c6a calc(100% - 100px),
+      #4d5988 calc(100% - 88px),
+      #717da6 calc(100% - 74px),
+      #97a3c5 calc(100% - 58px),
+      #bdc6dd calc(100% - 42px),
+      #e4e9f4 calc(100% - 24px),
+      #fbfcfe calc(100% - 8px),
       #ffffff 100%);
   pointer-events: none;
 }
