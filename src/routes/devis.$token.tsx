@@ -271,7 +271,18 @@ function DevisPublicPage() {
           </section>
         )}
 
-        {showPay && !devis.paid && devis.aRegler >= 1 ? (
+        {showPay && !devis.paid && devis.aRegler >= 1 && devis.paiementImmediat === false ? (
+          <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="mb-2 text-lg font-semibold text-foreground">Facturation différée</h2>
+            <p className="text-sm text-muted-foreground">
+              Votre compte professionnel bénéficie de la facturation différée : aucun paiement en ligne
+              n'est requis pour valider ce convoyage. Une facture vous sera adressée selon vos conditions
+              de règlement.
+            </p>
+          </section>
+        ) : null}
+
+        {showPay && !devis.paid && devis.aRegler >= 1 && devis.paiementImmediat !== false ? (
           <section id="paiement" className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
               <CreditCard size={18} className="text-primary" /> Paiement sécurisé
