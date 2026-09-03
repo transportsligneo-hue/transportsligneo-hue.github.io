@@ -102,6 +102,7 @@ export default function ProTimeline() {
 
         style={{
           maxWidth: 980,
+          aspectRatio: "16 / 9",
           margin: "34px auto 0",
           borderRadius: 24,
           overflow: "hidden",
@@ -116,7 +117,7 @@ export default function ProTimeline() {
           muted
           playsInline
           preload="auto"
-          style={{ display: "block", width: "100%", height: "auto" }}
+          style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
         />
       </div>
     </div>
