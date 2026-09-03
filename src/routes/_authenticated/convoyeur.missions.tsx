@@ -38,6 +38,9 @@ interface Mission extends MissionCardData {
   trajet_id: string;
   numero_mission?: string | null;
   options_completion?: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null;
+  /** Duo Livraison + Restitution : identifiant du groupe et rôle du volet. */
+  mission_group_id?: string | null;
+  leg_type?: string | null;
 }
 
 
@@ -213,7 +216,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -234,6 +237,8 @@ function ConvoyeurMissions() {
           numero_mission: attr.numero_mission,
           options_completion: attr.options_completion ?? {},
           trajet,
+          mission_group_id: (trajetRes.data as { mission_group_id?: string | null } | null)?.mission_group_id ?? null,
+          leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
         };
