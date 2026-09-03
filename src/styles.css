@@ -7876,29 +7876,31 @@ html.theme-light .plateforme-pro .feat-toggle {
 html.theme-light { --ligneo-page-bg: 245, 247, 252; }
 
 .r4-page .v5-hero { padding-bottom: clamp(140px, 15vw, 260px) !important; }
+/* Le dégradé blanc reste SERRÉ au bas du hero : la photo reste sombre
+   jusqu'à la limite marquée, le fondu vers le fond clair n'apparaît
+   qu'à cet endroit-là, jamais plus haut. */
 .r4-page .v5-hero-fade {
   background: linear-gradient(180deg,
-    rgba(var(--ligneo-page-bg), 0) 64%,
-    rgba(var(--ligneo-page-bg), 0.12) 74%,
-    rgba(var(--ligneo-page-bg), 0.38) 83%,
-    rgba(var(--ligneo-page-bg), 0.70) 90%,
-    rgba(var(--ligneo-page-bg), 0.93) 95%,
-    rgba(var(--ligneo-page-bg), 1) 98%,
+    rgba(var(--ligneo-page-bg), 0) 84%,
+    rgba(var(--ligneo-page-bg), 0.10) 88%,
+    rgba(var(--ligneo-page-bg), 0.32) 92%,
+    rgba(var(--ligneo-page-bg), 0.72) 96%,
+    rgba(var(--ligneo-page-bg), 0.96) 99%,
     rgba(var(--ligneo-page-bg), 1) 100%) !important;
 }
 .r4-page .v5-hero-photo,
 .r4-page .v5-hero-tint {
   -webkit-mask-image: linear-gradient(180deg,
-    #000 0%, #000 74%,
-    rgba(0,0,0,0.9) 82%,
-    rgba(0,0,0,0.6) 90%,
-    rgba(0,0,0,0.25) 96%,
+    #000 0%, #000 86%,
+    rgba(0,0,0,0.92) 90%,
+    rgba(0,0,0,0.62) 94%,
+    rgba(0,0,0,0.25) 98%,
     rgba(0,0,0,0) 100%);
   mask-image: linear-gradient(180deg,
-    #000 0%, #000 74%,
-    rgba(0,0,0,0.9) 82%,
-    rgba(0,0,0,0.6) 90%,
-    rgba(0,0,0,0.25) 96%,
+    #000 0%, #000 86%,
+    rgba(0,0,0,0.92) 90%,
+    rgba(0,0,0,0.62) 94%,
+    rgba(0,0,0,0.25) 98%,
     rgba(0,0,0,0) 100%);
 }
 
@@ -8120,7 +8122,10 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  /* on démarre le fondu plus bas (sous les chiffres 5000+/6 ans...) */
+  /* Les dégradés blancs restent collés aux limites des sections :
+     le fondu démarre à la jonction avec la bande chiffres (pas plus
+     haut) et le noir remonte à la jonction avec "Ils nous font
+     confiance" (pas plus haut non plus). */
   padding: 150px 24px 170px;
   margin-top: -1px;
   margin-bottom: -1px;
@@ -8136,27 +8141,26 @@ html.theme-light .r4-page .ligneo-map::before {
     radial-gradient(120% 60% at 50% 50%, rgba(47,95,255,0.18), transparent 72%),
     linear-gradient(180deg,
       #f5f7fc 0%,
-      #eef1f9 6%,
-      #dfe4f1 11%,
-      #c3cbe0 15%,
-      #9ba6c4 19%,
-      #7280a8 22%,
-      #4d5b87 25%,
-      #2f3c68 28%,
-      #1a2449 31%,
-      #0f1631 34%,
-      #0b1026 38%,
-      #0b1026 60%,
-      #0f1631 64%,
-      #1a2449 67%,
-      #2f3c68 70%,
-      #4d5b87 73%,
-      #7280a8 76%,
-      #9ba6c4 80%,
-      #c6cee1 84%,
-      #e4e9f4 89%,
-      #f3f6fc 94%,
-      #fbfcfe 97%,
+      #eef1f9 2.5%,
+      #dce1f0 5%,
+      #bdc6dd 7.5%,
+      #97a3c5 10%,
+      #717da6 12.5%,
+      #4d5988 15%,
+      #313c6a 17%,
+      #1c2752 18.5%,
+      #101a3d 19.5%,
+      #0b1026 20%,
+      #0b1026 85%,
+      #101a3d 87%,
+      #1c2752 89%,
+      #313c6a 91%,
+      #4d5988 93%,
+      #717da6 95%,
+      #97a3c5 96.5%,
+      #bdc6dd 98%,
+      #e4e9f4 99.2%,
+      #fbfcfe 99.8%,
       #ffffff 100%);
   pointer-events: none;
 }
