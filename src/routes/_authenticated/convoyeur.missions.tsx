@@ -745,7 +745,49 @@ function ConvoyeurMissions() {
       />
     ) : null;
 
+    // === Duo Livraison + Restitution : enchaînement direct sans repasser par la liste
+    const twinMission = openMission.mission_group_id
+      ? missions.find(
+          (m) => m.id !== openMission.id && m.mission_group_id === openMission.mission_group_id,
+        ) ?? null
+      : null;
+    const legReachedArrival =
+      DONE_STATUTS.has(openMission.statut) ||
+      ["arrive_destination", "edl_arrivee_fait", "en_attente_validation", "termine"].includes(
+        openMission.etape_courante ?? "",
+      );
+    const twinIsRestitution = (twinMission?.leg_type ?? "") === "retour";
+    const nextLegSlot =
+      twinMission && legReachedArrival && !DONE_STATUTS.has(twinMission.statut) ? (
+        <div className="mv3-docs-card" style={{ borderColor: "rgba(52,211,153,0.35)" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-300/80">
+            {twinIsRestitution ? "Restitution liée" : "Volet lié"}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-white">
+            {twinMission.numero_mission ? displayNumero(twinMission.numero_mission) : "Second volet"}
+            {twinMission.trajet ? ` · ${twinMission.trajet.depart} → ${twinMission.trajet.arrivee}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-white/60">
+            Enchaînez directement {twinIsRestitution ? "la restitution" : "le second volet"} sans revenir à la liste des missions.
+          </p>
+          <button
+            onClick={() => {
+              setDetailTab("action");
+              setOpenMissionId(twinMission.id);
+              if (twinMission.statut === "accepte" || twinMission.statut === "propose") {
+                toast.info("Second volet ouvert", { description: "Démarrez-le quand vous êtes prêt." });
+              }
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98]"
+          >
+            {twinIsRestitution ? "Passer à la restitution" : "Ouvrir le second volet"} <ChevronRight size={16} />
+          </button>
+        </div>
+      ) : null;
+
     return (
+
       <>
       {inspectionOverlay}
       <div className="mv3-fullscreen">
