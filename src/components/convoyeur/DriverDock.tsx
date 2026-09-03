@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
 
+const CATALOGUE_SEEN_KEY = "ldock-catalogue-seen";
+
 interface ActiveMission {
   id: string;
   depart: string;
@@ -37,6 +39,11 @@ export default function DriverDock({
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
   const [catalogueCount, setCatalogueCount] = useState(0);
+  // Nombre de missions catalogue déjà vues : le badge disparaît après consultation.
+  const [catalogueSeen, setCatalogueSeen] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    return Number(window.localStorage.getItem(CATALOGUE_SEEN_KEY) ?? 0) || 0;
+  });
   const [active, setActive] = useState<ActiveMission | null>(null);
   // Masquage temporaire du dock (étapes critiques : signature, EDL).
   const [collapsed, setCollapsed] = useState(false);
@@ -107,6 +114,19 @@ export default function DriverDock({
   const activeCatalogue = catalogue ? isActive(catalogue) : false;
   const activeOverflow = overflow.some(isActive);
 
+  const markCatalogueSeen = (count: number) => {
+    setCatalogueSeen(count);
+    try { window.localStorage.setItem(CATALOGUE_SEEN_KEY, String(count)); } catch { /* ignore */ }
+  };
+
+  // Consultation en cours du catalogue → on considère tout comme vu.
+  useEffect(() => {
+    if (activeCatalogue && catalogueCount !== catalogueSeen) markCatalogueSeen(catalogueCount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCatalogue, catalogueCount]);
+
+  const catalogueNew = Math.max(0, catalogueCount - catalogueSeen);
+
   const city = (s: string) => s.split(",")[0].trim();
 
   return (
@@ -138,8 +158,12 @@ export default function DriverDock({
             <span>Mes missions</span>
           </Link>
 
-          <Link to="/convoyeur/catalogue" className={`ldock-item${activeCatalogue ? " is-active" : ""}`}>
-            {catalogueCount > 0 && <i className="ldock-badge not-italic">{catalogueCount > 9 ? "9+" : catalogueCount}</i>}
+          <Link
+            to="/convoyeur/catalogue"
+            onClick={() => markCatalogueSeen(catalogueCount)}
+            className={`ldock-item${activeCatalogue ? " is-active" : ""}`}
+          >
+            {catalogueNew > 0 && <i className="ldock-badge not-italic">{catalogueNew > 9 ? "9+" : catalogueNew}</i>}
             <span className="ldock-ic">
               <Truck strokeWidth={2} />
             </span>
