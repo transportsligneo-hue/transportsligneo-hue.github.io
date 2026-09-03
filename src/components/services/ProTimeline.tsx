@@ -102,7 +102,7 @@ export default function ProTimeline() {
 
         style={{
           maxWidth: 980,
-          margin: "0 auto",
+          margin: "34px auto 0",
           borderRadius: 24,
           overflow: "hidden",
           border: "1px solid rgba(122,163,255,0.25)",
