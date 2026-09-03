@@ -916,6 +916,7 @@ function ConvoyeurMissions() {
             onTabChange={setDetailTab}
             infoSlot={infoSlot}
             docsSlot={docsSlot}
+            nextLegSlot={nextLegSlot}
           />
         )}
       </div>
