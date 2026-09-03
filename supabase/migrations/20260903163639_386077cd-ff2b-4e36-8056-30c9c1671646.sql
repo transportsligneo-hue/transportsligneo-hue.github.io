@@ -1,0 +1,10 @@
+REVOKE ALL ON public.convoyeurs FROM anon;
+REVOKE ALL ON public.loyalty_settings FROM anon;
+REVOKE ALL ON public.public_tracking_attempts FROM anon;
+REVOKE ALL ON public.public_tracking_attempts FROM authenticated;
+GRANT SELECT ON public.public_tracking_attempts TO authenticated;
+GRANT ALL ON public.public_tracking_attempts TO service_role;
+GRANT SELECT, INSERT, UPDATE ON public.convoyeurs TO authenticated;
+GRANT ALL ON public.convoyeurs TO service_role;
+GRANT SELECT ON public.loyalty_settings TO authenticated;
+GRANT ALL ON public.loyalty_settings TO service_role;
