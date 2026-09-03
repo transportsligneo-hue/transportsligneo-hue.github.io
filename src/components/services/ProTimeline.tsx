@@ -80,7 +80,7 @@ export default function ProTimeline() {
               <span className="pro-tl-num">{String(i + 1).padStart(2, "0")}</span>
             </div>
             <div className="pro-tl-body">
-              <h4>{s.title}</h4>
+              <h3>{s.title}</h3>
               <p>{s.desc}</p>
               <ul>
                 {s.points.map((p) => (
