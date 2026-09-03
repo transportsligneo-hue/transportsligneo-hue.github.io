@@ -884,6 +884,8 @@ export function MissionCockpitStickyCTA({
 }) {
   const gates = useMissionGates(attributionId);
   const selfieOK = gates.hasSelfie || gates.isDisabled("selfie");
+  const edlDepartOK = inspectionDepartDone || gates.isDisabled("edl_depart");
+  const edlArriveeOK = inspectionArriveeDone || gates.isDisabled("edl_arrivee");
 
   let label = "Continuer";
   if (["validee", "termine"].includes(statut)) label = "Mission validée";
@@ -891,11 +893,11 @@ export function MissionCockpitStickyCTA({
   else if (currentEtape === "assignee" || currentEtape === "acceptee" || statut === "accepte") label = "En route pour récupérer le véhicule";
   else if (currentEtape === "en_route") label = "Je suis arrivé";
   else if (!selfieOK && (currentEtape === "sur_place" || currentEtape === "vehicule_recupere")) label = "Prendre selfie";
-  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !inspectionDepartDone) label = "Inspection départ";
-  else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && inspectionDepartDone)) label = "Prendre la route";
+  else if ((currentEtape === "sur_place" || currentEtape === "vehicule_recupere") && !edlDepartOK) label = "Inspection départ";
+  else if (currentEtape === "edl_depart_fait" || (currentEtape === "sur_place" && edlDepartOK)) label = "Prendre la route";
   else if (currentEtape === "en_livraison") label = "Je suis arrivé";
-  else if (currentEtape === "arrive_destination" && !inspectionArriveeDone) label = "Inspection arrivée";
-  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && inspectionArriveeDone)) label = "Envoyer";
+  else if (currentEtape === "arrive_destination" && !edlArriveeOK) label = "Inspection arrivée";
+  else if (currentEtape === "edl_arrivee_fait" || (currentEtape === "arrive_destination" && edlArriveeOK)) label = "Envoyer";
 
   const isDone = ["en_attente_validation", "validee", "termine"].includes(statut);
 
