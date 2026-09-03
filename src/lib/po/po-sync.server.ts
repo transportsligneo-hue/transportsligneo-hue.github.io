@@ -288,6 +288,25 @@ export async function matchPoToDevis(
   const selectCols =
     "id, numero, created_at, prix_estime, nom, prenom, email, arrivee, statut, mission_id, vin, vin_retour";
 
+  // 0) Le n° de PO est peut-être déjà saisi à la main sur une mission / attribution :
+  //    dans ce cas le bon de commande est considéré comme rapproché sans ambiguïté.
+  const existing = await findOperationsByPoNumber(supabaseAdmin, numeroPo);
+  if (existing.trajetIds.length) {
+    await supabaseAdmin
+      .from("bons_commande")
+      .update({
+        statut: "rapproche",
+        candidats: [],
+        ...(existing.devisId ? { devis_id: existing.devisId } : {}),
+        ...(existing.missionId ? { mission_id: existing.missionId } : {}),
+      } as never)
+      .eq("id", poId);
+    await applyPoToOperations(supabaseAdmin, numeroPo, existing.devisId, vin);
+    console.log(`[PO] ${numeroPo} déjà présent sur ${existing.trajetIds.length} mission(s) → rapproché`);
+    return "rapproche";
+  }
+
+
   const { data: devisRows } = await supabaseAdmin
     .from("devis")
     .select(selectCols)
@@ -331,8 +350,14 @@ export async function matchPoToDevis(
         .update({ statut: "accepte", accepted_at: new Date().toISOString() } as never)
         .eq("id", devis.id);
     }
-    await applyPoToOperations(supabaseAdmin, numeroPo, devis.id as string, vin);
-    console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero}`);
+    const applied = await applyPoToOperations(supabaseAdmin, numeroPo, devis.id as string, vin);
+    if (applied.missionId) {
+      await supabaseAdmin
+        .from("bons_commande")
+        .update({ mission_id: applied.missionId } as never)
+        .eq("id", poId);
+    }
+    console.log(`[PO] ${numeroPo} rapproché au devis ${devis.numero} (${applied.trajets} mission(s))`);
     return "rapproche";
   }
 
@@ -383,25 +408,36 @@ export async function applyPoToOperations(
   devisId: string | null,
   vin: string | null,
 ): Promise<{ trajets: number; missionId: string | null }> {
-  const cols = "id, mission_group_id, vin, vehicule_vin, mission_id, devis_id";
+  const cols = "id, mission_group_id, vin, vehicule_vin, mission_id, devis_id, commande_ref";
   const found = new Map<string, Record<string, unknown>>();
+
+  const vins = new Set<string>();
+  if (vin) vins.add(vin);
 
   if (devisId) {
     const { data } = await supabaseAdmin.from("trajets").select(cols).eq("devis_id", devisId);
     for (const t of data ?? []) found.set(t.id as string, t);
+    // Le VIN du devis peut différer légèrement de celui du PO : on l'ajoute au filet.
+    const { data: dev } = await supabaseAdmin
+      .from("devis").select("vin, vin_retour").eq("id", devisId).maybeSingle();
+    for (const v of [dev?.vin, dev?.vin_retour]) if (v) vins.add(v as string);
   }
-  if (!found.size && vin) {
+
+  if (vins.size) {
     const { data } = await supabaseAdmin
       .from("trajets")
       .select(cols)
       .order("created_at", { ascending: false })
       .limit(1500);
     for (const t of data ?? []) {
-      if (
-        vinLooseMatch(t.vin as string | null, vin) ||
-        vinLooseMatch(t.vehicule_vin as string | null, vin)
-      ) {
-        found.set(t.id as string, t);
+      for (const v of vins) {
+        if (
+          vinLooseMatch(t.vin as string | null, v) ||
+          vinLooseMatch(t.vehicule_vin as string | null, v)
+        ) {
+          found.set(t.id as string, t);
+          break;
+        }
       }
     }
   }
@@ -437,4 +473,107 @@ export async function applyPoToOperations(
   console.log(`[PO] ${numeroPo} appliqué à ${trajetIds.length} mission(s)`);
   return { trajets: trajetIds.length, missionId: missionIds.length === 1 ? missionIds[0]! : null };
 }
+
+/** Cherche les missions/trajets qui portent déjà ce n° de PO (saisi à la main). */
+export async function findOperationsByPoNumber(
+  supabaseAdmin: AdminClient,
+  numeroPo: string,
+): Promise<{ trajetIds: string[]; devisId: string | null; missionId: string | null }> {
+  const ref = numeroPo.trim();
+  if (!ref) return { trajetIds: [], devisId: null, missionId: null };
+
+  const { data: trajets } = await supabaseAdmin
+    .from("trajets")
+    .select("id, devis_id, mission_id")
+    .eq("commande_ref", ref);
+
+  let rows = trajets ?? [];
+
+  if (!rows.length) {
+    // Le PO peut n'exister que sur la facture / l'attribution
+    const { data: factures } = await supabaseAdmin
+      .from("factures")
+      .select("attribution_id")
+      .eq("reference_client", ref)
+      .not("attribution_id", "is", null);
+    const attrIds = [...new Set((factures ?? []).map((f) => f.attribution_id as string))];
+    if (attrIds.length) {
+      const { data: attrs } = await supabaseAdmin
+        .from("attributions").select("trajet_id").in("id", attrIds);
+      const trajetIds = [...new Set((attrs ?? []).map((a) => a.trajet_id as string).filter(Boolean))];
+      if (trajetIds.length) {
+        const { data: t2 } = await supabaseAdmin
+          .from("trajets").select("id, devis_id, mission_id").in("id", trajetIds);
+        rows = t2 ?? [];
+      }
+    }
+  }
+
+  if (!rows.length) return { trajetIds: [], devisId: null, missionId: null };
+  const devisIds = [...new Set(rows.map((r) => r.devis_id as string | null).filter(Boolean))] as string[];
+  const missionIds = [...new Set(rows.map((r) => r.mission_id as string | null).filter(Boolean))] as string[];
+  return {
+    trajetIds: rows.map((r) => r.id as string),
+    devisId: devisIds.length === 1 ? devisIds[0]! : null,
+    missionId: missionIds.length === 1 ? missionIds[0]! : null,
+  };
+}
+
+/**
+ * Passe de fiabilisation : rejoue le rapprochement des PO en attente et
+ * réécrit le n° de PO sur les missions créées après coup (devis converti
+ * en mission une fois le bon de commande importé).
+ */
+export async function reconcileAllPo(): Promise<{ rapproches: number; reappliques: number }> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const out = { rapproches: 0, reappliques: 0 };
+
+  const { data: rows } = await supabaseAdmin
+    .from("bons_commande")
+    .select("id, numero_po, vin, statut, devis_id, mission_id")
+    .in("statut", ["non_rapproche", "rapproche"])
+    .order("created_at", { ascending: false })
+    .limit(120);
+
+  for (const po of rows ?? []) {
+    const numero = po.numero_po as string;
+    const vin = (po.vin as string | null) ?? null;
+    try {
+      if (po.statut === "non_rapproche") {
+        if (!vin) continue;
+        const outcome = await matchPoToDevis(supabaseAdmin, po.id as string, numero, vin);
+        if (outcome === "rapproche") out.rapproches++;
+        continue;
+      }
+      // Déjà rapproché : s'assurer que le n° est bien écrit côté exploitation.
+      const already = await findOperationsByPoNumber(supabaseAdmin, numero);
+      if (already.trajetIds.length) {
+        if (!po.mission_id && already.missionId) {
+          await supabaseAdmin
+            .from("bons_commande")
+            .update({ mission_id: already.missionId } as never)
+            .eq("id", po.id as string);
+        }
+        continue;
+      }
+      const applied = await applyPoToOperations(
+        supabaseAdmin, numero, (po.devis_id as string | null) ?? null, vin,
+      );
+      if (applied.trajets) {
+        out.reappliques++;
+        if (applied.missionId && !po.mission_id) {
+          await supabaseAdmin
+            .from("bons_commande")
+            .update({ mission_id: applied.missionId } as never)
+            .eq("id", po.id as string);
+        }
+      }
+    } catch (err) {
+      console.error("[PO] reconcile échoué", numero, err);
+    }
+  }
+
+  return out;
+}
+
 

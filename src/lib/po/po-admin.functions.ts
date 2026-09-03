@@ -28,6 +28,14 @@ export type PoRow = {
 export const listBonsCommande = createServerFn({ method: "GET" }).handler(async (): Promise<PoRow[]> => {
   await verifyAdminAccess();
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // Fiabilisation : rejoue les rapprochements en attente et réécrit le n° de PO
+  // sur les missions créées après l'import du bon de commande.
+  try {
+    const { reconcileAllPo } = await import("@/lib/po/po-sync.server");
+    await reconcileAllPo();
+  } catch (err) {
+    console.error("[PO] reconcile au chargement échoué", err);
+  }
   const { data, error } = await supabaseAdmin
     .from("bons_commande")
     .select("*, devis:devis_id(numero, nom, prenom, depart, arrivee, prix_estime)")
@@ -143,8 +151,16 @@ export const searchDevisForPo = createServerFn({ method: "POST" })
 /** Import manuel depuis l'admin (bouton « Synchroniser Gmail »). */
 export const runGmailPoSync = createServerFn({ method: "POST" }).handler(async () => {
   await verifyAdminAccess();
-  const { syncPoFromGmail } = await import("@/lib/po/po-sync.server");
-  return await syncPoFromGmail(40);
+  const { syncPoFromGmail, reconcileAllPo } = await import("@/lib/po/po-sync.server");
+  const res = await syncPoFromGmail(40);
+  const rec = await reconcileAllPo();
+  if (rec.rapproches || rec.reappliques) {
+    res.rapproches += rec.rapproches;
+    res.messages.push(
+      `${rec.rapproches} PO rapproché(s) automatiquement · ${rec.reappliques} mission(s) mise(s) à jour`,
+    );
+  }
+  return res;
 });
 
 /** Relance le rapprochement d'un PO existant (après correction d'un VIN de devis). */
