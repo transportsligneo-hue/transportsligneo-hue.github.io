@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.devis_set_paiement_immediat() FROM PUBLIC, anon, authenticated;
