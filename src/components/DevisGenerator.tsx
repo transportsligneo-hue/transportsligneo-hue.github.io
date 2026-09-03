@@ -238,6 +238,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const [telephone, setTelephone] = useState(prefill?.telephone ?? "");
   const [email, setEmail] = useState(prefill?.email ?? "");
   const [societe, setSociete] = useState(prefill?.societe ?? "");
+  const [clientType, setClientType] = useState<ClientType>("particulier");
+  const isPro = clientType !== "particulier";
+  const paiementImmediat = clientType === "particulier" || clientType === "pro_ponctuel";
   const [comment, setComment] = useState("");
 
   // Met à jour les champs quand le prefill arrive après le 1er render (chargement profil)
@@ -488,6 +491,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       // 2) Insertion du devis (RLS autorise anon avec validation)
       const { data: devisRow } = await supabase.from("devis").insert({
         nom, prenom, telephone, email,
+        client_type: clientType,
         depart: departure, arrivee: arrival,
         distance_km: distance,
         duree_estimee: estimateDuration(distance),
@@ -1054,6 +1058,30 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {/* STEP 1 · Trajet (récap modifiable) */}
               {step === 1 && (
                 <div className="space-y-5 animate-fade-in">
+                  <div>
+                    <h4 className="font-heading text-lg text-cream tracking-wide mb-3">Vous êtes…</h4>
+                    <div className="grid sm:grid-cols-2 gap-2.5">
+                      {CLIENT_TYPES.map(opt => {
+                        const active = clientType === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setClientType(opt.id)}
+                            className={`text-left rounded-2xl border px-4 py-3 transition-colors ${active ? "border-[#e7c76a] bg-[#e7c76a]/[0.07]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}
+                          >
+                            <span className={`block font-heading text-sm tracking-wide ${active ? "text-[#e7c76a]" : "text-cream"}`}>{opt.label}</span>
+                            <span className="block text-[11px] text-cream/50 mt-1 leading-snug">{opt.hint}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2.5 text-[11px] text-cream/55 leading-relaxed">
+                      {paiementImmediat
+                        ? "Règlement en ligne sécurisé (carte bancaire) à la validation du devis."
+                        : "Facturation différée : aucun paiement en ligne, une facture vous est adressée selon vos conditions de règlement."}
+                    </p>
+                  </div>
                   <h4 className="font-heading text-lg text-cream tracking-wide">Confirmez votre trajet</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -1358,8 +1386,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} className={inputCard} required />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Société (si professionnel)</label>
-                      <input value={societe} onChange={e => setSociete(e.target.value)} className={inputCard} placeholder="Optionnel" />
+                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Société {isPro ? "*" : "(si professionnel)"}</label>
+                      <input value={societe} onChange={e => setSociete(e.target.value)} className={inputCard} placeholder={isPro ? "Raison sociale" : "Optionnel"} required={isPro} />
                     </div>
                   </div>
 
@@ -1426,6 +1454,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
                       <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
                       <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
+                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Profil</em><strong className="font-normal text-[13px] text-white/90">{CLIENT_TYPES.find(c => c.id === clientType)?.label}{paiementImmediat ? " · paiement en ligne" : " · facturation différée"}</strong></div>
                       <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
                     </div>
                     {pricing && (
@@ -1463,7 +1492,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   disabled={
                     (step === 1 && (!departure || !arrival || !date || !heure)) ||
                     (step === 2 && (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim()))) ||
-                    (step === 3 && (!nom.trim() || !prenom.trim() || !email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) || telephone.replace(/\D/g, "").length < 9 || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted)))
+                    (step === 3 && (!nom.trim() || !prenom.trim() || !email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) || telephone.replace(/\D/g, "").length < 9 || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted) || (isPro && !societe.trim())))
                   }
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
