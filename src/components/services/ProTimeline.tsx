@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import filmParcoursMission from "@/assets/film-parcours-mission.mp4.asset.json";
+import filmParcoursPro from "@/assets/film-parcours-pro.mp4.asset.json";
 
 const STEPS = [
   {
@@ -102,7 +102,7 @@ export default function ProTimeline() {
       >
         <video
           ref={videoRef}
-          src={filmParcoursMission.url}
+          src={filmParcoursPro.url}
           controls
           muted
           playsInline
