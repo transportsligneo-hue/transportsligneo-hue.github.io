@@ -24,6 +24,15 @@ import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 
+type ClientType = "particulier" | "pro_ponctuel" | "pro_recurrent" | "flotte";
+
+const CLIENT_TYPES: { id: ClientType; label: string; hint: string }[] = [
+  { id: "particulier", label: "Particulier", hint: "Paiement en ligne sécurisé" },
+  { id: "pro_ponctuel", label: "Professionnel ponctuel", hint: "Besoin occasionnel · paiement en ligne" },
+  { id: "pro_recurrent", label: "Professionnel récurrent", hint: "Volume régulier · facturation différée" },
+  { id: "flotte", label: "Gestionnaire de flotte", hint: "Compte flotte · facturation différée" },
+];
+
 
 // === Pricing data (inchangé) ===
 const CITY_DISTANCES: Record<string, Record<string, number>> = {
