@@ -65,6 +65,8 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
+import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
+
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
 import { logPoEvent } from "@/lib/po-history";
@@ -1097,6 +1099,28 @@ function AdminMissionDetail() {
           societe={clientSociete}
         />
       )}
+
+      {/* === Rattachement client === */}
+      <div className="flex flex-wrap items-center gap-2">
+        <AttachClientDialog
+          trajetId={trajet.id}
+          numeroMission={canonicalNumero}
+          currentEmail={trajet.client_email}
+          onAttached={fetchAll}
+          triggerLabel={trajet.client_email ? "Changer le client rattaché" : "Rattacher un client"}
+        />
+        {clientUserId && (
+          <Link
+            to="/admin/apercu-client/$userId"
+            params={{ userId: clientUserId }}
+            className="inline-flex items-center gap-1.5 rounded-md border border-pro-border px-3 py-1.5 text-sm text-pro-text-soft hover:text-pro-accent transition-colors"
+          >
+            <Eye size={14} /> Aperçu espace client
+          </Link>
+        )}
+      </div>
+
+
 
 
       {/* === Header mission === */}

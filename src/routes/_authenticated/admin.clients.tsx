@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RefreshCw, Eye, Ban, CheckCircle, UserRound, MapPin, Truck, Pencil, Euro, Search, Phone, Mail } from "lucide-react";
@@ -325,6 +325,15 @@ function AdminClients() {
                   <button type="button" className="dvx-ico" title="Voir la fiche" onClick={() => setSelected(c)}>
                     <Eye size={15} />
                   </button>
+                  <Link
+                    to="/admin/apercu-client/$userId"
+                    params={{ userId: c.user_id }}
+                    className="dvx-btn"
+                    title="Voir son espace client (lecture seule)"
+                  >
+                    <Eye size={13} />
+                    Aperçu espace client
+                  </Link>
                   {c.actif ? (
                     <button type="button" className="dvx-btn" onClick={() => toggleActif(c.user_id, false)}>
                       <Ban size={13} />
