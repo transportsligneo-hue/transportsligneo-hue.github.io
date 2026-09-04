@@ -28,6 +28,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
+import { EditDevisDialog } from "@/components/admin/EditDevisDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
@@ -150,6 +151,7 @@ function isExpired(d: DevisRow): boolean {
 function AdminDevisPage() {
   const convertDevis = useServerFn(convertDevisToMission);
   const [selected, setSelected] = useState<DevisRow | null>(null);
+  const [editing, setEditing] = useState<DevisRow | null>(null);
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [acceptations, setAcceptations] = useState<Record<string, AcceptationInfo>>({});
   const [loading, setLoading] = useState(true);
@@ -665,6 +667,10 @@ function AdminDevisPage() {
                   <button type="button" className="dvx-ico" title="Aperçu du devis" onClick={() => setSelected(d)}>
                     <Eye size={15} />
                   </button>
+                  <button type="button" className="dvx-btn outline" title="Modifier le devis" onClick={() => setEditing(d)}>
+                    <PenLine size={13} />
+                    Modifier
+                  </button>
                   <button
                     type="button"
                     className="dvx-btn solid"
@@ -722,6 +728,7 @@ function AdminDevisPage() {
         acceptation={selected ? acceptations[selected.id] ?? null : null}
         onClose={() => setSelected(null)}
         onDownload={handleDownload}
+        onEdit={(d) => setEditing(d)}
         onConvert={handleConvert}
         onArchive={(d) => { handleArchive(d); setSelected(null); }}
         onPriceSaved={(updated) => {
@@ -739,6 +746,18 @@ function AdminDevisPage() {
           setSelected((cur) => cur && cur.id === id ? { ...cur, statut: "accepte", locked_at: now } : cur);
         }}
       />
+      {editing && (
+        <EditDevisDialog
+          devis={editing}
+          onClose={() => setEditing(null)}
+          onSaved={(patch) => {
+            const updated = { ...editing, ...patch } as DevisRow;
+            setDevis((rows) => rows.map((row) => row.id === updated.id ? updated : row));
+            setSelected((current) => current?.id === updated.id ? updated : current);
+            setEditing(updated);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -748,6 +767,7 @@ function DevisDrawer({
   acceptation,
   onClose,
   onDownload,
+  onEdit,
   onConvert,
   onArchive,
   onPriceSaved,
@@ -758,6 +778,7 @@ function DevisDrawer({
   acceptation: AcceptationInfo | null;
   onClose: () => void;
   onDownload: (d: DevisRow) => void;
+  onEdit: (d: DevisRow) => void;
   onConvert: (d: DevisRow) => void;
   onArchive: (d: DevisRow) => void;
   onPriceSaved: (d: DevisRow) => void;
@@ -851,6 +872,9 @@ function DevisDrawer({
             onValidated={() => onValidated(devis.id)}
           />
           <Button size="sm" onClick={() => onDownload(devis)} icon={<Download size={12} />}>PDF</Button>
+          <Button size="sm" variant="secondary" onClick={() => onEdit(devis)} icon={<PenLine size={12} />}>
+            Modifier
+          </Button>
           <Button size="sm" onClick={() => onConvert(devis)} disabled={!!devis.mission_id} icon={<ArrowRightCircle size={12} />}>
             {devis.mission_id ? "Converti" : "→ Mission"}
           </Button>
