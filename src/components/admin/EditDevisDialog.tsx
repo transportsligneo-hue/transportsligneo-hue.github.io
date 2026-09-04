@@ -9,7 +9,7 @@
  */
 import { useMemo, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { Loader2, RefreshCw, Save, Search, X } from 'lucide-react'
+import { Loader2, Plus, RefreshCw, Save, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/admin/AdminUI'
@@ -21,6 +21,7 @@ import { lookupPlate } from '@/lib/plate.functions'
 import {
   applyPlateauPoidsToMessage,
   HEAVY_CHECKBOX_LABEL,
+  HEAVY_LABEL,
   HEAVY_SURCHARGE,
   HEAVY_THRESHOLD_KG,
   parsePlateauPoids,
