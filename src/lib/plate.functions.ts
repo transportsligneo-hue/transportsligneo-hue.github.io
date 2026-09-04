@@ -301,6 +301,21 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puissance_din",
         ]),
         finition: pick(flat, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
+        poids: pick(flat, [
+          "AWN_poids_a_vide",
+          "AWN_poids_vide",
+          "AWN_masse_en_ordre_de_marche",
+          "AWN_ptac",
+          "AWN_PTAC",
+          "poids_a_vide",
+          "poidsAVide",
+          "masse_en_ordre_de_marche",
+          "ptac",
+          "PTAC",
+          "poids",
+          "weight",
+        ]),
+
         carrosserie: pick(flat, [
           "AWN_carrosserie_CG",
           "AWN_carrosserie",
