@@ -58,6 +58,14 @@ export function AdminSidebar({ items, children }: Props) {
   }, {});
   const groupOrder = Object.keys(groups);
 
+  // Onglets mobiles (raccourcis les plus utilisés sur le terrain)
+  const TAB_PATHS = ["/admin", "/admin/missions", "/admin/attributions", "/admin/demandes"];
+  const tabItems = TAB_PATHS
+    .map((p) => items.find((i) => i.to === p))
+    .filter((i): i is AdminSidebarItem => !!i)
+    .map((i) => ({ ...i, label: i.label === "Tableau de bord" ? "Bord" : i.label === "Demandes de convoyage" ? "Demandes" : i.label }));
+
+
   const renderNav = (onClick?: () => void, mini = false) => (
     <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
       {groupOrder.map((g) => (
@@ -143,18 +151,19 @@ export function AdminSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile header === */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
-        <div className="h-14 px-4 flex items-center justify-between">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-b border-pro-border safe-top">
+        <div className="h-14 px-3 flex items-center justify-between gap-2">
           <LigneoBrand role="admin" variant="light" compact />
           <button
             onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
+            className="w-11 h-11 rounded-xl border border-pro-border flex items-center justify-center text-pro-text-soft active:bg-pro-surface-2"
             aria-label="Menu"
           >
-            <Menu size={18} />
+            <Menu size={20} />
           </button>
         </div>
       </header>
+
 
       {/* === Mobile drawer === */}
       {mobileOpen && (
@@ -198,13 +207,40 @@ export function AdminSidebar({ items, children }: Props) {
         {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
       </button>
 
+      {/* === Barre d'onglets mobile (style appli native) === */}
+      <nav className="admin-tabbar lg:hidden">
+        {tabItems.map((item) => {
+          const active = isActive(item);
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`admin-tabbar__item${active ? " is-active" : ""}`}
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="admin-tabbar__item"
+          aria-label="Ouvrir le menu complet"
+        >
+          <Menu size={20} />
+          <span>Menu</span>
+        </button>
+      </nav>
+
       {/* === Main === */}
       <main
         className={`flex-1 min-w-0 max-w-full ${collapsed ? "lg:ml-[76px]" : "lg:ml-64"} pt-14 lg:pt-0 min-h-screen flex flex-col transition-[margin] duration-200 ease-out`}
       >
         <DashboardHeader variant="light" enableGlobalSearch />
-        <div className="p-4 sm:p-5 lg:px-6 lg:py-7 max-w-[2000px] mx-auto w-full min-w-0 flex-1">{children}</div>
+        <div className="p-4 sm:p-5 lg:px-6 lg:py-7 pb-28 lg:pb-7 max-w-[2000px] mx-auto w-full min-w-0 flex-1">{children}</div>
       </main>
+
 
 
     </div>

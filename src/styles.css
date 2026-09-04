@@ -8560,3 +8560,67 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !i
 .tln-places-menu .places-suggestion-item:focus .places-suggestion-primary {
   color: #1c3fc4;
 }
+
+/* ============================================================
+   ADMIN MOBILE — ergonomie type application native
+   ============================================================ */
+.admin-tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 2px;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-top: 1px solid var(--admin-border, #e4e9f2);
+  box-shadow: 0 -6px 24px rgba(15,23,42,0.08);
+}
+@media (min-width: 1024px) { .admin-tabbar { display: none; } }
+.admin-tabbar__item {
+  flex: 1 1 0;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 14px;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-tabbar__item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-tabbar__item:active { background: #eef2f9; transform: scale(0.97); }
+.admin-tabbar__item.is-active { color: #1d4ed8; background: #e8efff; }
+
+@media (max-width: 1023px) {
+  /* Cibles tactiles confortables */
+  .admin-shell button,
+  .admin-shell a[role="button"],
+  .admin-shell [role="tab"],
+  .admin-shell select {
+    min-height: 40px;
+  }
+  .admin-shell input,
+  .admin-shell select,
+  .admin-shell textarea {
+    font-size: 16px; /* évite le zoom automatique iOS */
+  }
+  /* Aucun débordement horizontal de la page : les tableaux défilent dans leur bloc */
+  .admin-shell { overflow-x: hidden; }
+  .admin-shell table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .admin-shell .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+  /* Fenêtres modales plein écran et défilables */
+  .admin-shell [role="dialog"],
+  body > div [role="dialog"] {
+    max-height: 92dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
 import { toast } from "sonner";
+import { isApercuMode } from "@/lib/apercu-mode";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard-client")({
   component: ClientLayout,
@@ -30,9 +32,10 @@ function ClientLayout() {
   const { isAuthenticated, roleActif, isLoading, homeRoute, user, refresh } = useAuth();
   const navigate = useNavigate();
   const [resending, setResending] = useState(false);
+  const apercu = isApercuMode();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || apercu) return;
     if (!isAuthenticated) {
       navigate({ to: "/login" });
       return;
@@ -40,7 +43,8 @@ function ClientLayout() {
     if (homeRoute !== "/dashboard-client") {
       navigate({ to: homeRoute, replace: true });
     }
-  }, [isLoading, isAuthenticated, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, homeRoute, navigate, apercu]);
+
 
   if (isLoading) {
     return (
