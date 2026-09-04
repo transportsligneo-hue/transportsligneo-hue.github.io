@@ -74,6 +74,7 @@ import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/tra
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
+import { Route as ApiPublicAlertesFlotteTcoRouteImport } from './routes/api/public/alertes-flotte-tco'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiPublicAdminAlertsDispatchRouteImport } from './routes/api/public/admin-alerts-dispatch'
 import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
@@ -531,6 +532,12 @@ const ApiPublicAssistantChatRoute = ApiPublicAssistantChatRouteImport.update({
   path: '/api/public/assistant-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAlertesFlotteTcoRoute =
+  ApiPublicAlertesFlotteTcoRouteImport.update({
+    id: '/api/public/alertes-flotte-tco',
+    path: '/api/public/alertes-flotte-tco',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAlertesDocumentsVehiculesRoute =
   ApiPublicAlertesDocumentsVehiculesRouteImport.update({
     id: '/api/public/alertes-documents-vehicules',
@@ -1363,6 +1370,7 @@ export interface FileRoutesByFullPath {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -1540,6 +1548,7 @@ export interface FileRoutesByTo {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -1728,6 +1737,7 @@ export interface FileRoutesById {
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
+  '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -1916,6 +1926,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
     | '/api/public/stripe-webhook'
@@ -2093,6 +2104,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
     | '/api/public/stripe-webhook'
@@ -2280,6 +2292,7 @@ export interface FileRouteTypes {
     | '/api/facture/payment-intent'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
+    | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
     | '/api/public/stripe-webhook'
@@ -2387,6 +2400,7 @@ export interface RootRouteChildren {
   ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
   ApiPublicAdminAlertsDispatchRoute: typeof ApiPublicAdminAlertsDispatchRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
+  ApiPublicAlertesFlotteTcoRoute: typeof ApiPublicAlertesFlotteTcoRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -2878,6 +2892,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/assistant-chat'
       fullPath: '/api/public/assistant-chat'
       preLoaderRoute: typeof ApiPublicAssistantChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/alertes-flotte-tco': {
+      id: '/api/public/alertes-flotte-tco'
+      path: '/api/public/alertes-flotte-tco'
+      fullPath: '/api/public/alertes-flotte-tco'
+      preLoaderRoute: typeof ApiPublicAlertesFlotteTcoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/alertes-documents-vehicules': {
@@ -4221,6 +4242,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAdminAlertsDispatchRoute: ApiPublicAdminAlertsDispatchRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
+  ApiPublicAlertesFlotteTcoRoute: ApiPublicAlertesFlotteTcoRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   ApiPublicCampaignUnsubscribeRoute: ApiPublicCampaignUnsubscribeRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
