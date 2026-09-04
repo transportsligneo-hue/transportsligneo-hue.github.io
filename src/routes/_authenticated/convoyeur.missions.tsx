@@ -252,6 +252,8 @@ function ConvoyeurMissions() {
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
           non_roulant: !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant,
+          devisSigned: false,
+          edlNonRoulantDone: false,
           devis_id: (trajetRes.data as { devis_id?: string | null } | null)?.devis_id ?? null,
         };
       }));
@@ -590,8 +592,51 @@ function ConvoyeurMissions() {
     </EdlErrorBoundary>
   ) : null;
 
+  const nrMission = edlNonRoulantId ? missions.find((m) => m.id === edlNonRoulantId) : null;
+  const nrNumero = (m: Mission | null | undefined) =>
+    m?.numero_mission ? displayNumero(m.numero_mission) : `MIS-${(m?.id ?? "").slice(0, 8).toUpperCase()}`;
+  const nonRoulantOverlay = nrMission && user ? (
+    <EdlErrorBoundary onClose={() => setEdlNonRoulantId(null)}>
+      <EdlNonRoulantFlow
+        attributionId={nrMission.id}
+        userId={user.id}
+        driverName={driverDisplayName}
+        numero={nrNumero(nrMission)}
+        mission={{
+          depart: nrMission.trajet?.depart ?? null,
+          arrivee: nrMission.trajet?.arrivee ?? null,
+          marque: nrMission.trajet?.marque ?? null,
+          modele: nrMission.trajet?.modele ?? null,
+          immatriculation:
+            nrMission.trajet?.immatriculation ||
+            (nrMission.trajet as { vehicule_immatriculation?: string | null } | null)?.vehicule_immatriculation ||
+            null,
+          vin:
+            (nrMission.trajet as { vin?: string | null } | null)?.vin ||
+            (nrMission.trajet as { vehicule_vin?: string | null } | null)?.vehicule_vin ||
+            null,
+          date_trajet: nrMission.trajet?.date_trajet ?? null,
+        }}
+        onComplete={() => { void fetchMissions(); }}
+        onClose={() => setEdlNonRoulantId(null)}
+      />
+    </EdlErrorBoundary>
+  ) : null;
+
+  const devisMission = devisSheetId ? missions.find((m) => m.id === devisSheetId) : null;
+  const devisOverlay = devisMission && user && devisMission.devis_id ? (
+    <DevisSignatureSheet
+      attributionId={devisMission.id}
+      devisId={devisMission.devis_id}
+      userId={user.id}
+      numero={nrNumero(devisMission)}
+      onSigned={() => { void fetchMissions(); }}
+      onClose={() => setDevisSheetId(null)}
+    />
+  ) : null;
+
   if (loading) {
-    return inspectionOverlay ?? (
+    return inspectionOverlay ?? nonRoulantOverlay ?? (
       <div className="min-h-[60vh] flex items-center justify-center bg-[#050a1f]">
         <Loader2 className="animate-spin text-[#d4af37]" size={24} />
       </div>
@@ -916,6 +961,38 @@ function ConvoyeurMissions() {
           </div>
         )}
 
+        {/* === Véhicule non roulant : parcours plateau dédié === */}
+        {openMission.statut !== "propose" && openMission.non_roulant && (
+          <div className="mx-4 mb-4 rounded-2xl border border-[#d4af37]/35 bg-[#d4af37]/[0.06] p-4">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Véhicule non roulant · plateau</p>
+            <p className="mt-1 text-sm text-white/70">
+              Bon de prise en charge simplifié (arrimage, 4 photos, double signature) et devis à faire signer au remettant.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setEdlNonRoulantId(openMission.id)}
+                className="rounded-xl bg-[#d4af37] py-3 text-sm font-semibold text-[#0b1026]"
+              >
+                {openMission.edlNonRoulantDone ? "Bon de prise en charge signé ✓" : "Bon de prise en charge"}
+              </button>
+              <button
+                type="button"
+                disabled={!openMission.devis_id}
+                onClick={() => setDevisSheetId(openMission.id)}
+                className="rounded-xl border border-white/20 py-3 text-sm font-semibold text-white/85 disabled:opacity-40"
+              >
+                {openMission.devisSigned ? "Devis signé ✓" : "Faire signer le devis"}
+              </button>
+            </div>
+            {!openMission.devisSigned && (
+              <p className="mt-2 text-xs text-amber-300">
+                La mission ne peut pas être terminée tant que le devis signé n'est pas rattaché.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* === COCKPIT MISSION plein écran === */}
         {openMission.statut !== "propose" && user && rechargeOnly && (
           <RechargeMissionCockpit
@@ -1002,6 +1079,8 @@ function ConvoyeurMissions() {
   return (
     <>
     {inspectionOverlay}
+    {nonRoulantOverlay}
+    {devisOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
