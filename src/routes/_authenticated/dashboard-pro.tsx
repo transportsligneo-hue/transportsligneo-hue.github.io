@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import { isApercuMode, apercuAccountType } from "@/lib/apercu-mode";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro")({
   component: ProLayout,
@@ -42,11 +44,12 @@ function ProLayout() {
   const { isAuthenticated, isLoading, homeRoute } = useAuth();
   const navigate = useNavigate();
   const { data: orgInfo } = useCurrentOrgAccountType();
-  const accountType = orgInfo?.accountType ?? "b2b_standard";
+  const apercu = isApercuMode();
+  const accountType = (apercu ? apercuAccountType() : null) ?? orgInfo?.accountType ?? "b2b_standard";
   const navItems = useMemo(() => buildNavItems(accountType), [accountType]);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || apercu) return;
     if (!isAuthenticated) {
       navigate({ to: "/login" });
       return;
@@ -54,15 +57,16 @@ function ProLayout() {
     if (homeRoute !== "/dashboard-pro") {
       navigate({ to: homeRoute, replace: true });
     }
-  }, [isLoading, isAuthenticated, homeRoute, navigate]);
+  }, [isLoading, isAuthenticated, homeRoute, navigate, apercu]);
 
-  if (isLoading || !isAuthenticated || homeRoute !== "/dashboard-pro") {
+  if (isLoading || (!apercu && (!isAuthenticated || homeRoute !== "/dashboard-pro"))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />
       </div>
     );
   }
+
 
   return (
     <div className="dashboard-shell-light" data-account-type={accountType}>
