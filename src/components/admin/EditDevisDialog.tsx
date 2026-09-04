@@ -8,6 +8,7 @@
  * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
 import { useMemo, useState } from 'react'
+import { useServerFn } from '@tanstack/react-start'
 import { Loader2, RefreshCw, Save, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
@@ -102,6 +103,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false)
   const [recalcul, setRecalcul] = useState(false)
   const [plateLoading, setPlateLoading] = useState(false)
+  const lookupPlateFn = useServerFn(lookupPlate)
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
@@ -134,7 +136,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     }
     setPlateLoading(true)
     try {
-      const res = await lookupPlate({ data: { plate: plaque } })
+      const res = await lookupPlateFn({ data: { plate: plaque } })
       if (!res.ok || !res.data) {
         toast.error('Véhicule introuvable', { description: res.error ?? '' })
         return
