@@ -220,7 +220,8 @@ export async function generatePvMissionPdf(
   doc.setLineWidth(0.7);
   doc.line(M, 35, right, 35);
 
-  let y = 39;
+  const sp = isLiv ? 4.4 : 2.6;
+  let y = 38;
 
   /* ---------- Parties ---------- */
   const cw = (W - 10) / 3;
@@ -230,7 +231,7 @@ export async function generatePvMissionPdf(
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
     [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)", d.destinataire ?? null],
   ];
-  const partH = 22;
+  const partH = isLiv ? 21 : 18;
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
@@ -242,46 +243,46 @@ export async function generatePvMissionPdf(
     });
     doc.setDrawColor(...RULE);
     doc.setLineWidth(0.25);
-    doc.line(x + 4, y + 13.5, x + cw - 4, y + 13.5);
-    doc.line(x + 4, y + 19.5, x + cw - 4, y + 19.5);
+    doc.line(x + 4, y + partH - 8.5, x + cw - 4, y + partH - 8.5);
+    doc.line(x + 4, y + partH - 2.5, x + cw - 4, y + partH - 2.5);
     if (val) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.4);
       doc.setTextColor(...TEXT);
-      doc.text(doc.splitTextToSize(val, cw - 8)[0] as string, x + 4, y + 18.4);
+      doc.text(doc.splitTextToSize(val, cw - 8)[0] as string, x + 4, y + partH - 3.6);
     }
   });
-  y += partH + 3;
+  y += partH + sp;
 
   /* ---------- Véhicule ---------- */
   const c3 = (W - 20) / 3;
   const x2 = M + 6 + c3 + 4;
   const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  const vehH = 30;
+  const vehH = isLiv ? 28 : 24;
   panel(doc, M, y, W, vehH);
   panelTitle(doc, M + 6, y + 6.5, "Véhicule");
   field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
   field(doc, x2, y + 13, c3, "Immatriculation", d.immatriculation);
   field(doc, x3, y + 13, c3, "VIN", vin ? formatVin(vin) : null);
-  field(doc, M + 6, y + 23, c3, "N° mission Transports Ligneo", d.numero_mission);
-  field(doc, x2, y + 23, c3, isLiv ? "Kilométrage à la livraison" : "Kilométrage à la restitution", d.kilometrage_arrivee);
-  field(doc, x3, y + 23, c3, "Niveau carburant / batterie", d.carburant);
-  y += vehH + 3;
+  field(doc, M + 6, y + vehH - 7, c3, "N° mission Transports Ligneo", d.numero_mission);
+  field(doc, x2, y + vehH - 7, c3, isLiv ? "Kilométrage à la livraison" : "Kilométrage à la restitution", d.kilometrage_arrivee);
+  field(doc, x3, y + vehH - 7, c3, "Niveau carburant / batterie", d.carburant);
+  y += vehH + sp;
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = 20;
+    const cmpH = 15;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 13, c3, "Kilométrage au départ", d.kilometrage_depart);
     field(doc, x2, y + 13, c3, "Kilométrage à la restitution", d.kilometrage_arrivee);
     field(doc, x3, y + 13, c3, "Écart", null);
-    y += cmpH + 3;
+    y += cmpH + sp;
   }
 
   /* ---------- Trajet ---------- */
-  const trH = 28;
+  const trH = isLiv ? 26 : 22;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
@@ -289,9 +290,9 @@ export async function generatePvMissionPdf(
   panelTitle(doc, fx1, y + 6.5, isLiv ? "Détails du trajet" : "Détails de la restitution");
   field(doc, fx1, y + 12.5, fw, isLiv ? "Lieu de prise en charge" : "Lieu de mise à disposition initiale", d.lieu_prise_en_charge);
   field(doc, fx2, y + 12.5, fw, isLiv ? "Lieu de livraison" : "Lieu de restitution", d.lieu_livraison);
-  field(doc, fx1, y + 22, fw, isLiv ? "Date / heure de prise en charge" : "Date / heure de mise à disposition", d.date_prise_en_charge);
-  field(doc, fx2, y + 22, fw, isLiv ? "Date / heure de livraison" : "Date / heure de restitution", d.date_livraison);
-  y += trH + 4;
+  field(doc, fx1, y + trH - 6, fw, isLiv ? "Date / heure de prise en charge" : "Date / heure de mise à disposition", d.date_prise_en_charge);
+  field(doc, fx2, y + trH - 6, fw, isLiv ? "Date / heure de livraison" : "Date / heure de restitution", d.date_livraison);
+  y += trH + sp;
 
   /* ---------- Conformité ---------- */
   const confH = 10;
@@ -310,10 +311,10 @@ export async function generatePvMissionPdf(
   doc.text(isLiv ? "Livraison conforme, sans réserve" : "Restitution conforme, sans réserve", M + 11.5, y + 6.5);
   doc.setTextColor(...INK);
   doc.text(isLiv ? "Livraison avec réserves (voir ci-dessous)" : "Restitution avec réserves (voir ci-dessous)", XR + 11.5, y + 6.5);
-  y += confH + 3.5;
+  y += confH + sp;
 
   /* ---------- Réserves ---------- */
-  const resH = isLiv ? 26 : 20;
+  const resH = isLiv ? 26 : 15;
   doc.setFillColor(...CREAM);
   doc.setDrawColor(240, 224, 178);
   doc.setLineWidth(0.4);
@@ -330,19 +331,22 @@ export async function generatePvMissionPdf(
   doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.3);
   doc.roundedRect(M + 5, y + 8.5, W - 10, resH - 13, 1.6, 1.6, "FD");
-  y += resH + 3.5;
+  y += resH + sp;
 
   /* ---------- Schéma + légende ---------- */
   const legW = 60;
   const schW = W - legW - 4;
   const boxGap = 3;
-  const boxW = (schW - 12 - boxGap * 3) / 4;
-  const boxH = 26;
-  const schH = 16 + boxH + 5;
+  const ratios = [1, 1.85, 1, 1.85];
+  const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
+  const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
+  const schH = isLiv ? 42 : 33;
+  const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
   VUES.forEach(([png, label, iw, ih], i) => {
-    const bx = M + 6 + i * (boxW + boxGap);
+    const boxW = ratios[i]! * boxUnit;
+    const bx = boxX[i]!;
     const by = y + 11;
     doc.setFillColor(...WHITE);
     doc.setDrawColor(...BORDER);
@@ -387,7 +391,7 @@ export async function generatePvMissionPdf(
     doc.text(label, legX + 12, ly + 0.3);
     ly += legStep;
   });
-  y += schH + 3;
+  y += schH + sp;
 
   /* ---------- Dommages repris de l'EDL ---------- */
   const dommages = (d.dommages ?? []).slice(0, 4);
@@ -405,7 +409,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = 24;
+    const frH = 19;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -420,16 +424,16 @@ export async function generatePvMissionPdf(
     doc.setTextColor(...INK);
     doc.text("Aucun frais additionnel", M + 16, y + 14.3);
     doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 14.3);
-    field(doc, M + 6, y + 21, fw, "Nature des frais", null);
-    field(doc, fx2, y + 21, fw, "Montant estimé", null);
-    y += frH + 6;
+    field(doc, M + 6, y + 17, fw, "Nature des frais", null);
+    field(doc, fx2, y + 17, fw, "Montant estimé", null);
+    y += frH + sp;
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = 25;
+  const docsH = isLiv ? 24 : 20;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
-  let dy = y + 12;
+  let dy = y + (isLiv ? 12 : 10.5);
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
     checkbox(doc, M + 6, dy - 2.6, 3.2);
     checkbox(doc, XR, dy - 2.6, 3.2);
@@ -438,18 +442,19 @@ export async function generatePvMissionPdf(
     doc.setTextColor(...TEXT);
     doc.text(l, M + 12, dy);
     doc.text(r, XR + 6, dy);
-    dy += 5.2;
+    dy += isLiv ? 5.2 : 4.6;
   });
-  y += docsH + 3;
+  y += docsH + sp;
 
   /* ---------- Mention légale ---------- */
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.3);
   const mention = doc.splitTextToSize(mentionText(isLiv), W - 12) as string[];
-  const mentH = mention.length * 3.4 + 7;
+  const mentH = mention.length * 3.2 + 6;
   panel(doc, M, y, W, mentH);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.4);
   doc.setTextColor(...MUTED);
-  mention.forEach((l, i) => doc.text(l, M + 6, y + 5.5 + i * 3.4));
+  mention.forEach((l, i) => doc.text(l, M + 6, y + 5 + i * 3.2));
   y += mentH + 6;
 
   /* ---------- Signatures ---------- */
