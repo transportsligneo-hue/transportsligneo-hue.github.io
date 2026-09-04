@@ -1051,6 +1051,49 @@ function AdminNouveauDevisPage() {
                 </span>
               </label>
 
+              {plateau && (
+                <div className="space-y-3 rounded-lg border border-pro-border bg-white/60 p-3">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={lourd}
+                      onChange={(e) => setLourd(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 accent-pro-accent"
+                    />
+                    <span>
+                      <span className="block text-[13px] font-bold text-pro-text">{HEAVY_CHECKBOX_LABEL}</span>
+                      <span className="block text-[11.5px] text-pro-muted">
+                        Porte-voiture plus puissant : majoration carburant / consommation ajoutée en supplément.
+                      </span>
+                    </span>
+                  </label>
+                  <div className="flex items-end gap-2">
+                    <label className="flex-1">
+                      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-pro-muted">
+                        Poids du véhicule (kg)
+                      </span>
+                      <input
+                        value={poidsKg}
+                        inputMode="numeric"
+                        placeholder="ex. 1600"
+                        onChange={(e) => setPoidsKg(e.target.value)}
+                        className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none"
+                      />
+                    </label>
+                    <Button variant="secondary" onClick={() => lookupSiv(1)} disabled={sivLoading}>
+                      Rechercher par plaque
+                    </Button>
+                  </div>
+                  {poidsKg.trim() !== "" && Number(poidsKg.replace(/[^\d]/g, "")) > HEAVY_THRESHOLD_KG && !lourd && (
+                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                      Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                    </p>
+                  )}
+                </div>
+              )}
+
+
+
               <div className="border-t border-pro-border pt-3">
                 <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
                   Suppléments facturés (lignes détaillées sur le devis)
