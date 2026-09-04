@@ -916,6 +916,7 @@ export default function QuickMissionForm({
               </div>
             )}
           </div>
+          )}
 
           {/* Date et heure retour */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -973,7 +974,8 @@ export default function QuickMissionForm({
           })}
         </div>
 
-        {/* PV de livraison digitalisé */}
+        {/* PV de livraison digitalisé (comptes professionnels) */}
+        {!isParticulier && (
         <div className="mb-4">
           <label className={lbl}>PV de livraison digitalisé</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1004,6 +1006,7 @@ export default function QuickMissionForm({
             Model s'ouvre directement dans l'application mobile du convoyeur, Welcome Auto sur le site internet.
           </p>
         </div>
+        )}
 
         <div className="mb-4">
           <label className={lbl}>Autre demande / commentaire</label>
