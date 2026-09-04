@@ -75,6 +75,9 @@ export type PlateLookupResult = {
     carburant?: string;
     puissance?: string;
     finition?: string;
+    /** Poids à vide du véhicule en kg (source SIV), si disponible. */
+    poids?: string;
+
     /** Énergie normalisée : electrique | hybride | essence | diesel | gpl | hydrogene */
     energie?: string;
     /** Catégorie normalisée : citadine | berline | break | suv | monospace | coupe | cabriolet | utilitaire | luxe */
