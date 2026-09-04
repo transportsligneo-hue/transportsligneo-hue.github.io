@@ -143,18 +143,19 @@ export function AdminSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile header === */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-pro-border safe-top">
-        <div className="h-14 px-4 flex items-center justify-between">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-b border-pro-border safe-top">
+        <div className="h-14 px-3 flex items-center justify-between gap-2">
           <LigneoBrand role="admin" variant="light" compact />
           <button
             onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
+            className="w-11 h-11 rounded-xl border border-pro-border flex items-center justify-center text-pro-text-soft active:bg-pro-surface-2"
             aria-label="Menu"
           >
-            <Menu size={18} />
+            <Menu size={20} />
           </button>
         </div>
       </header>
+
 
       {/* === Mobile drawer === */}
       {mobileOpen && (
