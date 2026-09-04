@@ -65,6 +65,8 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
+import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
+
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { PoHistoryPanel } from "@/components/admin/PoHistoryPanel";
 import { logPoEvent } from "@/lib/po-history";
