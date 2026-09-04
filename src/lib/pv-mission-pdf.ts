@@ -120,7 +120,7 @@ function field(doc: jsPDF, x: number, y: number, w: number, label: string, value
     doc.setTextColor(...DOC_TEXT);
     doc.text(doc.splitTextToSize(v, w)[0] as string, x, y + 4.4);
   }
-  return y + 9.6;
+  return y + 9.0;
 }
 
 function cartouche(doc: jsPDF, x: number, y: number, w: number, h: number, titre: string, lignes: string[]) {
@@ -248,11 +248,11 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 18;
+  y += 17;
 
   /* Schéma des dommages + légende */
   const schemaTop = y + 4;
-  const schemaW = 78;
+  const schemaW = 68;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
@@ -306,7 +306,7 @@ export async function generatePvMissionPdf(
 
   /* Documents, mention légale et signatures : jamais à cheval sur le pied de page. */
   const pageH = doc.internal.pageSize.getHeight();
-  const need = 12 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 40;
+  const need = 10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 40;
   if (y + need > pageH - 18) {
     doc.addPage();
     y = 30;
