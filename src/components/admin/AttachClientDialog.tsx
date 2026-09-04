@@ -32,9 +32,13 @@ interface ProfileRow {
   societe: string | null;
 }
 
+type TypeClient = "particulier" | "b2b" | "flotte";
+
 interface Props {
   /** Trajet (opérationnel) à rattacher. */
   trajetId?: string | null;
+  /** Devis à rattacher au compte client. */
+  devisId?: string | null;
   /** Numéro de mission — sert à retrouver la fiche côté espace client. */
   numeroMission?: string | null;
   currentEmail?: string | null;
@@ -44,6 +48,7 @@ interface Props {
 
 export function AttachClientDialog({
   trajetId,
+  devisId,
   numeroMission,
   currentEmail,
   onAttached,
@@ -64,7 +69,7 @@ export function AttachClientDialog({
     nom: "",
     telephone: "",
     societe: "",
-    type_client: "particulier" as "particulier" | "b2b",
+    type_client: "particulier" as TypeClient,
   });
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -118,8 +123,23 @@ export function AttachClientDialog({
           .eq("numero", numeroMission);
       }
 
-      // Le devis et les factures liés suivent automatiquement le même client.
+      // Rattachement direct d'un devis (même si le client n'a pas encore choisi son mot de passe).
       let devisMaj = 0;
+      if (devisId) {
+        const { error: dErr } = await supabase
+          .from("devis")
+          .update({
+            user_id: p.user_id,
+            email: p.email,
+            nom: p.nom ?? nomComplet,
+            prenom: p.prenom ?? "",
+            telephone: p.telephone ?? null,
+          })
+          .eq("id", devisId);
+        if (dErr) throw dErr;
+        devisMaj += 1;
+      }
+
       let facturesMaj = 0;
       if (trajetId) {
         const { data: t } = await supabase
@@ -162,10 +182,11 @@ export function AttachClientDialog({
         facturesMaj > 0 ? `${facturesMaj} facture${facturesMaj > 1 ? "s" : ""}` : null,
       ].filter(Boolean);
 
+      const objet = devisId && !trajetId && !numeroMission ? "Devis rattaché" : "Mission rattachée";
       toast.success(
         details.length > 0
-          ? `Mission rattachée à ${nomComplet} · ${details.join(" et ")} mis à jour`
-          : `Mission rattachée à ${nomComplet}`,
+          ? `${objet} à ${nomComplet} · ${details.join(" et ")} mis à jour`
+          : `${objet} à ${nomComplet}`,
       );
       setOpen(false);
       onAttached?.();
@@ -251,11 +272,17 @@ export function AttachClientDialog({
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Rattacher la mission à un client</DialogTitle>
+          <DialogTitle>
+            {devisId && !trajetId && !numeroMission
+              ? "Rattacher le devis à un compte client"
+              : "Rattacher la mission à un client"}
+          </DialogTitle>
           <DialogDescription>
             {currentEmail
               ? `Client actuel : ${currentEmail}. Le rattachement remplacera ce contact.`
-              : "La mission apparaîtra immédiatement dans l'espace du client choisi."}
+              : devisId && !trajetId && !numeroMission
+                ? "Le devis apparaîtra immédiatement dans l'espace du client choisi, même s'il n'a pas encore créé son mot de passe."
+                : "La mission apparaîtra immédiatement dans l'espace du client choisi."}
           </DialogDescription>
         </DialogHeader>
 
@@ -335,11 +362,12 @@ export function AttachClientDialog({
               <Input value={form.societe} onChange={(e) => set("societe", e.target.value)} />
             </Field>
             <Field label="Type de client">
-              <Select value={form.type_client} onValueChange={(v) => set("type_client", v as "particulier" | "b2b")}>
+              <Select value={form.type_client} onValueChange={(v) => set("type_client", v as TypeClient)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="particulier">Particulier</SelectItem>
-                  <SelectItem value="b2b">Entreprise (B2B)</SelectItem>
+                  <SelectItem value="b2b">Entreprise (B2B ponctuel)</SelectItem>
+                  <SelectItem value="flotte">Flotte / compte pro</SelectItem>
                 </SelectContent>
               </Select>
             </Field>

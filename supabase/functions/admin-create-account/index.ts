@@ -13,7 +13,7 @@ interface CreateAccountPayload {
   nom: string;
   telephone?: string;
   role: "admin" | "super_admin" | "convoyeur" | "client" | "manager" | "sous_traitant";
-  type_client?: "particulier" | "b2b";
+  type_client?: "particulier" | "b2b" | "flotte";
   societe?: string;
   siret?: string;
   organization_id?: string;
@@ -94,12 +94,18 @@ Deno.serve(async (req) => {
     }
 
 
-    // Mettre à jour le profil avec type_client si fourni
-    if (body.type_client) {
-      await admin
-        .from("profiles")
-        .update({ type_client: body.type_client })
-        .eq("user_id", newUserId);
+    // Mettre à jour le profil : type de compte (particulier / b2b / flotte) + identité
+    {
+      const profilePatch: Record<string, unknown> = {};
+      if (body.type_client) profilePatch.type_client = body.type_client;
+      if (body.societe) profilePatch.societe = body.societe;
+      if (body.siret) profilePatch.siret = body.siret;
+      if (body.telephone) profilePatch.telephone = body.telephone;
+      if (body.prenom) profilePatch.prenom = body.prenom;
+      if (body.nom) profilePatch.nom = body.nom;
+      if (Object.keys(profilePatch).length > 0) {
+        await admin.from("profiles").update(profilePatch).eq("user_id", newUserId);
+      }
     }
 
     // Rattacher à une organisation si fourni
