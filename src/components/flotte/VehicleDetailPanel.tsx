@@ -103,9 +103,11 @@ const fmtEur = (n: number) =>
 const TABS = [
   { id: "general", label: "Général" },
   { id: "documents", label: "Documents" },
-  { id: "entretien", label: "Entretien & TCO" },
+  { id: "couts", label: "Coûts & TCO" },
+  { id: "entretien", label: "Entretien" },
   { id: "historique", label: "Historique" },
 ] as const;
+
 type TabId = (typeof TABS)[number]["id"];
 
 export default function VehicleDetailPanel({
