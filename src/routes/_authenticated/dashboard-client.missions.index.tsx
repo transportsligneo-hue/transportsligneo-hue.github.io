@@ -205,8 +205,7 @@ function ClientMissions() {
       </div>
 
       {/* Filters */}
-      {true && (
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -218,10 +217,9 @@ function ClientMissions() {
               }`}
             >
               {f.label}
-            </button>
-          ))}
-        </div>
-      )}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
