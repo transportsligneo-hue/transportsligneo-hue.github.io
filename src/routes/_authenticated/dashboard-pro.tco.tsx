@@ -337,7 +337,7 @@ function FleetTcoPage() {
                   if (!orgId) return;
                   setSavingSettings(true);
                   try {
-                    await saveFleetSettings === null;
+                    
                     await saveSettingsFn({ data: { orgId, seuilPct: seuil, emailsActifs, emails: [] } });
                     toast.success("Réglages enregistrés");
                     await load();
