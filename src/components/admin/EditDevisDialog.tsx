@@ -20,7 +20,6 @@ import { parseDevisSupplements, parseDevisPrestationLabel } from '@/lib/devis-pd
 import { lookupPlate } from '@/lib/plate.functions'
 import {
   applyPlateauPoidsToMessage,
-  HEAVY_CHECKBOX_LABEL,
   HEAVY_LABEL,
   HEAVY_SURCHARGE,
   HEAVY_THRESHOLD_KG,
