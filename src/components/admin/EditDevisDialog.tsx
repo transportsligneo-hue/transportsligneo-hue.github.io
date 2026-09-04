@@ -106,7 +106,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     parseDevisPrestationLabel(devis.message) ??
     (initialPlateau ? 'Transport sur plateau porte-voiture' : 'Convoyage routier par conducteur professionnel')
   const suppTotal =
-    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) + (initialPoids.lourd ? HEAVY_SURCHARGE : 0)
+    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) +
+    (initialPoids.lourd ? initialLourdMontant : 0)
   const initialPrincipal = Math.max(0, +(Number(devis.prix_estime ?? 0) - suppTotal).toFixed(2))
 
   const [f, setF] = useState({
@@ -122,6 +123,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     option_trajet: initialOption,
     plateau: initialPlateau,
     lourd: initialPoids.lourd,
+    lourd_montant: String(initialLourdMontant),
     poids_kg: initialPoids.poidsKg != null ? String(initialPoids.poidsKg) : '',
     marque: devis.marque ?? '',
     modele: devis.modele ?? '',
