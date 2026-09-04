@@ -2799,6 +2799,72 @@ export type Database = {
           },
         ]
       }
+      document_scan_logs: {
+        Row: {
+          attribution_id: string | null
+          classement: string
+          confiance: number | null
+          created_at: string
+          id: string
+          mission_document_id: string | null
+          numero_mission: string | null
+          ocr_client: string | null
+          ocr_date: string | null
+          ocr_numero: string | null
+          ocr_plaque: string | null
+          scanned_by: string
+          type_document: string
+          type_libre: string | null
+        }
+        Insert: {
+          attribution_id?: string | null
+          classement?: string
+          confiance?: number | null
+          created_at?: string
+          id?: string
+          mission_document_id?: string | null
+          numero_mission?: string | null
+          ocr_client?: string | null
+          ocr_date?: string | null
+          ocr_numero?: string | null
+          ocr_plaque?: string | null
+          scanned_by: string
+          type_document: string
+          type_libre?: string | null
+        }
+        Update: {
+          attribution_id?: string | null
+          classement?: string
+          confiance?: number | null
+          created_at?: string
+          id?: string
+          mission_document_id?: string | null
+          numero_mission?: string | null
+          ocr_client?: string | null
+          ocr_date?: string | null
+          ocr_numero?: string | null
+          ocr_plaque?: string | null
+          scanned_by?: string
+          type_document?: string
+          type_libre?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_scan_logs_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_scan_logs_mission_document_id_fkey"
+            columns: ["mission_document_id"]
+            isOneToOne: false
+            referencedRelation: "mission_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents_convoyeurs: {
         Row: {
           convoyeur_id: string
