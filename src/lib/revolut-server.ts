@@ -14,11 +14,23 @@ export function revolutBaseUrl(env: RevolutEnv): string {
 export function revolutSecretKey(env: RevolutEnv): string {
   const key =
     env === "sandbox"
-      ? process.env["REVOLUT_SECRET_KEY_SANDBOX"] || process.env["REVOLUT_SECRET_KEY"]
+      ? process.env["REVOLUT_SECRET_KEY_SANDBOX"]
       : process.env["REVOLUT_SECRET_KEY"];
-  if (!key) throw new Error("REVOLUT_SECRET_KEY is not configured");
+  if (!key) {
+    throw new Error(
+      env === "sandbox"
+        ? "Mode test indisponible : la clé secrète Revolut sandbox n'est pas configurée."
+        : "La clé secrète Revolut n'est pas configurée.",
+    );
+  }
+  if (!key.startsWith("sk_")) {
+    throw new Error(
+      `Clé Revolut ${env === "sandbox" ? "sandbox " : ""}invalide : il faut la clé secrète (commence par « sk_ »), pas la clé publique.`,
+    );
+  }
   return key;
 }
+
 
 async function revolutFetch(
   env: RevolutEnv,

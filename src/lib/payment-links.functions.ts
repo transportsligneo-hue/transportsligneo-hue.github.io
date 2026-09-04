@@ -12,9 +12,24 @@ export type PaymentLinkRow = {
   revolut_order_id: string | null;
   checkout_url: string | null;
   mission_id: string | null;
+  devis_id: string | null;
+  facture_id: string | null;
+  client_nom: string | null;
+  client_prenom: string | null;
+  client_email: string | null;
+  client_telephone: string | null;
   paid_at: string | null;
   created_at: string;
+  attributions?: {
+    numero_mission: string | null;
+    trajets?: { depart?: string | null; arrivee?: string | null; client_nom?: string | null } | null;
+  } | null;
+  devis?: { numero: string | null } | null;
+  factures?: { numero: string | null } | null;
 };
+
+const SELECT_COLS =
+  "id, provider, environment, amount_cents, currency, description, statut, revolut_order_id, checkout_url, mission_id, devis_id, facture_id, client_nom, client_prenom, client_email, client_telephone, paid_at, created_at, attributions:mission_id(numero_mission, trajets(depart, arrivee, client_nom)), devis:devis_id(numero), factures:facture_id(numero)";
 
 async function assertAdmin(context: any) {
   const { data: isAdmin } = await context.supabase.rpc("has_role", {
@@ -37,36 +52,45 @@ export const listPaymentLinks = createServerFn({ method: "POST" })
     await assertAdmin(context);
     let q = context.supabase
       .from("payment_links")
-      .select(
-        "id, provider, environment, amount_cents, currency, description, statut, revolut_order_id, checkout_url, mission_id, paid_at, created_at",
-      )
+      .select(SELECT_COLS)
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.missionId) q = q.eq("mission_id", data.missionId);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as PaymentLinkRow[];
+    return (rows ?? []) as unknown as PaymentLinkRow[];
   });
+
+export type CreatePaymentLinkInput = {
+  provider: "revolut" | "stripe";
+  amount: number;
+  currency?: string;
+  description?: string | null;
+  missionId?: string | null;
+  devisId?: string | null;
+  factureId?: string | null;
+  sandbox?: boolean;
+  clientNom?: string | null;
+  clientPrenom?: string | null;
+  clientEmail?: string | null;
+  clientTelephone?: string | null;
+  checkoutUrl?: string | null;
+};
 
 /** Crée un lien de paiement Revolut (ou enregistre un lien Stripe existant). */
 export const createPaymentLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (input: {
-      provider: "revolut" | "stripe";
-      amount: number;
-      currency?: string;
-      description?: string | null;
-      missionId?: string | null;
-      sandbox?: boolean;
-      email?: string | null;
-      checkoutUrl?: string | null;
-    }) => {
-      if (!input || !(input.amount > 0)) throw new Error("Montant invalide.");
-      if (input.amount > 1_000_000) throw new Error("Montant trop élevé.");
-      return input;
-    },
-  )
+  .inputValidator((input: CreatePaymentLinkInput) => {
+    if (!input || !(input.amount > 0)) throw new Error("Montant invalide.");
+    if (input.amount > 1_000_000) throw new Error("Montant trop élevé.");
+    if (!input.missionId && !input.devisId && !input.factureId) {
+      throw new Error("Rattachez le paiement à une mission, un devis ou une facture.");
+    }
+    if (input.clientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.clientEmail.trim())) {
+      throw new Error("Email invalide.");
+    }
+    return input;
+  })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const currency = (data.currency || "EUR").toUpperCase().slice(0, 3);
@@ -83,7 +107,7 @@ export const createPaymentLink = createServerFn({ method: "POST" })
         amountMinor,
         currency,
         description: data.description ?? null,
-        email: data.email ?? null,
+        email: data.clientEmail ?? null,
       });
       revolutOrderId = order.id;
       checkoutUrl =
@@ -102,25 +126,29 @@ export const createPaymentLink = createServerFn({ method: "POST" })
         currency,
         description: data.description ?? null,
         mission_id: data.missionId ?? null,
+        devis_id: data.devisId ?? null,
+        facture_id: data.factureId ?? null,
+        client_nom: data.clientNom ?? null,
+        client_prenom: data.clientPrenom ?? null,
+        client_email: data.clientEmail ?? null,
+        client_telephone: data.clientTelephone ?? null,
         revolut_order_id: revolutOrderId,
         checkout_url: checkoutUrl,
         created_by: context.userId,
       })
-      .select(
-        "id, provider, environment, amount_cents, currency, description, statut, revolut_order_id, checkout_url, mission_id, paid_at, created_at",
-      )
+      .select(SELECT_COLS)
       .single();
     if (error) throw new Error(error.message);
 
     if (data.missionId) {
       await context.supabase.from("payment_link_attachments").insert({
-        payment_link_id: row.id,
+        payment_link_id: (row as any).id,
         mission_id: data.missionId,
         action: "attach",
         performed_by: context.userId,
       });
     }
-    return row as PaymentLinkRow;
+    return row as unknown as PaymentLinkRow;
   });
 
 /** Rattache ou détache un lien de paiement d'une mission (historisé). */
@@ -147,19 +175,105 @@ export const setPaymentLinkMission = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** Historique de rattachement d'un lien. */
+/** Historique complet d'un lien : rattachements, envois et événements bancaires. */
 export const getPaymentLinkHistory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { linkId: string }) => input)
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { data: rows, error } = await context.supabase
-      .from("payment_link_attachments")
-      .select("id, action, mission_id, created_at, performed_by")
-      .eq("payment_link_id", data.linkId)
-      .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return rows ?? [];
+    const [attachments, sends] = await Promise.all([
+      context.supabase
+        .from("payment_link_attachments")
+        .select("id, action, mission_id, created_at")
+        .eq("payment_link_id", data.linkId)
+        .order("created_at", { ascending: false }),
+      context.supabase
+        .from("payment_link_sends")
+        .select("id, channel, destination, status, error, created_at")
+        .eq("payment_link_id", data.linkId)
+        .order("created_at", { ascending: false }),
+    ]);
+    return {
+      attachments: (attachments.data ?? []) as any[],
+      sends: (sends.data ?? []) as any[],
+    };
+  });
+
+/** Envoie le lien de paiement par SMS ou par email au client. */
+export const sendPaymentLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { linkId: string; channel: "sms" | "email"; destination?: string | null }) => {
+    if (!input?.linkId) throw new Error("Lien introuvable.");
+    if (input.channel !== "sms" && input.channel !== "email") throw new Error("Canal invalide.");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: link, error } = await context.supabase
+      .from("payment_links")
+      .select(SELECT_COLS)
+      .eq("id", data.linkId)
+      .single();
+    if (error || !link) throw new Error("Lien introuvable.");
+    const row = link as unknown as PaymentLinkRow;
+    if (!row.checkout_url) throw new Error("Ce lien n'a pas d'URL de paiement.");
+
+    const destination =
+      (data.destination || "").trim() ||
+      (data.channel === "sms" ? row.client_telephone : row.client_email) ||
+      "";
+    if (!destination) {
+      throw new Error(
+        data.channel === "sms" ? "Aucun numéro de téléphone." : "Aucune adresse email.",
+      );
+    }
+
+    const montant = new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: row.currency || "EUR",
+    }).format(row.amount_cents / 100);
+    const reference =
+      row.attributions?.numero_mission || row.devis?.numero || row.factures?.numero || null;
+
+    let ok = false;
+    let errorMessage: string | null = null;
+
+    if (data.channel === "sms") {
+      const { sendSms } = await import("@/lib/sms.server");
+      const body = `Transports Ligneo${reference ? ` - ${reference}` : ""}\nRèglement de ${montant} :\n${row.checkout_url}`;
+      const res = await sendSms({ to: destination, body, from: "LIGNEO" });
+      ok = res.ok;
+      errorMessage = res.error ?? null;
+    } else {
+      const { sendTransactionalEmailServer } = await import("@/server/email-send");
+      const res = await sendTransactionalEmailServer({
+        templateName: "message-manuel",
+        recipientEmail: destination,
+        templateData: {
+          prenom: row.client_prenom ?? undefined,
+          subject: `Votre lien de paiement — ${montant}`,
+          titre: "Votre lien de paiement sécurisé",
+          message: `${row.description ? `${row.description}. ` : ""}Montant à régler : ${montant}. Le paiement est sécurisé et immédiat.`,
+          reference: reference ?? undefined,
+          ctaLabel: `Payer ${montant}`,
+          ctaUrl: row.checkout_url,
+        },
+      });
+      ok = res.success;
+      errorMessage = res.success ? null : (res.reason ?? "Envoi impossible");
+    }
+
+    await context.supabase.from("payment_link_sends").insert({
+      payment_link_id: row.id,
+      channel: data.channel,
+      destination,
+      status: ok ? "sent" : "failed",
+      error: errorMessage,
+      sent_by: context.userId,
+    });
+
+    if (!ok) throw new Error(errorMessage || "Envoi impossible.");
+    return { ok: true, destination };
   });
 
 /** Rafraîchit le statut depuis Revolut (secours si le webhook n'est pas reçu). */
@@ -198,7 +312,7 @@ export const searchMissionsForPaymentLink = createServerFn({ method: "POST" })
     const term = data.q.trim();
     let q = context.supabase
       .from("attributions")
-      .select("id, numero_mission, statut, created_at, trajets(depart, arrivee, client_nom, prix_client)")
+      .select("id, numero_mission, statut, created_at, trajets(depart, arrivee, client_nom, client_email, client_telephone, prix_client)")
       .order("created_at", { ascending: false })
       .limit(20);
     if (term) {
@@ -208,5 +322,25 @@ export const searchMissionsForPaymentLink = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return (rows ?? []) as any[];
+  });
 
+/** Recherche de devis pour le sélecteur de rattachement. */
+export const searchDevisForPaymentLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { q: string }) => ({ q: String(input?.q ?? "").slice(0, 80) }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const term = data.q.trim();
+    let q = context.supabase
+      .from("devis")
+      .select("id, numero, nom, prenom, email, telephone, depart, arrivee, prix_estime, created_at")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (term) {
+      const like = `%${term.replace(/[%,]/g, "")}%`;
+      q = q.or(`numero.ilike.${like},nom.ilike.${like},email.ilike.${like}`);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as any[];
   });
