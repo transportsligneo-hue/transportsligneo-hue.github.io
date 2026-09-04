@@ -203,7 +203,9 @@ function AdminPaiements() {
           ["stripe", `Stripe B2C (${devis.filter(d => d.statut === "paye" || d.amount_paid_cents).length})`],
           ["b2b", `B2B (${b2b.length})`],
           ["factures", `Factures (${factures.length})`],
+          ["liens", "Liens de paiement"],
         ] as [Tab, string][]).map(([k, lbl]) => (
+
           <button
             key={k}
             type="button"
