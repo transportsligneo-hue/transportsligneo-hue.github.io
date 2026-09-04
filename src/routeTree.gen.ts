@@ -88,6 +88,7 @@ import { Route as AuthenticatedEntrepriseSocieteRouteImport } from './routes/_au
 import { Route as AuthenticatedEntrepriseMissionsRouteImport } from './routes/_authenticated/entreprise.missions'
 import { Route as AuthenticatedEntrepriseMembresRouteImport } from './routes/_authenticated/entreprise.membres'
 import { Route as AuthenticatedEntrepriseFacturesRouteImport } from './routes/_authenticated/entreprise.factures'
+import { Route as AuthenticatedDashboardProTcoRouteImport } from './routes/_authenticated/dashboard-pro.tco'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
 import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
@@ -609,6 +610,12 @@ const AuthenticatedEntrepriseFacturesRoute =
     id: '/factures',
     path: '/factures',
     getParentRoute: () => AuthenticatedEntrepriseRoute,
+  } as any)
+const AuthenticatedDashboardProTcoRoute =
+  AuthenticatedDashboardProTcoRouteImport.update({
+    id: '/tco',
+    path: '/tco',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProSocieteRoute =
   AuthenticatedDashboardProSocieteRouteImport.update({
@@ -1341,6 +1348,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
@@ -1517,6 +1525,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
@@ -1704,6 +1713,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
+  '/_authenticated/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/_authenticated/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
   '/_authenticated/entreprise/membres': typeof AuthenticatedEntrepriseMembresRoute
   '/_authenticated/entreprise/missions': typeof AuthenticatedEntrepriseMissionsRoute
@@ -1891,6 +1901,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/societe'
+    | '/dashboard-pro/tco'
     | '/entreprise/factures'
     | '/entreprise/membres'
     | '/entreprise/missions'
@@ -2067,6 +2078,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/societe'
+    | '/dashboard-pro/tco'
     | '/entreprise/factures'
     | '/entreprise/membres'
     | '/entreprise/missions'
@@ -2253,6 +2265,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/nouvelle-mission'
     | '/_authenticated/dashboard-pro/societe'
+    | '/_authenticated/dashboard-pro/tco'
     | '/_authenticated/entreprise/factures'
     | '/_authenticated/entreprise/membres'
     | '/_authenticated/entreprise/missions'
@@ -2964,6 +2977,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/entreprise/factures'
       preLoaderRoute: typeof AuthenticatedEntrepriseFacturesRouteImport
       parentRoute: typeof AuthenticatedEntrepriseRoute
+    }
+    '/_authenticated/dashboard-pro/tco': {
+      id: '/_authenticated/dashboard-pro/tco'
+      path: '/tco'
+      fullPath: '/dashboard-pro/tco'
+      preLoaderRoute: typeof AuthenticatedDashboardProTcoRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/societe': {
       id: '/_authenticated/dashboard-pro/societe'
@@ -4002,6 +4022,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
   AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
+  AuthenticatedDashboardProTcoRoute: typeof AuthenticatedDashboardProTcoRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
 }
 
@@ -4027,6 +4048,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProNouvelleMissionRouteWithChildren,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
+    AuthenticatedDashboardProTcoRoute: AuthenticatedDashboardProTcoRoute,
     AuthenticatedDashboardProIndexRoute: AuthenticatedDashboardProIndexRoute,
   }
 
