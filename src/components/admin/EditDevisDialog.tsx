@@ -228,7 +228,13 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     try {
       const km = f.distance_km === '' ? null : Number(String(f.distance_km).replace(',', '.'))
       const priceChanged = Number(devis.prix_estime ?? 0) !== prix
-      const message = applyPlateauToMessage(f.message, f.plateau)
+      const poidsKg = f.poids_kg === '' ? null : Number(String(f.poids_kg).replace(',', '.'))
+      const message = applyPlateauPoidsToMessage(applyPlateauToMessage(f.message, f.plateau), {
+        plateau: f.plateau,
+        lourd: f.plateau && f.lourd,
+        poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+      })
+
       const patch: Record<string, unknown> = {
         prenom: f.prenom.trim(),
         nom: f.nom.trim(),
