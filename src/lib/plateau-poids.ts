@@ -45,8 +45,12 @@ export function parsePlateauPoids(message?: string | null): { lourd: boolean; po
  */
 export function applyPlateauPoidsToMessage(
   message: string,
-  opts: { plateau: boolean; lourd: boolean; poidsKg?: number | null },
+  opts: { plateau: boolean; lourd: boolean; poidsKg?: number | null; surcharge?: number | null },
 ): string {
+  const montant =
+    opts.surcharge != null && Number.isFinite(opts.surcharge) && opts.surcharge > 0
+      ? opts.surcharge
+      : HEAVY_SURCHARGE
   const lines = message
     .split('\n')
     .filter((l) => !FLAG_RE.test(l) && !POIDS_RE.test(l) && !SUPP_RE.test(l))
@@ -55,7 +59,7 @@ export function applyPlateauPoidsToMessage(
       lines.push(`Poids véhicule : ${Math.round(opts.poidsKg)} kg`)
     }
     lines.push(`Véhicule de plus de 1,1 t : ${opts.lourd ? 'oui' : 'non'}`)
-    if (opts.lourd) lines.push(`Supplément : ${HEAVY_LABEL} = ${HEAVY_SURCHARGE} €`)
+    if (opts.lourd) lines.push(`Supplément : ${HEAVY_LABEL} = ${montant} €`)
   }
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }

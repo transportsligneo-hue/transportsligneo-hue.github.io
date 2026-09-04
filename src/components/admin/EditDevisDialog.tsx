@@ -20,7 +20,6 @@ import { parseDevisSupplements, parseDevisPrestationLabel } from '@/lib/devis-pd
 import { lookupPlate } from '@/lib/plate.functions'
 import {
   applyPlateauPoidsToMessage,
-  HEAVY_CHECKBOX_LABEL,
   HEAVY_LABEL,
   HEAVY_SURCHARGE,
   HEAVY_THRESHOLD_KG,
@@ -95,6 +94,9 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialParsed = parseDevisSupplements(devis.message)
   const initialPlateau = initialParsed.plateau
   const initialPoids = parsePlateauPoids(devis.message)
+  /** Montant de la majoration « > 1,1 t » : relu depuis le devis, 200 € par défaut, modifiable. */
+  const initialLourdMontant =
+    initialParsed.supplements.find((s) => /plus de 1[,.]1\s*t/i.test(s.label))?.montant ?? HEAVY_SURCHARGE
   /** Suppléments éditables : la majoration « > 1,1 t » reste pilotée par la case à cocher. */
   const initialSupplements = initialParsed.supplements
     .filter((s) => !/plus de 1[,.]1\s*t/i.test(s.label))
@@ -103,7 +105,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     parseDevisPrestationLabel(devis.message) ??
     (initialPlateau ? 'Transport sur plateau porte-voiture' : 'Convoyage routier par conducteur professionnel')
   const suppTotal =
-    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) + (initialPoids.lourd ? HEAVY_SURCHARGE : 0)
+    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) +
+    (initialPoids.lourd ? initialLourdMontant : 0)
   const initialPrincipal = Math.max(0, +(Number(devis.prix_estime ?? 0) - suppTotal).toFixed(2))
 
   const [f, setF] = useState({
@@ -119,6 +122,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     option_trajet: initialOption,
     plateau: initialPlateau,
     lourd: initialPoids.lourd,
+    lourd_montant: String(initialLourdMontant),
     poids_kg: initialPoids.poidsKg != null ? String(initialPoids.poidsKg) : '',
     marque: devis.marque ?? '',
     modele: devis.modele ?? '',
@@ -150,9 +154,9 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       +(
         num(f.principal_montant) +
         supplements.reduce((s, x) => s + num(x.montant), 0) +
-        (f.plateau && f.lourd ? HEAVY_SURCHARGE : 0)
+        (f.plateau && f.lourd ? num(f.lourd_montant) : 0)
       ).toFixed(2),
-    [f.principal_montant, f.plateau, f.lourd, supplements],
+    [f.principal_montant, f.plateau, f.lourd, f.lourd_montant, supplements],
   )
 
   const updateSupp = (i: number, patch: Partial<{ label: string; montant: string }>) =>
@@ -165,8 +169,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     set('lourd', checked)
     toast.info(
       checked
-        ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
-        : `Majoration véhicule > 1,1 t retirée (−${HEAVY_SURCHARGE} €)`,
+        ? `Majoration véhicule > 1,1 t appliquée (+${num(f.lourd_montant)} €)`
+        : `Majoration véhicule > 1,1 t retirée (−${num(f.lourd_montant)} €)`,
     )
   }
 
@@ -277,6 +281,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
           plateau: f.plateau,
           lourd: f.plateau && f.lourd,
           poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+          surcharge: f.plateau && f.lourd ? num(f.lourd_montant) : null,
         },
       )
 
@@ -429,12 +434,23 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                     onChange={(e) => toggleLourd(e.target.checked)}
                   />
                   <span>
-                    {HEAVY_CHECKBOX_LABEL}
+                    Véhicule de plus de 1,1 t (majoration carburant)
                     <span className="block text-[11px] text-pro-muted">
                       Porte-voiture plus puissant : majoration carburant / consommation.
                     </span>
                   </span>
                 </label>
+                {f.lourd && (
+                  <Field label="Montant de la majoration (€ TTC)">
+                    <input
+                      className={`${inputCls} sm:max-w-[160px]`}
+                      inputMode="decimal"
+                      placeholder={String(HEAVY_SURCHARGE)}
+                      value={f.lourd_montant}
+                      onChange={(e) => set('lourd_montant', e.target.value)}
+                    />
+                  </Field>
+                )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                   <Field label="Poids du véhicule (kg)">
                     <input
@@ -457,7 +473,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 </div>
                 {f.poids_kg !== '' && Number(f.poids_kg) > HEAVY_THRESHOLD_KG && !f.lourd && (
                   <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
-                    Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                    Ce véhicule dépasse 1,1 t : la majoration de {num(f.lourd_montant)} € devrait être cochée.
                   </p>
                 )}
               </div>
@@ -542,7 +558,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 {f.plateau && f.lourd && (
                   <div className="col-span-full flex items-center justify-between text-xs text-pro-muted">
                     <span>{HEAVY_LABEL}</span>
-                    <span>{HEAVY_SURCHARGE.toFixed(2)} €</span>
+                    <span>{num(f.lourd_montant).toFixed(2)} €</span>
                   </div>
                 )}
               </div>
