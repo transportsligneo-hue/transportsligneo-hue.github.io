@@ -437,12 +437,16 @@ function AdminNouveauDevisPage() {
 
   /** Suppléments cochés, valorisés. */
   const supplements = useMemo(
-    () =>
-      SUPPLEMENTS_LIST.filter((s) => s.id in supp)
+    () => [
+      ...SUPPLEMENTS_LIST.filter((s) => s.id in supp)
         .map((s) => ({ label: s.label, montant: Math.round(parseEur(supp[s.id]) * 100) / 100 }))
         .filter((s) => s.montant > 0),
-    [supp],
+      // Majoration « véhicule de plus de 1,1 t » (plateau uniquement)
+      ...(plateau && lourd ? [{ label: HEAVY_LABEL, montant: HEAVY_SURCHARGE }] : []),
+    ],
+    [supp, plateau, lourd],
   );
+
   const totalSupplements = useMemo(
     () => supplements.reduce((s, x) => s + x.montant, 0),
     [supplements],
