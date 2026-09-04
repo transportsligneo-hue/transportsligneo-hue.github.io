@@ -95,6 +95,9 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialParsed = parseDevisSupplements(devis.message)
   const initialPlateau = initialParsed.plateau
   const initialPoids = parsePlateauPoids(devis.message)
+  /** Montant de la majoration « > 1,1 t » : relu depuis le devis, 200 € par défaut, modifiable. */
+  const initialLourdMontant =
+    initialParsed.supplements.find((s) => /plus de 1[,.]1\s*t/i.test(s.label))?.montant ?? HEAVY_SURCHARGE
   /** Suppléments éditables : la majoration « > 1,1 t » reste pilotée par la case à cocher. */
   const initialSupplements = initialParsed.supplements
     .filter((s) => !/plus de 1[,.]1\s*t/i.test(s.label))
