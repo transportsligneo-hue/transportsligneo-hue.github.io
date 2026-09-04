@@ -491,11 +491,70 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 Recalculer
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Distance (km)"><input className={inputCls} inputMode="decimal" value={f.distance_km} onChange={(e) => set('distance_km', e.target.value)} /></Field>
-              <Field label="Montant TTC (€)"><input className={inputCls} inputMode="decimal" value={f.prix_estime} onChange={(e) => set('prix_estime', e.target.value)} /></Field>
               <Field label="Libellé tarifaire"><input className={inputCls} value={f.tarif_label} onChange={(e) => set('tarif_label', e.target.value)} /></Field>
             </div>
+
+            <div className="space-y-2 rounded-lg border border-pro-border bg-pro-surface/50 p-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-pro-muted">
+                Détail des prestations (lignes du devis)
+              </p>
+              <div className="grid grid-cols-[1fr_110px_28px] items-end gap-2">
+                <Field label="Prestation principale">
+                  <input className={inputCls} value={f.principal_label} onChange={(e) => set('principal_label', e.target.value)} />
+                </Field>
+                <Field label="Montant TTC">
+                  <input
+                    className={inputCls}
+                    inputMode="decimal"
+                    value={f.principal_montant}
+                    onChange={(e) => set('principal_montant', e.target.value)}
+                  />
+                </Field>
+                <span />
+                {supplements.map((s, i) => (
+                  <div key={i} className="col-span-full grid grid-cols-[1fr_110px_28px] items-center gap-2">
+                    <input
+                      className={inputCls}
+                      placeholder="ex. Péages et frais de route"
+                      value={s.label}
+                      onChange={(e) => updateSupp(i, { label: e.target.value })}
+                    />
+                    <input
+                      className={inputCls}
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={s.montant}
+                      onChange={(e) => updateSupp(i, { montant: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSupp(i)}
+                      className="rounded-lg p-1.5 text-pro-muted hover:bg-black/5"
+                      aria-label="Supprimer la ligne"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                {f.plateau && f.lourd && (
+                  <div className="col-span-full flex items-center justify-between text-xs text-pro-muted">
+                    <span>{HEAVY_LABEL}</span>
+                    <span>{HEAVY_SURCHARGE.toFixed(2)} €</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <Button variant="secondary" size="sm" onClick={addSupp} icon={<Plus size={12} />}>
+                  Ajouter une ligne
+                </Button>
+                <p className="text-sm font-semibold text-pro-text">
+                  Total TTC : {totalTtc.toFixed(2)} €
+                </p>
+              </div>
+            </div>
+
             <label className="flex items-center gap-2 text-xs text-pro-text">
               <input type="checkbox" className="accent-pro-accent" checked={f.prix_manuel} onChange={(e) => set('prix_manuel', e.target.checked)} />
               Prix imposé manuellement (aucun recalcul automatique)
