@@ -256,6 +256,7 @@ function AdminLayout() {
   return (
     <AdminSidebar items={navItems}>
       <Outlet />
+      <AdminScanDocumentFab />
     </AdminSidebar>
   );
 }
