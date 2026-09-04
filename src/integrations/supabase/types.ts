@@ -7255,6 +7255,7 @@ export type Database = {
           marque: string | null
           mission_group_id: string | null
           modele: string | null
+          non_roulant: boolean | null
           numero_mission: string | null
           options_meta: Json | null
           prix_convoyeur_fixe: number | null
@@ -7480,6 +7481,7 @@ export type Database = {
           marque: string
           mission_group_id: string
           modele: string
+          non_roulant: boolean
           numero_mission: string
           options_meta: Json
           prix_convoyeur_fixe: number
