@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { sendAccountAccessInvite } from "@/lib/admin-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +36,7 @@ interface Props {
 }
 
 export function CreateAccountDialog({ onCreated }: Props) {
+  const sendInvite = useServerFn(sendAccountAccessInvite);
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);

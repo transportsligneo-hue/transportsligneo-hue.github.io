@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Loader2, Search, UserPlus, Link2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { sendAccountAccessInvite } from "@/lib/admin-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +51,7 @@ export function AttachClientDialog({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"existant" | "nouveau">("existant");
+  const sendInvite = useServerFn(sendAccountAccessInvite);
   const [busy, setBusy] = useState(false);
 
   const [q, setQ] = useState("");
