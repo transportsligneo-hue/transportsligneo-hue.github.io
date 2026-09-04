@@ -72,6 +72,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialOption = String(devis.option_trajet ?? 'Livraison simple')
   const initialPlateau = parseDevisSupplements(devis.message).plateau
+  const initialPoids = parsePlateauPoids(devis.message)
 
   const [f, setF] = useState({
     prenom: devis.prenom ?? '',
@@ -85,6 +86,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     date_a_determiner: !devis.date_souhaitee,
     option_trajet: initialOption,
     plateau: initialPlateau,
+    lourd: initialPoids.lourd,
+    poids_kg: initialPoids.poidsKg != null ? String(initialPoids.poidsKg) : '',
     marque: devis.marque ?? '',
     modele: devis.modele ?? '',
     type_vehicule: devis.type_vehicule ?? '',
@@ -98,8 +101,70 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   })
   const [saving, setSaving] = useState(false)
   const [recalcul, setRecalcul] = useState(false)
+  const [plateLoading, setPlateLoading] = useState(false)
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
+
+  /** Ajoute ou retire la majoration « plus de 1,1 t » du montant TTC. */
+  const toggleLourd = (checked: boolean) => {
+    setF((p) => {
+      const current = parseFloat(String(p.prix_estime).replace(/\s/g, '').replace(',', '.'))
+      const next = Number.isFinite(current)
+        ? Math.max(0, +(current + (checked ? HEAVY_SURCHARGE : -HEAVY_SURCHARGE)).toFixed(2))
+        : current
+      return {
+        ...p,
+        lourd: checked,
+        prix_estime: Number.isFinite(next) ? String(next) : p.prix_estime,
+      }
+    })
+    toast.info(
+      checked
+        ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
+        : `Majoration véhicule > 1,1 t retirée (−${HEAVY_SURCHARGE} €)`,
+    )
+  }
+
+  /** Récupère le poids (et les infos véhicule) via la plaque. */
+  const rechercherPlaque = async () => {
+    const plaque = f.immatriculation.trim().toUpperCase()
+    if (plaque.replace(/[^A-Z0-9]/g, '').length < 4) {
+      toast.error('Renseignez une immatriculation valide')
+      return
+    }
+    setPlateLoading(true)
+    try {
+      const res = await lookupPlate({ data: { plate: plaque } })
+      if (!res.ok || !res.data) {
+        toast.error('Véhicule introuvable', { description: res.error ?? '' })
+        return
+      }
+      const d = res.data
+      const poids = d.poids ? Number(d.poids) : null
+      setF((p) => ({
+        ...p,
+        marque: p.marque || d.marque || '',
+        modele: p.modele || d.modele || '',
+        carburant: p.carburant || d.carburant || '',
+        poids_kg: poids != null && Number.isFinite(poids) ? String(poids) : p.poids_kg,
+      }))
+      if (poids != null && Number.isFinite(poids)) {
+        toast.success(`Poids récupéré : ${poids} kg`, {
+          description:
+            poids > HEAVY_THRESHOLD_KG
+              ? 'Au-dessus de 1,1 t — pensez à cocher la majoration.'
+              : 'En dessous de 1,1 t — pas de majoration.',
+        })
+      } else {
+        toast.warning('Poids non communiqué par le fichier véhicule', { description: 'Saisissez-le manuellement.' })
+      }
+    } catch (e) {
+      toast.error('Recherche impossible', { description: e instanceof Error ? e.message : '' })
+    } finally {
+      setPlateLoading(false)
+    }
+  }
+
 
   /** Liste des options : les valeurs standard + celle du devis si elle diffère. */
   const optionList = useMemo(() => {
