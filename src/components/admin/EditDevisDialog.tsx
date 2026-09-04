@@ -435,12 +435,23 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                     onChange={(e) => toggleLourd(e.target.checked)}
                   />
                   <span>
-                    {HEAVY_CHECKBOX_LABEL}
+                    Véhicule de plus de 1,1 t (majoration carburant)
                     <span className="block text-[11px] text-pro-muted">
                       Porte-voiture plus puissant : majoration carburant / consommation.
                     </span>
                   </span>
                 </label>
+                {f.lourd && (
+                  <Field label="Montant de la majoration (€ TTC)">
+                    <input
+                      className={`${inputCls} sm:max-w-[160px]`}
+                      inputMode="decimal"
+                      placeholder={String(HEAVY_SURCHARGE)}
+                      value={f.lourd_montant}
+                      onChange={(e) => set('lourd_montant', e.target.value)}
+                    />
+                  </Field>
+                )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                   <Field label="Poids du véhicule (kg)">
                     <input
