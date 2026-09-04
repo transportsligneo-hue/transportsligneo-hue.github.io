@@ -220,7 +220,7 @@ export async function generatePvMissionPdf(
   doc.setLineWidth(0.7);
   doc.line(M, 35, right, 35);
 
-  const sp = isLiv ? 4.4 : 2.6;
+  const sp = isLiv ? 4.4 : 2.0;
   let y = 38;
 
   /* ---------- Parties ---------- */
@@ -231,7 +231,7 @@ export async function generatePvMissionPdf(
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
     [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)", d.destinataire ?? null],
   ];
-  const partH = isLiv ? 21 : 18;
+  const partH = isLiv ? 21 : 17;
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
@@ -259,7 +259,7 @@ export async function generatePvMissionPdf(
   const x2 = M + 6 + c3 + 4;
   const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  const vehH = isLiv ? 28 : 24;
+  const vehH = isLiv ? 28 : 26;
   panel(doc, M, y, W, vehH);
   panelTitle(doc, M + 6, y + 6.5, "Véhicule");
   field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
@@ -272,7 +272,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = 15;
+    const cmpH = 14;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 13, c3, "Kilométrage au départ", d.kilometrage_depart);
@@ -282,7 +282,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Trajet ---------- */
-  const trH = isLiv ? 26 : 22;
+  const trH = isLiv ? 26 : 25;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
@@ -314,7 +314,7 @@ export async function generatePvMissionPdf(
   y += confH + sp;
 
   /* ---------- Réserves ---------- */
-  const resH = isLiv ? 26 : 15;
+  const resH = isLiv ? 26 : 18;
   doc.setFillColor(...CREAM);
   doc.setDrawColor(240, 224, 178);
   doc.setLineWidth(0.4);
@@ -330,7 +330,7 @@ export async function generatePvMissionPdf(
   doc.setFillColor(...WHITE);
   doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.3);
-  doc.roundedRect(M + 5, y + 8.5, W - 10, resH - 13, 1.6, 1.6, "FD");
+  doc.roundedRect(M + 5, y + 8, W - 10, resH - 11.5, 1.6, 1.6, "FD");
   y += resH + sp;
 
   /* ---------- Schéma + légende ---------- */
@@ -340,7 +340,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = isLiv ? 42 : 33;
+  const schH = isLiv ? 42 : 30;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -375,8 +375,8 @@ export async function generatePvMissionPdf(
   doc.setFontSize(7.4);
   doc.setTextColor(212, 175, 55);
   doc.text("LÉGENDE", legX + legW / 2, y + 5.4, { align: "center" });
-  let ly = y + 13.5;
-  const legStep = (schH - 14) / LEGENDE.length;
+  const legStep = Math.min(4.6, (schH - 12) / LEGENDE.length);
+  let ly = y + 8 + (schH - 8 - legStep * (LEGENDE.length - 1)) / 2;
   LEGENDE.forEach(([code, label]) => {
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(0.3);
@@ -409,7 +409,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = 19;
+    const frH = 24;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -424,8 +424,8 @@ export async function generatePvMissionPdf(
     doc.setTextColor(...INK);
     doc.text("Aucun frais additionnel", M + 16, y + 14.3);
     doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 14.3);
-    field(doc, M + 6, y + 17, fw, "Nature des frais", null);
-    field(doc, fx2, y + 17, fw, "Montant estimé", null);
+    field(doc, M + 6, y + 22, fw, "Nature des frais", null);
+    field(doc, fx2, y + 22, fw, "Montant estimé", null);
     y += frH + sp;
   }
 
@@ -455,7 +455,7 @@ export async function generatePvMissionPdf(
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   mention.forEach((l, i) => doc.text(l, M + 6, y + 5 + i * 3.2));
-  y += mentH + 6;
+  y += mentH + (isLiv ? 6 : 4.5);
 
   /* ---------- Signatures ---------- */
   doc.setFont("helvetica", "bold");
