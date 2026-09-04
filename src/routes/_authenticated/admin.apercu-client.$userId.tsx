@@ -344,8 +344,9 @@ function InterfacePreview({ typeClient }: { typeClient: string | null }) {
           style={{ width: current.width * scale, height: current.height * scale }}
         >
           <iframe
-            key={`${page}-${device}-${reload}`}
-            src={page}
+            key={`${espaceKey}-${page}-${device}-${reload}`}
+            src={`${page}${espace.suffix}`}
+
             title="Aperçu de l'interface"
             className="origin-top-left border-0 bg-white"
             style={{
