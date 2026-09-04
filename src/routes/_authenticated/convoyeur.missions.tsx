@@ -251,7 +251,9 @@ function ConvoyeurMissions() {
           leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
-          non_roulant: !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant,
+          non_roulant:
+            !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant ||
+            !!((trajetRes.data as { options_meta?: { plateau?: boolean } | null } | null)?.options_meta?.plateau),
           devisSigned: false,
           edlNonRoulantDone: false,
           devis_id: (trajetRes.data as { devis_id?: string | null } | null)?.devis_id ?? null,
