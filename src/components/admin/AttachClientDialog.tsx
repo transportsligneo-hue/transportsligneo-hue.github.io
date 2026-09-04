@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Loader2, Search, UserPlus, Link2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { sendAccountAccessInvite } from "@/lib/admin-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +51,7 @@ export function AttachClientDialog({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"existant" | "nouveau">("existant");
+  const sendInvite = useServerFn(sendAccountAccessInvite);
   const [busy, setBusy] = useState(false);
 
   const [q, setQ] = useState("");
@@ -57,7 +60,6 @@ export function AttachClientDialog({
 
   const [form, setForm] = useState({
     email: "",
-    password: "",
     prenom: "",
     nom: "",
     telephone: "",
@@ -126,9 +128,13 @@ export function AttachClientDialog({
     }
   }
 
+  function randomTempPassword() {
+    return `Lgn-${crypto.randomUUID()}-${Date.now().toString(36)}!`;
+  }
+
   async function createAndAttach() {
-    if (!form.email || form.password.length < 8) {
-      toast.error("Email et mot de passe (min. 8 caractères) requis");
+    if (!form.email.trim()) {
+      toast.error("L'adresse email est requise");
       return;
     }
     setBusy(true);
@@ -147,7 +153,7 @@ export function AttachClientDialog({
           },
           body: JSON.stringify({
             email: form.email.trim(),
-            password: form.password,
+            password: randomTempPassword(),
             prenom: form.prenom,
             nom: form.nom,
             telephone: form.telephone || undefined,
@@ -159,6 +165,20 @@ export function AttachClientDialog({
       );
       const json = (await res.json()) as { ok?: boolean; user_id?: string; error?: string };
       if (!res.ok || !json.ok || !json.user_id) throw new Error(json.error ?? "Erreur création");
+
+      try {
+        await sendInvite({
+          data: {
+            email: form.email.trim(),
+            prenom: form.prenom,
+            role: "client",
+            origin: window.location.origin,
+          },
+        });
+        toast.success("Invitation envoyée : le client choisira son mot de passe.");
+      } catch (e) {
+        toast.error(`Compte créé, mais l'invitation n'est pas partie : ${(e as Error).message}`);
+      }
 
       await attach({
         user_id: json.user_id,
@@ -254,9 +274,6 @@ export function AttachClientDialog({
             <Field label="Email *">
               <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
             </Field>
-            <Field label="Mot de passe * (min. 8)">
-              <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => set("password", e.target.value)} />
-            </Field>
             <Field label="Prénom">
               <Input value={form.prenom} onChange={(e) => set("prenom", e.target.value)} />
             </Field>
@@ -278,6 +295,9 @@ export function AttachClientDialog({
                 </SelectContent>
               </Select>
             </Field>
+            <p className="sm:col-span-2 text-xs text-slate-500">
+              Aucun mot de passe à saisir : le client reçoit un email d'invitation et crée lui-même son mot de passe.
+            </p>
             <div className="sm:col-span-2 flex justify-end">
               <Button onClick={() => void createAndAttach()} disabled={busy} className="gap-2">
                 {busy ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}

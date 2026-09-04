@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { sendAccountAccessInvite } from "@/lib/admin-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,13 +36,13 @@ interface Props {
 }
 
 export function CreateAccountDialog({ onCreated }: Props) {
+  const sendInvite = useServerFn(sendAccountAccessInvite);
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orgs, setOrgs] = useState<OrgOption[]>([]);
 
   const [form, setForm] = useState({
     email: "",
-    password: "",
     prenom: "",
     nom: "",
     telephone: "",
@@ -65,8 +67,8 @@ export function CreateAccountDialog({ onCreated }: Props) {
     setForm((f) => ({ ...f, [k]: v }));
 
   async function handleSubmit() {
-    if (!form.email || !form.password || form.password.length < 8) {
-      toast.error("Email et mot de passe (min. 8 caractères) requis");
+    if (!form.email.trim()) {
+      toast.error("L'adresse email est requise");
       return;
     }
     setSubmitting(true);
@@ -85,7 +87,7 @@ export function CreateAccountDialog({ onCreated }: Props) {
           },
           body: JSON.stringify({
             email: form.email,
-            password: form.password,
+            password: `Lgn-${crypto.randomUUID()}-${Date.now().toString(36)}!`,
             prenom: form.prenom,
             nom: form.nom,
             telephone: form.telephone || undefined,
@@ -101,10 +103,22 @@ export function CreateAccountDialog({ onCreated }: Props) {
       const json = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !json.ok) throw new Error(json.error ?? "Erreur création");
 
-      toast.success("Compte créé avec succès");
+      try {
+        await sendInvite({
+          data: {
+            email: form.email.trim(),
+            prenom: form.prenom,
+            role: form.role,
+            origin: window.location.origin,
+          },
+        });
+        toast.success("Compte créé — invitation envoyée pour choisir le mot de passe.");
+      } catch (e) {
+        toast.error(`Compte créé, mais l'invitation n'est pas partie : ${(e as Error).message}`);
+      }
       setOpen(false);
       setForm({
-        email: "", password: "", prenom: "", nom: "", telephone: "",
+        email: "", prenom: "", nom: "", telephone: "",
         role: "client", type_client: "particulier", societe: "", siret: "",
         organization_id: "", member_role: "member",
       });
@@ -129,16 +143,13 @@ export function CreateAccountDialog({ onCreated }: Props) {
         <DialogHeader>
           <DialogTitle>Créer un compte utilisateur</DialogTitle>
           <DialogDescription>
-            Le compte est créé immédiatement et confirmé. L'utilisateur pourra se connecter avec son mot de passe.
+            Le compte est créé immédiatement. L'utilisateur reçoit un email d'invitation et choisit lui-même son mot de passe.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
           <Field label="Email *">
             <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
-          </Field>
-          <Field label="Mot de passe * (min. 8)">
-            <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => set("password", e.target.value)} />
           </Field>
           <Field label="Prénom">
             <Input value={form.prenom} onChange={(e) => set("prenom", e.target.value)} />
