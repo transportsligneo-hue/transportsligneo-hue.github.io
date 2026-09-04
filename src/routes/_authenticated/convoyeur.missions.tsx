@@ -12,6 +12,8 @@ import {
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
+import { EdlNonRoulantFlow } from "@/components/inspection/EdlNonRoulantFlow";
+import { DevisSignatureSheet } from "@/components/mission/DevisSignatureSheet";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
@@ -41,6 +43,11 @@ interface Mission extends MissionCardData {
   /** Duo Livraison + Restitution : identifiant du groupe et rôle du volet. */
   mission_group_id?: string | null;
   leg_type?: string | null;
+  /** Véhicule non roulant : parcours EDL plateau + devis signé obligatoire. */
+  non_roulant?: boolean;
+  devis_id?: string | null;
+  devisSigned?: boolean;
+  edlNonRoulantDone?: boolean;
 }
 
 
@@ -117,6 +124,9 @@ function ConvoyeurMissions() {
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
+  /** Parcours « véhicule non roulant » (plateau) — indépendant de l'EDL roulant. */
+  const [edlNonRoulantId, setEdlNonRoulantId] = useState<string | null>(null);
+  const [devisSheetId, setDevisSheetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -216,7 +226,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("non_roulant, devis_id, depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -241,8 +251,33 @@ function ConvoyeurMissions() {
           leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
+          non_roulant: !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant,
+          devis_id: (trajetRes.data as { devis_id?: string | null } | null)?.devis_id ?? null,
         };
       }));
+
+      // Véhicules non roulants : état du devis signé et du bon de prise en charge.
+      try {
+        const nrIds = enriched.filter((m) => m.non_roulant).map((m) => m.id);
+        if (nrIds.length) {
+          const [{ data: sigs }, { data: edls }] = await Promise.all([
+            supabase.from("mission_devis_signatures" as never).select("attribution_id").in("attribution_id", nrIds),
+            supabase.from("edl_non_roulant" as never).select("attribution_id, statut").in("attribution_id", nrIds),
+          ]);
+          const signed = new Set(((sigs ?? []) as unknown as Array<{ attribution_id: string }>).map((r) => r.attribution_id));
+          const done = new Set(
+            ((edls ?? []) as unknown as Array<{ attribution_id: string; statut: string | null }>)
+              .filter((r) => r.statut === "signe")
+              .map((r) => r.attribution_id),
+          );
+          enriched.forEach((m) => {
+            m.devisSigned = signed.has(m.id);
+            m.edlNonRoulantDone = done.has(m.id);
+          });
+        }
+      } catch {
+        /* non bloquant */
+      }
 
       // Lots multi-plaques : missions distinctes reliées pour l'attribution groupée.
       let withLots = enriched;
@@ -394,6 +429,15 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
+    if (statut === "termine" || statut === "en_attente_validation") {
+      const m = missions.find((mm) => mm.id === id);
+      if (m?.non_roulant && !m.devisSigned) {
+        toast.error("Devis non signé", {
+          description: "Faites signer le devis au remettant (papier ou sur l'app) avant de terminer la mission.",
+        });
+        return false;
+      }
+    }
     const { queued } = await writeWithOutbox(
       { kind: "update", table: "attributions", values: { statut }, match: { id } },
       `Statut ${statut}`,
