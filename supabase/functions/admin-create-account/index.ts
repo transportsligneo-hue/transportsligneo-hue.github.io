@@ -13,7 +13,7 @@ interface CreateAccountPayload {
   nom: string;
   telephone?: string;
   role: "admin" | "super_admin" | "convoyeur" | "client" | "manager" | "sous_traitant";
-  type_client?: "particulier" | "b2b";
+  type_client?: "particulier" | "b2b" | "flotte";
   societe?: string;
   siret?: string;
   organization_id?: string;
