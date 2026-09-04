@@ -75,6 +75,9 @@ export type PlateLookupResult = {
     carburant?: string;
     puissance?: string;
     finition?: string;
+    /** Poids à vide du véhicule en kg (source SIV), si disponible. */
+    poids?: string;
+
     /** Énergie normalisée : electrique | hybride | essence | diesel | gpl | hydrogene */
     energie?: string;
     /** Catégorie normalisée : citadine | berline | break | suv | monospace | coupe | cabriolet | utilitaire | luxe */
@@ -298,6 +301,21 @@ export const lookupPlate = createServerFn({ method: "POST" })
           "puissance_din",
         ]),
         finition: pick(flat, ["AWN_version", "AWN_serie", "finition", "version", "variant", "Version"]),
+        poids: pick(flat, [
+          "AWN_poids_a_vide",
+          "AWN_poids_vide",
+          "AWN_masse_en_ordre_de_marche",
+          "AWN_ptac",
+          "AWN_PTAC",
+          "poids_a_vide",
+          "poidsAVide",
+          "masse_en_ordre_de_marche",
+          "ptac",
+          "PTAC",
+          "poids",
+          "weight",
+        ]),
+
         carrosserie: pick(flat, [
           "AWN_carrosserie_CG",
           "AWN_carrosserie",
@@ -317,6 +335,14 @@ export const lookupPlate = createServerFn({ method: "POST" })
         const m = result.annee.match(/(\d{4})/);
         if (m) result.annee = m[1];
       }
+
+      // Poids : ne garder que les chiffres (ex. "1 460 kg" → "1460")
+      if (result.poids) {
+        const digits = String(result.poids).replace(/[^\d]/g, "");
+        result.poids = digits || undefined;
+      }
+
+
 
       result.energie = normalizeEnergie(result.carburant);
       result.categorie = detectCategorie(result.carrosserie, result.modele, result.finition);

@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { lookupPlate } from "@/lib/plate.functions";
+import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
+
 import { supabase } from "@/integrations/supabase/client";
 import PlacesInput from "@/components/PlacesInput";
 
@@ -223,6 +225,10 @@ function AdminNouveauDevisPage() {
   const [dateRetourADeterminer, setDateRetourADeterminer] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [plateau, setPlateau] = useState(false);
+  /** Plateau : véhicule de plus de 1,1 t → majoration carburant. */
+  const [lourd, setLourd] = useState(false);
+  const [poidsKg, setPoidsKg] = useState("");
+
   const [supp, setSupp] = useState<Record<string, string>>({});
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
@@ -330,6 +336,11 @@ function AdminNouveauDevisPage() {
           if (d.marque) setVehicule(d.marque);
           if (d.modele) setModele(d.modele);
           if (d.vin) setVin(d.vin.toUpperCase());
+          if (d.poids) {
+            setPoidsKg(d.poids);
+            if (Number(d.poids) > HEAVY_THRESHOLD_KG) setLourd(true);
+          }
+
         } else {
           if (d.marque) setVehiculeRetour(d.marque);
           if (d.modele) setModeleRetour(d.modele);
@@ -437,12 +448,16 @@ function AdminNouveauDevisPage() {
 
   /** Suppléments cochés, valorisés. */
   const supplements = useMemo(
-    () =>
-      SUPPLEMENTS_LIST.filter((s) => s.id in supp)
+    () => [
+      ...SUPPLEMENTS_LIST.filter((s) => s.id in supp)
         .map((s) => ({ label: s.label, montant: Math.round(parseEur(supp[s.id]) * 100) / 100 }))
         .filter((s) => s.montant > 0),
-    [supp],
+      // Majoration « véhicule de plus de 1,1 t » (plateau uniquement)
+      ...(plateau && lourd ? [{ label: HEAVY_LABEL, montant: HEAVY_SURCHARGE }] : []),
+    ],
+    [supp, plateau, lourd],
   );
+
   const totalSupplements = useMemo(
     () => supplements.reduce((s, x) => s + x.montant, 0),
     [supplements],
@@ -518,6 +533,9 @@ function AdminNouveauDevisPage() {
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     plateau ? "Transport sur plateau : oui (véhicule non roulant)" : null,
+    plateau && poidsKg.trim() ? `Poids véhicule : ${poidsKg.replace(/[^\d]/g, "")} kg` : null,
+    plateau ? `Véhicule de plus de 1,1 t : ${lourd ? "oui" : "non"}` : null,
+
     dateADeterminer ? "Date d'enlèvement : à déterminer avec le client" : null,
     isAllerRetour && dateRetourADeterminer ? "Date de restitution : à déterminer avec le client" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
@@ -1032,6 +1050,49 @@ function AdminNouveauDevisPage() {
                   </span>
                 </span>
               </label>
+
+              {plateau && (
+                <div className="space-y-3 rounded-lg border border-pro-border bg-white/60 p-3">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={lourd}
+                      onChange={(e) => setLourd(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 accent-pro-accent"
+                    />
+                    <span>
+                      <span className="block text-[13px] font-bold text-pro-text">{HEAVY_CHECKBOX_LABEL}</span>
+                      <span className="block text-[11.5px] text-pro-muted">
+                        Porte-voiture plus puissant : majoration carburant / consommation ajoutée en supplément.
+                      </span>
+                    </span>
+                  </label>
+                  <div className="flex items-end gap-2">
+                    <label className="flex-1">
+                      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-pro-muted">
+                        Poids du véhicule (kg)
+                      </span>
+                      <input
+                        value={poidsKg}
+                        inputMode="numeric"
+                        placeholder="ex. 1600"
+                        onChange={(e) => setPoidsKg(e.target.value)}
+                        className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none"
+                      />
+                    </label>
+                    <Button variant="secondary" onClick={() => handleSivLookup(1)} disabled={sivLoading}>
+                      Rechercher par plaque
+                    </Button>
+                  </div>
+                  {poidsKg.trim() !== "" && Number(poidsKg.replace(/[^\d]/g, "")) > HEAVY_THRESHOLD_KG && !lourd && (
+                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                      Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                    </p>
+                  )}
+                </div>
+              )}
+
+
 
               <div className="border-t border-pro-border pt-3">
                 <p className="mb-2 text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">

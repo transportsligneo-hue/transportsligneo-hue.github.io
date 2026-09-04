@@ -8,7 +8,8 @@
  * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
 import { useMemo, useState } from 'react'
-import { Loader2, RefreshCw, Save, X } from 'lucide-react'
+import { useServerFn } from '@tanstack/react-start'
+import { Loader2, RefreshCw, Save, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/admin/AdminUI'
@@ -16,6 +17,15 @@ import PlacesInput from '@/components/PlacesInput'
 import { calculateBasePrice, getDistance, type TripType } from '@/lib/reservation-pricing'
 import { geocodeDistanceKm, normalizeAddress } from '@/lib/distance-fallback'
 import { parseDevisSupplements } from '@/lib/devis-pdf'
+import { lookupPlate } from '@/lib/plate.functions'
+import {
+  applyPlateauPoidsToMessage,
+  HEAVY_CHECKBOX_LABEL,
+  HEAVY_SURCHARGE,
+  HEAVY_THRESHOLD_KG,
+  parsePlateauPoids,
+} from '@/lib/plateau-poids'
+
 
 interface Props {
   devis: Record<string, any>
@@ -63,6 +73,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialOption = String(devis.option_trajet ?? 'Livraison simple')
   const initialPlateau = parseDevisSupplements(devis.message).plateau
+  const initialPoids = parsePlateauPoids(devis.message)
 
   const [f, setF] = useState({
     prenom: devis.prenom ?? '',
@@ -76,6 +87,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     date_a_determiner: !devis.date_souhaitee,
     option_trajet: initialOption,
     plateau: initialPlateau,
+    lourd: initialPoids.lourd,
+    poids_kg: initialPoids.poidsKg != null ? String(initialPoids.poidsKg) : '',
     marque: devis.marque ?? '',
     modele: devis.modele ?? '',
     type_vehicule: devis.type_vehicule ?? '',
@@ -89,8 +102,71 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   })
   const [saving, setSaving] = useState(false)
   const [recalcul, setRecalcul] = useState(false)
+  const [plateLoading, setPlateLoading] = useState(false)
+  const lookupPlateFn = useServerFn(lookupPlate)
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
+
+  /** Ajoute ou retire la majoration « plus de 1,1 t » du montant TTC. */
+  const toggleLourd = (checked: boolean) => {
+    setF((p) => {
+      const current = parseFloat(String(p.prix_estime).replace(/\s/g, '').replace(',', '.'))
+      const next = Number.isFinite(current)
+        ? Math.max(0, +(current + (checked ? HEAVY_SURCHARGE : -HEAVY_SURCHARGE)).toFixed(2))
+        : current
+      return {
+        ...p,
+        lourd: checked,
+        prix_estime: Number.isFinite(next) ? String(next) : p.prix_estime,
+      }
+    })
+    toast.info(
+      checked
+        ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
+        : `Majoration véhicule > 1,1 t retirée (−${HEAVY_SURCHARGE} €)`,
+    )
+  }
+
+  /** Récupère le poids (et les infos véhicule) via la plaque. */
+  const rechercherPlaque = async () => {
+    const plaque = f.immatriculation.trim().toUpperCase()
+    if (plaque.replace(/[^A-Z0-9]/g, '').length < 4) {
+      toast.error('Renseignez une immatriculation valide')
+      return
+    }
+    setPlateLoading(true)
+    try {
+      const res = await lookupPlateFn({ data: { plate: plaque } })
+      if (!res.ok || !res.data) {
+        toast.error('Véhicule introuvable', { description: res.error ?? '' })
+        return
+      }
+      const d = res.data
+      const poids = d.poids ? Number(d.poids) : null
+      setF((p) => ({
+        ...p,
+        marque: p.marque || d.marque || '',
+        modele: p.modele || d.modele || '',
+        carburant: p.carburant || d.carburant || '',
+        poids_kg: poids != null && Number.isFinite(poids) ? String(poids) : p.poids_kg,
+      }))
+      if (poids != null && Number.isFinite(poids)) {
+        toast.success(`Poids récupéré : ${poids} kg`, {
+          description:
+            poids > HEAVY_THRESHOLD_KG
+              ? 'Au-dessus de 1,1 t — pensez à cocher la majoration.'
+              : 'En dessous de 1,1 t — pas de majoration.',
+        })
+      } else {
+        toast.warning('Poids non communiqué par le fichier véhicule', { description: 'Saisissez-le manuellement.' })
+      }
+    } catch (e) {
+      toast.error('Recherche impossible', { description: e instanceof Error ? e.message : '' })
+    } finally {
+      setPlateLoading(false)
+    }
+  }
+
 
   /** Liste des options : les valeurs standard + celle du devis si elle diffère. */
   const optionList = useMemo(() => {
@@ -120,13 +196,17 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       let km = getDistance(f.depart, f.arrivee)
       if (km == null) km = await geocodeDistanceKm(f.depart, f.arrivee)
       const res = calculateBasePrice(f.depart, f.arrivee, type, km)
-      setF((p) => ({
-        ...p,
-        distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
-        tarif_label: res.label,
-        prix_estime: res.base > 0 ? String(res.base) : p.prix_estime,
-        prix_manuel: false,
-      }))
+      setF((p) => {
+        const majoration = p.plateau && p.lourd ? HEAVY_SURCHARGE : 0
+        return {
+          ...p,
+          distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
+          tarif_label: res.label,
+          prix_estime: res.base > 0 ? String(+(res.base + majoration).toFixed(2)) : p.prix_estime,
+          prix_manuel: false,
+        }
+      })
+
       if (res.base > 0) toast.success('Prix recalculé', { description: res.label })
       else toast.warning('Distance introuvable', { description: 'Saisissez le montant manuellement.' })
     } catch (e) {
@@ -150,7 +230,13 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     try {
       const km = f.distance_km === '' ? null : Number(String(f.distance_km).replace(',', '.'))
       const priceChanged = Number(devis.prix_estime ?? 0) !== prix
-      const message = applyPlateauToMessage(f.message, f.plateau)
+      const poidsKg = f.poids_kg === '' ? null : Number(String(f.poids_kg).replace(',', '.'))
+      const message = applyPlateauPoidsToMessage(applyPlateauToMessage(f.message, f.plateau), {
+        plateau: f.plateau,
+        lourd: f.plateau && f.lourd,
+        poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+      })
+
       const patch: Record<string, unknown> = {
         prenom: f.prenom.trim(),
         nom: f.nom.trim(),
@@ -290,6 +376,50 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
               />
               Véhicule non roulant — transport sur plateau porte-voiture
             </label>
+            {f.plateau && (
+              <div className="space-y-3 rounded-lg border border-pro-border bg-pro-surface/60 p-3">
+                <label className="flex items-start gap-2 text-xs text-pro-text">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 accent-pro-accent"
+                    checked={f.lourd}
+                    onChange={(e) => toggleLourd(e.target.checked)}
+                  />
+                  <span>
+                    {HEAVY_CHECKBOX_LABEL}
+                    <span className="block text-[11px] text-pro-muted">
+                      Porte-voiture plus puissant : majoration carburant / consommation.
+                    </span>
+                  </span>
+                </label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <Field label="Poids du véhicule (kg)">
+                    <input
+                      className={inputCls}
+                      inputMode="numeric"
+                      placeholder="ex. 1600"
+                      value={f.poids_kg}
+                      onChange={(e) => set('poids_kg', e.target.value)}
+                    />
+                  </Field>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={rechercherPlaque}
+                    disabled={plateLoading}
+                    icon={plateLoading ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                  >
+                    Rechercher par plaque
+                  </Button>
+                </div>
+                {f.poids_kg !== '' && Number(f.poids_kg) > HEAVY_THRESHOLD_KG && !f.lourd && (
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                    Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                  </p>
+                )}
+              </div>
+            )}
+
             {trajetChanged && (
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
                 Le trajet a changé : recalculez la distance et le prix avant d'enregistrer.
