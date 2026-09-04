@@ -5578,15 +5578,62 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_link_sends: {
+        Row: {
+          channel: string
+          created_at: string
+          destination: string
+          error: string | null
+          id: string
+          payment_link_id: string
+          sent_by: string | null
+          status: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          destination: string
+          error?: string | null
+          id?: string
+          payment_link_id: string
+          sent_by?: string | null
+          status?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          destination?: string
+          error?: string | null
+          id?: string
+          payment_link_id?: string
+          sent_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_link_sends_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_links: {
         Row: {
           amount_cents: number
           checkout_url: string | null
+          client_email: string | null
+          client_nom: string | null
+          client_prenom: string | null
+          client_telephone: string | null
           created_at: string
           created_by: string | null
           currency: string
           description: string | null
+          devis_id: string | null
           environment: string
+          facture_id: string | null
           id: string
           mission_id: string | null
           paid_at: string | null
@@ -5598,11 +5645,17 @@ export type Database = {
         Insert: {
           amount_cents: number
           checkout_url?: string | null
+          client_email?: string | null
+          client_nom?: string | null
+          client_prenom?: string | null
+          client_telephone?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           description?: string | null
+          devis_id?: string | null
           environment?: string
+          facture_id?: string | null
           id?: string
           mission_id?: string | null
           paid_at?: string | null
@@ -5614,11 +5667,17 @@ export type Database = {
         Update: {
           amount_cents?: number
           checkout_url?: string | null
+          client_email?: string | null
+          client_nom?: string | null
+          client_prenom?: string | null
+          client_telephone?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           description?: string | null
+          devis_id?: string | null
           environment?: string
+          facture_id?: string | null
           id?: string
           mission_id?: string | null
           paid_at?: string | null
@@ -5628,6 +5687,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_links_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_links_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_links_mission_id_fkey"
             columns: ["mission_id"]
