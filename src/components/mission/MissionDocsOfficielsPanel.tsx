@@ -96,6 +96,11 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [pvDocs, setPvDocs] = useState<StoredDoc[]>([]);
   const [clientSociete, setClientSociete] = useState<string | null>(null);
+  const [kmDepart, setKmDepart] = useState<number | null>(null);
+  const [kmArrivee, setKmArrivee] = useState<number | null>(null);
+  const [dommages, setDommages] = useState<PvDommage[]>([]);
+  const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [showPvForm, setShowPvForm] = useState(false);
