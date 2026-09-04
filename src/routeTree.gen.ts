@@ -186,6 +186,7 @@ import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './route
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
 import { Route as AuthenticatedAdminConvoyeursConvoyeurIdRouteImport } from './routes/_authenticated/admin.convoyeurs.$convoyeurId'
 import { Route as AuthenticatedAdminClientsClientIdRouteImport } from './routes/_authenticated/admin.clients.$clientId'
+import { Route as AuthenticatedAdminApercuClientUserIdRouteImport } from './routes/_authenticated/admin.apercu-client.$userId'
 import { Route as ApiPublicV1QuotesIndexRouteImport } from './routes/api/public/v1/quotes/index'
 import { Route as ApiPublicV1MissionsIndexRouteImport } from './routes/api/public/v1/missions/index'
 import { Route as ApiPublicV1QuotesEstimateRouteImport } from './routes/api/public/v1/quotes/estimate'
@@ -1189,6 +1190,12 @@ const AuthenticatedAdminClientsClientIdRoute =
     path: '/$clientId',
     getParentRoute: () => AuthenticatedAdminClientsRoute,
   } as any)
+const AuthenticatedAdminApercuClientUserIdRoute =
+  AuthenticatedAdminApercuClientUserIdRouteImport.update({
+    id: '/apercu-client/$userId',
+    path: '/apercu-client/$userId',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicV1QuotesIndexRoute = ApiPublicV1QuotesIndexRouteImport.update({
   id: '/api/public/v1/quotes/',
   path: '/api/public/v1/quotes/',
@@ -1393,6 +1400,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/entreprise/': typeof AuthenticatedEntrepriseIndexRoute
   '/flotte/': typeof AuthenticatedFlotteIndexRoute
+  '/admin/apercu-client/$userId': typeof AuthenticatedAdminApercuClientUserIdRoute
   '/admin/clients/$clientId': typeof AuthenticatedAdminClientsClientIdRoute
   '/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
@@ -1572,6 +1580,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro': typeof AuthenticatedDashboardProIndexRoute
   '/entreprise': typeof AuthenticatedEntrepriseIndexRoute
   '/flotte': typeof AuthenticatedFlotteIndexRoute
+  '/admin/apercu-client/$userId': typeof AuthenticatedAdminApercuClientUserIdRoute
   '/admin/clients/$clientId': typeof AuthenticatedAdminClientsClientIdRoute
   '/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
@@ -1762,6 +1771,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/': typeof AuthenticatedDashboardProIndexRoute
   '/_authenticated/entreprise/': typeof AuthenticatedEntrepriseIndexRoute
   '/_authenticated/flotte/': typeof AuthenticatedFlotteIndexRoute
+  '/_authenticated/admin/apercu-client/$userId': typeof AuthenticatedAdminApercuClientUserIdRoute
   '/_authenticated/admin/clients/$clientId': typeof AuthenticatedAdminClientsClientIdRoute
   '/_authenticated/admin/convoyeurs/$convoyeurId': typeof AuthenticatedAdminConvoyeursConvoyeurIdRoute
   '/_authenticated/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
@@ -1952,6 +1962,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/'
     | '/entreprise/'
     | '/flotte/'
+    | '/admin/apercu-client/$userId'
     | '/admin/clients/$clientId'
     | '/admin/convoyeurs/$convoyeurId'
     | '/admin/devis/$devisId'
@@ -2131,6 +2142,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro'
     | '/entreprise'
     | '/flotte'
+    | '/admin/apercu-client/$userId'
     | '/admin/clients/$clientId'
     | '/admin/convoyeurs/$convoyeurId'
     | '/admin/devis/$devisId'
@@ -2320,6 +2332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/'
     | '/_authenticated/entreprise/'
     | '/_authenticated/flotte/'
+    | '/_authenticated/admin/apercu-client/$userId'
     | '/_authenticated/admin/clients/$clientId'
     | '/_authenticated/admin/convoyeurs/$convoyeurId'
     | '/_authenticated/admin/devis/$devisId'
@@ -3691,6 +3704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsClientIdRouteImport
       parentRoute: typeof AuthenticatedAdminClientsRoute
     }
+    '/_authenticated/admin/apercu-client/$userId': {
+      id: '/_authenticated/admin/apercu-client/$userId'
+      path: '/apercu-client/$userId'
+      fullPath: '/admin/apercu-client/$userId'
+      preLoaderRoute: typeof AuthenticatedAdminApercuClientUserIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/v1/quotes/': {
       id: '/api/public/v1/quotes/'
       path: '/api/public/v1/quotes'
@@ -3861,6 +3881,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminApercuClientUserIdRoute: typeof AuthenticatedAdminApercuClientUserIdRoute
   AuthenticatedAdminMissionsMissionIdRoute: typeof AuthenticatedAdminMissionsMissionIdRoute
   AuthenticatedAdminMissionsIndexRoute: typeof AuthenticatedAdminMissionsIndexRoute
 }
@@ -3908,6 +3929,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminTrajetsRoute: AuthenticatedAdminTrajetsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminApercuClientUserIdRoute:
+    AuthenticatedAdminApercuClientUserIdRoute,
   AuthenticatedAdminMissionsMissionIdRoute:
     AuthenticatedAdminMissionsMissionIdRoute,
   AuthenticatedAdminMissionsIndexRoute: AuthenticatedAdminMissionsIndexRoute,
