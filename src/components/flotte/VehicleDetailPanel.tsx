@@ -475,7 +475,17 @@ export default function VehicleDetailPanel({
                 </div>
               )}
 
+              {tab === "couts" && v && (
+                <VehicleCostsTab
+                  vehicleId={v.id}
+                  organizationId={v.organization_id}
+                  vehicleLabel={[v.marque, v.modele, v.immatriculation].filter(Boolean).join(" · ") || "Véhicule"}
+                  canManage={canManage}
+                />
+              )}
+
               {tab === "entretien" && (
+
                 <div>
                   {loading ? (
                     <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
