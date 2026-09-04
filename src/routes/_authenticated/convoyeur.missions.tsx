@@ -1148,6 +1148,7 @@ function ConvoyeurMissions() {
             )}
           </button>
         ))}
+        <MissionViewSwitcher view={view} onChange={setView} className="ml-auto shrink-0 self-center" />
       </div>
 
       {/* List */}
@@ -1161,6 +1162,8 @@ function ConvoyeurMissions() {
             <p className="text-pro-text-soft text-xs mt-1.5">{emptyMessages[filter].hint}</p>
           )}
         </div>
+      ) : view !== "list" ? (
+        <MissionViewsBody view={view} items={viewItems} />
       ) : (
         <div className="space-y-3">
           {filtered.map(m => (
