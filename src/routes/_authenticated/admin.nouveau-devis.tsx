@@ -1080,7 +1080,7 @@ function AdminNouveauDevisPage() {
                         className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none"
                       />
                     </label>
-                    <Button variant="secondary" onClick={() => lookupSiv(1)} disabled={sivLoading}>
+                    <Button variant="secondary" onClick={() => handleSivLookup(1)} disabled={sivLoading}>
                       Rechercher par plaque
                     </Button>
                   </div>
