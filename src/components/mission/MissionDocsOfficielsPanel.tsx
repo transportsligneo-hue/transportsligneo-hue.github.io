@@ -400,6 +400,25 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         <Download size={16} className="opacity-60" />
       </button>
 
+      {(["livraison", "restitution"] as PvVariant[]).map((v) => {
+        const signe = pvSigne(v);
+        const label = v === "livraison" ? "PV de livraison" : "PV de restitution";
+        return signe ? (
+          <button key={v} type="button" className={btn} onClick={() => void openStored(signe.url_fichier)}>
+            <FileCheck2 size={18} />
+            <span className="flex-1">Voir le {label.toLowerCase()} signé</span>
+            <Eye size={16} className="opacity-60" />
+          </button>
+        ) : (
+          <button key={v} type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
+            {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
+            <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
+            <Download size={16} className="opacity-60" />
+          </button>
+        );
+      })}
+
+
       {pvDocs.map((d) => (
         <button key={d.id} type="button" className={btn} onClick={() => void openStored(d.url_fichier)}>
           <FileText size={18} />
