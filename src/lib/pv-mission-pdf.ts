@@ -269,7 +269,7 @@ export async function generatePvMissionPdf(
 
   const legendX = 100;
   const legendW = pageW - 14 - legendX;
-  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.0 + 8);
+  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.0 + 10);
   doc.setFillColor(...DOC_NAVY);
   doc.roundedRect(legendX, schemaTop - 3, legendW, 7, 1.5, 1.5, "F");
   doc.setDrawColor(...DOC_LINE);
