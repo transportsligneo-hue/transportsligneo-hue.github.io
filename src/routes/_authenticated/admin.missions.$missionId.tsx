@@ -1098,6 +1098,28 @@ function AdminMissionDetail() {
         />
       )}
 
+      {/* === Rattachement client === */}
+      <div className="flex flex-wrap items-center gap-2">
+        <AttachClientDialog
+          trajetId={trajet.id}
+          numeroMission={canonicalNumero}
+          currentEmail={trajet.client_email}
+          onAttached={fetchAll}
+          triggerLabel={trajet.client_email ? "Changer le client rattaché" : "Rattacher un client"}
+        />
+        {clientUserId && (
+          <Link
+            to="/admin/apercu-client/$userId"
+            params={{ userId: clientUserId }}
+            className="inline-flex items-center gap-1.5 rounded-md border border-pro-border px-3 py-1.5 text-sm text-pro-text-soft hover:text-pro-accent transition-colors"
+          >
+            <Eye size={14} /> Aperçu espace client
+          </Link>
+        )}
+      </div>
+
+
+
 
       {/* === Header mission === */}
       <Card>
