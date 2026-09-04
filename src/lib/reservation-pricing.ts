@@ -26,9 +26,13 @@ function extractCity(address: string): string {
   return "";
 }
 
+import { looksForeign } from "./geocode";
+
 export function getDistance(from: string, to: string): number | null {
   if (!from || !to) return null;
   if (normalizeAddress(from) === normalizeAddress(to)) return 0;
+  // Adresse hors France : la table locale (villes françaises) n'a aucun sens.
+  if (looksForeign(from) || looksForeign(to)) return null;
   const cFrom = extractCity(from);
   const cTo = extractCity(to);
   if (!cFrom || !cTo) return null;
