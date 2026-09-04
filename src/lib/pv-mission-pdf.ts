@@ -77,7 +77,7 @@ const LEGENDE: [string, string][] = [
   ["E", "Enfoncement"],
   ["M", "Manquant / Cassé"],
   ["T", "Tache"],
-  ["•", "Impact (gravillon)"],
+  ["I", "Impact (gravillon)"],
 ];
 
 const DOCS_LIVRAISON: [string, string][] = [
@@ -239,7 +239,7 @@ export async function generatePvMissionPdf(
   doc.setFillColor(253, 250, 242);
   doc.setDrawColor(...DOC_GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, w, 20, 1.5, 1.5, "FD");
+  doc.roundedRect(14, y, w, 16, 1.5, 1.5, "FD");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_GOLD);
@@ -248,7 +248,7 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 24;
+  y += 20;
 
   /* Schéma des dommages + légende */
   const schemaTop = y;
@@ -331,7 +331,8 @@ export async function generatePvMissionPdf(
   });
   y += 4;
 
-  /* Signatures */
+  /* Signatures — toujours au-dessus du pied de page */
+  y = Math.min(y, doc.internal.pageSize.getHeight() - 48);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);

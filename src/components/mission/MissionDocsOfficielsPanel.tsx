@@ -178,7 +178,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     }[];
     setDommages(
       (Array.isArray(nrPhotos) ? nrPhotos : []).flatMap((p) =>
-        (p.annotations ?? []).map((a) => ({ code: a.code || "•", zone: EDL_VUE_LABELS[p.vue || ""] || p.vue || null })),
+        (p.annotations ?? []).map((a) => ({ code: a.code || "I", zone: EDL_VUE_LABELS[p.vue || ""] || p.vue || null })),
       ),
     );
 
