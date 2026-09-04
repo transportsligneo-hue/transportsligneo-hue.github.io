@@ -259,7 +259,7 @@ export async function generatePvMissionPdf(
 
   /* Schéma des dommages + légende */
   const schemaTop = y + 2;
-  const schemaW = 58;
+  const schemaW = 52;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
@@ -344,12 +344,11 @@ export async function generatePvMissionPdf(
   const mention = mentionText(isLiv);
   (doc.splitTextToSize(mention, w) as string[]).forEach((l) => {
     doc.text(l, 14, y);
-    y += 3.2;
+    y += 3.05;
   });
-  y += 4;
+  y += 3;
 
   /* Signatures */
-  y += 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
