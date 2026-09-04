@@ -3191,6 +3191,41 @@ export type Database = {
           },
         ]
       }
+      fleet_settings: {
+        Row: {
+          alert_emails: string[]
+          alertes_email_actives: boolean
+          created_at: string
+          organization_id: string
+          tco_ecart_seuil_pct: number
+          updated_at: string
+        }
+        Insert: {
+          alert_emails?: string[]
+          alertes_email_actives?: boolean
+          created_at?: string
+          organization_id: string
+          tco_ecart_seuil_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          alert_emails?: string[]
+          alertes_email_actives?: boolean
+          created_at?: string
+          organization_id?: string
+          tco_ecart_seuil_pct?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       formation_certificates: {
         Row: {
           certificate_number: string
@@ -4990,6 +5025,42 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_member_sites: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          site_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          site_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          site_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_member_sites_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_member_sites_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -6534,6 +6605,110 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_cost_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          cost_id: string
+          created_at: string
+          id: string
+          vehicle_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          cost_id: string
+          created_at?: string
+          id?: string
+          vehicle_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          cost_id?: string
+          created_at?: string
+          id?: string
+          vehicle_id?: string
+        }
+        Relationships: []
+      }
+      vehicle_costs: {
+        Row: {
+          archived_at: string | null
+          categorie: string
+          created_at: string
+          created_by: string | null
+          date_cout: string
+          facture_id: string | null
+          id: string
+          justificatif_path: string | null
+          kilometrage: number | null
+          libelle: string | null
+          mission_id: string | null
+          montant: number
+          notes: string | null
+          source: string
+          statut: string
+          trajet_id: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          categorie: string
+          created_at?: string
+          created_by?: string | null
+          date_cout?: string
+          facture_id?: string | null
+          id?: string
+          justificatif_path?: string | null
+          kilometrage?: number | null
+          libelle?: string | null
+          mission_id?: string | null
+          montant: number
+          notes?: string | null
+          source?: string
+          statut?: string
+          trajet_id?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          categorie?: string
+          created_at?: string
+          created_by?: string | null
+          date_cout?: string
+          facture_id?: string | null
+          id?: string
+          justificatif_path?: string | null
+          kilometrage?: number | null
+          libelle?: string | null
+          mission_id?: string | null
+          montant?: number
+          notes?: string | null
+          source?: string
+          statut?: string
+          trajet_id?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_costs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_documents: {
         Row: {
           created_at: string
@@ -6577,6 +6752,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_finance_contracts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          duree_mois: number | null
+          id: string
+          loyer_mensuel: number | null
+          notes: string | null
+          organisme: string | null
+          type: string
+          updated_at: string
+          valeur_acquisition: number | null
+          valeur_residuelle: number | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          duree_mois?: number | null
+          id?: string
+          loyer_mensuel?: number | null
+          notes?: string | null
+          organisme?: string | null
+          type: string
+          updated_at?: string
+          valeur_acquisition?: number | null
+          valeur_residuelle?: number | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          duree_mois?: number | null
+          id?: string
+          loyer_mensuel?: number | null
+          notes?: string | null
+          organisme?: string | null
+          type?: string
+          updated_at?: string
+          valeur_acquisition?: number | null
+          valeur_residuelle?: number | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_finance_contracts_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -6699,6 +6933,66 @@ export type Database = {
           },
         ]
       }
+      vehicle_service_events: {
+        Row: {
+          cost_id: string | null
+          created_at: string
+          created_by: string | null
+          date_prevue: string | null
+          date_realisee: string | null
+          id: string
+          kilometrage_prevu: number | null
+          notes: string | null
+          statut: string
+          type: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          cost_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          id?: string
+          kilometrage_prevu?: number | null
+          notes?: string | null
+          statut?: string
+          type: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          cost_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_prevue?: string | null
+          date_realisee?: string | null
+          id?: string
+          kilometrage_prevu?: number | null
+          notes?: string | null
+          statut?: string
+          type?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_service_events_cost_id_fkey"
+            columns: ["cost_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_service_events_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           archived_at: string | null
@@ -6709,6 +7003,7 @@ export type Database = {
           couleur: string | null
           created_at: string
           energie: string | null
+          fin_de_vie_prevue: string | null
           id: string
           immatriculation: string | null
           intervalle_revision_km: number | null
@@ -6723,6 +7018,7 @@ export type Database = {
           statut: string
           type_vehicule: string | null
           updated_at: string
+          valeur_revente_estimee: number | null
           vin: string | null
         }
         Insert: {
@@ -6734,6 +7030,7 @@ export type Database = {
           couleur?: string | null
           created_at?: string
           energie?: string | null
+          fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
           intervalle_revision_km?: number | null
@@ -6748,6 +7045,7 @@ export type Database = {
           statut?: string
           type_vehicule?: string | null
           updated_at?: string
+          valeur_revente_estimee?: number | null
           vin?: string | null
         }
         Update: {
@@ -6759,6 +7057,7 @@ export type Database = {
           couleur?: string | null
           created_at?: string
           energie?: string | null
+          fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
           intervalle_revision_km?: number | null
@@ -6773,6 +7072,7 @@ export type Database = {
           statut?: string
           type_vehicule?: string | null
           updated_at?: string
+          valeur_revente_estimee?: number | null
           vin?: string | null
         }
         Relationships: [
@@ -7510,6 +7810,19 @@ export type Database = {
         }
         Returns: string
       }
+      fleet_can_manage_costs: {
+        Args: { _user_id: string; _vehicle_id: string }
+        Returns: boolean
+      }
+      fleet_can_view_vehicle: {
+        Args: { _user_id: string; _vehicle_id: string }
+        Returns: boolean
+      }
+      fleet_is_global_admin: { Args: { _user_id: string }; Returns: boolean }
+      fleet_member_role: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: string
+      }
       gen_tracking_code: { Args: never; Returns: string }
       generate_group_reference: { Args: never; Returns: string }
       generate_lot_reference: { Args: never; Returns: string }
@@ -7592,6 +7905,16 @@ export type Database = {
           telephone: string
         }[]
       }
+      get_fleet_alerts: { Args: { _org_id: string }; Returns: Json }
+      get_fleet_tco: {
+        Args: {
+          _from?: string
+          _org_id: string
+          _site_id?: string
+          _to?: string
+        }
+        Returns: Json
+      }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
       get_my_contrat_status: {
@@ -7626,6 +7949,10 @@ export type Database = {
         }[]
       }
       get_training_modules: { Args: never; Returns: Json }
+      get_vehicle_tco: {
+        Args: { _from?: string; _to?: string; _vehicle_id: string }
+        Returns: Json
+      }
       has_completed_driver_training: {
         Args: { _user_id?: string }
         Returns: boolean
@@ -7824,6 +8151,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _target_user_id: string
         }
+        Returns: undefined
+      }
+      sync_convoyage_cost: {
+        Args: { _mission_id: string; _trajet_id: string; _vehicle_id: string }
         Returns: undefined
       }
       sync_grouped_devis_trajets: {
