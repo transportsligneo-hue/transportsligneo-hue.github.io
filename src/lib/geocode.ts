@@ -74,6 +74,29 @@ async function geocodeOSM(address: string): Promise<GeoPoint | null> {
   }
 }
 
+// Photon (komoot) : géocodeur OSM mondial, sans clé, CORS ouvert — beaucoup
+// plus fiable que Nominatim (qui bloque souvent les requêtes navigateur) et
+// que l'API française pour les adresses étrangères.
+async function geocodePhoton(address: string): Promise<GeoPoint | null> {
+  try {
+    const r = await fetch(
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(address)}&limit=1`,
+      { headers: { Accept: "application/json" } },
+    );
+    if (!r.ok) return null;
+    const d = await r.json();
+    const f = d?.features?.[0];
+    const coords = f?.geometry?.coordinates as [number, number] | undefined;
+    if (!coords) return null;
+    const [lng, lat] = coords;
+    const p = f.properties ?? {};
+    const label = [p.name, p.city, p.country].filter(Boolean).join(", ");
+    return { lat, lng, label: label || address };
+  } catch {
+    return null;
+  }
+}
+
 export async function geocodeAddress(address: string | null | undefined): Promise<GeoPoint | null> {
   const q = (address ?? "").trim();
   if (!q) return null;
@@ -81,8 +104,8 @@ export async function geocodeAddress(address: string | null | undefined): Promis
   const cached = readCache(key);
   if (cached) return cached;
   const point = looksForeign(q)
-    ? ((await geocodeOSM(q)) ?? (await geocodeFR(q)))
-    : ((await geocodeFR(q)) ?? (await geocodeOSM(q)));
+    ? ((await geocodePhoton(q)) ?? (await geocodeOSM(q)) ?? (await geocodeFR(q)))
+    : ((await geocodeFR(q)) ?? (await geocodePhoton(q)) ?? (await geocodeOSM(q)));
   if (point) writeCache(key, point);
   return point;
 }
