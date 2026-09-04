@@ -121,6 +121,7 @@ import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
 import { Route as AuthenticatedAdminTestNotificationsRouteImport } from './routes/_authenticated/admin.test-notifications'
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
+import { Route as AuthenticatedAdminScanDocumentRouteImport } from './routes/_authenticated/admin.scan-document'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminPaiementsConvoyeursRouteImport } from './routes/_authenticated/admin.paiements-convoyeurs'
@@ -811,6 +812,12 @@ const AuthenticatedAdminSuperAdminRoute =
     path: '/super-admin',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminScanDocumentRoute =
+  AuthenticatedAdminScanDocumentRouteImport.update({
+    id: '/scan-document',
+    path: '/scan-document',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminParametresIaRoute =
   AuthenticatedAdminParametresIaRouteImport.update({
     id: '/parametres-ia',
@@ -1338,6 +1345,7 @@ export interface FileRoutesByFullPath {
   '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -1521,6 +1529,7 @@ export interface FileRoutesByTo {
   '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -1709,6 +1718,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/_authenticated/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/_authenticated/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -1900,6 +1910,7 @@ export interface FileRouteTypes {
     | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/scan-document'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
@@ -2083,6 +2094,7 @@ export interface FileRouteTypes {
     | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/scan-document'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
@@ -2270,6 +2282,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/paiements-convoyeurs'
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
+    | '/_authenticated/admin/scan-document'
     | '/_authenticated/admin/super-admin'
     | '/_authenticated/admin/test-notifications'
     | '/_authenticated/admin/trajets'
@@ -3249,6 +3262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuperAdminRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/scan-document': {
+      id: '/_authenticated/admin/scan-document'
+      path: '/scan-document'
+      fullPath: '/admin/scan-document'
+      preLoaderRoute: typeof AuthenticatedAdminScanDocumentRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/parametres-ia': {
       id: '/_authenticated/admin/parametres-ia'
       path: '/parametres-ia'
@@ -3876,6 +3896,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPaiementsConvoyeursRoute: typeof AuthenticatedAdminPaiementsConvoyeursRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
+  AuthenticatedAdminScanDocumentRoute: typeof AuthenticatedAdminScanDocumentRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
   AuthenticatedAdminTestNotificationsRoute: typeof AuthenticatedAdminTestNotificationsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
@@ -3923,6 +3944,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminPaiementsConvoyeursRoute,
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
+  AuthenticatedAdminScanDocumentRoute: AuthenticatedAdminScanDocumentRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
   AuthenticatedAdminTestNotificationsRoute:
     AuthenticatedAdminTestNotificationsRoute,
