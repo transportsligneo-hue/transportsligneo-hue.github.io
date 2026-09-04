@@ -118,7 +118,55 @@ export function AttachClientDialog({
           .eq("numero", numeroMission);
       }
 
-      toast.success(`Mission rattachée à ${nomComplet}`);
+      // Le devis et les factures liés suivent automatiquement le même client.
+      let devisMaj = 0;
+      let facturesMaj = 0;
+      if (trajetId) {
+        const { data: t } = await supabase
+          .from("trajets")
+          .select("devis_id, mission_id")
+          .eq("id", trajetId)
+          .maybeSingle();
+        const lien = (t ?? null) as { devis_id: string | null; mission_id: string | null } | null;
+
+        if (lien?.devis_id) {
+          const { error: devisErr } = await supabase
+            .from("devis")
+            .update({
+              user_id: p.user_id,
+              email: p.email,
+              nom: p.nom ?? nomComplet,
+              prenom: p.prenom ?? "",
+              telephone: p.telephone ?? null,
+            })
+            .eq("id", lien.devis_id);
+          if (!devisErr) devisMaj += 1;
+        }
+
+        if (lien?.mission_id) {
+          const { data: fRows, error: facErr } = await supabase
+            .from("factures")
+            .update({
+              client_email: p.email,
+              client_nom: p.societe ?? nomComplet,
+              client_prenom: p.prenom ?? null,
+            })
+            .eq("mission_id", lien.mission_id)
+            .select("id");
+          if (!facErr) facturesMaj = (fRows ?? []).length;
+        }
+      }
+
+      const details = [
+        devisMaj > 0 ? "devis" : null,
+        facturesMaj > 0 ? `${facturesMaj} facture${facturesMaj > 1 ? "s" : ""}` : null,
+      ].filter(Boolean);
+
+      toast.success(
+        details.length > 0
+          ? `Mission rattachée à ${nomComplet} · ${details.join(" et ")} mis à jour`
+          : `Mission rattachée à ${nomComplet}`,
+      );
       setOpen(false);
       onAttached?.();
     } catch (err) {

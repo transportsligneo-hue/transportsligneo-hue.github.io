@@ -14,7 +14,6 @@ import {
   FileText,
   LayoutList,
   LayoutGrid,
-  Kanban,
   CalendarDays,
 } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
@@ -58,20 +57,12 @@ const STATUS_FILTERS = [
 
 const ARCHIVE_STATUTS = ["livree", "terminee", "validee", "en_attente_validation", "annulee"];
 
-type ViewMode = "list" | "cards" | "kanban" | "planning";
+type ViewMode = "list" | "cards" | "planning";
 
 const VIEWS: { value: ViewMode; label: string; icon: typeof LayoutList }[] = [
   { value: "list", label: "Liste", icon: LayoutList },
   { value: "cards", label: "Cartes", icon: LayoutGrid },
-  { value: "kanban", label: "Kanban", icon: Kanban },
   { value: "planning", label: "Planning", icon: CalendarDays },
-];
-
-const KANBAN_COLUMNS: { key: string; label: string; match: (s: string) => boolean }[] = [
-  { key: "en_attente", label: "En attente", match: (s) => s === "en_attente" || s === "en_recherche" },
-  { key: "confirmee", label: "Planifiées", match: (s) => s === "confirmee" || s === "attribuee" },
-  { key: "en_cours", label: "En cours", match: (s) => s === "en_cours" || s === "demarree" },
-  { key: "terminee", label: "Terminées", match: (s) => ARCHIVE_STATUTS.includes(s) },
 ];
 
 function ClientMissions() {
@@ -162,13 +153,6 @@ function ClientMissions() {
     return Array.from(groups.entries()).sort(([a], [b]) => (a > b ? 1 : -1));
   }, [missions]);
 
-  const kanbanColumns = useMemo(() => {
-    return KANBAN_COLUMNS.map((col) => ({
-      ...col,
-      items: missions.filter((m) => col.match(m.statut)),
-    }));
-  }, [missions]);
-
   const prefetchLinkProps = (m: Mission) => ({
     to: "/dashboard-client/missions/$missionId" as const,
     params: { missionId: m.id },
@@ -220,9 +204,8 @@ function ClientMissions() {
         </div>
       </div>
 
-      {/* Filters (hidden in kanban since columns act as filters) */}
-      {view !== "kanban" && (
-        <div className="flex flex-wrap gap-2">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -234,10 +217,9 @@ function ClientMissions() {
               }`}
             >
               {f.label}
-            </button>
-          ))}
-        </div>
-      )}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
@@ -315,40 +297,6 @@ function ClientMissions() {
                 )}
               </div>
             </Link>
-          ))}
-        </div>
-      ) : view === "kanban" ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {kanbanColumns.map((col) => (
-            <div key={col.key} className="card-premium p-3 rounded flex flex-col min-h-[300px]">
-              <div className="flex items-center justify-between px-1 pb-3 mb-2 border-b border-primary/15">
-                <h3 className="text-cream/80 text-[11px] uppercase tracking-wider font-heading">{col.label}</h3>
-                <span className="text-cream/50 text-[10px] bg-navy/60 px-1.5 py-0.5 rounded">{col.items.length}</span>
-              </div>
-              <div className="space-y-2 flex-1">
-                {col.items.length === 0 ? (
-                  <p className="text-cream/30 text-[11px] text-center py-6">—</p>
-                ) : (
-                  col.items.map((m) => (
-                    <Link
-                      key={m.id}
-                      {...prefetchLinkProps(m)}
-                      className="block p-3 rounded bg-navy/50 border border-primary/15 hover:border-primary/40 transition-all"
-                    >
-                      <div className="text-cream/40 text-[10px] uppercase tracking-wider mb-1">{m.numero}</div>
-                      <p className="text-cream text-xs leading-snug">
-                        <span className="truncate block">{m.ville_depart}</span>
-                        <span className="text-primary/60">↓</span>
-                        <span className="truncate block">{m.ville_arrivee}</span>
-                      </p>
-                      <div className="flex items-center gap-1 text-[10px] text-cream/50 mt-2">
-                        <Calendar size={10} />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </div>
           ))}
         </div>
       ) : (
