@@ -88,7 +88,7 @@ export function EdlNonRoulantFlow({
   const [step, setStep] = useState<Step>("arrimage");
   const [arrimage, setArrimage] = useState<Record<string, boolean>>({});
   const [photos, setPhotos] = useState<Record<NrViewId, PhotoState>>(() =>
-    Object.fromEntries(NR_VIEWS.map((v) => [v.id, { dataUrl: null, annotations: [] }])) as Record<NrViewId, PhotoState>,
+    Object.fromEntries(NR_VIEWS.map((v) => [v.id, { dataUrl: null, annotations: [] } as PhotoState])) as unknown as Record<NrViewId, PhotoState>,
   );
   const [annotating, setAnnotating] = useState<NrViewId | null>(null);
   const [observations, setObservations] = useState("");
