@@ -16,7 +16,7 @@ import { Button } from '@/components/admin/AdminUI'
 import PlacesInput from '@/components/PlacesInput'
 import { calculateBasePrice, getDistance, type TripType } from '@/lib/reservation-pricing'
 import { geocodeDistanceKm, normalizeAddress } from '@/lib/distance-fallback'
-import { parseDevisSupplements } from '@/lib/devis-pdf'
+import { parseDevisSupplements, parseDevisPrestationLabel } from '@/lib/devis-pdf'
 import { lookupPlate } from '@/lib/plate.functions'
 import {
   applyPlateauPoidsToMessage,
