@@ -282,6 +282,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
           plateau: f.plateau,
           lourd: f.plateau && f.lourd,
           poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+          surcharge: f.plateau && f.lourd ? num(f.lourd_montant) : null,
         },
       )
 
