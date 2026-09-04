@@ -2,28 +2,32 @@
  * Procès-verbal de livraison / restitution — génération PDF à partir des données
  * d'une mission existante.
  *
- * Le PV n'a PAS de compteur propre : il reprend strictement le numéro de mission
- * Transports Ligneo (`PV-LIV-<numéro mission>` / `PV-RES-<numéro mission>`), avec
- * un suffixe `-v2`, `-v3`… si plusieurs PV du même type sont établis.
+ * La mise en page reproduit au pixel près les gabarits papier Transports Ligneo
+ * (en-tête logo + titre, cartouches parties, panneaux gris clair, schéma 4 vues,
+ * légende navy/or, mention L.133-3, signatures).
  *
- * Ce document coexiste avec la fiche de mission, le bon de prise en charge et
- * l'état des lieux : il ne les remplace pas.
+ * Le PV n'a PAS de compteur propre : il reprend strictement le numéro de mission
+ * (`PV-LIV-<numéro>` / `PV-RES-<numéro>`), suffixé `-v2`, `-v3`… si plusieurs PV
+ * du même type sont établis.
  */
 import jsPDF from "jspdf";
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
-import { EDL_CAR_SCHEMA_H, EDL_CAR_SCHEMA_PNG, EDL_CAR_SCHEMA_W } from "@/lib/edl-car-schema";
 import {
-  DOC_CREAM,
-  DOC_GOLD,
-  DOC_LINE,
-  DOC_MUTED,
-  DOC_NAVY,
-  DOC_TEXT,
-  DOC_WHITE,
-  drawDocHeader,
-  drawSectionTitle,
+  CAR_COTE_DROIT_H,
+  CAR_COTE_DROIT_PNG,
+  CAR_COTE_DROIT_W,
+  CAR_COTE_GAUCHE_H,
+  CAR_COTE_GAUCHE_PNG,
+  CAR_COTE_GAUCHE_W,
+  CAR_FACE_ARRIERE_H,
+  CAR_FACE_ARRIERE_PNG,
+  CAR_FACE_ARRIERE_W,
+  CAR_FACE_AVANT_H,
+  CAR_FACE_AVANT_PNG,
+  CAR_FACE_AVANT_W,
+} from "@/lib/edl-car-views";
+import {
   fetchCompanyInfo,
-  finalizeDoc,
   loadImageAsDataUrl,
   toSiren,
   type CompanyInfo,
@@ -71,6 +75,26 @@ export function pvNumero(variant: PvVariant, numeroMission: string, version = 1)
   return version > 1 ? `${base}-v${version}` : base;
 }
 
+/* ------------------------------------------------------------------ charte */
+
+const INK: [number, number, number] = [17, 22, 38];
+const NAVY: [number, number, number] = [12, 21, 55];
+const BLUE: [number, number, number] = [37, 91, 235];
+const GOLD: [number, number, number] = [186, 138, 45];
+const CREAM: [number, number, number] = [253, 249, 238];
+const PANEL: [number, number, number] = [244, 246, 250];
+const BORDER: [number, number, number] = [223, 228, 238];
+const RULE: [number, number, number] = [205, 211, 224];
+const TEXT: [number, number, number] = [55, 60, 74];
+const MUTED: [number, number, number] = [128, 134, 148];
+const WHITE: [number, number, number] = [255, 255, 255];
+
+const M = 14;
+const PAGE_W = 210;
+const W = PAGE_W - M * 2;
+const XR = M + W / 2 + 3;
+const COL2 = W / 2 - 3;
+
 const LEGENDE: [string, string][] = [
   ["R", "Rayure"],
   ["C", "Coup"],
@@ -78,6 +102,13 @@ const LEGENDE: [string, string][] = [
   ["M", "Manquant / Cassé"],
   ["T", "Tache"],
   ["I", "Impact (gravillon)"],
+];
+
+const VUES: [string, string, number, number][] = [
+  [CAR_FACE_AVANT_PNG, "Face avant", CAR_FACE_AVANT_W, CAR_FACE_AVANT_H],
+  [CAR_COTE_GAUCHE_PNG, "Côté gauche", CAR_COTE_GAUCHE_W, CAR_COTE_GAUCHE_H],
+  [CAR_FACE_ARRIERE_PNG, "Face arrière", CAR_FACE_ARRIERE_W, CAR_FACE_ARRIERE_H],
+  [CAR_COTE_DROIT_PNG, "Côté droit", CAR_COTE_DROIT_W, CAR_COTE_DROIT_H],
 ];
 
 const DOCS_LIVRAISON: [string, string][] = [
@@ -92,60 +123,43 @@ const DOCS_RESTITUTION: [string, string][] = [
   ["État des lieux de départ joint", "Accessoires (roue secours, triangle, gilet)"],
 ];
 
-function drawCheckbox(doc: jsPDF, x: number, y: number, size = 3.2, checked = false) {
-  doc.setDrawColor(...DOC_NAVY);
-  doc.setLineWidth(0.25);
-  doc.setFillColor(...DOC_WHITE);
-  doc.rect(x, y, size, size, "FD");
-  if (checked) {
-    doc.setLineWidth(0.5);
-    doc.line(x + 0.7, y + size / 2, x + size * 0.42, y + size - 0.7);
-    doc.line(x + size * 0.42, y + size - 0.7, x + size - 0.6, y + 0.7);
-  }
+/* ------------------------------------------------------------------ helpers */
+
+function panel(doc: jsPDF, x: number, y: number, w: number, h: number, fill = PANEL) {
+  doc.setFillColor(...fill);
+  doc.roundedRect(x, y, w, h, 2.2, 2.2, "F");
 }
 
-/** Champ « Label » + valeur pré-remplie, ou trait à compléter si vide. */
-function field(doc: jsPDF, x: number, y: number, w: number, label: string, value?: string | null): number {
+function panelTitle(doc: jsPDF, x: number, y: number, label: string, color = INK) {
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
-  doc.setTextColor(...DOC_NAVY);
+  doc.setFontSize(8);
+  doc.setTextColor(...color);
+  doc.text(label.toUpperCase(), x, y);
+}
+
+/** Libellé gras + valeur pré-remplie posée sur un trait à compléter. */
+function field(doc: jsPDF, x: number, y: number, w: number, label: string, value?: string | null) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.4);
+  doc.setTextColor(...INK);
   doc.text(label, x, y);
   const v = (value ?? "").toString().trim();
-  doc.setDrawColor(...DOC_LINE);
-  doc.setLineWidth(0.25);
-  doc.line(x, y + 5.4, x + w, y + 5.4);
   if (v) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.6);
-    doc.setTextColor(...DOC_TEXT);
-    doc.text(doc.splitTextToSize(v, w)[0] as string, x, y + 4.4);
+    doc.setTextColor(...TEXT);
+    doc.text(doc.splitTextToSize(v, w)[0] as string, x, y + 4.6);
   }
-  return y + 8.6;
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.25);
+  doc.line(x, y + 5.8, x + w, y + 5.8);
 }
 
-function cartouche(doc: jsPDF, x: number, y: number, w: number, h: number, titre: string, lignes: string[]) {
-  doc.setFillColor(...DOC_CREAM);
-  doc.setDrawColor(...DOC_LINE);
+function checkbox(doc: jsPDF, x: number, y: number, size = 3.4) {
+  doc.setDrawColor(...RULE);
   doc.setLineWidth(0.3);
-  doc.roundedRect(x, y, w, h, 1.5, 1.5, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...DOC_NAVY);
-  (doc.splitTextToSize(titre.toUpperCase(), w - 6) as string[]).slice(0, 2).forEach((l, i) => {
-    doc.text(l, x + 3, y + 5 + i * 3.6);
-  });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(...DOC_TEXT);
-  let ly = y + h - 4 - Math.max(0, lignes.length - 1) * 4;
-  if (!lignes.length) {
-    doc.setDrawColor(...DOC_LINE);
-    doc.line(x + 3, y + h - 4, x + w - 3, y + h - 4);
-  }
-  lignes.forEach((l) => {
-    doc.text(doc.splitTextToSize(l, w - 6)[0] as string, x + 3, ly);
-    ly += 4;
-  });
+  doc.setFillColor(...WHITE);
+  doc.roundedRect(x, y, size, size, 0.5, 0.5, "FD");
 }
 
 /** Mention L.133-3 adaptée au type de PV. */
@@ -155,6 +169,8 @@ function mentionText(isLiv: boolean): string {
     : "Conformément à l'article L.133-3 du Code de commerce, le propriétaire ou donneur d'ordre dispose d'un délai de 48 heures, non compris les jours fériés, pour notifier au transporteur par lettre recommandée toute réserve motivée relative à l'état du véhicule qui n'aurait pas été mentionnée sur le présent procès-verbal au moment de la restitution. Passé ce délai, la restitution est réputée conforme et sans réserve.";
 }
 
+/* ------------------------------------------------------------------ document */
+
 export async function generatePvMissionPdf(
   variant: PvVariant,
   d: PvMissionData,
@@ -163,222 +179,332 @@ export async function generatePvMissionPdf(
   const isLiv = variant === "livraison";
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   applyLigneoFonts(doc);
-  const pageW = doc.internal.pageSize.getWidth();
   const c = company ?? (await fetchCompanyInfo());
   const logo = await loadImageAsDataUrl(logoLigneo);
-  drawDocHeader(doc, {
-    pageW,
-    logoData: logo,
-    title: isLiv ? "Procès-verbal de livraison" : "Procès-verbal de restitution",
-    numero: d.numero_pv,
-    subtitle: `Mission ${d.numero_mission}`,
-    company: c,
-  });
 
-  const w = pageW - 28;
-  let y = 52;
+  /* ---------- En-tête ---------- */
+  if (logo) doc.addImage(logo, "PNG", M, 12, 15, 15, undefined, "FAST");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(...INK);
+  doc.text("TRANSPORTS ", M + 19, 20.5);
+  const wT = doc.getTextWidth("TRANSPORTS ");
+  doc.setTextColor(...BLUE);
+  doc.text("LIGNEO", M + 19 + wT, 20.5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.4);
+  doc.setTextColor(...MUTED);
+  const ville = [c?.adresse_cp?.slice(0, 2), c?.adresse_ville].filter(Boolean).length
+    ? `${c?.adresse_ville ?? ""} (${(c?.adresse_cp ?? "").slice(0, 2)})`
+    : "Tours (37)";
+  doc.text(`Convoyage automobile B2B · ${ville}`, M + 19, 25.5);
 
-  /* Parties */
-  const cw = (w - 8) / 3;
+  const right = PAGE_W - M;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14.5);
+  doc.setTextColor(...INK);
+  doc.text(isLiv ? "PROCÈS-VERBAL DE LIVRAISON" : "PROCÈS-VERBAL DE RESTITUTION", right, 19.5, { align: "right" });
+  doc.setFontSize(10.5);
+  doc.setTextColor(...BLUE);
+  doc.text(d.numero_pv, right, 25.5, { align: "right" });
+  doc.setDrawColor(...BLUE);
+  doc.setLineWidth(0.3);
+  doc.line(right - doc.getTextWidth(d.numero_pv), 26.6, right, 26.6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.4);
+  doc.setTextColor(...TEXT);
+  const annee = new Date().getFullYear();
+  doc.text(`Date : ____ / ____ / ${annee}    Heure : ____ h ____`, right, 31.5, { align: "right" });
+
+  doc.setDrawColor(...NAVY);
+  doc.setLineWidth(0.7);
+  doc.line(M, 35, right, 35);
+
+  const sp = isLiv ? 3.4 : 1.6;
+  let y = isLiv ? 38 : 36;
+
+  /* ---------- Parties ---------- */
+  const cw = (W - 10) / 3;
   const siren = toSiren(c?.siret) || "753 320 001";
-  cartouche(doc, 14, y, cw, 18, "Transporteur", [
-    `${(c?.raison_sociale || "Transports Ligneo")} · SIREN ${siren}`,
-  ]);
-  cartouche(doc, 14 + cw + 4, y, cw, 18, isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre",
-    d.donneur_ordre ? [d.donneur_ordre] : []);
-  cartouche(doc, 14 + (cw + 4) * 2, y, cw, 18, isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)",
-    d.destinataire ? [d.destinataire] : []);
-  y += 22;
+  const parties: [string, string | null][] = [
+    ["Transporteur", `${c?.raison_sociale || "Transports Ligneo"} · SIREN ${siren}`],
+    [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
+    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (locataire)", d.destinataire ?? null],
+  ];
+  const partH = isLiv ? 21 : 18;
+  parties.forEach(([titre, val], i) => {
+    const x = M + i * (cw + 5);
+    panel(doc, x, y, cw, partH);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.4);
+    doc.setTextColor(...BLUE);
+    (doc.splitTextToSize(titre.toUpperCase(), cw - 8) as string[]).slice(0, 2).forEach((l, k) => {
+      doc.text(l, x + 4, y + 5.5 + k * 3.4);
+    });
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.25);
+    doc.line(x + 4, y + partH - 8.5, x + cw - 4, y + partH - 8.5);
+    doc.line(x + 4, y + partH - 2.5, x + cw - 4, y + partH - 2.5);
+    if (val) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.4);
+      doc.setTextColor(...TEXT);
+      doc.text(doc.splitTextToSize(val, cw - 8)[0] as string, x + 4, y + partH - 3.6);
+    }
+  });
+  y += partH + sp;
 
-  /* Véhicule */
-  y = drawSectionTitle(doc, pageW, y, "Véhicule");
-  const c3 = (w - 12) / 3;
-  const x2 = 14 + c3 + 6;
-  const x3 = 14 + (c3 + 6) * 2;
+  /* ---------- Véhicule ---------- */
+  const c3 = (W - 20) / 3;
+  const x2 = M + 6 + c3 + 4;
+  const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  let yy = field(doc, 14, y, c3, "Marque / Modèle", d.marque_modele);
-  field(doc, x2, y, c3, "Immatriculation", d.immatriculation);
-  field(doc, x3, y, c3, "VIN", vin ? formatVin(vin) : null);
-  y = yy;
-  yy = field(doc, 14, y, c3, "N° mission Transports Ligneo", d.numero_mission);
-  field(doc, x2, y, c3, isLiv ? "Kilométrage à la livraison" : "Kilométrage à la restitution", d.kilometrage_arrivee);
-  field(doc, x3, y, c3, "Niveau carburant / batterie", null);
-  y = yy + 1;
+  const vehH = isLiv ? 28 : 26;
+  panel(doc, M, y, W, vehH);
+  panelTitle(doc, M + 6, y + 6.5, "Véhicule");
+  field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
+  field(doc, x2, y + 13, c3, "Immatriculation", d.immatriculation);
+  field(doc, x3, y + 13, c3, "VIN", vin ? formatVin(vin) : null);
+  field(doc, M + 6, y + vehH - 7, c3, "N° mission Transports Ligneo", d.numero_mission);
+  field(doc, x2, y + vehH - 7, c3, isLiv ? "Kilométrage à la livraison" : "Kilométrage à la restitution", d.kilometrage_arrivee);
+  field(doc, x3, y + vehH - 7, c3, "Niveau carburant / batterie", d.carburant);
+  y += vehH + sp;
 
+  /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    // Comparaison avec l'EDL de départ, intégrée au bloc véhicule.
-    yy = field(doc, 14, y, c3, "Kilométrage au départ (EDL)", d.kilometrage_depart);
-    field(doc, x2, y, c3, "Écart kilométrique", null);
-    field(doc, x3, y, c3, "Carnet / entretien à jour", null);
-    y = yy + 1;
+    const cmpH = 18;
+    panel(doc, M, y, W, cmpH);
+    panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
+    field(doc, M + 6, y + 11.5, c3, "Kilométrage au départ", d.kilometrage_depart);
+    field(doc, x2, y + 11.5, c3, "Kilométrage à la restitution", d.kilometrage_arrivee);
+    field(doc, x3, y + 11.5, c3, "Écart", null);
+    y += cmpH + sp;
   }
 
-  /* Trajet */
-  y = drawSectionTitle(doc, pageW, y, isLiv ? "Détails du trajet" : "Détails de la restitution");
-  const c2 = (w - 6) / 2;
-  const xR = 14 + c2 + 6;
-  yy = field(doc, 14, y, c2, isLiv ? "Lieu de prise en charge" : "Lieu de mise à disposition initiale", d.lieu_prise_en_charge);
-  field(doc, xR, y, c2, isLiv ? "Lieu de livraison" : "Lieu de restitution", d.lieu_livraison);
-  y = yy;
-  yy = field(doc, 14, y, c2, isLiv ? "Date / heure de prise en charge" : "Date / heure de mise à disposition", d.date_prise_en_charge);
-  field(doc, xR, y, c2, isLiv ? "Date / heure de livraison" : "Date / heure de restitution", d.date_livraison);
-  y = yy + 1;
+  /* ---------- Trajet ---------- */
+  const trH = isLiv ? 26 : 23;
+  const fx1 = M + 6;
+  const fx2 = M + W / 2 + 2;
+  const fw = W / 2 - 10;
+  panel(doc, M, y, W, trH);
+  panelTitle(doc, fx1, y + 6.5, isLiv ? "Détails du trajet" : "Détails de la restitution");
+  field(doc, fx1, y + 11.5, fw, isLiv ? "Lieu de prise en charge" : "Lieu de mise à disposition initiale", d.lieu_prise_en_charge);
+  field(doc, fx2, y + 11.5, fw, isLiv ? "Lieu de livraison" : "Lieu de restitution", d.lieu_livraison);
+  field(doc, fx1, y + trH - 6, fw, isLiv ? "Date / heure de prise en charge" : "Date / heure de mise à disposition", d.date_prise_en_charge);
+  field(doc, fx2, y + trH - 6, fw, isLiv ? "Date / heure de livraison" : "Date / heure de restitution", d.date_livraison);
+  y += trH + sp;
 
-  /* Conformité */
-  const boxH = 9;
-  doc.setFillColor(...DOC_NAVY);
-  doc.roundedRect(14, y, c2, boxH, 1.5, 1.5, "F");
-  doc.setDrawColor(...DOC_LINE);
-  doc.setFillColor(...DOC_WHITE);
-  doc.roundedRect(xR, y, c2, boxH, 1.5, 1.5, "FD");
-  doc.setFillColor(...DOC_GOLD);
-  doc.rect(19, y + 3, 3.2, 3.2, "F");
-  drawCheckbox(doc, xR + 5, y + 3, 3.2, false);
+  /* ---------- Conformité ---------- */
+  const confH = 10;
+  doc.setFillColor(...NAVY);
+  doc.roundedRect(M, y, COL2, confH, 2.2, 2.2, "F");
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(XR, y, COL2, confH, 2.2, 2.2, "FD");
+  doc.setFillColor(212, 175, 55);
+  doc.roundedRect(M + 5, y + 3.3, 3.4, 3.4, 0.5, 0.5, "F");
+  checkbox(doc, XR + 5, y + 3.3);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...DOC_WHITE);
-  doc.text(isLiv ? "Livraison conforme, sans réserve" : "Restitution conforme, sans réserve", 25, y + 5.8);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text(isLiv ? "Livraison avec réserves (voir ci-dessous)" : "Restitution avec réserves (voir ci-dessous)", xR + 11, y + 5.8);
-  y += boxH + 4;
+  doc.setFontSize(8.4);
+  doc.setTextColor(...WHITE);
+  doc.text(isLiv ? "Livraison conforme, sans réserve" : "Restitution conforme, sans réserve", M + 11.5, y + 6.5);
+  doc.setTextColor(...INK);
+  doc.text(isLiv ? "Livraison avec réserves (voir ci-dessous)" : "Restitution avec réserves (voir ci-dessous)", XR + 11.5, y + 6.5);
+  y += confH + sp;
 
-  /* Réserves */
-  doc.setFillColor(253, 250, 242);
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, w, 12, 1.5, 1.5, "FD");
+  /* ---------- Réserves ---------- */
+  const resH = isLiv ? 26 : 18;
+  doc.setFillColor(...CREAM);
+  doc.setDrawColor(240, 224, 178);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(M, y, W, resH, 2.2, 2.2, "FD");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...DOC_GOLD);
+  doc.setFontSize(7.6);
+  doc.setTextColor(...GOLD);
   doc.text(
     isLiv ? "RÉSERVES CONSTATÉES PAR LE DESTINATAIRE" : "RÉSERVES / DOMMAGES CONSTATÉS À LA RESTITUTION",
-    18,
-    y + 5,
+    M + 5,
+    y + 6,
   );
-  y += 12;
-
-  /* Schéma des dommages + légende */
-  const schemaTop = y + 2;
-  const schemaW = 52;
-  const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text("SCHÉMA DES DOMMAGES CONSTATÉS", 14, schemaTop);
-  doc.addImage(EDL_CAR_SCHEMA_PNG, "PNG", 16, schemaTop + 3, schemaW, schemaH, undefined, "FAST");
-
-  const legendX = 100;
-  const legendW = pageW - 14 - legendX;
-  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.0 + 10);
-  doc.setFillColor(...DOC_NAVY);
-  doc.roundedRect(legendX, schemaTop - 3, legendW, 7, 1.5, 1.5, "F");
-  doc.setDrawColor(...DOC_LINE);
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.3);
-  doc.rect(legendX, schemaTop + 4, legendW, legendH - 7, "S");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7);
-  doc.setTextColor(...DOC_GOLD);
-  doc.text("LÉGENDE", legendX + legendW / 2, schemaTop + 1.5, { align: "center" });
-  let ly = schemaTop + 9;
-  LEGENDE.forEach(([code, label]) => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.8);
-    doc.setTextColor(...DOC_GOLD);
-    doc.text(`(${code})`, legendX + 4, ly);
+  doc.roundedRect(M + 5, y + 8, W - 10, resH - 11.5, 1.6, 1.6, "FD");
+  y += resH + sp;
+
+  /* ---------- Schéma + légende ---------- */
+  const legW = 60;
+  const schW = W - legW - 4;
+  const boxGap = 3;
+  const ratios = [1, 1.85, 1, 1.85];
+  const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
+  const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
+  const schH = isLiv ? 42 : 34;
+  const boxH = schH - 16;
+  panel(doc, M, y, schW, schH);
+  panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
+  VUES.forEach(([png, label, iw, ih], i) => {
+    const boxW = ratios[i]! * boxUnit;
+    const bx = boxX[i]!;
+    const by = y + 11;
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(bx, by, boxW, boxH, 1.6, 1.6, "FD");
+    const maxW = boxW - 3;
+    const maxH = boxH - 4;
+    const s = Math.min(maxW / iw, maxH / ih);
+    doc.addImage(png, "PNG", bx + (boxW - iw * s) / 2, by + (boxH - ih * s) / 2, iw * s, ih * s, undefined, "FAST");
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...DOC_TEXT);
-    doc.text(label, legendX + 13, ly);
-    ly += 4.0;
+    doc.setFontSize(6.2);
+    doc.setTextColor(...MUTED);
+    doc.text(label, bx + boxW / 2, by + boxH + 3.6, { align: "center" });
   });
 
-  y = Math.max(schemaTop + schemaH + 6, schemaTop + legendH + 4);
+  const legX = M + schW + 4;
+  doc.setFillColor(...NAVY);
+  doc.roundedRect(legX, y, legW, 8, 2.2, 2.2, "F");
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(legX, y + 6, legW, schH - 6, 2.2, 2.2, "FD");
+  doc.setFillColor(...NAVY);
+  doc.roundedRect(legX, y, legW, 8, 2.2, 2.2, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.4);
+  doc.setTextColor(212, 175, 55);
+  doc.text("LÉGENDE", legX + legW / 2, y + 5.4, { align: "center" });
+  const legStep = Math.min(4.6, (schH - 12) / LEGENDE.length);
+  let ly = y + 8 + (schH - 8 - legStep * (LEGENDE.length - 1)) / 2;
+  LEGENDE.forEach(([code, label]) => {
+    doc.setDrawColor(...GOLD);
+    doc.setLineWidth(0.3);
+    doc.circle(legX + 7, ly - 1, 2.1, "S");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.4);
+    doc.setTextColor(...GOLD);
+    doc.text(code, legX + 7, ly + 0.3, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.4);
+    doc.setTextColor(...TEXT);
+    doc.text(label, legX + 12, ly + 0.3);
+    ly += legStep;
+  });
+  y += schH + sp;
 
-  const dommages = (d.dommages ?? []).slice(0, 6);
+  /* ---------- Dommages repris de l'EDL ---------- */
+  const dommages = (d.dommages ?? []).slice(0, 4);
   if (dommages.length) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.setTextColor(...DOC_NAVY);
-    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", 14, y);
-    y += 4;
+    doc.setFontSize(6.8);
+    doc.setTextColor(...INK);
+    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", M, y + 2);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(...DOC_TEXT);
-    dommages.forEach((dm) => {
-      const line = [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" — ");
-      doc.text(doc.splitTextToSize(line, w)[0] as string, 14, y);
-      y += 3.6;
-    });
-    y += 2;
+    doc.setTextColor(...TEXT);
+    const txt = dommages.map((dm) => [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" ")).join("  ·  ");
+    doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 5.6);
+    y += 8.5;
   }
 
-  /* Documents, mention légale et signatures : jamais à cheval sur le pied de page. */
-  const pageH = doc.internal.pageSize.getHeight();
-  const mentionLines = (doc.splitTextToSize(mentionText(isLiv), w) as string[]).length;
-  const need =
-    10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 21;
-  if (y + need > pageH - 14) {
-
-    doc.addPage();
-    y = 30;
+  /* ---------- Frais additionnels (restitution) ---------- */
+  if (!isLiv) {
+    const frH = 25;
+    panel(doc, M, y, W, frH);
+    panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(M + 6, y + 8.5, COL2 - 6, 7.5, 2, 2, "FD");
+    doc.roundedRect(XR, y + 8.5, COL2 - 6, 7.5, 2, 2, "FD");
+    checkbox(doc, M + 10, y + 10.6, 3.2);
+    checkbox(doc, XR + 4, y + 10.6, 3.2);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.8);
+    doc.setTextColor(...INK);
+    doc.text("Aucun frais additionnel", M + 16, y + 13.5);
+    doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 13.5);
+    field(doc, M + 6, y + 18, fw, "Nature des frais", null);
+    field(doc, fx2, y + 18, fw, "Montant estimé", null);
+    y += frH + sp;
   }
 
-  /* Documents et accessoires */
-  y = drawSectionTitle(doc, pageW, y, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
+  /* ---------- Documents et accessoires ---------- */
+  const docsH = isLiv ? 24 : 20;
+  panel(doc, M, y, W, docsH);
+  panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
+  let dy = y + (isLiv ? 12 : 10.5);
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
-    drawCheckbox(doc, 16, y - 2.6, 3.2, false);
-    drawCheckbox(doc, xR, y - 2.6, 3.2, false);
+    checkbox(doc, M + 6, dy - 2.6, 3.2);
+    checkbox(doc, XR, dy - 2.6, 3.2);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.2);
-    doc.setTextColor(...DOC_TEXT);
-    doc.text(l, 21, y);
-    doc.text(r, xR + 5, y);
-    y += 5;
+    doc.setFontSize(7.6);
+    doc.setTextColor(...TEXT);
+    doc.text(l, M + 12, dy);
+    doc.text(r, XR + 6, dy);
+    dy += isLiv ? 5.2 : 4.6;
   });
-  y += 2;
+  y += docsH + sp;
 
-  /* Mention légale */
+  /* ---------- Mention légale ---------- */
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.2);
-  doc.setTextColor(...DOC_MUTED);
-  const mention = mentionText(isLiv);
-  (doc.splitTextToSize(mention, w) as string[]).forEach((l) => {
-    doc.text(l, 14, y);
-    y += 3.05;
-  });
-  y += 3;
+  doc.setFontSize(6.3);
+  const mention = doc.splitTextToSize(mentionText(isLiv), W - 12) as string[];
+  const mentH = mention.length * 3.2 + 6;
+  panel(doc, M, y, W, mentH);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...MUTED);
+  mention.forEach((l, i) => doc.text(l, M + 6, y + 5 + i * 3.2));
+  y += mentH + (isLiv ? 6 : 4.5);
 
-  /* Signatures */
+  /* ---------- Signatures ---------- */
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text("Signature du convoyeur", 14, y);
-  doc.text(isLiv ? "Signature du destinataire" : "Signature du propriétaire / donneur d'ordre", xR, y);
+  doc.setFontSize(9);
+  doc.setTextColor(...INK);
+  doc.text("Signature du convoyeur", M, y);
+  doc.text(isLiv ? "Signature du destinataire" : "Signature du propriétaire / donneur d'ordre", XR, y);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.6);
-  doc.setTextColor(...DOC_MUTED);
+  doc.setFontSize(7);
+  doc.setTextColor(...MUTED);
   doc.text(
     isLiv
       ? "Certifie la livraison du véhicule dans les conditions décrites ci-dessus"
       : "Certifie la restitution du véhicule dans les conditions décrites ci-dessus",
-    14,
-    y + 4,
+    M,
+    y + 4.6,
   );
   doc.text(
     isLiv
       ? "Certifie la réception du véhicule et l'exactitude des informations ci-dessus"
       : "Certifie la reprise du véhicule et l'exactitude des informations ci-dessus",
-    xR,
-    y + 4,
+    XR,
+    y + 4.6,
   );
-  const sigY = y + 14;
-  doc.setDrawColor(...DOC_LINE);
+  const sigY = y + 16;
+  doc.setDrawColor(...RULE);
   doc.setLineWidth(0.3);
-  doc.line(14, sigY, 14 + c2, sigY);
-  doc.line(xR, sigY, xR + c2, sigY);
-  doc.setFontSize(6.4);
-  doc.text("Nom, date et signature", 14, sigY + 3.5);
-  doc.text("Nom, date et signature", xR, sigY + 3.5);
+  doc.line(M, sigY, M + COL2, sigY);
+  doc.line(XR, sigY, XR + COL2, sigY);
+  doc.setFontSize(6.6);
+  doc.setTextColor(...MUTED);
+  doc.text("Nom, date et signature", M, sigY + 3.6);
+  doc.text("Nom, date et signature", XR, sigY + 3.6);
 
-  finalizeDoc(doc, c);
+  /* ---------- Pied de page ---------- */
+  const footY = 283;
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.3);
+  doc.line(M, footY, right, footY);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.4);
+  doc.setTextColor(...MUTED);
+  doc.text(`${c?.raison_sociale || "Transports Ligneo"} · ${ville}`, M, footY + 4.5);
+  const site = (c?.site_web || "www.transportsligneo.fr").replace(/^https?:\/\//, "");
+  doc.setTextColor(...BLUE);
+  doc.text(site, right, footY + 4.5, { align: "right" });
+  const siteW = doc.getTextWidth(site);
+  doc.setTextColor(...MUTED);
+  doc.text(c?.email_contact || "contact@transportsligneo.fr", right - siteW - 4, footY + 4.5, { align: "right" });
+
   return doc.output("blob");
 }
