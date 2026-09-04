@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
+import { EditDevisDialog } from "@/components/admin/EditDevisDialog";
 
 const CLIENT_TYPE_LABELS: Record<string, string> = {
   particulier: "Particulier",
@@ -58,6 +59,21 @@ function AdminDevisDetailPage() {
   const [lienPaiement, setLienPaiement] = useState("");
   const [savingLien, setSavingLien] = useState(false);
   const [savingPaiement, setSavingPaiement] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  /** Applique une modification de devis : état local + régénération du PDF (même numéro). */
+  const applyDevisPatch = async (patch: Record<string, unknown>) => {
+    const next = { ...devis, ...patch };
+    setDevis(next);
+    setPriceInput(next.prix_estime != null ? String(next.prix_estime) : "");
+    try {
+      const blob = await generateDevisPdf(buildDevisData(next));
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(URL.createObjectURL(blob));
+    } catch (e) {
+      console.error("PDF regen error", e);
+    }
+  };
 
 
   const buildDevisData = (row: any): DevisData =>
@@ -354,6 +370,9 @@ function AdminDevisDetailPage() {
                 onSaved={(next: string) => setDevis((d: any) => (d ? { ...d, numero: next } : d))}
               />
               <Badge tone={devisStatutTone[devis.statut] ?? "neutral"}>{statut.label}</Badge>
+              {Number(devis.version ?? 1) > 1 && (
+                <Badge tone="warning">Devis modifié · rév. v{devis.version}</Badge>
+              )}
               {devis.email_envoye && <Badge tone="success">Email envoyé</Badge>}
               {devis.mission_id && <Badge tone="info">Mission</Badge>}
             </div>
@@ -365,7 +384,12 @@ function AdminDevisDetailPage() {
           </Card>
 
           <Card>
-            <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium mb-3">Trajet</p>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-[10px] uppercase tracking-wider text-pro-muted font-medium">Trajet</p>
+              <Button size="sm" variant="secondary" icon={<PenLine size={12} />} onClick={() => setEditOpen(true)}>
+                Modifier le devis
+              </Button>
+            </div>
             <div className="space-y-2 text-sm">
               <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 text-pro-accent shrink-0" /><span><span className="text-pro-muted text-xs block">Départ</span>{devis.depart}</span></p>
               <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 text-pro-accent shrink-0" /><span><span className="text-pro-muted text-xs block">Arrivée</span>{devis.arrivee}</span></p>
