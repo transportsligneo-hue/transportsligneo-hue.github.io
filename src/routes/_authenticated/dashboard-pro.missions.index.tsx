@@ -7,6 +7,7 @@ import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
