@@ -5539,7 +5539,7 @@ export type Database = {
             foreignKeyName: "payment_link_attachments_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
-            referencedRelation: "missions"
+            referencedRelation: "attributions"
             referencedColumns: ["id"]
           },
           {
@@ -5632,7 +5632,7 @@ export type Database = {
             foreignKeyName: "payment_links_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
-            referencedRelation: "missions"
+            referencedRelation: "attributions"
             referencedColumns: ["id"]
           },
         ]
