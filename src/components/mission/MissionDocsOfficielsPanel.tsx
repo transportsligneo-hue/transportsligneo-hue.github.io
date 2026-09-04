@@ -96,7 +96,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
       .maybeSingle();
     if (!attr) { setLoading(false); return; }
 
-    const [tRes, cRes, dRes, comp] = await Promise.all([
+    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
         ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
@@ -108,6 +108,23 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         .eq("type_document", PV_TYPE)
         .order("created_at", { ascending: false }),
       fetchCompanyInfo(),
+      supabase
+        .from("inspections")
+        .select("kilometrage_depart, kilometrage_arrivee")
+        .eq("attribution_id", attributionId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("edl_non_roulant")
+        .select("photos")
+        .eq("attribution_id", attributionId)
+        .order("created_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("mission_documents")
+        .select("id, nom_fichier, url_fichier, created_at, type_document")
+        .eq("attribution_id", attributionId)
+        .in("type_document", ["pv_livraison", "pv_restitution"])
+        .order("created_at", { ascending: false }),
     ]);
 
     const t = tRes.data as unknown as TrajetLite | null;
@@ -125,6 +142,23 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);
+
+    const insp = ((inspRes.data as { kilometrage_depart: number | null; kilometrage_arrivee: number | null }[] | null) ?? []);
+    setKmDepart(insp.find((i) => i.kilometrage_depart != null)?.kilometrage_depart ?? null);
+    setKmArrivee(insp.find((i) => i.kilometrage_arrivee != null)?.kilometrage_arrivee ?? null);
+
+    const nrPhotos = ((nrRes.data as { photos: unknown }[] | null)?.[0]?.photos ?? []) as {
+      vue?: string;
+      annotations?: { code?: string }[];
+    }[];
+    setDommages(
+      (Array.isArray(nrPhotos) ? nrPhotos : []).flatMap((p) =>
+        (p.annotations ?? []).map((a) => ({ code: a.code || "•", zone: EDL_VUE_LABELS[p.vue || ""] || p.vue || null })),
+      ),
+    );
+
+    setPvSignes((pvRes.data as SignedPvDoc[] | null) ?? []);
+
 
     // Société du client (organisation / profil) — sinon nom du particulier
     let soc = (t?.arrivee_contact_societe || "").trim() || null;
