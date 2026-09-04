@@ -206,10 +206,10 @@ export async function generatePvMissionPdf(
   y = yy + 1;
 
   if (!isLiv) {
-    y = drawSectionTitle(doc, pageW, y, "Comparaison avec l'état des lieux de départ");
-    yy = field(doc, 14, y, c3, "Kilométrage au départ", d.kilometrage_depart);
-    field(doc, x2, y, c3, "Kilométrage à la restitution", d.kilometrage_arrivee);
-    field(doc, x3, y, c3, "Écart", null);
+    // Comparaison avec l'EDL de départ, intégrée au bloc véhicule.
+    yy = field(doc, 14, y, c3, "Kilométrage au départ (EDL)", d.kilometrage_depart);
+    field(doc, x2, y, c3, "Écart kilométrique", null);
+    field(doc, x3, y, c3, "Carnet / entretien à jour", null);
     y = yy + 1;
   }
 
