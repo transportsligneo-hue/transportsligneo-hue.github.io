@@ -51,12 +51,10 @@ export function AttachClientDialog({
   const [tab, setTab] = useState<"existant" | "nouveau">("existant");
   const [busy, setBusy] = useState(false);
 
-  // --- Recherche compte existant ---
   const [q, setQ] = useState("");
   const [results, setResults] = useState<ProfileRow[]>([]);
   const [searched, setSearched] = useState(false);
 
-  // --- Création de compte ---
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -84,7 +82,6 @@ export function AttachClientDialog({
     setBusy(false);
   }
 
-  /** Rattache le client (profil) à la mission courante. */
   async function attach(p: ProfileRow) {
     if (!p.email) {
       toast.error("Ce compte n'a pas d'email : impossible de le rattacher.");
@@ -186,9 +183,119 @@ export function AttachClientDialog({
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Rattacher la mission à un client</DittleFix />
+          <DialogTitle>Rattacher la mission à un client</DialogTitle>
+          <DialogDescription>
+            {currentEmail
+              ? `Client actuel : ${currentEmail}. Le rattachement remplacera ce contact.`
+              : "La mission apparaîtra immédiatement dans l'espace du client choisi."}
+          </DialogDescription>
         </DialogHeader>
+
+        <div className="flex gap-2 border-b border-slate-200 pb-2">
+          <button
+            type="button"
+            onClick={() => setTab("existant")}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium ${tab === "existant" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+          >
+            Compte existant
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("nouveau")}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium ${tab === "nouveau" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+          >
+            Nouveau compte
+          </button>
+        </div>
+
+        {tab === "existant" ? (
+          <div className="space-y-3 py-2">
+            <div className="flex gap-2">
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void search(); }}
+                placeholder="Nom, email, société…"
+              />
+              <Button onClick={() => void search()} disabled={busy || q.trim().length < 2}>
+                {busy ? <Loader2 className="animate-spin" size={16} /> : <Search size={16} />}
+              </Button>
+            </div>
+
+            {searched && results.length === 0 && (
+              <p className="text-sm text-slate-500 py-4 text-center">
+                Aucun compte trouvé. Créez-en un dans l'onglet « Nouveau compte ».
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {results.map((p) => (
+                <div
+                  key={p.user_id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">
+                      {`${p.prenom ?? ""} ${p.nom ?? ""}`.trim() || p.societe || "—"}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {p.email ?? "sans email"}{p.societe ? ` · ${p.societe}` : ""}
+                    </p>
+                  </div>
+                  <Button size="sm" disabled={busy} onClick={() => void attach(p)} className="shrink-0 gap-1.5">
+                    <CheckCircle2 size={14} /> Rattacher
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
+            <Field label="Email *">
+              <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
+            </Field>
+            <Field label="Mot de passe * (min. 8)">
+              <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => set("password", e.target.value)} />
+            </Field>
+            <Field label="Prénom">
+              <Input value={form.prenom} onChange={(e) => set("prenom", e.target.value)} />
+            </Field>
+            <Field label="Nom">
+              <Input value={form.nom} onChange={(e) => set("nom", e.target.value)} />
+            </Field>
+            <Field label="Téléphone">
+              <Input value={form.telephone} onChange={(e) => set("telephone", e.target.value)} />
+            </Field>
+            <Field label="Société">
+              <Input value={form.societe} onChange={(e) => set("societe", e.target.value)} />
+            </Field>
+            <Field label="Type de client">
+              <Select value={form.type_client} onValueChange={(v) => set("type_client", v as "particulier" | "b2b")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="particulier">Particulier</SelectItem>
+                  <SelectItem value="b2b">Entreprise (B2B)</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <div className="sm:col-span-2 flex justify-end">
+              <Button onClick={() => void createAndAttach()} disabled={busy} className="gap-2">
+                {busy ? <Loader2 className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                Créer le compte et rattacher
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs uppercase tracking-wider text-slate-500">{label}</Label>
+      {children}
+    </div>
   );
 }
