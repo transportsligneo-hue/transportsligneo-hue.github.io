@@ -318,7 +318,7 @@ export function AdminScanDocumentFab() {
         type="button"
         onClick={() => { setOpen(true); setStep("type"); }}
         aria-label="Scanner un document"
-        className="fixed bottom-5 right-5 z-[70] inline-flex items-center gap-2 rounded-full px-4 py-3 font-semibold text-sm text-[#0b1026] bg-gradient-to-r from-[#d4af37] to-[#e7c76a] shadow-[0_6px_24px_rgba(212,175,55,0.45)] hover:shadow-[0_8px_30px_rgba(212,175,55,0.6)] transition"
+        className="fixed bottom-[86px] lg:bottom-5 right-4 lg:right-5 z-[70] inline-flex items-center gap-2 rounded-full px-4 py-3 font-semibold text-sm text-[#0b1026] bg-gradient-to-r from-[#d4af37] to-[#e7c76a] shadow-[0_6px_24px_rgba(212,175,55,0.45)] hover:shadow-[0_8px_30px_rgba(212,175,55,0.6)] transition"
       >
         <ScanLine size={18} />
         <span className="hidden sm:inline">Scanner un document</span>
