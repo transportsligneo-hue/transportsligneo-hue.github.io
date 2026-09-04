@@ -47,7 +47,7 @@ export function CreateAccountDialog({ onCreated }: Props) {
     nom: "",
     telephone: "",
     role: "client" as RoleOption,
-    type_client: "particulier" as "particulier" | "b2b",
+    type_client: "particulier" as "particulier" | "b2b" | "flotte",
     societe: "",
     siret: "",
     organization_id: "",
@@ -176,11 +176,12 @@ export function CreateAccountDialog({ onCreated }: Props) {
 
           {form.role === "client" && (
             <Field label="Type client">
-              <Select value={form.type_client} onValueChange={(v) => set("type_client", v as "particulier" | "b2b")}>
+              <Select value={form.type_client} onValueChange={(v) => set("type_client", v as "particulier" | "b2b" | "flotte")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="particulier">Particulier</SelectItem>
-                  <SelectItem value="b2b">Entreprise (B2B)</SelectItem>
+                  <SelectItem value="b2b">Entreprise (B2B ponctuel)</SelectItem>
+                  <SelectItem value="flotte">Flotte / compte pro</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
