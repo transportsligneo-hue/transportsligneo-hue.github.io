@@ -304,6 +304,14 @@ export async function generatePvMissionPdf(
     y += 2;
   }
 
+  /* Documents, mention légale et signatures : jamais à cheval sur le pied de page. */
+  const pageH = doc.internal.pageSize.getHeight();
+  const need = 30 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 34;
+  if (y + need > pageH - 22) {
+    doc.addPage();
+    y = 30;
+  }
+
   /* Documents et accessoires */
   y = drawSectionTitle(doc, pageW, y, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
@@ -331,8 +339,8 @@ export async function generatePvMissionPdf(
   });
   y += 4;
 
-  /* Signatures — toujours au-dessus du pied de page */
-  y = Math.min(y, doc.internal.pageSize.getHeight() - 48);
+  /* Signatures */
+  y += 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
