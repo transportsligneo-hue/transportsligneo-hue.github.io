@@ -336,6 +336,14 @@ export const lookupPlate = createServerFn({ method: "POST" })
         if (m) result.annee = m[1];
       }
 
+      // Poids : ne garder que les chiffres (ex. "1 460 kg" → "1460")
+      if (result.poids) {
+        const digits = String(result.poids).replace(/[^\d]/g, "");
+        result.poids = digits || undefined;
+      }
+
+
+
       result.energie = normalizeEnergie(result.carburant);
       result.categorie = detectCategorie(result.carrosserie, result.modele, result.finition);
 
