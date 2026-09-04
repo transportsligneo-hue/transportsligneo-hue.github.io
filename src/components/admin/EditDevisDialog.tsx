@@ -5,14 +5,17 @@
  * - Recalcule automatiquement la distance et le prix conseillé si les adresses
  *   ou l'option de trajet changent (sauf prix verrouillé manuellement)
  * - Conserve le même numéro de devis et incrémente la révision (v2, v3…)
+ * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
 import { useMemo, useState } from 'react'
 import { Loader2, RefreshCw, Save, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/admin/AdminUI'
+import PlacesInput from '@/components/PlacesInput'
 import { calculateBasePrice, getDistance, type TripType } from '@/lib/reservation-pricing'
 import { geocodeDistanceKm, normalizeAddress } from '@/lib/distance-fallback'
+import { parseDevisSupplements } from '@/lib/devis-pdf'
 
 interface Props {
   devis: Record<string, any>
@@ -20,11 +23,30 @@ interface Props {
   onSaved: (patch: Record<string, unknown>) => void
 }
 
-const OPTIONS: { value: TripType; label: string }[] = [
-  { value: 'aller_simple', label: 'Aller simple' },
-  { value: 'aller_retour', label: 'Aller-retour' },
-  { value: 'express', label: 'Express' },
-]
+/** Libellés proposés — la valeur d'origine du devis est toujours conservée. */
+const OPTIONS = [
+  'Livraison simple',
+  'Livraison + restitution',
+  'Recharge uniquement (sans livraison)',
+  'Aller simple',
+  'Aller-retour',
+  'Express',
+] as const
+
+/** Traduit un libellé libre en type tarifaire pour le recalcul. */
+function toTripType(label: string): TripType {
+  const t = label.toLowerCase()
+  if (t.includes('express')) return 'express'
+  if (t.includes('retour') || t.includes('restitution')) return 'aller_retour'
+  return 'aller_simple'
+}
+
+/** Réécrit la ligne « Transport sur plateau » dans le récapitulatif message. */
+function applyPlateauToMessage(message: string, plateau: boolean): string {
+  const lines = message.split('\n').filter((l) => !/^\s*Transport sur plateau\s*:/i.test(l))
+  lines.push(`Transport sur plateau : ${plateau ? 'oui' : 'non'}`)
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
 
 const inputCls =
   'w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20'
@@ -39,6 +61,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
+  const initialOption = String(devis.option_trajet ?? 'Livraison simple')
+  const initialPlateau = parseDevisSupplements(devis.message).plateau
+
   const [f, setF] = useState({
     prenom: devis.prenom ?? '',
     nom: devis.nom ?? '',
@@ -48,7 +73,9 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     arrivee: devis.arrivee ?? '',
     date_souhaitee: devis.date_souhaitee ?? '',
     heure_souhaitee: devis.heure_souhaitee ?? '',
-    option_trajet: (devis.option_trajet ?? 'aller_simple') as TripType,
+    date_a_determiner: !devis.date_souhaitee,
+    option_trajet: initialOption,
+    plateau: initialPlateau,
     marque: devis.marque ?? '',
     modele: devis.modele ?? '',
     type_vehicule: devis.type_vehicule ?? '',
@@ -65,12 +92,21 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
+  /** Liste des options : les valeurs standard + celle du devis si elle diffère. */
+  const optionList = useMemo(() => {
+    const all = [...OPTIONS] as string[]
+    if (initialOption && !all.some((o) => o.toLowerCase() === initialOption.toLowerCase())) {
+      all.unshift(initialOption)
+    }
+    return all
+  }, [initialOption])
+
   const trajetChanged = useMemo(
     () =>
       normalizeAddress(f.depart) !== normalizeAddress(devis.depart ?? '') ||
       normalizeAddress(f.arrivee) !== normalizeAddress(devis.arrivee ?? '') ||
-      f.option_trajet !== (devis.option_trajet ?? 'aller_simple'),
-    [f.depart, f.arrivee, f.option_trajet, devis],
+      f.option_trajet !== initialOption,
+    [f.depart, f.arrivee, f.option_trajet, devis, initialOption],
   )
 
   const recalculer = async () => {
@@ -80,9 +116,10 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     }
     setRecalcul(true)
     try {
+      const type = toTripType(f.option_trajet)
       let km = getDistance(f.depart, f.arrivee)
       if (km == null) km = await geocodeDistanceKm(f.depart, f.arrivee)
-      const res = calculateBasePrice(f.depart, f.arrivee, f.option_trajet, km)
+      const res = calculateBasePrice(f.depart, f.arrivee, type, km)
       setF((p) => ({
         ...p,
         distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
@@ -113,6 +150,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     try {
       const km = f.distance_km === '' ? null : Number(String(f.distance_km).replace(',', '.'))
       const priceChanged = Number(devis.prix_estime ?? 0) !== prix
+      const message = applyPlateauToMessage(f.message, f.plateau)
       const patch: Record<string, unknown> = {
         prenom: f.prenom.trim(),
         nom: f.nom.trim(),
@@ -120,8 +158,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
         telephone: f.telephone.trim() || null,
         depart: f.depart.trim(),
         arrivee: f.arrivee.trim(),
-        date_souhaitee: f.date_souhaitee || null,
-        heure_souhaitee: f.heure_souhaitee || null,
+        date_souhaitee: f.date_a_determiner ? null : f.date_souhaitee || null,
+        heure_souhaitee: f.date_a_determiner ? null : f.heure_souhaitee || null,
         option_trajet: f.option_trajet,
         marque: f.marque.trim() || null,
         modele: f.modele.trim() || null,
@@ -130,7 +168,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
         immatriculation: f.immatriculation.trim().toUpperCase() || null,
         distance_km: km != null && Number.isFinite(km) ? km : null,
         tarif_label: f.tarif_label || null,
-        message: f.message.trim() || null,
+        message: message || null,
         prix_estime: prix,
         prix_manuel: f.prix_manuel || (priceChanged && !trajetChanged),
         version: Number(devis.version ?? 1) + 1,
@@ -159,11 +197,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-6" onClick={onClose}>
-      <div
-        className="flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-6">
+      <div className="flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
         <div className="flex items-center justify-between border-b border-pro-border px-4 py-3">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-pro-muted">Modifier le devis</p>
@@ -186,23 +221,75 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
 
           <section className="space-y-3 rounded-xl border border-pro-border p-3">
             <p className="text-[10px] font-medium uppercase tracking-wider text-pro-muted">Trajet</p>
-            <Field label="Adresse de départ"><input className={inputCls} value={f.depart} onChange={(e) => set('depart', e.target.value)} /></Field>
-            <Field label="Adresse d'arrivée"><input className={inputCls} value={f.arrivee} onChange={(e) => set('arrivee', e.target.value)} /></Field>
+            <Field label="Adresse de départ">
+              <PlacesInput
+                value={f.depart}
+                onChange={(v) => set('depart', v)}
+                onSelect={(v) => set('depart', v)}
+                placeholder="Ville, code postal ou adresse complète"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Adresse d'arrivée">
+              <PlacesInput
+                value={f.arrivee}
+                onChange={(v) => set('arrivee', v)}
+                onSelect={(v) => set('arrivee', v)}
+                placeholder="Ville, code postal ou adresse complète"
+                className={inputCls}
+              />
+            </Field>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Field label="Date">
-                <input type="date" className={inputCls} value={f.date_souhaitee ?? ''} onChange={(e) => set('date_souhaitee', e.target.value)} />
+                <input
+                  type="date"
+                  className={`${inputCls} disabled:bg-pro-surface disabled:text-pro-muted`}
+                  disabled={f.date_a_determiner}
+                  value={f.date_souhaitee ?? ''}
+                  onChange={(e) => set('date_souhaitee', e.target.value)}
+                />
               </Field>
               <Field label="Heure">
-                <input type="time" className={inputCls} value={f.heure_souhaitee ?? ''} onChange={(e) => set('heure_souhaitee', e.target.value)} />
+                <input
+                  type="time"
+                  className={`${inputCls} disabled:bg-pro-surface disabled:text-pro-muted`}
+                  disabled={f.date_a_determiner}
+                  value={f.heure_souhaitee ?? ''}
+                  onChange={(e) => set('heure_souhaitee', e.target.value)}
+                />
               </Field>
               <Field label="Option de trajet">
-                <select className={inputCls} value={f.option_trajet} onChange={(e) => set('option_trajet', e.target.value as TripType)}>
-                  {OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                <select className={inputCls} value={f.option_trajet} onChange={(e) => set('option_trajet', e.target.value)}>
+                  {optionList.map((o) => (
+                    <option key={o} value={o}>{o}</option>
                   ))}
                 </select>
               </Field>
             </div>
+            <label className="flex items-center gap-2 text-xs text-pro-text">
+              <input
+                type="checkbox"
+                className="accent-pro-accent"
+                checked={f.date_a_determiner}
+                onChange={(e) =>
+                  setF((p) => ({
+                    ...p,
+                    date_a_determiner: e.target.checked,
+                    ...(e.target.checked ? { date_souhaitee: '', heure_souhaitee: '' } : {}),
+                  }))
+                }
+              />
+              Date et heure à déterminer (rendez-vous à convenir avec le client)
+            </label>
+            <label className="flex items-center gap-2 text-xs text-pro-text">
+              <input
+                type="checkbox"
+                className="accent-pro-accent"
+                checked={f.plateau}
+                onChange={(e) => set('plateau', e.target.checked)}
+              />
+              Véhicule non roulant — transport sur plateau porte-voiture
+            </label>
             {trajetChanged && (
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
                 Le trajet a changé : recalculez la distance et le prix avant d'enregistrer.
@@ -253,7 +340,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
             Le numéro {devis.numero} est conservé — le document passera en révision v{Number(devis.version ?? 1) + 1}.
           </p>
           <div className="flex gap-2">
-            <Button variant="secondary" size="sm" onClick={onClose}>Annuler</Button>
+            <Button variant="secondary" size="sm" onClick={onClose}>Fermer</Button>
             <Button size="sm" onClick={save} disabled={saving} icon={saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}>
               Enregistrer & régénérer
             </Button>
