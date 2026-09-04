@@ -28,6 +28,7 @@ import {
   type MissionMeta,
 } from "@/components/admin/missions/MissionsTableExtras";
 import { displayTrajetRef, displayNumero, stripLegSuffix, hasLegSuffix } from "@/lib/mission-number";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 import { LegSuffixLegend } from "@/components/admin/LegSuffixLegend";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
 
@@ -646,6 +647,29 @@ function AdminMissionsUnified() {
     return out;
   }, [visible, meta]);
 
+  const [view, setView] = useMissionView("ligneo:view:admin-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      visible.map((m) => ({
+        id: m.id,
+        numero: m.ref,
+        depart: m.depart ?? "—",
+        arrivee: m.arrivee ?? "—",
+        date: m.date ? `${m.date}T${(m.heure ?? "00:00").slice(0, 5)}` : null,
+        statut: m.status,
+        statutLabel: UNIFIED_STATUS[m.status]?.label ?? m.status,
+        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || m.clientNom || undefined,
+        amount: m.prix != null ? `${Number(m.prix).toFixed(2)} €` : undefined,
+        wrap: (children) => (
+          <button type="button" onClick={() => setSelected(m)} className="block w-full text-left h-full">
+            {children}
+          </button>
+        ),
+      })),
+    [visible],
+  );
+
   useEffect(() => {
     if (!selected) return;
     const fresh = rows.find((r) => r.id === selected.id && r.kind === selected.kind);
@@ -663,6 +687,7 @@ function AdminMissionsUnified() {
         subtitle={`Demandes, trajets et attributions réunis dans un seul flux — ${rows.length} mission${rows.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <MissionViewSwitcher view={view} onChange={setView} />
             <ColumnsMenu hidden={hidden} onToggle={toggleColumn} />
             <Link
               to="/admin/attributions"
@@ -797,6 +822,9 @@ function AdminMissionsUnified() {
       <LegSuffixLegend className="mb-3" />
 
       {/* Tableau unique */}
+      {view !== "list" && visible.length > 0 ? (
+        <MissionViewsBody view={view} items={viewItems} />
+      ) : (
       <div className="a6-card overflow-hidden">
         {visible.length === 0 ? (
           <RadarEmptyV6
@@ -1105,6 +1133,7 @@ function AdminMissionsUnified() {
           </div>
         )}
       </div>
+      )}
 
       {selected && (
         <MissionUnifiedPanel mission={selected} onClose={() => setSelected(null)} onChanged={fetchAll} />

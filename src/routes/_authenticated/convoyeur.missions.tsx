@@ -27,6 +27,7 @@ import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   validateSearch: (search: Record<string, unknown>): { open?: string; f?: string } => ({
@@ -539,6 +540,29 @@ function ConvoyeurMissions() {
       return ba === 2 ? (db > da ? 1 : -1) : (da > db ? 1 : -1);
     });
   }, [missions, filter, search]);
+
+  const [view, setView] = useMissionView("ligneo:view:convoyeur-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      filtered.map((m) => ({
+        id: m.id,
+        numero: m.numero_mission ? displayNumero(m.numero_mission) : `MIS-${m.id.slice(0, 8).toUpperCase()}`,
+        depart: m.trajet?.depart ?? "—",
+        arrivee: m.trajet?.arrivee ?? "—",
+        date: m.trajet?.date_trajet
+          ? `${m.trajet.date_trajet}T${(m.trajet.heure_trajet ?? "00:00").slice(0, 5)}`
+          : null,
+        statut: m.statut,
+        meta: [m.trajet?.marque, m.trajet?.modele].filter(Boolean).join(" ") || m.trajet?.immatriculation || undefined,
+        wrap: (children) => (
+          <button type="button" onClick={() => setOpenMissionId(m.id)} className="block w-full text-left h-full">
+            {children}
+          </button>
+        ),
+      })),
+    [filtered, setOpenMissionId],
+  );
 
   const closeInspection = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -1124,6 +1148,7 @@ function ConvoyeurMissions() {
             )}
           </button>
         ))}
+        <MissionViewSwitcher view={view} onChange={setView} className="ml-auto shrink-0 self-center" />
       </div>
 
       {/* List */}
@@ -1137,6 +1162,8 @@ function ConvoyeurMissions() {
             <p className="text-pro-text-soft text-xs mt-1.5">{emptyMessages[filter].hint}</p>
           )}
         </div>
+      ) : view !== "list" ? (
+        <MissionViewsBody view={view} items={viewItems} />
       ) : (
         <div className="space-y-3">
           {filtered.map(m => (

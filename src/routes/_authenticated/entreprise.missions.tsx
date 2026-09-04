@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { legRef } from "@/lib/mission-number";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/entreprise/missions")({
   component: EntrepriseMissions,
@@ -45,12 +46,34 @@ function EntrepriseMissions() {
     })();
   }, [user]);
 
+  const [view, setView] = useMissionView("ligneo:view:entreprise-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      rows.map((r) => ({
+        id: r.id,
+        numero: legRef(r.numero, r.leg_type, r.leg_index, r.leg_type === "aller" || r.leg_type === "retour"),
+        depart: r.ville_depart,
+        arrivee: r.ville_arrivee,
+        date: r.date_prise_en_charge,
+        statut: r.statut,
+        amount: `${Number(r.prix_total).toFixed(2)} €`,
+      })),
+    [rows],
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-pro-text">Missions</h1>
         <p className="text-sm text-pro-muted mt-1">Toutes les missions liées à votre entreprise.</p>
+        <div className="mt-3">
+          <MissionViewSwitcher view={view} onChange={setView} />
+        </div>
       </div>
+      {view !== "list" && !loading && rows.length > 0 ? (
+        <MissionViewsBody view={view} items={viewItems} />
+      ) : (
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -79,6 +102,7 @@ function EntrepriseMissions() {
           </TableBody>
         </Table>
       </Card>
+      )}
     </div>
   );
 }

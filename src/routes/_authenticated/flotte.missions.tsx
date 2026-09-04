@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { legRef } from "@/lib/mission-number";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/flotte/missions")({
   component: FlotteMissions,
@@ -46,12 +47,39 @@ function FlotteMissions() {
     })();
   }, [user]);
 
+  const [view, setView] = useMissionView("ligneo:view:flotte-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      rows.map((r) => ({
+        id: r.id,
+        numero: legRef(r.numero, r.leg_type, r.leg_index, r.leg_type === "aller" || r.leg_type === "retour"),
+        depart: r.ville_depart,
+        arrivee: r.ville_arrivee,
+        date: r.date_prise_en_charge,
+        statut: r.statut,
+        amount: `${Number(r.prix_total).toFixed(2)} €`,
+        wrap: (children) => (
+          <Link to="/flotte/missions/$missionId" params={{ missionId: r.id }} className="block h-full">
+            {children}
+          </Link>
+        ),
+      })),
+    [rows],
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-pro-text">Missions assignées</h1>
         <p className="text-sm text-pro-muted mt-1">Missions confiées à votre flotte par Ligneo.</p>
+        <div className="mt-3">
+          <MissionViewSwitcher view={view} onChange={setView} />
+        </div>
       </div>
+      {view !== "list" && !loading && rows.length > 0 ? (
+        <MissionViewsBody view={view} items={viewItems} />
+      ) : (
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -93,6 +121,7 @@ function FlotteMissions() {
           </TableBody>
         </Table>
       </Card>
+      )}
     </div>
   );
 }

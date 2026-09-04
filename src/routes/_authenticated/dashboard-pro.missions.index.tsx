@@ -7,6 +7,7 @@ import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
@@ -213,6 +214,29 @@ function ProMissionsIndex() {
     );
   }, [pending, search]);
 
+  const [view, setView] = useMissionView("ligneo:view:pro-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      filtered.map((m) => ({
+        id: m.id,
+        numero: displayNumero(m.numero),
+        depart: m.ville_depart,
+        arrivee: m.ville_arrivee,
+        date: m.date_prise_en_charge,
+        statut: m.statut,
+        statutLabel: statutLabel[m.statut] ?? m.statut,
+        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || undefined,
+        amount: `${Number(m.prix_total ?? 0).toFixed(2)} €`,
+        wrap: (children) => (
+          <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block h-full">
+            {children}
+          </Link>
+        ),
+      })),
+    [filtered],
+  );
+
   return (
     <div className="space-y-5">
       <FleetPageHeader
@@ -256,6 +280,7 @@ function ProMissionsIndex() {
             </button>
           ))}
         </div>
+        <MissionViewSwitcher view={view} onChange={setView} className="md:ml-auto self-start" />
       </div>
 
       {!loading && filter === "tous" && pendingFiltered.length > 0 && (
@@ -315,6 +340,8 @@ function ProMissionsIndex() {
             <Truck className="text-slate-300 mx-auto mb-3" size={36} />
             <p className="text-pro-text-soft text-sm">Aucune mission ne correspond.</p>
           </div>
+        ) : view !== "list" ? (
+          <MissionViewsBody view={view} items={viewItems} />
         ) : (
           dossiers.map(({ key, legs, isDuo, total, head }) => {
             const elec = (head.carburant ?? "").toLowerCase().includes("elec")
