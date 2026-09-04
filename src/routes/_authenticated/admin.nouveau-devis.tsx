@@ -336,6 +336,11 @@ function AdminNouveauDevisPage() {
           if (d.marque) setVehicule(d.marque);
           if (d.modele) setModele(d.modele);
           if (d.vin) setVin(d.vin.toUpperCase());
+          if (d.poids) {
+            setPoidsKg(d.poids);
+            if (Number(d.poids) > HEAVY_THRESHOLD_KG) setLourd(true);
+          }
+
         } else {
           if (d.marque) setVehiculeRetour(d.marque);
           if (d.modele) setModeleRetour(d.modele);
