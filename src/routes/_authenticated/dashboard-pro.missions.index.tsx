@@ -214,6 +214,29 @@ function ProMissionsIndex() {
     );
   }, [pending, search]);
 
+  const [view, setView] = useMissionView("ligneo:view:pro-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      filtered.map((m) => ({
+        id: m.id,
+        numero: displayNumero(m.numero),
+        depart: m.ville_depart,
+        arrivee: m.ville_arrivee,
+        date: m.date_prise_en_charge,
+        statut: m.statut,
+        statutLabel: statutLabel[m.statut] ?? m.statut,
+        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || undefined,
+        amount: `${Number(m.prix_total ?? 0).toFixed(2)} €`,
+        wrap: (children) => (
+          <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block h-full">
+            {children}
+          </Link>
+        ),
+      })),
+    [filtered],
+  );
+
   return (
     <div className="space-y-5">
       <FleetPageHeader
