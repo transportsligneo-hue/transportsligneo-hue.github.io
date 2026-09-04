@@ -541,6 +541,29 @@ function ConvoyeurMissions() {
     });
   }, [missions, filter, search]);
 
+  const [view, setView] = useMissionView("ligneo:view:convoyeur-missions");
+
+  const viewItems = useMemo<MissionViewItem[]>(
+    () =>
+      filtered.map((m) => ({
+        id: m.id,
+        numero: m.numero_mission ? displayNumero(m.numero_mission) : `MIS-${m.id.slice(0, 8).toUpperCase()}`,
+        depart: m.trajet?.depart ?? "—",
+        arrivee: m.trajet?.arrivee ?? "—",
+        date: m.trajet?.date_trajet
+          ? `${m.trajet.date_trajet}T${(m.trajet.heure_trajet ?? "00:00").slice(0, 5)}`
+          : null,
+        statut: m.statut,
+        meta: [m.trajet?.marque, m.trajet?.modele].filter(Boolean).join(" ") || m.trajet?.immatriculation || undefined,
+        wrap: (children) => (
+          <button type="button" onClick={() => setOpenMissionId(m.id)} className="block w-full text-left h-full">
+            {children}
+          </button>
+        ),
+      })),
+    [filtered, setOpenMissionId],
+  );
+
   const closeInspection = useCallback(() => {
     if (typeof window !== "undefined") {
       try {
