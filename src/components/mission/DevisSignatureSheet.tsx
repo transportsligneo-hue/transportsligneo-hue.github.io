@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Camera, Loader2, PenLine, Printer, Check } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, PenLine, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/image-compression";
@@ -274,5 +274,3 @@ export function DevisSignatureSheet({ attributionId, devisId, userId, numero, on
   if (typeof document === "undefined") return null;
   return createPortal(body, document.body);
 }
-
-export const DevisSignatureDoneIcon = Check;

@@ -265,14 +265,12 @@ export async function generateEdlNonRoulantPdf(
 
   // 3 — Arrimage
   y = drawSectionTitle(doc, pageW, y, "3. Transport sur plateau — contrôles d'arrimage");
-  let ax = 18;
-  let ay = y + 3;
+  const ay = y + 3;
   ARRIMAGE_ITEMS.forEach((item, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     checkbox(doc, 14 + col * colW + 4, ay + row * 6, !!d.arrimage?.[item.id], item.label);
   });
-  ax = 0;
   y = ay + Math.ceil(ARRIMAGE_ITEMS.length / 2) * 6 + 2;
 
   // 4 — Photos annotées

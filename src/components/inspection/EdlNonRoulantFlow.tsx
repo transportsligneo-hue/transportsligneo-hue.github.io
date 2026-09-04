@@ -12,7 +12,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowLeft, Camera, Check, ChevronRight, Loader2, PenLine, ShieldCheck, X,
+  ArrowLeft, Camera, Check, ChevronRight, Loader2, PenLine, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -452,5 +452,3 @@ export function EdlNonRoulantFlow({
   if (typeof document === "undefined") return null;
   return createPortal(body, document.body);
 }
-
-export { X as _unusedX };
