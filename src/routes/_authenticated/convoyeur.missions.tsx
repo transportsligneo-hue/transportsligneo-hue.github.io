@@ -27,6 +27,7 @@ import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
+import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   validateSearch: (search: Record<string, unknown>): { open?: string; f?: string } => ({
