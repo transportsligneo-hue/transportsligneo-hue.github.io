@@ -283,6 +283,39 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     } finally { setBusy(null); }
   };
 
+  /** PV signé déjà rattaché à la mission pour ce type, s'il existe. */
+  const pvSigne = (v: PvVariant) => pvSignes.find((d) => d.type_document === `pv_${v}`) ?? null;
+
+  const downloadPv = async (v: PvVariant) => {
+    if (!trajet || !guardCompany()) return;
+    setBusy(`pv-${v}`);
+    try {
+      // Le PV reprend le numéro de mission ; suffixe -v2/-v3 si un PV du même type existe déjà.
+      const version = pvSignes.filter((d) => d.type_document === `pv_${v}`).length + 1;
+      const blob = await generatePvMissionPdf(v, {
+        numero_mission: numero,
+        numero_pv: pvNumero(v, numero, version),
+        donneur_ordre: clientSociete || trajet.client_nom,
+        destinataire: (v === "livraison" ? contactArriveeNom : contactDepartNom) || null,
+        marque_modele: marqueModele,
+        immatriculation: immat,
+        vin: trajet.vin || trajet.vehicule_vin,
+        kilometrage_depart: kmDepart != null ? String(kmDepart) : trajet.vehicule_km != null ? String(trajet.vehicule_km) : null,
+        kilometrage_arrivee: kmArrivee != null ? String(kmArrivee) : null,
+        carburant: trajet.vehicule_energie,
+        lieu_prise_en_charge: trajet.depart,
+        lieu_livraison: trajet.arrivee,
+        date_prise_en_charge: trajet.date_trajet,
+        date_livraison: null,
+        dommages,
+      }, company);
+      downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
+    } catch {
+      toast.error("Génération impossible");
+    } finally { setBusy(null); }
+  };
+
+
   const openStored = async (url: string) => {
     if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
     const { data } = await supabase.storage.from("mission-documents").createSignedUrl(url, 300);
