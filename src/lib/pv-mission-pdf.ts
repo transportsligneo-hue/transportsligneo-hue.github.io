@@ -313,8 +313,11 @@ export async function generatePvMissionPdf(
 
   /* Documents, mention légale et signatures : jamais à cheval sur le pied de page. */
   const pageH = doc.internal.pageSize.getHeight();
-  const need = 10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 40;
-  if (y + need > pageH - 18) {
+  const mentionLines = (doc.splitTextToSize(mentionText(isLiv), w) as string[]).length;
+  const need =
+    10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 26;
+  if (y + need > pageH - 14) {
+
     doc.addPage();
     y = 30;
   }
