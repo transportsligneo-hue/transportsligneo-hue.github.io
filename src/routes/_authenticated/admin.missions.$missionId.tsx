@@ -1899,8 +1899,12 @@ function AdminMissionDetail() {
             contactTelephone={trajet.arrivee_contact_telephone}
           />
 
+          {/* Liens de paiement (Revolut / Stripe) */}
+          <PaymentLinksPanel missionId={attribution.id} title="Paiements — liens rattachés" />
+
           {/* Notification fin de mission (renvoi manuel) */}
           <MissionNotifAdminPanel attributionId={attribution.id} />
+
 
 
 
