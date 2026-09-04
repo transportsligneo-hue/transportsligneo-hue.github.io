@@ -194,13 +194,17 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       let km = getDistance(f.depart, f.arrivee)
       if (km == null) km = await geocodeDistanceKm(f.depart, f.arrivee)
       const res = calculateBasePrice(f.depart, f.arrivee, type, km)
-      setF((p) => ({
-        ...p,
-        distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
-        tarif_label: res.label,
-        prix_estime: res.base > 0 ? String(res.base) : p.prix_estime,
-        prix_manuel: false,
-      }))
+      setF((p) => {
+        const majoration = p.plateau && p.lourd ? HEAVY_SURCHARGE : 0
+        return {
+          ...p,
+          distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
+          tarif_label: res.label,
+          prix_estime: res.base > 0 ? String(+(res.base + majoration).toFixed(2)) : p.prix_estime,
+          prix_manuel: false,
+        }
+      })
+
       if (res.base > 0) toast.success('Prix recalculé', { description: res.label })
       else toast.warning('Distance introuvable', { description: 'Saisissez le montant manuellement.' })
     } catch (e) {
