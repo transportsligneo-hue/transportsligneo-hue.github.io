@@ -280,6 +280,7 @@ function ProMissionsIndex() {
             </button>
           ))}
         </div>
+        <MissionViewSwitcher view={view} onChange={setView} className="md:ml-auto self-start" />
       </div>
 
       {!loading && filter === "tous" && pendingFiltered.length > 0 && (
