@@ -72,8 +72,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialOption = String(devis.option_trajet ?? 'Livraison simple')
-  const initialPlateau = parseDevisSupplements(devis.message).plateau
+  const initialParsed = parseDevisSupplements(devis.message)
+  const initialPlateau = initialParsed.plateau
   const initialPoids = parsePlateauPoids(devis.message)
+  /** Suppléments éditables : la majoration « > 1,1 t » reste pilotée par la case à cocher. */
+  const initialSupplements = initialParsed.supplements
+    .filter((s) => !/plus de 1[,.]1\s*t/i.test(s.label))
+    .map((s) => ({ label: s.label, montant: String(s.montant) }))
+  const initialPrincipalLabel =
+    parseDevisPrestationLabel(devis.message) ??
+    (initialPlateau ? 'Transport sur plateau porte-voiture' : 'Convoyage routier par conducteur professionnel')
+  const suppTotal =
+    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) + (initialPoids.lourd ? HEAVY_SURCHARGE : 0)
+  const initialPrincipal = Math.max(0, +(Number(devis.prix_estime ?? 0) - suppTotal).toFixed(2))
 
   const [f, setF] = useState({
     prenom: devis.prenom ?? '',
@@ -95,11 +106,13 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     carburant: devis.carburant ?? '',
     immatriculation: devis.immatriculation ?? '',
     distance_km: devis.distance_km != null ? String(devis.distance_km) : '',
-    prix_estime: devis.prix_estime != null ? String(devis.prix_estime) : '',
+    principal_label: initialPrincipalLabel,
+    principal_montant: String(initialPrincipal),
     prix_manuel: !!devis.prix_manuel,
     tarif_label: devis.tarif_label ?? '',
     message: devis.message ?? '',
   })
+  const [supplements, setSupplements] = useState(initialSupplements)
   const [saving, setSaving] = useState(false)
   const [recalcul, setRecalcul] = useState(false)
   const [plateLoading, setPlateLoading] = useState(false)
@@ -107,19 +120,29 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
-  /** Ajoute ou retire la majoration « plus de 1,1 t » du montant TTC. */
+  const num = (v: string) => {
+    const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.'))
+    return Number.isFinite(n) ? n : 0
+  }
+  /** Total TTC affiché sur le devis = prestation principale + suppléments. */
+  const totalTtc = useMemo(
+    () =>
+      +(
+        num(f.principal_montant) +
+        supplements.reduce((s, x) => s + num(x.montant), 0) +
+        (f.plateau && f.lourd ? HEAVY_SURCHARGE : 0)
+      ).toFixed(2),
+    [f.principal_montant, f.plateau, f.lourd, supplements],
+  )
+
+  const updateSupp = (i: number, patch: Partial<{ label: string; montant: string }>) =>
+    setSupplements((p) => p.map((s, idx) => (idx === i ? { ...s, ...patch } : s)))
+  const addSupp = () => setSupplements((p) => [...p, { label: '', montant: '' }])
+  const removeSupp = (i: number) => setSupplements((p) => p.filter((_, idx) => idx !== i))
+
+  /** Active ou retire la majoration « plus de 1,1 t » (ligne dédiée du devis). */
   const toggleLourd = (checked: boolean) => {
-    setF((p) => {
-      const current = parseFloat(String(p.prix_estime).replace(/\s/g, '').replace(',', '.'))
-      const next = Number.isFinite(current)
-        ? Math.max(0, +(current + (checked ? HEAVY_SURCHARGE : -HEAVY_SURCHARGE)).toFixed(2))
-        : current
-      return {
-        ...p,
-        lourd: checked,
-        prix_estime: Number.isFinite(next) ? String(next) : p.prix_estime,
-      }
-    })
+    set('lourd', checked)
     toast.info(
       checked
         ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
