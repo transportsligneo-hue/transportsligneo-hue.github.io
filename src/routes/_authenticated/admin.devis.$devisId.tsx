@@ -701,6 +701,14 @@ function AdminDevisDetailPage() {
         title={`Prix par véhicule — devis ${devis.numero ?? ""}`}
         onSaved={() => void load()}
       />
+
+      {editOpen && (
+        <EditDevisDialog
+          devis={devis}
+          onClose={() => setEditOpen(false)}
+          onSaved={(patch) => void applyDevisPatch(patch)}
+        />
+      )}
     </div>
 
   );
