@@ -33,7 +33,7 @@ interface DevisRow {
   numero: string | null;
   statut: string | null;
   created_at: string;
-  prix_ttc: number | null;
+  prix_estime: number | null;
 }
 
 interface FactureRow {
@@ -81,7 +81,7 @@ function ApercuClient() {
 
     const devisQuery = supabase
       .from("devis")
-      .select("id, numero, statut, created_at, prix_ttc")
+      .select("id, numero, statut, created_at, prix_estime")
       .order("created_at", { ascending: false })
       .limit(50);
     const { data: d } = email
@@ -172,7 +172,7 @@ function ApercuClient() {
                   key={d.id}
                   main={d.numero ?? "Devis"}
                   sub={`${d.statut ?? "—"} · ${dateFr(d.created_at)}`}
-                  right={eur(d.prix_ttc)}
+                  right={eur(d.prix_estime)}
                 />
               ))
             )}
