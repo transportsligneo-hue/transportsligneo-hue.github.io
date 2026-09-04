@@ -245,11 +245,14 @@ function AdminPaiements() {
         </select>
       </div>
 
-      {loading ? (
+      {tab === "liens" ? (
+        <PaymentLinksPanel />
+      ) : loading ? (
         <div className="flex justify-center py-12">
           <LogoLoader label="Chargement des paiements…" />
         </div>
       ) : tab === "stripe" ? (
+
         filterStripe.length === 0 ? (
           <EmptyState icon={CreditCard} title="Aucun paiement Stripe" description="Les devis payés par les clients apparaîtront ici." />
         ) : (
