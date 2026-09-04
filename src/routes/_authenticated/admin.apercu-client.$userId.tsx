@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Eye, FileText, Receipt, Truck, UserRound } from "lucide-react";
+import { ArrowLeft, Eye, FileText, Monitor, Receipt, RefreshCw, Smartphone, Tablet, Truck, UserRound } from "lucide-react";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 
 export const Route = createFileRoute("/_authenticated/admin/apercu-client/$userId")({
