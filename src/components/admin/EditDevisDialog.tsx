@@ -474,7 +474,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 </div>
                 {f.poids_kg !== '' && Number(f.poids_kg) > HEAVY_THRESHOLD_KG && !f.lourd && (
                   <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
-                    Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                    Ce véhicule dépasse 1,1 t : la majoration de {num(f.lourd_montant)} € devrait être cochée.
                   </p>
                 )}
               </div>
@@ -559,7 +559,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 {f.plateau && f.lourd && (
                   <div className="col-span-full flex items-center justify-between text-xs text-pro-muted">
                     <span>{HEAVY_LABEL}</span>
-                    <span>{HEAVY_SURCHARGE.toFixed(2)} €</span>
+                    <span>{num(f.lourd_montant).toFixed(2)} €</span>
                   </div>
                 )}
               </div>
