@@ -76,6 +76,8 @@ import { MissionEditInfosPanel } from "@/components/admin/missions/MissionEditIn
 import { MissionClotureAdminPanel } from "@/components/admin/missions/MissionClotureAdminPanel";
 import { MissionConvertDuoPanel } from "@/components/admin/missions/MissionConvertDuoPanel";
 import { MissionLotPlaquesPanel } from "@/components/admin/missions/MissionLotPlaquesPanel";
+import { PaymentLinksPanel } from "@/components/admin/PaymentLinksPanel";
+
 import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
 
 
@@ -1899,8 +1901,12 @@ function AdminMissionDetail() {
             contactTelephone={trajet.arrivee_contact_telephone}
           />
 
+          {/* Liens de paiement (Revolut / Stripe) */}
+          <PaymentLinksPanel missionId={attribution.id} title="Paiements — liens rattachés" />
+
           {/* Notification fin de mission (renvoi manuel) */}
           <MissionNotifAdminPanel attributionId={attribution.id} />
+
 
 
 

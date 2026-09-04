@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, TrendingUp, Wallet, AlertTriangle, BarChart3, Search, Plus } from "lucide-react";
 import { EmptyState } from "@/components/admin/AdminUI";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { PaymentLinksPanel } from "@/components/admin/PaymentLinksPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/paiements")({
   component: AdminPaiements,
 });
 
-type Tab = "stripe" | "b2b" | "factures";
+type Tab = "stripe" | "b2b" | "factures" | "liens";
+
 
 interface DevisPaid {
   id: string; numero: string; nom: string | null; prenom: string | null; email: string | null;
@@ -201,7 +203,9 @@ function AdminPaiements() {
           ["stripe", `Stripe B2C (${devis.filter(d => d.statut === "paye" || d.amount_paid_cents).length})`],
           ["b2b", `B2B (${b2b.length})`],
           ["factures", `Factures (${factures.length})`],
+          ["liens", "Liens de paiement"],
         ] as [Tab, string][]).map(([k, lbl]) => (
+
           <button
             key={k}
             type="button"
@@ -241,11 +245,14 @@ function AdminPaiements() {
         </select>
       </div>
 
-      {loading ? (
+      {tab === "liens" ? (
+        <PaymentLinksPanel />
+      ) : loading ? (
         <div className="flex justify-center py-12">
           <LogoLoader label="Chargement des paiements…" />
         </div>
       ) : tab === "stripe" ? (
+
         filterStripe.length === 0 ? (
           <EmptyState icon={CreditCard} title="Aucun paiement Stripe" description="Les devis payés par les clients apparaîtront ici." />
         ) : (

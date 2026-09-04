@@ -5509,6 +5509,134 @@ export type Database = {
           },
         ]
       }
+      payment_link_attachments: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          mission_id: string | null
+          payment_link_id: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          mission_id?: string | null
+          payment_link_id: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          mission_id?: string | null
+          payment_link_id?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_link_attachments_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_link_attachments_payment_link_id_fkey"
+            columns: ["payment_link_id"]
+            isOneToOne: false
+            referencedRelation: "payment_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_link_events: {
+        Row: {
+          created_at: string
+          event_key: string
+          event_type: string | null
+          id: string
+          payload: Json
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          provider?: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          event_type?: string | null
+          id?: string
+          payload?: Json
+          provider?: string
+        }
+        Relationships: []
+      }
+      payment_links: {
+        Row: {
+          amount_cents: number
+          checkout_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          environment: string
+          id: string
+          mission_id: string | null
+          paid_at: string | null
+          provider: string
+          revolut_order_id: string | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          checkout_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          environment?: string
+          id?: string
+          mission_id?: string | null
+          paid_at?: string | null
+          provider?: string
+          revolut_order_id?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          checkout_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          environment?: string
+          id?: string
+          mission_id?: string | null
+          paid_at?: string | null
+          provider?: string
+          revolut_order_id?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_links_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       po_import_logs: {
         Row: {
           created_at: string
