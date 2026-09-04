@@ -246,7 +246,7 @@ export async function generatePvMissionPdf(
   doc.setFillColor(253, 250, 242);
   doc.setDrawColor(...DOC_GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, w, 14, 1.5, 1.5, "FD");
+  doc.roundedRect(14, y, w, 12, 1.5, 1.5, "FD");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_GOLD);
@@ -255,11 +255,11 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 15;
+  y += 13;
 
   /* Schéma des dommages + légende */
   const schemaTop = y + 2;
-  const schemaW = 68;
+  const schemaW = 58;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
@@ -288,7 +288,7 @@ export async function generatePvMissionPdf(
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...DOC_TEXT);
     doc.text(label, legendX + 13, ly);
-    ly += 4.2;
+    ly += 4.0;
   });
 
   y = Math.max(schemaTop + schemaH + 6, schemaTop + legendH + 4);
