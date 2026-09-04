@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, TrendingUp, Wallet, AlertTriangle, BarChart3, Search, Plus } from "lucide-react";
 import { EmptyState } from "@/components/admin/AdminUI";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { PaymentLinksPanel } from "@/components/admin/PaymentLinksPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/paiements")({
   component: AdminPaiements,
 });
 
-type Tab = "stripe" | "b2b" | "factures";
+type Tab = "stripe" | "b2b" | "factures" | "liens";
+
 
 interface DevisPaid {
   id: string; numero: string; nom: string | null; prenom: string | null; email: string | null;
