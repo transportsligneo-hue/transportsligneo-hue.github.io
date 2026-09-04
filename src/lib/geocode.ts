@@ -8,7 +8,7 @@ export interface GeoPoint {
   label?: string;
 }
 
-const CACHE_PREFIX = "geocode:v2:";
+const CACHE_PREFIX = "geocode:v3:";
 
 function readCache(key: string): GeoPoint | null {
   if (typeof window === "undefined") return null;
