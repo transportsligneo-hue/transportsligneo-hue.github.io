@@ -206,37 +206,75 @@ const DEVICES = [
   { key: "ordinateur", label: "Ordinateur", width: 1440, height: 900, icon: <Monitor size={14} /> },
 ] as const;
 
-function InterfacePreview({ typeClient }: { typeClient: string | null }) {
-  const pro = typeClient === "b2b";
-  const pages = pro
-    ? [
-        { label: "Accueil", path: "/dashboard-pro" },
-        { label: "Missions", path: "/dashboard-pro/missions" },
-        { label: "Nouvelle demande", path: "/dashboard-pro/nouvelle-demande" },
-        { label: "Devis instantané", path: "/dashboard-pro/devis-instantane" },
-        { label: "Société", path: "/dashboard-pro/societe" },
-      ]
-    : [
-        { label: "Accueil", path: "/dashboard-client" },
-        { label: "Missions", path: "/dashboard-client/missions" },
-        { label: "Nouvelle réservation", path: "/dashboard-client/nouvelle-reservation" },
-        { label: "Devis", path: "/dashboard-client/devis" },
-        { label: "Documents", path: "/dashboard-client/documents" },
-        { label: "Profil", path: "/dashboard-client/profil" },
-      ];
+const ESPACES = [
+  {
+    key: "particulier",
+    label: "Particulier",
+    suffix: "?apercu=1",
+    pages: [
+      { label: "Accueil", path: "/dashboard-client" },
+      { label: "Missions", path: "/dashboard-client/missions" },
+      { label: "Nouvelle réservation", path: "/dashboard-client/nouvelle-reservation" },
+      { label: "Factures & devis", path: "/dashboard-client/devis" },
+      { label: "Compte Kilomètres", path: "/dashboard-client/fidelite" },
+      { label: "Documents", path: "/dashboard-client/documents" },
+      { label: "Profil", path: "/dashboard-client/profil" },
+    ],
+  },
+  {
+    key: "flotte",
+    label: "Flotte",
+    suffix: "?apercu=1&apercu_type=flotte",
+    pages: [
+      { label: "Accueil", path: "/dashboard-pro" },
+      { label: "Missions", path: "/dashboard-pro/missions" },
+      { label: "Nouvelle mission", path: "/dashboard-pro/nouvelle-mission" },
+      { label: "Parc véhicules", path: "/dashboard-pro/flotte" },
+      { label: "Conducteurs", path: "/dashboard-pro/conducteurs" },
+      { label: "Factures & devis", path: "/dashboard-pro/documents" },
+      { label: "Société", path: "/dashboard-pro/societe" },
+    ],
+  },
+  {
+    key: "b2b",
+    label: "B2B ponctuel",
+    suffix: "?apercu=1&apercu_type=b2b_standard",
+    pages: [
+      { label: "Accueil", path: "/dashboard-pro" },
+      { label: "Missions", path: "/dashboard-pro/missions" },
+      { label: "Nouvelle mission", path: "/dashboard-pro/nouvelle-mission" },
+      { label: "Adresses", path: "/dashboard-pro/adresses" },
+      { label: "Factures & devis", path: "/dashboard-pro/documents" },
+      { label: "API & Intégrations", path: "/dashboard-pro/api" },
+      { label: "Société", path: "/dashboard-pro/societe" },
+    ],
+  },
+] as const;
 
-  const [page, setPage] = useState(pages[0]!.path);
+function InterfacePreview({ typeClient }: { typeClient: string | null }) {
+  const defaultEspace: (typeof ESPACES)[number]["key"] = typeClient === "b2b" ? "b2b" : "particulier";
+  const [espaceKey, setEspaceKey] = useState<(typeof ESPACES)[number]["key"]>(defaultEspace);
+  const espace = ESPACES.find((e) => e.key === espaceKey)!;
+  const pages = espace.pages;
+
+  const [page, setPage] = useState<string>(espace.pages[0]!.path);
   const [device, setDevice] = useState<(typeof DEVICES)[number]["key"]>("ordinateur");
   const [reload, setReload] = useState(0);
   const current = DEVICES.find((d) => d.key === device)!;
   const scale = Math.min(1, 900 / current.width);
+
+  const selectEspace = (key: (typeof ESPACES)[number]["key"]) => {
+    const next = ESPACES.find((e) => e.key === key)!;
+    setEspaceKey(key);
+    setPage(next.pages[0]!.path);
+  };
 
   return (
     <section className="dvx-card">
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-[#70727d]"><Eye size={14} /></span>
         <h2 className="text-[13.5px] font-bold text-[#14161c]">
-          Aperçu de l'interface {pro ? "professionnelle" : "client"}
+          Aperçu des espaces client
         </h2>
         <button
           type="button"
@@ -245,6 +283,23 @@ function InterfacePreview({ typeClient }: { typeClient: string | null }) {
         >
           <RefreshCw size={13} /> Rafraîchir
         </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 mb-2">
+        {ESPACES.map((e) => (
+          <button
+            key={e.key}
+            type="button"
+            onClick={() => selectEspace(e.key)}
+            className={`rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+              espaceKey === e.key
+                ? "bg-[#2F5FFF] text-white"
+                : "border border-slate-200 text-[#5a5c66] hover:bg-slate-50"
+            }`}
+          >
+            Espace {e.label}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
@@ -263,6 +318,7 @@ function InterfacePreview({ typeClient }: { typeClient: string | null }) {
           </button>
         ))}
       </div>
+
 
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         {DEVICES.map((d) => (
