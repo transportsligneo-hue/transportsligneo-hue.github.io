@@ -197,15 +197,16 @@ export const searchMissionsForPaymentLink = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const term = data.q.trim();
     let q = context.supabase
-      .from("missions")
-      .select("id, numero, nom, prenom, ville_depart, ville_arrivee, prix_total")
+      .from("attributions")
+      .select("id, numero_mission, statut, created_at, trajets(depart, arrivee, client_nom, prix_client)")
       .order("created_at", { ascending: false })
       .limit(20);
     if (term) {
       const like = `%${term.replace(/[%,]/g, "")}%`;
-      q = q.or(`numero.ilike.${like},nom.ilike.${like},prenom.ilike.${like}`);
+      q = q.ilike("numero_mission", like);
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return rows ?? [];
+    return (rows ?? []) as any[];
+
   });
