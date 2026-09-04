@@ -8624,3 +8624,93 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !i
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ============================================================
+   LIGNEO — TYPOGRAPHIE POPPINS + LISIBILITÉ GLOBALE
+   (ajouté en fin de feuille : s'applique partout, tous espaces)
+   ============================================================ */
+
+:root {
+  --neon-blue: #3d7bff;
+  --neon-blue-soft: #6ea1ff;
+  --neon-blue-glow: rgba(61, 123, 255, 0.45);
+}
+
+/* --- Poppins partout (sauf éléments explicitement serif/mono) --- */
+body,
+.admin-shell,
+.adm6,
+.pro-shell,
+.driver-shell,
+.dashboard-shell-light,
+.auth-shell,
+.r4-page,
+input, select, textarea, button {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+:is(h1, h2, h3, h4, h5, h6):not(.font-serif):not([class*="font-mono"]):not([class*="font-serif"]) {
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+.text-pro-text,
+.text-pro-text-soft,
+[class*="v3-"],
+[class*="a6-"],
+.admin-h1, .admin-h2, .admin-value, .admin-value-strong, .admin-stat__value {
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+/* --- Filet de sécurité contraste : jamais de texte clair sur fond clair ---
+   :where() = spécificité 0 → toute classe text-* explicite reste prioritaire. */
+:where(
+  [class~="bg-white"],
+  [class~="bg-slate-50"], [class~="bg-slate-100"], [class~="bg-slate-200"],
+  [class~="bg-gray-50"], [class~="bg-gray-100"], [class~="bg-gray-200"],
+  [class~="bg-zinc-50"], [class~="bg-zinc-100"],
+  [class~="bg-neutral-50"], [class~="bg-neutral-100"],
+  [class~="bg-stone-50"], [class~="bg-stone-100"],
+  [class~="bg-blue-50"], [class~="bg-sky-50"], [class~="bg-indigo-50"],
+  [class~="bg-emerald-50"], [class~="bg-green-50"], [class~="bg-teal-50"],
+  [class~="bg-amber-50"], [class~="bg-yellow-50"], [class~="bg-orange-50"],
+  [class~="bg-red-50"], [class~="bg-rose-50"], [class~="bg-violet-50"], [class~="bg-purple-50"],
+  .admin-card, .admin-card-flat, .admin-stat,
+  .card-premium-light, .v3-card, .a6-card, .a6-panel,
+  .pro-card, .client-card
+) {
+  color: var(--v3-text, #0f1526);
+}
+
+/* Les espaces clairs (admin, client, pro, flotte) partent toujours d'un texte encre */
+:where(.admin-shell, .adm6, .dashboard-shell-light, .pro-shell, .client-shell, .flotte-shell) {
+  color: var(--v3-text, #0f1526);
+}
+
+/* Champs de saisie : toujours lisibles quel que soit l'espace */
+input:not([type="checkbox"]):not([type="radio"]):not([class*="bg-transparent"]),
+textarea,
+select {
+  color: #0f1526;
+}
+:where(.driver-shell, .r4-page) input,
+:where(.driver-shell, .r4-page) textarea {
+  color: inherit;
+}
+
+/* Sélection de texte : bleu néon lisible */
+::selection {
+  background: var(--neon-blue);
+  color: #ffffff;
+}
+
+/* --- Touche de bleu néon --- */
+:where(.admin-shell, .dashboard-shell-light, .pro-shell) a:hover {
+  color: var(--neon-blue);
+}
+:where(.admin-shell, .dashboard-shell-light, .pro-shell) :is(input, textarea, select):focus,
+:where(.admin-shell, .dashboard-shell-light, .pro-shell) :is(input, textarea, select):focus-visible {
+  outline: none;
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 0 3px rgba(61, 123, 255, 0.18), 0 0 12px -2px var(--neon-blue-glow);
+}
+.admin-eyebrow { color: var(--neon-blue); text-shadow: 0 0 14px rgba(61, 123, 255, 0.35); }
+.neon-blue { color: var(--neon-blue); }
+.neon-blue-glow { box-shadow: 0 0 18px -4px var(--neon-blue-glow); }
