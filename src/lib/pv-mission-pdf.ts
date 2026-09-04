@@ -220,7 +220,7 @@ export async function generatePvMissionPdf(
   doc.setLineWidth(0.7);
   doc.line(M, 35, right, 35);
 
-  const sp = isLiv ? 4.4 : 1.6;
+  const sp = isLiv ? 3.4 : 1.6;
   let y = isLiv ? 38 : 36;
 
   /* ---------- Parties ---------- */
