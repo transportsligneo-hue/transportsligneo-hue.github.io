@@ -316,6 +316,7 @@ export async function generatePvMissionPdf(
   const mentionLines = (doc.splitTextToSize(mentionText(isLiv), w) as string[]).length;
   const need =
     10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 26;
+  console.log("[pv]", isLiv, "y", y.toFixed(1), "need", need.toFixed(1), "limit", pageH - 14);
   if (y + need > pageH - 14) {
 
     doc.addPage();
