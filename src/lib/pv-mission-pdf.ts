@@ -120,7 +120,7 @@ function field(doc: jsPDF, x: number, y: number, w: number, label: string, value
     doc.setTextColor(...DOC_TEXT);
     doc.text(doc.splitTextToSize(v, w)[0] as string, x, y + 4.4);
   }
-  return y + 9.0;
+  return y + 8.6;
 }
 
 function cartouche(doc: jsPDF, x: number, y: number, w: number, h: number, titre: string, lignes: string[]) {
@@ -255,7 +255,7 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 13;
+  y += 12;
 
   /* Schéma des dommages + légende */
   const schemaTop = y + 2;
@@ -315,7 +315,7 @@ export async function generatePvMissionPdf(
   const pageH = doc.internal.pageSize.getHeight();
   const mentionLines = (doc.splitTextToSize(mentionText(isLiv), w) as string[]).length;
   const need =
-    10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 26;
+    10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 21;
   console.log("[pv]", isLiv, "y", y.toFixed(1), "need", need.toFixed(1), "limit", pageH - 14);
   if (y + need > pageH - 14) {
 
@@ -372,7 +372,7 @@ export async function generatePvMissionPdf(
     xR,
     y + 4,
   );
-  const sigY = y + 18;
+  const sigY = y + 14;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
   doc.line(14, sigY, 14 + c2, sigY);
