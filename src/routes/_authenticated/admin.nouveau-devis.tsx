@@ -528,6 +528,9 @@ function AdminNouveauDevisPage() {
     isAllerRetour && arriveeRetour ? `Arrivée retour : ${arriveeRetour}` : null,
     options.length ? `Options : ${options.join(", ")}` : null,
     plateau ? "Transport sur plateau : oui (véhicule non roulant)" : null,
+    plateau && poidsKg.trim() ? `Poids véhicule : ${poidsKg.replace(/[^\d]/g, "")} kg` : null,
+    plateau ? `Véhicule de plus de 1,1 t : ${lourd ? "oui" : "non"}` : null,
+
     dateADeterminer ? "Date d'enlèvement : à déterminer avec le client" : null,
     isAllerRetour && dateRetourADeterminer ? "Date de restitution : à déterminer avec le client" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
