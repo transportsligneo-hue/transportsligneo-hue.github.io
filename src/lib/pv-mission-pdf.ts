@@ -251,7 +251,7 @@ export async function generatePvMissionPdf(
   y += 18;
 
   /* Schéma des dommages + légende */
-  const schemaTop = y;
+  const schemaTop = y + 4;
   const schemaW = 78;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
@@ -262,7 +262,7 @@ export async function generatePvMissionPdf(
 
   const legendX = 100;
   const legendW = pageW - 14 - legendX;
-  const legendH = schemaH + 7;
+  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.2 + 12);
   doc.setFillColor(...DOC_NAVY);
   doc.roundedRect(legendX, schemaTop - 3, legendW, 7, 1.5, 1.5, "F");
   doc.setDrawColor(...DOC_LINE);
@@ -284,7 +284,7 @@ export async function generatePvMissionPdf(
     ly += 4.2;
   });
 
-  y = schemaTop + schemaH + 6;
+  y = Math.max(schemaTop + schemaH + 6, schemaTop + legendH + 4);
 
   const dommages = (d.dommages ?? []).slice(0, 6);
   if (dommages.length) {
@@ -306,8 +306,8 @@ export async function generatePvMissionPdf(
 
   /* Documents, mention légale et signatures : jamais à cheval sur le pied de page. */
   const pageH = doc.internal.pageSize.getHeight();
-  const need = 30 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 34;
-  if (y + need > pageH - 22) {
+  const need = 12 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 40;
+  if (y + need > pageH - 18) {
     doc.addPage();
     y = 30;
   }
