@@ -248,11 +248,11 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 20;
+  y += 18;
 
   /* Schéma des dommages + légende */
   const schemaTop = y;
-  const schemaW = 104;
+  const schemaW = 78;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
@@ -260,7 +260,7 @@ export async function generatePvMissionPdf(
   doc.text("SCHÉMA DES DOMMAGES CONSTATÉS", 14, schemaTop);
   doc.addImage(EDL_CAR_SCHEMA_PNG, "PNG", 16, schemaTop + 3, schemaW, schemaH, undefined, "FAST");
 
-  const legendX = 132;
+  const legendX = 100;
   const legendW = pageW - 14 - legendX;
   const legendH = schemaH + 7;
   doc.setFillColor(...DOC_NAVY);
@@ -281,7 +281,7 @@ export async function generatePvMissionPdf(
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...DOC_TEXT);
     doc.text(label, legendX + 13, ly);
-    ly += 4.8;
+    ly += 4.2;
   });
 
   y = schemaTop + schemaH + 6;
