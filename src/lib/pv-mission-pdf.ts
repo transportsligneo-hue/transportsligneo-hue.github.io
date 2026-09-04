@@ -220,8 +220,8 @@ export async function generatePvMissionPdf(
   doc.setLineWidth(0.7);
   doc.line(M, 35, right, 35);
 
-  const sp = isLiv ? 4.4 : 2.0;
-  let y = 38;
+  const sp = isLiv ? 4.4 : 1.6;
+  let y = isLiv ? 38 : 36;
 
   /* ---------- Parties ---------- */
   const cw = (W - 10) / 3;
@@ -231,7 +231,7 @@ export async function generatePvMissionPdf(
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
     [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (locataire)", d.destinataire ?? null],
   ];
-  const partH = isLiv ? 21 : 16;
+  const partH = isLiv ? 21 : 18;
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
@@ -272,24 +272,24 @@ export async function generatePvMissionPdf(
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = 13;
+    const cmpH = 18;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
-    field(doc, M + 6, y + 13, c3, "Kilométrage au départ", d.kilometrage_depart);
-    field(doc, x2, y + 13, c3, "Kilométrage à la restitution", d.kilometrage_arrivee);
-    field(doc, x3, y + 13, c3, "Écart", null);
+    field(doc, M + 6, y + 11.5, c3, "Kilométrage au départ", d.kilometrage_depart);
+    field(doc, x2, y + 11.5, c3, "Kilométrage à la restitution", d.kilometrage_arrivee);
+    field(doc, x3, y + 11.5, c3, "Écart", null);
     y += cmpH + sp;
   }
 
   /* ---------- Trajet ---------- */
-  const trH = isLiv ? 26 : 25;
+  const trH = isLiv ? 26 : 23;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
   panel(doc, M, y, W, trH);
   panelTitle(doc, fx1, y + 6.5, isLiv ? "Détails du trajet" : "Détails de la restitution");
-  field(doc, fx1, y + 12.5, fw, isLiv ? "Lieu de prise en charge" : "Lieu de mise à disposition initiale", d.lieu_prise_en_charge);
-  field(doc, fx2, y + 12.5, fw, isLiv ? "Lieu de livraison" : "Lieu de restitution", d.lieu_livraison);
+  field(doc, fx1, y + 11.5, fw, isLiv ? "Lieu de prise en charge" : "Lieu de mise à disposition initiale", d.lieu_prise_en_charge);
+  field(doc, fx2, y + 11.5, fw, isLiv ? "Lieu de livraison" : "Lieu de restitution", d.lieu_livraison);
   field(doc, fx1, y + trH - 6, fw, isLiv ? "Date / heure de prise en charge" : "Date / heure de mise à disposition", d.date_prise_en_charge);
   field(doc, fx2, y + trH - 6, fw, isLiv ? "Date / heure de livraison" : "Date / heure de restitution", d.date_livraison);
   y += trH + sp;
@@ -409,23 +409,23 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = 22;
+    const frH = 25;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
     doc.setDrawColor(...BORDER);
     doc.setLineWidth(0.4);
-    doc.roundedRect(M + 6, y + 9, COL2 - 6, 8, 2, 2, "FD");
-    doc.roundedRect(XR, y + 9, COL2 - 6, 8, 2, 2, "FD");
-    checkbox(doc, M + 10, y + 11.4, 3.2);
-    checkbox(doc, XR + 4, y + 11.4, 3.2);
+    doc.roundedRect(M + 6, y + 8.5, COL2 - 6, 7.5, 2, 2, "FD");
+    doc.roundedRect(XR, y + 8.5, COL2 - 6, 7.5, 2, 2, "FD");
+    checkbox(doc, M + 10, y + 10.6, 3.2);
+    checkbox(doc, XR + 4, y + 10.6, 3.2);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.8);
     doc.setTextColor(...INK);
-    doc.text("Aucun frais additionnel", M + 16, y + 14.3);
-    doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 14.3);
-    field(doc, M + 6, y + 20, fw, "Nature des frais", null);
-    field(doc, fx2, y + 20, fw, "Montant estimé", null);
+    doc.text("Aucun frais additionnel", M + 16, y + 13.5);
+    doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 13.5);
+    field(doc, M + 6, y + 18, fw, "Nature des frais", null);
+    field(doc, fx2, y + 18, fw, "Montant estimé", null);
     y += frH + sp;
   }
 
