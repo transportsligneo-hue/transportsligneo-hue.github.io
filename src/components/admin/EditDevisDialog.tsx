@@ -237,7 +237,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   }
 
   const save = async () => {
-    const prix = parseFloat(String(f.prix_estime).replace(/\s/g, '').replace(',', '.'))
+    const prix = totalTtc
     if (!Number.isFinite(prix) || prix <= 0) {
       toast.error('Montant TTC invalide')
       return
@@ -251,11 +251,14 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       const km = f.distance_km === '' ? null : Number(String(f.distance_km).replace(',', '.'))
       const priceChanged = Number(devis.prix_estime ?? 0) !== prix
       const poidsKg = f.poids_kg === '' ? null : Number(String(f.poids_kg).replace(',', '.'))
-      const message = applyPlateauPoidsToMessage(applyPlateauToMessage(f.message, f.plateau), {
-        plateau: f.plateau,
-        lourd: f.plateau && f.lourd,
-        poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
-      })
+      const message = applyPlateauPoidsToMessage(
+        applyLignesToMessage(applyPlateauToMessage(f.message, f.plateau), f.principal_label, supplements),
+        {
+          plateau: f.plateau,
+          lourd: f.plateau && f.lourd,
+          poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+        },
+      )
 
       const patch: Record<string, unknown> = {
         prenom: f.prenom.trim(),
