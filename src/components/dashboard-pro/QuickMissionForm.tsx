@@ -79,9 +79,15 @@ const VAT_RATE = 0.20;
 
 interface Props {
   successRedirect?: string;
+  /** "particulier" = version allégée (sans options réservées aux flottes). */
+  variant?: "pro" | "particulier";
 }
 
-export default function QuickMissionForm({ successRedirect = "/dashboard-pro/missions" }: Props) {
+export default function QuickMissionForm({
+  successRedirect = "/dashboard-pro/missions",
+  variant = "pro",
+}: Props) {
+  const isParticulier = variant === "particulier";
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -614,7 +620,7 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
           <MapPin size={14} className="text-pro-accent" /> Lieu d'enlèvement
         </h2>
 
-        {favorites.length > 0 && (
+        {!isParticulier && favorites.length > 0 && (
           <div className="mb-4">
             <p className="text-xs text-pro-text-soft mb-2 flex items-center gap-1">
               <Star size={11} className="text-amber-500" /> Adresses favorites
@@ -797,16 +803,20 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
               {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value}>{v.label}</option>)}
             </select>
           </div>
-          <div>
-            <label className={lbl}>Couleur</label>
-            <input className={inp} value={couleur} onChange={(e) => setCouleur(e.target.value)} placeholder="Optionnel" />
-          </div>
-          <div>
-            <label className={lbl}>Kilométrage</label>
-            <input type="number" className={inp} value={km} onChange={(e) => setKm(e.target.value)} placeholder="Optionnel" />
-          </div>
+          {!isParticulier && (
+            <>
+              <div>
+                <label className={lbl}>Couleur</label>
+                <input className={inp} value={couleur} onChange={(e) => setCouleur(e.target.value)} placeholder="Optionnel" />
+              </div>
+              <div>
+                <label className={lbl}>Kilométrage</label>
+                <input type="number" className={inp} value={km} onChange={(e) => setKm(e.target.value)} placeholder="Optionnel" />
+              </div>
+            </>
+          )}
           <div className="md:col-span-2">
-            <label className={lbl}>Notes véhicule</label>
+            <label className={lbl}>{isParticulier ? "Précisions sur le véhicule" : "Notes véhicule"}</label>
             <input className={inp} value={vehNotes} onChange={(e) => setVehNotes(e.target.value)} placeholder="Particularités, état..." />
           </div>
         </div>
@@ -850,7 +860,8 @@ export default function QuickMissionForm({ successRedirect = "/dashboard-pro/mis
             )}
           </div>
 
-          {/* Véhicule retour */}
+          {/* Véhicule retour (réservé aux comptes professionnels) */}
+          {!isParticulier && (
           <div className="space-y-3 mb-4">
             <label className="flex items-start gap-2 text-sm text-pro-text cursor-pointer">
               <input
