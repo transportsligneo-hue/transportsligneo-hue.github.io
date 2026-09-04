@@ -879,6 +879,8 @@ function ConvoyeurMissions() {
 
       <>
       {inspectionOverlay}
+      {nonRoulantOverlay}
+      {devisOverlay}
       <div className="mv3-fullscreen">
         <style>{`
           .mv3-fullscreen { margin: -1rem -1rem 0; min-height: calc(100vh - 1rem); background: #060B24;
