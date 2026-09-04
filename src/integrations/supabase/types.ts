@@ -2846,6 +2846,83 @@ export type Database = {
           },
         ]
       }
+      edl_non_roulant: {
+        Row: {
+          arrimage: Json
+          attribution_id: string
+          convoyeur_latitude: number | null
+          convoyeur_longitude: number | null
+          convoyeur_nom: string | null
+          convoyeur_signature: string | null
+          convoyeur_signed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          observations: string | null
+          pdf_url: string | null
+          photos: Json
+          remettant_latitude: number | null
+          remettant_longitude: number | null
+          remettant_nom: string | null
+          remettant_signature: string | null
+          remettant_signed_at: string | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          arrimage?: Json
+          attribution_id: string
+          convoyeur_latitude?: number | null
+          convoyeur_longitude?: number | null
+          convoyeur_nom?: string | null
+          convoyeur_signature?: string | null
+          convoyeur_signed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observations?: string | null
+          pdf_url?: string | null
+          photos?: Json
+          remettant_latitude?: number | null
+          remettant_longitude?: number | null
+          remettant_nom?: string | null
+          remettant_signature?: string | null
+          remettant_signed_at?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          arrimage?: Json
+          attribution_id?: string
+          convoyeur_latitude?: number | null
+          convoyeur_longitude?: number | null
+          convoyeur_nom?: string | null
+          convoyeur_signature?: string | null
+          convoyeur_signed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          observations?: string | null
+          pdf_url?: string | null
+          photos?: Json
+          remettant_latitude?: number | null
+          remettant_longitude?: number | null
+          remettant_nom?: string | null
+          remettant_signature?: string | null
+          remettant_signed_at?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "edl_non_roulant_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: true
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -4028,6 +4105,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mission_departure_checklists_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: true
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_devis_signatures: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          created_by: string | null
+          document_url: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          mode: string
+          signature_data: string | null
+          signed_at: string
+          signer_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          mode?: string
+          signature_data?: string | null
+          signed_at?: string
+          signer_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          mode?: string
+          signature_data?: string | null
+          signed_at?: string
+          signer_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_devis_signatures_attribution_id_fkey"
             columns: ["attribution_id"]
             isOneToOne: true
             referencedRelation: "attributions"
@@ -6224,6 +6354,7 @@ export type Database = {
           mission_id: string | null
           modele: string | null
           niveau_requis: string
+          non_roulant: boolean
           numero_mission: string | null
           options_meta: Json
           parent_trajet_id: string | null
@@ -6303,6 +6434,7 @@ export type Database = {
           mission_id?: string | null
           modele?: string | null
           niveau_requis?: string
+          non_roulant?: boolean
           numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -6382,6 +6514,7 @@ export type Database = {
           mission_id?: string | null
           modele?: string | null
           niveau_requis?: string
+          non_roulant?: boolean
           numero_mission?: string | null
           options_meta?: Json
           parent_trajet_id?: string | null
@@ -7122,6 +7255,7 @@ export type Database = {
           marque: string | null
           mission_group_id: string | null
           modele: string | null
+          non_roulant: boolean | null
           numero_mission: string | null
           options_meta: Json | null
           prix_convoyeur_fixe: number | null
@@ -7347,6 +7481,7 @@ export type Database = {
           marque: string
           mission_group_id: string
           modele: string
+          non_roulant: boolean
           numero_mission: string
           options_meta: Json
           prix_convoyeur_fixe: number

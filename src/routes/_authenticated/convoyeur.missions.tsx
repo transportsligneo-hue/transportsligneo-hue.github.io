@@ -12,6 +12,8 @@ import {
 import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
+import { EdlNonRoulantFlow } from "@/components/inspection/EdlNonRoulantFlow";
+import { DevisSignatureSheet } from "@/components/mission/DevisSignatureSheet";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
@@ -41,6 +43,11 @@ interface Mission extends MissionCardData {
   /** Duo Livraison + Restitution : identifiant du groupe et rôle du volet. */
   mission_group_id?: string | null;
   leg_type?: string | null;
+  /** Véhicule non roulant : parcours EDL plateau + devis signé obligatoire. */
+  non_roulant?: boolean;
+  devis_id?: string | null;
+  devisSigned?: boolean;
+  edlNonRoulantDone?: boolean;
 }
 
 
@@ -117,6 +124,9 @@ function ConvoyeurMissions() {
   const [search, setSearch] = useState("");
   const [resumeSelfieMissionId, setResumeSelfieMissionId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
+  /** Parcours « véhicule non roulant » (plateau) — indépendant de l'EDL roulant. */
+  const [edlNonRoulantId, setEdlNonRoulantId] = useState<string | null>(null);
+  const [devisSheetId, setDevisSheetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -216,7 +226,7 @@ function ConvoyeurMissions() {
         const [trajetRes, { data: inspections }] = await Promise.all([
           supabase
             .from("trajets_assigned_safe" as never)
-            .select("depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
+            .select("non_roulant, devis_id, depart, arrivee, date_trajet, heure_trajet, mission_group_id, leg_type, marque, modele, immatriculation, vehicule_immatriculation, vehicule_vin, tarif_convoyeur, contact_depart_tel, contact_arrivee_tel, vin, carte_grise_recto_url, carte_grise_verso_url, vehicule_energie, vehicule_type, vehicule_couleur, vehicule_km, vehicule_notes, options_meta, type_mission, arrivee_contact_nom, arrivee_contact_telephone, arrivee_contact_telephone2, arrivee_contact_instructions")
             .eq("id", attr.trajet_id)
             .maybeSingle(),
           supabase
@@ -241,8 +251,37 @@ function ConvoyeurMissions() {
           leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
+          non_roulant:
+            !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant ||
+            !!((trajetRes.data as { options_meta?: { plateau?: boolean } | null } | null)?.options_meta?.plateau),
+          devisSigned: false,
+          edlNonRoulantDone: false,
+          devis_id: (trajetRes.data as { devis_id?: string | null } | null)?.devis_id ?? null,
         };
       }));
+
+      // Véhicules non roulants : état du devis signé et du bon de prise en charge.
+      try {
+        const nrIds = enriched.filter((m) => m.non_roulant).map((m) => m.id);
+        if (nrIds.length) {
+          const [{ data: sigs }, { data: edls }] = await Promise.all([
+            supabase.from("mission_devis_signatures" as never).select("attribution_id").in("attribution_id", nrIds),
+            supabase.from("edl_non_roulant" as never).select("attribution_id, statut").in("attribution_id", nrIds),
+          ]);
+          const signed = new Set(((sigs ?? []) as unknown as Array<{ attribution_id: string }>).map((r) => r.attribution_id));
+          const done = new Set(
+            ((edls ?? []) as unknown as Array<{ attribution_id: string; statut: string | null }>)
+              .filter((r) => r.statut === "signe")
+              .map((r) => r.attribution_id),
+          );
+          enriched.forEach((m) => {
+            m.devisSigned = signed.has(m.id);
+            m.edlNonRoulantDone = done.has(m.id);
+          });
+        }
+      } catch {
+        /* non bloquant */
+      }
 
       // Lots multi-plaques : missions distinctes reliées pour l'attribution groupée.
       let withLots = enriched;
@@ -394,6 +433,15 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
+    if (statut === "termine" || statut === "en_attente_validation") {
+      const m = missions.find((mm) => mm.id === id);
+      if (m?.non_roulant && !m.devisSigned) {
+        toast.error("Devis non signé", {
+          description: "Faites signer le devis au remettant (papier ou sur l'app) avant de terminer la mission.",
+        });
+        return false;
+      }
+    }
     const { queued } = await writeWithOutbox(
       { kind: "update", table: "attributions", values: { statut }, match: { id } },
       `Statut ${statut}`,
@@ -546,8 +594,51 @@ function ConvoyeurMissions() {
     </EdlErrorBoundary>
   ) : null;
 
+  const nrMission = edlNonRoulantId ? missions.find((m) => m.id === edlNonRoulantId) : null;
+  const nrNumero = (m: Mission | null | undefined) =>
+    m?.numero_mission ? displayNumero(m.numero_mission) : `MIS-${(m?.id ?? "").slice(0, 8).toUpperCase()}`;
+  const nonRoulantOverlay = nrMission && user ? (
+    <EdlErrorBoundary onClose={() => setEdlNonRoulantId(null)}>
+      <EdlNonRoulantFlow
+        attributionId={nrMission.id}
+        userId={user.id}
+        driverName={driverDisplayName}
+        numero={nrNumero(nrMission)}
+        mission={{
+          depart: nrMission.trajet?.depart ?? null,
+          arrivee: nrMission.trajet?.arrivee ?? null,
+          marque: nrMission.trajet?.marque ?? null,
+          modele: nrMission.trajet?.modele ?? null,
+          immatriculation:
+            nrMission.trajet?.immatriculation ||
+            (nrMission.trajet as { vehicule_immatriculation?: string | null } | null)?.vehicule_immatriculation ||
+            null,
+          vin:
+            (nrMission.trajet as { vin?: string | null } | null)?.vin ||
+            (nrMission.trajet as { vehicule_vin?: string | null } | null)?.vehicule_vin ||
+            null,
+          date_trajet: nrMission.trajet?.date_trajet ?? null,
+        }}
+        onComplete={() => { void fetchMissions(); }}
+        onClose={() => setEdlNonRoulantId(null)}
+      />
+    </EdlErrorBoundary>
+  ) : null;
+
+  const devisMission = devisSheetId ? missions.find((m) => m.id === devisSheetId) : null;
+  const devisOverlay = devisMission && user && devisMission.devis_id ? (
+    <DevisSignatureSheet
+      attributionId={devisMission.id}
+      devisId={devisMission.devis_id}
+      userId={user.id}
+      numero={nrNumero(devisMission)}
+      onSigned={() => { void fetchMissions(); }}
+      onClose={() => setDevisSheetId(null)}
+    />
+  ) : null;
+
   if (loading) {
-    return inspectionOverlay ?? (
+    return inspectionOverlay ?? nonRoulantOverlay ?? (
       <div className="min-h-[60vh] flex items-center justify-center bg-[#050a1f]">
         <Loader2 className="animate-spin text-[#d4af37]" size={24} />
       </div>
@@ -790,6 +881,8 @@ function ConvoyeurMissions() {
 
       <>
       {inspectionOverlay}
+      {nonRoulantOverlay}
+      {devisOverlay}
       <div className="mv3-fullscreen">
         <style>{`
           .mv3-fullscreen { margin: -1rem -1rem 0; min-height: calc(100vh - 1rem); background: #060B24;
@@ -869,6 +962,38 @@ function ConvoyeurMissions() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* === Véhicule non roulant : parcours plateau dédié === */}
+        {openMission.statut !== "propose" && openMission.non_roulant && (
+          <div className="mx-4 mb-4 rounded-2xl border border-[#d4af37]/35 bg-[#d4af37]/[0.06] p-4">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Véhicule non roulant · plateau</p>
+            <p className="mt-1 text-sm text-white/70">
+              Bon de prise en charge simplifié (arrimage, 4 photos, double signature) et devis à faire signer au remettant.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setEdlNonRoulantId(openMission.id)}
+                className="rounded-xl bg-[#d4af37] py-3 text-sm font-semibold text-[#0b1026]"
+              >
+                {openMission.edlNonRoulantDone ? "Bon de prise en charge signé ✓" : "Bon de prise en charge"}
+              </button>
+              <button
+                type="button"
+                disabled={!openMission.devis_id}
+                onClick={() => setDevisSheetId(openMission.id)}
+                className="rounded-xl border border-white/20 py-3 text-sm font-semibold text-white/85 disabled:opacity-40"
+              >
+                {openMission.devisSigned ? "Devis signé ✓" : "Faire signer le devis"}
+              </button>
+            </div>
+            {!openMission.devisSigned && (
+              <p className="mt-2 text-xs text-amber-300">
+                La mission ne peut pas être terminée tant que le devis signé n'est pas rattaché.
+              </p>
+            )}
           </div>
         )}
 
@@ -958,6 +1083,8 @@ function ConvoyeurMissions() {
   return (
     <>
     {inspectionOverlay}
+    {nonRoulantOverlay}
+    {devisOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>

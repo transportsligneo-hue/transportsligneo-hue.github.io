@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { NonRoulantToggle } from "@/components/admin/missions/NonRoulantToggle";
 import {
   X, MapPin, CalendarDays, Car, User2, Phone, Mail, Banknote, Gavel,
   Send, CheckCircle2, XCircle, Radar, ArrowRightCircle, Ban, Loader2, UserPlus, ExternalLink,
@@ -252,6 +253,8 @@ export function MissionUnifiedPanel({
                 />
                 <Line icon={Car} label="Véhicule" value={[mission.marque, mission.modele, mission.immatriculation].filter(Boolean).join(" · ") || "—"} />
               </div>
+
+              {isTrajet && <NonRoulantToggle trajetId={mission.id} />}
 
               <div className="a6-card p-4">
                 <Line icon={User2} label="Client" value={mission.clientNom || "—"} />
