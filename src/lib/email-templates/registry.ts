@@ -52,6 +52,7 @@ import { template as fideliteAvoir } from './fidelite-avoir'
 import { template as fideliteExpiration } from './fidelite-expiration'
 import { template as suppressionCompteAdmin } from './suppression-compte-admin'
 import { template as refusClient } from './refus-client'
+import { template as alerteFlotteTco } from './alerte-flotte-tco'
 
 
 
@@ -98,6 +99,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'fidelite-expiration': fideliteExpiration,
   'suppression-compte-admin': suppressionCompteAdmin,
   'refus-client': refusClient,
+  'alerte-flotte-tco': alerteFlotteTco,
   'waitlist-convoyeur': waitlistConvoyeur,
   'waitlist-convoyeur-admin': waitlistConvoyeurAdmin,
 }

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -263,12 +263,21 @@ function FleetPage() {
             { label: "À surveiller", value: kpi.docs, tone: "warn" as const },
           ]}
           actions={
-            canManage ? (
-              <FleetHeaderButton onClick={openCreate}>
-                <Plus size={14} /> Ajouter un véhicule
-              </FleetHeaderButton>
-            ) : undefined
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to="/dashboard-pro/tco"
+                className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-3.5 py-2 text-[12px] font-semibold text-[#14161c] hover:border-[#2f5fff]"
+              >
+                Coûts & TCO
+              </Link>
+              {canManage ? (
+                <FleetHeaderButton onClick={openCreate}>
+                  <Plus size={14} /> Ajouter un véhicule
+                </FleetHeaderButton>
+              ) : null}
+            </div>
           }
+
         />
       </div>
 

@@ -6,6 +6,7 @@ import {
   Upload, Trash2, Download, Plus, AlertCircle,
 } from "lucide-react";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
+import VehicleCostsTab from "@/components/flotte/VehicleCostsTab";
 
 
 
@@ -103,9 +104,11 @@ const fmtEur = (n: number) =>
 const TABS = [
   { id: "general", label: "Général" },
   { id: "documents", label: "Documents" },
-  { id: "entretien", label: "Entretien & TCO" },
+  { id: "couts", label: "Coûts & TCO" },
+  { id: "entretien", label: "Entretien" },
   { id: "historique", label: "Historique" },
 ] as const;
+
 type TabId = (typeof TABS)[number]["id"];
 
 export default function VehicleDetailPanel({
@@ -473,7 +476,17 @@ export default function VehicleDetailPanel({
                 </div>
               )}
 
+              {tab === "couts" && vehicle && (
+                <VehicleCostsTab
+                  vehicleId={vehicle.id}
+                  organizationId={vehicle.organization_id}
+                  vehicleLabel={[vehicle.marque, vehicle.modele, vehicle.immatriculation].filter(Boolean).join(" · ") || "Véhicule"}
+                  canManage={canManage}
+                />
+              )}
+
               {tab === "entretien" && (
+
                 <div>
                   {loading ? (
                     <Loader2 className="animate-spin text-[#2f5fff]" size={20} />
