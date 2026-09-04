@@ -89,10 +89,10 @@ export function MissionViewSwitcher({
 }
 
 const KANBAN_COLUMNS: { key: string; label: string; match: (s: string) => boolean }[] = [
-  { key: "attente", label: "En attente", match: (s) => ["en_attente", "en_recherche", "nouvelle", "brouillon", "publiee", "a_attribuer"].includes(s) },
-  { key: "planifiee", label: "Planifiées", match: (s) => ["confirmee", "attribuee", "acceptee", "planifiee", "programmee"].includes(s) },
+  { key: "attente", label: "En attente", match: (s) => ["en_attente", "en_recherche", "nouvelle", "brouillon", "publiee", "a_attribuer", "propose", "proposee", "en_attente_attribution"].includes(s) },
+  { key: "planifiee", label: "Planifiées", match: (s) => ["confirmee", "attribuee", "acceptee", "accepte", "planifiee", "programmee", "a_venir"].includes(s) },
   { key: "en_cours", label: "En cours", match: (s) => ["en_cours", "demarree", "en_route", "en_livraison"].includes(s) },
-  { key: "terminee", label: "Terminées", match: (s) => ["livree", "terminee", "validee", "en_attente_validation", "annulee", "cloturee", "facturee"].includes(s) },
+  { key: "terminee", label: "Terminées", match: (s) => ["livree", "terminee", "termine", "validee", "en_attente_validation", "annulee", "refusee", "cloturee", "facturee"].includes(s) },
 ];
 
 const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "Date à définir");
