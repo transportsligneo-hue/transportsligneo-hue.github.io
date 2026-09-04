@@ -6,6 +6,7 @@ import {
   Upload, Trash2, Download, Plus, AlertCircle,
 } from "lucide-react";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
+import VehicleCostsTab from "@/components/flotte/VehicleCostsTab";
 
 
 
@@ -475,11 +476,11 @@ export default function VehicleDetailPanel({
                 </div>
               )}
 
-              {tab === "couts" && v && (
+              {tab === "couts" && vehicle && (
                 <VehicleCostsTab
-                  vehicleId={v.id}
-                  organizationId={v.organization_id}
-                  vehicleLabel={[v.marque, v.modele, v.immatriculation].filter(Boolean).join(" · ") || "Véhicule"}
+                  vehicleId={vehicle.id}
+                  organizationId={vehicle.organization_id}
+                  vehicleLabel={[vehicle.marque, vehicle.modele, vehicle.immatriculation].filter(Boolean).join(" · ") || "Véhicule"}
                   canManage={canManage}
                 />
               )}
