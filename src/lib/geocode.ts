@@ -97,17 +97,41 @@ async function geocodePhoton(address: string): Promise<GeoPoint | null> {
   }
 }
 
+/** Adresse simplifiée : on retire le nom d'enseigne en tête ("Garage X - Rue Y, Ville" → "Rue Y, Ville"). */
+function simplifiedVariants(q: string): string[] {
+  const parts = q.split(",").map((s) => s.trim()).filter(Boolean);
+  const variants: string[] = [];
+  if (parts.length > 2) variants.push(parts.slice(-2).join(", "));
+  // "Enseigne - 12 rue de X" → "12 rue de X" (nom commercial avant un tiret)
+  const first = parts[0] ?? q;
+  const dash = first.split(" - ");
+  if (dash.length > 1) {
+    const rest = [dash.slice(1).join(" - "), ...parts.slice(1)].join(", ");
+    variants.push(rest);
+    if (parts.length > 1) variants.push([dash.slice(1).join(" - "), ...parts.slice(-1)].join(", "));
+  }
+  return variants.filter((v) => v && v !== q);
+}
+
 export async function geocodeAddress(address: string | null | undefined): Promise<GeoPoint | null> {
   const q = (address ?? "").trim();
   if (!q) return null;
   const key = q.toLowerCase();
   const cached = readCache(key);
   if (cached) return cached;
-  const point = looksForeign(q)
-    ? ((await geocodePhoton(q)) ?? (await geocodeOSM(q)) ?? (await geocodeFR(q)))
-    : ((await geocodeFR(q)) ?? (await geocodePhoton(q)) ?? (await geocodeOSM(q)));
-  if (point) writeCache(key, point);
-  return point;
+  const foreign = looksForeign(q);
+  // On essaie l'adresse complète, puis des variantes simplifiées (sans nom
+  // d'enseigne) : les géocodeurs échouent souvent sur "Garage Dupont - 12 rue…".
+  for (const candidate of [q, ...simplifiedVariants(q)]) {
+    const point = foreign
+      ? ((await geocodePhoton(candidate)) ?? (await geocodeOSM(candidate)) ?? (await geocodeFR(candidate)))
+      : ((await geocodeFR(candidate)) ?? (await geocodePhoton(candidate)) ?? (await geocodeOSM(candidate)));
+    if (point) {
+      writeCache(key, point);
+      return point;
+    }
+  }
+  return null;
 }
 
 /** Haversine distance in km between two points. */
