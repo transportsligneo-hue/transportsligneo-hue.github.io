@@ -70,9 +70,9 @@ export const getFleetOverview = createServerFn({ method: "POST" })
     const [tcoRes, alertsRes, sitesRes, settingsRes] = await Promise.all([
       supabase.rpc("get_fleet_tco", {
         _org_id: data.orgId,
-        _from: data.from ?? null,
-        _to: data.to ?? null,
-        _site_id: data.siteId ?? null,
+        _from: data.from ?? undefined,
+        _to: data.to ?? undefined,
+        _site_id: data.siteId ?? undefined,
       }),
       supabase.rpc("get_fleet_alerts", { _org_id: data.orgId }),
       supabase.from("organization_sites").select("id, nom").eq("organization_id", data.orgId),
@@ -101,8 +101,8 @@ export const getVehicleCostDetail = createServerFn({ method: "POST" })
     const [tcoRes, costsRes, contractsRes, eventsRes] = await Promise.all([
       supabase.rpc("get_vehicle_tco", {
         _vehicle_id: data.vehicleId,
-        _from: data.from ?? null,
-        _to: data.to ?? null,
+        _from: data.from ?? undefined,
+        _to: data.to ?? undefined,
       }),
       supabase
         .from("vehicle_costs")
