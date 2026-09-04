@@ -58,6 +58,25 @@ function applyPlateauToMessage(message: string, plateau: boolean): string {
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
+/** Réécrit le libellé de la prestation principale et les lignes de suppléments. */
+function applyLignesToMessage(
+  message: string,
+  principalLabel: string,
+  supplements: Array<{ label: string; montant: string }>,
+): string {
+  const lines = message
+    .split('\n')
+    .filter((l) => !/^\s*Libell[ée] prestation\s*:/i.test(l) && !/^\s*Suppl[ée]ment\s*:/i.test(l))
+  if (principalLabel.trim()) lines.push(`Libellé prestation : ${principalLabel.trim()}`)
+  supplements.forEach((s) => {
+    const montant = parseFloat(String(s.montant).replace(/\s/g, '').replace(',', '.'))
+    if (s.label.trim() && Number.isFinite(montant) && montant > 0) {
+      lines.push(`Supplément : ${s.label.trim()} = ${montant} €`)
+    }
+  })
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
 const inputCls =
   'w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20'
 
