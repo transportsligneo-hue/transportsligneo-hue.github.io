@@ -727,11 +727,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       })
     : [
         {
-          title: rechargeSeule
-            ? "Recharge électrique sur place"
-            : plateau
-              ? "Transport sur plateau porte-voiture"
-              : "Convoyage routier par conducteur professionnel",
+          title:
+            parseDevisPrestationLabel(d.message) ??
+            (rechargeSeule
+              ? "Recharge électrique sur place"
+              : plateau
+                ? "Transport sur plateau porte-voiture"
+                : "Convoyage routier par conducteur professionnel"),
           sub: rechargeSeule
             ? `${d.depart} — branchement, surveillance et contrôle photo du niveau de charge.`
             : `${d.depart} → ${d.arrivee}${distance ? `, environ ${Math.round(distance)} km` : ""}${plateau ? ", véhicule non roulant transporté sur plateau porte-voiture (non conduit)." : ". Carburant, péages et assurance tous risques inclus."}`,
