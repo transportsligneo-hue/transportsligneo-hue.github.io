@@ -1,14 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileText, Printer, Download, Loader2, FilePlus2 } from "lucide-react";
+import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye } from "lucide-react";
 import {
   generateFicheMissionPdf,
   generatePassageAVidePdf,
   generateEdlPapierPdf,
   downloadBlob,
 } from "@/lib/documents-officiels";
+import { generatePvMissionPdf, pvNumero, type PvDommage, type PvVariant } from "@/lib/pv-mission-pdf";
 import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
+
+/** Libellés des vues EDL, pour situer les dommages repris sur le PV. */
+const EDL_VUE_LABELS: Record<string, string> = {
+  face_avant: "Face avant",
+  face_arriere: "Face arrière",
+  cote_gauche: "Côté gauche",
+  cote_droit: "Côté droit",
+  toit: "Toit",
+  interieur: "Intérieur",
+};
+
+interface SignedPvDoc {
+  id: string;
+  nom_fichier: string;
+  url_fichier: string;
+  created_at: string;
+  type_document: string;
+}
+
 
 type Variant = "light" | "dark";
 
@@ -76,6 +96,11 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [pvDocs, setPvDocs] = useState<StoredDoc[]>([]);
   const [clientSociete, setClientSociete] = useState<string | null>(null);
+  const [kmDepart, setKmDepart] = useState<number | null>(null);
+  const [kmArrivee, setKmArrivee] = useState<number | null>(null);
+  const [dommages, setDommages] = useState<PvDommage[]>([]);
+  const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [showPvForm, setShowPvForm] = useState(false);
@@ -96,7 +121,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
       .maybeSingle();
     if (!attr) { setLoading(false); return; }
 
-    const [tRes, cRes, dRes, comp] = await Promise.all([
+    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
         ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
@@ -108,6 +133,23 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         .eq("type_document", PV_TYPE)
         .order("created_at", { ascending: false }),
       fetchCompanyInfo(),
+      supabase
+        .from("inspections")
+        .select("kilometrage_depart, kilometrage_arrivee")
+        .eq("attribution_id", attributionId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("edl_non_roulant")
+        .select("photos")
+        .eq("attribution_id", attributionId)
+        .order("created_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("mission_documents")
+        .select("id, nom_fichier, url_fichier, created_at, type_document")
+        .eq("attribution_id", attributionId)
+        .in("type_document", ["pv_livraison", "pv_restitution"])
+        .order("created_at", { ascending: false }),
     ]);
 
     const t = tRes.data as unknown as TrajetLite | null;
@@ -125,6 +167,23 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     setNumero(attr.numero_mission || t?.numero_mission || "—");
     setPvDocs((dRes.data as StoredDoc[] | null) ?? []);
     setCompany(comp);
+
+    const insp = ((inspRes.data as { kilometrage_depart: number | null; kilometrage_arrivee: number | null }[] | null) ?? []);
+    setKmDepart(insp.find((i) => i.kilometrage_depart != null)?.kilometrage_depart ?? null);
+    setKmArrivee(insp.find((i) => i.kilometrage_arrivee != null)?.kilometrage_arrivee ?? null);
+
+    const nrPhotos = ((nrRes.data as { photos: unknown }[] | null)?.[0]?.photos ?? []) as {
+      vue?: string;
+      annotations?: { code?: string }[];
+    }[];
+    setDommages(
+      (Array.isArray(nrPhotos) ? nrPhotos : []).flatMap((p) =>
+        (p.annotations ?? []).map((a) => ({ code: a.code || "I", zone: EDL_VUE_LABELS[p.vue || ""] || p.vue || null })),
+      ),
+    );
+
+    setPvSignes((pvRes.data as SignedPvDoc[] | null) ?? []);
+
 
     // Société du client (organisation / profil) — sinon nom du particulier
     let soc = (t?.arrivee_contact_societe || "").trim() || null;
@@ -224,6 +283,39 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     } finally { setBusy(null); }
   };
 
+  /** PV signé déjà rattaché à la mission pour ce type, s'il existe. */
+  const pvSigne = (v: PvVariant) => pvSignes.find((d) => d.type_document === `pv_${v}`) ?? null;
+
+  const downloadPv = async (v: PvVariant) => {
+    if (!trajet || !guardCompany()) return;
+    setBusy(`pv-${v}`);
+    try {
+      // Le PV reprend le numéro de mission ; suffixe -v2/-v3 si un PV du même type existe déjà.
+      const version = pvSignes.filter((d) => d.type_document === `pv_${v}`).length + 1;
+      const blob = await generatePvMissionPdf(v, {
+        numero_mission: numero,
+        numero_pv: pvNumero(v, numero, version),
+        donneur_ordre: clientSociete || trajet.client_nom,
+        destinataire: (v === "livraison" ? contactArriveeNom : contactDepartNom) || null,
+        marque_modele: marqueModele,
+        immatriculation: immat,
+        vin: trajet.vin || trajet.vehicule_vin,
+        kilometrage_depart: kmDepart != null ? String(kmDepart) : trajet.vehicule_km != null ? String(trajet.vehicule_km) : null,
+        kilometrage_arrivee: kmArrivee != null ? String(kmArrivee) : null,
+        carburant: trajet.vehicule_energie,
+        lieu_prise_en_charge: trajet.depart,
+        lieu_livraison: trajet.arrivee,
+        date_prise_en_charge: trajet.date_trajet,
+        date_livraison: null,
+        dommages,
+      }, company);
+      downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
+    } catch {
+      toast.error("Génération impossible");
+    } finally { setBusy(null); }
+  };
+
+
   const openStored = async (url: string) => {
     if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
     const { data } = await supabase.storage.from("mission-documents").createSignedUrl(url, 300);
@@ -307,6 +399,25 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         <span className="flex-1">État des lieux — Restitution</span>
         <Download size={16} className="opacity-60" />
       </button>
+
+      {(["livraison", "restitution"] as PvVariant[]).map((v) => {
+        const signe = pvSigne(v);
+        const label = v === "livraison" ? "PV de livraison" : "PV de restitution";
+        return signe ? (
+          <button key={v} type="button" className={btn} onClick={() => void openStored(signe.url_fichier)}>
+            <FileCheck2 size={18} />
+            <span className="flex-1">Voir le {label.toLowerCase()} signé</span>
+            <Eye size={16} className="opacity-60" />
+          </button>
+        ) : (
+          <button key={v} type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
+            {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
+            <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
+            <Download size={16} className="opacity-60" />
+          </button>
+        );
+      })}
+
 
       {pvDocs.map((d) => (
         <button key={d.id} type="button" className={btn} onClick={() => void openStored(d.url_fichier)}>
