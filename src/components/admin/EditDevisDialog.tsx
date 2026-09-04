@@ -8,7 +8,7 @@
  * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
 import { useMemo, useState } from 'react'
-import { Loader2, RefreshCw, Save, X } from 'lucide-react'
+import { Loader2, RefreshCw, Save, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/admin/AdminUI'
@@ -16,6 +16,15 @@ import PlacesInput from '@/components/PlacesInput'
 import { calculateBasePrice, getDistance, type TripType } from '@/lib/reservation-pricing'
 import { geocodeDistanceKm, normalizeAddress } from '@/lib/distance-fallback'
 import { parseDevisSupplements } from '@/lib/devis-pdf'
+import { lookupPlate } from '@/lib/plate.functions'
+import {
+  applyPlateauPoidsToMessage,
+  HEAVY_CHECKBOX_LABEL,
+  HEAVY_SURCHARGE,
+  HEAVY_THRESHOLD_KG,
+  parsePlateauPoids,
+} from '@/lib/plateau-poids'
+
 
 interface Props {
   devis: Record<string, any>
