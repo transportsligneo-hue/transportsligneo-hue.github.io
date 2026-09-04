@@ -340,6 +340,8 @@ function ProMissionsIndex() {
             <Truck className="text-slate-300 mx-auto mb-3" size={36} />
             <p className="text-pro-text-soft text-sm">Aucune mission ne correspond.</p>
           </div>
+        ) : view !== "list" ? (
+          <MissionViewsBody view={view} items={viewItems} />
         ) : (
           dossiers.map(({ key, legs, isDuo, total, head }) => {
             const elec = (head.carburant ?? "").toLowerCase().includes("elec")
