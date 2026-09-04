@@ -30,12 +30,12 @@ import {
   Gauge,
   Inbox,
   FileCheck2,
+  ScanLine,
 
 
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
-import { AdminScanDocumentFab } from "@/components/admin/AdminScanDocumentFab";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { verifyAdminAccess } from "@/lib/admin-guard.functions";
@@ -233,6 +233,7 @@ function AdminLayout() {
     { to: "/admin/historique", label: "Historique", icon: History, group: "Système" },
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
     { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
+    { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Système" },
   ];
 
   // Section Super Admin : visible uniquement pour super_admin
@@ -257,7 +258,6 @@ function AdminLayout() {
   return (
     <AdminSidebar items={navItems}>
       <Outlet />
-      <AdminScanDocumentFab />
     </AdminSidebar>
   );
 }
