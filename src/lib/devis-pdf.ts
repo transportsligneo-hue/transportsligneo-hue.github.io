@@ -122,6 +122,15 @@ export function parseDevisOptions(message?: string | null): { options: string[];
  * Relit le mode « transport sur plateau » et les suppléments facturés
  * (assurance, péages, chargement…) depuis le récapitulatif `message`.
  */
+export function parseDevisPrestationLabel(message?: string | null): string | null {
+  if (!message) return null;
+  for (const raw of message.split("\n")) {
+    const m = raw.trim().match(/^Libell[ée] prestation\s*:\s*(.+)$/i);
+    if (m && m[1].trim()) return m[1].trim();
+  }
+  return null;
+}
+
 export function parseDevisSupplements(message?: string | null): {
   plateau: boolean;
   supplements: Array<{ label: string; montant: number }>;
