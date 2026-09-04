@@ -269,7 +269,7 @@ export async function generatePvMissionPdf(
 
   const legendX = 100;
   const legendW = pageW - 14 - legendX;
-  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.2 + 12);
+  const legendH = Math.max(schemaH + 7, LEGENDE.length * 4.0 + 8);
   doc.setFillColor(...DOC_NAVY);
   doc.roundedRect(legendX, schemaTop - 3, legendW, 7, 1.5, 1.5, "F");
   doc.setDrawColor(...DOC_LINE);
@@ -279,7 +279,7 @@ export async function generatePvMissionPdf(
   doc.setFontSize(7);
   doc.setTextColor(...DOC_GOLD);
   doc.text("LÉGENDE", legendX + legendW / 2, schemaTop + 1.5, { align: "center" });
-  let ly = schemaTop + 10;
+  let ly = schemaTop + 9;
   LEGENDE.forEach(([code, label]) => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.8);
@@ -316,7 +316,6 @@ export async function generatePvMissionPdf(
   const mentionLines = (doc.splitTextToSize(mentionText(isLiv), w) as string[]).length;
   const need =
     10 + (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).length * 5 + 2 + mentionLines * 3.2 + 4 + 21;
-  console.log("[pv]", isLiv, "y", y.toFixed(1), "need", need.toFixed(1), "limit", pageH - 14);
   if (y + need > pageH - 14) {
 
     doc.addPage();
