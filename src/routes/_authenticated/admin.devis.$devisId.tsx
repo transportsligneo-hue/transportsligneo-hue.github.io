@@ -18,6 +18,7 @@ import { EditableNumero } from "@/components/admin/EditableNumero";
 import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
+import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
 import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
@@ -352,6 +353,15 @@ function AdminDevisDetailPage() {
         />
       </div>
 
+
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <AttachClientDialog
+          devisId={devis.id}
+          currentEmail={devis.email}
+          onAttached={() => void load()}
+          triggerLabel="Rattacher à un compte client"
+        />
+      </div>
 
       <div className="mb-5">
         <PoLinkCard devisId={devis.id} />
