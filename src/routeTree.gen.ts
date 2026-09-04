@@ -72,6 +72,7 @@ import { Route as ApiPublicYousignWebhookRouteImport } from './routes/api/public
 import { Route as ApiPublicTrackOpenRouteImport } from './routes/api/public/track-open'
 import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/track-click'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ApiPublicRevolutWebhookRouteImport } from './routes/api/public/revolut-webhook'
 import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicAlertesFlotteTcoRouteImport } from './routes/api/public/alertes-flotte-tco'
@@ -519,6 +520,11 @@ const ApiPublicTrackClickRoute = ApiPublicTrackClickRouteImport.update({
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRevolutWebhookRoute = ApiPublicRevolutWebhookRouteImport.update({
+  id: '/api/public/revolut-webhook',
+  path: '/api/public/revolut-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCampaignUnsubscribeRoute =
@@ -1373,6 +1379,7 @@ export interface FileRoutesByFullPath {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
@@ -1551,6 +1558,7 @@ export interface FileRoutesByTo {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
@@ -1740,6 +1748,7 @@ export interface FileRoutesById {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
   '/api/public/track-open': typeof ApiPublicTrackOpenRoute
@@ -1929,6 +1938,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
@@ -2107,6 +2117,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
@@ -2295,6 +2306,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
     | '/api/public/track-open'
@@ -2403,6 +2415,7 @@ export interface RootRouteChildren {
   ApiPublicAlertesFlotteTcoRoute: typeof ApiPublicAlertesFlotteTcoRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
+  ApiPublicRevolutWebhookRoute: typeof ApiPublicRevolutWebhookRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
   ApiPublicTrackOpenRoute: typeof ApiPublicTrackOpenRoute
@@ -2878,6 +2891,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/stripe-webhook'
       fullPath: '/api/public/stripe-webhook'
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/revolut-webhook': {
+      id: '/api/public/revolut-webhook'
+      path: '/api/public/revolut-webhook'
+      fullPath: '/api/public/revolut-webhook'
+      preLoaderRoute: typeof ApiPublicRevolutWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/campaign-unsubscribe': {
@@ -4245,6 +4265,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAlertesFlotteTcoRoute: ApiPublicAlertesFlotteTcoRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   ApiPublicCampaignUnsubscribeRoute: ApiPublicCampaignUnsubscribeRoute,
+  ApiPublicRevolutWebhookRoute: ApiPublicRevolutWebhookRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,
   ApiPublicTrackOpenRoute: ApiPublicTrackOpenRoute,
