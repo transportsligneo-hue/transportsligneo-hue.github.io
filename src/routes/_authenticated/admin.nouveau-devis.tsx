@@ -223,6 +223,10 @@ function AdminNouveauDevisPage() {
   const [dateRetourADeterminer, setDateRetourADeterminer] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
   const [plateau, setPlateau] = useState(false);
+  /** Plateau : véhicule de plus de 1,1 t → majoration carburant. */
+  const [lourd, setLourd] = useState(false);
+  const [poidsKg, setPoidsKg] = useState("");
+
   const [supp, setSupp] = useState<Record<string, string>>({});
   const [pvDigital, setPvDigital] = useState<PvChoice>("aucun");
   const [destNom, setDestNom] = useState("");
