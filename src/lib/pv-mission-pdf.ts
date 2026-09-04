@@ -148,6 +148,13 @@ function cartouche(doc: jsPDF, x: number, y: number, w: number, h: number, titre
   });
 }
 
+/** Mention L.133-3 adaptée au type de PV. */
+function mentionText(isLiv: boolean): string {
+  return isLiv
+    ? "Conformément à l'article L.133-3 du Code de commerce, le destinataire dispose d'un délai de 48 heures, non compris les jours fériés, pour notifier au transporteur par lettre recommandée toute réserve motivée relative à l'état du véhicule qui n'aurait pas été mentionnée sur le présent procès-verbal au moment de la livraison. Passé ce délai, la livraison est réputée conforme et sans réserve."
+    : "Conformément à l'article L.133-3 du Code de commerce, le propriétaire ou donneur d'ordre dispose d'un délai de 48 heures, non compris les jours fériés, pour notifier au transporteur par lettre recommandée toute réserve motivée relative à l'état du véhicule qui n'aurait pas été mentionnée sur le présent procès-verbal au moment de la restitution. Passé ce délai, la restitution est réputée conforme et sans réserve.";
+}
+
 export async function generatePvMissionPdf(
   variant: PvVariant,
   d: PvMissionData,
@@ -331,9 +338,6 @@ export async function generatePvMissionPdf(
   doc.setFontSize(6.2);
   doc.setTextColor(...DOC_MUTED);
   const mention = mentionText(isLiv);
-  const _unused = isLiv
-    ? "Conformément à l'article L.133-3 du Code de commerce, le destinataire dispose d'un délai de 48 heures, non compris les jours fériés, pour notifier au transporteur par lettre recommandée toute réserve motivée relative à l'état du véhicule qui n'aurait pas été mentionnée sur le présent procès-verbal au moment de la livraison. Passé ce délai, la livraison est réputée conforme et sans réserve."
-    : "Conformément à l'article L.133-3 du Code de commerce, le propriétaire ou donneur d'ordre dispose d'un délai de 48 heures, non compris les jours fériés, pour notifier au transporteur par lettre recommandée toute réserve motivée relative à l'état du véhicule qui n'aurait pas été mentionnée sur le présent procès-verbal au moment de la restitution. Passé ce délai, la restitution est réputée conforme et sans réserve.";
   (doc.splitTextToSize(mention, w) as string[]).forEach((l) => {
     doc.text(l, 14, y);
     y += 3.2;
