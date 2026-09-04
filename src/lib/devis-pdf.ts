@@ -262,12 +262,9 @@ async function resolveDistanceKm(d: DevisData): Promise<number | null> {
     if (local != null && local > 0) return Math.round(local);
   } catch { /* table indisponible */ }
   try {
-    const { geocodeAddress, haversineKm } = await import("@/lib/geocode");
-    const [a, b] = await Promise.all([geocodeAddress(from), geocodeAddress(to)]);
-    if (a && b) {
-      const km = haversineKm(a, b) * 1.22; // facteur routier
-      if (km > 0) return Math.round(km);
-    }
+    const { geocodeDistanceKm } = await import("@/lib/distance-fallback");
+    const km = await geocodeDistanceKm(from, to); // vraie distance routière
+    if (km != null && km > 0) return Math.round(km);
   } catch { /* réseau indisponible */ }
   return null;
 }

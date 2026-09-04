@@ -31,8 +31,35 @@ export async function geocodeDistanceKm(
   if (normalizeAddress(a) === normalizeAddress(b)) return 0;
   const [pa, pb] = await Promise.all([geocodeAddress(a), geocodeAddress(b)]);
   if (!pa || !pb) return null;
-  const km = haversineKm(pa, pb) * ROAD_FACTOR;
-  if (!Number.isFinite(km)) return null;
-  // Trajet court réel : on garde au minimum 1 km (jamais 0 si adresses ≠)
-  return Math.max(1, Math.round(km));
+
+  // 1) Vraie distance routière (OSRM) — indispensable pour les longs trajets
+  //    et l'international, où le vol d'oiseau sous-estime massivement.
+  const road = await osrmRoadKm(pa, pb);
+  if (road != null) return Math.max(1, Math.round(road));
+
+  // 2) Secours : vol d'oiseau majoré (facteur plus élevé sur longue distance).
+  const straight = haversineKm(pa, pb);
+  if (!Number.isFinite(straight)) return null;
+  const factor = straight > 300 ? 1.25 : ROAD_FACTOR;
+  return Math.max(1, Math.round(straight * factor));
+}
+
+async function osrmRoadKm(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): Promise<number | null> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const meters = d?.routes?.[0]?.distance;
+    if (typeof meters !== "number" || !Number.isFinite(meters) || meters <= 0) return null;
+    return meters / 1000;
+  } catch {
+    return null;
+  }
 }

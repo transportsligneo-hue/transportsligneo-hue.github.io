@@ -8,7 +8,7 @@ export interface GeoPoint {
   label?: string;
 }
 
-const CACHE_PREFIX = "geocode:v1:";
+const CACHE_PREFIX = "geocode:v2:";
 
 function readCache(key: string): GeoPoint | null {
   if (typeof window === "undefined") return null;
@@ -29,6 +29,16 @@ function writeCache(key: string, value: GeoPoint) {
   }
 }
 
+const FOREIGN_HINTS =
+  /\b(espagne|spain|portugal|italie|italy|allemagne|germany|belgique|belgium|suisse|switzerland|pays[- ]bas|netherlands|luxembourg|royaume[- ]uni|angleterre|united kingdom|maroc|pologne|autriche|danemark|suede|norvege|irlande|republique tcheque|slovaquie|hongrie|roumanie)\b/i;
+
+/** Une adresse manifestement étrangère ne doit jamais passer par l'API française. */
+export function looksForeign(address: string): boolean {
+  return FOREIGN_HINTS.test(
+    address.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+  );
+}
+
 async function geocodeFR(address: string): Promise<GeoPoint | null> {
   try {
     const r = await fetch(
@@ -38,6 +48,9 @@ async function geocodeFR(address: string): Promise<GeoPoint | null> {
     const d = await r.json();
     const f = d?.features?.[0];
     if (!f?.geometry?.coordinates) return null;
+    // Score faible = correspondance approximative (souvent une rue au hasard) :
+    // on préfère laisser la main au géocodeur mondial.
+    if (typeof f.properties?.score === "number" && f.properties.score < 0.55) return null;
     const [lng, lat] = f.geometry.coordinates as [number, number];
     return { lat, lng, label: f.properties?.label ?? address };
   } catch {
@@ -67,7 +80,9 @@ export async function geocodeAddress(address: string | null | undefined): Promis
   const key = q.toLowerCase();
   const cached = readCache(key);
   if (cached) return cached;
-  const point = (await geocodeFR(q)) ?? (await geocodeOSM(q));
+  const point = looksForeign(q)
+    ? ((await geocodeOSM(q)) ?? (await geocodeFR(q)))
+    : ((await geocodeFR(q)) ?? (await geocodeOSM(q)));
   if (point) writeCache(key, point);
   return point;
 }
