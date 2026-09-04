@@ -58,6 +58,14 @@ export function AdminSidebar({ items, children }: Props) {
   }, {});
   const groupOrder = Object.keys(groups);
 
+  // Onglets mobiles (raccourcis les plus utilisés sur le terrain)
+  const TAB_PATHS = ["/admin", "/admin/missions", "/admin/attributions", "/admin/demandes"];
+  const tabItems = TAB_PATHS
+    .map((p) => items.find((i) => i.to === p))
+    .filter((i): i is AdminSidebarItem => !!i)
+    .map((i) => ({ ...i, label: i.label === "Tableau de bord" ? "Bord" : i.label === "Demandes de convoyage" ? "Demandes" : i.label }));
+
+
   const renderNav = (onClick?: () => void, mini = false) => (
     <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
       {groupOrder.map((g) => (
