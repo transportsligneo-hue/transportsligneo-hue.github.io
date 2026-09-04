@@ -374,6 +374,50 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
               />
               Véhicule non roulant — transport sur plateau porte-voiture
             </label>
+            {f.plateau && (
+              <div className="space-y-3 rounded-lg border border-pro-border bg-pro-surface/60 p-3">
+                <label className="flex items-start gap-2 text-xs text-pro-text">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 accent-pro-accent"
+                    checked={f.lourd}
+                    onChange={(e) => toggleLourd(e.target.checked)}
+                  />
+                  <span>
+                    {HEAVY_CHECKBOX_LABEL}
+                    <span className="block text-[11px] text-pro-muted">
+                      Porte-voiture plus puissant : majoration carburant / consommation.
+                    </span>
+                  </span>
+                </label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <Field label="Poids du véhicule (kg)">
+                    <input
+                      className={inputCls}
+                      inputMode="numeric"
+                      placeholder="ex. 1600"
+                      value={f.poids_kg}
+                      onChange={(e) => set('poids_kg', e.target.value)}
+                    />
+                  </Field>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={rechercherPlaque}
+                    disabled={plateLoading}
+                    icon={plateLoading ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                  >
+                    Rechercher par plaque
+                  </Button>
+                </div>
+                {f.poids_kg !== '' && Number(f.poids_kg) > HEAVY_THRESHOLD_KG && !f.lourd && (
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                    Ce véhicule dépasse 1,1 t : la majoration de {HEAVY_SURCHARGE} € devrait être cochée.
+                  </p>
+                )}
+              </div>
+            )}
+
             {trajetChanged && (
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
                 Le trajet a changé : recalculez la distance et le prix avant d'enregistrer.
