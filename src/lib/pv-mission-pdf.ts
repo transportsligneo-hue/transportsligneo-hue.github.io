@@ -229,9 +229,9 @@ export async function generatePvMissionPdf(
   const parties: [string, string | null][] = [
     ["Transporteur", `${c?.raison_sociale || "Transports Ligneo"} · SIREN ${siren}`],
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
-    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)", d.destinataire ?? null],
+    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (locataire)", d.destinataire ?? null],
   ];
-  const partH = isLiv ? 21 : 17;
+  const partH = isLiv ? 21 : 16;
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
@@ -272,7 +272,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = 14;
+    const cmpH = 13;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 13, c3, "Kilométrage au départ", d.kilometrage_depart);
@@ -340,7 +340,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = isLiv ? 42 : 30;
+  const schH = isLiv ? 42 : 34;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -409,7 +409,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = 24;
+    const frH = 22;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -424,8 +424,8 @@ export async function generatePvMissionPdf(
     doc.setTextColor(...INK);
     doc.text("Aucun frais additionnel", M + 16, y + 14.3);
     doc.text("Frais additionnels (détail ci-dessous)", XR + 10, y + 14.3);
-    field(doc, M + 6, y + 22, fw, "Nature des frais", null);
-    field(doc, fx2, y + 22, fw, "Montant estimé", null);
+    field(doc, M + 6, y + 20, fw, "Nature des frais", null);
+    field(doc, fx2, y + 20, fw, "Montant estimé", null);
     y += frH + sp;
   }
 
