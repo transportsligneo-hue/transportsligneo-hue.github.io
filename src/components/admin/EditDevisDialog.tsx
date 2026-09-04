@@ -54,7 +54,7 @@ function toTripType(label: string): TripType {
 /** Réécrit la ligne « Transport sur plateau » dans le récapitulatif message. */
 function applyPlateauToMessage(message: string, plateau: boolean): string {
   const lines = message.split('\n').filter((l) => !/^\s*Transport sur plateau\s*:/i.test(l))
-  lines.push(`Transport sur plateau : ${plateau ? 'oui' : 'non'}`)
+  lines.push(`Transport sur plateau : ${plateau ? 'oui (véhicule non roulant)' : 'non'}`)
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
