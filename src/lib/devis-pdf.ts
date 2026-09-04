@@ -122,6 +122,15 @@ export function parseDevisOptions(message?: string | null): { options: string[];
  * Relit le mode « transport sur plateau » et les suppléments facturés
  * (assurance, péages, chargement…) depuis le récapitulatif `message`.
  */
+export function parseDevisPrestationLabel(message?: string | null): string | null {
+  if (!message) return null;
+  for (const raw of message.split("\n")) {
+    const m = raw.trim().match(/^Libell[ée] prestation\s*:\s*(.+)$/i);
+    if (m && m[1].trim()) return m[1].trim();
+  }
+  return null;
+}
+
 export function parseDevisSupplements(message?: string | null): {
   plateau: boolean;
   supplements: Array<{ label: string; montant: number }>;
@@ -718,11 +727,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       })
     : [
         {
-          title: rechargeSeule
-            ? "Recharge électrique sur place"
-            : plateau
-              ? "Transport sur plateau porte-voiture"
-              : "Convoyage routier par conducteur professionnel",
+          title:
+            parseDevisPrestationLabel(d.message) ??
+            (rechargeSeule
+              ? "Recharge électrique sur place"
+              : plateau
+                ? "Transport sur plateau porte-voiture"
+                : "Convoyage routier par conducteur professionnel"),
           sub: rechargeSeule
             ? `${d.depart} — branchement, surveillance et contrôle photo du niveau de charge.`
             : `${d.depart} → ${d.arrivee}${distance ? `, environ ${Math.round(distance)} km` : ""}${plateau ? ", véhicule non roulant transporté sur plateau porte-voiture (non conduit)." : ". Carburant, péages et assurance tous risques inclus."}`,

@@ -9,18 +9,19 @@
  */
 import { useMemo, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { Loader2, RefreshCw, Save, Search, X } from 'lucide-react'
+import { Loader2, Plus, RefreshCw, Save, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/admin/AdminUI'
 import PlacesInput from '@/components/PlacesInput'
 import { calculateBasePrice, getDistance, type TripType } from '@/lib/reservation-pricing'
 import { geocodeDistanceKm, normalizeAddress } from '@/lib/distance-fallback'
-import { parseDevisSupplements } from '@/lib/devis-pdf'
+import { parseDevisSupplements, parseDevisPrestationLabel } from '@/lib/devis-pdf'
 import { lookupPlate } from '@/lib/plate.functions'
 import {
   applyPlateauPoidsToMessage,
   HEAVY_CHECKBOX_LABEL,
+  HEAVY_LABEL,
   HEAVY_SURCHARGE,
   HEAVY_THRESHOLD_KG,
   parsePlateauPoids,
@@ -58,6 +59,25 @@ function applyPlateauToMessage(message: string, plateau: boolean): string {
   return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
+/** Réécrit le libellé de la prestation principale et les lignes de suppléments. */
+function applyLignesToMessage(
+  message: string,
+  principalLabel: string,
+  supplements: Array<{ label: string; montant: string }>,
+): string {
+  const lines = message
+    .split('\n')
+    .filter((l) => !/^\s*Libell[ée] prestation\s*:/i.test(l) && !/^\s*Suppl[ée]ment\s*:/i.test(l))
+  if (principalLabel.trim()) lines.push(`Libellé prestation : ${principalLabel.trim()}`)
+  supplements.forEach((s) => {
+    const montant = parseFloat(String(s.montant).replace(/\s/g, '').replace(',', '.'))
+    if (s.label.trim() && Number.isFinite(montant) && montant > 0) {
+      lines.push(`Supplément : ${s.label.trim()} = ${montant} €`)
+    }
+  })
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
 const inputCls =
   'w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20'
 
@@ -72,8 +92,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   const initialOption = String(devis.option_trajet ?? 'Livraison simple')
-  const initialPlateau = parseDevisSupplements(devis.message).plateau
+  const initialParsed = parseDevisSupplements(devis.message)
+  const initialPlateau = initialParsed.plateau
   const initialPoids = parsePlateauPoids(devis.message)
+  /** Suppléments éditables : la majoration « > 1,1 t » reste pilotée par la case à cocher. */
+  const initialSupplements = initialParsed.supplements
+    .filter((s) => !/plus de 1[,.]1\s*t/i.test(s.label))
+    .map((s) => ({ label: s.label, montant: String(s.montant) }))
+  const initialPrincipalLabel =
+    parseDevisPrestationLabel(devis.message) ??
+    (initialPlateau ? 'Transport sur plateau porte-voiture' : 'Convoyage routier par conducteur professionnel')
+  const suppTotal =
+    initialSupplements.reduce((s, x) => s + (Number(x.montant) || 0), 0) + (initialPoids.lourd ? HEAVY_SURCHARGE : 0)
+  const initialPrincipal = Math.max(0, +(Number(devis.prix_estime ?? 0) - suppTotal).toFixed(2))
 
   const [f, setF] = useState({
     prenom: devis.prenom ?? '',
@@ -95,11 +126,13 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     carburant: devis.carburant ?? '',
     immatriculation: devis.immatriculation ?? '',
     distance_km: devis.distance_km != null ? String(devis.distance_km) : '',
-    prix_estime: devis.prix_estime != null ? String(devis.prix_estime) : '',
+    principal_label: initialPrincipalLabel,
+    principal_montant: String(initialPrincipal),
     prix_manuel: !!devis.prix_manuel,
     tarif_label: devis.tarif_label ?? '',
     message: devis.message ?? '',
   })
+  const [supplements, setSupplements] = useState(initialSupplements)
   const [saving, setSaving] = useState(false)
   const [recalcul, setRecalcul] = useState(false)
   const [plateLoading, setPlateLoading] = useState(false)
@@ -107,19 +140,29 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
 
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
-  /** Ajoute ou retire la majoration « plus de 1,1 t » du montant TTC. */
+  const num = (v: string) => {
+    const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.'))
+    return Number.isFinite(n) ? n : 0
+  }
+  /** Total TTC affiché sur le devis = prestation principale + suppléments. */
+  const totalTtc = useMemo(
+    () =>
+      +(
+        num(f.principal_montant) +
+        supplements.reduce((s, x) => s + num(x.montant), 0) +
+        (f.plateau && f.lourd ? HEAVY_SURCHARGE : 0)
+      ).toFixed(2),
+    [f.principal_montant, f.plateau, f.lourd, supplements],
+  )
+
+  const updateSupp = (i: number, patch: Partial<{ label: string; montant: string }>) =>
+    setSupplements((p) => p.map((s, idx) => (idx === i ? { ...s, ...patch } : s)))
+  const addSupp = () => setSupplements((p) => [...p, { label: '', montant: '' }])
+  const removeSupp = (i: number) => setSupplements((p) => p.filter((_, idx) => idx !== i))
+
+  /** Active ou retire la majoration « plus de 1,1 t » (ligne dédiée du devis). */
   const toggleLourd = (checked: boolean) => {
-    setF((p) => {
-      const current = parseFloat(String(p.prix_estime).replace(/\s/g, '').replace(',', '.'))
-      const next = Number.isFinite(current)
-        ? Math.max(0, +(current + (checked ? HEAVY_SURCHARGE : -HEAVY_SURCHARGE)).toFixed(2))
-        : current
-      return {
-        ...p,
-        lourd: checked,
-        prix_estime: Number.isFinite(next) ? String(next) : p.prix_estime,
-      }
-    })
+    set('lourd', checked)
     toast.info(
       checked
         ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
@@ -196,16 +239,13 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       let km = getDistance(f.depart, f.arrivee)
       if (km == null) km = await geocodeDistanceKm(f.depart, f.arrivee)
       const res = calculateBasePrice(f.depart, f.arrivee, type, km)
-      setF((p) => {
-        const majoration = p.plateau && p.lourd ? HEAVY_SURCHARGE : 0
-        return {
-          ...p,
-          distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
-          tarif_label: res.label,
-          prix_estime: res.base > 0 ? String(+(res.base + majoration).toFixed(2)) : p.prix_estime,
-          prix_manuel: false,
-        }
-      })
+      setF((p) => ({
+        ...p,
+        distance_km: res.distance != null ? String(res.distance) : km != null ? String(km) : p.distance_km,
+        tarif_label: res.label,
+        principal_montant: res.base > 0 ? String(+res.base.toFixed(2)) : p.principal_montant,
+        prix_manuel: false,
+      }))
 
       if (res.base > 0) toast.success('Prix recalculé', { description: res.label })
       else toast.warning('Distance introuvable', { description: 'Saisissez le montant manuellement.' })
@@ -217,7 +257,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
   }
 
   const save = async () => {
-    const prix = parseFloat(String(f.prix_estime).replace(/\s/g, '').replace(',', '.'))
+    const prix = totalTtc
     if (!Number.isFinite(prix) || prix <= 0) {
       toast.error('Montant TTC invalide')
       return
@@ -231,11 +271,14 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       const km = f.distance_km === '' ? null : Number(String(f.distance_km).replace(',', '.'))
       const priceChanged = Number(devis.prix_estime ?? 0) !== prix
       const poidsKg = f.poids_kg === '' ? null : Number(String(f.poids_kg).replace(',', '.'))
-      const message = applyPlateauPoidsToMessage(applyPlateauToMessage(f.message, f.plateau), {
-        plateau: f.plateau,
-        lourd: f.plateau && f.lourd,
-        poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
-      })
+      const message = applyPlateauPoidsToMessage(
+        applyLignesToMessage(applyPlateauToMessage(f.message, f.plateau), f.principal_label, supplements),
+        {
+          plateau: f.plateau,
+          lourd: f.plateau && f.lourd,
+          poidsKg: poidsKg != null && Number.isFinite(poidsKg) ? poidsKg : null,
+        },
+      )
 
       const patch: Record<string, unknown> = {
         prenom: f.prenom.trim(),
@@ -449,11 +492,70 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
                 Recalculer
               </Button>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Distance (km)"><input className={inputCls} inputMode="decimal" value={f.distance_km} onChange={(e) => set('distance_km', e.target.value)} /></Field>
-              <Field label="Montant TTC (€)"><input className={inputCls} inputMode="decimal" value={f.prix_estime} onChange={(e) => set('prix_estime', e.target.value)} /></Field>
               <Field label="Libellé tarifaire"><input className={inputCls} value={f.tarif_label} onChange={(e) => set('tarif_label', e.target.value)} /></Field>
             </div>
+
+            <div className="space-y-2 rounded-lg border border-pro-border bg-pro-surface/50 p-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-pro-muted">
+                Détail des prestations (lignes du devis)
+              </p>
+              <div className="grid grid-cols-[1fr_110px_28px] items-end gap-2">
+                <Field label="Prestation principale">
+                  <input className={inputCls} value={f.principal_label} onChange={(e) => set('principal_label', e.target.value)} />
+                </Field>
+                <Field label="Montant TTC">
+                  <input
+                    className={inputCls}
+                    inputMode="decimal"
+                    value={f.principal_montant}
+                    onChange={(e) => set('principal_montant', e.target.value)}
+                  />
+                </Field>
+                <span />
+                {supplements.map((s, i) => (
+                  <div key={i} className="col-span-full grid grid-cols-[1fr_110px_28px] items-center gap-2">
+                    <input
+                      className={inputCls}
+                      placeholder="ex. Péages et frais de route"
+                      value={s.label}
+                      onChange={(e) => updateSupp(i, { label: e.target.value })}
+                    />
+                    <input
+                      className={inputCls}
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={s.montant}
+                      onChange={(e) => updateSupp(i, { montant: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSupp(i)}
+                      className="rounded-lg p-1.5 text-pro-muted hover:bg-black/5"
+                      aria-label="Supprimer la ligne"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                {f.plateau && f.lourd && (
+                  <div className="col-span-full flex items-center justify-between text-xs text-pro-muted">
+                    <span>{HEAVY_LABEL}</span>
+                    <span>{HEAVY_SURCHARGE.toFixed(2)} €</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <Button variant="secondary" size="sm" onClick={addSupp} icon={<Plus size={12} />}>
+                  Ajouter une ligne
+                </Button>
+                <p className="text-sm font-semibold text-pro-text">
+                  Total TTC : {totalTtc.toFixed(2)} €
+                </p>
+              </div>
+            </div>
+
             <label className="flex items-center gap-2 text-xs text-pro-text">
               <input type="checkbox" className="accent-pro-accent" checked={f.prix_manuel} onChange={(e) => set('prix_manuel', e.target.checked)} />
               Prix imposé manuellement (aucun recalcul automatique)
