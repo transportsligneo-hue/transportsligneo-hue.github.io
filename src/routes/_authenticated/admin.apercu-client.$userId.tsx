@@ -192,11 +192,123 @@ function ApercuClient() {
               ))
             )}
           </Section>
+
+          <InterfacePreview typeClient={profile.type_client} />
         </>
       )}
     </div>
   );
 }
+
+const DEVICES = [
+  { key: "mobile", label: "Mobile", width: 390, height: 780, icon: <Smartphone size={14} /> },
+  { key: "tablette", label: "Tablette", width: 834, height: 900, icon: <Tablet size={14} /> },
+  { key: "ordinateur", label: "Ordinateur", width: 1440, height: 900, icon: <Monitor size={14} /> },
+] as const;
+
+function InterfacePreview({ typeClient }: { typeClient: string | null }) {
+  const pro = typeClient === "b2b";
+  const pages = pro
+    ? [
+        { label: "Accueil", path: "/dashboard-pro" },
+        { label: "Missions", path: "/dashboard-pro/missions" },
+        { label: "Nouvelle demande", path: "/dashboard-pro/nouvelle-demande" },
+        { label: "Devis instantané", path: "/dashboard-pro/devis-instantane" },
+        { label: "Société", path: "/dashboard-pro/societe" },
+      ]
+    : [
+        { label: "Accueil", path: "/dashboard-client" },
+        { label: "Missions", path: "/dashboard-client/missions" },
+        { label: "Nouvelle réservation", path: "/dashboard-client/nouvelle-reservation" },
+        { label: "Devis", path: "/dashboard-client/devis" },
+        { label: "Documents", path: "/dashboard-client/documents" },
+        { label: "Profil", path: "/dashboard-client/profil" },
+      ];
+
+  const [page, setPage] = useState(pages[0]!.path);
+  const [device, setDevice] = useState<(typeof DEVICES)[number]["key"]>("ordinateur");
+  const [reload, setReload] = useState(0);
+  const current = DEVICES.find((d) => d.key === device)!;
+  const scale = Math.min(1, 900 / current.width);
+
+  return (
+    <section className="dvx-card">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[#70727d]"><Eye size={14} /></span>
+        <h2 className="text-[13.5px] font-bold text-[#14161c]">
+          Aperçu de l'interface {pro ? "professionnelle" : "client"}
+        </h2>
+        <button
+          type="button"
+          onClick={() => setReload((r) => r + 1)}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[12px] font-medium text-[#14161c] hover:bg-slate-50"
+        >
+          <RefreshCw size={13} /> Rafraîchir
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 mb-2">
+        {pages.map((p) => (
+          <button
+            key={p.path}
+            type="button"
+            onClick={() => setPage(p.path)}
+            className={`rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${
+              page === p.path
+                ? "bg-[#14161c] text-white"
+                : "border border-slate-200 text-[#5a5c66] hover:bg-slate-50"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 mb-3">
+        {DEVICES.map((d) => (
+          <button
+            key={d.key}
+            type="button"
+            onClick={() => setDevice(d.key)}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-colors ${
+              device === d.key
+                ? "bg-[#eef1ff] text-[#2F5FFF] border border-[#2F5FFF]/30"
+                : "border border-slate-200 text-[#5a5c66] hover:bg-slate-50"
+            }`}
+          >
+            {d.icon} {d.label}
+            <span className="text-[10.5px] text-[#a3a4ac]">{d.width}px</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100 p-3">
+        <div
+          className="mx-auto overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm"
+          style={{ width: current.width * scale, height: current.height * scale }}
+        >
+          <iframe
+            key={`${page}-${device}-${reload}`}
+            src={page}
+            title="Aperçu de l'interface"
+            className="origin-top-left border-0 bg-white"
+            style={{
+              width: current.width,
+              height: current.height,
+              transform: `scale(${scale})`,
+            }}
+          />
+        </div>
+      </div>
+
+      <p className="mt-2 text-[11.5px] text-[#a3a4ac]">
+        Rendu réel des écrans, avec vos propres accès : utile pour repérer un défaut d'affichage ou
+        valider une modification. Les données affichées sont les vôtres, pas celles du client.
+      </p>
+    </section>
+  );
+}
+
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
