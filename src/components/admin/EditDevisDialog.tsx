@@ -155,9 +155,9 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
       +(
         num(f.principal_montant) +
         supplements.reduce((s, x) => s + num(x.montant), 0) +
-        (f.plateau && f.lourd ? HEAVY_SURCHARGE : 0)
+        (f.plateau && f.lourd ? num(f.lourd_montant) : 0)
       ).toFixed(2),
-    [f.principal_montant, f.plateau, f.lourd, supplements],
+    [f.principal_montant, f.plateau, f.lourd, f.lourd_montant, supplements],
   )
 
   const updateSupp = (i: number, patch: Partial<{ label: string; montant: string }>) =>
@@ -170,8 +170,8 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
     set('lourd', checked)
     toast.info(
       checked
-        ? `Majoration véhicule > 1,1 t appliquée (+${HEAVY_SURCHARGE} €)`
-        : `Majoration véhicule > 1,1 t retirée (−${HEAVY_SURCHARGE} €)`,
+        ? `Majoration véhicule > 1,1 t appliquée (+${num(f.lourd_montant)} €)`
+        : `Majoration véhicule > 1,1 t retirée (−${num(f.lourd_montant)} €)`,
     )
   }
 
