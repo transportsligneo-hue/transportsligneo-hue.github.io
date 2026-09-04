@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSidebar";
+import { AdminScanDocumentFab } from "@/components/admin/AdminScanDocumentFab";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { verifyAdminAccess } from "@/lib/admin-guard.functions";
@@ -256,6 +257,7 @@ function AdminLayout() {
   return (
     <AdminSidebar items={navItems}>
       <Outlet />
+      <AdminScanDocumentFab />
     </AdminSidebar>
   );
 }
