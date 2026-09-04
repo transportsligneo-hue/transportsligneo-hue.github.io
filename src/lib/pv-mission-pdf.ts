@@ -181,14 +181,14 @@ export async function generatePvMissionPdf(
   /* Parties */
   const cw = (w - 8) / 3;
   const siren = toSiren(c?.siret) || "753 320 001";
-  cartouche(doc, 14, y, cw, 22, "Transporteur", [
+  cartouche(doc, 14, y, cw, 18, "Transporteur", [
     `${(c?.raison_sociale || "Transports Ligneo")} · SIREN ${siren}`,
   ]);
-  cartouche(doc, 14 + cw + 4, y, cw, 22, isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre",
+  cartouche(doc, 14 + cw + 4, y, cw, 18, isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre",
     d.donneur_ordre ? [d.donneur_ordre] : []);
-  cartouche(doc, 14 + (cw + 4) * 2, y, cw, 22, isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)",
+  cartouche(doc, 14 + (cw + 4) * 2, y, cw, 18, isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur / locataire)",
     d.destinataire ? [d.destinataire] : []);
-  y += 26;
+  y += 22;
 
   /* Véhicule */
   y = drawSectionTitle(doc, pageW, y, "Véhicule");
@@ -246,7 +246,7 @@ export async function generatePvMissionPdf(
   doc.setFillColor(253, 250, 242);
   doc.setDrawColor(...DOC_GOLD);
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, y, w, 16, 1.5, 1.5, "FD");
+  doc.roundedRect(14, y, w, 14, 1.5, 1.5, "FD");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(...DOC_GOLD);
@@ -255,10 +255,10 @@ export async function generatePvMissionPdf(
     18,
     y + 5,
   );
-  y += 17;
+  y += 15;
 
   /* Schéma des dommages + légende */
-  const schemaTop = y + 4;
+  const schemaTop = y + 2;
   const schemaW = 68;
   const schemaH = (schemaW * EDL_CAR_SCHEMA_H) / EDL_CAR_SCHEMA_W;
   doc.setFont("helvetica", "bold");
@@ -306,7 +306,7 @@ export async function generatePvMissionPdf(
     dommages.forEach((dm) => {
       const line = [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" — ");
       doc.text(doc.splitTextToSize(line, w)[0] as string, 14, y);
-      y += 4;
+      y += 3.6;
     });
     y += 2;
   }
