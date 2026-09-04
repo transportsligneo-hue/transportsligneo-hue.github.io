@@ -1,14 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileText, Printer, Download, Loader2, FilePlus2 } from "lucide-react";
+import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye } from "lucide-react";
 import {
   generateFicheMissionPdf,
   generatePassageAVidePdf,
   generateEdlPapierPdf,
   downloadBlob,
 } from "@/lib/documents-officiels";
+import { generatePvMissionPdf, pvNumero, type PvDommage, type PvVariant } from "@/lib/pv-mission-pdf";
 import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
+
+/** Libellés des vues EDL, pour situer les dommages repris sur le PV. */
+const EDL_VUE_LABELS: Record<string, string> = {
+  face_avant: "Face avant",
+  face_arriere: "Face arrière",
+  cote_gauche: "Côté gauche",
+  cote_droit: "Côté droit",
+  toit: "Toit",
+  interieur: "Intérieur",
+};
+
+interface SignedPvDoc {
+  id: string;
+  nom_fichier: string;
+  url_fichier: string;
+  created_at: string;
+  type_document: string;
+}
+
 
 type Variant = "light" | "dark";
 
