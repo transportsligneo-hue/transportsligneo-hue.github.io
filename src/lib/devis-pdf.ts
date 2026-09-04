@@ -330,7 +330,7 @@ function drawHeader(
   doc: jsPDF,
   pageW: number,
   logoData: string | null,
-  opts: { numero: string; emission: string; validite: number },
+  opts: { numero: string; emission: string; validite: number; revision?: number | null },
 ) {
   const right = pageW - M;
   if (logoData) {
@@ -365,6 +365,14 @@ function drawHeader(
     31.6,
     { align: "right" },
   );
+  if (opts.revision && opts.revision > 1) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.4);
+    doc.setTextColor(...BLUE);
+    doc.text(`Devis modifie - revision v${opts.revision}`, right, 36.2, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...MUTED);
+  }
 
 
   doc.setDrawColor(...LINE);
@@ -464,7 +472,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const validite = d.validite_jours ?? 15;
   const emission = d.created_at || new Date().toISOString();
 
-  drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
+  drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite, revision: d.version ?? null });
 
 
 
@@ -934,7 +942,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   if (d.otpProof) {
     doc.addPage();
     applyLigneoFonts(doc);
-    drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite });
+    drawHeader(doc, pageW, logoData, { numero: d.numero, emission, validite, revision: d.version ?? null });
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
