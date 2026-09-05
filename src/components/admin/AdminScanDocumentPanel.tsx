@@ -238,12 +238,32 @@ export function AdminScanDocumentPanel() {
     void processDocument(page, "image/jpeg");
   }, [processDocument]);
 
+  const openScanner = useCallback(() => {
+    if (isNativeScannerAvailable()) {
+      void (async () => {
+        const res = await scanNativeDocument({ maxPages: 1, filename: "document" });
+        if (res.status === "success" && res.files[0]) {
+          void processDocument(res.files[0], res.files[0].type || "image/jpeg");
+          return;
+        }
+        if (res.status === "cancelled") return;
+        if (res.status === "error") {
+          toast.error("Scanner indisponible", { description: res.message });
+        }
+        setScannerOpen(true);
+      })();
+      return;
+    }
+    setScannerOpen(true);
+  }, [processDocument]);
+
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     void processDocument(file, file.type || "application/octet-stream");
   }, [processDocument]);
+
 
   /* ------------------------------------------------------------- classement */
 
