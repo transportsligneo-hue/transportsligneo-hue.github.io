@@ -8626,6 +8626,44 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !i
 }
 
 /* ============================================================
+   MOBILE — le contenu ne passe plus sous la barre fixe du haut
+   (admin, espace client, espace pro / flotte)
+   ============================================================ */
+:root { --dash-topbar-h: 56px; }
+
+@media (max-width: 1023px) {
+  .dash-main-mobile {
+    padding-top: calc(var(--dash-topbar-h) + env(safe-area-inset-top)) !important;
+  }
+  /* En-tête de recherche collant : se cale sous la barre fixe */
+  .dash-main-mobile .dash-sticky-header {
+    top: calc(var(--dash-topbar-h) + env(safe-area-inset-top));
+  }
+  /* Panneaux/entêtes collants internes : ne collent pas sous la barre */
+  .dash-main-mobile [class*="sticky"][class*="top-0"]:not(.dash-sticky-header):not([role="dialog"] *) {
+    scroll-margin-top: calc(var(--dash-topbar-h) + env(safe-area-inset-top));
+  }
+  /* Espace en bas pour la barre d'onglets / dock */
+  .admin-shell .dash-main-mobile > div:last-child {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+  /* Ancres internes visibles sous la barre */
+  .dash-main-mobile :target {
+    scroll-margin-top: calc(var(--dash-topbar-h) + env(safe-area-inset-top) + 8px);
+  }
+}
+@media (max-width: 767px) {
+  .dash-main-mobile--md { padding-top: calc(var(--dash-topbar-h) + env(safe-area-inset-top)) !important; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Espace client : la barre du haut disparaît dès md, pas de décalage */
+  .dash-main-mobile--md { padding-top: 0 !important; }
+  .dash-main-mobile--md .dash-sticky-header { top: 0; }
+}
+
+
+
+/* ============================================================
    LIGNEO — TYPOGRAPHIE POPPINS + LISIBILITÉ GLOBALE
    (ajouté en fin de feuille : s'applique partout, tous espaces)
    ============================================================ */
