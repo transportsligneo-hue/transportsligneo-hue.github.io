@@ -100,6 +100,13 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [kmArrivee, setKmArrivee] = useState<number | null>(null);
   const [dommages, setDommages] = useState<PvDommage[]>([]);
   const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
+  /** Signatures collectées, indexées par « document:emplacement ». */
+  const [signatures, setSignatures] = useState<Record<string, string>>({});
+  /** Décharge pour récupération activée sur la mission (mandat à faire signer). */
+  const [mandat, setMandat] = useState<{ actif: boolean; lieu: string | null; motif: string | null }>({
+    actif: false, lieu: null, motif: null,
+  });
+  const [signTarget, setSignTarget] = useState<{ docType: SignatureDocType; slot?: string } | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
