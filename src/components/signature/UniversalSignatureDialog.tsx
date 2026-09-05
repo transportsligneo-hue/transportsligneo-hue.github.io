@@ -84,13 +84,19 @@ export function UniversalSignatureDialog({
 
   /** Enregistre la signature sur le bon document et le bon emplacement. */
   const persist = useCallback(
-    async (dataUrl: string, pos: { latitude: number; longitude: number } | null, signerName: string) => {
+    async (
+      dataUrl: string,
+      pos: { latitude: number; longitude: number } | null,
+      signerName: string,
+      source: "pc" | "telephone" = "pc",
+    ) => {
       const { data: auth } = await supabase.auth.getUser();
       const { error } = await supabase.from("mission_signatures").upsert(
         {
           attribution_id: attributionId,
           kind: signatureKind(docType, activeSlot),
           signer_name: signerName || null,
+          source,
           signature_data: dataUrl,
           signed_by_user_id: auth.user?.id ?? null,
           latitude: pos?.latitude ?? null,
@@ -179,6 +185,7 @@ export function UniversalSignatureDialog({
                   ? { latitude: row.latitude, longitude: row.longitude }
                   : null,
                 row.signer_name ?? signer.trim(),
+                "telephone",
               );
               toast.success("Signature reçue du téléphone");
               onSigned?.();
