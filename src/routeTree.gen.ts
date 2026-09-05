@@ -163,6 +163,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
+import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
@@ -1060,6 +1061,11 @@ const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
   path: '/api/public/signup/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSignHandoffRoute = ApiPublicSignHandoffRouteImport.update({
+  id: '/api/public/sign/handoff',
+  path: '/api/public/sign/handoff',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicScanHandoffSessionRoute =
   ApiPublicScanHandoffSessionRouteImport.update({
     id: '/api/public/scan/handoff-session',
@@ -1433,6 +1439,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1614,6 +1621,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1806,6 +1814,7 @@ export interface FileRoutesById {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1998,6 +2007,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2179,6 +2189,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2370,6 +2381,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2461,6 +2473,7 @@ export interface RootRouteChildren {
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
+  ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -3556,6 +3569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sign/handoff': {
+      id: '/api/public/sign/handoff'
+      path: '/api/public/sign/handoff'
+      fullPath: '/api/public/sign/handoff'
+      preLoaderRoute: typeof ApiPublicSignHandoffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-session': {
       id: '/api/public/scan/handoff-session'
       path: '/api/public/scan/handoff-session'
@@ -4331,6 +4351,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
+  ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
