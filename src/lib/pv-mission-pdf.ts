@@ -201,7 +201,7 @@ export async function generatePvMissionPdf(
   const plateau = !!d.plateau;
   // Le PV de restitution sur plateau est le plus dense (arrimage + comparaison EDL
   // + frais additionnels) : il utilise une page allongée, comme le gabarit papier.
-  const PAGE_H = plateau && !isLiv ? 320 : 297;
+  const PAGE_H = plateau && !isLiv ? 332 : 297;
   const doc = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H] });
   applyLigneoFonts(doc);
   const c = company ?? (await fetchCompanyInfo());
@@ -281,7 +281,7 @@ export async function generatePvMissionPdf(
   const parties: [string, string | null][] = [
     ["Transporteur", `${c?.raison_sociale || "Transports Ligneo"} · SIREN ${siren}`],
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
-    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur/locataire)", d.destinataire ?? null],
+    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par / utilisateur", d.destinataire ?? null],
   ];
   const partH = plateau ? 14 : isLiv ? 21 : 18;
 
@@ -325,7 +325,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Transport sur plateau — contrôles arrimage ---------- */
   if (plateau) {
-    const arH = plateau && !isLiv ? 27 : 29;
+    const arH = 29;
     doc.setFillColor(238, 243, 255);
     doc.setDrawColor(212, 226, 255);
     doc.setLineWidth(0.4);
@@ -425,7 +425,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = plateau ? (isLiv ? 29 : 27) : isLiv ? 42 : 34;
+  const schH = plateau ? 29 : isLiv ? 42 : 34;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -497,7 +497,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = plateau ? 19 : 25;
+    const frH = plateau ? 21 : 25;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -518,7 +518,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = plateau ? (isLiv ? 37 : 34) : 38;
+  const docsH = plateau ? 37 : 38;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
