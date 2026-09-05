@@ -77,10 +77,15 @@ function contact(nom?: string | null, tel?: string | null): string {
 function docsForMission(t: TrajetLite) {
   const docs: Array<{ label: string; note?: string }> = []
   docs.push({
+    label: 'Fiche de mission pré-remplie',
+    note: 'Véhicule, enlèvement, livraison et convoyeur déjà renseignés — à imprimer et emporter',
+  })
+  docs.push({
     label: 'État des lieux papier',
     note: t.non_roulant ? 'Version plateau / véhicule non roulant' : 'Version véhicule roulant',
   })
   if (t.decharge_recuperation) {
+
     docs.push({
       label: 'Mandat de récupération',
       note: t.recuperation_lieu ? `Lieu : ${t.recuperation_lieu}` : 'À faire signer sur place',
