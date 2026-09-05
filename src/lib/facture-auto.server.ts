@@ -30,10 +30,37 @@ async function findFactureForDevis(devis: FactureRow, sessionId?: string | null)
 export interface EnsureFactureOptions {
   amountCents?: number | null;
   missionId?: string | null;
+  attributionId?: string | null;
   sessionId?: string | null;
   paymentIntentId?: string | null;
   modePaiement?: string;
 }
+
+/**
+ * `payment_links.mission_id` (et d'autres écrans) référencent parfois une
+ * attribution plutôt qu'une ligne `missions`. On distingue les deux avant
+ * d'écrire les clés étrangères de la facture.
+ */
+export async function resolveFactureLinks(id: string | null | undefined): Promise<{
+  missionId: string | null;
+  attributionId: string | null;
+}> {
+  if (!id) return { missionId: null, attributionId: null };
+  const { data: mission } = await supabaseAdmin
+    .from("missions")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (mission) return { missionId: id, attributionId: null };
+  const { data: attr } = await supabaseAdmin
+    .from("attributions")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (attr) return { missionId: null, attributionId: id };
+  return { missionId: null, attributionId: null };
+}
+
 
 /**
  * Crée (ou retrouve) la facture payée correspondant à un devis réglé.
