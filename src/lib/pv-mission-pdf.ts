@@ -487,6 +487,9 @@ export async function generatePvMissionPdf(
     const txt = dommages.map((dm) => [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" ")).join("  ·  ");
     doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 4.8);
     y += plateau ? 6 : 8.5;
+  }
+
+
 
 
   /* ---------- Frais additionnels (restitution) ---------- */
