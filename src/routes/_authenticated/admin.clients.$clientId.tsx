@@ -758,7 +758,6 @@ function AdminClientDetail() {
                 <AdminEmpty icon={Receipt} title="Aucun devis" description="Aucun devis pour ce client. Utilisez « Rattacher un devis »." />
               ) : (
 
-              ) : (
                 <div className="overflow-x-auto -mx-1">
                   <table className="admin-table">
                     <thead>
