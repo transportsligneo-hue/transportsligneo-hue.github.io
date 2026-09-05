@@ -292,7 +292,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
   smallLabel("MISSION FACTURÉE", L, 93.5);
   const mTop = 96.5;
-  const mH = hasVeh ? 34 : 17;
+  const mH = hasVeh ? 37 : 17;
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
