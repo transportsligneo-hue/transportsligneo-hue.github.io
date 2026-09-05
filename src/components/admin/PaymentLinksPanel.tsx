@@ -14,10 +14,14 @@ import {
   Mail,
   History,
   FileText,
+  Ban,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  cancelPaymentLink,
   createPaymentLink,
+  deletePaymentLink,
   getPaymentLinkHistory,
   listPaymentLinks,
   refreshPaymentLinkStatus,
@@ -27,6 +31,7 @@ import {
   setPaymentLinkMission,
   type PaymentLinkRow,
 } from "@/lib/payment-links.functions";
+
 
 const eur = (cents: number, currency = "EUR") =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency }).format(cents / 100);
