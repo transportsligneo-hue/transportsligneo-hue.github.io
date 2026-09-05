@@ -100,6 +100,9 @@ export function PaymentLinksPanel({
   const searchDevis = useServerFn(searchDevisForPaymentLink);
   const sendLink = useServerFn(sendPaymentLink);
   const loadHistory = useServerFn(getPaymentLinkHistory);
+  const cancelLink = useServerFn(cancelPaymentLink);
+  const removeLink = useServerFn(deletePaymentLink);
+
 
   const [rows, setRows] = useState<PaymentLinkRow[]>([]);
   const [loading, setLoading] = useState(true);
