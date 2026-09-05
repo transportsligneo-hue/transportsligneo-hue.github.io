@@ -104,7 +104,9 @@ export function PaymentLinksPanel({
   const removeLink = useServerFn(deletePaymentLink);
 
 
+  const [busyRow, setBusyRow] = useState<string | null>(null);
   const [rows, setRows] = useState<PaymentLinkRow[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
