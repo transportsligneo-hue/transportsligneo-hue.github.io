@@ -466,3 +466,95 @@ export const deletePaymentLink = createServerFn({ method: "POST" })
     if (delErr) throw new Error(delErr.message);
     return { ok: true };
   });
+
+/**
+ * Envoie la facture au client une fois le lien de paiement réglé.
+ * Fonctionne même si la mission n'a pas encore démarré : la facture est
+ * créée à partir du devis si elle n'existe pas encore.
+ */
+export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { linkId: string; destination?: string | null }) => {
+    if (!input?.linkId) throw new Error("Lien introuvable.");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: link, error } = await context.supabase
+      .from("payment_links")
+      .select(
+        "id, statut, amount_cents, currency, mission_id, devis_id, facture_id, client_email, client_nom, client_prenom",
+      )
+      .eq("id", data.linkId)
+      .single();
+    if (error || !link) throw new Error("Lien introuvable.");
+    if (link.statut !== "paid") throw new Error("Ce lien n'est pas encore payé.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { ensureFactureForDevis } = await import("@/lib/facture-auto.server");
+
+    let facture: Record<string, any> | null = null;
+    if (link.facture_id) {
+      const { data: f } = await supabaseAdmin
+        .from("factures")
+        .select("*")
+        .eq("id", link.facture_id)
+        .maybeSingle();
+      facture = (f ?? null) as Record<string, any> | null;
+    }
+    if (!facture && link.devis_id) {
+      const { data: devis } = await supabaseAdmin
+        .from("devis")
+        .select("*")
+        .eq("id", link.devis_id)
+        .maybeSingle();
+      if (devis) {
+        facture = await ensureFactureForDevis(devis, {
+          amountCents: link.amount_cents ?? null,
+          missionId: link.mission_id ?? null,
+        });
+        if (facture?.["id"]) {
+          await supabaseAdmin
+            .from("payment_links")
+            .update({ facture_id: facture["id"] })
+            .eq("id", link.id);
+        }
+      }
+    }
+    if (!facture) {
+      throw new Error(
+        "Aucune facture rattachée à ce lien. Rattachez un devis ou une facture avant l'envoi.",
+      );
+    }
+
+    const destination =
+      (data.destination || "").trim() ||
+      (facture["client_email"] as string | null) ||
+      link.client_email ||
+      "";
+    if (!destination) throw new Error("Aucune adresse email pour ce client.");
+
+    const { sendTransactionalEmailServer } = await import("@/server/email-send");
+    const res = await sendTransactionalEmailServer({
+      templateName: "facture-disponible",
+      recipientEmail: destination,
+      templateData: {
+        prenom: facture["client_prenom"] ?? facture["client_nom"] ?? link.client_prenom ?? undefined,
+        numero: facture["numero"] ?? undefined,
+        montant: Number(facture["prix_ttc"] ?? (link.amount_cents ?? 0) / 100).toFixed(2),
+        pdfUrl: facture["pdf_url"] ?? undefined,
+      },
+    });
+
+    await context.supabase.from("payment_link_sends").insert({
+      payment_link_id: link.id,
+      channel: "email",
+      destination,
+      status: res.success ? "sent" : "failed",
+      error: res.success ? null : (res.reason ?? "Envoi impossible"),
+      sent_by: context.userId,
+    });
+
+    if (!res.success) throw new Error(res.reason ?? "Envoi impossible.");
+    return { ok: true, destination, numero: (facture["numero"] as string | null) ?? null };
+  });
