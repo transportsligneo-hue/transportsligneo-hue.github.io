@@ -29,6 +29,7 @@ import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
 import { EditDevisDialog } from "@/components/admin/EditDevisDialog";
+import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
@@ -1046,6 +1047,18 @@ function DevisDrawer({
         fallbackCarteGriseVerso={devis.carte_grise_verso_url}
         fallbackVin={devis.vin}
       />
+
+      <DrawerSection title="Compte client" icon={<User size={12} />}>
+        <p className="mb-3 text-xs text-slate-500">
+          Rattachez ce devis à un compte client existant, ou créez le compte (l'invitation
+          par email est envoyée, le rattachement fonctionne même avant le choix du mot de passe).
+        </p>
+        <AttachClientDialog
+          devisId={devis.id}
+          currentEmail={devis.email}
+          triggerLabel="Rattacher à un compte client"
+        />
+      </DrawerSection>
 
       <DrawerSection title="Envoi au client" icon={<User size={12} />}>
         <SendDocumentByEmail
