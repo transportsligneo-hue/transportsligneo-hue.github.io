@@ -173,3 +173,84 @@ export async function markFacturePaidAndSend(
 
   await sendFactureDisponibleEmail({ ...facture, statut: "payee" });
 }
+
+/**
+ * Crée (ou retrouve) la facture payée d'une mission (attribution), même sans
+ * devis rattaché : les informations sont reprises sur le trajet.
+ */
+export async function ensureFactureForMission(
+  missionId: string,
+  options: EnsureFactureOptions = {},
+): Promise<FactureRow | null> {
+  if (!missionId) return null;
+
+  const { data: existing } = await supabaseAdmin
+    .from("factures")
+    .select("*")
+    .eq("mission_id", missionId)
+    .maybeSingle();
+  if (existing) return existing as FactureRow;
+
+  const { data: attr } = await supabaseAdmin
+    .from("attributions")
+    .select("id, numero_mission, trajet_id, trajets(*)")
+    .eq("id", missionId)
+    .maybeSingle();
+  const trajet = (attr as any)?.trajets as Record<string, any> | null;
+  if (!trajet) return null;
+
+  if (trajet["devis_id"]) {
+    const { data: devis } = await supabaseAdmin
+      .from("devis")
+      .select("*")
+      .eq("id", trajet["devis_id"])
+      .maybeSingle();
+    if (devis) {
+      return ensureFactureForDevis(devis as FactureRow, { ...options, missionId });
+    }
+  }
+
+  const amountCents = Number(options.amountCents ?? 0);
+  const prixTtc = Number(
+    trajet["prix_client"] ?? trajet["prix"] ?? (amountCents ? amountCents / 100 : 0),
+  );
+  const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
+  const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
+  const vehiculeLabel = [trajet["marque"], trajet["modele"]].filter(Boolean).join(" ");
+  const numeroMission =
+    (attr as any)?.numero_mission ?? trajet["numero_mission"] ?? null;
+
+  const { data: inserted, error } = await supabaseAdmin
+    .from("factures")
+    .insert({
+      mission_id: missionId,
+      client_email: trajet["client_email"] ?? null,
+      client_nom: trajet["client_nom"] ?? null,
+      type_facture: "particulier",
+      date_mission: trajet["date_trajet"] ?? null,
+      depart: trajet["depart"] ?? null,
+      arrivee: trajet["arrivee"] ?? null,
+      designation: ["Convoyage automobile par conducteur professionnel", vehiculeLabel || null]
+        .filter(Boolean)
+        .join(" — "),
+      reference_label: numeroMission ? "Mission" : trajet["commande_ref"] ? "N° de PO" : null,
+      reference_client: numeroMission ?? trajet["commande_ref"] ?? null,
+      prix_ht: prixHt,
+      tva_taux: 20,
+      prix_tva: prixTva,
+      prix_ttc: prixTtc,
+      statut: "payee",
+      mode_paiement: options.modePaiement ?? "carte",
+      date_paiement: new Date().toISOString().slice(0, 10),
+      paid_at: new Date().toISOString(),
+      amount_paid_cents: amountCents || Math.round(prixTtc * 100),
+    } as never)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[facture-auto] insert mission error", error.message);
+    return null;
+  }
+  return (inserted ?? null) as FactureRow | null;
+}
