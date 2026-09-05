@@ -370,10 +370,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setTextColor(...GREY);
     const subLines = (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2);
     doc.text(subLines, L, y + 4.8);
-    y += 4.8 + subLines.length * 4.2 + 4;
+    y += 4.8 + subLines.length * 4.2 + 3;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
-    y += 8;
+    y += 7;
+
   };
 
   line(mainTitle, mainSub, eur(ht));
