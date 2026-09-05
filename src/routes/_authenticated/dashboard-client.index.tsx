@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
+import { isApercuMode } from "@/lib/apercu-mode";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
   component: ClientDashboard,
@@ -97,6 +98,10 @@ function ClientDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isApercuMode()) {
+      setLoading(false);
+      return;
+    }
     if (!user) return;
     let cancelled = false;
     (async () => {
