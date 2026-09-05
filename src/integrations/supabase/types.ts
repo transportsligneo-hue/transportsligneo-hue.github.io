@@ -6544,6 +6544,7 @@ export type Database = {
           id: string
           latitude: number | null
           longitude: number | null
+          short_code: string | null
           signature_data: string | null
           signed_at: string | null
           signer_name: string | null
@@ -6562,6 +6563,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          short_code?: string | null
           signature_data?: string | null
           signed_at?: string | null
           signer_name?: string | null
@@ -6580,6 +6582,7 @@ export type Database = {
           id?: string
           latitude?: number | null
           longitude?: number | null
+          short_code?: string | null
           signature_data?: string | null
           signed_at?: string | null
           signer_name?: string | null
