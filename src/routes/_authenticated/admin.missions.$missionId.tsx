@@ -796,9 +796,12 @@ function AdminMissionDetail() {
       const blob = await generateFacturePdf({
         numero: row["numero"] as string,
         type_facture: (row["type_facture"] as "particulier" | "b2b") ?? "particulier",
+        statut: (row["statut"] as string | null) ?? undefined,
         date_facture: (row["date_facture"] as string) ?? (row["created_at"] as string),
         date_mission: (row["date_mission"] as string | null) ?? null,
         date_echeance: (row["date_echeance"] as string | null) ?? null,
+        date_paiement: (row["date_paiement"] as string | null) ?? null,
+        paid_at: (row["paid_at"] as string | null) ?? null,
         mode_paiement: (row["mode_paiement"] as string | null) ?? null,
         conditions_paiement: (row["conditions_paiement"] as string | null) ?? null,
         client_nom: (row["client_nom"] as string | null) ?? null,

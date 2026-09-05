@@ -495,7 +495,9 @@ export function downloadFacturePdf(blob: Blob, numero: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Facture-${numero}.pdf`;
+  // Le suffixe distingue explicitement le document régénéré des anciens PDF
+  // déjà présents dans les téléchargements du navigateur/téléphone.
+  a.download = `Facture-${numero}-nouveau-modele.pdf`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
