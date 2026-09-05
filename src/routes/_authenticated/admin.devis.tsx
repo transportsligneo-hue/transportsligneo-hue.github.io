@@ -29,6 +29,7 @@ import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
 import { EditDevisDialog } from "@/components/admin/EditDevisDialog";
+import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
