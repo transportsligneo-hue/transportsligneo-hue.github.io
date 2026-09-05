@@ -15,7 +15,11 @@ export type SignatureDocType =
   | "pv_livraison"
   | "pv_restitution"
   | "mandat"
-  | "edl_papier";
+  | "edl_papier"
+  | "edl_livraison"
+  | "edl_restitution"
+  | "fiche_mission"
+  | "passage_a_vide";
 
 export interface SignatureSlot {
   /** Identifiant technique du slot (unique dans le document). */
