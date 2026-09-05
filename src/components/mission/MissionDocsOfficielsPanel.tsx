@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye } from "lucide-react";
+import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye, PenLine, ShieldCheck } from "lucide-react";
 import {
   generateFicheMissionPdf,
   generatePassageAVidePdf,
@@ -10,6 +10,9 @@ import {
 } from "@/lib/documents-officiels";
 import { generatePvMissionPdf, pvNumero, type PvDommage, type PvVariant } from "@/lib/pv-mission-pdf";
 import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
+import { generateMandatRecuperationPdf, mandatNumero } from "@/lib/mandat-recuperation-pdf";
+import { UniversalSignatureDialog } from "@/components/signature/UniversalSignatureDialog";
+import { signatureKind, type SignatureDocType } from "@/lib/signature-slots";
 
 /** Libellés des vues EDL, pour situer les dommages repris sur le PV. */
 const EDL_VUE_LABELS: Record<string, string> = {
@@ -100,6 +103,13 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [kmArrivee, setKmArrivee] = useState<number | null>(null);
   const [dommages, setDommages] = useState<PvDommage[]>([]);
   const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
+  /** Signatures collectées, indexées par « document:emplacement ». */
+  const [signatures, setSignatures] = useState<Record<string, string>>({});
+  /** Décharge pour récupération activée sur la mission (mandat à faire signer). */
+  const [mandat, setMandat] = useState<{ actif: boolean; lieu: string | null; motif: string | null }>({
+    actif: false, lieu: null, motif: null,
+  });
+  const [signTarget, setSignTarget] = useState<{ docType: SignatureDocType; slot?: string } | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -121,7 +131,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
       .maybeSingle();
     if (!attr) { setLoading(false); return; }
 
-    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes] = await Promise.all([
+    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes, sigRes, mandatRes] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
         ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
@@ -150,6 +160,15 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         .eq("attribution_id", attributionId)
         .in("type_document", ["pv_livraison", "pv_restitution"])
         .order("created_at", { ascending: false }),
+      supabase
+        .from("mission_signatures")
+        .select("kind, signature_data")
+        .eq("attribution_id", attributionId),
+      supabase
+        .from("trajets")
+        .select("decharge_recuperation, recuperation_lieu, recuperation_motif")
+        .eq("id", attr.trajet_id)
+        .maybeSingle(),
     ]);
 
     const t = tRes.data as unknown as TrajetLite | null;
@@ -183,6 +202,19 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     );
 
     setPvSignes((pvRes.data as SignedPvDoc[] | null) ?? []);
+
+    const sigRows = (sigRes.data as { kind: string; signature_data: string | null }[] | null) ?? [];
+    setSignatures(
+      Object.fromEntries(sigRows.filter((r) => r.signature_data).map((r) => [r.kind, r.signature_data as string])),
+    );
+    const md = mandatRes.data as
+      | { decharge_recuperation: boolean | null; recuperation_lieu: string | null; recuperation_motif: string | null }
+      | null;
+    setMandat({
+      actif: !!md?.decharge_recuperation,
+      lieu: md?.recuperation_lieu ?? null,
+      motif: md?.recuperation_motif ?? null,
+    });
 
 
     // Société du client (organisation / profil) — sinon nom du particulier
@@ -308,6 +340,12 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         date_prise_en_charge: trajet.date_trajet,
         date_livraison: null,
         dommages,
+        signatures: {
+          convoyeur: signatures[signatureKind(`pv_${v}` as SignatureDocType, "convoyeur")] ?? null,
+          contrepartie:
+            signatures[signatureKind(`pv_${v}` as SignatureDocType, v === "livraison" ? "destinataire" : "proprietaire")] ??
+            null,
+        },
       }, company);
       downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
     } catch {
@@ -315,6 +353,37 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     } finally { setBusy(null); }
   };
 
+
+  const downloadMandat = async () => {
+    if (!trajet || !guardCompany()) return;
+    setBusy("mandat");
+    try {
+      const blob = await generateMandatRecuperationPdf({
+        numero_mission: numero,
+        numero_mandat: mandatNumero(numero),
+        mandant_nom: trajet.client_nom,
+        mandant_societe: clientSociete,
+        mandant_adresse: trajet.depart,
+        mandant_tel: trajet.contact_depart_tel,
+        mandant_email: trajet.client_email,
+        marque_modele: marqueModele,
+        immatriculation: immat,
+        vin: trajet.vin || trajet.vehicule_vin,
+        lieu_recuperation: mandat.lieu || trajet.depart,
+        motif: mandat.motif,
+        destination: trajet.arrivee,
+        date_prevue: [trajet.date_trajet, trajet.heure_trajet].filter(Boolean).join(" ") || null,
+        convoyeur_nom: convoyeurNom,
+        signatures: {
+          mandant: signatures[signatureKind("mandat", "mandant")] ?? null,
+          mandataire: signatures[signatureKind("mandat", "mandataire")] ?? null,
+        },
+      }, company);
+      downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
+    } catch {
+      toast.error("Génération impossible");
+    } finally { setBusy(null); }
+  };
 
   const openStored = async (url: string) => {
     if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
@@ -372,6 +441,9 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const btn = dark
     ? "w-full flex items-center gap-3 rounded-2xl border border-[rgba(120,180,255,0.16)] bg-[rgba(20,32,72,0.45)] px-4 py-3 text-left text-[14px] font-semibold text-[#EAF3FF] transition hover:border-[rgba(47,216,255,0.35)]"
     : "w-full flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium text-foreground transition hover:border-primary/50";
+  const signBtn = dark
+    ? "inline-flex items-center gap-2 self-start rounded-xl border border-[rgba(47,216,255,0.35)] px-3 py-1.5 text-[12px] font-semibold text-[#9fd8ff]"
+    : "inline-flex items-center gap-2 self-start rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary";
   const input = dark
     ? "w-full rounded-lg border border-[rgba(120,180,255,0.2)] bg-[rgba(10,18,48,0.6)] px-3 py-2 text-[13px] text-[#EAF3FF] outline-none"
     : "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none";
@@ -410,13 +482,39 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             <Eye size={16} className="opacity-60" />
           </button>
         ) : (
-          <button key={v} type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
-            {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
-            <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
-            <Download size={16} className="opacity-60" />
-          </button>
+          <div key={v} className="flex flex-col gap-1.5">
+            <button type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
+              {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
+              <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
+              <Download size={16} className="opacity-60" />
+            </button>
+            <button
+              type="button"
+              className={signBtn}
+              onClick={() => setSignTarget({ docType: `pv_${v}` as SignatureDocType })}
+            >
+              <PenLine size={14} />
+              {signatureKind(`pv_${v}` as SignatureDocType, "convoyeur") in signatures
+                ? "Compléter les signatures"
+                : "Faire signer ce document"}
+            </button>
+          </div>
         );
       })}
+
+      {mandat.actif && (
+        <div className="flex flex-col gap-1.5">
+          <button type="button" className={btn} onClick={() => void downloadMandat()} disabled={busy === "mandat"}>
+            {busy === "mandat" ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+            <span className="flex-1">Mandat de récupération</span>
+            <Download size={16} className="opacity-60" />
+          </button>
+          <button type="button" className={signBtn} onClick={() => setSignTarget({ docType: "mandat" })}>
+            <PenLine size={14} />
+            {signatureKind("mandat", "mandant") in signatures ? "Compléter les signatures" : "Faire signer le mandat"}
+          </button>
+        </div>
+      )}
 
 
       {pvDocs.map((d) => (
@@ -468,6 +566,17 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             </button>
           </div>
         </div>
+      )}
+      {signTarget && (
+        <UniversalSignatureDialog
+          open
+          attributionId={attributionId}
+          docType={signTarget.docType}
+          slot={signTarget.slot}
+          defaultSignerName={signTarget.docType === "mandat" ? trajet?.client_nom ?? null : convoyeurNom}
+          onClose={() => setSignTarget(null)}
+          onSigned={() => void reload()}
+        />
       )}
     </div>
   );

@@ -42,6 +42,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
+import { Route as SignerTokenRouteImport } from './routes/signer.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
@@ -163,6 +164,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
+import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
@@ -361,6 +363,11 @@ const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
 const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
   id: '/verify-certificat/$token',
   path: '/verify-certificat/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignerTokenRoute = SignerTokenRouteImport.update({
+  id: '/signer/$token',
+  path: '/signer/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScanTokenRoute = ScanTokenRouteImport.update({
@@ -1060,6 +1067,11 @@ const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
   path: '/api/public/signup/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSignHandoffRoute = ApiPublicSignHandoffRouteImport.update({
+  id: '/api/public/sign/handoff',
+  path: '/api/public/sign/handoff',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicScanHandoffSessionRoute =
   ApiPublicScanHandoffSessionRouteImport.update({
     id: '/api/public/scan/handoff-session',
@@ -1310,6 +1322,7 @@ export interface FileRoutesByFullPath {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
@@ -1433,6 +1446,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1494,6 +1508,7 @@ export interface FileRoutesByTo {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
   '/scan': typeof ScanIndexRoute
@@ -1614,6 +1629,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1683,6 +1699,7 @@ export interface FileRoutesById {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
@@ -1806,6 +1823,7 @@ export interface FileRoutesById {
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
+  '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -1875,6 +1893,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
@@ -1998,6 +2017,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2059,6 +2079,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites'
     | '/scan'
@@ -2179,6 +2200,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2247,6 +2269,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
@@ -2370,6 +2393,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
+    | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -2429,6 +2453,7 @@ export interface RootRouteChildren {
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
+  SignerTokenRoute: typeof SignerTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   ScanIndexRoute: typeof ScanIndexRoute
@@ -2461,6 +2486,7 @@ export interface RootRouteChildren {
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
+  ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -2707,6 +2733,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-certificat/$token'
       fullPath: '/verify-certificat/$token'
       preLoaderRoute: typeof VerifyCertificatTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signer/$token': {
+      id: '/signer/$token'
+      path: '/signer/$token'
+      fullPath: '/signer/$token'
+      preLoaderRoute: typeof SignerTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scan/$token': {
@@ -3556,6 +3589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sign/handoff': {
+      id: '/api/public/sign/handoff'
+      path: '/api/public/sign/handoff'
+      fullPath: '/api/public/sign/handoff'
+      preLoaderRoute: typeof ApiPublicSignHandoffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-session': {
       id: '/api/public/scan/handoff-session'
       path: '/api/public/scan/handoff-session'
@@ -4297,6 +4337,7 @@ const rootRouteChildren: RootRouteChildren = {
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
+  SignerTokenRoute: SignerTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
   ScanIndexRoute: ScanIndexRoute,
@@ -4331,6 +4372,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
+  ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

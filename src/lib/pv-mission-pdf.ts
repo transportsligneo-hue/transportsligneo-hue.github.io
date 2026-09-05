@@ -70,6 +70,8 @@ export interface PvMissionData {
   plateau?: boolean | null;
   /** Transporteur / n° de plateau, si déjà renseigné sur la mission. */
   plateau_numero?: string | null;
+  /** Signatures collectées (PNG data URL) : convoyeur + destinataire/propriétaire. */
+  signatures?: { convoyeur?: string | null; contrepartie?: string | null };
 }
 
 
@@ -587,6 +589,13 @@ export async function generatePvMissionPdf(
     y + 4.6,
   );
   const sigY = y + 12;
+  // Signatures collectées dans l'app : posées dans la zone dédiée, au-dessus du filet.
+  if (d.signatures?.convoyeur) {
+    try { doc.addImage(d.signatures.convoyeur, "PNG", M, sigY - 13, 44, 12); } catch { /* optionnel */ }
+  }
+  if (d.signatures?.contrepartie) {
+    try { doc.addImage(d.signatures.contrepartie, "PNG", XR, sigY - 13, 44, 12); } catch { /* optionnel */ }
+  }
   doc.setDrawColor(...RULE);
   doc.setLineWidth(0.3);
   doc.line(M, sigY, M + COL2, sigY);
