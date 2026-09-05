@@ -33,6 +33,8 @@ import { AdminAvatarUploader } from "@/components/admin/AdminAvatarUploader";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
+import { AttachDevisToClientDialog } from "@/components/admin/AttachDevisToClientDialog";
+
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 
