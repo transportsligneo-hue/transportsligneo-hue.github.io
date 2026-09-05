@@ -24,6 +24,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PremiumScanner } from "@/components/scanner/PremiumScanner";
+import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/document-scanner";
+
 import { scanDocumentExtract } from "@/lib/scanner/scan-document.functions";
 import type { ExtractionResult } from "@/lib/scanner/types";
 
