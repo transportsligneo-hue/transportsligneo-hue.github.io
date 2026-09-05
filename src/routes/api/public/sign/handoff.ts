@@ -29,10 +29,26 @@ export const Route = createFileRoute("/api/public/sign/handoff")({
         }
 
         const action = String(payload.action ?? "");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        /* Le téléphone échange le code court à 6 caractères contre le lien secret. */
+        if (action === "resolve_code") {
+          const code = String(payload.code ?? "").trim().toUpperCase();
+          if (!/^[A-Z0-9]{6}$/.test(code)) return json({ ok: false, error: "Code invalide" }, 400);
+          const { data } = await supabaseAdmin
+            .from("signature_handoff_sessions")
+            .select("token, expires_at, status")
+            .eq("short_code", code)
+            .eq("status", "pending")
+            .gt("expires_at", new Date().toISOString())
+            .maybeSingle();
+          if (!data) return json({ ok: false, error: "Code inconnu ou expiré" }, 404);
+          return json({ ok: true, token: data.token });
+        }
+
         const token = String(payload.token ?? "");
         if (!/^[a-f0-9]{16,96}$/i.test(token)) return json({ ok: false, error: "Lien invalide" }, 400);
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const { data: session, error } = await supabaseAdmin
           .from("signature_handoff_sessions")
