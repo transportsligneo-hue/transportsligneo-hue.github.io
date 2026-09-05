@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye } from "lucide-react";
+import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye, PenLine, ShieldCheck } from "lucide-react";
 import {
   generateFicheMissionPdf,
   generatePassageAVidePdf,
@@ -441,6 +441,9 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const btn = dark
     ? "w-full flex items-center gap-3 rounded-2xl border border-[rgba(120,180,255,0.16)] bg-[rgba(20,32,72,0.45)] px-4 py-3 text-left text-[14px] font-semibold text-[#EAF3FF] transition hover:border-[rgba(47,216,255,0.35)]"
     : "w-full flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-left text-sm font-medium text-foreground transition hover:border-primary/50";
+  const signBtn = dark
+    ? "inline-flex items-center gap-2 self-start rounded-xl border border-[rgba(47,216,255,0.35)] px-3 py-1.5 text-[12px] font-semibold text-[#9fd8ff]"
+    : "inline-flex items-center gap-2 self-start rounded-lg border border-primary/40 px-3 py-1.5 text-xs font-semibold text-primary";
   const input = dark
     ? "w-full rounded-lg border border-[rgba(120,180,255,0.2)] bg-[rgba(10,18,48,0.6)] px-3 py-2 text-[13px] text-[#EAF3FF] outline-none"
     : "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none";
@@ -479,13 +482,39 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             <Eye size={16} className="opacity-60" />
           </button>
         ) : (
-          <button key={v} type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
-            {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
-            <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
-            <Download size={16} className="opacity-60" />
-          </button>
+          <div key={v} className="flex flex-col gap-1.5">
+            <button type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>
+              {busy === `pv-${v}` ? <Loader2 size={18} className="animate-spin" /> : <FileCheck2 size={18} />}
+              <span className="flex-1">Télécharger le {label.toLowerCase()}</span>
+              <Download size={16} className="opacity-60" />
+            </button>
+            <button
+              type="button"
+              className={signBtn}
+              onClick={() => setSignTarget({ docType: `pv_${v}` as SignatureDocType })}
+            >
+              <PenLine size={14} />
+              {signatureKind(`pv_${v}` as SignatureDocType, "convoyeur") in signatures
+                ? "Compléter les signatures"
+                : "Faire signer ce document"}
+            </button>
+          </div>
         );
       })}
+
+      {mandat.actif && (
+        <div className="flex flex-col gap-1.5">
+          <button type="button" className={btn} onClick={() => void downloadMandat()} disabled={busy === "mandat"}>
+            {busy === "mandat" ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+            <span className="flex-1">Mandat de récupération</span>
+            <Download size={16} className="opacity-60" />
+          </button>
+          <button type="button" className={signBtn} onClick={() => setSignTarget({ docType: "mandat" })}>
+            <PenLine size={14} />
+            {signatureKind("mandat", "mandant") in signatures ? "Compléter les signatures" : "Faire signer le mandat"}
+          </button>
+        </div>
+      )}
 
 
       {pvDocs.map((d) => (
@@ -537,6 +566,17 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             </button>
           </div>
         </div>
+      )}
+      {signTarget && (
+        <UniversalSignatureDialog
+          open
+          attributionId={attributionId}
+          docType={signTarget.docType}
+          slot={signTarget.slot}
+          defaultSignerName={signTarget.docType === "mandat" ? trajet?.client_nom ?? null : convoyeurNom}
+          onClose={() => setSignTarget(null)}
+          onSigned={() => void reload()}
+        />
       )}
     </div>
   );
