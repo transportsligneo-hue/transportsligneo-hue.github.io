@@ -167,6 +167,7 @@ import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public
 import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
+import { Route as ApiPublicHooksRappelMissionJ1RouteImport } from './routes/api/public/hooks/rappel-mission-j1'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/public/hooks/gmail-po-sync'
@@ -1084,6 +1085,12 @@ const ApiPublicScanHandoffExtractRoute =
     path: '/api/public/scan/handoff-extract',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRappelMissionJ1Route =
+  ApiPublicHooksRappelMissionJ1RouteImport.update({
+    id: '/api/public/hooks/rappel-mission-j1',
+    path: '/api/public/hooks/rappel-mission-j1',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksLoyaltyDailyRoute =
   ApiPublicHooksLoyaltyDailyRouteImport.update({
     id: '/api/public/hooks/loyalty-daily',
@@ -1444,6 +1451,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1627,6 +1635,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1821,6 +1830,7 @@ export interface FileRoutesById {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -2015,6 +2025,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2198,6 +2209,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2391,6 +2403,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2484,6 +2497,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGmailPoSyncRoute: typeof ApiPublicHooksGmailPoSyncRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
+  ApiPublicHooksRappelMissionJ1Route: typeof ApiPublicHooksRappelMissionJ1Route
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
@@ -3610,6 +3624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/rappel-mission-j1': {
+      id: '/api/public/hooks/rappel-mission-j1'
+      path: '/api/public/hooks/rappel-mission-j1'
+      fullPath: '/api/public/hooks/rappel-mission-j1'
+      preLoaderRoute: typeof ApiPublicHooksRappelMissionJ1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/loyalty-daily': {
       id: '/api/public/hooks/loyalty-daily'
       path: '/api/public/hooks/loyalty-daily'
@@ -4370,6 +4391,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
+  ApiPublicHooksRappelMissionJ1Route: ApiPublicHooksRappelMissionJ1Route,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,
