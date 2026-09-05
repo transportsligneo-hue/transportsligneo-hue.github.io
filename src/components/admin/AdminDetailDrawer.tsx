@@ -36,6 +36,7 @@ export function AdminDetailDrawer({
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
+        data-admin-drawer=""
         side="right"
         className={cn(
           "w-full p-0 flex flex-col gap-0 border-l-0",
