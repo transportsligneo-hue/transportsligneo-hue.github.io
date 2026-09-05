@@ -414,21 +414,23 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   y += 10;
 
   // ---------- Bandeau règlement ----------
+  const rightTxt = isPaid
+    ? `\u2713 Réglé${f.paid_at ? ` le ${fmtDateTime(f.paid_at)}` : f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""} — aucun montant restant dû`
+    : `\u25CF Montant restant dû : ${eur(ttc)}`;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  const rightW = doc.getTextWidth(rightTxt);
   doc.setFillColor(...BLUEBOX);
   doc.roundedRect(L, y, innerW, 11, 2.5, 2.5, "F");
-  doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...INK);
   const reglement = `Mode de règlement : ${f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement")} · Échéance : ${f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception")}`;
-  doc.text((doc.splitTextToSize(reglement, innerW * 0.62) as string[])[0], L + 6, y + 7);
+  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 20) as string[])[0], L + 6, y + 7);
+  doc.setFontSize(8.5);
   doc.setTextColor(...(isPaid ? GREEN : BLUE));
-  doc.text(
-    isPaid
-      ? `\u2713 Aucun montant restant dû${f.paid_at ? ` — réglé le ${fmtDateTime(f.paid_at)}` : ""}`
-      : `\u25CF Montant restant dû : ${eur(ttc)}`,
-    R - 6, y + 7, { align: "right" },
-  );
-  y += 18;
+  doc.text(rightTxt, R - 6, y + 7, { align: "right" });
+  y += 17;
+
 
   if (isB2B) {
     doc.setFont("helvetica", "normal");
