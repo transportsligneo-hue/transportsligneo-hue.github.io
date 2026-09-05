@@ -55,7 +55,7 @@ function ClientLayout() {
   }
 
   // Pas de rôle actif chargé : distinguer email non confirmé vs activation en cours
-  if (!roleActif) {
+  if (!apercu && !roleActif) {
     const emailNotConfirmed = !!user && !user.email_confirmed_at;
 
     const handleResend = async () => {
@@ -116,7 +116,7 @@ function ClientLayout() {
     );
   }
 
-  if (!isAuthenticated || homeRoute !== "/dashboard-client") {
+  if (!apercu && (!isAuthenticated || homeRoute !== "/dashboard-client")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pro-bg">
         <Loader2 className="animate-spin text-pro-accent" size={32} />
