@@ -167,6 +167,7 @@ import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public
 import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
+import { Route as ApiPublicHooksRappelMissionJ1RouteImport } from './routes/api/public/hooks/rappel-mission-j1'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/public/hooks/gmail-po-sync'
@@ -184,6 +185,7 @@ import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from '
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedConvoyeurFormationFaqRouteImport } from './routes/_authenticated/convoyeur.formation.faq'
 import { Route as AuthenticatedConvoyeurFormationDocumentsRouteImport } from './routes/_authenticated/convoyeur.formation.documents'
+import { Route as AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport } from './routes/_authenticated/convoyeur.documents-mission.$attributionId'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
@@ -1084,6 +1086,12 @@ const ApiPublicScanHandoffExtractRoute =
     path: '/api/public/scan/handoff-extract',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRappelMissionJ1Route =
+  ApiPublicHooksRappelMissionJ1RouteImport.update({
+    id: '/api/public/hooks/rappel-mission-j1',
+    path: '/api/public/hooks/rappel-mission-j1',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksLoyaltyDailyRoute =
   ApiPublicHooksLoyaltyDailyRouteImport.update({
     id: '/api/public/hooks/loyalty-daily',
@@ -1178,6 +1186,12 @@ const AuthenticatedConvoyeurFormationDocumentsRoute =
     id: '/documents',
     path: '/documents',
     getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
+  } as any)
+const AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute =
+  AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport.update({
+    id: '/documents-mission/$attributionId',
+    path: '/documents-mission/$attributionId',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
 const AuthenticatedAdminOrganisationsOrgIdRoute =
   AuthenticatedAdminOrganisationsOrgIdRouteImport.update({
@@ -1427,6 +1441,7 @@ export interface FileRoutesByFullPath {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1444,6 +1459,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1610,6 +1626,7 @@ export interface FileRoutesByTo {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1627,6 +1644,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1804,6 +1822,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/_authenticated/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/_authenticated/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/_authenticated/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1821,6 +1840,7 @@ export interface FileRoutesById {
   '/api/public/hooks/gmail-po-sync': typeof ApiPublicHooksGmailPoSyncRoute
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
+  '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1998,6 +2018,7 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/documents-mission/$attributionId'
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
@@ -2015,6 +2036,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2181,6 +2203,7 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/documents-mission/$attributionId'
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
@@ -2198,6 +2221,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2374,6 +2398,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/devis/$devisId'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/admin/organisations/$orgId'
+    | '/_authenticated/convoyeur/documents-mission/$attributionId'
     | '/_authenticated/convoyeur/formation/documents'
     | '/_authenticated/convoyeur/formation/faq'
     | '/_authenticated/dashboard-client/missions/$missionId'
@@ -2391,6 +2416,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/gmail-po-sync'
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
+    | '/api/public/hooks/rappel-mission-j1'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2484,6 +2510,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGmailPoSyncRoute: typeof ApiPublicHooksGmailPoSyncRoute
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
+  ApiPublicHooksRappelMissionJ1Route: typeof ApiPublicHooksRappelMissionJ1Route
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
@@ -3610,6 +3637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicScanHandoffExtractRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/rappel-mission-j1': {
+      id: '/api/public/hooks/rappel-mission-j1'
+      path: '/api/public/hooks/rappel-mission-j1'
+      fullPath: '/api/public/hooks/rappel-mission-j1'
+      preLoaderRoute: typeof ApiPublicHooksRappelMissionJ1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/loyalty-daily': {
       id: '/api/public/hooks/loyalty-daily'
       path: '/api/public/hooks/loyalty-daily'
@@ -3728,6 +3762,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/convoyeur/formation/documents'
       preLoaderRoute: typeof AuthenticatedConvoyeurFormationDocumentsRouteImport
       parentRoute: typeof AuthenticatedConvoyeurFormationRoute
+    }
+    '/_authenticated/convoyeur/documents-mission/$attributionId': {
+      id: '/_authenticated/convoyeur/documents-mission/$attributionId'
+      path: '/documents-mission/$attributionId'
+      fullPath: '/convoyeur/documents-mission/$attributionId'
+      preLoaderRoute: typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
     }
     '/_authenticated/admin/organisations/$orgId': {
       id: '/_authenticated/admin/organisations/$orgId'
@@ -4036,6 +4077,7 @@ interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
   AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
   AuthenticatedConvoyeurIndexRoute: typeof AuthenticatedConvoyeurIndexRoute
+  AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute: typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
 }
 
 const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
@@ -4054,6 +4096,8 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
     AuthenticatedConvoyeurProfilRoute: AuthenticatedConvoyeurProfilRoute,
     AuthenticatedConvoyeurIndexRoute: AuthenticatedConvoyeurIndexRoute,
+    AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute:
+      AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute,
   }
 
 const AuthenticatedConvoyeurRouteWithChildren =
@@ -4370,6 +4414,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksGoogleReviewDispatchRoute:
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
+  ApiPublicHooksRappelMissionJ1Route: ApiPublicHooksRappelMissionJ1Route,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,

@@ -54,5 +54,14 @@ export const notifyConvoyeurEvent = createServerFn({ method: "POST" })
     if (!isAdmin && !isSuper) throw new Error("Forbidden");
 
     const { sendConvoyeurPush } = await import("@/lib/push/driver-push.server");
-    return sendConvoyeurPush(data);
+    const res = await sendConvoyeurPush(data);
+
+    // Mission attribuée à moins de 24h : le rappel J-1 part tout de suite
+    // plutôt que d'attendre le prochain passage de la tâche planifiée.
+    if (data.attributionId && (data.event === "mission_attribuee" || data.event === "mission_validee")) {
+      const { maybeSendImminentReminder } = await import("@/lib/mission-reminder.server");
+      await maybeSendImminentReminder(data.attributionId);
+    }
+
+    return res;
   });
