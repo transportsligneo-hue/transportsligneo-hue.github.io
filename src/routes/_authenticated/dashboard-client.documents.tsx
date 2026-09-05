@@ -3,8 +3,10 @@ import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, Receipt, Download } from "lucide-react";
+import { toast } from "sonner";
 import ClientVehicleDocsCard from "@/components/dashboard/ClientVehicleDocsCard";
+import { generateFacturePdf, downloadFacturePdf, type FactureData } from "@/lib/facture-pdf";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/documents")({
   component: ClientDocuments,
@@ -18,35 +20,81 @@ interface DocRow {
   date_prise_en_charge: string;
 }
 
+interface FactRow {
+  id: string;
+  numero: string;
+  statut: string;
+  prix_ttc: number;
+  date_facture: string | null;
+  mode_paiement: string | null;
+  paid_at: string | null;
+}
+
+const FACT_STATUT: Record<string, { label: string; cls: string }> = {
+  emise: { label: "À régler", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
+  payee: { label: "Payée", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
+  en_retard: { label: "En retard", cls: "bg-red-500/15 text-red-300 border-red-500/30" },
+  annulee: { label: "Annulée", cls: "bg-cream/10 text-cream/60 border-cream/20" },
+};
+
 function ClientDocuments() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<DocRow[]>([]);
+  const [factures, setFactures] = useState<FactRow[]>([]);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    supabase
-      .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge")
-      .eq("user_id", user.id)
-      .in("statut", ["livree", "terminee", "en_cours"])
-      .order("date_prise_en_charge", { ascending: false })
-      .then(({ data }) => {
-        if (cancelled) return;
-        if (data) {
-          setMissions(data.map(m => ({
-            mission_id: m.id,
-            numero: m.numero,
-            ville_depart: m.ville_depart,
-            ville_arrivee: m.ville_arrivee,
-            date_prise_en_charge: m.date_prise_en_charge,
-          })));
-        }
-        setLoading(false);
-      });
+    (async () => {
+      // Le filtrage est assuré par les règles de sécurité (identifiant OU e-mail),
+      // un filtre client sur user_id masquerait les dossiers créés par l'admin.
+      const [mRes, fRes] = await Promise.all([
+        supabase
+          .from("missions")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut")
+          .order("date_prise_en_charge", { ascending: false }),
+        supabase
+          .from("factures")
+          .select("id, numero, statut, prix_ttc, date_facture, mode_paiement, paid_at")
+          .order("created_at", { ascending: false }),
+      ]);
+      if (cancelled) return;
+      const rows = (mRes.data ?? []).filter((m) => !["annulee", "annule", "brouillon"].includes(m.statut ?? ""));
+      setMissions(rows.map(m => ({
+        mission_id: m.id,
+        numero: m.numero,
+        ville_depart: m.ville_depart,
+        ville_arrivee: m.ville_arrivee,
+        date_prise_en_charge: m.date_prise_en_charge,
+      })));
+      setFactures((fRes.data ?? []) as FactRow[]);
+      setLoading(false);
+    })();
     return () => { cancelled = true; };
   }, [user]);
+
+  const handleDownloadFacture = async (f: FactRow) => {
+    setDownloadingId(f.id);
+    try {
+      const { data: full } = await supabase.from("factures").select("*").eq("id", f.id).maybeSingle();
+      if (!full) throw new Error("Facture introuvable");
+      const blob = await generateFacturePdf({
+        ...(full as unknown as FactureData),
+        prix_ht: Number(full.prix_ht),
+        tva_taux: Number(full.tva_taux),
+        prix_tva: Number(full.prix_tva),
+        prix_ttc: Number(full.prix_ttc),
+      });
+      downloadFacturePdf(blob, full.numero);
+    } catch (e) {
+      toast.error("Téléchargement impossible", { description: (e as Error).message });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -62,13 +110,48 @@ function ClientDocuments() {
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-      ) : missions.length === 0 ? (
+      ) : (
+      <>
+      {factures.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-cream/70 text-xs uppercase tracking-wider flex items-center gap-2"><Receipt size={13} /> Mes factures</h2>
+          {factures.map((f) => {
+            const st = FACT_STATUT[f.statut] ?? { label: f.statut, cls: "bg-cream/10 text-cream/70 border-cream/20" };
+            return (
+              <div key={f.id} className="card-premium p-5 rounded flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                <div>
+                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">{f.numero}</p>
+                  <p className="text-cream font-heading text-sm mt-1">{Number(f.prix_ttc).toFixed(2)} € TTC</p>
+                  <p className="text-cream/50 text-xs mt-1">
+                    {f.date_facture ? new Date(f.date_facture).toLocaleDateString("fr-FR") : ""}
+                    {f.mode_paiement ? ` — ${f.mode_paiement}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded border text-[10px] uppercase tracking-wider ${st.cls}`}>{st.label}</span>
+                  <button
+                    onClick={() => handleDownloadFacture(f)}
+                    disabled={downloadingId === f.id}
+                    className="px-3 py-2 rounded border border-primary/30 text-primary text-xs flex items-center gap-2 hover:bg-primary/10 transition-colors disabled:opacity-50"
+                  >
+                    {downloadingId === f.id ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+                    Télécharger
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {missions.length === 0 && factures.length === 0 ? (
         <div className="card-premium p-10 rounded text-center">
           <FileText className="text-cream/20 mx-auto mb-3" size={36} />
           <p className="text-cream/50 text-sm">Aucun document disponible pour le moment.</p>
           <p className="text-cream/30 text-xs mt-2">Les documents apparaîtront ici une fois vos missions démarrées.</p>
         </div>
       ) : (
+
         <div className="space-y-3">
           {missions.map((m) => (
             <div key={m.mission_id} className="card-premium p-5 rounded">
@@ -86,6 +169,9 @@ function ClientDocuments() {
           ))}
         </div>
       )}
+      </>
+      )}
     </div>
+
   );
 }
