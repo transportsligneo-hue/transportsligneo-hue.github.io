@@ -284,7 +284,7 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { data: link, error } = await context.supabase
       .from("payment_links")
-      .select("id, provider, environment, revolut_order_id, statut")
+      .select("id, provider, environment, revolut_order_id, statut, amount_cents, devis_id, facture_id, mission_id")
       .eq("id", data.linkId)
       .single();
     if (error || !link) throw new Error("Lien introuvable.");
@@ -300,8 +300,42 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
       .from("payment_links")
       .update({ statut, paid_at: statut === "paid" ? new Date().toISOString() : null })
       .eq("id", link.id);
+
+    // Le paiement vient d'être constaté : facture émise + envoyée au client.
+    if (statut === "paid" && link.statut !== "paid") {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { ensureFactureForDevis, sendFactureDisponibleEmail, markFacturePaidAndSend } =
+          await import("@/lib/facture-auto.server");
+        if (link.facture_id) {
+          await markFacturePaidAndSend(link.facture_id, { amountCents: link.amount_cents ?? null });
+        } else if (link.devis_id) {
+          const { data: devis } = await supabaseAdmin
+            .from("devis")
+            .select("*")
+            .eq("id", link.devis_id)
+            .maybeSingle();
+          if (devis) {
+            const facture = await ensureFactureForDevis(devis, {
+              amountCents: link.amount_cents ?? null,
+              missionId: link.mission_id ?? null,
+            });
+            await sendFactureDisponibleEmail(facture);
+            if (facture?.["id"]) {
+              await supabaseAdmin
+                .from("payment_links")
+                .update({ facture_id: facture["id"] })
+                .eq("id", link.id);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("[payment-links] facture auto error", e);
+      }
+    }
     return { statut };
   });
+
 
 /** Recherche de missions pour le sélecteur de rattachement. */
 export const searchMissionsForPaymentLink = createServerFn({ method: "POST" })
