@@ -344,3 +344,91 @@ export const searchDevisForPaymentLink = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return (rows ?? []) as any[];
   });
+
+/** Annule un lien de paiement (côté Revolut puis en base). Impossible si déjà payé. */
+export const cancelPaymentLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { linkId: string }) => {
+    if (!input?.linkId) throw new Error("Lien introuvable.");
+    return { linkId: input.linkId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: link, error } = await context.supabase
+      .from("payment_links")
+      .select("id, provider, environment, revolut_order_id, statut")
+      .eq("id", data.linkId)
+      .single();
+    if (error || !link) throw new Error("Lien introuvable.");
+    if (link.statut === "paid") throw new Error("Ce lien est déjà payé : il ne peut pas être annulé.");
+
+    let providerWarning: string | null = null;
+    if (link.provider === "revolut" && link.revolut_order_id) {
+      try {
+        const { cancelRevolutOrder } = await import("@/lib/revolut-server");
+        await cancelRevolutOrder(
+          link.environment === "sandbox" ? "sandbox" : "production",
+          link.revolut_order_id,
+        );
+      } catch (e) {
+        providerWarning = e instanceof Error ? e.message : "Annulation Revolut impossible";
+      }
+    }
+
+    const { error: upErr } = await context.supabase
+      .from("payment_links")
+      .update({ statut: "cancelled" })
+      .eq("id", link.id);
+    if (upErr) throw new Error(upErr.message);
+
+    await context.supabase.from("payment_link_attachments").insert({
+      payment_link_id: link.id,
+      mission_id: null,
+      action: "cancel",
+      performed_by: context.userId,
+    });
+
+    return { ok: true, statut: "cancelled", providerWarning };
+  });
+
+/** Supprime définitivement un lien de paiement (jamais s'il a été payé). */
+export const deletePaymentLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { linkId: string }) => {
+    if (!input?.linkId) throw new Error("Lien introuvable.");
+    return { linkId: input.linkId };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: link, error } = await context.supabase
+      .from("payment_links")
+      .select("id, provider, environment, revolut_order_id, statut")
+      .eq("id", data.linkId)
+      .single();
+    if (error || !link) throw new Error("Lien introuvable.");
+    if (link.statut === "paid") {
+      throw new Error("Un lien payé ne peut pas être supprimé (traçabilité comptable).");
+    }
+
+    // On tente d'abord d'annuler côté Revolut pour que le lien ne soit plus payable.
+    if (link.provider === "revolut" && link.revolut_order_id && link.statut !== "cancelled") {
+      try {
+        const { cancelRevolutOrder } = await import("@/lib/revolut-server");
+        await cancelRevolutOrder(
+          link.environment === "sandbox" ? "sandbox" : "production",
+          link.revolut_order_id,
+        );
+      } catch {
+        /* le lien est supprimé de la base même si Revolut refuse l'annulation */
+      }
+    }
+
+    await context.supabase.from("payment_link_sends").delete().eq("payment_link_id", link.id);
+    await context.supabase.from("payment_link_attachments").delete().eq("payment_link_id", link.id);
+    const { error: delErr } = await context.supabase
+      .from("payment_links")
+      .delete()
+      .eq("id", link.id);
+    if (delErr) throw new Error(delErr.message);
+    return { ok: true };
+  });
