@@ -3,7 +3,6 @@
 // encore, puis envoyée immédiatement au client par email.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailServer } from "@/server/email-send";
-import { parseDevisPrestationLabel, parseDevisSupplements } from "@/lib/devis-pdf";
 
 export type FactureRow = Record<string, any>;
 
@@ -40,9 +39,10 @@ export interface EnsureFactureOptions {
 
 function factureDesignationFromDevis(devis: FactureRow): string {
   const vehiculeLabel = [devis["marque"], devis["modele"]].filter(Boolean).join(" ");
-  const parsed = parseDevisSupplements(devis["message"]);
-  const prestationLabel = parseDevisPrestationLabel(devis["message"]);
-  const prestation = parsed.plateau
+  const message = String(devis["message"] ?? "");
+  const plateau = /^Transport sur plateau\s*:\s*oui/im.test(message);
+  const prestationLabel = message.match(/^Libell[ée] prestation\s*:\s*(.+)$/im)?.[1]?.trim();
+  const prestation = plateau
     ? prestationLabel || "Transport sur plateau porte-voiture"
     : "Convoyage automobile par conducteur professionnel";
   return [

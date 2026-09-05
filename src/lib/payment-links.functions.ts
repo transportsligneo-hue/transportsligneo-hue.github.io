@@ -305,7 +305,7 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
     if (statut === "paid" && link.statut !== "paid") {
       try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { ensureFactureForDevis, sendFactureDisponibleEmail, markFacturePaidAndSend } =
+        const { ensureFactureForDevis, ensureFactureForMission, sendFactureDisponibleEmail, markFacturePaidAndSend } =
           await import("@/lib/facture-auto.server");
         if (link.facture_id) {
           await markFacturePaidAndSend(link.facture_id, {
@@ -333,6 +333,19 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
                 .update({ facture_id: facture["id"] })
                 .eq("id", link.id);
             }
+          }
+        } else if (link.mission_id) {
+          const facture = await ensureFactureForMission(link.mission_id, {
+            amountCents: link.amount_cents ?? null,
+            modePaiement: "Revolut",
+            paidAt: new Date().toISOString(),
+          });
+          await sendFactureDisponibleEmail(facture);
+          if (facture?.["id"]) {
+            await supabaseAdmin
+              .from("payment_links")
+              .update({ facture_id: facture["id"] })
+              .eq("id", link.id);
           }
         }
       } catch (e) {
@@ -514,6 +527,25 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
         .eq("id", link.facture_id)
         .maybeSingle();
       facture = (f ?? null) as Record<string, any> | null;
+    }
+    // Lors d'un renvoi, resynchroniser une facture déjà créée avec le devis
+    // actuel afin de ne jamais expédier une ancienne désignation ou un ancien PDF.
+    if (facture && link.mission_id) {
+      const { data: attr } = await supabaseAdmin
+        .from("attributions")
+        .select("trajets(devis_id)")
+        .eq("id", link.mission_id)
+        .maybeSingle();
+      const devisId = (attr as any)?.trajets?.devis_id as string | undefined;
+      if (devisId) {
+        const { data: devis } = await supabaseAdmin.from("devis").select("*").eq("id", devisId).maybeSingle();
+        if (devis) {
+          facture = await ensureFactureForDevis(devis, {
+            ...paymentOptions,
+            missionId: link.mission_id,
+          });
+        }
+      }
     }
     if (!facture && link.devis_id) {
       const { data: devis } = await supabaseAdmin
