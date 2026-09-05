@@ -201,7 +201,7 @@ export async function generatePvMissionPdf(
   const plateau = !!d.plateau;
   // Le PV de restitution sur plateau est le plus dense (arrimage + comparaison EDL
   // + frais additionnels) : il utilise une page allongée, comme le gabarit papier.
-  const PAGE_H = plateau && !isLiv ? 332 : 297;
+  const PAGE_H = plateau && !isLiv ? 342 : 297;
   const doc = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H] });
   applyLigneoFonts(doc);
   const c = company ?? (await fetchCompanyInfo());
