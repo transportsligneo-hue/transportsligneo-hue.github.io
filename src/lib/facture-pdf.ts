@@ -23,6 +23,7 @@ export interface FactureData {
   date_mission?: string | null;
   date_echeance?: string | null;
   date_paiement?: string | null;
+  paid_at?: string | null;
   mode_paiement?: string | null;
   conditions_paiement?: string | null;
   client_nom?: string | null;
@@ -96,6 +97,19 @@ const fmtDate = (d?: string | null) => {
   if (!d) return "—";
   try {
     return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  } catch { return d; }
+};
+const fmtDateTime = (d?: string | null) => {
+  if (!d) return "—";
+  try {
+    return new Date(d).toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Paris",
+    });
   } catch { return d; }
 };
 
@@ -190,7 +204,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(10);
   doc.setTextColor(...GOLD);
   doc.text(
-    isPaid && !isB2B ? fmtDate(f.date_paiement) : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
+    isPaid && !isB2B
+      ? (f.paid_at ? fmtDateTime(f.paid_at) : fmtDate(f.date_paiement))
+      : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
     rX, 66, { align: "right" },
   );
 
@@ -384,7 +400,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     modalites.push(`Paiement à ${f.conditions_paiement || "30 jours fin de mois"} date de facture, par virement bancaire.`);
     modalites.push(`IBAN : ${f.iban || co?.iban || "—"} — BIC : ${f.bic || co?.bic || "—"}`);
   } else if (isPaid) {
-    modalites.push(`Facture acquittée — réglée par ${(f.mode_paiement || "carte bancaire").toLowerCase()}${f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""}.`);
+    modalites.push(`Facture acquittée — réglée par ${f.mode_paiement || "carte bancaire"}${f.paid_at ? ` le ${fmtDateTime(f.paid_at)}` : f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""}.`);
   } else {
     modalites.push("Paiement à réception de facture.");
   }
