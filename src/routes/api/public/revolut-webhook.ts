@@ -57,17 +57,65 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
                   ? "failed"
                   : mapRevolutState(payload?.state);
 
-        const { error } = await supabaseAdmin
+        const { data: updatedLinks, error } = await supabaseAdmin
           .from("payment_links")
           .update({
             statut,
             paid_at: statut === "paid" ? new Date().toISOString() : null,
           })
-          .eq("revolut_order_id", orderId);
+          .eq("revolut_order_id", orderId)
+          .select("id, amount_cents, devis_id, facture_id, mission_id");
         if (error) {
           console.error("[revolut-webhook] update error", error.message);
           return new Response("Handler error", { status: 500 });
         }
+
+        // Paiement encaissé → facture émise et envoyée immédiatement au client,
+        // même si aucune mission n'a encore été créée à partir du devis.
+        if (statut === "paid") {
+          const link = (updatedLinks ?? [])[0];
+          try {
+            const { ensureFactureForDevis, sendFactureDisponibleEmail, markFacturePaidAndSend } =
+              await import("@/lib/facture-auto.server");
+
+            if (link?.facture_id) {
+              await markFacturePaidAndSend(link.facture_id, {
+                amountCents: link.amount_cents ?? null,
+              });
+            } else if (link?.devis_id) {
+              const { data: devis } = await supabaseAdmin
+                .from("devis")
+                .select("*")
+                .eq("id", link.devis_id)
+                .maybeSingle();
+              if (devis) {
+                await supabaseAdmin
+                  .from("devis")
+                  .update({
+                    paid_at: new Date().toISOString(),
+                    amount_paid_cents: link.amount_cents ?? null,
+                    updated_at: new Date().toISOString(),
+                  } as never)
+                  .eq("id", link.devis_id);
+                const facture = await ensureFactureForDevis(devis, {
+                  amountCents: link.amount_cents ?? null,
+                  missionId: link.mission_id ?? null,
+                  modePaiement: "carte",
+                });
+                await sendFactureDisponibleEmail(facture);
+                if (facture?.["id"] && link.id) {
+                  await supabaseAdmin
+                    .from("payment_links")
+                    .update({ facture_id: facture["id"] })
+                    .eq("id", link.id);
+                }
+              }
+            }
+          } catch (e) {
+            console.error("[revolut-webhook] facture auto error", e);
+          }
+        }
+
 
         return Response.json({ received: true });
       },

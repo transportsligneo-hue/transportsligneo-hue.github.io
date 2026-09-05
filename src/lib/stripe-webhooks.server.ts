@@ -57,68 +57,20 @@ export async function handleDevisWebhookEvent(event: StripeEvent): Promise<void>
       }
 
       // 4. Auto-create facture (payée) — numéro aligné sur le devis (DEV-TLG-YYYY-### → FAC-TLG-YYYY-###)
+      //    puis envoi immédiat de la facture au client, même sans mission créée.
       if (devis) {
-        // Idempotence : ne pas recréer la facture si le webhook est rejoué
-        const { data: existingFacture } = await supabaseAdmin
-          .from("factures")
-          .select("id")
-          .eq("stripe_session_id", sessionId)
-          .maybeSingle();
-
-        const prixTtc = Number(devis.prix_estime ?? 0);
-        const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
-        const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
-        const factureNumero = /^DEV-TLG-\d{4}-#?\d{3}$/.test(devis.numero ?? "")
-          ? (devis.numero as string).replace("DEV-TLG", "FAC-TLG")
-          : undefined;
-        const vehiculeLabel = [devis.marque, devis.modele].filter(Boolean).join(" ");
-        const designation = [
-          "Convoyage automobile par conducteur professionnel",
-          vehiculeLabel || null,
-          devis.option_trajet === "aller_retour" ? "Livraison + restitution" : "Livraison simple",
-        ]
-          .filter(Boolean)
-          .join(" — ");
-
-        if (!existingFacture) await supabaseAdmin.from("factures").insert({
-          ...(factureNumero && { numero: factureNumero }),
-          mission_id: missionId,
-          client_email: devis.email,
-          client_nom: devis.nom,
-          client_prenom: devis.prenom,
-          type_facture: "particulier",
-          date_mission: devis.date_souhaitee ?? null,
-          depart: devis.depart ?? null,
-          arrivee: devis.arrivee ?? null,
-          distance_km: devis.distance_km ?? null,
-          designation,
-          reference_label: "Devis",
-          reference_client: devis.numero ?? null,
-          prix_ht: prixHt,
-          tva_taux: 20,
-          prix_tva: prixTva,
-          prix_ttc: prixTtc,
-          statut: "payee",
-          mode_paiement: "carte",
-          date_paiement: new Date().toISOString().slice(0, 10),
-          paid_at: new Date().toISOString(),
-          amount_paid_cents: amount || Math.round(prixTtc * 100),
-          stripe_session_id: sessionId ?? null,
-          stripe_payment_intent_id: paymentIntentId ?? null,
-        } as any);
-
-        // Aligner la séquence FAC-TLG pour éviter les collisions futures
-        if (factureNumero) {
-          const suffix = parseInt(factureNumero.slice(-3), 10);
-          const year = parseInt(factureNumero.split("-")[2], 10);
-          await supabaseAdmin
-            .from("mission_sequences")
-            .update({ current_value: suffix, updated_at: new Date().toISOString() })
-            .eq("prefix", "FAC-TLG")
-            .eq("year", year)
-            .lt("current_value", suffix);
-        }
+        const { ensureFactureForDevis, sendFactureDisponibleEmail } = await import(
+          "@/lib/facture-auto.server"
+        );
+        const facture = await ensureFactureForDevis(devis, {
+          amountCents: amount,
+          missionId,
+          sessionId: sessionId ?? null,
+          paymentIntentId: paymentIntentId ?? null,
+        });
+        await sendFactureDisponibleEmail(facture);
       }
+
 
       // 5. Enqueue confirmation email (template registry → file d'attente rendue)
       try {
@@ -263,7 +215,12 @@ export async function handleFactureWebhookEvent(event: StripeEvent): Promise<voi
         } catch (e) {
           console.error("[facture/webhook] email error", e);
         }
+
+        // Envoi immédiat de la facture acquittée
+        const { sendFactureDisponibleEmail } = await import("@/lib/facture-auto.server");
+        await sendFactureDisponibleEmail({ ...facture, statut: "payee" });
       }
+
     }
   }
 }
