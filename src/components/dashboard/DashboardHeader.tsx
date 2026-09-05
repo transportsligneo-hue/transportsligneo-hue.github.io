@@ -220,7 +220,7 @@ export function DashboardHeader({
 
   return (
     <header
-      className={`sticky top-0 z-30 ${wrapper}`}
+      className={`dash-sticky-header sticky top-0 z-30 ${wrapper}`}
     >
       <div className="h-14 px-4 sm:px-6 flex items-center gap-3">
         {/* === Recherche === */}
