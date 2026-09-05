@@ -75,12 +75,18 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
         if (statut === "paid") {
           const link = (updatedLinks ?? [])[0];
           try {
-            const { ensureFactureForDevis, sendFactureDisponibleEmail, markFacturePaidAndSend } =
+            const { ensureFactureForDevis, ensureFactureForMission, sendFactureDisponibleEmail, markFacturePaidAndSend } =
               await import("@/lib/facture-auto.server");
+            const rawPaidAt = payload?.timestamp;
+            const paidAt = typeof rawPaidAt === "string" || typeof rawPaidAt === "number"
+              ? String(rawPaidAt)
+              : new Date().toISOString();
 
             if (link?.facture_id) {
               await markFacturePaidAndSend(link.facture_id, {
                 amountCents: link.amount_cents ?? null,
+                modePaiement: "Revolut",
+                paidAt,
               });
             } else if (link?.devis_id) {
               const { data: devis } = await supabaseAdmin
@@ -100,7 +106,8 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
                 const facture = await ensureFactureForDevis(devis, {
                   amountCents: link.amount_cents ?? null,
                   missionId: link.mission_id ?? null,
-                  modePaiement: "carte",
+                    modePaiement: "Revolut",
+                    paidAt,
                 });
                 await sendFactureDisponibleEmail(facture);
                 if (facture?.["id"] && link.id) {
@@ -109,6 +116,19 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
                     .update({ facture_id: facture["id"] })
                     .eq("id", link.id);
                 }
+              }
+            } else if (link?.mission_id) {
+              const facture = await ensureFactureForMission(link.mission_id, {
+                amountCents: link.amount_cents ?? null,
+                modePaiement: "Revolut",
+                paidAt,
+              });
+              await sendFactureDisponibleEmail(facture);
+              if (facture?.["id"] && link.id) {
+                await supabaseAdmin
+                  .from("payment_links")
+                  .update({ facture_id: facture["id"] })
+                  .eq("id", link.id);
               }
             }
           } catch (e) {

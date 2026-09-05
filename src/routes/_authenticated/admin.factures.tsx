@@ -33,6 +33,8 @@ interface FactureRow {
   date_facture: string | null;
   date_mission: string | null;
   date_echeance: string | null;
+  date_paiement: string | null;
+  paid_at: string | null;
   mode_paiement: string | null;
   conditions_paiement: string | null;
   client_email: string | null;
@@ -167,9 +169,12 @@ function AdminFacturesPage() {
       const data: FactureData = {
         numero: row.numero,
         type_facture: row.type_facture,
+        statut: row.statut,
         date_facture: row.date_facture ?? row.created_at,
         date_mission: row.date_mission,
         date_echeance: row.date_echeance,
+        date_paiement: row.date_paiement,
+        paid_at: row.paid_at,
         mode_paiement: row.mode_paiement,
         conditions_paiement: row.conditions_paiement,
         client_nom: row.client_nom,
@@ -416,9 +421,12 @@ function AdminFacturesPage() {
           return generateFacturePdf({
             numero: row.numero,
             type_facture: row.type_facture,
+            statut: row.statut,
             date_facture: row.date_facture ?? new Date().toISOString(),
             date_mission: row.date_mission,
             date_echeance: row.date_echeance,
+            date_paiement: row.date_paiement,
+            paid_at: row.paid_at,
             mode_paiement: row.mode_paiement,
             conditions_paiement: row.conditions_paiement,
             client_nom: row.client_nom,
@@ -499,9 +507,12 @@ function AdminFacturesPage() {
                 generateFacturePdf({
                   numero: selected.numero,
                   type_facture: selected.type_facture,
+                  statut: selected.statut,
                   date_facture: selected.date_facture ?? selected.created_at,
                   date_mission: selected.date_mission,
                   date_echeance: selected.date_echeance,
+                  date_paiement: selected.date_paiement,
+                  paid_at: selected.paid_at,
                   mode_paiement: selected.mode_paiement,
                   conditions_paiement: selected.conditions_paiement,
                   client_nom: selected.client_nom,

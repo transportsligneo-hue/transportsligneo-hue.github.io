@@ -43,6 +43,7 @@ type FactureRow = {
   type_facture: "particulier" | "b2b";
   date_facture: string | null;
   date_paiement: string | null;
+  paid_at: string | null;
   client_nom: string | null;
   client_prenom: string | null;
   client_societe: string | null;
@@ -223,15 +224,12 @@ function MesFacturesEtDevis() {
   const handleDownloadFacture = async (f: FactureRow) => {
     setDownloadingId(f.id);
     try {
-      if (f.pdf_url) {
-        window.open(f.pdf_url, "_blank");
-        return;
-      }
       const blob = await generateFacturePdf({
         numero: f.numero,
         type_facture: f.type_facture,
         date_facture: f.date_facture ?? undefined,
         date_paiement: f.date_paiement,
+        paid_at: f.paid_at,
         statut: f.statut,
         client_nom: f.client_nom,
         client_prenom: f.client_prenom,

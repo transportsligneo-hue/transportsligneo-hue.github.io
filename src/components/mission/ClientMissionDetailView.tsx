@@ -201,10 +201,6 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
     if (!mission || !facture) return;
     setDownloadingFact(true);
     try {
-      if (facture.pdf_url) {
-        window.open(facture.pdf_url, "_blank");
-        return;
-      }
       const { data: full } = await supabase.from("factures").select("*").eq("id", facture.id).maybeSingle();
       if (!full) throw new Error("Facture introuvable");
       const blob = await generateFacturePdf({
@@ -212,6 +208,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         type_facture: (full.type_facture as "particulier" | "b2b") ?? "particulier",
         date_facture: full.date_facture ?? undefined,
         date_paiement: full.date_paiement,
+        paid_at: full.paid_at,
         statut: full.statut,
         client_nom: full.client_nom,
         client_prenom: full.client_prenom,

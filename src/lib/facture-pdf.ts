@@ -23,6 +23,7 @@ export interface FactureData {
   date_mission?: string | null;
   date_echeance?: string | null;
   date_paiement?: string | null;
+  paid_at?: string | null;
   mode_paiement?: string | null;
   conditions_paiement?: string | null;
   client_nom?: string | null;
@@ -98,6 +99,19 @@ const fmtDate = (d?: string | null) => {
     return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
   } catch { return d; }
 };
+const fmtDateTime = (d?: string | null) => {
+  if (!d) return "—";
+  try {
+    return new Date(d).toLocaleString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Paris",
+    });
+  } catch { return d; }
+};
 
 const M = 18; // marge gauche/droite
 
@@ -138,6 +152,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
+  const isPlateau = /plateau|porte-voiture/i.test(f.designation ?? "");
   const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
   // En franchise en base (micro), le montant net à payer est le prix affiché au client.
   const ht = tvaExempt ? Number(f.prix_ttc ?? f.prix_ht) : Number(f.prix_ht);
@@ -189,7 +204,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(10);
   doc.setTextColor(...GOLD);
   doc.text(
-    isPaid && !isB2B ? fmtDate(f.date_paiement) : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
+    isPaid && !isB2B
+      ? (f.paid_at ? fmtDateTime(f.paid_at) : fmtDate(f.date_paiement))
+      : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
     rX, 66, { align: "right" },
   );
 
@@ -296,7 +313,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const distance = f.distance_km ?? 0;
   const mainDesc = [
     f.designation || `Convoyage routier${f.depart && f.arrivee ? ` ${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}` : ""}${distance ? ` (${distance} km)` : ""}`,
-    "Inclus : carburant, péages, assurance tous risques",
+    isPlateau
+      ? "Transport du véhicule non roulant sur porte-voiture — chargement, arrimage et déchargement"
+      : "Inclus : carburant, péages, assurance tous risques",
   ].join(" — ");
   const rows: { desc: string; qty: string; unit: string; total: string; free?: boolean }[] = [
     { desc: mainDesc, qty: "1", unit: eur(ht), total: eur(ht) },
@@ -381,7 +400,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     modalites.push(`Paiement à ${f.conditions_paiement || "30 jours fin de mois"} date de facture, par virement bancaire.`);
     modalites.push(`IBAN : ${f.iban || co?.iban || "—"} — BIC : ${f.bic || co?.bic || "—"}`);
   } else if (isPaid) {
-    modalites.push(`Facture acquittée — réglée par ${(f.mode_paiement || "carte bancaire").toLowerCase()}${f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""}.`);
+    modalites.push(`Facture acquittée — réglée par ${f.mode_paiement || "carte bancaire"}${f.paid_at ? ` le ${fmtDateTime(f.paid_at)}` : f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""}.`);
   } else {
     modalites.push("Paiement à réception de facture.");
   }
