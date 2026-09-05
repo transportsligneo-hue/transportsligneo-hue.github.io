@@ -8672,6 +8672,10 @@ export type Database = {
         Args: { _devis_id: string }
         Returns: number
       }
+      sync_missions_from_devis: {
+        Args: { _devis_id: string }
+        Returns: undefined
+      }
       sync_trajet_dates_from_devis: {
         Args: { _devis_id: string }
         Returns: undefined
