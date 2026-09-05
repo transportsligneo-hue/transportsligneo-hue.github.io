@@ -5,6 +5,7 @@ import signatureGo from "@/assets/signature-go.png";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
   fetchCompanyInfo,
+  companyAddressLine,
   companyLegalLine1,
   companyLegalLine2,
   resolveClientBillingIdentity,
@@ -160,334 +161,338 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const ttc = tvaExempt ? ht : Number(f.prix_ttc);
 
 
-  // ===== Bandeau navy =====
-  doc.setFillColor(...NAVY);
-  doc.rect(M, 12, innerW, 26, "F");
+  // =====================================================================
+  //  Modèle officiel « facture-modele-transports-ligneo » (fond clair)
+  // =====================================================================
+  const INK: [number, number, number] = [11, 16, 32];
+  const BLUE: [number, number, number] = [47, 95, 255];
+  const GREY: [number, number, number] = [122, 130, 145];
+  const BOX: [number, number, number] = [244, 246, 250];
+  const RULE: [number, number, number] = [226, 231, 240];
+  const BLUEBOX: [number, number, number] = [238, 243, 255];
+
+  const L = M;
+  const R = pageW - M;
+
+  // ---------- En-tête ----------
   if (logoData) {
-    try { doc.addImage(logoData, "PNG", M + 5, 15, 20, 20); } catch {}
+    try { doc.addImage(logoData, "PNG", L, 21, 11, 11); } catch { /* logo optionnel */ }
   }
-  doc.setTextColor(...WHITE);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), M + 31, 24);
+  doc.setFontSize(14);
+  doc.setTextColor(...INK);
+  const brand = (co?.raison_sociale || "Transports Ligneo").toUpperCase();
+  const brandWords = brand.split(" ");
+  const lastWord = brandWords.length > 1 ? brandWords.pop()! : "";
+  const firstPart = brandWords.join(" ") + (lastWord ? " " : "");
+  doc.text(firstPart, L + 14, 27);
+  if (lastWord) {
+    doc.setTextColor(...BLUE);
+    doc.text(lastWord, L + 14 + doc.getTextWidth(firstPart), 27);
+  }
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...GOLD_SOFT);
-  doc.text("CONVOYAGE AUTOMOBILE — FRANCE & EUROPE", M + 31, 30);
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.8);
-  doc.line(M, 39, pageW - M, 39);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  doc.text(`Convoyage automobile${isB2B ? " B2B" : ""} · Tours (37)`, L + 14, 32);
 
-  // ===== Titre + dates =====
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(26);
-  doc.setTextColor(...NAVY);
-  doc.text(isB2B ? "FACTURE B2B" : "FACTURE", M, 54);
-  doc.setFontSize(10);
-  doc.setTextColor(...GOLD);
-  doc.text(`N° ${f.numero}`, M, 61);
-
-  const rX = pageW - M;
+  doc.setFontSize(24);
+  doc.setTextColor(...INK);
+  doc.text("FACTURE", R, 21, { align: "right" });
+  doc.setFontSize(12);
+  doc.setTextColor(...BLUE);
+  doc.text(f.numero, R, 27.5, { align: "right" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text("Date de facturation", rX, 47, { align: "right" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...NAVY);
-  doc.text(fmtDate(f.date_facture || new Date().toISOString()), rX, 53, { align: "right" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text(isPaid && !isB2B ? "Date de paiement" : "Date d'échéance", rX, 60, { align: "right" });
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...GOLD);
-  doc.text(
-    isPaid && !isB2B
-      ? (f.paid_at ? fmtDateTime(f.paid_at) : fmtDate(f.date_paiement))
-      : (f.date_echeance ? fmtDate(f.date_echeance) : "À réception"),
-    rX, 66, { align: "right" },
-  );
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  doc.text(`Émise le ${fmtDate(f.date_facture || new Date().toISOString())}`, R, 32.5, { align: "right" });
 
-  // ===== Facturé à / Références =====
-  const blockTop = 70;
-  const leftW = innerW * 0.52 - 4;
-  const clientLines: { t: string; bold?: boolean; muted?: boolean }[] = [];
-  const societe = f.client_societe?.trim();
-  const contact = `${f.client_prenom || ""} ${f.client_nom || ""}`.trim();
-  if (societe) {
-    // Facture au nom de l'entreprise uniquement (pas de nom de contact)
-    clientLines.push({ t: societe, bold: true });
-  } else if (contact) {
-    clientLines.push({ t: contact, bold: true });
-  } else {
-    clientLines.push({ t: "Client", bold: true });
+  // Pastille statut
+  {
+    const label = isPaid
+      ? `PAYÉE${f.paid_at || f.date_paiement ? ` LE ${new Date((f.paid_at || f.date_paiement)!).toLocaleDateString("fr-FR")}` : ""}`
+      : "À RÉGLER";
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    const w = doc.getTextWidth(label) + 12;
+    const bx = R - w;
+    doc.setFillColor(isPaid ? 232 : 255, isPaid ? 247 : 246, isPaid ? 238 : 230);
+    doc.roundedRect(bx, 35.4, w, 6.6, 3.3, 3.3, "F");
+    doc.setTextColor(...(isPaid ? GREEN : GOLD));
+    doc.text(`\u25CF ${label}`, bx + 6, 39.9);
   }
 
-  if (f.client_adresse) {
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    for (const l of doc.splitTextToSize(f.client_adresse, leftW - 12) as string[]) clientLines.push({ t: l });
-  }
-  if (f.client_siret) clientLines.push({ t: `SIRET ${f.client_siret}`, muted: true });
-  if (f.client_tva) clientLines.push({ t: `TVA ${f.client_tva}`, muted: true });
-  
+  doc.setDrawColor(...RULE);
+  doc.setLineWidth(0.3);
+  doc.line(L, 46, R, 46);
 
-  const logoBoxW = clientLogoData ? 22 : 0;
-  const boxH = Math.max(14 + clientLines.length * 5.0, clientLogoData ? 30 : 0);
-  doc.setFillColor(...SOFT_BG);
-  doc.rect(M, blockTop, leftW, boxH, "F");
+  // ---------- Émetteur / Client ----------
+  const colW = (innerW - 6) / 2;
+  const boxTop = 51.5;
+  const boxH2 = 35.5;
+  doc.setFillColor(...BOX);
+  doc.roundedRect(L, boxTop, colW, boxH2, 2.5, 2.5, "F");
+  doc.roundedRect(L + colW + 6, boxTop, colW, boxH2, 2.5, 2.5, "F");
+
+  const smallLabel = (t: string, x: number, y: number) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(...GREY);
+    doc.text(t, x, y);
+  };
+  smallLabel("ÉMETTEUR", L + 6, boxTop + 6);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  doc.text(co?.raison_sociale || "Transports Ligneo", L + 6, boxTop + 13);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  const emitterLines = [
+    [co?.signataire_nom, co?.forme_juridique || "Entreprise Individuelle"].filter(Boolean).join(" · "),
+    companyAddressLine(co) || "6 rue du Pont Libert, 37520 La Riche",
+    co?.siret ? `SIRET : ${co.siret}` : null,
+    [co?.email_contact, co?.telephone].filter(Boolean).join(" · ") || null,
+
+  ].filter(Boolean) as string[];
+  let ey = boxTop + 19;
+  for (const l of emitterLines) {
+    doc.text((doc.splitTextToSize(l, colW - 12) as string[])[0], L + 6, ey);
+    ey += 4.6;
+  }
+
+  const cX = L + colW + 6;
+  smallLabel("CLIENT", cX + 6, boxTop + 6);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  const clientTitle = f.client_societe?.trim() || `${f.client_prenom || ""} ${f.client_nom || ""}`.trim() || "Client";
+  doc.text((doc.splitTextToSize(clientTitle, colW - 12) as string[])[0], cX + 6, boxTop + 13);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GREY);
+  const clientDetail: string[] = [];
+  if (f.client_adresse) clientDetail.push(...(doc.splitTextToSize(f.client_adresse, colW - 12) as string[]).slice(0, 2));
+  if (f.client_siret) clientDetail.push(`N° SIRET : ${f.client_siret}`);
+  if (f.client_tva) clientDetail.push(`N° TVA : ${f.client_tva}`);
+  if (f.client_email) clientDetail.push(f.client_email);
+  if (f.reference_client?.trim()) clientDetail.push(`${f.reference_label?.trim() || "Référence dossier"} : ${f.reference_client.trim()}`);
+  let cy2 = boxTop + 19;
+  for (const l of clientDetail.slice(0, 4)) {
+    doc.text((doc.splitTextToSize(l, colW - 12) as string[])[0], cX + 6, cy2);
+    cy2 += 4.6;
+  }
   if (clientLogoData) {
-    try { doc.addImage(clientLogoData, "PNG", M + leftW - logoBoxW - 4, blockTop + 4, 18, 18); } catch { /* logo optionnel */ }
-  }
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text("FACTURÉ À", M + 6, blockTop + 8);
-  let cy = blockTop + 16;
-  const textMaxW = leftW - 12 - logoBoxW;
-  for (const l of clientLines) {
-    doc.setFont("helvetica", l.bold ? "bold" : "normal");
-    doc.setFontSize(l.bold ? 11 : 9);
-    doc.setTextColor(...(l.muted ? MUTED : TEXT));
-    const line = (doc.splitTextToSize(l.t, textMaxW) as string[])[0] || l.t;
-    doc.text(line, M + 6, cy);
-    cy += l.bold ? 6.4 : 5.2;
+    try { doc.addImage(clientLogoData, "PNG", cX + colW - 20, boxTop + 4, 14, 14); } catch { /* optionnel */ }
   }
 
-  // Références (colonne droite)
-  const refX = M + innerW * 0.52 + 6;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text("RÉFÉRENCES", refX, blockTop + 8);
-  const refs: [string, string][] = [];
-  if (f.reference_client?.trim()) refs.push([f.reference_label?.trim() || "N° de PO", f.reference_client.trim()]);
-  if (f.depart && f.arrivee) refs.push(["Trajet", `${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}`]);
+  // ---------- Mission facturée ----------
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   const plaque = f.vehicule_immatriculation?.trim() || "";
-  if (vehLabel || plaque) refs.push(["Véhicule", vehLabel || "Véhicule"]);
-  if (f.date_mission) refs.push(["Livré le", fmtDate(f.date_mission)]);
-  refs.push(["Mode de règlement", f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire")]);
-  let ry = blockTop + 16;
-  for (const [k, v] of refs) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...TEXT);
-    doc.text(`${k} : `, refX, ry);
-    const kw = doc.getTextWidth(`${k} : `);
-    doc.setFont("helvetica", "bold");
-    const val = (doc.splitTextToSize(v, pageW - M - refX - kw) as string[])[0];
-    doc.text(val, refX + kw, ry);
-    if (k === "Véhicule" && plaque) {
-      // Plaque au format exact du badge Missions / Attributions.
-      drawPlateTag(doc, refX + kw + doc.getTextWidth(val) + 2.6, ry - 5.6, plaque, 8.4);
-      ry += 2.4;
-    }
-    ry += 5.2;
-  }
+  const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
+  smallLabel("MISSION FACTURÉE", L, 93.5);
+  const mTop = 96.5;
+  const mH = hasVeh ? 37 : 17;
+  doc.setFillColor(...BOX);
+  doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
-
-  // ===== Tableau prestation =====
-  let y = Math.max(blockTop + boxH, ry) + 7;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...NAVY);
-  doc.text("DÉTAIL DE LA PRESTATION", M, y);
-  y += 5;
-
-  const colQty = pageW - M - 96;
-  const colUnit = pageW - M - 54;
-  const colTotal = pageW - M;
-  doc.setFillColor(...NAVY);
-  doc.rect(M, y, innerW, 9, "F");
-  doc.setTextColor(...WHITE);
-  doc.setFontSize(8);
-  doc.text("Description", M + 5, y + 5.9);
-  doc.text("Qté", colQty + 12, y + 5.9, { align: "center" });
-  doc.text("Prix unit. HT", colUnit + 20, y + 5.9, { align: "right" });
-  doc.text("Total HT", colTotal - 5, y + 5.9, { align: "right" });
-  y += 9;
-
-  const distance = f.distance_km ?? 0;
-  const mainDesc = [
-    f.designation || `Convoyage routier${f.depart && f.arrivee ? ` ${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}` : ""}${distance ? ` (${distance} km)` : ""}`,
-    isPlateau
-      ? "Transport du véhicule non roulant sur porte-voiture — chargement, arrimage et déchargement"
-      : "Inclus : carburant, péages, assurance tous risques",
-  ].join(" — ");
-  const rows: { desc: string; qty: string; unit: string; total: string; free?: boolean }[] = [
-    { desc: mainDesc, qty: "1", unit: eur(ht), total: eur(ht) },
-    { desc: "État des lieux contradictoire départ / arrivée (constat photo)", qty: "1", unit: "Inclus", total: eur(0), free: true },
-    { desc: "Suivi GPS temps réel + notifications client", qty: "1", unit: "Inclus", total: eur(0), free: true },
-  ];
-
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.2);
-  for (const r of rows) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    const lines = doc.splitTextToSize(r.desc, colQty - M - 8) as string[];
-    const rowH = Math.max(9, lines.length * 4.2 + 5);
-    doc.setTextColor(...TEXT);
-    doc.text(lines, M + 5, y + 6);
-    const midY = y + rowH / 2 + 1.4;
-    doc.text(r.qty, colQty + 12, midY, { align: "center" });
-    doc.setTextColor(...(r.free ? MUTED : TEXT));
-    doc.text(r.unit, colUnit + 20, midY, { align: "right" });
-    doc.setTextColor(...TEXT);
-    doc.text(r.total, colTotal - 5, midY, { align: "right" });
-    doc.rect(M, y, innerW, rowH, "S");
-    y += rowH;
-  }
-
-  // ===== Totaux =====
-  y += 7;
-  const totLabelX = colUnit + 20;
-  const totValX = colTotal - 5;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...TEXT);
-  doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y, { align: "right" });
-  doc.setFont("helvetica", "bold");
-  doc.text(eur(ht), totValX, y, { align: "right" });
-  y += 6;
-  doc.setFont("helvetica", "normal");
-  doc.text(tvaExempt ? "TVA" : `TVA (${tvaTaux} %)`, totLabelX, y, { align: "right" });
-  doc.text(tvaExempt ? "Non applicable" : eur(tva), totValX, y, { align: "right" });
-
-  y += 4;
-  doc.setFillColor(...NAVY);
-  doc.rect(colUnit - 30, y, colTotal - (colUnit - 30), 12, "F");
+  smallLabel("ENLÈVEMENT", L + 6, mTop + 6);
+  smallLabel("LIVRAISON", L + innerW * 0.44, mTop + 6);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(...WHITE);
-  doc.text(tvaExempt ? "TOTAL NET À PAYER" : "TOTAL TTC", totLabelX, y + 7.8, { align: "right" });
+  doc.setTextColor(...INK);
+  doc.text((doc.splitTextToSize(f.depart || "—", innerW * 0.40) as string[])[0], L + 6, mTop + 12.5);
+  doc.setTextColor(...GREY);
+  doc.text("\u2192", L + innerW * 0.41, mTop + 12.5);
+  doc.setTextColor(...INK);
+  doc.text((doc.splitTextToSize(f.arrivee || "—", innerW * 0.32) as string[])[0], L + innerW * 0.44, mTop + 12.5);
 
-  doc.setFontSize(11);
-  doc.setTextColor(...GOLD_SOFT);
-  doc.text(eur(ttc), totValX, y + 7.8, { align: "right" });
+  const missionRef = f.reference_client?.trim() && /^MIS-/i.test(f.reference_client) ? f.reference_client : f.numero.replace(/^FAC-/, "MIS-");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(...BLUE);
+  doc.text(missionRef, R - 6, mTop + 12.5, { align: "right" });
 
-  // N° de PO mis en avant, à gauche du bloc "TOTAL NET À PAYER"
-  const poRefMain = f.reference_client?.trim();
-  const poLabelMain = f.reference_label?.trim() || "N° de PO";
-  if (poRefMain) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text(poLabelMain.toUpperCase(), M, y + 4);
+  if (hasVeh) {
+    doc.setDrawColor(...RULE);
+    doc.line(L + 6, mTop + 18, R - 6, mTop + 18);
+    smallLabel("VÉHICULE", L + 6, mTop + 23.5);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...NAVY);
-    doc.text(poRefMain, M, y + 11.5);
-  }
-  y += 18;
-
-
-  // ===== Statut / modalités / signature =====
-  const fh = 22;
-  const contentBottom = pageH - M - fh - 8;
-  const ensure = (need: number) => {
-    if (y + need > contentBottom) {
-      doc.addPage();
-      y = M + 12;
+    doc.setFontSize(9.5);
+    doc.setTextColor(...INK);
+    let vx = L + 6;
+    if (vehLabel) {
+      doc.text(vehLabel, vx, mTop + 30);
+      vx += doc.getTextWidth(vehLabel) + 3.5;
     }
+    if (plaque) vx += drawPlateTag(doc, vx, mTop + 24.8, plaque, 8) + 4;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREY);
+    const extras: string[] = [];
+    if (f.vehicule_vin) extras.push(`VIN ${f.vehicule_vin}`);
+    if (f.km_depart != null) extras.push(`Km départ ${f.km_depart.toLocaleString("fr-FR")}`);
+    if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
+    if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
+    extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, mTop + 34);
+    void vx;
+  }
+
+  // ---------- Prestation ----------
+  let y = mTop + mH + 8;
+
+  smallLabel("PRESTATION", L, y);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7);
+  doc.setTextColor(...GREY);
+  doc.text("MONTANT HT", R, y, { align: "right" });
+  y += 3;
+  doc.setDrawColor(...RULE);
+  doc.line(L, y, R, y);
+  y += 8;
+
+  const mainTitle = f.designation?.trim()
+    || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
+  const mainSub = isPlateau
+    ? "Chargement, arrimage et déchargement du véhicule non roulant, assurance incluse."
+    : `Prestation de convoyage réalisée par conducteur professionnel${f.distance_km ? ` sur ${Math.round(f.distance_km)} km` : ""}, carburant, péages et assurance inclus.`;
+
+  const line = (title: string, sub: string, amount: string) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...INK);
+    doc.text((doc.splitTextToSize(title, innerW - 45) as string[])[0], L, y);
+    doc.setFont("helvetica", "bold");
+    doc.text(amount, R, y, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREY);
+    const subLines = (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2);
+    doc.text(subLines, L, y + 4.8);
+    y += 4.8 + subLines.length * 4.2 + 3;
+    doc.setDrawColor(...RULE);
+    doc.line(L, y, R, y);
+    y += 7;
+
   };
 
-  const modalites: string[] = [];
-  if (isB2B) {
-    modalites.push(`Paiement à ${f.conditions_paiement || "30 jours fin de mois"} date de facture, par virement bancaire.`);
-    modalites.push(`IBAN : ${f.iban || co?.iban || "—"} — BIC : ${f.bic || co?.bic || "—"}`);
-  } else if (isPaid) {
-    modalites.push(`Facture acquittée — réglée par ${f.mode_paiement || "carte bancaire"}${f.paid_at ? ` le ${fmtDateTime(f.paid_at)}` : f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""}.`);
-  } else {
-    modalites.push("Paiement à réception de facture.");
-  }
-  modalites.push("Retard de paiement : pénalités au taux légal + indemnité forfaitaire de 40 € (art. L441-10 du Code de commerce). Pas d'escompte pour paiement anticipé.");
-  if (tvaExempt && exemptionNote) modalites.push(exemptionNote);
-  if (legalMention) modalites.push(legalMention);
-
-  const textW = innerW * 0.6;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  const wrapped = modalites.map((m) => doc.splitTextToSize(`• ${m}`, textW) as string[]);
-  const blockH = 11 + wrapped.reduce((s, l) => s + l.length * 3.5 + 0.8, 0);
-  ensure(Math.max(blockH, 32));
-
-  const blockY = y;
-  // Statut
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...TEXT);
-  doc.text("Statut : ", M, blockY);
-  const sw = doc.getTextWidth("Statut : ");
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...(isPaid ? GREEN : GOLD));
-  doc.text(isPaid ? "PAYÉE" : "À RÉGLER", M + sw, blockY);
-
-  const modY = blockY + 8;
-
-
-  // Modalités
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...NAVY);
-  doc.text("MODALITÉS DE RÈGLEMENT", M, modY);
-  let my = modY + 4.5;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
-  doc.setTextColor(...TEXT);
-  for (const lines of wrapped) {
-    doc.text(lines, M, my);
-    my += lines.length * 3.5 + 0.8;
-  }
-
-  // Signature (colonne droite)
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...TEXT);
-  doc.text(`Pour ${co?.raison_sociale || "Transports Ligneo"}`, rX, blockY, { align: "right" });
-  if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", rX - 32, blockY + 2, 30, 14); } catch {}
-  }
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text(
-    `${co?.signataire_nom || "Olivier G."} — ${co?.signataire_fonction || "Fondateur"}`,
-    rX, blockY + 21, { align: "right" },
+  line(mainTitle, mainSub, eur(ht));
+  line(
+    "État des lieux contradictoire & suivi",
+    "Constat photo départ / arrivée, suivi GPS temps réel et notifications client.",
+    "Inclus",
   );
-  y = Math.max(my, blockY + 26);
+
+  // ---------- Totaux ----------
+  const totLabelX = L + innerW * 0.55;
+  y += 1;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...GREY);
+  doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y);
+  doc.setTextColor(...INK);
+  doc.text(eur(ht), R, y, { align: "right" });
+  y += 6;
+  doc.setTextColor(...GREY);
+  doc.text("TVA", totLabelX, y);
+  doc.setTextColor(...INK);
+  doc.text(tvaExempt ? "Non applicable" : `${eur(tva)} (${tvaTaux} %)`, R, y, { align: "right" });
+  y += 4;
+  doc.setDrawColor(...INK);
+  doc.setLineWidth(0.8);
+  doc.line(totLabelX, y, R, y);
+  doc.setLineWidth(0.3);
+  y += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(...INK);
+  doc.text("Net à payer", totLabelX, y);
+  doc.setTextColor(...(isPaid ? GREEN : INK));
+  doc.setFontSize(14);
+  doc.text(eur(ttc), R, y, { align: "right" });
+  y += 8;
+
+  // ---------- Bandeau règlement ----------
+  const rightTxt = isPaid
+    ? `\u2713 Réglé${f.paid_at ? ` le ${fmtDateTime(f.paid_at)}` : f.date_paiement ? ` le ${fmtDate(f.date_paiement)}` : ""} — aucun montant restant dû`
+    : `\u25CF Montant restant dû : ${eur(ttc)}`;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  const rightW = doc.getTextWidth(rightTxt);
+  doc.setFillColor(...BLUEBOX);
+  doc.roundedRect(L, y, innerW, 11, 2.5, 2.5, "F");
+  doc.setFontSize(9);
+  doc.setTextColor(...INK);
+  const modeTxt = f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement");
+  const echeanceTxt = f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception");
+  const reglement = isPaid ? `Mode de règlement : ${modeTxt}` : `Mode de règlement : ${modeTxt} · Échéance : ${echeanceTxt}`;
+  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 16) as string[])[0], L + 6, y + 7);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...(isPaid ? GREEN : BLUE));
+  doc.text(rightTxt, R - 6, y + 7, { align: "right" });
+  y += 13;
 
 
-  // ===== Pied de page navy (toutes les pages) =====
+  if (isB2B) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GREY);
+    doc.text(`IBAN : ${f.iban || co?.iban || "—"}  ·  BIC : ${f.bic || co?.bic || "—"}`, L, y);
+    y += 8;
+  }
+
+  // ---------- Mentions légales ----------
+  const mentions: string[] = [];
+  if (tvaExempt && exemptionNote) mentions.push(exemptionNote);
+  mentions.push("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée, ainsi qu'une indemnité forfaitaire de 40 € pour frais de recouvrement (articles L441-10 et D441-5 du Code de commerce).");
+  mentions.push("Pas d'escompte pour paiement anticipé. Facture émise en un exemplaire, à conserver.");
+  if (legalMention) mentions.push(legalMention);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
+  const mentionsH = 9.5 + mentionWrapped.reduce((s, l) => s + l.length * 3.8 + 2, 0);
+  if (y + mentionsH > pageH - 22) { doc.addPage(); y = M + 10; }
+  doc.setFillColor(...BOX);
+  doc.roundedRect(L, y, innerW, mentionsH, 2.5, 2.5, "F");
+  smallLabel("MENTIONS LÉGALES", L + 6, y + 7);
+  let my = y + 12.5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(80, 88, 104);
+  for (const lines of mentionWrapped) {
+    doc.text(lines, L + 6, my);
+    my += lines.length * 3.8 + 2;
+  }
+  y += mentionsH;
+
+  // ---------- Pied de page ----------
   const l1 = companyLegalLine1(co);
-  const l2 = companyLegalLine2(co);
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
-    doc.setFillColor(...NAVY);
-    doc.rect(M, pageH - M - fh, innerW, fh, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(...GOLD_SOFT);
-    doc.text((co?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase(), pageW / 2, pageH - M - fh + 7, { align: "center" });
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.3);
+    doc.line(L, pageH - 21, R, pageH - 21);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
-    doc.setTextColor(...WHITE);
-    if (l1) doc.text((doc.splitTextToSize(l1, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 12.5, { align: "center" });
-    if (l2) doc.text((doc.splitTextToSize(l2, innerW - 12) as string[])[0], pageW / 2, pageH - M - fh + 17, { align: "center" });
+    doc.setFontSize(7.5);
+    doc.setTextColor(...GREY);
+    doc.text((doc.splitTextToSize(l1 || "Transports Ligneo · Tours (37)", innerW - 60) as string[])[0], L, pageH - 16);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...BLUE);
+    doc.text(co?.site_web || "www.transportsligneo.fr", R, pageH - 16, { align: "right" });
     if (pages > 1) {
-      doc.setFontSize(6);
-      doc.setTextColor(...GOLD_SOFT);
-      doc.text(`${p}/${pages}`, pageW - M - 4, pageH - M - fh + 17, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...GREY);
+      doc.text(`${p}/${pages}`, pageW / 2, pageH - 16, { align: "center" });
     }
   }
 
+  void signatureData;
   return doc.output("blob");
 }
+
 
 
 
