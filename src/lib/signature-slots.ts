@@ -70,6 +70,35 @@ export const SIGNATURE_DOCS: Record<SignatureDocType, SignatureDocDef> = {
       { slot: "mandataire", label: "Transports Ligneo", hint: "Accepte le mandat" },
     ],
   },
+  edl_livraison: {
+    docType: "edl_livraison",
+    label: "État des lieux — Livraison",
+    slots: [
+      { slot: "convoyeur", label: "Convoyeur" },
+      { slot: "client", label: "Client / représentant" },
+    ],
+  },
+  edl_restitution: {
+    docType: "edl_restitution",
+    label: "État des lieux — Restitution",
+    slots: [
+      { slot: "convoyeur", label: "Convoyeur" },
+      { slot: "client", label: "Client / représentant" },
+    ],
+  },
+  fiche_mission: {
+    docType: "fiche_mission",
+    label: "Fiche de mission",
+    slots: [
+      { slot: "convoyeur_depart", label: "Convoyeur (départ)" },
+      { slot: "convoyeur_livraison", label: "Convoyeur (livraison)" },
+    ],
+  },
+  passage_a_vide: {
+    docType: "passage_a_vide",
+    label: "Attestation de passage à vide",
+    slots: [{ slot: "convoyeur", label: "Convoyeur" }],
+  },
   edl_papier: {
     docType: "edl_papier",
     label: "État des lieux papier",
