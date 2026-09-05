@@ -7603,6 +7603,36 @@ export type Database = {
       }
     }
     Views: {
+      avis_publics: {
+        Row: {
+          commentaire: string | null
+          date_avis: string | null
+          id: string | null
+          nom_affiche_public: string | null
+          note: number | null
+          type_client: string | null
+          ville: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          date_avis?: string | null
+          id?: string | null
+          nom_affiche_public?: string | null
+          note?: number | null
+          type_client?: string | null
+          ville?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          date_avis?: string | null
+          id?: string | null
+          nom_affiche_public?: string | null
+          note?: number | null
+          type_client?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
       trajets_assigned_safe: {
         Row: {
           arrivee: string | null
@@ -8222,6 +8252,7 @@ export type Database = {
       convoyeurs_self_update_allowed: {
         Args: {
           _account_status: string
+          _delai_paiement_defaut: string
           _email: string
           _has_completed_training: boolean
           _id: string
@@ -8491,6 +8522,10 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_owner: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_privileged_writer: { Args: never; Returns: boolean }
       is_public_app_setting_key: { Args: { _key: string }; Returns: boolean }
       is_validated_convoyeur: { Args: { _user_id: string }; Returns: boolean }
@@ -8553,6 +8588,10 @@ export type Database = {
         Returns: undefined
       }
       normalize_mission_numero: { Args: { p_numero: string }; Returns: string }
+      org_member_role_guard: {
+        Args: { _id: string; _new_role: string; _user_id: string }
+        Returns: boolean
+      }
       profiles_self_update_allowed: {
         Args: {
           _account_status: string

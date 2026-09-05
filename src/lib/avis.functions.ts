@@ -14,8 +14,8 @@ export interface AvisPublic {
 
 /**
  * Avis publiés destinés au site public.
- * Lecture via la clé publiable (rôle anonyme) : seules les colonnes d'affichage
- * sont accessibles, jamais le nom réel ni la mission liée.
+ * Lecture via la vue publique `avis_publics` (rôle anonyme) : seules les
+ * colonnes d'affichage sont exposées, jamais le nom réel ni la mission liée.
  */
 export const getAvisPublics = createServerFn({ method: "GET" }).handler(async () => {
   const supabasePublic = createClient<Database>(
@@ -24,10 +24,9 @@ export const getAvisPublics = createServerFn({ method: "GET" }).handler(async ()
     { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
   );
 
-  const { data, error } = await supabasePublic
-    .from("avis_clients")
+  const { data, error } = await (supabasePublic as any)
+    .from("avis_publics")
     .select("id, note, commentaire, nom_affiche_public, ville, type_client, date_avis")
-    .eq("statut", "publie")
     .order("date_avis", { ascending: false })
     .limit(6);
 
