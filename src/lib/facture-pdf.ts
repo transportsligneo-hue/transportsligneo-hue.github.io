@@ -73,6 +73,8 @@ export interface FactureData {
   options?: string[] | null;
   /** Suppléments chiffrés repris du devis (montants TTC). */
   supplements?: Array<{ label: string; montant: number }> | null;
+}
+
 
 
 
