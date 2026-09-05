@@ -97,6 +97,8 @@ export interface FicheMissionData {
   /** Numéro d'assistance 24/7 (sinon téléphone de la société). */
   assistance_tel?: string | null;
   notes?: string | null;
+  /** Signatures capturées (data URL PNG) à imprimer dans les cadres. */
+  signatures?: { convoyeur_depart?: string | null; convoyeur_livraison?: string | null };
 }
 
 /** Fiche de mission — mise en page compacte deux colonnes, garantie sur UNE page. */
