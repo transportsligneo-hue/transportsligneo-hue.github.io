@@ -39,17 +39,33 @@ function signatureBlocks(
   left: string,
   right: string,
   height = 24,
+  images?: { left?: string | null; right?: string | null },
 ): number {
   y = docEnsureSpace(doc, y, height + 6);
+  const boxW = (pageW - 32) / 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
-  doc.rect(14, y, (pageW - 32) / 2, height, "S");
-  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, height, "S");
+  doc.rect(14, y, boxW, height, "S");
+  doc.rect(pageW / 2 + 2, y, boxW, height, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
   doc.text(left, 18, y + 6);
   doc.text(right, pageW / 2 + 6, y + 6);
+
+  /* Signatures capturées (PC, téléphone ou OTP) intégrées dans les cadres. */
+  const sigW = Math.min(46, boxW - 10);
+  const sigH = Math.min(15, height - 9);
+  const place = (data: string | null | undefined, x: number) => {
+    if (!data || !data.startsWith("data:image")) return;
+    try {
+      doc.addImage(data, "PNG", x, y + height - sigH - 2, sigW, sigH, undefined, "FAST");
+    } catch {
+      /* signature illisible : on laisse le cadre vierge */
+    }
+  };
+  place(images?.left, 18);
+  place(images?.right, pageW / 2 + 6);
   return y;
 }
 
