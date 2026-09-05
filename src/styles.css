@@ -8749,3 +8749,16 @@ select {
 [data-admin-drawer] textarea::placeholder {
   color: #94a3b8 !important;
 }
+
+/* Filet de sécurité : tout ancien texte prévu pour un fond sombre reste lisible
+   dans le corps et le pied désormais clairs des volets administrateur. */
+[data-admin-drawer] :where(.admin-drawer-body, .admin-drawer-footer) [class*="text-white"] {
+  color: var(--admin-drawer-text) !important;
+}
+[data-admin-drawer] :where(.admin-drawer-body, .admin-drawer-footer) [class*="text-white/"] {
+  color: var(--admin-drawer-muted) !important;
+}
+[data-admin-drawer] .admin-btn-blue,
+[data-admin-drawer] .admin-btn-blue [class*="text-white"] {
+  color: #ffffff !important;
+}

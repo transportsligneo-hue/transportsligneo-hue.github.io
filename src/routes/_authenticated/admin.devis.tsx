@@ -38,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/admin/devis")({
 
 interface DevisRow {
   id: string;
+  user_id: string | null;
   numero: string;
   nom: string;
   prenom: string;
@@ -908,6 +909,17 @@ function DevisDrawer({
         </DrawerGrid>
       </DrawerSection>
 
+      <DrawerSection title="Compte client" icon={<User size={12} />}>
+        <div className="mb-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs leading-relaxed text-slate-700">
+          Un devis créé sans compte devient automatiquement visible si son adresse email correspond ensuite à celle d’un compte client. Vous pouvez toujours choisir ou changer explicitement le compte avec le bouton ci-dessous.
+        </div>
+        <AttachClientDialog
+          devisId={devis.id}
+          currentEmail={devis.email}
+          triggerLabel="Rattacher / changer le compte client"
+        />
+      </DrawerSection>
+
       <DrawerSection title="Acceptation & signature" icon={<PenLine size={12} />}>
         {acceptation ? (
           <div className="space-y-3">
@@ -918,7 +930,7 @@ function DevisDrawer({
               <DrawerField label="Version signée" value={`v${acceptation.devis_version ?? 1}`} />
             </DrawerGrid>
             {acceptation.user_agent && (
-              <p className="text-[10px] text-white/40 break-all">UA : {acceptation.user_agent}</p>
+              <p className="break-all text-[10px] text-slate-500">UA : {acceptation.user_agent}</p>
             )}
             <div className="flex gap-2 flex-wrap">
               {proofUrls.signature && (
@@ -928,14 +940,14 @@ function DevisDrawer({
                 </a>
               )}
               {proofUrls.pdf && (
-                <a href={proofUrls.pdf} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-2 rounded border border-white/15 text-white/80 text-xs hover:border-blue-400/50 transition">
+                <a href={proofUrls.pdf} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded border border-slate-200 px-3 py-2 text-xs text-slate-700 transition hover:border-blue-400">
                   <FileText size={12} /> PDF figé signé
                 </a>
               )}
             </div>
           </div>
         ) : (
-          <p className="text-xs text-white/50">Pas encore accepté ni signé par le client.</p>
+          <p className="text-xs text-slate-600">Pas encore accepté ni signé par le client.</p>
         )}
       </DrawerSection>
 
@@ -970,7 +982,7 @@ function DevisDrawer({
         </DrawerGrid>
         {(devis.carte_grise_recto_url || devis.carte_grise_verso_url) && (
           <div className="mt-3">
-            <p className="text-[10px] uppercase tracking-wider text-white/45 mb-2">Carte grise</p>
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">Carte grise</p>
             <CarteGriseLinks recto={devis.carte_grise_recto_url} verso={devis.carte_grise_verso_url} />
           </div>
         )}
@@ -987,14 +999,14 @@ function DevisDrawer({
 
       <DrawerSection title="Tarification">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="text-xs uppercase tracking-wider text-white/50">Prix estimé TTC</span>
-          <span className="text-3xl font-semibold text-white">{Number(devis.prix_estime).toFixed(2)} €</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-slate-600">Prix estimé TTC</span>
+          <span className="text-3xl font-semibold text-slate-950">{Number(devis.prix_estime).toFixed(2)} €</span>
         </div>
         {devis.locked_at ? (
-          <p className="mt-3 text-xs text-white/50">Ce devis est signé : son montant est verrouillé.</p>
+          <p className="mt-3 text-xs text-slate-600">Ce devis est signé : son montant est verrouillé.</p>
         ) : (
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <label htmlFor={`devis-price-${devis.id}`} className="mb-2 block text-[10px] font-medium uppercase tracking-wider text-white/60">
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <label htmlFor={`devis-price-${devis.id}`} className="mb-2 block text-[10px] font-medium uppercase tracking-wider text-slate-600">
               Modifier le prix TTC
             </label>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -1024,17 +1036,17 @@ function DevisDrawer({
 
       <DrawerSection title="Historique" icon={<History size={12} />}>
         {history === null ? (
-          <Loader2 className="animate-spin text-white/40" size={16} />
+          <Loader2 className="animate-spin text-slate-500" size={16} />
         ) : history.length === 0 ? (
-          <p className="text-xs text-white/50">Aucun événement enregistré.</p>
+          <p className="text-xs text-slate-600">Aucun événement enregistré.</p>
         ) : (
           <div className="space-y-1.5">
             {history.map((h) => (
-              <div key={h.id} className="flex items-center justify-between text-xs border-b border-white/5 pb-1.5">
-                <span className="text-white/80">
+              <div key={h.id} className="flex items-center justify-between gap-3 border-b border-slate-100 pb-1.5 text-xs">
+                <span className="text-slate-800">
                   {h.old_statut ? `${statutLabel(h.old_statut)} → ${statutLabel(h.new_statut)}` : `Créé (${statutLabel(h.new_statut)})`}
                 </span>
-                <span className="text-white/40">{new Date(h.created_at).toLocaleString("fr-FR")}</span>
+                <span className="shrink-0 text-slate-500">{new Date(h.created_at).toLocaleString("fr-FR")}</span>
               </div>
             ))}
           </div>
@@ -1048,22 +1060,10 @@ function DevisDrawer({
         fallbackVin={devis.vin}
       />
 
-      <DrawerSection title="Compte client" icon={<User size={12} />}>
-        <p className="mb-3 text-xs text-slate-500">
-          Rattachez ce devis à un compte client existant, ou créez le compte (l'invitation
-          par email est envoyée, le rattachement fonctionne même avant le choix du mot de passe).
-        </p>
-        <AttachClientDialog
-          devisId={devis.id}
-          currentEmail={devis.email}
-          triggerLabel="Rattacher à un compte client"
-        />
-      </DrawerSection>
-
       <DrawerSection title="Envoi au client" icon={<User size={12} />}>
         <SendDocumentByEmail
           kind="devis"
-          variant="dark"
+          variant="light"
           numero={devis.numero}
           documentId={devis.id}
           defaultEmail={devis.email}
@@ -1084,7 +1084,7 @@ function DevisDrawer({
 
       {devis.message && (
         <DrawerSection title="Message client">
-          <p className="text-sm italic text-white/80">"{devis.message}"</p>
+          <p className="whitespace-pre-wrap text-sm italic text-slate-800">"{devis.message}"</p>
         </DrawerSection>
       )}
 
@@ -1116,11 +1116,11 @@ function CarteGriseLinks({ recto, verso }: { recto: string | null; verso: string
       {(["recto", "verso"] as const).map((k) => {
         const url = urls[k];
         const path = k === "recto" ? recto : verso;
-        if (!path) return <div key={k} className="rounded border border-white/10 bg-white/5 p-3 text-center text-[11px] text-white/40">{k} non fourni</div>;
+        if (!path) return <div key={k} className="rounded border border-slate-200 bg-slate-50 p-3 text-center text-[11px] text-slate-500">{k} non fourni</div>;
         return (
-          <a key={k} href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block rounded border border-white/10 overflow-hidden hover:border-blue-400/50 transition">
-            {url ? <img src={url} alt={`Carte grise ${k}`} className="w-full h-32 object-cover" /> : <div className="h-32 flex items-center justify-center text-white/30 text-xs">Chargement…</div>}
-            <p className="text-[10px] text-center text-white/60 py-1 capitalize">{k}</p>
+          <a key={k} href={url ?? "#"} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded border border-slate-200 transition hover:border-blue-400">
+            {url ? <img src={url} alt={`Carte grise ${k}`} className="h-32 w-full object-cover" /> : <div className="flex h-32 items-center justify-center text-xs text-slate-500">Chargement…</div>}
+            <p className="py-1 text-center text-[10px] capitalize text-slate-600">{k}</p>
           </a>
         );
       })}
