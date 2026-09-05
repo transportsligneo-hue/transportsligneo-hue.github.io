@@ -86,11 +86,13 @@ export function AttachDevisToClientDialog({
   async function attach(d: DevisRow) {
     setBusy(true);
     try {
-      const patch: Record<string, unknown> = { user_id: userId };
-      if (clientEmail) patch.email = clientEmail;
-      if (clientNom) patch.nom = clientNom;
-      if (clientPrenom) patch.prenom = clientPrenom;
-      if (clientTelephone) patch.telephone = clientTelephone;
+      const patch = {
+        user_id: userId,
+        ...(clientEmail ? { email: clientEmail } : {}),
+        ...(clientNom ? { nom: clientNom } : {}),
+        ...(clientPrenom ? { prenom: clientPrenom } : {}),
+        ...(clientTelephone ? { telephone: clientTelephone } : {}),
+      };
 
       const { error } = await supabase.from("devis").update(patch).eq("id", d.id);
       if (error) throw error;
