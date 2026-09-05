@@ -198,7 +198,11 @@ export async function generatePvMissionPdf(
   company?: CompanyInfo | null,
 ): Promise<Blob> {
   const isLiv = variant === "livraison";
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const plateau = !!d.plateau;
+  // Le PV de restitution sur plateau est le plus dense (arrimage + comparaison EDL
+  // + frais additionnels) : il utilise une page allongée, comme le gabarit papier.
+  const PAGE_H = plateau && !isLiv ? 320 : 297;
+  const doc = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H] });
   applyLigneoFonts(doc);
   const c = company ?? (await fetchCompanyInfo());
   const logo = await loadImageAsDataUrl(logoLigneo);
@@ -238,7 +242,6 @@ export async function generatePvMissionPdf(
   doc.text(`Date : ____ / ____ / ${annee}    Heure : ____ h ____`, right, 31.5, { align: "right" });
 
   /* ---------- Bandeaux plateau (véhicule non roulant) ---------- */
-  const plateau = !!d.plateau;
   let ruleY = 35;
   if (plateau) {
     const bh = 6;
@@ -322,7 +325,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Transport sur plateau — contrôles arrimage ---------- */
   if (plateau) {
-    const arH = 29;
+    const arH = plateau && !isLiv ? 27 : 29;
     doc.setFillColor(238, 243, 255);
     doc.setDrawColor(212, 226, 255);
     doc.setLineWidth(0.4);
@@ -354,7 +357,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = plateau ? 16 : 18;
+    const cmpH = plateau ? 15 : 18;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 11.5, c3, "Kilométrage au départ", d.kilometrage_depart);
@@ -422,7 +425,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = plateau ? 29 : isLiv ? 42 : 34;
+  const schH = plateau ? (isLiv ? 29 : 27) : isLiv ? 42 : 34;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -494,7 +497,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = plateau ? 21 : 25;
+    const frH = plateau ? 19 : 25;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -515,7 +518,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = plateau ? 37 : 38;
+  const docsH = plateau ? (isLiv ? 37 : 34) : 38;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
@@ -594,7 +597,7 @@ export async function generatePvMissionPdf(
   doc.text("Nom, date et signature", XR, sigY + 3.6);
 
   /* ---------- Pied de page ---------- */
-  const footY = 283;
+  const footY = PAGE_H - 14;
   doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.3);
   doc.line(M, footY, right, footY);
