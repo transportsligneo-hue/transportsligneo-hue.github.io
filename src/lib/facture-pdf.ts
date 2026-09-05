@@ -473,7 +473,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   y += mentionsH;
 
   // ---------- Pied de page ----------
-  const l1 = companyLegalLine1(co);
+  const siren = toSiren(co?.siret);
+  const l1 = [
+    co?.raison_sociale || "Transports Ligneo",
+    co?.rcs ? `RCS ${co.rcs}` : null,
+    siren ? `SIREN ${siren}` : null,
+    co?.tva_intra ? `TVA ${co.tva_intra}` : null,
+  ].filter(Boolean).join(" — ");
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
