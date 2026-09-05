@@ -308,7 +308,11 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
         const { ensureFactureForDevis, sendFactureDisponibleEmail, markFacturePaidAndSend } =
           await import("@/lib/facture-auto.server");
         if (link.facture_id) {
-          await markFacturePaidAndSend(link.facture_id, { amountCents: link.amount_cents ?? null });
+          await markFacturePaidAndSend(link.facture_id, {
+            amountCents: link.amount_cents ?? null,
+            modePaiement: "Revolut",
+            paidAt: new Date().toISOString(),
+          });
         } else if (link.devis_id) {
           const { data: devis } = await supabaseAdmin
             .from("devis")
@@ -319,6 +323,8 @@ export const refreshPaymentLinkStatus = createServerFn({ method: "POST" })
             const facture = await ensureFactureForDevis(devis, {
               amountCents: link.amount_cents ?? null,
               missionId: link.mission_id ?? null,
+              modePaiement: "Revolut",
+              paidAt: new Date().toISOString(),
             });
             await sendFactureDisponibleEmail(facture);
             if (facture?.["id"]) {
@@ -483,7 +489,7 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
     const { data: link, error } = await context.supabase
       .from("payment_links")
       .select(
-        "id, statut, amount_cents, currency, mission_id, devis_id, facture_id, client_email, client_nom, client_prenom",
+        "id, provider, statut, amount_cents, currency, mission_id, devis_id, facture_id, client_email, client_nom, client_prenom, paid_at",
       )
       .eq("id", data.linkId)
       .single();
@@ -494,6 +500,11 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
     const { ensureFactureForDevis, ensureFactureForMission } = await import(
       "@/lib/facture-auto.server"
     );
+    const paymentOptions = {
+      amountCents: link.amount_cents ?? null,
+      modePaiement: link.provider === "revolut" ? "Revolut" : "Carte bancaire",
+      paidAt: link.paid_at ?? new Date().toISOString(),
+    };
 
     let facture: Record<string, any> | null = null;
     if (link.facture_id) {
@@ -512,7 +523,7 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
         .maybeSingle();
       if (devis) {
         facture = await ensureFactureForDevis(devis, {
-          amountCents: link.amount_cents ?? null,
+          ...paymentOptions,
           missionId: link.mission_id ?? null,
         });
       }
@@ -521,7 +532,7 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
       // Lien rattaché uniquement à une mission : la facture est créée à partir
       // de la mission (via son devis quand il existe), même si elle n'a pas démarré.
       facture = await ensureFactureForMission(link.mission_id, {
-        amountCents: link.amount_cents ?? null,
+        ...paymentOptions,
       });
     }
     if (facture?.["id"] && !link.facture_id) {

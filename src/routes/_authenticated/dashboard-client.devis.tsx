@@ -223,10 +223,6 @@ function MesFacturesEtDevis() {
   const handleDownloadFacture = async (f: FactureRow) => {
     setDownloadingId(f.id);
     try {
-      if (f.pdf_url) {
-        window.open(f.pdf_url, "_blank");
-        return;
-      }
       const blob = await generateFacturePdf({
         numero: f.numero,
         type_facture: f.type_facture,

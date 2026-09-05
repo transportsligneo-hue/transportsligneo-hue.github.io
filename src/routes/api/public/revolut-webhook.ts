@@ -81,6 +81,8 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
             if (link?.facture_id) {
               await markFacturePaidAndSend(link.facture_id, {
                 amountCents: link.amount_cents ?? null,
+                modePaiement: "Revolut",
+                paidAt: payload?.timestamp ?? new Date().toISOString(),
               });
             } else if (link?.devis_id) {
               const { data: devis } = await supabaseAdmin
@@ -100,7 +102,8 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
                 const facture = await ensureFactureForDevis(devis, {
                   amountCents: link.amount_cents ?? null,
                   missionId: link.mission_id ?? null,
-                  modePaiement: "carte",
+                    modePaiement: "Revolut",
+                    paidAt: payload?.timestamp ?? new Date().toISOString(),
                 });
                 await sendFactureDisponibleEmail(facture);
                 if (facture?.["id"] && link.id) {

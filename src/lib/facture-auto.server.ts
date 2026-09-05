@@ -3,6 +3,7 @@
 // encore, puis envoyée immédiatement au client par email.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendTransactionalEmailServer } from "@/server/email-send";
+import { parseDevisPrestationLabel, parseDevisSupplements } from "@/lib/devis-pdf";
 
 export type FactureRow = Record<string, any>;
 
@@ -34,6 +35,23 @@ export interface EnsureFactureOptions {
   sessionId?: string | null;
   paymentIntentId?: string | null;
   modePaiement?: string;
+  paidAt?: string | null;
+}
+
+function factureDesignationFromDevis(devis: FactureRow): string {
+  const vehiculeLabel = [devis["marque"], devis["modele"]].filter(Boolean).join(" ");
+  const parsed = parseDevisSupplements(devis["message"]);
+  const prestationLabel = parseDevisPrestationLabel(devis["message"]);
+  const prestation = parsed.plateau
+    ? prestationLabel || "Transport sur plateau porte-voiture"
+    : "Convoyage automobile par conducteur professionnel";
+  return [
+    prestation,
+    vehiculeLabel || null,
+    devis["option_trajet"] === "aller_retour" ? "Livraison + restitution" : "Livraison simple",
+  ]
+    .filter(Boolean)
+    .join(" — ");
 }
 
 /**
@@ -78,14 +96,28 @@ export async function ensureFactureForDevis(
 
   const existing = await findFactureForDevis(devis, options.sessionId ?? null);
   if (existing) {
-    // La mission a pu être créée après coup : on complète le lien si besoin.
-    const patch: Record<string, unknown> = {};
+    // Une facture déjà créée reste synchronisée avec la dernière version du devis.
+    const paidAt = options.paidAt ?? existing["paid_at"] ?? new Date().toISOString();
+    const patch: Record<string, unknown> = {
+      designation: factureDesignationFromDevis(devis),
+      depart: devis["depart"] ?? existing["depart"] ?? null,
+      arrivee: devis["arrivee"] ?? existing["arrivee"] ?? null,
+      mode_paiement: options.modePaiement ?? existing["mode_paiement"] ?? "Carte bancaire",
+      date_paiement: paidAt.slice(0, 10),
+      paid_at: paidAt,
+      statut: "payee",
+      pdf_url: null,
+      updated_at: new Date().toISOString(),
+    };
     if (links.missionId && !existing["mission_id"]) patch["mission_id"] = links.missionId;
     if (attributionId && !existing["attribution_id"]) patch["attribution_id"] = attributionId;
-    if (Object.keys(patch).length) {
-      await supabaseAdmin.from("factures").update(patch as never).eq("id", existing["id"]);
-    }
-    return existing;
+    const { data: refreshed } = await supabaseAdmin
+      .from("factures")
+      .update(patch as never)
+      .eq("id", existing["id"])
+      .select("*")
+      .maybeSingle();
+    return (refreshed ?? { ...existing, ...patch }) as FactureRow;
   }
 
 
@@ -96,14 +128,8 @@ export async function ensureFactureForDevis(
   const factureNumero = /^DEV-TLG-\d{4}-#?\d{3}$/.test(devis["numero"] ?? "")
     ? String(devis["numero"]).replace("DEV-TLG", "FAC-TLG")
     : undefined;
-  const vehiculeLabel = [devis["marque"], devis["modele"]].filter(Boolean).join(" ");
-  const designation = [
-    "Convoyage automobile par conducteur professionnel",
-    vehiculeLabel || null,
-    devis["option_trajet"] === "aller_retour" ? "Livraison + restitution" : "Livraison simple",
-  ]
-    .filter(Boolean)
-    .join(" — ");
+  const designation = factureDesignationFromDevis(devis);
+  const paidAt = options.paidAt ?? new Date().toISOString();
 
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")
@@ -128,9 +154,9 @@ export async function ensureFactureForDevis(
       prix_tva: prixTva,
       prix_ttc: prixTtc,
       statut: "payee",
-      mode_paiement: options.modePaiement ?? "carte",
-      date_paiement: new Date().toISOString().slice(0, 10),
-      paid_at: new Date().toISOString(),
+      mode_paiement: options.modePaiement ?? "Carte bancaire",
+      date_paiement: paidAt.slice(0, 10),
+      paid_at: paidAt,
       amount_paid_cents: amountCents || Math.round(prixTtc * 100),
       stripe_session_id: options.sessionId ?? null,
       stripe_payment_intent_id: options.paymentIntentId ?? null,
@@ -189,22 +215,19 @@ export async function markFacturePaidAndSend(
     .maybeSingle();
   if (!facture) return;
 
-  const already = facture["paid_at"] || facture["statut"] === "payee";
-  if (!already) {
-    await supabaseAdmin
-      .from("factures")
-      .update({
-        statut: "payee",
-        mode_paiement: options.modePaiement ?? "carte",
-        date_paiement: new Date().toISOString().slice(0, 10),
-        paid_at: new Date().toISOString(),
-        amount_paid_cents: options.amountCents ?? facture["amount_paid_cents"] ?? null,
-        updated_at: new Date().toISOString(),
-      } as never)
-      .eq("id", factureId);
-  }
+  const paidAt = options.paidAt ?? facture["paid_at"] ?? new Date().toISOString();
+  const patch = {
+    statut: "payee",
+    mode_paiement: options.modePaiement ?? facture["mode_paiement"] ?? "Carte bancaire",
+    date_paiement: paidAt.slice(0, 10),
+    paid_at: paidAt,
+    amount_paid_cents: options.amountCents ?? facture["amount_paid_cents"] ?? null,
+    pdf_url: null,
+    updated_at: new Date().toISOString(),
+  };
+  await supabaseAdmin.from("factures").update(patch as never).eq("id", factureId);
 
-  await sendFactureDisponibleEmail({ ...facture, statut: "payee" });
+  await sendFactureDisponibleEmail({ ...facture, ...patch });
 }
 
 /**
@@ -258,8 +281,12 @@ export async function ensureFactureForMission(
   const prixHt = Math.round((prixTtc / 1.2) * 100) / 100;
   const prixTva = Math.round((prixTtc - prixHt) * 100) / 100;
   const vehiculeLabel = [trajet["marque"], trajet["modele"]].filter(Boolean).join(" ");
+  const prestation = trajet["non_roulant"]
+    ? "Transport sur plateau porte-voiture"
+    : "Convoyage automobile par conducteur professionnel";
   const numeroMission =
     (attr as any)?.numero_mission ?? trajet["numero_mission"] ?? null;
+  const paidAt = options.paidAt ?? new Date().toISOString();
 
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")
@@ -273,7 +300,7 @@ export async function ensureFactureForMission(
       date_mission: trajet["date_trajet"] ?? null,
       depart: trajet["depart"] ?? null,
       arrivee: trajet["arrivee"] ?? null,
-      designation: ["Convoyage automobile par conducteur professionnel", vehiculeLabel || null]
+      designation: [prestation, vehiculeLabel || null]
         .filter(Boolean)
         .join(" — "),
       reference_label: numeroMission ? "Mission" : trajet["commande_ref"] ? "N° de PO" : null,
@@ -283,9 +310,9 @@ export async function ensureFactureForMission(
       prix_tva: prixTva,
       prix_ttc: prixTtc,
       statut: "payee",
-      mode_paiement: options.modePaiement ?? "carte",
-      date_paiement: new Date().toISOString().slice(0, 10),
-      paid_at: new Date().toISOString(),
+      mode_paiement: options.modePaiement ?? "Carte bancaire",
+      date_paiement: paidAt.slice(0, 10),
+      paid_at: paidAt,
       amount_paid_cents: amountCents || Math.round(prixTtc * 100),
     } as never)
     .select("*")

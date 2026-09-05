@@ -138,6 +138,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const isB2B = f.type_facture === "b2b";
   const isPaid = f.statut === "payee" || !!f.date_paiement;
+  const isPlateau = /plateau|porte-voiture/i.test(f.designation ?? "");
   const tvaTaux = tvaExempt ? 0 : (f.tva_taux ?? 20);
   // En franchise en base (micro), le montant net à payer est le prix affiché au client.
   const ht = tvaExempt ? Number(f.prix_ttc ?? f.prix_ht) : Number(f.prix_ht);
@@ -296,7 +297,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const distance = f.distance_km ?? 0;
   const mainDesc = [
     f.designation || `Convoyage routier${f.depart && f.arrivee ? ` ${f.depart.split(",")[0]} - ${f.arrivee.split(",")[0]}` : ""}${distance ? ` (${distance} km)` : ""}`,
-    "Inclus : carburant, péages, assurance tous risques",
+    isPlateau
+      ? "Transport du véhicule non roulant sur porte-voiture — chargement, arrimage et déchargement"
+      : "Inclus : carburant, péages, assurance tous risques",
   ].join(" — ");
   const rows: { desc: string; qty: string; unit: string; total: string; free?: boolean }[] = [
     { desc: mainDesc, qty: "1", unit: eur(ht), total: eur(ht) },
