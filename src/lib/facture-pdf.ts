@@ -419,8 +419,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const mainTitle = f.designation?.trim()
     || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
   const mainSub = isPlateau
-    ? "Chargement, arrimage et déchargement du véhicule non roulant, assurance incluse."
-    : `Prestation de convoyage réalisée par conducteur professionnel${f.distance_km ? ` sur ${Math.round(f.distance_km)} km` : ""}, carburant, péages et assurance inclus.`;
+    ? `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""} — véhicule non roulant transporté sur plateau porte-voiture (non conduit).`
+    : `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""}. Carburant, péages et assurance tous risques inclus.`;
 
   const line = (title: string, sub: string, amount: string) => {
     doc.setFont("helvetica", "normal");
@@ -432,26 +432,25 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
-    const subLines = (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2);
-    doc.text(subLines, L, y + 4.8);
-    y += 4.8 + subLines.length * 4.2 + 3;
+    const subLines = sub ? (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2) : [];
+    if (subLines.length) doc.text(subLines, L, y + 4.8);
+    y += (subLines.length ? 4.8 + subLines.length * 4.2 : 2) + 3;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
     y += 7;
 
   };
 
-  line(mainTitle, mainSub, eur(ht));
+  // Détail strictement identique au devis : mêmes libellés, mêmes montants.
+  line(mainTitle, mainSub, eur(baseHt));
+  supplements.forEach((s) => line(s.label, "", eur(toHt(Number(s.montant)))));
+  optionsList.forEach((o) => line(`Option : ${o}`, "", "Inclus"));
   line(
-    "État des lieux contradictoire & suivi",
-    "Constat photo départ / arrivée, suivi GPS temps réel et notifications client.",
+    "État des lieux numérique et suivi de mission",
+    "Photos horodatées et signature électronique au départ et à l'arrivée, suivi GPS et notifications client.",
     "Inclus",
   );
-  line(
-    "Assurance, chargement & déchargement",
-    "Assurance tous risques marchandises transportées incluse, chargement, arrimage et déchargement du véhicule pris en charge par nos soins.",
-    "Inclus",
-  );
+
 
   // ---------- Totaux ----------
   const totLabelX = L + innerW * 0.55;
