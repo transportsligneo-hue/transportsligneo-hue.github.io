@@ -309,7 +309,7 @@ export async function generatePvMissionPdf(
   const x2 = M + 6 + c3 + 4;
   const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  const vehH = isLiv ? 28 : 26;
+  const vehH = plateau ? (isLiv ? 26 : 24) : isLiv ? 28 : 26;
   panel(doc, M, y, W, vehH);
   panelTitle(doc, M + 6, y + 6.5, "Véhicule");
   field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
@@ -319,6 +319,38 @@ export async function generatePvMissionPdf(
   field(doc, x2, y + vehH - 7, c3, isLiv ? "Kilométrage à la livraison" : "Kilométrage à la restitution", d.kilometrage_arrivee);
   field(doc, x3, y + vehH - 7, c3, "Niveau carburant / batterie", d.carburant);
   y += vehH + sp;
+
+  /* ---------- Transport sur plateau — contrôles arrimage ---------- */
+  if (plateau) {
+    const arH = isLiv ? 25 : 24;
+    doc.setFillColor(238, 243, 255);
+    doc.setDrawColor(212, 226, 255);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(M, y, W, arH, 2.2, 2.2, "FD");
+    panelTitle(doc, M + 6, y + 6, "Transport sur plateau — contrôles arrimage", BLUE);
+    let ay = y + 10.5;
+    (isLiv ? ARRIMAGE_LIVRAISON : ARRIMAGE_RESTITUTION).forEach((label) => {
+      checkbox(doc, M + 6, ay - 2.6, 3.2);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.6);
+      doc.setTextColor(...TEXT);
+      doc.text(label, M + 12, ay);
+      ay += 3.6;
+    });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.4);
+    doc.setTextColor(...TEXT);
+    const lab = "Transporteur / N° plateau :";
+    doc.text(lab, M + 6, y + arH - 3.5);
+    const lx = M + 6 + doc.getTextWidth(lab) + 2;
+    const num = (d.plateau_numero ?? "").trim();
+    if (num) doc.text(num, lx + 1, y + arH - 3.5);
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.25);
+    doc.line(lx, y + arH - 2.8, M + W - 6, y + arH - 2.8);
+    y += arH + sp;
+  }
+
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
