@@ -369,6 +369,8 @@ export async function ensureFacture(
       },
       reference_client: refClient ?? undefined,
       reference_label: refClient ? refLabel : undefined,
+      // Une donnée modifiée invalide toujours l'ancien document figé.
+      pdf_url: null,
     };
     const { error: updateError } = await supabase
       .from("factures")

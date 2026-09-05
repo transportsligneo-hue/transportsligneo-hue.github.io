@@ -37,6 +37,15 @@ export interface EnsureFactureOptions {
   paidAt?: string | null;
 }
 
+function normalizePaidAt(value?: string | null): string {
+  if (!value) return new Date().toISOString();
+  const numeric = /^\d{10,13}$/.test(value) ? Number(value) : null;
+  const date = numeric === null
+    ? new Date(value)
+    : new Date(value.length === 10 ? numeric * 1000 : numeric);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+}
+
 function factureDesignationFromDevis(devis: FactureRow): string {
   const vehiculeLabel = [devis["marque"], devis["modele"]].filter(Boolean).join(" ");
   const message = String(devis["message"] ?? "");
@@ -97,7 +106,7 @@ export async function ensureFactureForDevis(
   const existing = await findFactureForDevis(devis, options.sessionId ?? null);
   if (existing) {
     // Une facture déjà créée reste synchronisée avec la dernière version du devis.
-    const paidAt = options.paidAt ?? existing["paid_at"] ?? new Date().toISOString();
+    const paidAt = normalizePaidAt(options.paidAt ?? existing["paid_at"] ?? null);
     const patch: Record<string, unknown> = {
       designation: factureDesignationFromDevis(devis),
       depart: devis["depart"] ?? existing["depart"] ?? null,
@@ -129,7 +138,7 @@ export async function ensureFactureForDevis(
     ? String(devis["numero"]).replace("DEV-TLG", "FAC-TLG")
     : undefined;
   const designation = factureDesignationFromDevis(devis);
-  const paidAt = options.paidAt ?? new Date().toISOString();
+  const paidAt = normalizePaidAt(options.paidAt);
 
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")
@@ -215,7 +224,7 @@ export async function markFacturePaidAndSend(
     .maybeSingle();
   if (!facture) return;
 
-  const paidAt = options.paidAt ?? facture["paid_at"] ?? new Date().toISOString();
+  const paidAt = normalizePaidAt(options.paidAt ?? facture["paid_at"] ?? null);
   const patch = {
     statut: "payee",
     mode_paiement: options.modePaiement ?? facture["mode_paiement"] ?? "Carte bancaire",
@@ -286,7 +295,7 @@ export async function ensureFactureForMission(
     : "Convoyage automobile par conducteur professionnel";
   const numeroMission =
     (attr as any)?.numero_mission ?? trajet["numero_mission"] ?? null;
-  const paidAt = options.paidAt ?? new Date().toISOString();
+  const paidAt = normalizePaidAt(options.paidAt);
 
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")

@@ -77,7 +77,10 @@ export const Route = createFileRoute("/api/public/revolut-webhook")({
           try {
             const { ensureFactureForDevis, ensureFactureForMission, sendFactureDisponibleEmail, markFacturePaidAndSend } =
               await import("@/lib/facture-auto.server");
-            const paidAt = typeof payload?.timestamp === "string" ? payload.timestamp : new Date().toISOString();
+            const rawPaidAt = payload?.timestamp;
+            const paidAt = typeof rawPaidAt === "string" || typeof rawPaidAt === "number"
+              ? String(rawPaidAt)
+              : new Date().toISOString();
 
             if (link?.facture_id) {
               await markFacturePaidAndSend(link.facture_id, {
