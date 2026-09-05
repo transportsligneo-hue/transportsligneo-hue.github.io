@@ -243,7 +243,11 @@ export async function ensureFactureForMission(
       .eq("id", trajet["devis_id"])
       .maybeSingle();
     if (devis) {
-      return ensureFactureForDevis(devis as FactureRow, { ...options, missionId });
+      return ensureFactureForDevis(devis as FactureRow, {
+        ...options,
+        missionId: links.missionId,
+        attributionId: links.attributionId,
+      });
     }
   }
 
@@ -260,9 +264,11 @@ export async function ensureFactureForMission(
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")
     .insert({
-      mission_id: missionId,
-      client_email: trajet["client_email"] ?? null,
-      client_nom: trajet["client_nom"] ?? null,
+      mission_id: links.missionId,
+      attribution_id: links.attributionId,
+      client_email: trajet["client_email"] ?? "",
+      client_nom: trajet["client_nom"] ?? "Client",
+
       type_facture: "particulier",
       date_mission: trajet["date_trajet"] ?? null,
       depart: trajet["depart"] ?? null,
