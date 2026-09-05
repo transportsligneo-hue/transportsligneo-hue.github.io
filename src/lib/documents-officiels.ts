@@ -158,7 +158,8 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   const yChecksR = drawChecks(docsDroite, xR);
   y = Math.max(yChecksL, yChecksR) + 2;
 
-  y += 6;
+  y += 4;
+
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
