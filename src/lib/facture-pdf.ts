@@ -2,7 +2,10 @@ import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
 import signatureGo from "@/assets/signature-go.png";
+import { supabase } from "@/integrations/supabase/client";
+import { parseDevisOptions, parseDevisSupplements } from "@/lib/devis-pdf";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
+
 import {
   fetchCompanyInfo,
   companyAddressLine,
@@ -67,7 +70,15 @@ export interface FactureData {
   reference_client?: string | null;
   /** Libellé personnalisé pour la référence externe (défaut : "Référence client"). */
   reference_label?: string | null;
+  /** Récapitulatif du devis d'origine (options, suppléments) — repris tel quel sur la facture. */
+  devis_message?: string | null;
+  /** Options facturées (reprises du devis). */
+  options?: string[] | null;
+  /** Suppléments chiffrés repris du devis (montants TTC). */
+  supplements?: Array<{ label: string; montant: number }> | null;
 }
+
+
 
 
 const NAVY: [number, number, number] = [14, 26, 53];
@@ -159,6 +170,30 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const ht = tvaExempt ? Number(f.prix_ttc ?? f.prix_ht) : Number(f.prix_ht);
   const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
   const ttc = tvaExempt ? ht : Number(f.prix_ttc);
+
+  // ---- Détail repris du devis d'origine (mêmes libellés, mêmes prix) ----
+  let devisMessage = f.devis_message ?? null;
+  if (!devisMessage && f.reference_client && /^DEV-/i.test(f.reference_client)) {
+    try {
+      const { data } = await supabase
+        .from("devis")
+        .select("message")
+        .eq("numero", f.reference_client)
+        .maybeSingle();
+      devisMessage = (data as { message?: string | null } | null)?.message ?? null;
+    } catch { /* détail optionnel */ }
+  }
+  const parsedSupp = parseDevisSupplements(devisMessage);
+  const parsedOpts = parseDevisOptions(devisMessage);
+  const supplements = (f.supplements?.length ? f.supplements : parsedSupp.supplements).filter(
+    (s) => s && Number(s.montant) > 0,
+  );
+  const optionsList = (f.options?.length ? f.options : parsedOpts.options).filter(Boolean);
+  const toHt = (v: number) => (tvaExempt ? v : +(v / (1 + tvaTaux / 100)).toFixed(2));
+  const supplementsTtc = supplements.reduce((s, x) => s + Number(x.montant), 0);
+  const baseHt = Math.max(0, +(ht - toHt(supplementsTtc)).toFixed(2));
+
+
 
 
   // =====================================================================
@@ -287,45 +322,73 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ---------- Mission facturée ----------
+  const AMBER: [number, number, number] = [176, 106, 12];
+  const AMBER_SOFT: [number, number, number] = [255, 243, 224];
+  const BLUE_SOFT: [number, number, number] = [232, 240, 255];
+  const pill = (
+    x: number,
+    y: number,
+    text: string,
+    bg: [number, number, number],
+    ink: [number, number, number],
+  ) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.4);
+    const w = doc.getTextWidth(text) + 5.2;
+    const h = 4.6;
+    doc.setFillColor(...bg);
+    doc.roundedRect(x, y, w, h, h / 2, h / 2, "F");
+    doc.setTextColor(...ink);
+    doc.text(text, x + 2.6, y + 3.2);
+  };
+
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   const plaque = f.vehicule_immatriculation?.trim() || "";
   const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
   smallLabel("MISSION FACTURÉE", L, 93.5);
   const mTop = 96.5;
-  const mH = hasVeh ? 37 : 17;
+  // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
+  const halfW = innerW * 0.42;
+  const departLines = (doc.setFont("helvetica", "bold"), doc.setFontSize(9),
+    (doc.splitTextToSize(f.depart || "—", halfW) as string[]).slice(0, 3));
+  const arriveeLines = (doc.splitTextToSize(f.arrivee || "—", halfW) as string[]).slice(0, 3);
+  const addrRows = Math.max(departLines.length, arriveeLines.length);
+  const addrBlockH = 11 + addrRows * 4.4;
+  const mH = addrBlockH + (hasVeh ? 20 : 3);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
-  smallLabel("ENLÈVEMENT", L + 6, mTop + 6);
-  smallLabel("LIVRAISON", L + innerW * 0.44, mTop + 6);
+  pill(L + 6, mTop + 4, "ENLÈVEMENT", BLUE_SOFT, BLUE);
+  pill(L + innerW * 0.5, mTop + 4, "LIVRAISON", AMBER_SOFT, AMBER);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(f.depart || "—", innerW * 0.40) as string[])[0], L + 6, mTop + 12.5);
+  departLines.forEach((l, i) => doc.text(l, L + 6, mTop + 14 + i * 4.4));
   doc.setTextColor(...GREY);
-  doc.text("\u2192", L + innerW * 0.41, mTop + 12.5);
+  doc.text("\u2192", L + innerW * 0.465, mTop + 14);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(f.arrivee || "—", innerW * 0.32) as string[])[0], L + innerW * 0.44, mTop + 12.5);
+  arriveeLines.forEach((l, i) => doc.text(l, L + innerW * 0.5, mTop + 14 + i * 4.4));
 
   const missionRef = f.reference_client?.trim() && /^MIS-/i.test(f.reference_client) ? f.reference_client : f.numero.replace(/^FAC-/, "MIS-");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(...BLUE);
-  doc.text(missionRef, R - 6, mTop + 12.5, { align: "right" });
+  doc.text(missionRef, R - 6, mTop + 7.2, { align: "right" });
 
   if (hasVeh) {
+    const vTop = mTop + addrBlockH;
     doc.setDrawColor(...RULE);
-    doc.line(L + 6, mTop + 18, R - 6, mTop + 18);
-    smallLabel("VÉHICULE", L + 6, mTop + 23.5);
+    doc.line(L + 6, vTop, R - 6, vTop);
+    smallLabel("VÉHICULE", L + 6, vTop + 5);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
     let vx = L + 6;
     if (vehLabel) {
-      doc.text(vehLabel, vx, mTop + 30);
+      doc.text(vehLabel, vx, vTop + 11.5);
       vx += doc.getTextWidth(vehLabel) + 3.5;
     }
-    if (plaque) vx += drawPlateTag(doc, vx, mTop + 24.8, plaque, 8) + 4;
+    if (plaque) vx += drawPlateTag(doc, vx, vTop + 6.3, plaque, 8) + 4;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -335,9 +398,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, mTop + 34);
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 16);
     void vx;
   }
+
 
   // ---------- Prestation ----------
   let y = mTop + mH + 8;
@@ -355,8 +419,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const mainTitle = f.designation?.trim()
     || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
   const mainSub = isPlateau
-    ? "Chargement, arrimage et déchargement du véhicule non roulant, assurance incluse."
-    : `Prestation de convoyage réalisée par conducteur professionnel${f.distance_km ? ` sur ${Math.round(f.distance_km)} km` : ""}, carburant, péages et assurance inclus.`;
+    ? `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""} — véhicule non roulant transporté sur plateau porte-voiture (non conduit).`
+    : `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""}. Carburant, péages et assurance tous risques inclus.`;
 
   const line = (title: string, sub: string, amount: string) => {
     doc.setFont("helvetica", "normal");
@@ -368,26 +432,25 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
-    const subLines = (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2);
-    doc.text(subLines, L, y + 4.8);
-    y += 4.8 + subLines.length * 4.2 + 3;
+    const subLines = sub ? (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2) : [];
+    if (subLines.length) doc.text(subLines, L, y + 4.8);
+    y += (subLines.length ? 4.8 + subLines.length * 4.2 : 2) + 3;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
     y += 7;
 
   };
 
-  line(mainTitle, mainSub, eur(ht));
+  // Détail strictement identique au devis : mêmes libellés, mêmes montants.
+  line(mainTitle, mainSub, eur(baseHt));
+  supplements.forEach((s) => line(s.label, "", eur(toHt(Number(s.montant)))));
+  optionsList.forEach((o) => line(`Option : ${o}`, "", "Inclus"));
   line(
-    "État des lieux contradictoire & suivi",
-    "Constat photo départ / arrivée, suivi GPS temps réel et notifications client.",
+    "État des lieux numérique et suivi de mission",
+    "Photos horodatées et signature électronique au départ et à l'arrivée, suivi GPS et notifications client.",
     "Inclus",
   );
-  line(
-    "Assurance, chargement & déchargement",
-    "Assurance tous risques marchandises transportées incluse, chargement, arrimage et déchargement du véhicule pris en charge par nos soins.",
-    "Inclus",
-  );
+
 
   // ---------- Totaux ----------
   const totLabelX = L + innerW * 0.55;
