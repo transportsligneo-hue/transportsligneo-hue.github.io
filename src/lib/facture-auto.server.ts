@@ -30,10 +30,37 @@ async function findFactureForDevis(devis: FactureRow, sessionId?: string | null)
 export interface EnsureFactureOptions {
   amountCents?: number | null;
   missionId?: string | null;
+  attributionId?: string | null;
   sessionId?: string | null;
   paymentIntentId?: string | null;
   modePaiement?: string;
 }
+
+/**
+ * `payment_links.mission_id` (et d'autres écrans) référencent parfois une
+ * attribution plutôt qu'une ligne `missions`. On distingue les deux avant
+ * d'écrire les clés étrangères de la facture.
+ */
+export async function resolveFactureLinks(id: string | null | undefined): Promise<{
+  missionId: string | null;
+  attributionId: string | null;
+}> {
+  if (!id) return { missionId: null, attributionId: null };
+  const { data: mission } = await supabaseAdmin
+    .from("missions")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (mission) return { missionId: id, attributionId: null };
+  const { data: attr } = await supabaseAdmin
+    .from("attributions")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+  if (attr) return { missionId: null, attributionId: id };
+  return { missionId: null, attributionId: null };
+}
+
 
 /**
  * Crée (ou retrouve) la facture payée correspondant à un devis réglé.
@@ -46,17 +73,21 @@ export async function ensureFactureForDevis(
 ): Promise<FactureRow | null> {
   if (!devis) return null;
 
+  const links = await resolveFactureLinks(options.missionId ?? null);
+  const attributionId = options.attributionId ?? links.attributionId;
+
   const existing = await findFactureForDevis(devis, options.sessionId ?? null);
   if (existing) {
     // La mission a pu être créée après coup : on complète le lien si besoin.
-    if (options.missionId && !existing["mission_id"]) {
-      await supabaseAdmin
-        .from("factures")
-        .update({ mission_id: options.missionId })
-        .eq("id", existing["id"]);
+    const patch: Record<string, unknown> = {};
+    if (links.missionId && !existing["mission_id"]) patch["mission_id"] = links.missionId;
+    if (attributionId && !existing["attribution_id"]) patch["attribution_id"] = attributionId;
+    if (Object.keys(patch).length) {
+      await supabaseAdmin.from("factures").update(patch as never).eq("id", existing["id"]);
     }
     return existing;
   }
+
 
   const amountCents = Number(options.amountCents ?? 0);
   const prixTtc = Number(devis["prix_estime"] ?? (amountCents ? amountCents / 100 : 0));
@@ -78,7 +109,9 @@ export async function ensureFactureForDevis(
     .from("factures")
     .insert({
       ...(factureNumero && { numero: factureNumero }),
-      mission_id: options.missionId ?? devis["mission_id"] ?? null,
+      mission_id: links.missionId ?? devis["mission_id"] ?? null,
+      attribution_id: attributionId,
+
       client_email: devis["email"],
       client_nom: devis["nom"],
       client_prenom: devis["prenom"],
@@ -184,10 +217,13 @@ export async function ensureFactureForMission(
 ): Promise<FactureRow | null> {
   if (!missionId) return null;
 
+  const links = await resolveFactureLinks(missionId);
+
   const { data: existing } = await supabaseAdmin
     .from("factures")
     .select("*")
-    .eq("mission_id", missionId)
+    .or(`mission_id.eq.${missionId},attribution_id.eq.${missionId}`)
+    .limit(1)
     .maybeSingle();
   if (existing) return existing as FactureRow;
 
@@ -199,6 +235,7 @@ export async function ensureFactureForMission(
   const trajet = (attr as any)?.trajets as Record<string, any> | null;
   if (!trajet) return null;
 
+
   if (trajet["devis_id"]) {
     const { data: devis } = await supabaseAdmin
       .from("devis")
@@ -206,7 +243,11 @@ export async function ensureFactureForMission(
       .eq("id", trajet["devis_id"])
       .maybeSingle();
     if (devis) {
-      return ensureFactureForDevis(devis as FactureRow, { ...options, missionId });
+      return ensureFactureForDevis(devis as FactureRow, {
+        ...options,
+        missionId: links.missionId,
+        attributionId: links.attributionId,
+      });
     }
   }
 
@@ -223,9 +264,11 @@ export async function ensureFactureForMission(
   const { data: inserted, error } = await supabaseAdmin
     .from("factures")
     .insert({
-      mission_id: missionId,
-      client_email: trajet["client_email"] ?? null,
-      client_nom: trajet["client_nom"] ?? null,
+      mission_id: links.missionId,
+      attribution_id: links.attributionId,
+      client_email: trajet["client_email"] ?? "",
+      client_nom: trajet["client_nom"] ?? "Client",
+
       type_facture: "particulier",
       date_mission: trajet["date_trajet"] ?? null,
       depart: trajet["depart"] ?? null,
