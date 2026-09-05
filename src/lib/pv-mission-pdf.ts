@@ -481,13 +481,13 @@ export async function generatePvMissionPdf(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.8);
     doc.setTextColor(...INK);
-    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", M, y + 2);
+    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", M, y + 1.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...TEXT);
     const txt = dommages.map((dm) => [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" ")).join("  ·  ");
-    doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 5.6);
-    y += 8.5;
-  }
+    doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 4.8);
+    y += plateau ? 6 : 8.5;
+
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
