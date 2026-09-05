@@ -322,45 +322,73 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ---------- Mission facturée ----------
+  const AMBER: [number, number, number] = [176, 106, 12];
+  const AMBER_SOFT: [number, number, number] = [255, 243, 224];
+  const BLUE_SOFT: [number, number, number] = [232, 240, 255];
+  const pill = (
+    x: number,
+    y: number,
+    text: string,
+    bg: [number, number, number],
+    ink: [number, number, number],
+  ) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.4);
+    const w = doc.getTextWidth(text) + 5.2;
+    const h = 4.6;
+    doc.setFillColor(...bg);
+    doc.roundedRect(x, y, w, h, h / 2, h / 2, "F");
+    doc.setTextColor(...ink);
+    doc.text(text, x + 2.6, y + 3.2);
+  };
+
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   const plaque = f.vehicule_immatriculation?.trim() || "";
   const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
   smallLabel("MISSION FACTURÉE", L, 93.5);
   const mTop = 96.5;
-  const mH = hasVeh ? 37 : 17;
+  // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
+  const halfW = innerW * 0.42;
+  const departLines = (doc.setFont("helvetica", "bold"), doc.setFontSize(9),
+    (doc.splitTextToSize(f.depart || "—", halfW) as string[]).slice(0, 3));
+  const arriveeLines = (doc.splitTextToSize(f.arrivee || "—", halfW) as string[]).slice(0, 3);
+  const addrRows = Math.max(departLines.length, arriveeLines.length);
+  const addrBlockH = 11 + addrRows * 4.4;
+  const mH = addrBlockH + (hasVeh ? 20 : 3);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
-  smallLabel("ENLÈVEMENT", L + 6, mTop + 6);
-  smallLabel("LIVRAISON", L + innerW * 0.44, mTop + 6);
+  pill(L + 6, mTop + 4, "ENLÈVEMENT", BLUE_SOFT, BLUE);
+  pill(L + innerW * 0.5, mTop + 4, "LIVRAISON", AMBER_SOFT, AMBER);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(f.depart || "—", innerW * 0.40) as string[])[0], L + 6, mTop + 12.5);
+  departLines.forEach((l, i) => doc.text(l, L + 6, mTop + 14 + i * 4.4));
   doc.setTextColor(...GREY);
-  doc.text("\u2192", L + innerW * 0.41, mTop + 12.5);
+  doc.text("\u2192", L + innerW * 0.465, mTop + 14);
   doc.setTextColor(...INK);
-  doc.text((doc.splitTextToSize(f.arrivee || "—", innerW * 0.32) as string[])[0], L + innerW * 0.44, mTop + 12.5);
+  arriveeLines.forEach((l, i) => doc.text(l, L + innerW * 0.5, mTop + 14 + i * 4.4));
 
   const missionRef = f.reference_client?.trim() && /^MIS-/i.test(f.reference_client) ? f.reference_client : f.numero.replace(/^FAC-/, "MIS-");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(...BLUE);
-  doc.text(missionRef, R - 6, mTop + 12.5, { align: "right" });
+  doc.text(missionRef, R - 6, mTop + 7.2, { align: "right" });
 
   if (hasVeh) {
+    const vTop = mTop + addrBlockH;
     doc.setDrawColor(...RULE);
-    doc.line(L + 6, mTop + 18, R - 6, mTop + 18);
-    smallLabel("VÉHICULE", L + 6, mTop + 23.5);
+    doc.line(L + 6, vTop, R - 6, vTop);
+    smallLabel("VÉHICULE", L + 6, vTop + 5);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
     let vx = L + 6;
     if (vehLabel) {
-      doc.text(vehLabel, vx, mTop + 30);
+      doc.text(vehLabel, vx, vTop + 11.5);
       vx += doc.getTextWidth(vehLabel) + 3.5;
     }
-    if (plaque) vx += drawPlateTag(doc, vx, mTop + 24.8, plaque, 8) + 4;
+    if (plaque) vx += drawPlateTag(doc, vx, vTop + 6.3, plaque, 8) + 4;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -370,9 +398,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, mTop + 34);
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 16);
     void vx;
   }
+
 
   // ---------- Prestation ----------
   let y = mTop + mH + 8;
