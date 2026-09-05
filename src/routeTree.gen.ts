@@ -185,6 +185,7 @@ import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from '
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedConvoyeurFormationFaqRouteImport } from './routes/_authenticated/convoyeur.formation.faq'
 import { Route as AuthenticatedConvoyeurFormationDocumentsRouteImport } from './routes/_authenticated/convoyeur.formation.documents'
+import { Route as AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport } from './routes/_authenticated/convoyeur.documents-mission.$attributionId'
 import { Route as AuthenticatedAdminOrganisationsOrgIdRouteImport } from './routes/_authenticated/admin.organisations.$orgId'
 import { Route as AuthenticatedAdminMissionsMissionIdRouteImport } from './routes/_authenticated/admin.missions.$missionId'
 import { Route as AuthenticatedAdminDevisDevisIdRouteImport } from './routes/_authenticated/admin.devis.$devisId'
@@ -1186,6 +1187,12 @@ const AuthenticatedConvoyeurFormationDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedConvoyeurFormationRoute,
   } as any)
+const AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute =
+  AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport.update({
+    id: '/documents-mission/$attributionId',
+    path: '/documents-mission/$attributionId',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
 const AuthenticatedAdminOrganisationsOrgIdRoute =
   AuthenticatedAdminOrganisationsOrgIdRouteImport.update({
     id: '/$orgId',
@@ -1434,6 +1441,7 @@ export interface FileRoutesByFullPath {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1618,6 +1626,7 @@ export interface FileRoutesByTo {
   '/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -1813,6 +1822,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/devis/$devisId': typeof AuthenticatedAdminDevisDevisIdRoute
   '/_authenticated/admin/missions/$missionId': typeof AuthenticatedAdminMissionsMissionIdRoute
   '/_authenticated/admin/organisations/$orgId': typeof AuthenticatedAdminOrganisationsOrgIdRoute
+  '/_authenticated/convoyeur/documents-mission/$attributionId': typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
   '/_authenticated/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/_authenticated/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
@@ -2008,6 +2018,7 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/documents-mission/$attributionId'
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
@@ -2192,6 +2203,7 @@ export interface FileRouteTypes {
     | '/admin/devis/$devisId'
     | '/admin/missions/$missionId'
     | '/admin/organisations/$orgId'
+    | '/convoyeur/documents-mission/$attributionId'
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
@@ -2386,6 +2398,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/devis/$devisId'
     | '/_authenticated/admin/missions/$missionId'
     | '/_authenticated/admin/organisations/$orgId'
+    | '/_authenticated/convoyeur/documents-mission/$attributionId'
     | '/_authenticated/convoyeur/formation/documents'
     | '/_authenticated/convoyeur/formation/faq'
     | '/_authenticated/dashboard-client/missions/$missionId'
@@ -3750,6 +3763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConvoyeurFormationDocumentsRouteImport
       parentRoute: typeof AuthenticatedConvoyeurFormationRoute
     }
+    '/_authenticated/convoyeur/documents-mission/$attributionId': {
+      id: '/_authenticated/convoyeur/documents-mission/$attributionId'
+      path: '/documents-mission/$attributionId'
+      fullPath: '/convoyeur/documents-mission/$attributionId'
+      preLoaderRoute: typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
     '/_authenticated/admin/organisations/$orgId': {
       id: '/_authenticated/admin/organisations/$orgId'
       path: '/$orgId'
@@ -4057,6 +4077,7 @@ interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
   AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
   AuthenticatedConvoyeurIndexRoute: typeof AuthenticatedConvoyeurIndexRoute
+  AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute: typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
 }
 
 const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
@@ -4075,6 +4096,8 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
     AuthenticatedConvoyeurProfilRoute: AuthenticatedConvoyeurProfilRoute,
     AuthenticatedConvoyeurIndexRoute: AuthenticatedConvoyeurIndexRoute,
+    AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute:
+      AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute,
   }
 
 const AuthenticatedConvoyeurRouteWithChildren =

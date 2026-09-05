@@ -11,17 +11,11 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailServer } from '@/server/email-send'
 import { sendConvoyeurPush } from '@/lib/push/driver-push.server'
+import { REGLES_SECURITE_CONVOYEUR } from '@/lib/mission-securite'
 
 const SITE_URL = 'https://transportsligneo.fr'
 
-/** Règles de sécurité — reprises telles quelles de la checklist convoyeur existante. */
-export const REGLES_SECURITE_CONVOYEUR = [
-  'Gilet jaune haute visibilité à bord et porté avant d’approcher le véhicule ou en cas d’arrêt sur la voie publique.',
-  'Kit de sécurité complet dans le véhicule : triangle de signalisation + gilet.',
-  'Permis de conduire original en cours de validité, en votre possession.',
-  'Documents de conduite à jour : assurance du véhicule utilisé pour vous rendre sur place.',
-  'Tenue correcte et professionnelle, conforme à la charte de présentation (survêtement proscrit).',
-]
+
 
 type TrajetLite = {
   id: string
@@ -176,7 +170,7 @@ export async function sendMissionReminder(
       roulant: t.non_roulant
         ? 'Véhicule NON roulant — plateau à prévoir'
         : 'Véhicule roulant',
-      securite: REGLES_SECURITE_CONVOYEUR,
+      securite: [...REGLES_SECURITE_CONVOYEUR],
       documents: docsForMission(t),
       docsUrl,
       appUrl,
