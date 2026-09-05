@@ -4767,7 +4767,8 @@ export type Database = {
           signature_data: string
           signed_at: string
           signed_by_user_id: string | null
-          signer_name: string
+          signer_name: string | null
+          source: string
         }
         Insert: {
           attribution_id: string
@@ -4779,7 +4780,8 @@ export type Database = {
           signature_data: string
           signed_at?: string
           signed_by_user_id?: string | null
-          signer_name: string
+          signer_name?: string | null
+          source?: string
         }
         Update: {
           attribution_id?: string
@@ -4791,7 +4793,8 @@ export type Database = {
           signature_data?: string
           signed_at?: string
           signed_by_user_id?: string | null
-          signer_name?: string
+          signer_name?: string | null
+          source?: string
         }
         Relationships: []
       }
