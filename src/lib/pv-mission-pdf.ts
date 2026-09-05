@@ -261,7 +261,7 @@ export async function generatePvMissionPdf(
     doc.circle(x1b + 5, by + 3, 1.1, "F");
     doc.setTextColor(190, 32, 48);
     doc.text(t1, x1b + 8, by + 4.1);
-    ruleY = 42.5;
+    ruleY = 41;
   }
 
   doc.setDrawColor(...NAVY);
@@ -280,7 +280,7 @@ export async function generatePvMissionPdf(
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
     [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur/locataire)", d.destinataire ?? null],
   ];
-  const partH = plateau ? (isLiv ? 18 : 16) : isLiv ? 21 : 18;
+  const partH = plateau ? 15.5 : isLiv ? 21 : 18;
 
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
@@ -309,7 +309,7 @@ export async function generatePvMissionPdf(
   const x2 = M + 6 + c3 + 4;
   const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  const vehH = plateau ? (isLiv ? 26 : 24) : isLiv ? 28 : 26;
+  const vehH = plateau ? 28 : isLiv ? 28 : 26;
   panel(doc, M, y, W, vehH);
   panelTitle(doc, M + 6, y + 6.5, "Véhicule");
   field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
@@ -322,7 +322,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Transport sur plateau — contrôles arrimage ---------- */
   if (plateau) {
-    const arH = isLiv ? 25 : 24;
+    const arH = 28;
     doc.setFillColor(238, 243, 255);
     doc.setDrawColor(212, 226, 255);
     doc.setLineWidth(0.4);
@@ -335,7 +335,7 @@ export async function generatePvMissionPdf(
       doc.setFontSize(7.6);
       doc.setTextColor(...TEXT);
       doc.text(label, M + 12, ay);
-      ay += 3.6;
+      ay += 4;
     });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.4);
@@ -354,7 +354,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = plateau ? 15 : 18;
+    const cmpH = plateau ? 16 : 18;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 11.5, c3, "Kilométrage au départ", d.kilometrage_depart);
@@ -364,7 +364,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Trajet ---------- */
-  const trH = plateau ? (isLiv ? 22 : 20) : isLiv ? 26 : 23;
+  const trH = plateau ? 24 : isLiv ? 26 : 23;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
@@ -377,7 +377,7 @@ export async function generatePvMissionPdf(
   y += trH + sp;
 
   /* ---------- Conformité ---------- */
-  const confH = 10;
+  const confH = plateau ? 9 : 10;
   doc.setFillColor(...NAVY);
   doc.roundedRect(M, y, COL2, confH, 2.2, 2.2, "F");
   doc.setFillColor(...WHITE);
@@ -396,7 +396,7 @@ export async function generatePvMissionPdf(
   y += confH + sp;
 
   /* ---------- Réserves ---------- */
-  const resH = plateau ? (isLiv ? 16 : 14) : isLiv ? 26 : 18;
+  const resH = plateau ? 13 : isLiv ? 26 : 18;
   doc.setFillColor(...CREAM);
   doc.setDrawColor(240, 224, 178);
   doc.setLineWidth(0.4);
@@ -422,7 +422,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = plateau ? (isLiv ? 32 : 28) : isLiv ? 42 : 34;
+  const schH = plateau ? 31 : isLiv ? 42 : 34;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -457,12 +457,12 @@ export async function generatePvMissionPdf(
   doc.setFontSize(7.4);
   doc.setTextColor(212, 175, 55);
   doc.text("LÉGENDE", legX + legW / 2, y + 5.4, { align: "center" });
-  const legStep = Math.min(4.6, (schH - 12) / LEGENDE.length);
+  const legStep = Math.min(4.6, (schH - 9) / LEGENDE.length);
   let ly = y + 8 + (schH - 8 - legStep * (LEGENDE.length - 1)) / 2;
   LEGENDE.forEach(([code, label]) => {
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(0.3);
-    doc.circle(legX + 7, ly - 1, 2.1, "S");
+    doc.circle(legX + 7, ly - 1, Math.min(2.1, legStep / 2 - 0.15), "S");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.4);
     doc.setTextColor(...GOLD);
@@ -491,7 +491,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = plateau ? 20 : 25;
+    const frH = plateau ? 21 : 25;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -512,12 +512,12 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = plateau ? 33 : 36;
+  const docsH = plateau ? 36 : 38;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
   field(doc, fx2, y + 11, fw, "Câble de recharge (si électrique) — nombre", null);
-  let dy = y + 21;
+  let dy = y + (plateau ? 19.5 : 21);
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
     checkbox(doc, M + 6, dy - 2.6, 3.2);
     doc.setFont("helvetica", "normal");
@@ -528,7 +528,7 @@ export async function generatePvMissionPdf(
       checkbox(doc, XR, dy - 2.6, 3.2);
       doc.text(r, XR + 6, dy);
     }
-    dy += plateau ? 3.8 : 4.2;
+    dy += plateau ? 3.7 : 4.2;
   });
   const pillY = y + docsH - 9;
   doc.setFillColor(...WHITE);
