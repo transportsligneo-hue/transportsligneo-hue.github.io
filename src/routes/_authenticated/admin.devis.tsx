@@ -916,7 +916,7 @@ function DevisDrawer({
         <AttachClientDialog
           devisId={devis.id}
           currentEmail={devis.email}
-          triggerLabel={devis.user_id ? "Changer le compte rattaché" : "Rattacher à un compte client"}
+          triggerLabel="Rattacher / changer le compte client"
         />
       </DrawerSection>
 
