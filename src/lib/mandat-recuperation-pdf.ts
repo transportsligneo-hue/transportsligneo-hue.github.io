@@ -73,8 +73,7 @@ function field(doc: jsPDF, label: string, value: string | null | undefined, x: n
   doc.setFontSize(9);
   doc.setTextColor(...TEXT);
   const lines = doc.splitTextToSize(value && String(value).trim() ? String(value) : "—", w) as string[];
-  lines.slice(0, 2).forEach((l, i) => doc.text(l, x, y + 4.6 + i * 4);
-  );
+  lines.slice(0, 2).forEach((l, i) => doc.text(l, x, y + 4.6 + i * 4));
   return y + 4.6 + Math.min(lines.length, 2) * 4;
 }
 
