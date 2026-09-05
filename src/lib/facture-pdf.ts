@@ -325,7 +325,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       doc.text(vehLabel, vx, mTop + 30);
       vx += doc.getTextWidth(vehLabel) + 3.5;
     }
-    if (plaque) vx += drawPlateTag(doc, vx, mTop + 25.8, plaque, 8) + 4;
+    if (plaque) vx += drawPlateTag(doc, vx, mTop + 24.8, plaque, 8) + 4;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -393,7 +393,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y);
   doc.setTextColor(...INK);
   doc.text(eur(ht), R, y, { align: "right" });
-  y += 7;
+  y += 6;
   doc.setTextColor(...GREY);
   doc.text("TVA", totLabelX, y);
   doc.setTextColor(...INK);
@@ -403,7 +403,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setLineWidth(0.8);
   doc.line(totLabelX, y, R, y);
   doc.setLineWidth(0.3);
-  y += 9;
+  y += 8;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(...INK);
@@ -411,7 +411,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...(isPaid ? GREEN : INK));
   doc.setFontSize(14);
   doc.text(eur(ttc), R, y, { align: "right" });
-  y += 10;
+  y += 8;
 
   // ---------- Bandeau règlement ----------
   const rightTxt = isPaid
@@ -425,11 +425,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(9);
   doc.setTextColor(...INK);
   const reglement = `Mode de règlement : ${f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement")} · Échéance : ${f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception")}`;
-  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 20) as string[])[0], L + 6, y + 7);
+  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 16) as string[])[0], L + 6, y + 7);
   doc.setFontSize(8.5);
   doc.setTextColor(...(isPaid ? GREEN : BLUE));
   doc.text(rightTxt, R - 6, y + 7, { align: "right" });
-  y += 17;
+  y += 15;
 
 
   if (isB2B) {
@@ -450,8 +450,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
-  const mentionsH = 11 + mentionWrapped.reduce((s, l) => s + l.length * 4 + 2, 0);
-  if (y + mentionsH > pageH - 28) { doc.addPage(); y = M + 10; }
+  const mentionsH = 11 + mentionWrapped.reduce((s, l) => s + l.length * 3.8 + 2, 0);
+  if (y + mentionsH > pageH - 24) { doc.addPage(); y = M + 10; }
   doc.setFillColor(...BOX);
   doc.roundedRect(L, y, innerW, mentionsH, 2.5, 2.5, "F");
   smallLabel("MENTIONS LÉGALES", L + 6, y + 7);
@@ -461,7 +461,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(80, 88, 104);
   for (const lines of mentionWrapped) {
     doc.text(lines, L + 6, my);
-    my += lines.length * 4 + 2;
+    my += lines.length * 3.8 + 2;
   }
   y += mentionsH;
 
