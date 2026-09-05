@@ -66,7 +66,12 @@ export interface PvMissionData {
   date_livraison?: string | null;
   /** Annotations de dommages issues de l'EDL — schéma vierge si vide. */
   dommages?: PvDommage[];
+  /** Véhicule non roulant : bascule sur la version « transport sur plateau ». */
+  plateau?: boolean | null;
+  /** Transporteur / n° de plateau, si déjà renseigné sur la mission. */
+  plateau_numero?: string | null;
 }
+
 
 /** Numéro de PV dérivé du numéro de mission (jamais de compteur autonome). */
 export function pvNumero(variant: PvVariant, numeroMission: string, version = 1): string {
@@ -112,16 +117,32 @@ const VUES: [string, string, number, number][] = [
 ];
 
 const DOCS_LIVRAISON: [string, string][] = [
-  ["Clé principale", "Clé de secours"],
   ["Carte grise", "Attestation d'assurance"],
-  ["État des lieux départ joint", "Accessoires (roue secours, triangle, gilet)"],
+  ["Tapis de sol", "Kit de sécurité (triangle + gilet)"],
+  ["État des lieux digitalisé (réalisé sur l'application)", ""],
 ];
 
 const DOCS_RESTITUTION: [string, string][] = [
-  ["Clé principale", "Clé de secours"],
   ["Carte grise", "Carnet d'entretien"],
-  ["État des lieux de départ joint", "Accessoires (roue secours, triangle, gilet)"],
+  ["Tapis de sol", "Kit de sécurité (triangle + gilet)"],
+  ["État des lieux digitalisé (réalisé sur l'application)", ""],
 ];
+
+/** Contrôles d'arrimage — version plateau (véhicule non roulant). */
+const ARRIMAGE_LIVRAISON = [
+  "Sangles avant retirées sans dommage",
+  "Sangles arrière retirées sans dommage",
+  "Cales roues retirées",
+  "Aucune trace d'arrimage sur carrosserie",
+];
+
+const ARRIMAGE_RESTITUTION = [
+  "Sangles avant posées et tendues",
+  "Sangles arrière posées et tendues",
+  "Cales roues en place",
+  "Points d'arrimage vérifiés",
+];
+
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -177,7 +198,11 @@ export async function generatePvMissionPdf(
   company?: CompanyInfo | null,
 ): Promise<Blob> {
   const isLiv = variant === "livraison";
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const plateau = !!d.plateau;
+  // Le PV de restitution sur plateau est le plus dense (arrimage + comparaison EDL
+  // + frais additionnels) : il utilise une page allongée, comme le gabarit papier.
+  const PAGE_H = plateau && !isLiv ? 342 : 297;
+  const doc = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H] });
   applyLigneoFonts(doc);
   const c = company ?? (await fetchCompanyInfo());
   const logo = await loadImageAsDataUrl(logoLigneo);
@@ -216,12 +241,39 @@ export async function generatePvMissionPdf(
   const annee = new Date().getFullYear();
   doc.text(`Date : ____ / ____ / ${annee}    Heure : ____ h ____`, right, 31.5, { align: "right" });
 
+  /* ---------- Bandeaux plateau (véhicule non roulant) ---------- */
+  let ruleY = 35;
+  if (plateau) {
+    const bh = 6;
+    const by = 33.5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.4);
+    const t2 = "TRANSPORT SUR PLATEAU";
+    const w2 = doc.getTextWidth(t2) + 10;
+    const t1 = "VÉHICULE NON ROULANT";
+    const w1 = doc.getTextWidth(t1) + 14;
+    const x2b = right - w2;
+    const x1b = x2b - 3 - w1;
+    doc.setFillColor(224, 236, 255);
+    doc.roundedRect(x2b, by, w2, bh, 3, 3, "F");
+    doc.setTextColor(...BLUE);
+    doc.text(t2, x2b + w2 / 2, by + 4.1, { align: "center" });
+    doc.setFillColor(255, 232, 235);
+    doc.roundedRect(x1b, by, w1, bh, 3, 3, "F");
+    doc.setFillColor(214, 45, 60);
+    doc.circle(x1b + 5, by + 3, 1.1, "F");
+    doc.setTextColor(190, 32, 48);
+    doc.text(t1, x1b + 8, by + 4.1);
+    ruleY = 41;
+  }
+
   doc.setDrawColor(...NAVY);
   doc.setLineWidth(0.7);
-  doc.line(M, 35, right, 35);
+  doc.line(M, ruleY, right, ruleY);
 
-  const sp = isLiv ? 3.4 : 1.6;
-  let y = isLiv ? 38 : 36;
+  const sp = isLiv && !plateau ? 2.5 : 1.2;
+  let y = ruleY + (plateau ? 3 : isLiv ? 3 : 1);
+
 
   /* ---------- Parties ---------- */
   const cw = (W - 10) / 3;
@@ -229,9 +281,10 @@ export async function generatePvMissionPdf(
   const parties: [string, string | null][] = [
     ["Transporteur", `${c?.raison_sociale || "Transports Ligneo"} · SIREN ${siren}`],
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
-    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (locataire)", d.destinataire ?? null],
+    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par / utilisateur", d.destinataire ?? null],
   ];
-  const partH = isLiv ? 21 : 18;
+  const partH = 14;
+
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
@@ -259,7 +312,7 @@ export async function generatePvMissionPdf(
   const x2 = M + 6 + c3 + 4;
   const x3 = M + 6 + (c3 + 4) * 2;
   const vin = normalizeVin(d.vin);
-  const vehH = isLiv ? 28 : 26;
+  const vehH = 28;
   panel(doc, M, y, W, vehH);
   panelTitle(doc, M + 6, y + 6.5, "Véhicule");
   field(doc, M + 6, y + 13, c3, "Marque / Modèle", d.marque_modele);
@@ -270,9 +323,41 @@ export async function generatePvMissionPdf(
   field(doc, x3, y + vehH - 7, c3, "Niveau carburant / batterie", d.carburant);
   y += vehH + sp;
 
+  /* ---------- Transport sur plateau — contrôles arrimage ---------- */
+  if (plateau) {
+    const arH = 29;
+    doc.setFillColor(238, 243, 255);
+    doc.setDrawColor(212, 226, 255);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(M, y, W, arH, 2.2, 2.2, "FD");
+    panelTitle(doc, M + 6, y + 6, "Transport sur plateau — contrôles arrimage", BLUE);
+    let ay = y + 10.5;
+    (isLiv ? ARRIMAGE_LIVRAISON : ARRIMAGE_RESTITUTION).forEach((label) => {
+      checkbox(doc, M + 6, ay - 2.6, 3.2);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.6);
+      doc.setTextColor(...TEXT);
+      doc.text(label, M + 12, ay);
+      ay += 4;
+    });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.4);
+    doc.setTextColor(...TEXT);
+    const lab = "Transporteur / N° plateau :";
+    doc.text(lab, M + 6, y + arH - 3.5);
+    const lx = M + 6 + doc.getTextWidth(lab) + 2;
+    const num = (d.plateau_numero ?? "").trim();
+    if (num) doc.text(num, lx + 1, y + arH - 3.5);
+    doc.setDrawColor(...RULE);
+    doc.setLineWidth(0.25);
+    doc.line(lx, y + arH - 2.8, M + W - 6, y + arH - 2.8);
+    y += arH + sp;
+  }
+
+
   /* ---------- Comparaison EDL (restitution) ---------- */
   if (!isLiv) {
-    const cmpH = 18;
+    const cmpH = 15;
     panel(doc, M, y, W, cmpH);
     panelTitle(doc, M + 6, y + 6.5, "Comparaison avec l'état des lieux de départ");
     field(doc, M + 6, y + 11.5, c3, "Kilométrage au départ", d.kilometrage_depart);
@@ -282,7 +367,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Trajet ---------- */
-  const trH = isLiv ? 26 : 23;
+  const trH = 25.5;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
@@ -295,7 +380,7 @@ export async function generatePvMissionPdf(
   y += trH + sp;
 
   /* ---------- Conformité ---------- */
-  const confH = 10;
+  const confH = 8.5;
   doc.setFillColor(...NAVY);
   doc.roundedRect(M, y, COL2, confH, 2.2, 2.2, "F");
   doc.setFillColor(...WHITE);
@@ -314,7 +399,7 @@ export async function generatePvMissionPdf(
   y += confH + sp;
 
   /* ---------- Réserves ---------- */
-  const resH = isLiv ? 26 : 18;
+  const resH = isLiv && !plateau ? 20 : 14;
   doc.setFillColor(...CREAM);
   doc.setDrawColor(240, 224, 178);
   doc.setLineWidth(0.4);
@@ -340,7 +425,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = isLiv ? 42 : 34;
+  const schH = plateau ? 29 : isLiv ? 36 : 28;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -375,12 +460,12 @@ export async function generatePvMissionPdf(
   doc.setFontSize(7.4);
   doc.setTextColor(212, 175, 55);
   doc.text("LÉGENDE", legX + legW / 2, y + 5.4, { align: "center" });
-  const legStep = Math.min(4.6, (schH - 12) / LEGENDE.length);
+  const legStep = Math.min(4.6, (schH - 9) / LEGENDE.length);
   let ly = y + 8 + (schH - 8 - legStep * (LEGENDE.length - 1)) / 2;
   LEGENDE.forEach(([code, label]) => {
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(0.3);
-    doc.circle(legX + 7, ly - 1, 2.1, "S");
+    doc.circle(legX + 7, ly - 1, Math.min(2.1, legStep / 2 - 0.15), "S");
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.4);
     doc.setTextColor(...GOLD);
@@ -399,17 +484,20 @@ export async function generatePvMissionPdf(
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.8);
     doc.setTextColor(...INK);
-    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", M, y + 2);
+    doc.text("DOMMAGES RELEVÉS À L'ÉTAT DES LIEUX DE CETTE MISSION", M, y + 1.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...TEXT);
     const txt = dommages.map((dm) => [`(${dm.code})`, dm.zone, dm.note].filter(Boolean).join(" ")).join("  ·  ");
-    doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 5.6);
-    y += 8.5;
+    doc.text(doc.splitTextToSize(txt, W)[0] as string, M, y + 4.8);
+    y += 6;
   }
+
+
+
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = 25;
+    const frH = 24;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
@@ -430,21 +518,39 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = isLiv ? 24 : 20;
+  const docsH = 39;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
-  let dy = y + (isLiv ? 12 : 10.5);
+  field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
+  field(doc, fx2, y + 11, fw, "Câble de recharge (si électrique) — nombre", null);
+  let dy = y + (plateau ? 19.5 : 21);
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
     checkbox(doc, M + 6, dy - 2.6, 3.2);
-    checkbox(doc, XR, dy - 2.6, 3.2);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.6);
     doc.setTextColor(...TEXT);
     doc.text(l, M + 12, dy);
-    doc.text(r, XR + 6, dy);
-    dy += isLiv ? 5.2 : 4.6;
+    if (r) {
+      checkbox(doc, XR, dy - 2.6, 3.2);
+      doc.text(r, XR + 6, dy);
+    }
+    dy += plateau ? 3.7 : 4.2;
   });
+  const pillY = y + docsH - 9;
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(M + 6, pillY, COL2 - 6, 7.5, 2, 2, "FD");
+  doc.roundedRect(XR, pillY, COL2 - 6, 7.5, 2, 2, "FD");
+  checkbox(doc, M + 10, pillY + 2.1, 3.2);
+  checkbox(doc, XR + 4, pillY + 2.1, 3.2);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.8);
+  doc.setTextColor(...INK);
+  doc.text("Roue secours / kit anti-crevaison présent", M + 16, pillY + 5);
+  doc.text("Absent", XR + 10, pillY + 5);
   y += docsH + sp;
+
 
   /* ---------- Mention légale ---------- */
   doc.setFont("helvetica", "normal");
@@ -455,7 +561,7 @@ export async function generatePvMissionPdf(
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   mention.forEach((l, i) => doc.text(l, M + 6, y + 5 + i * 3.2));
-  y += mentH + (isLiv ? 6 : 4.5);
+  y += mentH + (plateau ? 2.5 : 4);
 
   /* ---------- Signatures ---------- */
   doc.setFont("helvetica", "bold");
@@ -480,7 +586,7 @@ export async function generatePvMissionPdf(
     XR,
     y + 4.6,
   );
-  const sigY = y + 16;
+  const sigY = y + 12;
   doc.setDrawColor(...RULE);
   doc.setLineWidth(0.3);
   doc.line(M, sigY, M + COL2, sigY);
@@ -491,7 +597,7 @@ export async function generatePvMissionPdf(
   doc.text("Nom, date et signature", XR, sigY + 3.6);
 
   /* ---------- Pied de page ---------- */
-  const footY = 283;
+  const footY = PAGE_H - 14;
   doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.3);
   doc.line(M, footY, right, footY);
