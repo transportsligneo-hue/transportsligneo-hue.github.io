@@ -270,3 +270,27 @@ export async function runMissionReminders(): Promise<{ found: number; sent: numb
 
   return { found: results.length, sent: results.filter((r) => r.sent).length, results }
 }
+
+/**
+ * Envoie le rappel immédiatement si la mission démarre dans moins de 24h
+ * (attribution tardive). Sans effet sinon : le balayage quotidien s'en charge.
+ */
+export async function maybeSendImminentReminder(attributionId: string): Promise<ReminderResult> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('attributions')
+      .select('id, trajet:trajets(date_trajet, heure_trajet)')
+      .eq('id', attributionId)
+      .maybeSingle()
+    const t = (data as any)?.trajet as { date_trajet: string | null; heure_trajet: string | null } | null
+    if (!t?.date_trajet) return { attributionId, sent: false, reason: 'date inconnue' }
+    const start = parisToUtc(t.date_trajet, t.heure_trajet)
+    if (!start) return { attributionId, sent: false, reason: 'date invalide' }
+    const diffH = (start.getTime() - Date.now()) / 3600_000
+    if (diffH > 24 || diffH < -1) return { attributionId, sent: false, reason: 'hors fenêtre 24h' }
+    return await sendMissionReminder(attributionId)
+  } catch (e) {
+    console.error('[rappel-j1] envoi immédiat impossible', attributionId, e)
+    return { attributionId, sent: false, reason: 'erreur' }
+  }
+}
