@@ -217,10 +217,13 @@ export async function ensureFactureForMission(
 ): Promise<FactureRow | null> {
   if (!missionId) return null;
 
+  const links = await resolveFactureLinks(missionId);
+
   const { data: existing } = await supabaseAdmin
     .from("factures")
     .select("*")
-    .eq("mission_id", missionId)
+    .or(`mission_id.eq.${missionId},attribution_id.eq.${missionId}`)
+    .limit(1)
     .maybeSingle();
   if (existing) return existing as FactureRow;
 
@@ -231,6 +234,7 @@ export async function ensureFactureForMission(
     .maybeSingle();
   const trajet = (attr as any)?.trajets as Record<string, any> | null;
   if (!trajet) return null;
+
 
   if (trajet["devis_id"]) {
     const { data: devis } = await supabaseAdmin
