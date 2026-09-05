@@ -383,6 +383,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     "Constat photo départ / arrivée, suivi GPS temps réel et notifications client.",
     "Inclus",
   );
+  line(
+    "Assurance, chargement & déchargement",
+    "Assurance tous risques marchandises transportées incluse, chargement, arrimage et déchargement du véhicule pris en charge par nos soins.",
+    "Inclus",
+  );
 
   // ---------- Totaux ----------
   const totLabelX = L + innerW * 0.55;
