@@ -268,7 +268,7 @@ export async function generatePvMissionPdf(
   doc.setLineWidth(0.7);
   doc.line(M, ruleY, right, ruleY);
 
-  const sp = plateau ? (isLiv ? 1.6 : 1.1) : isLiv ? 3.4 : 1.6;
+  const sp = plateau ? 1.2 : isLiv ? 3.4 : 1.6;
   let y = ruleY + (plateau ? 3 : isLiv ? 3 : 1);
 
 
@@ -280,7 +280,7 @@ export async function generatePvMissionPdf(
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
     [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur/locataire)", d.destinataire ?? null],
   ];
-  const partH = plateau ? 15.5 : isLiv ? 21 : 18;
+  const partH = plateau ? 14 : isLiv ? 21 : 18;
 
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
@@ -322,7 +322,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Transport sur plateau — contrôles arrimage ---------- */
   if (plateau) {
-    const arH = 28;
+    const arH = 29;
     doc.setFillColor(238, 243, 255);
     doc.setDrawColor(212, 226, 255);
     doc.setLineWidth(0.4);
@@ -364,7 +364,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Trajet ---------- */
-  const trH = plateau ? 24 : isLiv ? 26 : 23;
+  const trH = plateau ? 25.5 : isLiv ? 26 : 23;
   const fx1 = M + 6;
   const fx2 = M + W / 2 + 2;
   const fw = W / 2 - 10;
@@ -377,7 +377,7 @@ export async function generatePvMissionPdf(
   y += trH + sp;
 
   /* ---------- Conformité ---------- */
-  const confH = plateau ? 9 : 10;
+  const confH = plateau ? 8.5 : 10;
   doc.setFillColor(...NAVY);
   doc.roundedRect(M, y, COL2, confH, 2.2, 2.2, "F");
   doc.setFillColor(...WHITE);
@@ -396,7 +396,7 @@ export async function generatePvMissionPdf(
   y += confH + sp;
 
   /* ---------- Réserves ---------- */
-  const resH = plateau ? 13 : isLiv ? 26 : 18;
+  const resH = plateau ? 14 : isLiv ? 26 : 18;
   doc.setFillColor(...CREAM);
   doc.setDrawColor(240, 224, 178);
   doc.setLineWidth(0.4);
@@ -422,7 +422,7 @@ export async function generatePvMissionPdf(
   const ratios = [1, 1.85, 1, 1.85];
   const boxUnit = (schW - 12 - boxGap * 3) / ratios.reduce((a, b) => a + b, 0);
   const boxX = ratios.map((_, i) => M + 6 + ratios.slice(0, i).reduce((a, b) => a + b, 0) * boxUnit + i * boxGap);
-  const schH = plateau ? 31 : isLiv ? 42 : 34;
+  const schH = plateau ? 29 : isLiv ? 42 : 34;
   const boxH = schH - 16;
   panel(doc, M, y, schW, schH);
   panelTitle(doc, M + 6, y + 7, "Schéma des dommages constatés");
@@ -515,7 +515,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = plateau ? 36 : 38;
+  const docsH = plateau ? 37 : 38;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
@@ -558,7 +558,7 @@ export async function generatePvMissionPdf(
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   mention.forEach((l, i) => doc.text(l, M + 6, y + 5 + i * 3.2));
-  y += mentH + (isLiv ? 6 : 4.5);
+  y += mentH + (plateau ? 2.5 : isLiv ? 6 : 4.5);
 
   /* ---------- Signatures ---------- */
   doc.setFont("helvetica", "bold");
@@ -583,7 +583,7 @@ export async function generatePvMissionPdf(
     XR,
     y + 4.6,
   );
-  const sigY = y + 16;
+  const sigY = y + (plateau ? 12 : 16);
   doc.setDrawColor(...RULE);
   doc.setLineWidth(0.3);
   doc.line(M, sigY, M + COL2, sigY);
