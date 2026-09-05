@@ -109,7 +109,9 @@ export async function ensureFactureForDevis(
     .from("factures")
     .insert({
       ...(factureNumero && { numero: factureNumero }),
-      mission_id: options.missionId ?? devis["mission_id"] ?? null,
+      mission_id: links.missionId ?? devis["mission_id"] ?? null,
+      attribution_id: attributionId,
+
       client_email: devis["email"],
       client_nom: devis["nom"],
       client_prenom: devis["prenom"],
