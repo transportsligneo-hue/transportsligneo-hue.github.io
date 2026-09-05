@@ -429,7 +429,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8.5);
   doc.setTextColor(...(isPaid ? GREEN : BLUE));
   doc.text(rightTxt, R - 6, y + 7, { align: "right" });
-  y += 15;
+  y += 13;
 
 
   if (isB2B) {
@@ -450,12 +450,12 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
-  const mentionsH = 11 + mentionWrapped.reduce((s, l) => s + l.length * 3.8 + 2, 0);
-  if (y + mentionsH > pageH - 24) { doc.addPage(); y = M + 10; }
+  const mentionsH = 9.5 + mentionWrapped.reduce((s, l) => s + l.length * 3.8 + 2, 0);
+  if (y + mentionsH > pageH - 22) { doc.addPage(); y = M + 10; }
   doc.setFillColor(...BOX);
   doc.roundedRect(L, y, innerW, mentionsH, 2.5, 2.5, "F");
   smallLabel("MENTIONS LÉGALES", L + 6, y + 7);
-  let my = y + 13.5;
+  let my = y + 12.5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(80, 88, 104);
