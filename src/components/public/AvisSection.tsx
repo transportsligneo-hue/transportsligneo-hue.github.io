@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { getAvisPublics } from "@/lib/avis.functions";
 
 type AvisRow = {
   id: string;
@@ -18,22 +19,23 @@ type AvisRow = {
  */
 export default function AvisSection() {
   const [avis, setAvis] = useState<AvisRow[]>([]);
+  const fetchAvis = useServerFn(getAvisPublics);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data } = await supabase
-        .from("avis_clients")
-        .select("id, note, commentaire, nom_affiche_public, ville, type_client, date_avis")
-        .eq("statut", "publie")
-        .order("date_avis", { ascending: false })
-        .limit(6);
-      if (mounted && data) setAvis(data as AvisRow[]);
+      try {
+        const data = await fetchAvis();
+        if (mounted && data) setAvis(data as AvisRow[]);
+      } catch {
+        /* section masquée si indisponible */
+      }
     })();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [fetchAvis]);
+
 
   if (avis.length === 0) return null;
 
