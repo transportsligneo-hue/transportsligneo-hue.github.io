@@ -39,17 +39,33 @@ function signatureBlocks(
   left: string,
   right: string,
   height = 24,
+  images?: { left?: string | null; right?: string | null },
 ): number {
   y = docEnsureSpace(doc, y, height + 6);
+  const boxW = (pageW - 32) / 2;
   doc.setDrawColor(...DOC_LINE);
   doc.setLineWidth(0.3);
-  doc.rect(14, y, (pageW - 32) / 2, height, "S");
-  doc.rect(pageW / 2 + 2, y, (pageW - 32) / 2, height, "S");
+  doc.rect(14, y, boxW, height, "S");
+  doc.rect(pageW / 2 + 2, y, boxW, height, "S");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...DOC_NAVY);
   doc.text(left, 18, y + 6);
   doc.text(right, pageW / 2 + 6, y + 6);
+
+  /* Signatures capturées (PC, téléphone ou OTP) intégrées dans les cadres. */
+  const sigW = Math.min(46, boxW - 10);
+  const sigH = Math.min(15, height - 9);
+  const place = (data: string | null | undefined, x: number) => {
+    if (!data || !data.startsWith("data:image")) return;
+    try {
+      doc.addImage(data, "PNG", x, y + height - sigH - 2, sigW, sigH, undefined, "FAST");
+    } catch {
+      /* signature illisible : on laisse le cadre vierge */
+    }
+  };
+  place(images?.left, 18);
+  place(images?.right, pageW / 2 + 6);
   return y;
 }
 
@@ -81,6 +97,8 @@ export interface FicheMissionData {
   /** Numéro d'assistance 24/7 (sinon téléphone de la société). */
   assistance_tel?: string | null;
   notes?: string | null;
+  /** Signatures capturées (data URL PNG) à imprimer dans les cadres. */
+  signatures?: { convoyeur_depart?: string | null; convoyeur_livraison?: string | null };
 }
 
 /** Fiche de mission — mise en page compacte deux colonnes, garantie sur UNE page. */
@@ -176,7 +194,10 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   }
   y += 20;
 
-  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22);
+  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22, {
+    left: d.signatures?.convoyeur_depart ?? null,
+    right: d.signatures?.convoyeur_livraison ?? null,
+  });
   finalizeDoc(doc, c);
   return doc.output("blob");
 }
@@ -188,6 +209,8 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
 
 export interface PassageAVideData {
   numero: string;
+  /** Signature capturée (data URL PNG) à imprimer dans le cadre convoyeur. */
+  signatures?: { convoyeur?: string | null };
   convoyeur_nom?: string | null;
   convoyeur_permis?: string | null;
   convoyeur_statut?: string | null;
@@ -266,7 +289,9 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
   doc.setTextColor(...DOC_MUTED);
   doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
   y += 4;
-  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22);
+  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22, {
+    left: d.signatures?.convoyeur ?? null,
+  });
 
 
   finalizeDoc(doc, c);
@@ -352,6 +377,8 @@ export interface EdlPapierData {
   arrivee?: string | null;
   date_prevue?: string | null;
   convoyeur_nom?: string | null;
+  /** Signatures capturées (data URL PNG) à imprimer dans les cadres. */
+  signatures?: { convoyeur?: string | null; client?: string | null };
 }
 
 const EDL_ENERGIES = ["Essence", "Diesel", "Hybride", "Électrique"];
@@ -593,7 +620,10 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
 
   /* Signatures */
   const sigH = 21;
-  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH);
+  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH, {
+    left: d.signatures?.convoyeur ?? null,
+    right: d.signatures?.client ?? null,
+  });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);

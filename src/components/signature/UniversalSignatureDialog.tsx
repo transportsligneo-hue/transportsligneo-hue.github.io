@@ -31,7 +31,14 @@ interface Props {
   onSigned?: () => void;
 }
 
-const SESSION_TTL_MIN = 15;
+const SESSION_TTL_MIN = 30;
+
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function newShortCode(): string {
+  const bytes = new Uint8Array(6);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+}
 
 function newToken(): string {
   const bytes = new Uint8Array(24);
@@ -68,21 +75,28 @@ export function UniversalSignatureDialog({
   const [signer, setSigner] = useState(defaultSignerName ?? "");
   const [busy, setBusy] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
+  const [shortCode, setShortCode] = useState<string | null>(null);
   const [qrBusy, setQrBusy] = useState(false);
   const sessionId = useRef<string | null>(null);
 
   useEffect(() => { if (slot) setActiveSlot(slot); }, [slot]);
-  useEffect(() => { if (open) { setQr(null); sessionId.current = null; } }, [open, docType]);
+  useEffect(() => { if (open) { setQr(null); setShortCode(null); sessionId.current = null; } }, [open, docType]);
 
   /** Enregistre la signature sur le bon document et le bon emplacement. */
   const persist = useCallback(
-    async (dataUrl: string, pos: { latitude: number; longitude: number } | null, signerName: string) => {
+    async (
+      dataUrl: string,
+      pos: { latitude: number; longitude: number } | null,
+      signerName: string,
+      source: "pc" | "telephone" = "pc",
+    ) => {
       const { data: auth } = await supabase.auth.getUser();
       const { error } = await supabase.from("mission_signatures").upsert(
         {
           attribution_id: attributionId,
           kind: signatureKind(docType, activeSlot),
           signer_name: signerName || null,
+          source,
           signature_data: dataUrl,
           signed_by_user_id: auth.user?.id ?? null,
           latitude: pos?.latitude ?? null,
@@ -120,10 +134,12 @@ export function UniversalSignatureDialog({
     try {
       const { data: auth } = await supabase.auth.getUser();
       const token = newToken();
+      const code = newShortCode();
       const { data, error } = await supabase
         .from("signature_handoff_sessions")
         .insert({
           token,
+          short_code: code,
           attribution_id: attributionId,
           doc_type: docType,
           slot: activeSlot,
@@ -136,6 +152,7 @@ export function UniversalSignatureDialog({
         .single();
       if (error) throw error;
       sessionId.current = (data as { id: string }).id;
+      setShortCode(code);
       const url = `${window.location.origin}/signer/${token}`;
       setQr(await QRCode.toDataURL(url, { width: 320, margin: 1 }));
     } catch {
@@ -168,6 +185,7 @@ export function UniversalSignatureDialog({
                   ? { latitude: row.latitude, longitude: row.longitude }
                   : null,
                 row.signer_name ?? signer.trim(),
+                "telephone",
               );
               toast.success("Signature reçue du téléphone");
               onSigned?.();
@@ -236,10 +254,18 @@ export function UniversalSignatureDialog({
           <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
             <img src={qr} alt="QR code de signature mobile" className="h-44 w-44 rounded-lg bg-white p-2" />
             <p className="text-sm font-medium text-slate-700">Scannez ce code avec le téléphone du signataire</p>
+            {shortCode && (
+              <div className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2">
+                <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                  Ou rendez-vous sur {typeof window !== "undefined" ? window.location.host : ""}/signer et saisissez le code
+                </p>
+                <p className="text-2xl font-bold tracking-[0.3em] text-slate-900">{shortCode}</p>
+              </div>
+            )}
             <p className="text-xs text-slate-500">
               Lien valable {SESSION_TTL_MIN} minutes, à usage unique. La signature apparaîtra ici automatiquement.
             </p>
-            <button type="button" onClick={() => setQr(null)} className="text-xs font-semibold text-[#2F5FFF] underline">
+            <button type="button" onClick={() => { setQr(null); setShortCode(null); }} className="text-xs font-semibold text-[#2F5FFF] underline">
               Signer plutôt sur cet écran
             </button>
           </div>

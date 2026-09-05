@@ -39,6 +39,7 @@ import { Route as AttenteValidationRouteImport } from './routes/attente-validati
 import { Route as AProposRouteImport } from './routes/a-propos'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignerIndexRouteImport } from './routes/signer.index'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
@@ -350,6 +351,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignerIndexRoute = SignerIndexRouteImport.update({
+  id: '/signer/',
+  path: '/signer/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScanIndexRoute = ScanIndexRouteImport.update({
@@ -1340,6 +1346,7 @@ export interface FileRoutesByFullPath {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
+  '/signer/': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1528,6 +1535,7 @@ export interface FileRoutesByTo {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
   '/scan': typeof ScanIndexRoute
+  '/signer': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1721,6 +1729,7 @@ export interface FileRoutesById {
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
+  '/signer/': typeof SignerIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
   '/_authenticated/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
@@ -1917,6 +1926,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
+    | '/signer/'
     | '/admin/acceptations'
     | '/admin/alertes'
     | '/admin/assistant-ia'
@@ -2105,6 +2115,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites'
     | '/scan'
+    | '/signer'
     | '/admin/acceptations'
     | '/admin/alertes'
     | '/admin/assistant-ia'
@@ -2297,6 +2308,7 @@ export interface FileRouteTypes {
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
+    | '/signer/'
     | '/_authenticated/admin/acceptations'
     | '/_authenticated/admin/alertes'
     | '/_authenticated/admin/assistant-ia'
@@ -2483,6 +2495,7 @@ export interface RootRouteChildren {
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   ScanIndexRoute: typeof ScanIndexRoute
+  SignerIndexRoute: typeof SignerIndexRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
@@ -2739,6 +2752,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signer/': {
+      id: '/signer/'
+      path: '/signer'
+      fullPath: '/signer/'
+      preLoaderRoute: typeof SignerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scan/': {
@@ -4385,6 +4405,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
   ScanIndexRoute: ScanIndexRoute,
+  SignerIndexRoute: SignerIndexRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,

@@ -15,7 +15,11 @@ export type SignatureDocType =
   | "pv_livraison"
   | "pv_restitution"
   | "mandat"
-  | "edl_papier";
+  | "edl_papier"
+  | "edl_livraison"
+  | "edl_restitution"
+  | "fiche_mission"
+  | "passage_a_vide";
 
 export interface SignatureSlot {
   /** Identifiant technique du slot (unique dans le document). */
@@ -65,6 +69,35 @@ export const SIGNATURE_DOCS: Record<SignatureDocType, SignatureDocDef> = {
       { slot: "mandant", label: "Mandant (propriétaire)", hint: "Autorise la récupération" },
       { slot: "mandataire", label: "Transports Ligneo", hint: "Accepte le mandat" },
     ],
+  },
+  edl_livraison: {
+    docType: "edl_livraison",
+    label: "État des lieux — Livraison",
+    slots: [
+      { slot: "convoyeur", label: "Convoyeur" },
+      { slot: "client", label: "Client / représentant" },
+    ],
+  },
+  edl_restitution: {
+    docType: "edl_restitution",
+    label: "État des lieux — Restitution",
+    slots: [
+      { slot: "convoyeur", label: "Convoyeur" },
+      { slot: "client", label: "Client / représentant" },
+    ],
+  },
+  fiche_mission: {
+    docType: "fiche_mission",
+    label: "Fiche de mission",
+    slots: [
+      { slot: "convoyeur_depart", label: "Convoyeur (départ)" },
+      { slot: "convoyeur_livraison", label: "Convoyeur (livraison)" },
+    ],
+  },
+  passage_a_vide: {
+    docType: "passage_a_vide",
+    label: "Attestation de passage à vide",
+    slots: [{ slot: "convoyeur", label: "Convoyeur" }],
   },
   edl_papier: {
     docType: "edl_papier",
