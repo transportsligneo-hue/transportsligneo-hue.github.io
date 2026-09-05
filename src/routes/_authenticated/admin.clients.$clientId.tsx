@@ -738,9 +738,24 @@ function AdminClientDetail() {
           </AdminSection>
 
           <div className="grid md:grid-cols-2 gap-6 mt-6">
-            <AdminSection title="Devis" description={`${devisList.length} devis`}>
+            <AdminSection
+              title="Devis"
+              description={`${devisList.length} devis`}
+              actions={
+                <AttachDevisToClientDialog
+                  userId={clientId}
+                  clientEmail={profile?.email}
+                  clientNom={profile?.nom}
+                  clientPrenom={profile?.prenom}
+                  clientTelephone={profile?.telephone}
+                  onAttached={() => void load()}
+                />
+              }
+            >
               {devisList.length === 0 ? (
-                <AdminEmpty icon={Receipt} title="Aucun devis" description="Aucun devis pour ce client." />
+                <AdminEmpty icon={Receipt} title="Aucun devis" description="Aucun devis pour ce client. Utilisez « Rattacher un devis »." />
+              ) : (
+
               ) : (
                 <div className="overflow-x-auto -mx-1">
                   <table className="admin-table">
