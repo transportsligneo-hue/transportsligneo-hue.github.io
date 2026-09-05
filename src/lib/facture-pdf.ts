@@ -405,6 +405,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---------- Prestation ----------
   let y = mTop + mH + 8;
+  // Les factures détaillées (comme la 109) doivent rester sur une seule page A4.
+  const compactDetails = supplements.length + optionsList.length >= 4;
 
   smallLabel("PRESTATION", L, y);
   doc.setFont("helvetica", "bold");
@@ -414,7 +416,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   y += 3;
   doc.setDrawColor(...RULE);
   doc.line(L, y, R, y);
-  y += 8;
+  y += compactDetails ? 5 : 8;
 
   const mainTitle = f.designation?.trim()
     || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
@@ -424,20 +426,24 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const line = (title: string, sub: string, amount: string) => {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10.5);
+    doc.setFontSize(compactDetails ? 8.8 : 10.5);
     doc.setTextColor(...INK);
     doc.text((doc.splitTextToSize(title, innerW - 45) as string[])[0], L, y);
     doc.setFont("helvetica", "bold");
     doc.text(amount, R, y, { align: "right" });
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(compactDetails ? 7 : 8.5);
     doc.setTextColor(...GREY);
     const subLines = sub ? (doc.splitTextToSize(sub, innerW - 45) as string[]).slice(0, 2) : [];
-    if (subLines.length) doc.text(subLines, L, y + 4.8);
-    y += (subLines.length ? 4.8 + subLines.length * 4.2 : 2) + 3;
+    const subOffset = compactDetails ? 3.2 : 4.8;
+    const subLeading = compactDetails ? 2.7 : 4.2;
+    if (subLines.length) doc.text(subLines, L, y + subOffset);
+    y += compactDetails
+      ? (subLines.length ? subOffset + subLines.length * subLeading + 1 : 2)
+      : (subLines.length ? subOffset + subLines.length * subLeading : 2) + 3;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
-    y += 7;
+    y += compactDetails ? 2.8 : 7;
 
   };
 
@@ -454,32 +460,32 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---------- Totaux ----------
   const totLabelX = L + innerW * 0.55;
-  y += 1;
+  y += compactDetails ? 0 : 1;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(compactDetails ? 8.5 : 10);
   doc.setTextColor(...GREY);
   doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y);
   doc.setTextColor(...INK);
   doc.text(eur(ht), R, y, { align: "right" });
-  y += 6;
+  y += compactDetails ? 4.5 : 6;
   doc.setTextColor(...GREY);
   doc.text("TVA", totLabelX, y);
   doc.setTextColor(...INK);
   doc.text(tvaExempt ? "Non applicable" : `${eur(tva)} (${tvaTaux} %)`, R, y, { align: "right" });
-  y += 4;
+  y += compactDetails ? 3 : 4;
   doc.setDrawColor(...INK);
   doc.setLineWidth(0.8);
   doc.line(totLabelX, y, R, y);
   doc.setLineWidth(0.3);
-  y += 8;
+  y += compactDetails ? 5.5 : 8;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
+  doc.setFontSize(compactDetails ? 11 : 13);
   doc.setTextColor(...INK);
   doc.text("Net à payer", totLabelX, y);
   doc.setTextColor(...(isPaid ? GREEN : INK));
-  doc.setFontSize(14);
+  doc.setFontSize(compactDetails ? 12 : 14);
   doc.text(eur(ttc), R, y, { align: "right" });
-  y += 8;
+  y += compactDetails ? 5.5 : 8;
 
   // ---------- Bandeau règlement ----------
   const rightTxt = isPaid
@@ -489,17 +495,19 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8.5);
   const rightW = doc.getTextWidth(rightTxt);
   doc.setFillColor(...BLUEBOX);
-  doc.roundedRect(L, y, innerW, 11, 2.5, 2.5, "F");
-  doc.setFontSize(9);
+  const paymentBoxH = compactDetails ? 9 : 11;
+  const paymentTextY = y + (compactDetails ? 5.8 : 7);
+  doc.roundedRect(L, y, innerW, paymentBoxH, 2.5, 2.5, "F");
+  doc.setFontSize(compactDetails ? 7.5 : 9);
   doc.setTextColor(...INK);
   const modeTxt = f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement");
   const echeanceTxt = f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception");
   const reglement = isPaid ? `Mode de règlement : ${modeTxt}` : `Mode de règlement : ${modeTxt} · Échéance : ${echeanceTxt}`;
-  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 16) as string[])[0], L + 6, y + 7);
-  doc.setFontSize(8.5);
+  doc.text((doc.splitTextToSize(reglement, innerW - rightW - 16) as string[])[0], L + 6, paymentTextY);
+  doc.setFontSize(compactDetails ? 7.2 : 8.5);
   doc.setTextColor(...(isPaid ? GREEN : BLUE));
-  doc.text(rightTxt, R - 6, y + 7, { align: "right" });
-  y += 13;
+  doc.text(rightTxt, R - 6, paymentTextY, { align: "right" });
+  y += paymentBoxH + (compactDetails ? 1.5 : 2);
 
 
   if (isB2B) {
@@ -518,20 +526,26 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (legalMention) mentions.push(legalMention);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  const mentionFontSize = compactDetails ? 5.8 : 8;
+  const mentionLeading = compactDetails ? 2.6 : 3.8;
+  const mentionGap = compactDetails ? 0.4 : 2;
+  doc.setFontSize(mentionFontSize);
   const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
-  const mentionsH = 9.5 + mentionWrapped.reduce((s, l) => s + l.length * 3.8 + 2, 0);
-  if (y + mentionsH > pageH - 22) { doc.addPage(); y = M + 10; }
+  const mentionsH = (compactDetails ? 8 : 9.5)
+    + mentionWrapped.reduce((s, l) => s + l.length * mentionLeading + mentionGap, 0);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, y, innerW, mentionsH, 2.5, 2.5, "F");
-  smallLabel("MENTIONS LÉGALES", L + 6, y + 7);
-  let my = y + 12.5;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(compactDetails ? 6 : 7);
+  doc.setTextColor(...GREY);
+  doc.text("MENTIONS LÉGALES", L + 6, y + (compactDetails ? 5.2 : 7));
+  let my = y + (compactDetails ? 8.5 : 12.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(mentionFontSize);
   doc.setTextColor(80, 88, 104);
   for (const lines of mentionWrapped) {
     doc.text(lines, L + 6, my);
-    my += lines.length * 3.8 + 2;
+    my += lines.length * mentionLeading + mentionGap;
   }
   y += mentionsH;
 
