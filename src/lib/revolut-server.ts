@@ -168,3 +168,13 @@ export async function verifyRevolutSignature(params: {
       return timingSafeEqual(value.toLowerCase(), expected);
     });
 }
+
+/** Annule une order Revolut (impossible si déjà payée). */
+export async function cancelRevolutOrder(
+  env: RevolutEnv,
+  orderId: string,
+): Promise<RevolutOrder> {
+  return (await revolutFetch(env, `/orders/${encodeURIComponent(orderId)}/cancel`, {
+    method: "POST",
+  })) as RevolutOrder;
+}
