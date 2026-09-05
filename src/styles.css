@@ -8714,3 +8714,38 @@ select {
 .admin-eyebrow { color: var(--neon-blue); text-shadow: 0 0 14px rgba(61, 123, 255, 0.35); }
 .neon-blue { color: var(--neon-blue); }
 .neon-blue-glow { box-shadow: 0 0 18px -4px var(--neon-blue-glow); }
+
+/* === Lisibilité des volets latéraux admin (fond clair) ===
+   Certaines fiches historiques utilisent encore des classes text-white/*
+   héritées du thème sombre : on les remappe en encre foncée pour éviter
+   tout texte blanc sur fond blanc. */
+[data-admin-drawer] .text-white,
+[data-admin-drawer] [class*="text-white\\/9"],
+[data-admin-drawer] [class*="text-white\\/8"],
+[data-admin-drawer] [class*="text-white\\/7"] {
+  color: var(--admin-drawer-text) !important;
+}
+[data-admin-drawer] [class*="text-white\\/6"],
+[data-admin-drawer] [class*="text-white\\/5"],
+[data-admin-drawer] [class*="text-white\\/4"],
+[data-admin-drawer] [class*="text-white\\/3"],
+[data-admin-drawer] [class*="text-white\\/2"] {
+  color: var(--admin-drawer-muted) !important;
+}
+[data-admin-drawer] [class*="bg-white\\/5"],
+[data-admin-drawer] [class*="bg-white\\/10"] {
+  background-color: #f6f8fc !important;
+}
+[data-admin-drawer] [class*="border-white\\/"] {
+  border-color: var(--admin-drawer-border) !important;
+}
+[data-admin-drawer] input,
+[data-admin-drawer] textarea,
+[data-admin-drawer] select {
+  color: var(--admin-drawer-text) !important;
+  background-color: #ffffff;
+}
+[data-admin-drawer] input::placeholder,
+[data-admin-drawer] textarea::placeholder {
+  color: #94a3b8 !important;
+}
