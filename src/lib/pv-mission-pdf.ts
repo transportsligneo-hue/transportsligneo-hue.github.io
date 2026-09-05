@@ -278,9 +278,10 @@ export async function generatePvMissionPdf(
   const parties: [string, string | null][] = [
     ["Transporteur", `${c?.raison_sociale || "Transports Ligneo"} · SIREN ${siren}`],
     [isLiv ? "Donneur d'ordre / Expéditeur" : "Propriétaire / Donneur d'ordre", d.donneur_ordre ?? null],
-    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (locataire)", d.destinataire ?? null],
+    [isLiv ? "Destinataire / Réceptionnaire" : "Restitué par (utilisateur/locataire)", d.destinataire ?? null],
   ];
-  const partH = isLiv ? 21 : 18;
+  const partH = plateau ? (isLiv ? 18 : 16) : isLiv ? 21 : 18;
+
   parties.forEach(([titre, val], i) => {
     const x = M + i * (cw + 5);
     panel(doc, x, y, cw, partH);
