@@ -5,6 +5,7 @@ import signatureGo from "@/assets/signature-go.png";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
   fetchCompanyInfo,
+  companyAddressLine,
   companyLegalLine1,
   companyLegalLine2,
   resolveClientBillingIdentity,
