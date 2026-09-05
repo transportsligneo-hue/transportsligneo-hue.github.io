@@ -216,11 +216,12 @@ export function PaymentLinksPanel({
   function pickMission(m: MissionOption) {
     setPickedMission(m);
     setPickedDevis(null);
-    if (m.trajets?.client_nom && !nom) setNom(m.trajets.client_nom);
-    if (m.trajets?.client_email && !email) setEmail(m.trajets.client_email);
-    if (m.trajets?.client_telephone && !telephone) setTelephone(m.trajets.client_telephone);
-    if (m.trajets?.prix_client && !amount) setAmount(String(m.trajets.prix_client));
-    if (!description && m.trajets?.depart) {
+    if (m.trajets?.client_nom) setNom(m.trajets.client_nom);
+    if (m.trajets?.client_email) setEmail(m.trajets.client_email);
+    if (m.trajets?.client_telephone) setTelephone(m.trajets.client_telephone);
+    // Toujours reprendre le prix à jour de la mission (devis modifié inclus).
+    if (m.trajets?.prix_client) setAmount(String(m.trajets.prix_client));
+    if (m.trajets?.depart) {
       setDescription(`Convoyage ${m.trajets.depart} → ${m.trajets.arrivee ?? ""}`.trim());
     }
   }
@@ -228,15 +229,17 @@ export function PaymentLinksPanel({
   function pickDevis(d: DevisOption) {
     setPickedDevis(d);
     setPickedMission(null);
-    if (d.nom && !nom) setNom(d.nom);
-    if (d.prenom && !prenom) setPrenom(d.prenom);
-    if (d.email && !email) setEmail(d.email);
-    if (d.telephone && !telephone) setTelephone(d.telephone);
-    if (d.prix_estime && !amount) setAmount(String(d.prix_estime));
-    if (!description && d.depart) {
+    if (d.nom) setNom(d.nom);
+    if (d.prenom) setPrenom(d.prenom);
+    if (d.email) setEmail(d.email);
+    if (d.telephone) setTelephone(d.telephone);
+    // Le montant suit toujours la dernière révision du devis.
+    if (d.prix_estime) setAmount(String(d.prix_estime));
+    if (d.depart) {
       setDescription(`Devis ${d.numero ?? ""} · ${d.depart} → ${d.arrivee ?? ""}`.trim());
     }
   }
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
