@@ -491,7 +491,9 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
     if (link.statut !== "paid") throw new Error("Ce lien n'est pas encore payé.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { ensureFactureForDevis } = await import("@/lib/facture-auto.server");
+    const { ensureFactureForDevis, ensureFactureForMission } = await import(
+      "@/lib/facture-auto.server"
+    );
 
     let facture: Record<string, any> | null = null;
     if (link.facture_id) {
@@ -513,19 +515,27 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
           amountCents: link.amount_cents ?? null,
           missionId: link.mission_id ?? null,
         });
-        if (facture?.["id"]) {
-          await supabaseAdmin
-            .from("payment_links")
-            .update({ facture_id: facture["id"] })
-            .eq("id", link.id);
-        }
       }
+    }
+    if (!facture && link.mission_id) {
+      // Lien rattaché uniquement à une mission : la facture est créée à partir
+      // de la mission (via son devis quand il existe), même si elle n'a pas démarré.
+      facture = await ensureFactureForMission(link.mission_id, {
+        amountCents: link.amount_cents ?? null,
+      });
+    }
+    if (facture?.["id"] && !link.facture_id) {
+      await supabaseAdmin
+        .from("payment_links")
+        .update({ facture_id: facture["id"] })
+        .eq("id", link.id);
     }
     if (!facture) {
       throw new Error(
-        "Aucune facture rattachée à ce lien. Rattachez un devis ou une facture avant l'envoi.",
+        "Impossible de créer la facture : aucune mission, devis ou facture exploitable sur ce lien.",
       );
     }
+
 
     const destination =
       (data.destination || "").trim() ||
