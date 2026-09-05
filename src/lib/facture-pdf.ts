@@ -6,9 +6,9 @@ import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
   fetchCompanyInfo,
   companyAddressLine,
-  companyLegalLine1,
   companyLegalLine2,
   resolveClientBillingIdentity,
+  toSiren,
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
@@ -249,9 +249,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8.5);
   doc.setTextColor(...GREY);
   const emitterLines = [
-    [co?.signataire_nom, co?.forme_juridique || "Entreprise Individuelle"].filter(Boolean).join(" · "),
+    co?.signataire_nom || null,
     companyAddressLine(co) || "6 rue du Pont Libert, 37520 La Riche",
-    co?.siret ? `SIRET : ${co.siret}` : null,
+    toSiren(co?.siret) ? `SIREN : ${toSiren(co?.siret)}` : null,
     [co?.email_contact, co?.telephone].filter(Boolean).join(" · ") || null,
 
   ].filter(Boolean) as string[];
@@ -383,6 +383,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     "Constat photo départ / arrivée, suivi GPS temps réel et notifications client.",
     "Inclus",
   );
+  line(
+    "Assurance, chargement & déchargement",
+    "Assurance tous risques marchandises transportées incluse, chargement, arrimage et déchargement du véhicule pris en charge par nos soins.",
+    "Inclus",
+  );
 
   // ---------- Totaux ----------
   const totLabelX = L + innerW * 0.55;
@@ -468,7 +473,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   y += mentionsH;
 
   // ---------- Pied de page ----------
-  const l1 = companyLegalLine1(co);
+  const siren = toSiren(co?.siret);
+  const l1 = [
+    co?.raison_sociale || "Transports Ligneo",
+    co?.rcs ? `RCS ${co.rcs}` : null,
+    siren ? `SIREN ${siren}` : null,
+    co?.tva_intra ? `TVA ${co.tva_intra}` : null,
+  ].filter(Boolean).join(" — ");
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
