@@ -25,6 +25,7 @@ import { template as b2bLeadFlotteAdmin } from './b2b-lead-flotte-admin'
 import { template as b2bConversionSuggestionAdmin } from './b2b-conversion-suggestion-admin'
 import { template as paiementConfirme } from './paiement-confirme'
 import { template as attributionConvoyeur } from './attribution-convoyeur'
+import { template as rappelMissionJ1 } from './rappel-mission-j1'
 import { template as missionTermineeClient } from './mission-terminee-client'
 import { template as factureDisponible } from './facture-disponible'
 import { template as devisAccepte } from './devis-accepte'
@@ -76,6 +77,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'b2b-conversion-suggestion-admin': b2bConversionSuggestionAdmin,
   'paiement-confirme': paiementConfirme,
   'attribution-convoyeur': attributionConvoyeur,
+  'rappel-mission-j1': rappelMissionJ1,
   'mission-terminee-client': missionTermineeClient,
   'facture-disponible': factureDisponible,
   'devis-accepte': devisAccepte,
