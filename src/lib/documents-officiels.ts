@@ -76,6 +76,10 @@ export interface FicheMissionData {
   livraison_instructions?: string | null;
   convoyeur_nom?: string | null;
   convoyeur_tel?: string | null;
+  /** Kilométrage relevé au départ, si déjà connu sur la mission. */
+  km_depart?: number | null;
+  /** Numéro d'assistance 24/7 (sinon téléphone de la société). */
+  assistance_tel?: string | null;
   notes?: string | null;
 }
 
@@ -90,20 +94,21 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   const w = pageW - 28;
   const colW = (w - 6) / 2;
   const xR = 14 + colW + 6;
-  const kv = (x: number, y: number, label: string, value: string) =>
-    drawKeyValueRow(doc, x, y, colW, label, value, { labelW: colW * 0.42 });
+  /** Champ vide = ligne vierge (jamais de valeur par défaut trompeuse). */
+  const kv = (x: number, y: number, label: string, value?: string | null) =>
+    drawKeyValueRow(doc, x, y, colW, label, (value ?? "").trim(), { labelW: colW * 0.42 });
   let y = 52;
 
   /* Véhicule */
   y = drawSectionTitle(doc, pageW, y, "Véhicule à convoyer");
   let yl = y;
   let yr = y;
-  yl = kv(14, yl, "Marque / modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" ") || "—");
-  yl = kv(14, yl, "Immatriculation", d.immatriculation || "—");
-  yl = kv(14, yl, "N° de série (VIN)", d.vin || "—");
-  yr = kv(xR, yr, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — ") || "—");
-  yr = kv(xR, yr, "Km au départ", "____________ km");
-  yr = kv(xR, yr, "Assistance 24/7", c?.telephone || "—");
+  yl = kv(14, yl, "Marque / modèle", [d.vehicule_marque, d.vehicule_modele, d.vehicule_type].filter(Boolean).join(" "));
+  yl = kv(14, yl, "Immatriculation", d.immatriculation);
+  yl = kv(14, yl, "N° de série (VIN)", d.vin);
+  yr = kv(xR, yr, "Carburant / boîte", [d.carburant, d.boite].filter(Boolean).join(" — "));
+  yr = kv(xR, yr, "Km au départ", d.km_depart != null ? `${d.km_depart} km` : "");
+  yr = kv(xR, yr, "Assistance 24/7", d.assistance_tel || c?.telephone || "");
   y = Math.max(yl, yr) + 3;
 
   /* Enlèvement / Livraison côte à côte */
@@ -112,35 +117,47 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   y = drawSectionTitle(doc, pageW, ySec, "Livraison", { x: xR, w: colW });
   yl = y;
   yr = y;
-  yl = kv(14, yl, "Adresse", d.enlevement_adresse || "—");
-  yl = kv(14, yl, "Contact", d.enlevement_contact || "—");
-  yl = kv(14, yl, "Créneau", d.enlevement_creneau || "—");
-  yl = kv(14, yl, "Instructions", d.enlevement_instructions || "—");
-  yr = kv(xR, yr, "Adresse", d.livraison_adresse || "—");
-  yr = kv(xR, yr, "Contact", d.livraison_contact || "—");
-  yr = kv(xR, yr, "Créneau", d.livraison_creneau || "—");
-  yr = kv(xR, yr, "Instructions", d.livraison_instructions || "—");
+  yl = kv(14, yl, "Adresse", d.enlevement_adresse);
+  yl = kv(14, yl, "Contact", d.enlevement_contact);
+  yl = kv(14, yl, "Créneau", d.enlevement_creneau);
+  yl = kv(14, yl, "Instructions", d.enlevement_instructions);
+  yr = kv(xR, yr, "Adresse", d.livraison_adresse);
+  yr = kv(xR, yr, "Contact", d.livraison_contact);
+  yr = kv(xR, yr, "Créneau", d.livraison_creneau);
+  yr = kv(xR, yr, "Instructions", d.livraison_instructions);
   y = Math.max(yl, yr) + 3;
 
   /* Convoyeur */
   y = drawSectionTitle(doc, pageW, y, "Convoyeur assigné");
-  yl = kv(14, y, "Nom et prénom", d.convoyeur_nom || "—");
-  yr = kv(xR, y, "Téléphone", d.convoyeur_tel || "—");
+  yl = kv(14, y, "Nom et prénom", d.convoyeur_nom);
+  yr = kv(xR, y, "Téléphone", d.convoyeur_tel);
   y = Math.max(yl, yr) + 4;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...DOC_NAVY);
   doc.text("DOCUMENTS À EMPORTER PAR LE CONVOYEUR", 14, y);
-  y += 4.5;
+  y += 5;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...DOC_TEXT);
-  doc.setFontSize(7);
-  doc.text(
-    "[  ] Permis de conduire     [  ] Pièce d'identité     [  ] Ordre de mission (ce document)     [  ] Constat amiable     [  ] Attestation RC Pro",
-    14,
-    y,
-  );
+  doc.setFontSize(7.5);
+  const docsGauche = ["Permis de conduire", "Ordre de mission (ce document)", "Attestation RC Pro"];
+  const docsDroite = ["Pièce d'identité", "Constat amiable"];
+  const drawChecks = (items: string[], x: number) => {
+    let yy = y;
+    items.forEach((label) => {
+      doc.setDrawColor(...DOC_LINE);
+      doc.setLineWidth(0.3);
+      doc.rect(x, yy - 2.6, 3, 3, "S");
+      doc.text(label, x + 5, yy);
+      yy += 5;
+    });
+    return yy;
+  };
+  const yChecksL = drawChecks(docsGauche, 14);
+  const yChecksR = drawChecks(docsDroite, xR);
+  y = Math.max(yChecksL, yChecksR) + 2;
+
   y += 6;
 
   doc.setFont("helvetica", "bold");
