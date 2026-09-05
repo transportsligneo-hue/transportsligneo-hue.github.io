@@ -192,7 +192,10 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
   }
   y += 20;
 
-  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22);
+  signatureBlocks(doc, pageW, y, "Signature convoyeur (départ)", "Signature convoyeur (livraison)", 22, {
+    left: d.signatures?.convoyeur_depart ?? null,
+    right: d.signatures?.convoyeur_livraison ?? null,
+  });
   finalizeDoc(doc, c);
   return doc.output("blob");
 }
@@ -368,6 +371,8 @@ export interface EdlPapierData {
   arrivee?: string | null;
   date_prevue?: string | null;
   convoyeur_nom?: string | null;
+  /** Signatures capturées (data URL PNG) à imprimer dans les cadres. */
+  signatures?: { convoyeur?: string | null; client?: string | null };
 }
 
 const EDL_ENERGIES = ["Essence", "Diesel", "Hybride", "Électrique"];
@@ -609,7 +614,10 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
 
   /* Signatures */
   const sigH = 21;
-  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH);
+  const sigY = signatureBlocks(doc, pageW, y, "LE CONVOYEUR / PARC LIVREUR", "LE CLIENT / REPRÉSENTANT", sigH, {
+    left: d.signatures?.convoyeur ?? null,
+    right: d.signatures?.client ?? null,
+  });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
