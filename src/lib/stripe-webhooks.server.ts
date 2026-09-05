@@ -215,7 +215,12 @@ export async function handleFactureWebhookEvent(event: StripeEvent): Promise<voi
         } catch (e) {
           console.error("[facture/webhook] email error", e);
         }
+
+        // Envoi immédiat de la facture acquittée
+        const { sendFactureDisponibleEmail } = await import("@/lib/facture-auto.server");
+        await sendFactureDisponibleEmail({ ...facture, statut: "payee" });
       }
+
     }
   }
 }
