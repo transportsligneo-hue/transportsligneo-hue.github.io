@@ -282,8 +282,10 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         livraison_instructions: trajet.contact_arrivee_note,
         convoyeur_nom: convoyeurNom,
         convoyeur_tel: convoyeur?.telephone ?? null,
+        km_depart: kmDepart ?? trajet.vehicule_km ?? null,
         notes: trajet.vehicule_notes,
       }, company);
+
       downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
