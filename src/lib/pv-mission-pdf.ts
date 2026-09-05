@@ -518,7 +518,7 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = 37;
+  const docsH = 39;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
   field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
