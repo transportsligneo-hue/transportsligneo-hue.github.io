@@ -395,7 +395,7 @@ export function AdminScanDocumentPanel() {
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"
-                  onClick={() => setScannerOpen(true)}
+                  onClick={openScanner}
                   className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#d4af37] to-[#e7c76a] text-[#0b1026] font-semibold py-3 text-sm"
                 >
                   <ScanLine size={16} /> Prendre une photo
