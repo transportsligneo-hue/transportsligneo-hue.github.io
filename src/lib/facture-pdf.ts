@@ -168,6 +168,30 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const tva = tvaExempt ? 0 : Number(f.prix_tva ?? +(ht * tvaTaux / 100).toFixed(2));
   const ttc = tvaExempt ? ht : Number(f.prix_ttc);
 
+  // ---- Détail repris du devis d'origine (mêmes libellés, mêmes prix) ----
+  let devisMessage = f.devis_message ?? null;
+  if (!devisMessage && f.reference_client && /^DEV-/i.test(f.reference_client)) {
+    try {
+      const { data } = await supabase
+        .from("devis")
+        .select("message")
+        .eq("numero", f.reference_client)
+        .maybeSingle();
+      devisMessage = (data as { message?: string | null } | null)?.message ?? null;
+    } catch { /* détail optionnel */ }
+  }
+  const parsedSupp = parseDevisSupplements(devisMessage);
+  const parsedOpts = parseDevisOptions(devisMessage);
+  const supplements = (f.supplements?.length ? f.supplements : parsedSupp.supplements).filter(
+    (s) => s && Number(s.montant) > 0,
+  );
+  const optionsList = (f.options?.length ? f.options : parsedOpts.options).filter(Boolean);
+  const toHt = (v: number) => (tvaExempt ? v : +(v / (1 + tvaTaux / 100)).toFixed(2));
+  const supplementsTtc = supplements.reduce((s, x) => s + Number(x.montant), 0);
+  const baseHt = Math.max(0, +(ht - toHt(supplementsTtc)).toFixed(2));
+
+
+
 
   // =====================================================================
   //  Modèle officiel « facture-modele-transports-ligneo » (fond clair)
