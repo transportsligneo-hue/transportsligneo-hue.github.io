@@ -10,6 +10,9 @@ import {
 } from "@/lib/documents-officiels";
 import { generatePvMissionPdf, pvNumero, type PvDommage, type PvVariant } from "@/lib/pv-mission-pdf";
 import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type CompanyInfo } from "@/lib/doc-branding";
+import { generateMandatRecuperationPdf, mandatNumero } from "@/lib/mandat-recuperation-pdf";
+import { UniversalSignatureDialog } from "@/components/signature/UniversalSignatureDialog";
+import { signatureKind, type SignatureDocType } from "@/lib/signature-slots";
 
 /** Libellés des vues EDL, pour situer les dommages repris sur le PV. */
 const EDL_VUE_LABELS: Record<string, string> = {
@@ -128,7 +131,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
       .maybeSingle();
     if (!attr) { setLoading(false); return; }
 
-    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes] = await Promise.all([
+    const [tRes, cRes, dRes, comp, inspRes, nrRes, pvRes, sigRes, mandatRes] = await Promise.all([
       supabase.from("trajets_client_safe").select("*").eq("id", attr.trajet_id).maybeSingle(),
       attr.convoyeur_id
         ? supabase.from("convoyeurs").select("nom, prenom, telephone, user_id").eq("id", attr.convoyeur_id).maybeSingle()
@@ -157,6 +160,15 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         .eq("attribution_id", attributionId)
         .in("type_document", ["pv_livraison", "pv_restitution"])
         .order("created_at", { ascending: false }),
+      supabase
+        .from("mission_signatures")
+        .select("kind, signature_data")
+        .eq("attribution_id", attributionId),
+      supabase
+        .from("trajets")
+        .select("decharge_recuperation, recuperation_lieu, recuperation_motif")
+        .eq("id", attr.trajet_id)
+        .maybeSingle(),
     ]);
 
     const t = tRes.data as unknown as TrajetLite | null;
@@ -190,6 +202,19 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     );
 
     setPvSignes((pvRes.data as SignedPvDoc[] | null) ?? []);
+
+    const sigRows = (sigRes.data as { kind: string; signature_data: string | null }[] | null) ?? [];
+    setSignatures(
+      Object.fromEntries(sigRows.filter((r) => r.signature_data).map((r) => [r.kind, r.signature_data as string])),
+    );
+    const md = mandatRes.data as
+      | { decharge_recuperation: boolean | null; recuperation_lieu: string | null; recuperation_motif: string | null }
+      | null;
+    setMandat({
+      actif: !!md?.decharge_recuperation,
+      lieu: md?.recuperation_lieu ?? null,
+      motif: md?.recuperation_motif ?? null,
+    });
 
 
     // Société du client (organisation / profil) — sinon nom du particulier
@@ -315,6 +340,12 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         date_prise_en_charge: trajet.date_trajet,
         date_livraison: null,
         dommages,
+        signatures: {
+          convoyeur: signatures[signatureKind(`pv_${v}` as SignatureDocType, "convoyeur")] ?? null,
+          contrepartie:
+            signatures[signatureKind(`pv_${v}` as SignatureDocType, v === "livraison" ? "destinataire" : "proprietaire")] ??
+            null,
+        },
       }, company);
       downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
     } catch {
@@ -322,6 +353,37 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     } finally { setBusy(null); }
   };
 
+
+  const downloadMandat = async () => {
+    if (!trajet || !guardCompany()) return;
+    setBusy("mandat");
+    try {
+      const blob = await generateMandatRecuperationPdf({
+        numero_mission: numero,
+        numero_mandat: mandatNumero(numero),
+        mandant_nom: trajet.client_nom,
+        mandant_societe: clientSociete,
+        mandant_adresse: trajet.depart,
+        mandant_tel: trajet.contact_depart_tel,
+        mandant_email: trajet.client_email,
+        marque_modele: marqueModele,
+        immatriculation: immat,
+        vin: trajet.vin || trajet.vehicule_vin,
+        lieu_recuperation: mandat.lieu || trajet.depart,
+        motif: mandat.motif,
+        destination: trajet.arrivee,
+        date_prevue: [trajet.date_trajet, trajet.heure_trajet].filter(Boolean).join(" ") || null,
+        convoyeur_nom: convoyeurNom,
+        signatures: {
+          mandant: signatures[signatureKind("mandat", "mandant")] ?? null,
+          mandataire: signatures[signatureKind("mandat", "mandataire")] ?? null,
+        },
+      }, company);
+      downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
+    } catch {
+      toast.error("Génération impossible");
+    } finally { setBusy(null); }
+  };
 
   const openStored = async (url: string) => {
     if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
