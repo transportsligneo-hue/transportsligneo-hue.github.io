@@ -112,16 +112,32 @@ const VUES: [string, string, number, number][] = [
 ];
 
 const DOCS_LIVRAISON: [string, string][] = [
-  ["Clé principale", "Clé de secours"],
   ["Carte grise", "Attestation d'assurance"],
-  ["État des lieux départ joint", "Accessoires (roue secours, triangle, gilet)"],
+  ["Tapis de sol", "Kit de sécurité (triangle + gilet)"],
+  ["État des lieux digitalisé (réalisé sur l'application)", ""],
 ];
 
 const DOCS_RESTITUTION: [string, string][] = [
-  ["Clé principale", "Clé de secours"],
   ["Carte grise", "Carnet d'entretien"],
-  ["État des lieux de départ joint", "Accessoires (roue secours, triangle, gilet)"],
+  ["Tapis de sol", "Kit de sécurité (triangle + gilet)"],
+  ["État des lieux digitalisé (réalisé sur l'application)", ""],
 ];
+
+/** Contrôles d'arrimage — version plateau (véhicule non roulant). */
+const ARRIMAGE_LIVRAISON = [
+  "Sangles avant retirées sans dommage",
+  "Sangles arrière retirées sans dommage",
+  "Cales roues retirées",
+  "Aucune trace d'arrimage sur carrosserie",
+];
+
+const ARRIMAGE_RESTITUTION = [
+  "Sangles avant posées et tendues",
+  "Sangles arrière posées et tendues",
+  "Cales roues en place",
+  "Points d'arrimage vérifiés",
+];
+
 
 /* ------------------------------------------------------------------ helpers */
 
