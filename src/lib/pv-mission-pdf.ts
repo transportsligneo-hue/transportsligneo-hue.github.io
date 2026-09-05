@@ -512,21 +512,39 @@ export async function generatePvMissionPdf(
   }
 
   /* ---------- Documents et accessoires ---------- */
-  const docsH = isLiv ? 24 : 20;
+  const docsH = plateau ? 33 : 36;
   panel(doc, M, y, W, docsH);
   panelTitle(doc, M + 6, y + 6.5, isLiv ? "Documents et accessoires remis" : "Documents et accessoires restitués");
-  let dy = y + (isLiv ? 12 : 10.5);
+  field(doc, M + 6, y + 11, fw, isLiv ? "Nombre de clés remises" : "Nombre de clés restituées", null);
+  field(doc, fx2, y + 11, fw, "Câble de recharge (si électrique) — nombre", null);
+  let dy = y + 21;
   (isLiv ? DOCS_LIVRAISON : DOCS_RESTITUTION).forEach(([l, r]) => {
     checkbox(doc, M + 6, dy - 2.6, 3.2);
-    checkbox(doc, XR, dy - 2.6, 3.2);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.6);
     doc.setTextColor(...TEXT);
     doc.text(l, M + 12, dy);
-    doc.text(r, XR + 6, dy);
-    dy += isLiv ? 5.2 : 4.6;
+    if (r) {
+      checkbox(doc, XR, dy - 2.6, 3.2);
+      doc.text(r, XR + 6, dy);
+    }
+    dy += plateau ? 3.8 : 4.2;
   });
+  const pillY = y + docsH - 9;
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...BORDER);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(M + 6, pillY, COL2 - 6, 7.5, 2, 2, "FD");
+  doc.roundedRect(XR, pillY, COL2 - 6, 7.5, 2, 2, "FD");
+  checkbox(doc, M + 10, pillY + 2.1, 3.2);
+  checkbox(doc, XR + 4, pillY + 2.1, 3.2);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.8);
+  doc.setTextColor(...INK);
+  doc.text("Roue secours / kit anti-crevaison présent", M + 16, pillY + 5);
+  doc.text("Absent", XR + 10, pillY + 5);
   y += docsH + sp;
+
 
   /* ---------- Mention légale ---------- */
   doc.setFont("helvetica", "normal");
