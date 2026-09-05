@@ -67,7 +67,13 @@ export interface FactureData {
   reference_client?: string | null;
   /** Libellé personnalisé pour la référence externe (défaut : "Référence client"). */
   reference_label?: string | null;
-}
+  /** Récapitulatif du devis d'origine (options, suppléments) — repris tel quel sur la facture. */
+  devis_message?: string | null;
+  /** Options facturées (reprises du devis). */
+  options?: string[] | null;
+  /** Suppléments chiffrés repris du devis (montants TTC). */
+  supplements?: Array<{ label: string; montant: number }> | null;
+
 
 
 const NAVY: [number, number, number] = [14, 26, 53];
