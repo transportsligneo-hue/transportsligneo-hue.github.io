@@ -6498,6 +6498,71 @@ export type Database = {
         }
         Relationships: []
       }
+      signature_handoff_sessions: {
+        Row: {
+          attribution_id: string | null
+          created_at: string
+          created_by: string | null
+          doc_label: string | null
+          doc_type: string
+          expires_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          signature_data: string | null
+          signed_at: string | null
+          signer_name: string | null
+          slot: string
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          attribution_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_label?: string | null
+          doc_type: string
+          expires_at: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          slot: string
+          status?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doc_label?: string | null
+          doc_type?: string
+          expires_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          slot?: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_handoff_sessions_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signup_events: {
         Row: {
           created_at: string
@@ -6603,6 +6668,7 @@ export type Database = {
           created_at: string
           date_souhaitee: string | null
           date_trajet: string | null
+          decharge_recuperation: boolean
           demande_id: string | null
           depart: string
           devis_id: string | null
@@ -6638,6 +6704,8 @@ export type Database = {
           proposal_expires_at: string | null
           published_at: string | null
           pv_digitalise: string | null
+          recuperation_lieu: string | null
+          recuperation_motif: string | null
           refus_motif: string | null
           refused_at: string | null
           statut: string
@@ -6683,6 +6751,7 @@ export type Database = {
           created_at?: string
           date_souhaitee?: string | null
           date_trajet?: string | null
+          decharge_recuperation?: boolean
           demande_id?: string | null
           depart: string
           devis_id?: string | null
@@ -6718,6 +6787,8 @@ export type Database = {
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
+          recuperation_lieu?: string | null
+          recuperation_motif?: string | null
           refus_motif?: string | null
           refused_at?: string | null
           statut?: string
@@ -6763,6 +6834,7 @@ export type Database = {
           created_at?: string
           date_souhaitee?: string | null
           date_trajet?: string | null
+          decharge_recuperation?: boolean
           demande_id?: string | null
           depart?: string
           devis_id?: string | null
@@ -6798,6 +6870,8 @@ export type Database = {
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
+          recuperation_lieu?: string | null
+          recuperation_motif?: string | null
           refus_motif?: string | null
           refused_at?: string | null
           statut?: string
