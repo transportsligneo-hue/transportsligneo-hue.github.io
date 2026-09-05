@@ -91,6 +91,20 @@ interface StoredDoc {
 
 const PV_TYPE = "passage_a_vide";
 
+interface SignatureRow {
+  kind: string;
+  signature_data: string | null;
+  signer_name: string | null;
+  signed_at: string | null;
+  source: string | null;
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  pc: "ordinateur",
+  telephone: "téléphone",
+  otp: "code de validation client",
+};
+
 export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0 }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
@@ -105,6 +119,8 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
   /** Signatures collectées, indexées par « document:emplacement ». */
   const [signatures, setSignatures] = useState<Record<string, string>>({});
+  /** Historique lisible : qui a signé quoi, quand et depuis quel support. */
+  const [signatureRows, setSignatureRows] = useState<SignatureRow[]>([]);
   /** Décharge pour récupération activée sur la mission (mandat à faire signer). */
   const [mandat, setMandat] = useState<{ actif: boolean; lieu: string | null; motif: string | null }>({
     actif: false, lieu: null, motif: null,
@@ -162,7 +178,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         .order("created_at", { ascending: false }),
       supabase
         .from("mission_signatures")
-        .select("kind, signature_data")
+        .select("kind, signature_data, signer_name, signed_at, source")
         .eq("attribution_id", attributionId),
       supabase
         .from("trajets")
@@ -203,9 +219,12 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
 
     setPvSignes((pvRes.data as SignedPvDoc[] | null) ?? []);
 
-    const sigRows = (sigRes.data as { kind: string; signature_data: string | null }[] | null) ?? [];
+    const sigRows = (sigRes.data as SignatureRow[] | null) ?? [];
     setSignatures(
       Object.fromEntries(sigRows.filter((r) => r.signature_data).map((r) => [r.kind, r.signature_data as string])),
+    );
+    setSignatureRows(
+      [...sigRows].sort((a, b) => (b.signed_at ?? "").localeCompare(a.signed_at ?? "")),
     );
     const md = mandatRes.data as
       | { decharge_recuperation: boolean | null; recuperation_lieu: string | null; recuperation_motif: string | null }
@@ -284,6 +303,10 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         convoyeur_tel: convoyeur?.telephone ?? null,
         km_depart: kmDepart ?? trajet.vehicule_km ?? null,
         notes: trajet.vehicule_notes,
+        signatures: {
+          convoyeur_depart: signatures[signatureKind("fiche_mission", "convoyeur_depart")] ?? null,
+          convoyeur_livraison: signatures[signatureKind("fiche_mission", "convoyeur_livraison")] ?? null,
+        },
       }, company);
 
       downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
@@ -310,6 +333,10 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         arrivee: trajet.arrivee,
         date_prevue: trajet.date_trajet,
         convoyeur_nom: (v === "livraison" ? contactArriveeNom : contactDepartNom) || convoyeurNom,
+        signatures: {
+          convoyeur: signatures[signatureKind(`edl_${v}` as SignatureDocType, "convoyeur")] ?? null,
+          client: signatures[signatureKind(`edl_${v}` as SignatureDocType, "client")] ?? null,
+        },
       }, company);
       downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
     } catch {
@@ -413,6 +440,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         heures: pvForm.heures || null,
         distance_km: pvForm.distance_km ? Number(pvForm.distance_km) : null,
         mission_ref: numero,
+        signatures: { convoyeur: signatures[signatureKind("passage_a_vide", "convoyeur")] ?? null },
       }, company);
 
       const filename = `Passage-a-vide-${refSafe}-${Date.now()}.pdf`;

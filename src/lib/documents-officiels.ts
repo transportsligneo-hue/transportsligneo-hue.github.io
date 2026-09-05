@@ -209,6 +209,8 @@ export async function generateFicheMissionPdf(d: FicheMissionData, company?: Com
 
 export interface PassageAVideData {
   numero: string;
+  /** Signature capturée (data URL PNG) à imprimer dans le cadre convoyeur. */
+  signatures?: { convoyeur?: string | null };
   convoyeur_nom?: string | null;
   convoyeur_permis?: string | null;
   convoyeur_statut?: string | null;
@@ -287,7 +289,9 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
   doc.setTextColor(...DOC_MUTED);
   doc.text(`Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(new Date().toISOString())}`, 14, y);
   y += 4;
-  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22);
+  signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22, {
+    left: d.signatures?.convoyeur ?? null,
+  });
 
 
   finalizeDoc(doc, c);
