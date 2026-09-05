@@ -66,7 +66,12 @@ export interface PvMissionData {
   date_livraison?: string | null;
   /** Annotations de dommages issues de l'EDL — schéma vierge si vide. */
   dommages?: PvDommage[];
+  /** Véhicule non roulant : bascule sur la version « transport sur plateau ». */
+  plateau?: boolean | null;
+  /** Transporteur / n° de plateau, si déjà renseigné sur la mission. */
+  plateau_numero?: string | null;
 }
+
 
 /** Numéro de PV dérivé du numéro de mission (jamais de compteur autonome). */
 export function pvNumero(variant: PvVariant, numeroMission: string, version = 1): string {
