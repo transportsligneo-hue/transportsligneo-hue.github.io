@@ -688,7 +688,58 @@ export function PaymentLinksPanel({
                       <Search size={13} /> Rattacher à une mission
                     </button>
                   ))}
+                {r.statut !== "paid" && r.statut !== "cancelled" && (
+                  <button
+                    type="button"
+                    className="dvx-btn outline"
+                    disabled={busyRow === r.id}
+                    onClick={async () => {
+                      if (!window.confirm("Annuler ce lien de paiement ? Il ne sera plus payable.")) return;
+                      setBusyRow(r.id);
+                      setError(null);
+                      try {
+                        const res: any = await cancelLink({ data: { linkId: r.id } });
+                        setNotice(
+                          res?.providerWarning
+                            ? `Lien annulé ici. Revolut : ${res.providerWarning}`
+                            : "Lien de paiement annulé.",
+                        );
+                        await load();
+                      } catch (e: any) {
+                        setError(e?.message ?? "Annulation impossible");
+                      } finally {
+                        setBusyRow(null);
+                      }
+                    }}
+                  >
+                    <Ban size={13} /> Annuler
+                  </button>
+                )}
+                {r.statut !== "paid" && (
+                  <button
+                    type="button"
+                    className="dvx-btn outline text-[#b3261e]"
+                    disabled={busyRow === r.id}
+                    onClick={async () => {
+                      if (!window.confirm("Supprimer définitivement ce lien de paiement ?")) return;
+                      setBusyRow(r.id);
+                      setError(null);
+                      try {
+                        await removeLink({ data: { linkId: r.id } });
+                        setNotice("Lien de paiement supprimé.");
+                        await load();
+                      } catch (e: any) {
+                        setError(e?.message ?? "Suppression impossible");
+                      } finally {
+                        setBusyRow(null);
+                      }
+                    }}
+                  >
+                    <Trash2 size={13} /> Supprimer
+                  </button>
+                )}
               </div>
+
 
               {sendFor === r.id && (
                 <div className="mt-3 grid gap-2 rounded-lg border border-[#e6e8ef] p-3">
