@@ -73,17 +73,21 @@ export async function ensureFactureForDevis(
 ): Promise<FactureRow | null> {
   if (!devis) return null;
 
+  const links = await resolveFactureLinks(options.missionId ?? null);
+  const attributionId = options.attributionId ?? links.attributionId;
+
   const existing = await findFactureForDevis(devis, options.sessionId ?? null);
   if (existing) {
     // La mission a pu être créée après coup : on complète le lien si besoin.
-    if (options.missionId && !existing["mission_id"]) {
-      await supabaseAdmin
-        .from("factures")
-        .update({ mission_id: options.missionId })
-        .eq("id", existing["id"]);
+    const patch: Record<string, unknown> = {};
+    if (links.missionId && !existing["mission_id"]) patch["mission_id"] = links.missionId;
+    if (attributionId && !existing["attribution_id"]) patch["attribution_id"] = attributionId;
+    if (Object.keys(patch).length) {
+      await supabaseAdmin.from("factures").update(patch as never).eq("id", existing["id"]);
     }
     return existing;
   }
+
 
   const amountCents = Number(options.amountCents ?? 0);
   const prixTtc = Number(devis["prix_estime"] ?? (amountCents ? amountCents / 100 : 0));
