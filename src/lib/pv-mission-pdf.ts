@@ -497,7 +497,7 @@ export async function generatePvMissionPdf(
 
   /* ---------- Frais additionnels (restitution) ---------- */
   if (!isLiv) {
-    const frH = plateau ? 21 : 25;
+    const frH = plateau ? 24 : 25;
     panel(doc, M, y, W, frH);
     panelTitle(doc, M + 6, y + 6.5, "Frais additionnels imputables");
     doc.setFillColor(...WHITE);
