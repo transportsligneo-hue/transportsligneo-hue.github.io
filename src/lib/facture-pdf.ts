@@ -335,11 +335,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    if (extras.length) doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, mTop + 30);
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, mTop + 34);
+    void vx;
   }
 
   // ---------- Prestation ----------
-  let y = mTop + mH + 9;
+  let y = mTop + mH + 8;
+
   smallLabel("PRESTATION", L, y);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
