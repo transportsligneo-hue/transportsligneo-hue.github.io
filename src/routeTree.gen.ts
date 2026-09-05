@@ -42,6 +42,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
+import { Route as SignerTokenRouteImport } from './routes/signer.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
@@ -362,6 +363,11 @@ const ActualitesIndexRoute = ActualitesIndexRouteImport.update({
 const VerifyCertificatTokenRoute = VerifyCertificatTokenRouteImport.update({
   id: '/verify-certificat/$token',
   path: '/verify-certificat/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignerTokenRoute = SignerTokenRouteImport.update({
+  id: '/signer/$token',
+  path: '/signer/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScanTokenRoute = ScanTokenRouteImport.update({
@@ -1316,6 +1322,7 @@ export interface FileRoutesByFullPath {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
@@ -1501,6 +1508,7 @@ export interface FileRoutesByTo {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
   '/scan': typeof ScanIndexRoute
@@ -1691,6 +1699,7 @@ export interface FileRoutesById {
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
   '/scan/': typeof ScanIndexRoute
@@ -1884,6 +1893,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
@@ -2069,6 +2079,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites'
     | '/scan'
@@ -2258,6 +2269,7 @@ export interface FileRouteTypes {
     | '/invitation-convoyeur/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
     | '/scan/'
@@ -2441,6 +2453,7 @@ export interface RootRouteChildren {
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
+  SignerTokenRoute: typeof SignerTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
   ScanIndexRoute: typeof ScanIndexRoute
@@ -2720,6 +2733,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-certificat/$token'
       fullPath: '/verify-certificat/$token'
       preLoaderRoute: typeof VerifyCertificatTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signer/$token': {
+      id: '/signer/$token'
+      path: '/signer/$token'
+      fullPath: '/signer/$token'
+      preLoaderRoute: typeof SignerTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scan/$token': {
@@ -4317,6 +4337,7 @@ const rootRouteChildren: RootRouteChildren = {
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
+  SignerTokenRoute: SignerTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
   ScanIndexRoute: ScanIndexRoute,
