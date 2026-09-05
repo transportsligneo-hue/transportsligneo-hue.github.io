@@ -70,6 +70,8 @@ export interface PvMissionData {
   plateau?: boolean | null;
   /** Transporteur / n° de plateau, si déjà renseigné sur la mission. */
   plateau_numero?: string | null;
+  /** Signatures collectées (PNG data URL) : convoyeur + destinataire/propriétaire. */
+  signatures?: { convoyeur?: string | null; contrepartie?: string | null };
 }
 
 
