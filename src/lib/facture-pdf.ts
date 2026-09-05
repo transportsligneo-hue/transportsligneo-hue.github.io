@@ -424,7 +424,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.roundedRect(L, y, innerW, 11, 2.5, 2.5, "F");
   doc.setFontSize(9);
   doc.setTextColor(...INK);
-  const reglement = `Mode de règlement : ${f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement")} · Échéance : ${f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception")}`;
+  const modeTxt = f.mode_paiement || (isB2B ? "Virement bancaire" : "Carte bancaire / virement");
+  const echeanceTxt = f.date_echeance ? fmtDate(f.date_echeance) : (isB2B ? (f.conditions_paiement || "30 jours fin de mois") : "À réception");
+  const reglement = isPaid ? `Mode de règlement : ${modeTxt}` : `Mode de règlement : ${modeTxt} · Échéance : ${echeanceTxt}`;
   doc.text((doc.splitTextToSize(reglement, innerW - rightW - 16) as string[])[0], L + 6, y + 7);
   doc.setFontSize(8.5);
   doc.setTextColor(...(isPaid ? GREEN : BLUE));
