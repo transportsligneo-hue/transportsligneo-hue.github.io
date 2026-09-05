@@ -225,20 +225,19 @@ export async function sendMissionReminder(
 }
 
 /**
- * Balayage : toutes les missions qui démarrent dans les 24 prochaines heures
+ * Balayage quotidien (J-1) : toutes les missions programmées pour demain
  * et dont le convoyeur n'a pas encore reçu son rappel.
+ * Le cron associé tourne une fois par jour à 17h UTC (18h CET / 19h CEST).
  */
 export async function runMissionReminders(): Promise<{ found: number; sent: number; results: ReminderResult[] }> {
   const now = new Date()
-  const today = parisDateStr(now)
   const tomorrow = parisDateStr(new Date(now.getTime() + 24 * 3600_000))
-  const dayAfter = parisDateStr(new Date(now.getTime() + 48 * 3600_000))
 
   const { data, error } = await supabaseAdmin
     .from('attributions')
     .select(`id, statut, trajet:trajets!inner(id, date_trajet, heure_trajet)`)
     .in('statut', ['acceptee', 'attribuee', 'confirmee', 'en_cours', 'validee'])
-    .in('trajet.date_trajet', [today, tomorrow, dayAfter])
+    .eq('trajet.date_trajet', tomorrow)
     .limit(500)
 
   if (error) {
@@ -253,12 +252,6 @@ export async function runMissionReminders(): Promise<{ found: number; sent: numb
 
   const results: ReminderResult[] = []
   for (const row of rows) {
-    const start = row.trajet?.date_trajet
-      ? parisToUtc(row.trajet.date_trajet, row.trajet.heure_trajet)
-      : null
-    if (!start) continue
-    const diffH = (start.getTime() - now.getTime()) / 3600_000
-    if (diffH > 24 || diffH < -1) continue
     results.push(await sendMissionReminder(row.id))
   }
 
