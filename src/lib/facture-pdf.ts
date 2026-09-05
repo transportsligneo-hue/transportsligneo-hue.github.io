@@ -6,9 +6,9 @@ import { resolveInvoiceMention } from "@/lib/invoice-settings";
 import {
   fetchCompanyInfo,
   companyAddressLine,
-  companyLegalLine1,
   companyLegalLine2,
   resolveClientBillingIdentity,
+  toSiren,
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
