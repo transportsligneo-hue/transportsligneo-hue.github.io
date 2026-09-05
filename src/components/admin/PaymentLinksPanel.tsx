@@ -16,6 +16,7 @@ import {
   FileText,
   Ban,
   Trash2,
+  Receipt,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -28,6 +29,7 @@ import {
   searchDevisForPaymentLink,
   searchMissionsForPaymentLink,
   sendPaymentLink,
+  sendFactureForPaymentLink,
   setPaymentLinkMission,
   type PaymentLinkRow,
 } from "@/lib/payment-links.functions";
@@ -102,6 +104,7 @@ export function PaymentLinksPanel({
   const loadHistory = useServerFn(getPaymentLinkHistory);
   const cancelLink = useServerFn(cancelPaymentLink);
   const removeLink = useServerFn(deletePaymentLink);
+  const sendFacture = useServerFn(sendFactureForPaymentLink);
 
 
   const [busyRow, setBusyRow] = useState<string | null>(null);
@@ -690,6 +693,38 @@ export function PaymentLinksPanel({
                       <Search size={13} /> Rattacher à une mission
                     </button>
                   ))}
+                {r.statut === "paid" && (
+                  <button
+                    type="button"
+                    className="dvx-btn outline"
+                    disabled={busyRow === r.id}
+                    onClick={async () => {
+                      const to = window.prompt(
+                        "Envoyer la facture par email à :",
+                        r.client_email ?? "",
+                      );
+                      if (to === null) return;
+                      setBusyRow(r.id);
+                      setError(null);
+                      setNotice(null);
+                      try {
+                        const res: any = await sendFacture({
+                          data: { linkId: r.id, destination: to.trim() || null },
+                        });
+                        setNotice(
+                          `Facture${res?.numero ? ` ${res.numero}` : ""} envoyée à ${res?.destination}.`,
+                        );
+                        await load();
+                      } catch (e: any) {
+                        setError(e?.message ?? "Envoi de la facture impossible");
+                      } finally {
+                        setBusyRow(null);
+                      }
+                    }}
+                  >
+                    <Receipt size={13} /> Envoyer la facture
+                  </button>
+                )}
                 {r.statut !== "paid" && r.statut !== "cancelled" && (
                   <button
                     type="button"
