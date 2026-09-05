@@ -249,9 +249,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setTextColor(...GREY);
   const emitterLines = [
     [co?.signataire_nom, co?.forme_juridique || "Entreprise Individuelle"].filter(Boolean).join(" · "),
-    co?.adresse || "6 rue du Pont Libert, 37520 La Riche",
+    companyAddressLine(co) || "6 rue du Pont Libert, 37520 La Riche",
     co?.siret ? `SIRET : ${co.siret}` : null,
-    [co?.email, co?.telephone].filter(Boolean).join(" · ") || null,
+    [co?.email_contact, co?.telephone].filter(Boolean).join(" · ") || null,
+
   ].filter(Boolean) as string[];
   let ey = boxTop + 19;
   for (const l of emitterLines) {
