@@ -4590,6 +4590,41 @@ export type Database = {
         }
         Relationships: []
       }
+      mission_rappels_j1: {
+        Row: {
+          attribution_id: string
+          convoyeur_id: string | null
+          email_ok: boolean
+          push_ok: boolean
+          sent_at: string
+          trajet_id: string | null
+        }
+        Insert: {
+          attribution_id: string
+          convoyeur_id?: string | null
+          email_ok?: boolean
+          push_ok?: boolean
+          sent_at?: string
+          trajet_id?: string | null
+        }
+        Update: {
+          attribution_id?: string
+          convoyeur_id?: string | null
+          email_ok?: boolean
+          push_ok?: boolean
+          sent_at?: string
+          trajet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_rappels_j1_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: true
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_review_requests: {
         Row: {
           attempts: number
