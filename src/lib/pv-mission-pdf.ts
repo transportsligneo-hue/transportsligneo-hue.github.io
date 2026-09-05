@@ -237,12 +237,40 @@ export async function generatePvMissionPdf(
   const annee = new Date().getFullYear();
   doc.text(`Date : ____ / ____ / ${annee}    Heure : ____ h ____`, right, 31.5, { align: "right" });
 
+  /* ---------- Bandeaux plateau (véhicule non roulant) ---------- */
+  const plateau = !!d.plateau;
+  let ruleY = 35;
+  if (plateau) {
+    const bh = 6;
+    const by = 33.5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.4);
+    const t2 = "TRANSPORT SUR PLATEAU";
+    const w2 = doc.getTextWidth(t2) + 10;
+    const t1 = "VÉHICULE NON ROULANT";
+    const w1 = doc.getTextWidth(t1) + 14;
+    const x2b = right - w2;
+    const x1b = x2b - 3 - w1;
+    doc.setFillColor(224, 236, 255);
+    doc.roundedRect(x2b, by, w2, bh, 3, 3, "F");
+    doc.setTextColor(...BLUE);
+    doc.text(t2, x2b + w2 / 2, by + 4.1, { align: "center" });
+    doc.setFillColor(255, 232, 235);
+    doc.roundedRect(x1b, by, w1, bh, 3, 3, "F");
+    doc.setFillColor(214, 45, 60);
+    doc.circle(x1b + 5, by + 3, 1.1, "F");
+    doc.setTextColor(190, 32, 48);
+    doc.text(t1, x1b + 8, by + 4.1);
+    ruleY = 42.5;
+  }
+
   doc.setDrawColor(...NAVY);
   doc.setLineWidth(0.7);
-  doc.line(M, 35, right, 35);
+  doc.line(M, ruleY, right, ruleY);
 
-  const sp = isLiv ? 3.4 : 1.6;
-  let y = isLiv ? 38 : 36;
+  const sp = plateau ? (isLiv ? 1.6 : 1.1) : isLiv ? 3.4 : 1.6;
+  let y = ruleY + (plateau ? 3 : isLiv ? 3 : 1);
+
 
   /* ---------- Parties ---------- */
   const cw = (W - 10) / 3;
