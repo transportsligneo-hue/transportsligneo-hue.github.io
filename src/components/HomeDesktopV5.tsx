@@ -6,6 +6,7 @@ import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
+import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
 
@@ -30,7 +31,15 @@ export default function HomeDesktopV5() {
           <div>
             <div className="v4-hero-eyebrow"><span className="dot" />Convoyage automobile · France &amp; Europe</div>
             <h1 className="v5-hero-h1">
-              TRANSPORTS LIGNEO.<br /><br />&nbsp;Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
+              <span className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
+                  <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" loading="lazy" />
+                </span>
+                <span className="font-heading text-[13px] font-extrabold tracking-[0.03em] text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_10px_rgba(91,143,255,0.7)]">LIGNEO</span>
+                </span>
+              </span>
+              <br />&nbsp;Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
             </h1>
             <p className="v5-hero-lead">
               Transports Ligneo, spécialiste du convoyage automobile.
