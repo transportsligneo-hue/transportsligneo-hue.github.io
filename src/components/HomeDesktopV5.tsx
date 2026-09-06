@@ -39,7 +39,7 @@ export default function HomeDesktopV5() {
                   TRANSPORTS&nbsp;<span className="text-[#6ea1ff] [text-shadow:0_0_16px_rgba(91,143,255,0.7)]">LIGNEO</span>
                 </span>
               </span>
-              <br />Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
+              <br /><br />Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
             </h1>
             <p className="v5-hero-lead">
               Transports Ligneo, spécialiste du convoyage automobile.
