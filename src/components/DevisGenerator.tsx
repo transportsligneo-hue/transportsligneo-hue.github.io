@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useId } from "react";
 import { normalizeVin } from "@/lib/vin";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
@@ -127,6 +127,8 @@ export interface DevisGeneratorProps {
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
+  const inputId = useId();
+
   // --- régime de facturation (micro = franchise en base de TVA) ---
   const [microRegime, setMicroRegime] = useState(true);
   useEffect(() => {
