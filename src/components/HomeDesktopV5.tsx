@@ -31,15 +31,15 @@ export default function HomeDesktopV5() {
           <div>
             <div className="v4-hero-eyebrow"><span className="dot" />Convoyage automobile · France &amp; Europe</div>
             <h1 className="v5-hero-h1">
-              <span className="flex items-center gap-3">
-                <span className="w-12 h-12 rounded-xl overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
+              <span className="flex items-center gap-4">
+                <span className="w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
                   <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" loading="lazy" />
                 </span>
-                <span className="font-heading text-[18px] font-extrabold tracking-[0.03em] text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_14px_rgba(91,143,255,0.7)]">LIGNEO</span>
+                <span className="font-heading text-[26px] font-extrabold tracking-[0.03em] text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  TRANSPORTS <span className="text-[#6ea1ff] [text-shadow:0_0_16px_rgba(91,143,255,0.7)]">LIGNEO</span>
                 </span>
               </span>
-              <br />&nbsp;Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
+              <br />Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
             </h1>
             <p className="v5-hero-lead">
               Transports Ligneo, spécialiste du convoyage automobile.
