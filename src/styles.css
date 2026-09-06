@@ -7266,7 +7266,7 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 /* ============================================================
    ESTIMATEUR · VARIANTE FLAT (/tarifs) — champs posés sur le fond
    ============================================================ */
-.dg-flat { width: 100%; }
+.dg-flat { width: 100%; transform: translateX(1.5cm); }
 .dg-flat-field {
   position: relative;
   border-radius: 18px;
