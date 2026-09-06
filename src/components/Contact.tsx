@@ -93,7 +93,7 @@ ${form.message}`;
     <div className="r4-page">
       <div className="v4-hero">
         <div className="v4-hero-eyebrow"><span className="dot" />Contact</div>
-        <h1 className="v4-h1">Parlons de votre <span className="v4-accent">trajet</span>.</h1>
+        <h1 className="v4-h1">Contactez l'équipe <span className="v4-accent">Transports Ligneo</span></h1>
         <p className="v4-hero-p">Une question, un devis, un partenariat : notre équipe vous répond sous 24h.</p>
       </div>
 

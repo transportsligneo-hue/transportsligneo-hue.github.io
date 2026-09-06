@@ -149,7 +149,7 @@ export default function MobileHomeScreen() {
             className="text-[35px] leading-[1.06] font-extrabold tracking-[-0.01em] mb-3 text-white"
             style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}
           >
-            La tranquillité<br />
+            Convoyage automobile<br />
             sur <span className="neon-accent">toute la ligne</span>
           </h1>
           <p className="text-[13px] leading-[1.55] mb-4 max-w-[290px] text-[#dbe3ff]" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>

@@ -30,7 +30,7 @@ export default function HomeDesktopV5() {
           <div>
             <div className="v4-hero-eyebrow"><span className="dot" />Convoyage automobile · France &amp; Europe</div>
             <h1 className="v5-hero-h1">
-              La tranquillité<br />sur <span className="v4-accent">toute la ligne</span>.
+              Convoyage automobile<br />sur <span className="v4-accent">toute la ligne</span>.
             </h1>
             <p className="v5-hero-lead">
               Transports Ligneo, spécialiste du convoyage automobile.

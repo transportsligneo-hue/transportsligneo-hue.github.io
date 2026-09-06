@@ -28,7 +28,7 @@ export default function MobileTarifsScreen() {
           Tarifs
         </div>
         <h1 className="text-[32px] leading-[1.08] font-extrabold tracking-[-0.01em] mb-3 text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-          Un tarif <span style={{ color: "#6ea1ff", textShadow: "0 0 18px rgba(91,143,255,0.8)" }}>clair et juste</span>.
+          Tarifs de <span style={{ color: "#6ea1ff", textShadow: "0 0 18px rgba(91,143,255,0.8)" }}>convoyage automobile</span>
         </h1>
         <p className="text-[13px] leading-[1.55] text-[#dbe3ff] max-w-[320px]">
           Péages, carburant et assurance inclus. Aucun frais caché, devis instantané.

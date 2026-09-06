@@ -34,7 +34,7 @@ function TarifsPage() {
             <span className="dot" />Tarifs
           </div>
           <h1 className="v4-h1">
-            Un tarif <span className="v4-accent">clair et juste</span>.
+            Tarifs de <span className="v4-accent">convoyage automobile</span>
           </h1>
           <p>Péages, carburant et assurance inclus. Aucun frais caché, devis instantané en ligne.</p>
         </section>
