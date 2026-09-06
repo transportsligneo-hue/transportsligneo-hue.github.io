@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useId } from "react";
 import { normalizeVin } from "@/lib/vin";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
@@ -127,6 +127,8 @@ export interface DevisGeneratorProps {
 }
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
+  const inputId = useId();
+
   // --- régime de facturation (micro = franchise en base de TVA) ---
   const [microRegime, setMicroRegime] = useState(true);
   useEffect(() => {
@@ -630,10 +632,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Rangée 1 · Départ / Arrivée (grands champs) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="dg-flat-field dg-flat-field--lg relative">
-                <label className="dg-flat-label">
+                <label htmlFor={`${inputId}-departure`} className="dg-flat-label">
                   <MapPin size={12} /> Départ
                 </label>
                 <PlacesInput
+                  inputId={`${inputId}-departure`}
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Adresse de départ complète"
@@ -642,10 +645,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 />
               </div>
               <div className="dg-flat-field dg-flat-field--lg relative">
-                <label className="dg-flat-label">
+                <label htmlFor={`${inputId}-arrival`} className="dg-flat-label">
                   <MapPinned size={12} /> Arrivée
                 </label>
                 <PlacesInput
+                  inputId={`${inputId}-arrival`}
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée complète"
@@ -658,8 +662,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Rangée 2 · Véhicule / Date / Heure */}
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="dg-flat-field relative">
-                <label className="dg-flat-label"><Car size={12} /> Véhicule</label>
+                <label htmlFor={`${inputId}-vehicle`} className="dg-flat-label"><Car size={12} /> Véhicule</label>
                 <select
+                  id={`${inputId}-vehicle`}
                   value={vehicleType}
                   onChange={e => setVehicleType(e.target.value)}
                   className="dg-flat-input appearance-none pr-6 cursor-pointer"
@@ -670,12 +675,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <ChevronDown size={14} className="absolute right-3 bottom-3.5 text-[#60a5fa] pointer-events-none" />
               </div>
               <div className="dg-flat-field">
-                <label className="dg-flat-label"><Calendar size={12} /> Date *</label>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="dg-flat-input" />
+                <label htmlFor={`${inputId}-date`} className="dg-flat-label"><Calendar size={12} /> Date *</label>
+                <input id={`${inputId}-date`} type="date" value={date} onChange={e => setDate(e.target.value)} className="dg-flat-input" />
               </div>
               <div className="dg-flat-field">
-                <label className="dg-flat-label"><Clock size={12} /> Heure *</label>
-                <input type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
+                <label htmlFor={`${inputId}-heure`} className="dg-flat-label"><Clock size={12} /> Heure *</label>
+                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
               </div>
             </div>
 
@@ -738,10 +743,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Départ / Arrivée · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <label htmlFor={`${inputId}-departure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
                   <MapPin size={11} className="text-[#e7c76a]" /> Départ
                 </label>
                 <PlacesInput
+                  inputId={`${inputId}-departure`}
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Adresse de départ"
@@ -750,10 +756,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <label htmlFor={`${inputId}-arrival`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
                   <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
                 </label>
                 <PlacesInput
+                  inputId={`${inputId}-arrival`}
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Adresse d'arrivée"
@@ -772,10 +779,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Véhicule · pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+              <label htmlFor={`${inputId}-vehicle`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
                 <Car size={11} className="text-[#e7c76a]" /> Véhicule
               </label>
               <select
+                id={`${inputId}-vehicle`}
                 value={vehicleType}
                 onChange={e => setVehicleType(e.target.value)}
                 className="w-full bg-transparent text-white text-[15px] font-semibold appearance-none pr-6 cursor-pointer focus:outline-none"
@@ -789,10 +797,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Date / Heure · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <label htmlFor={`${inputId}-date`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
                   <Calendar size={11} className="text-[#e7c76a]" /> Date *
                 </label>
                 <input
+                  id={`${inputId}-date`}
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
@@ -800,10 +809,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
+                <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
                   <Clock size={11} className="text-[#e7c76a]" /> Heure *
                 </label>
                 <input
+                  id={`${inputId}-heure`}
                   type="time"
                   value={heure}
                   onChange={e => setHeure(e.target.value)}
@@ -881,9 +891,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <span className="h-7 w-7 rounded-full grid place-items-center bg-[#5fb6ff]/15 border border-[#5fb6ff]/30">
                     <MapPin size={13} className="text-[#5fb6ff]" />
                   </span>
-                  <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse de départ</label>
+                  <label htmlFor={`${inputId}-departure`} className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse de départ</label>
                 </div>
                 <PlacesInput
+                  inputId={`${inputId}-departure`}
                   value={departure}
                   onChange={setDeparture}
                   placeholder="Ville, rue, code postal…"
@@ -910,9 +921,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <span className="h-7 w-7 rounded-full grid place-items-center bg-[#e7c76a]/15 border border-[#e7c76a]/30">
                     <MapPinned size={13} className="text-[#e7c76a]" />
                   </span>
-                  <label className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
+                  <label htmlFor={`${inputId}-arrival`} className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
                 </div>
                 <PlacesInput
+                  inputId={`${inputId}-arrival`}
                   value={arrival}
                   onChange={setArrival}
                   placeholder="Ville, rue, code postal…"
@@ -925,10 +937,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Détails trajet + CTA */}
             <div className="mt-5 grid grid-cols-2 md:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-3 md:gap-4 items-end">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <label htmlFor={`${inputId}-vehicle`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                   <Car size={11} className="text-[#e7c76a]" /> Véhicule
                 </label>
-                <select value={vehicleType} onChange={e => setVehicleType(e.target.value)}
+                <select id={`${inputId}-vehicle`} value={vehicleType} onChange={e => setVehicleType(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
                   <option value="">Sélectionner</option>
                   {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
@@ -936,17 +948,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <label htmlFor={`${inputId}-date`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                   <Calendar size={11} className="text-[#e7c76a]" /> Date *
                 </label>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                <input id={`${inputId}-date`} type="date" value={date} onChange={e => setDate(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
+                <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                   <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison *
                 </label>
-                <input type="time" value={heure} onChange={e => setHeure(e.target.value)}
+                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
               </div>
               <button
