@@ -165,7 +165,7 @@ function ActualitesPage() {
             Actualités
           </div>
           <h1 className="mb-3 mt-3 font-heading text-[34px] leading-tight text-white md:text-[42px]">
-            Le journal du <span className="v4-accent">convoyage</span>
+            Le journal <span className="v4-accent">Ligneo</span>
           </h1>
           <p className="mb-8 max-w-[640px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
             Conseils pratiques pour préparer vos livraisons, coulisses de nos missions en France et
