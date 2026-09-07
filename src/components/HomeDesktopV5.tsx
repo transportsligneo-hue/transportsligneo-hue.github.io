@@ -31,12 +31,12 @@ export default function HomeDesktopV5() {
           <div>
             <div className="v4-hero-eyebrow"><span className="dot" />Convoyage automobile · France &amp; Europe</div>
             <h1 className="v5-hero-h1">
-              <span className="flex items-center gap-5">
-                <span className="w-20 h-20 rounded-2xl overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
+              <span className="flex items-center gap-6">
+                <span className="w-28 h-28 rounded-[22px] overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
                   <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" loading="lazy" />
                 </span>
-                <span className="font-heading text-[44px] font-extrabold tracking-[0.03em] text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  TRANSPORTS&nbsp;<span className="text-[#6ea1ff] [text-shadow:0_0_16px_rgba(91,143,255,0.7)]">LIGNEO</span>
+                <span className="font-heading text-[52px] font-extrabold tracking-[0.03em] text-white leading-none" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  TRANSPORTS&nbsp;<span className="text-[#6ea1ff] [text-shadow:0_0_20px_rgba(91,143,255,0.8)]">LIGNEO</span>
                 </span>
               </span>
               <br /><br />Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
