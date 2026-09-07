@@ -2524,6 +2524,9 @@ body.is-driver-app .closed-link svg {
     scroll-snap-type: x proximity;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
+    /* Fondu sur le bord droit : indique que la liste se poursuit */
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 26px), transparent 100%);
   }
   .mnav-pill > li { flex: 0 0 auto; scroll-snap-align: center; }
   .mnav-pill > li:first-child { margin-left: 2px; }
