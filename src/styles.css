@@ -2141,9 +2141,9 @@ body.is-driver-app .closed-link svg {
     font-size: 1rem;
     font-weight: 800;
     letter-spacing: 0.04em;
-    color: #ffffff;
+    color: #00f3ff;
     line-height: 1.1;
-    text-shadow: 0 0 14px rgba(231,199,106,0.9);
+    text-shadow: 0 0 14px rgba(0, 243, 255, 0.85);
   }
 
   .nav-phone-sub {
@@ -2153,7 +2153,7 @@ body.is-driver-app .closed-link svg {
     font-size: 9px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(255, 235, 180, 0.98);
+    color: #00ff7f;
     margin-top: 3px;
     line-height: 1;
   }
