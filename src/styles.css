@@ -2551,7 +2551,7 @@ body.is-driver-app .closed-link svg {
   }
   .nav-phone-block.mnav-phone-compact .mnav-phone-label {
     font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
-    text-transform: uppercase; color: #dfe8ff; white-space: nowrap;
+    text-transform: uppercase; color: #00f3ff; white-space: nowrap;
   }
   @media (max-width: 400px) {
     .nav-phone-block.mnav-phone-compact { padding: 0; width: 30px; }
