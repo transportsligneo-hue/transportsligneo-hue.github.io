@@ -148,11 +148,6 @@ export default function MobileHomeScreen() {
           <p className="text-[13px] leading-[1.55] mb-4 max-w-[290px] text-[#dbe3ff]" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>
             Estimez, réservez et suivez vos convoyages en quelques secondes, partout en France.
           </p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <TrustItem icon={<Zap size={12} className="text-[#d9b54a]" />} label="Devis en 30s" />
-            <TrustItem label="6+ ans d'expérience" />
-            <TrustItem label="France entière" />
-          </div>
         </div>
       </section>
 
