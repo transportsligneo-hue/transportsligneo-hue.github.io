@@ -8393,6 +8393,7 @@ body .tln-bar-inner { gap: 8px !important; }
   pointer-events: none;
 }
 .r4-page .v5-hero-quote > * { position: relative; }
+.r4-page .v5-hero-quote .dg-flat { transform: none; }
 
 /* Dropdown de suggestions d'adresses dans l'estimateur hero — lisible dans les deux thèmes */
 .r4-page .v5-hero-quote .places-suggestion-list {
