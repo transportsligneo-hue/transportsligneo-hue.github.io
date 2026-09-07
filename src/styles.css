@@ -516,6 +516,11 @@ body.is-driver-app .closed-link svg {
   --cream: #f5f1e8;
   --electric-blue: oklch(0.62 0.22 250);
   --electric-blue-soft: oklch(0.72 0.18 250);
+  --neon-blue: #6ea1ff;
+  --neon-blue-strong: #4f8cff;
+  --neon-blue-deep: #2f5fff;
+  --neon-blue-glow: rgba(91, 143, 255, 0.8);
+  --neon-blue-soft: rgba(91, 143, 255, 0.18);
   /* === Couleurs opérationnelles (suivi missions / véhicules) === */
   --op-electric: #00AEEF;        /* Planifiée / accent métier */
   --op-violet: #8B5CF6;          /* En cours */
@@ -549,8 +554,8 @@ body.is-driver-app .closed-link svg {
   --v3-text: #0f1526;
   --v3-text-muted: #6b7590;
   --v3-text-dim: #9aa2ba;
-  --v3-blue: #2f5fff;
-  --v3-blue-deep: #1c3fc4;
+    --v3-blue: #4f8cff;
+    --v3-blue-deep: #2f5fff;
   --v3-blue-soft: #ecf1ff;
   --v3-blue-soft-2: #dbe6ff;
   --v3-gold: #b8862a;
@@ -3255,9 +3260,9 @@ body.is-driver-app .closed-link svg {
     --r4-navy-1: #0a1638;
     --r4-navy-2: #081230;
     --r4-navy-3: #061238;
-    --r4-blue: #2f5fff;
-    --r4-blue-bright: #4f8cff;
-    --r4-blue-glow: #6ea1ff;
+    --r4-blue: var(--neon-blue-deep);
+    --r4-blue-bright: var(--neon-blue-strong);
+    --r4-blue-glow: var(--neon-blue);
     --r4-gold: #d9b54a;
     --r4-text-muted: #9aa6c9;
     --r4-border: rgba(122,163,255,0.16);
@@ -3779,9 +3784,9 @@ body.is-driver-app .closed-link svg {
    ============================================================ */
 .r4-page {
   --v4-navy:#070c1f;
-  --v4-blue:#2f5fff;
-  --v4-blue-bright:#4f8cff;
-  --v4-blue-glow:#6ea1ff;
+  --v4-blue:var(--neon-blue-deep);
+  --v4-blue-bright:var(--neon-blue-strong);
+  --v4-blue-glow:var(--neon-blue);
   --v4-gold:#d9b54a;
   --v4-violet:#7c5cff;
   --v4-violet-glow:#a794ff;
@@ -5717,7 +5722,7 @@ html.theme-light .r4-page {
     linear-gradient(180deg, #f7f9ff 0%, #f5f7fc 100%) !important;
   color: #0f1526 !important;
 }
-html.theme-light .r4-page .v4-accent { color: #2f5fff; text-shadow: none; animation: none; }
+html.theme-light .r4-page .v4-accent { color: var(--neon-blue-strong); text-shadow: 0 0 10px rgba(91,143,255,.42); animation: r4PulseGlow 2.6s ease-in-out infinite; }
 html.theme-light .r4-page .v4-accent.v { color: #6b47ff; text-shadow: none; animation: none; }
 html.theme-light .r4-page .v4-hero-eyebrow { color: #1c3fc4; }
 html.theme-light .r4-page .v4-svc-card,
@@ -5819,8 +5824,7 @@ html.theme-light .mhome-root [class*="text-[#d9b54a]"],
 html.theme-light .mhome-root [class*="text-[#e7c76a]"] { color: #b8862a !important; }
 html.theme-light .mhome-root [class*="text-[#4f8cff]"],
 html.theme-light .mhome-root [class*="text-[#6ea1ff]"],
-html.theme-light .mhome-root [class*="text-[#60a5fa]"] { color: #2f5fff !important; }
-html.theme-light .mhome-root [style*="text-shadow"] { text-shadow: none !important; }
+html.theme-light .mhome-root [class*="text-[#60a5fa]"] { color: var(--neon-blue-strong) !important; }
 html.theme-light .mobile-card,
 html.theme-light .mobile-card-pressable {
   background: #ffffff !important;
@@ -8433,11 +8437,13 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
   border-color: rgba(96, 165, 250, 0.6) !important;
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
-html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { color: var(--neon-blue) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label { text-shadow: 0 0 14px var(--neon-blue-glow) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #16a34a !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator span,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator label { color: #ffffff !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-estimator label:not(.dg-flat-label) { color: #ffffff !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input option { color: #0f1526 !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle {
@@ -8452,6 +8458,129 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle.is-active {
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust { border-top-color: rgba(255, 255, 255, 0.14) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !important; background: #f7f7f9 !important; }
+
+/* ============================================================
+   SIGNATURE BLEU ÉLECTRIQUE LIGNEO
+   Une seule teinte, la même lueur vivante et le même rendu dans
+   les deux thèmes. Les surfaces sombres gardent leurs textes clairs.
+   ============================================================ */
+.electric-neon-text,
+.ligneo-lockup--blue .ligneo-lockup-accent {
+  color: var(--neon-blue);
+  text-shadow:
+    0 0 10px var(--neon-blue-glow),
+    0 0 24px rgba(91, 143, 255, 0.55);
+  animation: ligneoNeonBreathe 2.8s ease-in-out infinite;
+}
+
+@keyframes ligneoNeonBreathe {
+  0%, 100% {
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(91,143,255,.7), 0 0 24px rgba(91,143,255,.42);
+  }
+  50% {
+    color: #86b2ff;
+    text-shadow: 0 0 16px rgba(91,143,255,1), 0 0 34px rgba(91,143,255,.68);
+  }
+}
+
+.ligneo-lockup-badge {
+  background: #0b1026;
+  border: 1px solid var(--neon-blue-strong);
+  box-shadow: 0 0 14px var(--neon-blue-strong), 0 0 28px rgba(79,140,255,.3), inset 0 0 10px rgba(79,140,255,.15);
+}
+.ligneo-lockup-logo { filter: drop-shadow(0 0 4px var(--neon-blue-strong)); }
+.ligneo-lockup-transport { color: #fff; }
+.ligneo-lockup--blue .ligneo-lockup-tag {
+  color: var(--neon-blue);
+  text-shadow: 0 0 8px var(--neon-blue-strong);
+}
+.ligneo-lockup--green .ligneo-lockup-badge {
+  border-color: #6effcd;
+  box-shadow: 0 0 14px #6effcd, 0 0 28px rgba(78,255,178,.3), inset 0 0 10px rgba(110,255,205,.15);
+}
+.ligneo-lockup--green .ligneo-lockup-logo { filter: drop-shadow(0 0 4px #6effcd); }
+.ligneo-lockup--green .ligneo-lockup-accent,
+.ligneo-lockup--green .ligneo-lockup-tag { color: #6effcd; text-shadow: 0 0 10px #6effcd; }
+
+/* Harmonisation des textes et pictogrammes bleus existants. */
+body:not(.is-driver-app) :where(
+  .text-primary,
+  .text-v3-blue,
+  [class*="text-[#2f5fff]"],
+  [class*="text-[#2F5FFF]"],
+  [class*="text-[#4f8cff]"],
+  [class*="text-[#4F8CFF]"],
+  [class*="text-[#5fb6ff]"],
+  [class*="text-[#5FB6FF]"],
+  [class*="text-[#60a5fa]"],
+  [class*="text-[#60A5FA]"],
+  [class*="text-[#67c1ff]"],
+  [class*="text-[#67C1FF]"],
+  [class*="text-[#6ea1ff]"],
+  [class*="text-[#6EA1FF]"],
+  [class*="text-[#7aa3ff]"],
+  [class*="text-[#7AA3FF]"],
+  [class*="text-[#8fb4ff]"],
+  [class*="text-[#8FB4FF]"],
+  .text-blue-300,
+  .text-blue-400,
+  .text-blue-500,
+  .text-blue-600,
+  .text-blue-700
+) {
+  color: var(--neon-blue) !important;
+}
+
+body:not(.is-driver-app) :where(
+  .r4-accent,
+  .v4-accent,
+  .auth-accent,
+  .electric-text,
+  [class*="text-[#6ea1ff]"]
+) {
+  text-shadow: 0 0 12px var(--neon-blue-glow), 0 0 28px rgba(91,143,255,.5) !important;
+  animation: ligneoNeonBreathe 2.8s ease-in-out infinite !important;
+}
+
+/* Les commandes bleues partagent désormais le même flux électrique. */
+body:not(.is-driver-app) :where(
+  .v3-btn-primary,
+  .r4-nav-link.is-active,
+  .dg-flat-cta,
+  .theme-pref-btn.is-active,
+  .dvx-cta
+) {
+  background-image: linear-gradient(110deg, var(--neon-blue-deep), var(--neon-blue-strong), var(--neon-blue), var(--neon-blue-deep)) !important;
+  background-size: 240% 100% !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px -8px rgba(79,140,255,.78), 0 0 18px rgba(91,143,255,.28) !important;
+  animation: ligneoBlueFlow 6s linear infinite !important;
+}
+@keyframes ligneoBlueFlow { to { background-position: 240% 0; } }
+
+/* Le hero reste sombre en mode clair : ses petites légendes doivent rester visibles. */
+html.theme-light .r4-page .v5-hero .electric-neon-text,
+html.theme-light .r4-page .v5-hero .v4-accent,
+html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label,
+html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
+  color: var(--neon-blue) !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label {
+  text-shadow: 0 0 10px var(--neon-blue-glow), 0 0 22px rgba(91,143,255,.48) !important;
+}
+html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
+  filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .electric-neon-text,
+  .ligneo-lockup--blue .ligneo-lockup-accent,
+  body:not(.is-driver-app) :where(.r4-accent, .v4-accent, .auth-accent, .electric-text),
+  body:not(.is-driver-app) :where(.v3-btn-primary, .r4-nav-link.is-active, .dg-flat-cta, .theme-pref-btn.is-active, .dvx-cta) {
+    animation: none !important;
+  }
+}
 
 /* ============================================================
    ADMIN · Page Devis (zone de contenu uniquement) — préfixe .dvx
