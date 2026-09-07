@@ -8459,6 +8459,21 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle.is-active {
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust { border-top-color: rgba(255, 255, 255, 0.14) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !important; background: #f7f7f9 !important; }
 
+/* Labels de l'estimateur hero (départ / arrivée / véhicule / date / heure) en blanc. */
+.r4-page .v5-hero-quote .dg-flat-label,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
+.r4-page .v5-hero-quote .dg-flat-label svg,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg {
+  color: #ffffff !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+/* Légende "Complétez votre trajet…" plus lisible : gris clair en hero, gris foncé sur fond clair. */
+.dg-flat-hint { color: rgba(250, 247, 239, 0.85); }
+.r4-page .v5-hero-quote .dg-flat-hint { color: #9ca3af; }
+html.theme-light .dg-estimator--flat .dg-flat-hint { color: #6b7280; }
+
 /* ============================================================
    SIGNATURE BLEU ÉLECTRIQUE LIGNEO
    Une seule teinte, la même lueur vivante et le même rendu dans
@@ -8471,6 +8486,14 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !i
     0 0 10px var(--neon-blue-glow),
     0 0 24px rgba(91, 143, 255, 0.55);
   animation: ligneoNeonBreathe 2.8s ease-in-out infinite;
+}
+
+/* Gros LIGNEO du hero : couleur néon identique, sans clignotement. */
+.hero-title-ligneo {
+  color: var(--neon-blue);
+  text-shadow:
+    0 0 10px var(--neon-blue-glow),
+    0 0 24px rgba(91, 143, 255, 0.55);
 }
 
 @keyframes ligneoNeonBreathe {
