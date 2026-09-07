@@ -5783,13 +5783,13 @@ html.theme-light .r4-nav-link.nav-accent-green { color: #0f8a63 !important; }
 html.theme-light .r4-nav-link.nav-accent-green.is-active { color: #ffffff !important; background: linear-gradient(135deg,#0f8a63,#25c08a) !important; }
 html.theme-light .r4-nav-link.nav-accent-green svg { filter: none; }
 html.theme-light .nav-phone-block {
-  background: #eef3ff !important;
-  border-color: rgba(47,95,255,0.28) !important;
+  background: linear-gradient(120deg, rgba(0,243,255,0.14), rgba(235,247,255,0.7)) !important;
+  border-color: rgba(0,243,255,0.45) !important;
   color: #0f1526 !important;
 }
-html.theme-light .nav-phone-number { color: #0f1526 !important; }
-html.theme-light .nav-phone-sub { color: #1c3fc4 !important; }
-html.theme-light .mnav-phone-label { color: #1c3fc4 !important; }
+html.theme-light .nav-phone-number { color: #008ea8 !important; text-shadow: 0 0 10px rgba(0,243,255,0.5) !important; }
+html.theme-light .nav-phone-sub { color: #00a05a !important; }
+html.theme-light .mnav-phone-label { color: #008ea8 !important; }
 html.theme-light .mnav-bar {
   background: rgba(255,255,255,0.94) !important;
   border-bottom: 1px solid rgba(15,21,38,0.08) !important;
