@@ -8473,6 +8473,14 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !i
   animation: ligneoNeonBreathe 2.8s ease-in-out infinite;
 }
 
+/* Gros LIGNEO du hero : couleur néon identique, sans clignotement. */
+.hero-title-ligneo {
+  color: var(--neon-blue);
+  text-shadow:
+    0 0 10px var(--neon-blue-glow),
+    0 0 24px rgba(91, 143, 255, 0.55);
+}
+
 @keyframes ligneoNeonBreathe {
   0%, 100% {
     color: var(--neon-blue);
