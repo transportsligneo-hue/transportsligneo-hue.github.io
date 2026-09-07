@@ -28,7 +28,7 @@ export default function HomeDesktopV5() {
 
         <div className="v5-hero-grid">
           {/* Colonne gauche */}
-          <div className="-translate-x-[4.3cm] translate-y-[1.5cm]">
+          <div className="-translate-x-[4.3cm] translate-y-[0.5cm]">
             <div className="v4-hero-eyebrow"><span className="dot" />Convoyage automobile · France &amp; Europe</div>
             <h1 className="v5-hero-h1">
               <span className="flex items-center gap-6">
