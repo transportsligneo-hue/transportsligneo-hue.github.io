@@ -8443,7 +8443,7 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { filter: drop-shado
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #16a34a !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator span,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator label { color: #ffffff !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-estimator label:not(.dg-flat-label) { color: #ffffff !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input::placeholder { color: rgba(255, 255, 255, 0.5) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input option { color: #0f1526 !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle {
