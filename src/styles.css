@@ -7365,7 +7365,7 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 .dg-estimator--mini .dg-flat-trust span { font-size: 11px; justify-content: flex-start; }
 
 /* ---- Variante MINI dans le hero : cases plus grandes pour lire les adresses ---- */
-.r4-page .v5-hero-quote { max-width: 600px; }
+.r4-page .v5-hero-quote { max-width: 1100px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field { padding: 14px 18px; border-radius: 16px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field--lg { padding: 18px 22px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-label { font-size: 10px; letter-spacing: .18em; margin-bottom: 5px; }
