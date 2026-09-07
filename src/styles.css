@@ -8437,9 +8437,11 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
   border-color: rgba(96, 165, 250, 0.6) !important;
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
-html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { color: var(--neon-blue) !important; }
-html.theme-light .r4-page .v5-hero-quote .dg-flat-label { text-shadow: 0 0 14px var(--neon-blue-glow) !important; }
-html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg {
+  color: #ffffff !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #16a34a !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator span,
