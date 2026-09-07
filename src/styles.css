@@ -3651,12 +3651,12 @@ body.is-driver-app .closed-link svg {
   html.theme-light .tln-bar .r4-nav-link:hover { color: #ffffff !important; background: linear-gradient(120deg, rgba(47,95,255,0.22), rgba(79,140,255,0.14)) !important; }
   html.theme-light .tln-bar .r4-nav-link.is-active { color: #ffffff !important; background: linear-gradient(120deg, var(--r4-blue), var(--r4-blue-bright)) !important; }
   html.theme-light .tln-bar .nav-phone-block {
-    background: linear-gradient(120deg, rgba(212,175,55,0.28), rgba(60,45,10,0.6)) !important;
-    border-color: rgba(231,199,106,0.55) !important;
+    background: linear-gradient(120deg, rgba(0,243,255,0.24), rgba(5,18,45,0.62)) !important;
+    border-color: rgba(0,243,255,0.55) !important;
     color: #ffffff !important;
   }
-  html.theme-light .tln-bar .nav-phone-number { color: #ffffff !important; text-shadow: 0 0 14px rgba(231,199,106,0.9) !important; }
-  html.theme-light .tln-bar .nav-phone-sub { color: rgba(255,235,180,0.98) !important; }
+  html.theme-light .tln-bar .nav-phone-number { color: #00f3ff !important; text-shadow: 0 0 14px rgba(0,243,255,0.9) !important; }
+  html.theme-light .tln-bar .nav-phone-sub { color: #00ff7f !important; }
 
 
 
