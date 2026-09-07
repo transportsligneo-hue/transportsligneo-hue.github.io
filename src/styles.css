@@ -4039,8 +4039,8 @@ body.is-driver-app .closed-link svg {
   background:linear-gradient(180deg, transparent 45%, #081230 96%); }
 .r4-page .v5-hero-glow { position:absolute; top:-60px; right:-60px; width:340px; height:340px; border-radius:50%; z-index:1;
   background:radial-gradient(circle, rgba(63,123,255,0.4), transparent 70%); filter:blur(10px); mix-blend-mode:screen; }
-.r4-page .v5-hero-grid { position:relative; z-index:2; max-width:1280px; margin:0 auto;
-  padding:150px 32px 40px; display:grid; grid-template-columns:0.95fr 1.15fr; gap:40px; align-items:center; }
+.r4-page .v5-hero-grid { position:relative; z-index:2; max-width:1440px; margin:0 auto;
+  padding:150px 32px 40px; display:grid; grid-template-columns:0.65fr 1.55fr; gap:40px; align-items:center; }
 .r4-page .v5-hero-h1 { font-family:'Poppins',sans-serif; font-weight:800; font-size:44px;
   line-height:1.08; letter-spacing:-0.02em; margin-bottom:20px; color:#fff; }
 .r4-page .v5-hero-lead { color:var(--v4-text-muted); font-size:15.5px; line-height:1.65; max-width:480px; margin-bottom:26px; }
@@ -7365,7 +7365,7 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 .dg-estimator--mini .dg-flat-trust span { font-size: 11px; justify-content: flex-start; }
 
 /* ---- Variante MINI dans le hero : cases plus grandes pour lire les adresses ---- */
-.r4-page .v5-hero-quote { max-width: 600px; }
+.r4-page .v5-hero-quote { max-width: 1100px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field { padding: 14px 18px; border-radius: 16px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field--lg { padding: 18px 22px; }
 .r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-label { font-size: 10px; letter-spacing: .18em; margin-bottom: 5px; }
@@ -8379,7 +8379,7 @@ body .tln-bar-inner { gap: 8px !important; }
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 660px;
+  max-width: 1100px;
   margin-left: auto;
   padding: 4px 0;
 }
