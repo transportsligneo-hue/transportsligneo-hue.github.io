@@ -1038,7 +1038,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           </p>
         )}
         {!isComplete && (
-          <p className="mt-3 text-cream/45 text-xs text-center tracking-wide">
+          <p className="dg-flat-hint mt-3 text-xs text-center tracking-wide">
             Complétez votre trajet pour voir le prix en direct
           </p>
         )}
