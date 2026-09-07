@@ -67,7 +67,7 @@ export default function HomeDesktopV5() {
           </div>
 
           {/* Colonne droite — estimateur fusionné dans le fond du hero (comme /tarifs, en plus petit) */}
-          <div className="v5-hero-quote">
+          <div className="v5-hero-quote translate-y-[1.5cm]">
             <DevisGenerator variant="flat-mini" />
           </div>
         </div>

@@ -7364,6 +7364,14 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 .dg-estimator--mini .dg-flat-trust { margin-top: 14px; padding-top: 12px; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .dg-estimator--mini .dg-flat-trust span { font-size: 11px; justify-content: flex-start; }
 
+/* ---- Variante MINI dans le hero : cases plus grandes pour lire les adresses ---- */
+.r4-page .v5-hero-quote { max-width: 600px; }
+.r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field { padding: 14px 18px; border-radius: 16px; }
+.r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-field--lg { padding: 18px 22px; }
+.r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-label { font-size: 10px; letter-spacing: .18em; margin-bottom: 5px; }
+.r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-input { font-size: 15px; }
+.r4-page .v5-hero-quote .dg-estimator--mini .dg-flat-input--lg { font-size: 16px; height: 28px; }
+
 
 .dg-flat-trust {
   margin-top: 20px; padding-top: 18px;
