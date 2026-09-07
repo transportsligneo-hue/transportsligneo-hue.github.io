@@ -516,6 +516,11 @@ body.is-driver-app .closed-link svg {
   --cream: #f5f1e8;
   --electric-blue: oklch(0.62 0.22 250);
   --electric-blue-soft: oklch(0.72 0.18 250);
+  --neon-blue: #6ea1ff;
+  --neon-blue-strong: #4f8cff;
+  --neon-blue-deep: #2f5fff;
+  --neon-blue-glow: rgba(91, 143, 255, 0.8);
+  --neon-blue-soft: rgba(91, 143, 255, 0.18);
   /* === Couleurs opérationnelles (suivi missions / véhicules) === */
   --op-electric: #00AEEF;        /* Planifiée / accent métier */
   --op-violet: #8B5CF6;          /* En cours */
@@ -549,8 +554,8 @@ body.is-driver-app .closed-link svg {
   --v3-text: #0f1526;
   --v3-text-muted: #6b7590;
   --v3-text-dim: #9aa2ba;
-  --v3-blue: #2f5fff;
-  --v3-blue-deep: #1c3fc4;
+    --v3-blue: #4f8cff;
+    --v3-blue-deep: #2f5fff;
   --v3-blue-soft: #ecf1ff;
   --v3-blue-soft-2: #dbe6ff;
   --v3-gold: #b8862a;
@@ -3255,9 +3260,9 @@ body.is-driver-app .closed-link svg {
     --r4-navy-1: #0a1638;
     --r4-navy-2: #081230;
     --r4-navy-3: #061238;
-    --r4-blue: #2f5fff;
-    --r4-blue-bright: #4f8cff;
-    --r4-blue-glow: #6ea1ff;
+    --r4-blue: var(--neon-blue-deep);
+    --r4-blue-bright: var(--neon-blue-strong);
+    --r4-blue-glow: var(--neon-blue);
     --r4-gold: #d9b54a;
     --r4-text-muted: #9aa6c9;
     --r4-border: rgba(122,163,255,0.16);
@@ -3779,9 +3784,9 @@ body.is-driver-app .closed-link svg {
    ============================================================ */
 .r4-page {
   --v4-navy:#070c1f;
-  --v4-blue:#2f5fff;
-  --v4-blue-bright:#4f8cff;
-  --v4-blue-glow:#6ea1ff;
+  --v4-blue:var(--neon-blue-deep);
+  --v4-blue-bright:var(--neon-blue-strong);
+  --v4-blue-glow:var(--neon-blue);
   --v4-gold:#d9b54a;
   --v4-violet:#7c5cff;
   --v4-violet-glow:#a794ff;
@@ -5717,7 +5722,7 @@ html.theme-light .r4-page {
     linear-gradient(180deg, #f7f9ff 0%, #f5f7fc 100%) !important;
   color: #0f1526 !important;
 }
-html.theme-light .r4-page .v4-accent { color: #2f5fff; text-shadow: none; animation: none; }
+html.theme-light .r4-page .v4-accent { color: var(--neon-blue-strong); text-shadow: 0 0 10px rgba(91,143,255,.42); animation: r4PulseGlow 2.6s ease-in-out infinite; }
 html.theme-light .r4-page .v4-accent.v { color: #6b47ff; text-shadow: none; animation: none; }
 html.theme-light .r4-page .v4-hero-eyebrow { color: #1c3fc4; }
 html.theme-light .r4-page .v4-svc-card,
@@ -5819,8 +5824,7 @@ html.theme-light .mhome-root [class*="text-[#d9b54a]"],
 html.theme-light .mhome-root [class*="text-[#e7c76a]"] { color: #b8862a !important; }
 html.theme-light .mhome-root [class*="text-[#4f8cff]"],
 html.theme-light .mhome-root [class*="text-[#6ea1ff]"],
-html.theme-light .mhome-root [class*="text-[#60a5fa]"] { color: #2f5fff !important; }
-html.theme-light .mhome-root [style*="text-shadow"] { text-shadow: none !important; }
+html.theme-light .mhome-root [class*="text-[#60a5fa]"] { color: var(--neon-blue-strong) !important; }
 html.theme-light .mobile-card,
 html.theme-light .mobile-card-pressable {
   background: #ffffff !important;
@@ -8433,7 +8437,9 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
   border-color: rgba(96, 165, 250, 0.6) !important;
 }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-label,
-html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { color: var(--neon-blue) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label { text-shadow: 0 0 14px var(--neon-blue-glow) !important; }
+html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg { filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust svg { color: #16a34a !important; }
 html.theme-light .r4-page .v5-hero-quote .dg-flat-input,
 html.theme-light .r4-page .v5-hero-quote .dg-estimator span,

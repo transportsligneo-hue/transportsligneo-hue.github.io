@@ -36,7 +36,7 @@ export default function HomeDesktopV5() {
                   <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" loading="lazy" />
                 </span>
                 <span className="font-heading text-[52px] font-extrabold tracking-[0.03em] text-white leading-none" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  TRANSPORTS&nbsp;<span className="text-[#6ea1ff] [text-shadow:0_0_20px_rgba(91,143,255,0.8)]">LIGNEO</span>
+                  TRANSPORTS&nbsp;<span className="electric-neon-text">LIGNEO</span>
                 </span>
               </span>
               <br /><br />Votre logistique automobile<br /><span className="v4-accent">sur toute la ligne</span>.
