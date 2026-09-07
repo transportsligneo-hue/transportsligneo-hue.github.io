@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import AvisSection from "@/components/public/AvisSection";
-import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
 import StoreBadges from "@/components/public/StoreBadges";
 import {
@@ -9,11 +8,6 @@ import {
   Phone,
   ShieldCheck,
   ChevronRight,
-  Zap,
-  ArrowRight,
-  Truck,
-  FileText,
-  User,
   X,
   Home,
   Tag,
@@ -22,8 +16,6 @@ import {
   MessageSquare,
   LogIn,
   LogOut,
-  Clock,
-  
   Award,
   MessageCircle,
 } from "lucide-react";
@@ -155,156 +147,16 @@ export default function MobileHomeScreen() {
           <p className="text-[13px] leading-[1.55] mb-4 max-w-[290px] text-[#dbe3ff]" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>
             Estimez, réservez et suivez vos convoyages en quelques secondes, partout en France.
           </p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <TrustItem icon={<Zap size={12} className="text-[#d9b54a]" />} label="Devis en 30s" />
-            <TrustItem label="6+ ans d'expérience" />
-            <TrustItem label="France entière" />
-          </div>
         </div>
       </section>
 
 
 
-      {/* === Espace perso + Estimateur === */}
-      <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20 space-y-4">
-        <button
-          type="button"
-          onClick={goEspace}
-          className="w-full flex items-center gap-3 rounded-[20px] px-4 py-3.5 border border-white/[0.08] active:scale-[0.98] transition-transform text-left"
-          style={{
-            background: "linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(15,45,128,0.5) 100%)",
-            boxShadow: "0 14px 34px -16px rgba(59,130,246,0.5)",
-          }}
-        >
-          <span
-            className="w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #1d4ed8)", boxShadow: "0 8px 20px -6px rgba(59,130,246,0.55)" }}
-          >
-            {isAuthenticated && user?.email ? (
-              <span className="text-sm font-bold">{user.email[0]?.toUpperCase()}</span>
-            ) : (
-              <LogIn size={18} />
-            )}
-          </span>
-          <span className="flex-1 min-w-0">
-            <span className="block text-[14px] text-white font-bold tracking-wide">
-              {espaceLabel}
-            </span>
-            <span className="block text-white/60 text-[11.5px] mt-0.5 truncate">
-              {isAuthenticated ? (user?.email ?? "Tableau de bord") : "Accéder à mon compte"}
-            </span>
-          </span>
-          <ChevronRight size={16} className="text-[#93c5fd] shrink-0" />
-        </button>
-
+      {/* === Estimateur === */}
+      <div id="mobile-devis" className="relative z-[3] mx-[18px] mt-5 scroll-mt-20">
         <DevisGenerator variant="flat-mini" />
       </div>
 
-      {/* Bande de statistiques (alignée sur le PC) */}
-      <div className="relative z-[2] flex justify-around px-[18px] pt-6 pb-1">
-        {[
-          { v: "5000+", l: "Véhicules convoyés" },
-          { v: "6+ ans", l: "D'expérience" },
-          { v: "100%", l: "Digitalisé" },
-          { v: "7j/7", l: "Disponible" },
-        ].map((s) => (
-          <div key={s.l} className="text-center">
-            <div
-              className="text-[20px] font-extrabold text-[#6ea1ff]"
-              style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 14px rgba(91,143,255,0.5)" }}
-            >
-              {s.v}
-            </div>
-            <div className="text-[9px] uppercase tracking-[0.05em] text-[#9aa6c9] mt-1 font-semibold">
-              {s.l}
-            </div>
-          </div>
-        ))}
-      </div>
-
-
-      {/* Bande fonctionnalités */}
-      <div className="relative z-[1] flex justify-between gap-3 px-[26px] pt-5 pb-1">
-        <FeatureItem icon={<Zap size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="Rapide" sub="Estimation 30s" />
-        <FeatureItem icon={<ShieldCheck size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="Sécurisé" sub="Convoyeurs vérifiés" />
-        <FeatureItem icon={<MapPin size={17} className="text-[#8fb4ff]" strokeWidth={2} />} title="France" sub="24/48h" />
-      </div>
-
-      {/* Accès rapide (scroll horizontal snap) */}
-      <section className="relative z-[1] pt-6 pb-1">
-        <div className="flex justify-between items-center px-[22px] mb-3.5">
-          <h2 className="section-title text-[16px] font-bold tracking-[-0.01em] text-white flex items-center gap-2.5" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <span className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg,#d9b54a,#4f8cff)" }} />
-            Accès rapide
-          </h2>
-          <button
-            onClick={goEspace}
-            className="text-[11px] font-bold tracking-[0.02em] text-[#4f8cff] flex items-center gap-1"
-          >
-            Tout voir <ArrowRight size={12} strokeWidth={2.6} />
-          </button>
-        </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 px-[22px] no-scrollbar mh-snap-x">
-          <QuickCard
-            icon={<FileText size={18} className="text-white" strokeWidth={2} />}
-            title="Mes devis"
-            sub="Consulter & gérer"
-            tone="blue"
-            onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/devis" : "/login" })}
-          />
-          <QuickCard
-            icon={<Truck size={18} className="text-white" strokeWidth={2} />}
-            title="Mes missions"
-            sub="Suivi en direct"
-            tone="gold"
-            onClick={() => navigate({ to: isAuthenticated ? "/dashboard-client/missions" : "/login" })}
-          />
-          <QuickCard
-            icon={<User size={18} className="text-white" strokeWidth={2} />}
-            title={espaceLabel}
-            sub="Mon compte"
-            tone="green"
-            onClick={goEspace}
-          />
-          <QuickCard
-            icon={<Phone size={18} className="text-white" strokeWidth={2} />}
-            title="Contact"
-            sub="Équipe 7j/7"
-            tone="blue"
-            onClick={() => navigate({ to: "/contact" })}
-          />
-          <span aria-hidden className="shrink-0 w-[6px]" />
-        </div>
-      </section>
-
-      {/* Bento stats */}
-      <div className="relative z-[1] mx-[18px] mt-5 grid grid-cols-[1.1fr_1fr] gap-3 items-stretch">
-        <div
-          className="relative overflow-hidden rounded-[22px] p-[18px] flex flex-col justify-end border border-[rgba(122,163,255,0.24)]"
-          style={{ background: "linear-gradient(160deg, rgba(63,123,255,0.18), rgba(10,16,42,0.6))" }}
-        >
-          <span
-            aria-hidden
-            className="absolute top-4 left-4 w-[130px] h-[130px] rounded-full blur-[10px]"
-            style={{ background: "radial-gradient(circle, rgba(79,140,255,0.3), transparent 70%)" }}
-          />
-          <span className="relative z-[1] w-[48px] h-[48px] rounded-[16px] border border-[rgba(122,163,255,0.4)] bg-white/[0.08] flex items-center justify-center mb-auto">
-            <Truck size={22} className="text-[#4f8cff]" strokeWidth={2} />
-          </span>
-          <div
-            className="relative z-[1] text-[34px] font-extrabold leading-none tracking-[-0.01em] text-white mt-5 mb-1.5"
-            style={{ fontFamily: "'Poppins', sans-serif", textShadow: "0 0 20px rgba(79,140,255,0.5)" }}
-          >
-            5000+
-          </div>
-          <div className="relative z-[1] text-[11.5px] text-[#9aa6c9]">Véhicules convoyés</div>
-        </div>
-        <div className="grid grid-rows-3 gap-3">
-          <MiniStat icon={<Clock size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Expérience" value="6+ ans" />
-          <MiniStat icon={<ShieldCheck size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Inclus" value="Carburant, péage, assurance" />
-          <MiniStat icon={<Zap size={15} className="text-[#4f8cff]" strokeWidth={2} />} label="Dispo" value="24/7" />
-        </div>
-      </div>
 
       {/* Contact banner */}
       <div
@@ -351,7 +203,6 @@ export default function MobileHomeScreen() {
       {/* Contenu public dynamique : avis, actualités, FAQ */}
       <div className="relative z-[1] r4-page">
         <AvisSection />
-        <DerniersArticles />
         <FaqDynamique />
       </div>
 
@@ -516,106 +367,6 @@ function RouteThread() {
   );
 }
 
-function TrustItem({ icon, label }: { icon?: React.ReactNode; label: string }) {
-  return (
-    <span
-      className="flex items-center gap-1.5 text-[11.5px] font-semibold text-white bg-[rgba(10,16,38,0.4)] border border-white/15 px-3 py-1.5 rounded-full backdrop-blur-md"
-    >
-      {icon}
-      {label}
-    </span>
-  );
-}
-
-function FeatureItem({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1.5 flex-1">
-      <span
-        className="mh-ring w-[52px] h-[52px] rounded-full border border-[rgba(122,163,255,0.35)] flex items-center justify-center"
-        style={{
-          background: "rgba(63,123,255,0.12)",
-          boxShadow: "0 0 12px rgba(63,123,255,0.2)",
-        }}
-      >
-        {icon}
-      </span>
-      <div className="text-[12.5px] font-bold text-white mt-1">{title}</div>
-      <div className="text-[10px] text-[#9aa6c9] text-center">{sub}</div>
-    </div>
-  );
-}
-
-const QUICK_TONES: Record<string, { badge: string; shadow: string; halo: string }> = {
-  blue: {
-    badge: "linear-gradient(135deg,#2f5fff,#4f8cff)",
-    shadow: "0 8px 18px rgba(47,95,255,0.4)",
-    halo: "radial-gradient(circle, #2f5fff, transparent 70%)",
-  },
-  gold: {
-    badge: "linear-gradient(135deg,#e8c976,#d9b54a)",
-    shadow: "0 8px 18px rgba(217,181,74,0.35)",
-    halo: "radial-gradient(circle, #d9b54a, transparent 70%)",
-  },
-  green: {
-    badge: "linear-gradient(135deg,#6ee0b8,#4ad0a0)",
-    shadow: "0 8px 18px rgba(74,208,160,0.35)",
-    halo: "radial-gradient(circle, #4ad0a0, transparent 70%)",
-  },
-};
-
-function QuickCard({
-  icon,
-  title,
-  sub,
-  tone = "blue",
-  onClick,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  sub: string;
-  tone?: "blue" | "gold" | "green";
-  onClick: () => void;
-}) {
-  const t = QUICK_TONES[tone] ?? QUICK_TONES.blue;
-  return (
-    <button
-      onClick={onClick}
-      className="mh-snap-item relative overflow-hidden shrink-0 w-[150px] text-left rounded-[20px] px-4 py-5 border border-[rgba(122,163,255,0.2)] bg-white/[0.04] active:scale-[0.96] transition-transform"
-    >
-      <span
-        aria-hidden
-        className="absolute -top-[30px] -right-[30px] w-[90px] h-[90px] rounded-full opacity-50 blur-[4px]"
-        style={{ background: t.halo }}
-      />
-      <span
-        className="relative z-[1] w-[42px] h-[42px] rounded-[13px] flex items-center justify-center mb-3.5"
-        style={{ background: t.badge, boxShadow: t.shadow }}
-      >
-        {icon}
-      </span>
-      <div className="relative z-[1] text-[14px] font-bold text-white mb-1">{title}</div>
-      <div className="relative z-[1] text-[11px] text-[#9aa6c9] leading-[1.35]">{sub}</div>
-    </button>
-  );
-}
-
-function MiniStat({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="h-full flex items-center gap-3 rounded-[16px] border border-[rgba(122,163,255,0.2)] bg-white/[0.04] px-3.5 py-3">
-      {icon ? (
-        <span className="w-[34px] h-[34px] shrink-0 rounded-[10px] border border-[rgba(122,163,255,0.3)] bg-[rgba(63,123,255,0.14)] flex items-center justify-center">
-          {icon}
-        </span>
-      ) : null}
-      <div className="min-w-0">
-        <div className="text-[9.5px] uppercase tracking-[0.05em] font-bold text-[#9aa6c9] mb-0.5">{label}</div>
-        <div className="text-[13px] font-bold leading-[1.2] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 
 /* ==== Drawer menu ==== */
