@@ -713,7 +713,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Bandeau de réassurance */}
             <div className="dg-flat-trust">
-              <span><Shield size={13} /> Assurance incluse</span>
+              <span><Shield size={13} /> Assurance, carburant & péages inclus</span>
               <span><Clock size={13} /> Disponible 7j/7</span>
               <span><CheckCircle size={13} /> Aucun frais caché</span>
               <span><Sparkles size={13} /> Réponse immédiate</span>
