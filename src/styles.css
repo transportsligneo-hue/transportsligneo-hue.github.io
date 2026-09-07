@@ -8460,6 +8460,123 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-trust { border-top-color: rgba
 html.theme-light .r4-page .v5-hero-quote .dg-flat-trust span { color: #3d4355 !important; background: #f7f7f9 !important; }
 
 /* ============================================================
+   SIGNATURE BLEU ÉLECTRIQUE LIGNEO
+   Une seule teinte, la même lueur vivante et le même rendu dans
+   les deux thèmes. Les surfaces sombres gardent leurs textes clairs.
+   ============================================================ */
+.electric-neon-text,
+.ligneo-lockup--blue .ligneo-lockup-accent {
+  color: var(--neon-blue);
+  text-shadow:
+    0 0 10px var(--neon-blue-glow),
+    0 0 24px rgba(91, 143, 255, 0.55);
+  animation: ligneoNeonBreathe 2.8s ease-in-out infinite;
+}
+
+@keyframes ligneoNeonBreathe {
+  0%, 100% {
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(91,143,255,.7), 0 0 24px rgba(91,143,255,.42);
+  }
+  50% {
+    color: #86b2ff;
+    text-shadow: 0 0 16px rgba(91,143,255,1), 0 0 34px rgba(91,143,255,.68);
+  }
+}
+
+.ligneo-lockup-badge {
+  background: #0b1026;
+  border: 1px solid var(--neon-blue-strong);
+  box-shadow: 0 0 14px var(--neon-blue-strong), 0 0 28px rgba(79,140,255,.3), inset 0 0 10px rgba(79,140,255,.15);
+}
+.ligneo-lockup-logo { filter: drop-shadow(0 0 4px var(--neon-blue-strong)); }
+.ligneo-lockup-transport { color: #fff; }
+.ligneo-lockup--blue .ligneo-lockup-tag {
+  color: var(--neon-blue);
+  text-shadow: 0 0 8px var(--neon-blue-strong);
+}
+.ligneo-lockup--green .ligneo-lockup-badge {
+  border-color: #6effcd;
+  box-shadow: 0 0 14px #6effcd, 0 0 28px rgba(78,255,178,.3), inset 0 0 10px rgba(110,255,205,.15);
+}
+.ligneo-lockup--green .ligneo-lockup-logo { filter: drop-shadow(0 0 4px #6effcd); }
+.ligneo-lockup--green .ligneo-lockup-accent,
+.ligneo-lockup--green .ligneo-lockup-tag { color: #6effcd; text-shadow: 0 0 10px #6effcd; }
+
+/* Harmonisation des textes et pictogrammes bleus existants. */
+body:not(.is-driver-app) :where(
+  .text-primary,
+  .text-v3-blue,
+  [class*="text-[#2f5fff]"],
+  [class*="text-[#2F5FFF]"],
+  [class*="text-[#4f8cff]"],
+  [class*="text-[#4F8CFF]"],
+  [class*="text-[#5fb6ff]"],
+  [class*="text-[#5FB6FF]"],
+  [class*="text-[#60a5fa]"],
+  [class*="text-[#60A5FA]"],
+  [class*="text-[#67c1ff]"],
+  [class*="text-[#67C1FF]"],
+  [class*="text-[#6ea1ff]"],
+  [class*="text-[#6EA1FF]"],
+  [class*="text-[#7aa3ff]"],
+  [class*="text-[#7AA3FF]"],
+  [class*="text-[#8fb4ff]"],
+  [class*="text-[#8FB4FF]"],
+  .text-blue-300,
+  .text-blue-400,
+  .text-blue-500,
+  .text-blue-600,
+  .text-blue-700
+) {
+  color: var(--neon-blue) !important;
+}
+
+body:not(.is-driver-app) :where(
+  .r4-accent,
+  .v4-accent,
+  .auth-accent,
+  .electric-text,
+  [class*="text-[#6ea1ff]"]
+) {
+  text-shadow: 0 0 12px var(--neon-blue-glow), 0 0 28px rgba(91,143,255,.5) !important;
+  animation: ligneoNeonBreathe 2.8s ease-in-out infinite !important;
+}
+
+/* Les commandes bleues partagent désormais le même flux électrique. */
+body:not(.is-driver-app) :where(
+  .v3-btn-primary,
+  .r4-nav-link.is-active,
+  .dg-flat-cta,
+  .theme-pref-btn.is-active,
+  .dvx-cta
+) {
+  background-image: linear-gradient(110deg, var(--neon-blue-deep), var(--neon-blue-strong), var(--neon-blue), var(--neon-blue-deep)) !important;
+  background-size: 240% 100% !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px -8px rgba(79,140,255,.78), 0 0 18px rgba(91,143,255,.28) !important;
+  animation: ligneoBlueFlow 6s linear infinite !important;
+}
+@keyframes ligneoBlueFlow { to { background-position: 240% 0; } }
+
+/* Le hero reste sombre en mode clair : ses petites légendes doivent rester visibles. */
+html.theme-light .r4-page .v5-hero .electric-neon-text,
+html.theme-light .r4-page .v5-hero .v4-accent,
+html.theme-light .r4-page .v5-hero .dg-flat-label,
+html.theme-light .r4-page .v5-hero .dg-flat-label svg {
+  color: var(--neon-blue) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .electric-neon-text,
+  .ligneo-lockup--blue .ligneo-lockup-accent,
+  body:not(.is-driver-app) :where(.r4-accent, .v4-accent, .auth-accent, .electric-text),
+  body:not(.is-driver-app) :where(.v3-btn-primary, .r4-nav-link.is-active, .dg-flat-cta, .theme-pref-btn.is-active, .dvx-cta) {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
    ADMIN · Page Devis (zone de contenu uniquement) — préfixe .dvx
    ============================================================ */
 .dvx-head { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:22px; }
