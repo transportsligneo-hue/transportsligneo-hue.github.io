@@ -188,16 +188,60 @@ export function MissionAvisGooglePanel({
     );
   };
 
-  const contactHasEmail = !!(savedContactEmail && savedContactEmail.includes("@"));
-  const contactHasPhone = !!(savedContactPhone && savedContactPhone.replace(/\D/g, "").length >= 10);
+  const hasEmail = (t: RecipientType) => /\S+@\S+\.\S+/.test(form[t].email.trim());
+  const hasPhone = (t: RecipientType) => form[t].phone.replace(/\D/g, "").length >= 10;
 
   const canSend = (t: RecipientType) => {
-    if (channel === "email") return t === "client" ? !!clientEmail : contactHasEmail;
-    if (channel === "sms") return t === "client" ? !!(clientTelephone && clientTelephone.replace(/\D/g, "").length >= 10) : contactHasPhone;
-    return t === "client"
-      ? !!clientEmail || !!(clientTelephone && clientTelephone.replace(/\D/g, "").length >= 10)
-      : contactHasEmail || contactHasPhone;
+    if (channel === "email") return hasEmail(t);
+    if (channel === "sms") return hasPhone(t);
+    return hasEmail(t) || hasPhone(t);
   };
+
+  const renderBlock = (t: RecipientType, titre: string, nom: string | null) => (
+    <div className="rounded-lg border border-pro-border px-3 py-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-pro-text">{titre}</p>
+          <p className="truncate text-[11px] text-pro-muted">{nom || "—"}</p>
+          <div className="mt-1 flex flex-col gap-0.5">
+            {renderStatus(t, "email")}
+            {renderStatus(t, "sms")}
+          </div>
+        </div>
+        <Button
+          icon={loading === t ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+          onClick={() => handleSend(t)}
+          disabled={loading !== null || !canSend(t) || !reviewUrl}
+        >
+          {rowFor(t, channel) ? "Renvoyer" : "Envoyer"}
+        </Button>
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
+        <Mail size={14} className="text-pro-muted" />
+        <input
+          type="email"
+          value={form[t].email}
+          onChange={(e) => setField(t, "email", e.target.value)}
+          placeholder="email destinataire"
+          className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+        />
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <Smartphone size={14} className="text-pro-muted" />
+        <input
+          type="tel"
+          value={form[t].phone}
+          onChange={(e) => setField(t, "phone", e.target.value)}
+          placeholder="téléphone destinataire"
+          className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+        />
+        <Button icon={<Save size={13} />} onClick={() => saveCoords(t)} disabled={saving === t}>
+          {saving === t ? "…" : "Enregistrer"}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Card>
@@ -228,81 +272,15 @@ export function MissionAvisGooglePanel({
       </div>
 
       <div className="space-y-3">
-        {/* Client */}
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-pro-border px-3 py-2">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-pro-text">Client</p>
-            <p className="truncate text-[11px] text-pro-muted">
-              {clientNom || "—"} {clientEmail ? `· ${clientEmail}` : "· email manquant"}{" "}
-              {clientTelephone ? `· ${clientTelephone}` : "· téléphone manquant"}
-            </p>
-            <div className="mt-1 flex flex-col gap-0.5">
-              {renderStatus("client", "email")}
-              {renderStatus("client", "sms")}
-            </div>
-          </div>
-          <Button
-            icon={loading === "client" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-            onClick={() => handleSend("client")}
-            disabled={loading !== null || !canSend("client") || !reviewUrl}
-          >
-            {rowFor("client", channel) ? "Renvoyer" : "Envoyer au client"}
-          </Button>
-        </div>
-
-        {/* Contact livraison */}
-        <div className="rounded-lg border border-pro-border px-3 py-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-pro-text">Contact livraison</p>
-              <p className="truncate text-[11px] text-pro-muted">
-                {contactNom || "—"} {contactHasEmail ? `· ${savedContactEmail}` : "· email manquant"}{" "}
-                {contactHasPhone ? `· ${savedContactPhone}` : "· téléphone manquant"}
-              </p>
-              <div className="mt-1 flex flex-col gap-0.5">
-                {renderStatus("contact_livraison", "email")}
-                {renderStatus("contact_livraison", "sms")}
-              </div>
-            </div>
-            <Button
-              icon={
-                loading === "contact_livraison" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />
-              }
-              onClick={() => handleSend("contact_livraison")}
-              disabled={loading !== null || !canSend("contact_livraison") || !reviewUrl}
-            >
-              {rowFor("contact_livraison", channel) ? "Renvoyer" : "Envoyer au contact"}
-            </Button>
-          </div>
-
-          <div className="mt-2 flex items-center gap-2">
-            <Mail size={14} className="text-pro-muted" />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email du contact livraison"
-              className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
-            />
-            <Button icon={<Save size={13} />} onClick={saveContactEmail} disabled={savingEmail}>
-              {savingEmail ? "…" : "Enregistrer"}
-            </Button>
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <Smartphone size={14} className="text-pro-muted" />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="téléphone du contact livraison"
-              className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
-            />
-            <Button icon={<Save size={13} />} onClick={saveContactPhone} disabled={savingPhone}>
-              {savingPhone ? "…" : "Enregistrer"}
-            </Button>
-          </div>
-        </div>
+        {renderBlock("client", "Client / donneur d'ordre", clientNom)}
+        {renderBlock("contact_livraison", "Contact livraison", contactNom)}
       </div>
+
+      <p className="mt-2 text-[11px] text-pro-muted">
+        Les coordonnées ci-dessus sont modifiables : l'envoi utilise exactement ce qui est saisi.
+        « Enregistrer » les conserve aussi sur la mission.
+      </p>
+
 
       <p className="mt-3 text-[11px] text-pro-muted">
         L'envoi automatique (X heures après le passage en « Terminée ») se paramètre dans Admin &gt; Paramètres.
