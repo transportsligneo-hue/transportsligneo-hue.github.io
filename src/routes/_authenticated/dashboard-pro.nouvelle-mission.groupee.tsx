@@ -14,6 +14,7 @@ import {
   Clock, Send, Star, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
   component: GroupedMissionForm,
@@ -100,7 +101,7 @@ function GroupedMissionForm() {
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [pricing, setPricing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ ref: string; count: number } | null>(null);
+  const [result, setResult] = useState<{ ref: string; count: number; devisId: string | null } | null>(null);
 
   // Chargement profil + adresses favorites
   useEffect(() => {
@@ -279,7 +280,7 @@ function GroupedMissionForm() {
           })),
         },
       });
-      setResult({ ref: res.groupReference, count: res.count });
+      setResult({ ref: res.groupReference, count: res.count, devisId: res.devisId ?? null });
       toast.success(`Mission groupée créée · ${res.groupReference}`);
     } catch (e) {
       console.error("[grouped-mission] submit failed", e);
@@ -288,6 +289,25 @@ function GroupedMissionForm() {
       setSubmitting(false);
     }
   };
+
+  const resetForm = () => {
+    setResult(null);
+    setRows([newRow(), newRow()]);
+    setPrices({});
+    setMessage("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (result?.devisId) {
+    return (
+      <FleetDevisSuccess
+        devisId={result.devisId}
+        title="Mission groupée envoyée"
+        subtitle={`${result.count} véhicule${result.count > 1 ? "s" : ""} · référence de groupe ${result.ref}.`}
+        onNewRequest={resetForm}
+      />
+    );
+  }
 
   if (result) {
     return (
@@ -308,7 +328,7 @@ function GroupedMissionForm() {
             Voir mes missions
           </button>
           <button
-            onClick={() => { setResult(null); setRows([newRow(), newRow()]); setPrices({}); }}
+            onClick={resetForm}
             className="rounded-[11px] border border-slate-200 px-5 py-3 text-[13.5px] font-semibold text-slate-600 hover:border-slate-300"
           >
             Nouvelle mission groupée
@@ -317,6 +337,7 @@ function GroupedMissionForm() {
       </div>
     );
   }
+
 
   return (
     <div className="max-w-[920px] mx-auto pb-16">

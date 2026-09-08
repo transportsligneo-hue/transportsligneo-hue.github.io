@@ -13,6 +13,7 @@ import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { lookupPlate } from "@/lib/plate.functions";
 import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
@@ -152,6 +153,7 @@ export default function QuickMissionForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successDevisId, setSuccessDevisId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Load profile + favorites
@@ -551,7 +553,12 @@ export default function QuickMissionForm({
 
 
       setSuccess(true);
-      setTimeout(() => navigate({ to: successRedirect }), 1600);
+      setSubmitting(false);
+      if (devisId) {
+        setSuccessDevisId(devisId);
+      } else {
+        setTimeout(() => navigate({ to: successRedirect }), 1600);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'envoi";
       setError(msg);
@@ -567,6 +574,32 @@ export default function QuickMissionForm({
     );
   }
 
+  if (successDevisId) {
+    return (
+      <FleetDevisSuccess
+        devisId={successDevisId}
+        subtitle="Votre demande a bien été transmise à notre équipe."
+        onNewRequest={() => {
+          setSuccessDevisId(null);
+          setSuccess(false);
+          setError(null);
+          setDepart(""); setArrivee("");
+          setContactDepartNom(""); setContactDepartTel(""); setContactDepartNote("");
+          setContactArriveeNom(""); setContactArriveeTel(""); setContactArriveeNote("");
+          setImmat(""); setVin(""); setMarque(""); setModele(""); setEnergie("");
+          setCouleur(""); setKm(""); setVehNotes("");
+          setDepartRetour(""); setArriveeRetour(""); setImmatRetour("");
+          setMarqueRetour(""); setModeleRetour(""); setVinRetour("");
+          setDateRetour(""); setHeureRetour("");
+          setOptions({}); setAutreNote(""); setPvDigitalise("aucun");
+          setDate(""); setHeure(""); setMessage("");
+          setPricing(null);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
+    );
+  }
+
   if (success) {
     return (
       <div className="bg-white rounded-xl border border-emerald-200 p-8 text-center">
@@ -578,6 +611,7 @@ export default function QuickMissionForm({
       </div>
     );
   }
+
 
   const inp = "w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pro-accent/20 focus:border-pro-accent transition-colors";
   const lbl = "block text-xs font-medium text-pro-text-soft uppercase tracking-wide mb-1.5";

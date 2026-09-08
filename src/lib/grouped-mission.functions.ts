@@ -71,6 +71,58 @@ export const createGroupedMission = createServerFn({ method: "POST" })
             ? "Journée complète"
             : "");
 
+    // 1) Devis unique couvrant l'ensemble du groupe (visible immédiatement
+    //    côté client dans "Factures & devis" et côté admin dans "Devis").
+    const totalTtc =
+      Math.round(data.vehicles.reduce((s, v) => s + (v.prixTtc || 0), 0) * 100) / 100;
+    const firstVehicle = data.vehicles[0];
+
+    const { data: devisRow } = await supabase
+      .from("devis")
+      .insert({
+        user_id: userId,
+        nom,
+        prenom,
+        email,
+        telephone: profile?.telephone || "",
+        depart: data.depart,
+        arrivee: firstVehicle?.arrivee ?? data.depart,
+        date_souhaitee: data.date || null,
+        heure_souhaitee: heureText || null,
+        marque: firstVehicle?.marque ?? null,
+        modele: firstVehicle?.modele ?? null,
+        immatriculation: firstVehicle?.immatriculation ?? null,
+        vin: firstVehicle?.vin ?? null,
+        carburant: firstVehicle?.energie ?? null,
+        option_trajet: "aller_simple",
+        prestation: `Mission groupée ${groupReference} · ${data.vehicles.length} véhicule${data.vehicles.length > 1 ? "s" : ""}`,
+        prix_estime: totalTtc,
+        statut: "envoye",
+        origine: "demande_client",
+        mission_group_id: groupId,
+        vehicules: data.vehicles.map((v) => ({
+          immatriculation: v.immatriculation ?? null,
+          marque: v.marque ?? null,
+          modele: v.modele ?? null,
+          vin: v.vin ?? null,
+          arrivee: v.arrivee,
+          prix: v.prixTtc,
+        })),
+        message: [
+          `[Mission groupée ${groupReference}]`,
+          data.message,
+          profile?.societe ? `Société : ${profile.societe}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+      .select("id, numero")
+      .maybeSingle();
+
+    const devisId = (devisRow as { id?: string } | null)?.id ?? null;
+    const devisNumero = (devisRow as { numero?: string } | null)?.numero ?? null;
+
     const rows = data.vehicles.map((v) => ({
       user_id: userId,
       nom,
@@ -111,6 +163,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       carburant: v.energie ?? "",
       mission_group_id: groupId,
       group_reference: groupReference,
+      ...(devisId ? { devis_id: devisId, devis_genere_at: new Date().toISOString() } : {}),
     }));
 
     const { data: inserted, error: insErr } = await supabase
@@ -120,10 +173,18 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       .select("id");
     if (insErr) throw insErr;
 
+    const demandeIds = (inserted ?? []).map((r) => r.id as string);
+    if (devisId && demandeIds[0]) {
+      await supabase.from("devis").update({ demande_id: demandeIds[0] }).eq("id", devisId);
+    }
+
     return {
       groupReference,
       groupId,
-      demandeIds: (inserted ?? []).map((r) => r.id as string),
+      demandeIds,
       count: rows.length,
+      devisId,
+      devisNumero,
     };
   });
+
