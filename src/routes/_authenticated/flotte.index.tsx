@@ -26,7 +26,7 @@ function FlotteIndex() {
 
       const [missionsRes, convRes] = await Promise.all([
         supabase.from("missions").select("prix_total", { count: "exact" }).eq("fleet_organization_id", orgId),
-        supabase.from("convoyeurs").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
+        supabase.from("conducteurs_flotte").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
       ]);
 
       const ca = (missionsRes.data ?? []).reduce(
