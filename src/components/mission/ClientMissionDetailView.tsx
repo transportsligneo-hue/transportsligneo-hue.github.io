@@ -11,6 +11,7 @@ import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 import { legRef } from "@/lib/mission-number";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
 interface Mission {
   id: string;
@@ -393,7 +394,15 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             <p className="mission-text text-lg font-semibold mt-1 truncate">
               {[mission.marque, mission.modele].filter(Boolean).join(" ") || " · "}
             </p>
+            <ElectricBadge
+              energie={mission.carburant}
+              marque={mission.marque}
+              modele={mission.modele}
+              size="md"
+              className="mt-2"
+            />
           </div>
+
           {mission.immatriculation && (
             <div className="shrink-0">
               <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 text-right">Plaque</p>

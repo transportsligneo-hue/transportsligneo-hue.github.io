@@ -41,6 +41,7 @@ import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/
 import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { notifyDriver } from "@/lib/push/driver-notify";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
+import { ElectricBadge, resolveMotorisationKind } from "@/components/mission/ElectricBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
@@ -90,9 +91,12 @@ const QUICK_STATUS: { value: string; label: string }[] = [
   { value: "annule", label: "Annulée" },
 ];
 
-function isElectric(energie: string | null | undefined) {
-  const e = (energie ?? "").toLowerCase();
-  return e.includes("elec") || e.includes("élec") || e === "ev";
+function isElectric(
+  energie: string | null | undefined,
+  marque?: string | null,
+  modele?: string | null,
+) {
+  return resolveMotorisationKind(energie, marque, modele) !== null;
 }
 
 /* Tons de badges alignés sur le design system Devis (dvx-*) */
@@ -548,7 +552,7 @@ function AdminMissionsUnified() {
       }
       if (payFilter !== "all" && paymentState(m?.facture ?? null) !== payFilter) return false;
       if (energyFilter !== "all") {
-        const elec = isElectric(m?.energie);
+        const elec = isElectric(m?.energie, r.marque, r.modele);
         if (energyFilter === "electrique" ? !elec : elec) return false;
       }
       if (!q) return true;
@@ -1016,12 +1020,19 @@ function AdminMissionsUnified() {
                       {show("vehicule") && (
                         <td className="text-[11.5px] text-[var(--a6-muted)]">
                           <span className="inline-flex items-center gap-1">
-                            {isElectric(meta.get(r.m.id)?.energie) ? (
+                            {isElectric(meta.get(r.m.id)?.energie, r.m.marque, r.m.modele) ? (
                               <Zap size={11} className="text-emerald-600" />
                             ) : (
                               <Fuel size={11} className="text-[var(--a6-dim)]" />
                             )}
                             {[r.m.marque, r.m.modele].filter(Boolean).join(" ") || "—"}
+                            <ElectricBadge
+                              energie={meta.get(r.m.id)?.energie}
+                              marque={r.m.marque}
+                              modele={r.m.modele}
+                              variant="light"
+                              compact
+                            />
                           </span>
                         </td>
                       )}

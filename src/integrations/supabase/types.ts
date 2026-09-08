@@ -8297,6 +8297,10 @@ export type Database = {
       }
       admin_purge_demande: { Args: { _demande_id: string }; Returns: undefined }
       admin_purge_devis: { Args: { _devis_id: string }; Returns: undefined }
+      admin_purge_missions: {
+        Args: { _mission_ids: string[] }
+        Returns: undefined
+      }
       admin_purge_trajet: { Args: { _trajet_id: string }; Returns: undefined }
       admin_reject_offer: {
         Args: { _offre_id: string; _reason?: string }

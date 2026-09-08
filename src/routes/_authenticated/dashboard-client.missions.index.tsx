@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
 const friendlyStatusLabel = (statut: string): string => missionStatusLabel(statut);
 
@@ -46,6 +47,7 @@ interface Mission {
   marque: string | null;
   modele: string | null;
   immatriculation: string | null;
+  carburant?: string | null;
 }
 
 const STATUS_FILTERS = [
@@ -98,7 +100,7 @@ function ClientMissions() {
 
     let q = supabase
       .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation")
+      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation, carburant")
       .or(orFilter)
       .order("created_at", { ascending: false });
     if (filter === "archives") {
@@ -279,6 +281,7 @@ function ClientMissions() {
                     {(m.marque || m.modele) && (
                       <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}{m.immatriculation ? ` · ${m.immatriculation}` : ""}</span>
                     )}
+                    <ElectricBadge energie={m.carburant} marque={m.marque} modele={m.modele} />
                   </div>
                 </div>
                 <span className="text-primary text-[10px] uppercase tracking-wider opacity-60 group-hover:opacity-100">Voir le suivi →</span>
@@ -313,6 +316,7 @@ function ClientMissions() {
                 {(m.marque || m.modele) && (
                   <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}</span>
                 )}
+                <ElectricBadge energie={m.carburant} marque={m.marque} modele={m.modele} compact />
               </div>
             </Link>
           ))}
