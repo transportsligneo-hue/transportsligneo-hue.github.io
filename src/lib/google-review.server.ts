@@ -168,9 +168,12 @@ async function sendReviewEmail(params: {
         numero: attribution.numero_mission ?? '',
         depart: trajet.depart,
         arrivee: trajet.arrivee,
+        immatriculation: trajet.immatriculation || trajet.vehicule_immatriculation || '',
+        vehicule: [trajet.marque, trajet.modele].filter(Boolean).join(' '),
         reviewUrl: settings.url,
         isContactLivraison: params.recipientType === 'contact_livraison',
       },
+
     })
     if (res?.success) return { success: true }
     return { success: false, reason: res?.reason || "L'email n'a pas pu être mis en file d'envoi." }
