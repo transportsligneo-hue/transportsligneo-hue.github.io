@@ -1686,6 +1686,22 @@ function AdminMissionDetail() {
               </div>
             </div>
 
+            <label className="mb-4 flex items-start gap-3 rounded-xl border border-pro-border bg-pro-surface/60 px-3 py-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={Boolean(trajet.process_client_externe_requis)}
+                disabled={savingProcessExterne}
+                onChange={(e) => void toggleProcessExterne(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-pro-accent"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-pro-text">Process client externe requis</span>
+                <span className="block text-[11px] text-pro-muted">
+                  Le convoyeur devra réaliser l'état des lieux dans l'outil du client (détecté automatiquement) avant la signature client.
+                </span>
+              </span>
+            </label>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
               <div className="sm:col-span-2">
                 <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-0.5">Date de mission</p>
