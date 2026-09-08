@@ -119,6 +119,17 @@ Deno.serve(async (req) => {
       }
       case "change_role": {
         if (!body.role) return json({ error: "Rôle manquant" }, 400);
+        // Les rôles privilégiés passent par la RPC auditée (contrôle super_admin + journal).
+        if (PRIVILEGED_ROLES.includes(body.role)) {
+          await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
+          const { error: pErr } = await userClient.rpc("super_admin_set_role", {
+            _target_user_id: body.user_id,
+            _role: body.role,
+            _actif: true,
+          });
+          if (pErr) return json({ error: pErr.message }, 403);
+          break;
+        }
         // Désactive tous les rôles existants, puis upsert le nouveau actif=true.
         // L'upsert évite l'échec UNIQUE(user_id, role) qui laissait tous les rôles inactifs.
         await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
