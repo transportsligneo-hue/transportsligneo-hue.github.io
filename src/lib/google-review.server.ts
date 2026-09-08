@@ -168,9 +168,12 @@ async function sendReviewEmail(params: {
         numero: attribution.numero_mission ?? '',
         depart: trajet.depart,
         arrivee: trajet.arrivee,
+        immatriculation: trajet.immatriculation || trajet.vehicule_immatriculation || '',
+        vehicule: [trajet.marque, trajet.modele].filter(Boolean).join(' '),
         reviewUrl: settings.url,
         isContactLivraison: params.recipientType === 'contact_livraison',
       },
+
     })
     if (res?.success) return { success: true }
     return { success: false, reason: res?.reason || "L'email n'a pas pu être mis en file d'envoi." }
@@ -286,6 +289,8 @@ export async function sendGoogleReviewRequestServer(params: {
   attributionId: string
   recipientType: ReviewRecipientType
   emailOverride?: string | null
+  phoneOverride?: string | null
+
   channel?: ReviewChannel
   auto?: boolean
   actorUserId?: string | null
@@ -306,14 +311,16 @@ export async function sendGoogleReviewRequestServer(params: {
   const { data: trajet } = await supabaseAdmin
     .from('trajets')
     .select(
-      'id, depart, arrivee, client_nom, client_email, client_telephone, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_email, arrivee_contact_telephone, arrivee_contact_telephone2, contact_depart_tel, contact_arrivee_tel',
+      'id, depart, arrivee, marque, modele, immatriculation, vehicule_immatriculation, client_nom, client_email, client_telephone, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_email, arrivee_contact_telephone, arrivee_contact_telephone2, contact_depart_tel, contact_arrivee_tel',
     )
     .eq('id', attribution.trajet_id)
     .maybeSingle()
   if (!trajet) return { ok: false, error: 'Trajet introuvable.' }
 
   const recipient = getRecipientInfo(trajet, params.recipientType)
-  if (params.emailOverride) recipient.email = params.emailOverride
+  if (params.emailOverride?.trim()) recipient.email = params.emailOverride.trim()
+  if (params.phoneOverride?.trim()) recipient.phone = params.phoneOverride.trim()
+
 
   const channel = params.channel ?? settings.channel ?? 'email'
 

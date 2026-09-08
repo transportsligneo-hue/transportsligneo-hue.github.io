@@ -7,11 +7,13 @@ interface Props {
   numero?: string
   depart?: string
   arrivee?: string
+  immatriculation?: string
+  vehicule?: string
   reviewUrl?: string
   isContactLivraison?: boolean
 }
 
-const Email = ({ prenom, numero, depart, arrivee, reviewUrl, isContactLivraison }: Props) => (
+const Email = ({ prenom, numero, depart, arrivee, immatriculation, vehicule, reviewUrl, isContactLivraison }: Props) => (
   <LigneoEmailShell
     preview="Votre avis compte — 30 secondes suffisent"
     tagline="Merci pour votre confiance"
@@ -27,7 +29,13 @@ const Email = ({ prenom, numero, depart, arrivee, reviewUrl, isContactLivraison 
   >
     <SimpleCard
       title={depart && arrivee ? `${depart} → ${arrivee}` : 'Convoyage terminé'}
-      subtitle={numero ? `Référence ${numero}` : ''}
+      subtitle={[
+        numero ? `Référence ${numero}` : '',
+        vehicule || '',
+        immatriculation ? `Plaque ${immatriculation}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')}
     />
   </LigneoEmailShell>
 )
@@ -42,6 +50,8 @@ export const template = {
     numero: 'MIS-TLG-2026-114',
     depart: 'La Riche',
     arrivee: 'Tours',
+    vehicule: 'Peugeot 208',
+    immatriculation: 'AB-123-CD',
     reviewUrl: 'https://g.page/r/example/review',
   },
 } satisfies TemplateEntry

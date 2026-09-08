@@ -57,12 +57,11 @@ export function MissionAvisGooglePanel({
   const [reviewUrl, setReviewUrl] = useState<string>("");
   const [defaultChannel, setDefaultChannel] = useState<ReviewChannel>("email");
   const [channel, setChannel] = useState<ReviewChannel>("email");
-  const [email, setEmail] = useState(contactEmail ?? "");
-  const [phone, setPhone] = useState(contactTelephone ?? "");
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [savingPhone, setSavingPhone] = useState(false);
-  const [savedContactEmail, setSavedContactEmail] = useState(contactEmail ?? "");
-  const [savedContactPhone, setSavedContactPhone] = useState(contactTelephone ?? "");
+  const [saving, setSaving] = useState<RecipientType | null>(null);
+  const [form, setForm] = useState<Record<RecipientType, { email: string; phone: string }>>({
+    client: { email: clientEmail ?? "", phone: clientTelephone ?? "" },
+    contact_livraison: { email: contactEmail ?? "", phone: contactTelephone ?? "" },
+  });
 
   const load = useCallback(async () => {
     const [{ data: reqs }, { data: setting }] = await Promise.all([
@@ -85,11 +84,14 @@ export function MissionAvisGooglePanel({
   }, [load]);
 
   useEffect(() => {
-    setEmail(contactEmail ?? "");
-    setPhone(contactTelephone ?? "");
-    setSavedContactEmail(contactEmail ?? "");
-    setSavedContactPhone(contactTelephone ?? "");
-  }, [contactEmail, contactTelephone]);
+    setForm({
+      client: { email: clientEmail ?? "", phone: clientTelephone ?? "" },
+      contact_livraison: { email: contactEmail ?? "", phone: contactTelephone ?? "" },
+    });
+  }, [clientEmail, clientTelephone, contactEmail, contactTelephone]);
+
+  const setField = (t: RecipientType, key: "email" | "phone", value: string) =>
+    setForm((prev) => ({ ...prev, [t]: { ...prev[t], [key]: value } }));
 
   const rowFor = (t: RecipientType, ch: ReviewChannel) =>
     rows.find((r) => r.recipient_type === t && r.channel === ch);
@@ -97,7 +99,15 @@ export function MissionAvisGooglePanel({
   const handleSend = async (recipientType: RecipientType) => {
     setLoading(recipientType);
     try {
-      const res = await send({ data: { attributionId, recipientType, channel } });
+      const res = await send({
+        data: {
+          attributionId,
+          recipientType,
+          channel,
+          emailOverride: form[recipientType].email.trim() || null,
+          phoneOverride: form[recipientType].phone.trim() || null,
+        },
+      });
       const detail = (res.results ?? [])
         .map((r) => `${r.channel === "email" ? "Email" : "SMS"} : ${r.ok ? "OK" : (r.error ?? "échec")}`)
         .join(" · ");
@@ -120,33 +130,24 @@ export function MissionAvisGooglePanel({
     }
   };
 
-  const saveContactEmail = async () => {
-    setSavingEmail(true);
-    const { error } = await supabase
-      .from("trajets")
-      .update({ arrivee_contact_email: email.trim() || null } as never)
-      .eq("id", trajetId);
-    setSavingEmail(false);
+  /** Enregistre durablement les coordonnées saisies sur le trajet. */
+  const saveCoords = async (t: RecipientType) => {
+    setSaving(t);
+    const values = form[t];
+    const patch =
+      t === "client"
+        ? { client_email: values.email.trim() || null, client_telephone: values.phone.trim() || null }
+        : {
+            arrivee_contact_email: values.email.trim() || null,
+            arrivee_contact_telephone: values.phone.trim() || null,
+          };
+    const { error } = await supabase.from("trajets").update(patch as never).eq("id", trajetId);
+    setSaving(null);
     if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else {
-      setSavedContactEmail(email.trim());
-      toast.success("Email du contact livraison enregistré");
-    }
+    else toast.success("Coordonnées enregistrées");
   };
 
-  const saveContactPhone = async () => {
-    setSavingPhone(true);
-    const { error } = await supabase
-      .from("trajets")
-      .update({ arrivee_contact_telephone: phone.trim() || null } as never)
-      .eq("id", trajetId);
-    setSavingPhone(false);
-    if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else {
-      setSavedContactPhone(phone.trim());
-      toast.success("Téléphone du contact livraison enregistré");
-    }
-  };
+
 
   const renderStatus = (t: RecipientType, ch: ReviewChannel) => {
     const r = rowFor(t, ch);
@@ -187,16 +188,60 @@ export function MissionAvisGooglePanel({
     );
   };
 
-  const contactHasEmail = !!(savedContactEmail && savedContactEmail.includes("@"));
-  const contactHasPhone = !!(savedContactPhone && savedContactPhone.replace(/\D/g, "").length >= 10);
+  const hasEmail = (t: RecipientType) => /\S+@\S+\.\S+/.test(form[t].email.trim());
+  const hasPhone = (t: RecipientType) => form[t].phone.replace(/\D/g, "").length >= 10;
 
   const canSend = (t: RecipientType) => {
-    if (channel === "email") return t === "client" ? !!clientEmail : contactHasEmail;
-    if (channel === "sms") return t === "client" ? !!(clientTelephone && clientTelephone.replace(/\D/g, "").length >= 10) : contactHasPhone;
-    return t === "client"
-      ? !!clientEmail || !!(clientTelephone && clientTelephone.replace(/\D/g, "").length >= 10)
-      : contactHasEmail || contactHasPhone;
+    if (channel === "email") return hasEmail(t);
+    if (channel === "sms") return hasPhone(t);
+    return hasEmail(t) || hasPhone(t);
   };
+
+  const renderBlock = (t: RecipientType, titre: string, nom: string | null) => (
+    <div className="rounded-lg border border-pro-border px-3 py-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-pro-text">{titre}</p>
+          <p className="truncate text-[11px] text-pro-muted">{nom || "—"}</p>
+          <div className="mt-1 flex flex-col gap-0.5">
+            {renderStatus(t, "email")}
+            {renderStatus(t, "sms")}
+          </div>
+        </div>
+        <Button
+          icon={loading === t ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+          onClick={() => handleSend(t)}
+          disabled={loading !== null || !canSend(t) || !reviewUrl}
+        >
+          {rowFor(t, channel) ? "Renvoyer" : "Envoyer"}
+        </Button>
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
+        <Mail size={14} className="text-pro-muted" />
+        <input
+          type="email"
+          value={form[t].email}
+          onChange={(e) => setField(t, "email", e.target.value)}
+          placeholder="email destinataire"
+          className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+        />
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <Smartphone size={14} className="text-pro-muted" />
+        <input
+          type="tel"
+          value={form[t].phone}
+          onChange={(e) => setField(t, "phone", e.target.value)}
+          placeholder="téléphone destinataire"
+          className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+        />
+        <Button icon={<Save size={13} />} onClick={() => saveCoords(t)} disabled={saving === t}>
+          {saving === t ? "…" : "Enregistrer"}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <Card>
@@ -227,81 +272,15 @@ export function MissionAvisGooglePanel({
       </div>
 
       <div className="space-y-3">
-        {/* Client */}
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-pro-border px-3 py-2">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-pro-text">Client</p>
-            <p className="truncate text-[11px] text-pro-muted">
-              {clientNom || "—"} {clientEmail ? `· ${clientEmail}` : "· email manquant"}{" "}
-              {clientTelephone ? `· ${clientTelephone}` : "· téléphone manquant"}
-            </p>
-            <div className="mt-1 flex flex-col gap-0.5">
-              {renderStatus("client", "email")}
-              {renderStatus("client", "sms")}
-            </div>
-          </div>
-          <Button
-            icon={loading === "client" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-            onClick={() => handleSend("client")}
-            disabled={loading !== null || !canSend("client") || !reviewUrl}
-          >
-            {rowFor("client", channel) ? "Renvoyer" : "Envoyer au client"}
-          </Button>
-        </div>
-
-        {/* Contact livraison */}
-        <div className="rounded-lg border border-pro-border px-3 py-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-pro-text">Contact livraison</p>
-              <p className="truncate text-[11px] text-pro-muted">
-                {contactNom || "—"} {contactHasEmail ? `· ${savedContactEmail}` : "· email manquant"}{" "}
-                {contactHasPhone ? `· ${savedContactPhone}` : "· téléphone manquant"}
-              </p>
-              <div className="mt-1 flex flex-col gap-0.5">
-                {renderStatus("contact_livraison", "email")}
-                {renderStatus("contact_livraison", "sms")}
-              </div>
-            </div>
-            <Button
-              icon={
-                loading === "contact_livraison" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />
-              }
-              onClick={() => handleSend("contact_livraison")}
-              disabled={loading !== null || !canSend("contact_livraison") || !reviewUrl}
-            >
-              {rowFor("contact_livraison", channel) ? "Renvoyer" : "Envoyer au contact"}
-            </Button>
-          </div>
-
-          <div className="mt-2 flex items-center gap-2">
-            <Mail size={14} className="text-pro-muted" />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email du contact livraison"
-              className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
-            />
-            <Button icon={<Save size={13} />} onClick={saveContactEmail} disabled={savingEmail}>
-              {savingEmail ? "…" : "Enregistrer"}
-            </Button>
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <Smartphone size={14} className="text-pro-muted" />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="téléphone du contact livraison"
-              className="flex-1 rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
-            />
-            <Button icon={<Save size={13} />} onClick={saveContactPhone} disabled={savingPhone}>
-              {savingPhone ? "…" : "Enregistrer"}
-            </Button>
-          </div>
-        </div>
+        {renderBlock("client", "Client / donneur d'ordre", clientNom)}
+        {renderBlock("contact_livraison", "Contact livraison", contactNom)}
       </div>
+
+      <p className="mt-2 text-[11px] text-pro-muted">
+        Les coordonnées ci-dessus sont modifiables : l'envoi utilise exactement ce qui est saisi.
+        « Enregistrer » les conserve aussi sur la mission.
+      </p>
+
 
       <p className="mt-3 text-[11px] text-pro-muted">
         L'envoi automatique (X heures après le passage en « Terminée ») se paramètre dans Admin &gt; Paramètres.
