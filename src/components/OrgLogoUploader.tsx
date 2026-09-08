@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BUCKET_ORGANIZATION_LOGOS, organizationLogoPath } from "@/lib/storage-buckets";
 import { Upload, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { OrgLogo } from "@/components/OrgLogo";
 
-const BUCKET = "organization-logos";
+const BUCKET = BUCKET_ORGANIZATION_LOGOS;
 const ACCEPTED = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/svg+xml"];
 const MAX_BYTES = 2 * 1024 * 1024; // 2 Mo
 
@@ -38,7 +39,7 @@ export function OrgLogoUploader({ organizationId, organizationName, value, onCha
     setBusy(true);
     try {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `${organizationId}/logo-${Date.now()}.${ext}`;
+      const path = organizationLogoPath(organizationId, ext);
       const { error: upErr } = await supabase.storage
         .from(BUCKET)
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });

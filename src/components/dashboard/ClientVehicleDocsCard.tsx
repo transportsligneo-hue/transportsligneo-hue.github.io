@@ -8,12 +8,13 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BUCKET_CARTES_GRISES, clientVehicleDocPath } from "@/lib/storage-buckets";
 import { compressImage } from "@/lib/image-compression";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
 import { toast } from "sonner";
 import { Upload, Loader2, FileText, Trash2, Eye, ImageIcon } from "lucide-react";
 
-const BUCKET = "cartes-grises";
+const BUCKET = BUCKET_CARTES_GRISES;
 const FOLDER = "mes-documents";
 const MAX_SIZE = 10 * 1024 * 1024;
 
@@ -71,8 +72,7 @@ export default function ClientVehicleDocsCard({ userId }: { userId: string }) {
           const isImage = file.type.startsWith("image/");
           const body = isImage ? await compressImage(file) : file;
           const ext = isImage ? "jpg" : (file.name.split(".").pop() || "pdf").toLowerCase();
-          const safe = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9-_]/g, "-").slice(0, 40) || "document";
-          const path = `${prefix}/${safe}-${Date.now()}.${ext}`;
+          const path = clientVehicleDocPath(userId, file.name, ext);
           const { error } = await supabase.storage.from(BUCKET).upload(path, body, {
             upsert: false,
             contentType: isImage ? "image/jpeg" : file.type || "application/octet-stream",
