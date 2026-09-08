@@ -8,6 +8,7 @@ import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
+import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
@@ -52,14 +53,6 @@ const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "termi
 const statutLabel: Record<string, string> = {
   tous: "Tous", en_attente: "En attente", confirmee: "Confirmée", en_cours: "En cours",
   livree: "Livrée", terminee: "Terminée", annulee: "Annulée",
-};
-const statutPill: Record<string, string> = {
-  en_attente: "bg-slate-100 text-slate-700",
-  confirmee: "bg-blue-50 text-blue-700",
-  en_cours: "bg-amber-50 text-amber-700",
-  livree: "bg-emerald-50 text-emerald-700",
-  terminee: "bg-emerald-50 text-emerald-700",
-  annulee: "bg-red-50 text-red-700",
 };
 
 function ProMissionsIndex() {
@@ -214,7 +207,7 @@ function ProMissionsIndex() {
     );
   }, [pending, search]);
 
-  const [view, setView] = useMissionView("ligneo:view:pro-missions");
+  const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
@@ -404,9 +397,9 @@ function ProMissionsIndex() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-mono text-[11px] text-pro-text-soft">{legRef(m.numero, m.leg_type, m.leg_index, isDuo)}</span>
                           <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${statutPill[m.statut] ?? "bg-slate-100 text-slate-700"}`}>
-                            {statutLabel[m.statut] ?? m.statut}
-                          </span>
+                          <StatusBadge kind={missionStatusKind(m.statut)}>
+                            {statutLabel[m.statut] ?? missionStatusLabel(m.statut)}
+                          </StatusBadge>
                         </div>
                         <div className="fleet-leg-route">
                           <MapPin size={12} className="text-[#5334d6] shrink-0" />

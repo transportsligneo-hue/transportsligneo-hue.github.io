@@ -647,7 +647,7 @@ function AdminMissionsUnified() {
     return out;
   }, [visible, meta]);
 
-  const [view, setView] = useMissionView("ligneo:view:admin-missions");
+  const [view, setView] = useMissionView("ligneo:view:admin-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>

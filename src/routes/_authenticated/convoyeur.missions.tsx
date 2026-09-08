@@ -541,7 +541,7 @@ function ConvoyeurMissions() {
     });
   }, [missions, filter, search]);
 
-  const [view, setView] = useMissionView("ligneo:view:convoyeur-missions");
+  const [view, setView] = useMissionView("ligneo:view:convoyeur-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>

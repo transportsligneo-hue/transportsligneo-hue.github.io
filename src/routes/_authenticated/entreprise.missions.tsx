@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { legRef } from "@/lib/mission-number";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
@@ -46,7 +46,7 @@ function EntrepriseMissions() {
     })();
   }, [user]);
 
-  const [view, setView] = useMissionView("ligneo:view:entreprise-missions");
+  const [view, setView] = useMissionView("ligneo:view:entreprise-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
@@ -95,7 +95,7 @@ function EntrepriseMissions() {
                 <TableCell className="font-mono text-xs">{legRef(r.numero, r.leg_type, r.leg_index, r.leg_type === "aller" || r.leg_type === "retour")}</TableCell>
                 <TableCell>{r.ville_depart} → {r.ville_arrivee}</TableCell>
                 <TableCell>{new Date(r.date_prise_en_charge).toLocaleDateString("fr-FR")}</TableCell>
-                <TableCell><Badge variant="outline">{r.statut}</Badge></TableCell>
+                <TableCell><StatusBadge kind={missionStatusKind(r.statut)}>{missionStatusLabel(r.statut)}</StatusBadge></TableCell>
                 <TableCell className="text-right">{Number(r.prix_total).toFixed(2)} €</TableCell>
               </TableRow>
             ))}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LayoutList, LayoutGrid, Kanban, CalendarDays, Calendar, MapPin, ArrowRight } from "lucide-react";
+import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 
 export type MissionViewMode = "list" | "cards" | "kanban" | "planning";
 
@@ -150,7 +151,7 @@ export function MissionViewsBody({
             <div className={`${card} flex flex-col gap-2 h-full`}>
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
-                {i.badge ?? <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${chip}`}>{i.statutLabel ?? i.statut}</span>}
+                {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
               </div>
               <p className={`text-sm flex items-center gap-2 ${strong}`}>
                 <MapPin size={12} className="text-pro-accent shrink-0" />
@@ -249,7 +250,7 @@ export function MissionViewsBody({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
-                        {i.badge ?? <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full ${chip}`}>{i.statutLabel ?? i.statut}</span>}
+                        {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
                       </div>
                       <p className={`text-sm truncate ${strong}`}>
                         {i.depart} <span className="opacity-40">→</span> {i.arrivee}
