@@ -109,6 +109,7 @@ interface TrajetFull {
   devis_id?: string | null;
   numero_mission?: string | null;
   leg_index?: number | null;
+  process_client_externe_requis?: boolean | null;
 
 
   depart: string;
