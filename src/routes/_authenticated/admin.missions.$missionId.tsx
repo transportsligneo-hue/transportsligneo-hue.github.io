@@ -590,6 +590,25 @@ function AdminMissionDetail() {
     setSavingNote(false);
   };
 
+  /** Active/désactive l'état des lieux via l'outil externe du client. */
+  const toggleProcessExterne = async (value: boolean) => {
+    if (!trajet) return;
+    setSavingProcessExterne(true);
+    try {
+      const { error } = await supabase
+        .from("trajets")
+        .update({ process_client_externe_requis: value } as never)
+        .eq("id", trajet.id);
+      if (error) throw error;
+      setTrajet({ ...trajet, process_client_externe_requis: value });
+      toast.success(value ? "Process client externe activé" : "Process client externe désactivé");
+    } catch (e) {
+      toast.error("Enregistrement impossible", { description: (e as Error).message });
+    } finally {
+      setSavingProcessExterne(false);
+    }
+  };
+
   const saveContactArrivee = async () => {
     if (!trajet) return;
     setSavingContact(true);
