@@ -234,6 +234,7 @@ function AdminLayout() {
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
     { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
     { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Système" },
+    { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Système" },
   ];
 
   // Section Super Admin : visible uniquement pour super_admin
