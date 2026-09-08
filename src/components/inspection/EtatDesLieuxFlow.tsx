@@ -828,6 +828,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           )}
         </div>
       </BottomBar>
+      )}
 
       {askExit && <ExitConfirm onCancel={() => setAskExit(false)} onConfirm={onClose} />}
     </FullScreen>
