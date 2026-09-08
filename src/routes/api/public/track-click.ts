@@ -1,6 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { LIGNEO_SITE_ORIGIN } from '@/lib/brand-assets'
 
+/** Domaines autorisés comme destination de redirection (anti-phishing). */
+const ALLOWED_REDIRECT_HOSTS = [
+  'transportsligneo.fr',
+  'transportsligneo.lovable.app',
+  'lovable.app',
+  'google.com',
+  'g.page',
+]
+
 export const Route = createFileRoute('/api/public/track-click')({
   server: {
     handlers: {
