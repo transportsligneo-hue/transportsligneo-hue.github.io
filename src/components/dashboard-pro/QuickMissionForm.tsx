@@ -13,6 +13,7 @@ import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { lookupPlate } from "@/lib/plate.functions";
 import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
+import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
