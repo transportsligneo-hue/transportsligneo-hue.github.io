@@ -13,7 +13,11 @@ export const Route = createFileRoute('/api/public/track-click')({
         if (target) {
           try {
             const parsed = new URL(target)
-            if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            const host = parsed.hostname.toLowerCase()
+            const allowed =
+              (parsed.protocol === 'http:' || parsed.protocol === 'https:') &&
+              ALLOWED_REDIRECT_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))
+            if (allowed) {
               destination = parsed.toString()
             }
           } catch {
