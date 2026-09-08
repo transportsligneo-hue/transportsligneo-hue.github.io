@@ -54,14 +54,6 @@ const statutLabel: Record<string, string> = {
   tous: "Tous", en_attente: "En attente", confirmee: "Confirmée", en_cours: "En cours",
   livree: "Livrée", terminee: "Terminée", annulee: "Annulée",
 };
-const statutPill: Record<string, string> = {
-  en_attente: "bg-slate-100 text-slate-700",
-  confirmee: "bg-blue-50 text-blue-700",
-  en_cours: "bg-amber-50 text-amber-700",
-  livree: "bg-emerald-50 text-emerald-700",
-  terminee: "bg-emerald-50 text-emerald-700",
-  annulee: "bg-red-50 text-red-700",
-};
 
 function ProMissionsIndex() {
   const { user } = useAuth();
