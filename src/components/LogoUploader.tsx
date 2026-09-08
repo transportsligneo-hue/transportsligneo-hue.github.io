@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BUCKET_COMPANY_LOGOS, companyLogoPath } from "@/lib/storage-buckets";
 import { Upload, Trash2, Loader2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -54,12 +55,12 @@ export function LogoUploader({
     setUploading(true);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
-      const path = `${ownerUserId}/logo-${Date.now()}.${ext}`;
+      const path = companyLogoPath(ownerUserId, ext);
       const { error } = await supabase.storage
-        .from("company-logos")
+        .from(BUCKET_COMPANY_LOGOS)
         .upload(path, file, { upsert: true, contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from("company-logos").getPublicUrl(path);
+      const { data } = supabase.storage.from(BUCKET_COMPANY_LOGOS).getPublicUrl(path);
       await onChange(data.publicUrl);
       toast.success("Logo mis à jour");
     } catch (e) {
@@ -76,11 +77,11 @@ export function LogoUploader({
     setUploading(true);
     try {
       // Extract storage path from public URL (after /company-logos/)
-      const marker = "/company-logos/";
+      const marker = `/${BUCKET_COMPANY_LOGOS}/`;
       const idx = value.indexOf(marker);
       if (idx >= 0) {
         const path = value.substring(idx + marker.length);
-        await supabase.storage.from("company-logos").remove([path]);
+        await supabase.storage.from(BUCKET_COMPANY_LOGOS).remove([path]);
       }
       await onChange(null);
       toast.success("Logo supprimé");

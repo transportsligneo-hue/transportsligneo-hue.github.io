@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { Upload, Loader2, CheckCircle2, AlertTriangle, Camera, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { BUCKET_CARTES_GRISES, carteGriseDevisPath } from "@/lib/storage-buckets";
 import { compressImage } from "@/lib/image-compression";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -51,9 +52,9 @@ export function VehiculeDocsStep({
     setUploading(kind);
     try {
       const compressed = await compressImage(file);
-      const path = `${user.id}/${devisId}/carte-grise-${kind}-${Date.now()}.jpg`;
+      const path = carteGriseDevisPath(user.id, devisId, kind);
       const { error } = await supabase.storage
-        .from("cartes-grises")
+        .from(BUCKET_CARTES_GRISES)
         .upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
       if (error) throw error;
       if (kind === "recto") setRectoUrl(path);
@@ -182,7 +183,7 @@ function UploadCard({
   // Génère URL signée pour preview
   const loadPreview = async (path: string) => {
     const { data } = await supabase.storage
-      .from("cartes-grises")
+      .from(BUCKET_CARTES_GRISES)
       .createSignedUrl(path, 600);
     if (data?.signedUrl) setPreviewUrl(data.signedUrl);
   };
