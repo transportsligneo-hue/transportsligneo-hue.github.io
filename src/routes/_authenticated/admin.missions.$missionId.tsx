@@ -58,6 +58,7 @@ import { buildLegDossierPdf, mergeDossierParts } from "@/lib/dossier-mission";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { MissionPriceCard } from "@/components/admin/MissionPriceCard";
 import { MissionPriceHistory } from "@/components/admin/MissionPriceHistory";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
 import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { toast } from "sonner";
@@ -1654,6 +1655,13 @@ function AdminMissionDetail() {
                     .filter(Boolean)
                     .join(" · ") || "Énergie, couleur et kilométrage à compléter"}
                 </p>
+                <ElectricBadge
+                  energie={trajet.vehicule_energie}
+                  marque={trajet.marque ?? trajet.vehicule_marque}
+                  modele={trajet.modele ?? trajet.vehicule_modele}
+                  variant="light"
+                  className="mt-1.5"
+                />
               </div>
             </div>
 
