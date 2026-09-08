@@ -1781,6 +1781,123 @@ export type Database = {
         }
         Relationships: []
       }
+      conducteur_vehicules: {
+        Row: {
+          conducteur_id: string
+          created_at: string
+          date_debut: string
+          date_fin: string | null
+          id: string
+          is_principal: boolean
+          notes: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          conducteur_id: string
+          created_at?: string
+          date_debut?: string
+          date_fin?: string | null
+          id?: string
+          is_principal?: boolean
+          notes?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          conducteur_id?: string
+          created_at?: string
+          date_debut?: string
+          date_fin?: string | null
+          id?: string
+          is_principal?: boolean
+          notes?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conducteur_vehicules_conducteur_id_fkey"
+            columns: ["conducteur_id"]
+            isOneToOne: false
+            referencedRelation: "conducteurs_flotte"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conducteur_vehicules_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conducteurs_flotte: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nom: string
+          notes: string | null
+          numero_permis: string | null
+          organization_id: string
+          permis_categorie: string | null
+          permis_expiration: string | null
+          prenom: string
+          site_id: string | null
+          statut: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom: string
+          notes?: string | null
+          numero_permis?: string | null
+          organization_id: string
+          permis_categorie?: string | null
+          permis_expiration?: string | null
+          prenom: string
+          site_id?: string | null
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom?: string
+          notes?: string | null
+          numero_permis?: string | null
+          organization_id?: string
+          permis_categorie?: string | null
+          permis_expiration?: string | null
+          prenom?: string
+          site_id?: string | null
+          statut?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conducteurs_flotte_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conducteurs_flotte_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -7382,6 +7499,7 @@ export type Database = {
       }
       vehicle_movements: {
         Row: {
+          conducteur_id: string | null
           created_at: string
           from_address: string | null
           id: string
@@ -7394,6 +7512,7 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          conducteur_id?: string | null
           created_at?: string
           from_address?: string | null
           id?: string
@@ -7406,6 +7525,7 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          conducteur_id?: string | null
           created_at?: string
           from_address?: string | null
           id?: string
@@ -7418,6 +7538,13 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_movements_conducteur_id_fkey"
+            columns: ["conducteur_id"]
+            isOneToOne: false
+            referencedRelation: "conducteurs_flotte"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_movements_mission_id_fkey"
             columns: ["mission_id"]
