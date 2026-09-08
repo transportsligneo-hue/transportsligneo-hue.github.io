@@ -14,6 +14,7 @@ import {
   Clock, Send, Star, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
   component: GroupedMissionForm,
