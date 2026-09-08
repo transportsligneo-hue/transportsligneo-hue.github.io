@@ -57,12 +57,11 @@ export function MissionAvisGooglePanel({
   const [reviewUrl, setReviewUrl] = useState<string>("");
   const [defaultChannel, setDefaultChannel] = useState<ReviewChannel>("email");
   const [channel, setChannel] = useState<ReviewChannel>("email");
-  const [email, setEmail] = useState(contactEmail ?? "");
-  const [phone, setPhone] = useState(contactTelephone ?? "");
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [savingPhone, setSavingPhone] = useState(false);
-  const [savedContactEmail, setSavedContactEmail] = useState(contactEmail ?? "");
-  const [savedContactPhone, setSavedContactPhone] = useState(contactTelephone ?? "");
+  const [saving, setSaving] = useState<RecipientType | null>(null);
+  const [form, setForm] = useState<Record<RecipientType, { email: string; phone: string }>>({
+    client: { email: clientEmail ?? "", phone: clientTelephone ?? "" },
+    contact_livraison: { email: contactEmail ?? "", phone: contactTelephone ?? "" },
+  });
 
   const load = useCallback(async () => {
     const [{ data: reqs }, { data: setting }] = await Promise.all([
@@ -85,11 +84,14 @@ export function MissionAvisGooglePanel({
   }, [load]);
 
   useEffect(() => {
-    setEmail(contactEmail ?? "");
-    setPhone(contactTelephone ?? "");
-    setSavedContactEmail(contactEmail ?? "");
-    setSavedContactPhone(contactTelephone ?? "");
-  }, [contactEmail, contactTelephone]);
+    setForm({
+      client: { email: clientEmail ?? "", phone: clientTelephone ?? "" },
+      contact_livraison: { email: contactEmail ?? "", phone: contactTelephone ?? "" },
+    });
+  }, [clientEmail, clientTelephone, contactEmail, contactTelephone]);
+
+  const setField = (t: RecipientType, key: "email" | "phone", value: string) =>
+    setForm((prev) => ({ ...prev, [t]: { ...prev[t], [key]: value } }));
 
   const rowFor = (t: RecipientType, ch: ReviewChannel) =>
     rows.find((r) => r.recipient_type === t && r.channel === ch);
@@ -97,7 +99,15 @@ export function MissionAvisGooglePanel({
   const handleSend = async (recipientType: RecipientType) => {
     setLoading(recipientType);
     try {
-      const res = await send({ data: { attributionId, recipientType, channel } });
+      const res = await send({
+        data: {
+          attributionId,
+          recipientType,
+          channel,
+          emailOverride: form[recipientType].email.trim() || null,
+          phoneOverride: form[recipientType].phone.trim() || null,
+        },
+      });
       const detail = (res.results ?? [])
         .map((r) => `${r.channel === "email" ? "Email" : "SMS"} : ${r.ok ? "OK" : (r.error ?? "échec")}`)
         .join(" · ");
@@ -120,33 +130,24 @@ export function MissionAvisGooglePanel({
     }
   };
 
-  const saveContactEmail = async () => {
-    setSavingEmail(true);
-    const { error } = await supabase
-      .from("trajets")
-      .update({ arrivee_contact_email: email.trim() || null } as never)
-      .eq("id", trajetId);
-    setSavingEmail(false);
+  /** Enregistre durablement les coordonnées saisies sur le trajet. */
+  const saveCoords = async (t: RecipientType) => {
+    setSaving(t);
+    const values = form[t];
+    const patch =
+      t === "client"
+        ? { client_email: values.email.trim() || null, client_telephone: values.phone.trim() || null }
+        : {
+            arrivee_contact_email: values.email.trim() || null,
+            arrivee_contact_telephone: values.phone.trim() || null,
+          };
+    const { error } = await supabase.from("trajets").update(patch as never).eq("id", trajetId);
+    setSaving(null);
     if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else {
-      setSavedContactEmail(email.trim());
-      toast.success("Email du contact livraison enregistré");
-    }
+    else toast.success("Coordonnées enregistrées");
   };
 
-  const saveContactPhone = async () => {
-    setSavingPhone(true);
-    const { error } = await supabase
-      .from("trajets")
-      .update({ arrivee_contact_telephone: phone.trim() || null } as never)
-      .eq("id", trajetId);
-    setSavingPhone(false);
-    if (error) toast.error("Enregistrement impossible", { description: error.message });
-    else {
-      setSavedContactPhone(phone.trim());
-      toast.success("Téléphone du contact livraison enregistré");
-    }
-  };
+
 
   const renderStatus = (t: RecipientType, ch: ReviewChannel) => {
     const r = rowFor(t, ch);
