@@ -776,6 +776,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           </div>
         </div>
       </div>
+      )}
 
       {/* Hidden input */}
       <input
