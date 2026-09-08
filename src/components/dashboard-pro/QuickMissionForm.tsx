@@ -552,7 +552,12 @@ export default function QuickMissionForm({
 
 
       setSuccess(true);
-      setTimeout(() => navigate({ to: successRedirect }), 1600);
+      setSubmitting(false);
+      if (devisId) {
+        setSuccessDevisId(devisId);
+      } else {
+        setTimeout(() => navigate({ to: successRedirect }), 1600);
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'envoi";
       setError(msg);
