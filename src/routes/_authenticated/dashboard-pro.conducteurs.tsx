@@ -150,11 +150,11 @@ function ConducteursPage() {
     <div className="space-y-5">
       <FleetPageHeader
         breadcrumb="Conducteurs"
-        eyebrow="Convoyeurs rattachés"
+        eyebrow="Conducteurs rattachés"
         title="Mes"
         highlight="conducteurs"
         badge="Flotte partenaire"
-        subtitle="Convoyeurs rattachés à votre flotte, prêts à prendre des missions Ligneo."
+        subtitle="Conducteurs de votre société rattachés à vos véhicules."
         actions={
           <button onClick={() => setModalOpen(true)} className="fleet-btn-violet">
             <UserPlus size={15} />
