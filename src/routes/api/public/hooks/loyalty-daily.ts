@@ -1,20 +1,18 @@
 /**
- * Job quotidien du Compte Kilomètres Ligneo (appelé par pg_cron, header apikey) :
+ * Job quotidien du Compte Kilomètres Ligneo (appelé par pg_cron, en-tête x-cron-secret) :
  *  1. clôture des périodes de 12 mois échues (calcul du taux + crédit de l'avoir)
  *  2. expiration des avoirs de plus de 24 mois
  *  3. notifications : palier atteint, avoir crédité, rappel J-30 avant expiration
  */
 import { createFileRoute } from '@tanstack/react-router'
+import { verifyCronSecret } from '@/lib/cron-auth.server'
 import { currentTier, type LoyaltyTier } from '@/lib/loyalty'
 
 export const Route = createFileRoute('/api/public/hooks/loyalty-daily')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get('apikey') ?? ''
-        const expected =
-          process.env['SUPABASE_PUBLISHABLE_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? ''
-        if (!expected || key !== expected) {
+        if (!(await verifyCronSecret(request))) {
           return new Response('Unauthorized', { status: 401 })
         }
 

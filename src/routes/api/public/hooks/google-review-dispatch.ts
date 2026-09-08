@@ -1,18 +1,16 @@
 /**
  * Job automatique : demande d'avis Google X heures après la fin d'une mission.
- * Appelé par pg_cron (POST, header apikey).
+ * Appelé par pg_cron (POST, en-tête x-cron-secret).
  */
 import { createFileRoute } from '@tanstack/react-router'
+import { verifyCronSecret } from '@/lib/cron-auth.server'
 import type { ReviewChannel, ReviewRecipientType } from '@/lib/google-review.server'
 
 export const Route = createFileRoute('/api/public/hooks/google-review-dispatch')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get('apikey') ?? ''
-        const expected =
-          process.env['SUPABASE_PUBLISHABLE_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? ''
-        if (!expected || key !== expected) {
+        if (!(await verifyCronSecret(request))) {
           return new Response('Unauthorized', { status: 401 })
         }
 

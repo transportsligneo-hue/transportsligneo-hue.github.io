@@ -61,14 +61,36 @@ Deno.serve(async (req) => {
       .select("role")
       .eq("user_id", userData.user.id)
       .eq("actif", true);
-    const isAdmin = (roles ?? []).some((r) => r.role === "admin" || r.role === "super_admin");
+    const isSuperAdmin = (roles ?? []).some((r) => r.role === "super_admin");
+    const isAdmin = isSuperAdmin || (roles ?? []).some((r) => r.role === "admin");
     if (!isAdmin) return json({ error: "Forbidden — admin only" }, 403);
 
     const body = (await req.json()) as Payload;
     if (!body.action || !body.user_id) return json({ error: "Missing fields" }, 400);
 
-    if (body.user_id === userData.user.id && ["suspend", "delete"].includes(body.action)) {
+    const ROLE_ACTIONS = ["change_role", "activate_role"];
+    const PRIVILEGED_ROLES = ["admin", "super_admin"];
+
+    if (
+      body.user_id === userData.user.id &&
+      ["suspend", "delete", ...ROLE_ACTIONS].includes(body.action)
+    ) {
       return json({ error: "Action interdite sur son propre compte" }, 400);
+    }
+
+    // Seuls les super admins peuvent accorder / retirer un rôle privilégié.
+    if (ROLE_ACTIONS.includes(body.action) && !isSuperAdmin) {
+      if (body.role && PRIVILEGED_ROLES.includes(body.role)) {
+        return json({ error: "Réservé au Super Admin" }, 403);
+      }
+      const { data: targetRoles } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", body.user_id)
+        .eq("actif", true);
+      if ((targetRoles ?? []).some((r) => PRIVILEGED_ROLES.includes(r.role as string))) {
+        return json({ error: "Réservé au Super Admin" }, 403);
+      }
     }
 
     let result: Record<string, unknown> = {};
@@ -97,6 +119,17 @@ Deno.serve(async (req) => {
       }
       case "change_role": {
         if (!body.role) return json({ error: "Rôle manquant" }, 400);
+        // Les rôles privilégiés passent par la RPC auditée (contrôle super_admin + journal).
+        if (PRIVILEGED_ROLES.includes(body.role)) {
+          await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
+          const { error: pErr } = await userClient.rpc("super_admin_set_role", {
+            _target_user_id: body.user_id,
+            _role: body.role,
+            _actif: true,
+          });
+          if (pErr) return json({ error: pErr.message }, 403);
+          break;
+        }
         // Désactive tous les rôles existants, puis upsert le nouveau actif=true.
         // L'upsert évite l'échec UNIQUE(user_id, role) qui laissait tous les rôles inactifs.
         await admin.from("user_roles").update({ actif: false }).eq("user_id", body.user_id);
