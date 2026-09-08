@@ -789,6 +789,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       />
 
       {/* Bottom action bar */}
+      {!needExterne && (
       <BottomBar>
         <div className="flex items-center gap-2">
           <button
