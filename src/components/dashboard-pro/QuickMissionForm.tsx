@@ -152,6 +152,7 @@ export default function QuickMissionForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successDevisId, setSuccessDevisId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Load profile + favorites
