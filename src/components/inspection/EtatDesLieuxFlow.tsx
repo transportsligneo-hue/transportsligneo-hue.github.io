@@ -165,6 +165,8 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   const [inspectionId, setInspectionId] = useState<string | null>(() => initialState?.inspectionId ?? null);
   const [carburant, setCarburant] = useState<string | null>(null);
   const [vehicleLabel, setVehicleLabel] = useState<string>("");
+  const [externe, setExterne] = useState<OutilExterneMission | null>(null);
+  const [externeDone, setExterneDone] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [askExit, setAskExit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
