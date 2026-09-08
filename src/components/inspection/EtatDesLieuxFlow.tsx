@@ -25,6 +25,8 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { EdlExterneGate } from "@/components/inspection/EdlExterneGate";
+import { fetchOutilExterneMission, fetchPassageExterne, type OutilExterneMission } from "@/lib/outils-externes";
 
 interface Props {
   attributionId: string;
