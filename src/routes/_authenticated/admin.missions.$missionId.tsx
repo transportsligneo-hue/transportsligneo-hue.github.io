@@ -274,6 +274,7 @@ function AdminMissionDetail() {
   const [edlPreviewUrl, setEdlPreviewUrl] = useState<string | null>(null);
   const [dossierOpen, setDossierOpen] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
+  const [savingProcessExterne, setSavingProcessExterne] = useState(false);
   const [contactNom, setContactNom] = useState("");
   const [contactPrenom, setContactPrenom] = useState("");
   const [contactSociete, setContactSociete] = useState("");
