@@ -274,6 +274,18 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
     })();
   }, [attributionId]);
 
+  // Process client externe (ex: Welcome Auto) · détection automatique, sans choix manuel
+  useEffect(() => {
+    (async () => {
+      const info = await fetchOutilExterneMission(attributionId);
+      setExterne(info);
+      if (info.requis) {
+        const done = await fetchPassageExterne(attributionId, type);
+        if (done) setExterneDone(true);
+      }
+    })();
+  }, [attributionId, type]);
+
   // Restore photos déjà uploadées (en cas de reprise)
   useEffect(() => {
     if (!inspectionId) return;
