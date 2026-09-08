@@ -2322,7 +2322,7 @@ body.is-driver-app .closed-link svg {
   .auth-accent {
     color: #6ea1ff;
     text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.45);
-    animation: v4PulseGlow 2.6s ease-in-out infinite;
+    animation: v4PulseGlow 1.4s ease-out 1 both;
   }
   .auth-eyebrow {
     display: inline-flex;
@@ -3283,14 +3283,14 @@ body.is-driver-app .closed-link svg {
 
   /* Wordmark LIGNEO */
   .r4-word { font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: 0.01em; }
-  .r4-word .g { color: var(--r4-blue-glow); text-shadow: 0 0 12px rgba(91,143,255,0.6); animation: r4PulseGlow 2.6s ease-in-out infinite; }
+  .r4-word .g { color: var(--r4-blue-glow); text-shadow: 0 0 12px rgba(91,143,255,0.6); animation: r4PulseGlow 1.4s ease-out 1 both; }
   @keyframes r4PulseGlow {
     0%,100% { text-shadow: 0 0 12px rgba(91,143,255,0.6), 0 0 30px rgba(91,143,255,0.35); }
     50%     { text-shadow: 0 0 20px rgba(91,143,255,0.9), 0 0 44px rgba(91,143,255,0.55); }
   }
   .r4-accent { color: var(--r4-blue-glow);
     text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.5);
-    animation: r4PulseGlow 2.6s ease-in-out infinite; }
+    animation: r4PulseGlow 1.4s ease-out 1 both; }
 
   .r4-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
@@ -4071,7 +4071,7 @@ body.is-driver-app .closed-link svg {
 .r4-page .v5-trust-label { text-align:center; font-family:'Poppins',sans-serif; font-size:32px;
   font-weight:800; letter-spacing:0.04em; color:#6ea1ff; text-transform:none; margin-bottom:8px;
   text-shadow:0 0 26px rgba(91,143,255,0.6), 0 0 56px rgba(91,143,255,0.32);
-  animation:v4PulseGlow 2.8s ease-in-out infinite; }
+  animation:v4PulseGlow 1.4s ease-out 1 both; }
 .r4-page .v5-trust-sub { text-align:center; font-family:'Space Grotesk',sans-serif; font-size:12px;
   font-weight:600; letter-spacing:0.3em; color:var(--v4-text-muted); text-transform:uppercase; margin-bottom:42px; }
 .r4-page .v5-marquee-mask { position:relative; overflow:hidden;
