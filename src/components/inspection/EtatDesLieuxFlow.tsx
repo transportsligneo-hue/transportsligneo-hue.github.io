@@ -218,6 +218,9 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   const currentStep = STEPS[safeStepIndex];
   const currentPhoto = photos[currentStep.id];
   const isSignatureStep = currentStep.section === "signature";
+  /** Étape conditionnelle « État des lieux client » : juste avant la signature du client. */
+  const needExterne =
+    Boolean(externe?.requis) && !externeDone && currentStep.id === "signature_client";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
