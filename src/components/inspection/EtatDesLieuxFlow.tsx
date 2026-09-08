@@ -670,6 +670,15 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       </div>
 
       {/* Main content */}
+      {needExterne ? (
+        <EdlExterneGate
+          attributionId={attributionId}
+          type={type}
+          clientNom={externe?.client_nom ?? null}
+          outil={externe?.outil ?? null}
+          onDone={() => setExterneDone(true)}
+        />
+      ) : (
       <div className="flex-1 overflow-auto bg-slate-50">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <ExampleFrame stepId={currentStep.id} label={currentStep.label} />
