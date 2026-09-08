@@ -17,8 +17,17 @@ const MAX_BYTES = 2 * 1024 * 1024;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function explain(err: unknown): string {
-  const raw = err instanceof Error ? err.message : typeof err === "string" ? err : "";
+  const asRecord = typeof err === "object" && err !== null ? (err as Record<string, unknown>) : null;
+  const raw =
+    err instanceof Error
+      ? err.message
+      : typeof err === "string"
+        ? err
+        : typeof asRecord?.["message"] === "string"
+          ? (asRecord["message"] as string)
+          : "";
   const msg = raw.toLowerCase();
+
   if (!navigator.onLine) return "Aucune connexion internet. Reconnectez-vous puis revalidez.";
   if (msg.includes("failed to fetch") || msg.includes("network") || msg.includes("timeout"))
     return "Réseau instable : la signature n'a pas pu être transmise. Réessayez dans quelques secondes.";
