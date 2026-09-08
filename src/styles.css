@@ -2322,7 +2322,7 @@ body.is-driver-app .closed-link svg {
   .auth-accent {
     color: #6ea1ff;
     text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.45);
-    animation: v4PulseGlow 2.6s ease-in-out infinite;
+    animation: v4PulseGlow 1.4s ease-out 1 both;
   }
   .auth-eyebrow {
     display: inline-flex;
@@ -2777,7 +2777,7 @@ body.is-driver-app .closed-link svg {
     background: linear-gradient(90deg, #e7c76a 0%, #fff2c2 30%, #d4af37 55%, #e7c76a 80%, #fff2c2 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: cyber-shine 6s linear infinite;
+    animation: cyber-shine 1.8s ease-out 1 both;
   }
   @keyframes cyber-shine { to { background-position: 200% 0; } }
 
@@ -3283,14 +3283,14 @@ body.is-driver-app .closed-link svg {
 
   /* Wordmark LIGNEO */
   .r4-word { font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: 0.01em; }
-  .r4-word .g { color: var(--r4-blue-glow); text-shadow: 0 0 12px rgba(91,143,255,0.6); animation: r4PulseGlow 2.6s ease-in-out infinite; }
+  .r4-word .g { color: var(--r4-blue-glow); text-shadow: 0 0 12px rgba(91,143,255,0.6); animation: r4PulseGlow 1.4s ease-out 1 both; }
   @keyframes r4PulseGlow {
     0%,100% { text-shadow: 0 0 12px rgba(91,143,255,0.6), 0 0 30px rgba(91,143,255,0.35); }
     50%     { text-shadow: 0 0 20px rgba(91,143,255,0.9), 0 0 44px rgba(91,143,255,0.55); }
   }
   .r4-accent { color: var(--r4-blue-glow);
     text-shadow: 0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.5);
-    animation: r4PulseGlow 2.6s ease-in-out infinite; }
+    animation: r4PulseGlow 1.4s ease-out 1 both; }
 
   .r4-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
@@ -3817,8 +3817,8 @@ body.is-driver-app .closed-link svg {
 .r4-page .v4-hero-eyebrow.v { color:var(--v4-violet); }
 .r4-page .v4-hero-eyebrow.v .dot{ background:var(--v4-violet); box-shadow:0 0 8px var(--v4-violet); }
 .r4-page .v4-h1 { font-family:'Poppins',sans-serif; font-weight:800; font-size:46px; letter-spacing:-0.02em; margin-bottom:16px; color:#fff; line-height:1.08; }
-.r4-page .v4-accent { color:#6ea1ff; text-shadow:0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.5); animation:v4PulseGlow 2.6s ease-in-out infinite; }
-.r4-page .v4-accent.v { color:#a794ff; text-shadow:0 0 18px rgba(124,92,255,0.7), 0 0 40px rgba(124,92,255,0.4); animation:v4PulseGlowV 2.6s ease-in-out infinite; }
+.r4-page .v4-accent { color:#6ea1ff; text-shadow:0 0 18px rgba(91,143,255,0.8), 0 0 40px rgba(91,143,255,0.5); animation:v4PulseGlow 1.4s ease-out 1 both; }
+.r4-page .v4-accent.v { color:#a794ff; text-shadow:0 0 18px rgba(124,92,255,0.7), 0 0 40px rgba(124,92,255,0.4); animation:v4PulseGlowV 1.4s ease-out 1 both; }
 .r4-page .v4-hero p, .r4-page .v4-hero .v4-hero-p { color:var(--v4-text-muted); font-size:15.5px; max-width:600px; margin:0 auto; line-height:1.6; }
 
 .r4-page .v4-section { max-width:1220px; margin:0 auto; padding:20px 32px 70px; }
@@ -4071,7 +4071,7 @@ body.is-driver-app .closed-link svg {
 .r4-page .v5-trust-label { text-align:center; font-family:'Poppins',sans-serif; font-size:32px;
   font-weight:800; letter-spacing:0.04em; color:#6ea1ff; text-transform:none; margin-bottom:8px;
   text-shadow:0 0 26px rgba(91,143,255,0.6), 0 0 56px rgba(91,143,255,0.32);
-  animation:v4PulseGlow 2.8s ease-in-out infinite; }
+  animation:v4PulseGlow 1.4s ease-out 1 both; }
 .r4-page .v5-trust-sub { text-align:center; font-family:'Space Grotesk',sans-serif; font-size:12px;
   font-weight:600; letter-spacing:0.3em; color:var(--v4-text-muted); text-transform:uppercase; margin-bottom:42px; }
 .r4-page .v5-marquee-mask { position:relative; overflow:hidden;
@@ -5722,7 +5722,7 @@ html.theme-light .r4-page {
     linear-gradient(180deg, #f7f9ff 0%, #f5f7fc 100%) !important;
   color: #0f1526 !important;
 }
-html.theme-light .r4-page .v4-accent { color: var(--neon-blue-strong); text-shadow: 0 0 10px rgba(91,143,255,.42); animation: r4PulseGlow 2.6s ease-in-out infinite; }
+html.theme-light .r4-page .v4-accent { color: var(--neon-blue-strong); text-shadow: 0 0 10px rgba(91,143,255,.42); animation: r4PulseGlow 1.4s ease-out 1 both; }
 html.theme-light .r4-page .v4-accent.v { color: #6b47ff; text-shadow: none; animation: none; }
 html.theme-light .r4-page .v4-hero-eyebrow { color: #1c3fc4; }
 html.theme-light .r4-page .v4-svc-card,
@@ -8487,7 +8487,7 @@ html.theme-light .dg-estimator--flat .dg-flat-hint { color: #6b7280; }
   text-shadow:
     0 0 10px var(--neon-blue-glow),
     0 0 24px rgba(91, 143, 255, 0.55);
-  animation: ligneoNeonBreathe 2.8s ease-in-out infinite;
+  animation: ligneoNeonBreathe 1.4s ease-out 1 both;
 }
 
 /* Gros LIGNEO du hero : couleur néon identique, sans clignotement. */
@@ -8565,7 +8565,7 @@ body:not(.is-driver-app) :where(
   [class*="text-[#6ea1ff]"]
 ) {
   text-shadow: 0 0 12px var(--neon-blue-glow), 0 0 28px rgba(91,143,255,.5) !important;
-  animation: ligneoNeonBreathe 2.8s ease-in-out infinite !important;
+  animation: ligneoNeonBreathe 1.4s ease-out 1 both !important;
 }
 
 /* Les commandes bleues partagent désormais le même flux électrique. */
