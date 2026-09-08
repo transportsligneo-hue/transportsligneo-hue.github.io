@@ -4395,6 +4395,57 @@ export type Database = {
           },
         ]
       }
+      mission_edl_externe_passages: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          id: string
+          outil_id: string | null
+          outil_nom: string | null
+          ouvert_at: string | null
+          termine_at: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          id?: string
+          outil_id?: string | null
+          outil_nom?: string | null
+          ouvert_at?: string | null
+          termine_at?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          id?: string
+          outil_id?: string | null
+          outil_nom?: string | null
+          ouvert_at?: string | null
+          termine_at?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_edl_externe_passages_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: false
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_edl_externe_passages_outil_id_fkey"
+            columns: ["outil_id"]
+            isOneToOne: false
+            referencedRelation: "outils_externes_client"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_etape_history: {
         Row: {
           attribution_id: string
@@ -5662,6 +5713,71 @@ export type Database = {
           },
         ]
       }
+      outils_externes_client: {
+        Row: {
+          actif: boolean
+          android_package: string | null
+          app_store_url: string | null
+          client_nom: string | null
+          created_at: string
+          deeplink: string | null
+          id: string
+          instructions: string | null
+          logo_url: string | null
+          nom: string
+          organization_id: string | null
+          play_store_url: string | null
+          type: string
+          updated_at: string
+          url_web: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actif?: boolean
+          android_package?: string | null
+          app_store_url?: string | null
+          client_nom?: string | null
+          created_at?: string
+          deeplink?: string | null
+          id?: string
+          instructions?: string | null
+          logo_url?: string | null
+          nom: string
+          organization_id?: string | null
+          play_store_url?: string | null
+          type?: string
+          updated_at?: string
+          url_web?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actif?: boolean
+          android_package?: string | null
+          app_store_url?: string | null
+          client_nom?: string | null
+          created_at?: string
+          deeplink?: string | null
+          id?: string
+          instructions?: string | null
+          logo_url?: string | null
+          nom?: string
+          organization_id?: string | null
+          play_store_url?: string | null
+          type?: string
+          updated_at?: string
+          url_web?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outils_externes_client_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paiements_convoyeurs: {
         Row: {
           convoyeur_id: string
@@ -6859,6 +6975,7 @@ export type Database = {
           prix_societe: number | null
           prix_suggere: number | null
           prix_total: number | null
+          process_client_externe_requis: boolean
           proposal_expires_at: string | null
           published_at: string | null
           pv_digitalise: string | null
@@ -6942,6 +7059,7 @@ export type Database = {
           prix_societe?: number | null
           prix_suggere?: number | null
           prix_total?: number | null
+          process_client_externe_requis?: boolean
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
@@ -7025,6 +7143,7 @@ export type Database = {
           prix_societe?: number | null
           prix_suggere?: number | null
           prix_total?: number | null
+          process_client_externe_requis?: boolean
           proposal_expires_at?: string | null
           published_at?: string | null
           pv_digitalise?: string | null
@@ -8618,6 +8737,10 @@ export type Database = {
           total: number
           trajet_id: string
         }[]
+      }
+      get_outil_externe_mission: {
+        Args: { p_attribution_id: string }
+        Returns: Json
       }
       get_public_pricing_display: {
         Args: never
