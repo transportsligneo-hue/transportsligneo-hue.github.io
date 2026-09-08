@@ -9,6 +9,7 @@ import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
@@ -380,6 +381,7 @@ function ProMissionsIndex() {
                   <span className="text-pro-muted">·</span>
                   <Car size={12} />
                   <span>{[head.marque, head.modele].filter(Boolean).join(" ") || "Véhicule à préciser"}</span>
+                  <ElectricBadge energie={head.carburant} marque={head.marque} modele={head.modele} variant="light" />
                   {head.vin && <span className="fleet-vin">VIN {head.vin}</span>}
                 </div>
 

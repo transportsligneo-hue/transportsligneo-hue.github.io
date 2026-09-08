@@ -11,6 +11,7 @@ import { generateEdlFinalPdf } from "@/lib/edl-final-pdf";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 import { legRef } from "@/lib/mission-number";
+import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
 interface Mission {
   id: string;
