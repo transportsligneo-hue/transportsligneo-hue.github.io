@@ -311,14 +311,16 @@ export async function sendGoogleReviewRequestServer(params: {
   const { data: trajet } = await supabaseAdmin
     .from('trajets')
     .select(
-      'id, depart, arrivee, client_nom, client_email, client_telephone, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_email, arrivee_contact_telephone, arrivee_contact_telephone2, contact_depart_tel, contact_arrivee_tel',
+      'id, depart, arrivee, marque, modele, immatriculation, vehicule_immatriculation, client_nom, client_email, client_telephone, arrivee_contact_nom, arrivee_contact_prenom, arrivee_contact_email, arrivee_contact_telephone, arrivee_contact_telephone2, contact_depart_tel, contact_arrivee_tel',
     )
     .eq('id', attribution.trajet_id)
     .maybeSingle()
   if (!trajet) return { ok: false, error: 'Trajet introuvable.' }
 
   const recipient = getRecipientInfo(trajet, params.recipientType)
-  if (params.emailOverride) recipient.email = params.emailOverride
+  if (params.emailOverride?.trim()) recipient.email = params.emailOverride.trim()
+  if (params.phoneOverride?.trim()) recipient.phone = params.phoneOverride.trim()
+
 
   const channel = params.channel ?? settings.channel ?? 'email'
 
