@@ -109,6 +109,7 @@ interface TrajetFull {
   devis_id?: string | null;
   numero_mission?: string | null;
   leg_index?: number | null;
+  process_client_externe_requis?: boolean | null;
 
 
   depart: string;
@@ -273,6 +274,7 @@ function AdminMissionDetail() {
   const [edlPreviewUrl, setEdlPreviewUrl] = useState<string | null>(null);
   const [dossierOpen, setDossierOpen] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
+  const [savingProcessExterne, setSavingProcessExterne] = useState(false);
   const [contactNom, setContactNom] = useState("");
   const [contactPrenom, setContactPrenom] = useState("");
   const [contactSociete, setContactSociete] = useState("");
@@ -587,6 +589,25 @@ function AdminMissionDetail() {
       .from("trajets_admin_data" as never)
       .upsert({ trajet_id: trajet.id, notes_internes: adminNote } as never, { onConflict: "trajet_id" } as never);
     setSavingNote(false);
+  };
+
+  /** Active/désactive l'état des lieux via l'outil externe du client. */
+  const toggleProcessExterne = async (value: boolean) => {
+    if (!trajet) return;
+    setSavingProcessExterne(true);
+    try {
+      const { error } = await supabase
+        .from("trajets")
+        .update({ process_client_externe_requis: value } as never)
+        .eq("id", trajet.id);
+      if (error) throw error;
+      setTrajet({ ...trajet, process_client_externe_requis: value });
+      toast.success(value ? "Process client externe activé" : "Process client externe désactivé");
+    } catch (e) {
+      toast.error("Enregistrement impossible", { description: (e as Error).message });
+    } finally {
+      setSavingProcessExterne(false);
+    }
   };
 
   const saveContactArrivee = async () => {
@@ -1664,6 +1685,22 @@ function AdminMissionDetail() {
                 />
               </div>
             </div>
+
+            <label className="mb-4 flex items-start gap-3 rounded-xl border border-pro-border bg-pro-surface/60 px-3 py-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={Boolean(trajet.process_client_externe_requis)}
+                disabled={savingProcessExterne}
+                onChange={(e) => void toggleProcessExterne(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-pro-accent"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-pro-text">Process client externe requis</span>
+                <span className="block text-[11px] text-pro-muted">
+                  Le convoyeur devra réaliser l'état des lieux dans l'outil du client (détecté automatiquement) avant la signature client.
+                </span>
+              </span>
+            </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
               <div className="sm:col-span-2">

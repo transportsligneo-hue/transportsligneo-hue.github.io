@@ -25,6 +25,8 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { EdlExterneGate } from "@/components/inspection/EdlExterneGate";
+import { fetchOutilExterneMission, fetchPassageExterne, type OutilExterneMission } from "@/lib/outils-externes";
 
 interface Props {
   attributionId: string;
@@ -163,6 +165,8 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   const [inspectionId, setInspectionId] = useState<string | null>(() => initialState?.inspectionId ?? null);
   const [carburant, setCarburant] = useState<string | null>(null);
   const [vehicleLabel, setVehicleLabel] = useState<string>("");
+  const [externe, setExterne] = useState<OutilExterneMission | null>(null);
+  const [externeDone, setExterneDone] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [askExit, setAskExit] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -214,6 +218,9 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
   const currentStep = STEPS[safeStepIndex];
   const currentPhoto = photos[currentStep.id];
   const isSignatureStep = currentStep.section === "signature";
+  /** Étape conditionnelle « État des lieux client » : juste avant la signature du client. */
+  const needExterne =
+    Boolean(externe?.requis) && !externeDone && currentStep.id === "signature_client";
   const totalSteps = STEPS.length;
   const completedCount = STEPS.filter(s => photos[s.id]?.status === "success").length;
   const progress = (completedCount / totalSteps) * 100;
@@ -271,6 +278,18 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
 
     })();
   }, [attributionId]);
+
+  // Process client externe (ex: Welcome Auto) · détection automatique, sans choix manuel
+  useEffect(() => {
+    (async () => {
+      const info = await fetchOutilExterneMission(attributionId);
+      setExterne(info);
+      if (info.requis) {
+        const done = await fetchPassageExterne(attributionId, type);
+        if (done) setExterneDone(true);
+      }
+    })();
+  }, [attributionId, type]);
 
   // Restore photos déjà uploadées (en cas de reprise)
   useEffect(() => {
@@ -651,6 +670,15 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       </div>
 
       {/* Main content */}
+      {needExterne ? (
+        <EdlExterneGate
+          attributionId={attributionId}
+          type={type}
+          clientNom={externe?.client_nom ?? null}
+          outil={externe?.outil ?? null}
+          onDone={() => setExterneDone(true)}
+        />
+      ) : (
       <div className="flex-1 overflow-auto bg-slate-50">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <ExampleFrame stepId={currentStep.id} label={currentStep.label} />
@@ -748,6 +776,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           </div>
         </div>
       </div>
+      )}
 
       {/* Hidden input */}
       <input
@@ -760,6 +789,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
       />
 
       {/* Bottom action bar */}
+      {!needExterne && (
       <BottomBar>
         <div className="flex items-center gap-2">
           <button
@@ -798,6 +828,7 @@ export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onCl
           )}
         </div>
       </BottomBar>
+      )}
 
       {askExit && <ExitConfirm onCancel={() => setAskExit(false)} onConfirm={onClose} />}
     </FullScreen>
