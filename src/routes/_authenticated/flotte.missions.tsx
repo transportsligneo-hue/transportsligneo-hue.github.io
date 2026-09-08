@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { legRef } from "@/lib/mission-number";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
@@ -47,7 +47,7 @@ function FlotteMissions() {
     })();
   }, [user]);
 
-  const [view, setView] = useMissionView("ligneo:view:flotte-missions");
+  const [view, setView] = useMissionView("ligneo:view:flotte-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
@@ -114,7 +114,7 @@ function FlotteMissions() {
                   </Link>
                 </TableCell>
                 <TableCell>{new Date(r.date_prise_en_charge).toLocaleDateString("fr-FR")}</TableCell>
-                <TableCell><Badge variant="outline">{r.statut}</Badge></TableCell>
+                <TableCell><StatusBadge kind={missionStatusKind(r.statut)}>{missionStatusLabel(r.statut)}</StatusBadge></TableCell>
                 <TableCell className="text-right">{Number(r.prix_total).toFixed(2)} €</TableCell>
               </TableRow>
             ))}

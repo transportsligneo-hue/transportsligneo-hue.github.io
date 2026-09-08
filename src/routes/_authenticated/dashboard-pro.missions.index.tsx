@@ -214,7 +214,7 @@ function ProMissionsIndex() {
     );
   }, [pending, search]);
 
-  const [view, setView] = useMissionView("ligneo:view:pro-missions");
+  const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
