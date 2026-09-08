@@ -289,6 +289,8 @@ export async function sendGoogleReviewRequestServer(params: {
   attributionId: string
   recipientType: ReviewRecipientType
   emailOverride?: string | null
+  phoneOverride?: string | null
+
   channel?: ReviewChannel
   auto?: boolean
   actorUserId?: string | null
