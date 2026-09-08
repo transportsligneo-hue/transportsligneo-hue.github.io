@@ -100,7 +100,7 @@ function GroupedMissionForm() {
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [pricing, setPricing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ ref: string; count: number } | null>(null);
+  const [result, setResult] = useState<{ ref: string; count: number; devisId: string | null } | null>(null);
 
   // Chargement profil + adresses favorites
   useEffect(() => {
