@@ -1,19 +1,17 @@
 /**
  * Rappel automatique J-1 aux convoyeurs (email + push).
  *
- * Appelé par pg_cron (header `apikey`). Accepte aussi `{ attributionId }`
+ * Appelé par pg_cron (en-tête `x-cron-secret`). Accepte aussi `{ attributionId }`
  * pour un envoi immédiat quand une mission est attribuée à moins de 24h.
  */
 import { createFileRoute } from '@tanstack/react-router'
+import { verifyCronSecret } from '@/lib/cron-auth.server'
 
 export const Route = createFileRoute('/api/public/hooks/rappel-mission-j1')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get('apikey') ?? ''
-        const expected =
-          process.env['SUPABASE_PUBLISHABLE_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? ''
-        if (!expected || key !== expected) {
+        if (!(await verifyCronSecret(request))) {
           return new Response('Unauthorized', { status: 401 })
         }
 

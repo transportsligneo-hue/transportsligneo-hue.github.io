@@ -1,17 +1,15 @@
 /**
  * Import automatique des bons de commande CAT / K2 depuis Gmail.
- * Appelé par pg_cron (header apikey) — jamais exposé au navigateur.
+ * Appelé par pg_cron (en-tête x-cron-secret) — jamais exposé au navigateur.
  */
 import { createFileRoute } from '@tanstack/react-router'
+import { verifyCronSecret } from '@/lib/cron-auth.server'
 
 export const Route = createFileRoute('/api/public/hooks/gmail-po-sync')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = request.headers.get('apikey') ?? ''
-        const expected =
-          process.env['SUPABASE_PUBLISHABLE_KEY'] ?? process.env['SUPABASE_ANON_KEY'] ?? ''
-        if (!expected || key !== expected) {
+        if (!(await verifyCronSecret(request))) {
           return new Response('Unauthorized', { status: 401 })
         }
 
