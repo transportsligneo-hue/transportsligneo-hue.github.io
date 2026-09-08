@@ -9,6 +9,7 @@ export const sendGoogleReviewRequest = createServerFn({ method: 'POST' })
       attributionId: string
       recipientType: 'client' | 'contact_livraison'
       emailOverride?: string | null
+      phoneOverride?: string | null
       channel?: 'email' | 'sms' | 'email+sms'
     }) => input,
   )
@@ -23,6 +24,7 @@ export const sendGoogleReviewRequest = createServerFn({ method: 'POST' })
       attributionId: data.attributionId,
       recipientType: data.recipientType,
       emailOverride: data.emailOverride ?? null,
+      phoneOverride: data.phoneOverride ?? null,
       channel: data.channel,
       auto: false,
       actorUserId: context.userId,
