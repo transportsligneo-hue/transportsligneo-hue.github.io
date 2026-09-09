@@ -4056,12 +4056,38 @@ body.is-driver-app .closed-link svg {
 
 /* ---- HERO STATS ---- */
 .r4-page .v5-hero-stats { position:relative; z-index:1; display:flex; justify-content:center;
-  gap:70px; padding:0 32px 50px; flex-wrap:wrap; }
+  gap:70px; padding:32px 32px 50px; flex-wrap:wrap; background:#081230; }
 .r4-page .v5-hstat { text-align:center; }
 .r4-page .v5-hstat .v { font-family:'Poppins',sans-serif; font-size:32px; font-weight:800; color:#6ea1ff;
   text-shadow:0 0 20px rgba(91,143,255,0.5); }
 .r4-page .v5-hstat .l { font-size:11px; color:var(--v4-text-muted); text-transform:uppercase;
   letter-spacing:0.06em; margin-top:6px; font-weight:600; }
+html.theme-light .r4-page .v5-hero-stats { background:#081230 !important; }
+html.theme-light .r4-page .v5-hstat .l { color:rgba(255,255,255,0.75) !important; }
+
+/* Transition nette entre la section chiffres (navy) et la carte */
+.v5-section-transition {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 130px;
+  pointer-events: none;
+  background: linear-gradient(180deg, #081230 0%, #061238 100%);
+}
+html.theme-light .v5-section-transition {
+  background: linear-gradient(180deg, #081230 0%, #f5f7fc 100%);
+  margin-bottom: 24px;
+}
+
+/* Supprime les anciens voiles flous autour des stats */
+.r4-page .v5-hero-stats::before,
+.r4-page .v5-hero-stats::after {
+  display: none !important;
+  background: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  content: none !important;
+}
 
 /* ---- TRUST SECTION (logos) ---- */
 .r4-page .v5-trust { position:relative; padding:64px 0; overflow:hidden;
@@ -4427,10 +4453,8 @@ body.is-driver-app .closed-link svg {
   box-shadow:0 30px 70px rgba(4,8,22,0.4); }
 .ligneo-map-big .ligneo-map-card { max-width:960px; }
 .ligneo-map-small .ligneo-map-card { max-width:420px; }
-.ligneo-map-card::before { content:''; position:absolute; top:-120px; left:-100px; width:340px; height:340px; border-radius:50%;
-  background:radial-gradient(circle, rgba(63,123,255,0.28), transparent 70%); filter:blur(20px); pointer-events:none; }
-.ligneo-map-card::after { content:''; position:absolute; bottom:-140px; right:-100px; width:380px; height:380px; border-radius:50%;
-  background:radial-gradient(circle, rgba(217,181,74,0.14), transparent 70%); filter:blur(20px); pointer-events:none; }
+.ligneo-map-card::before,
+.ligneo-map-card::after { display: none !important; content: none !important; }
 .ligneo-map-inner { position:relative; z-index:1; }
 .ligneo-map-inner .ligneo-map-svg { position:relative; z-index:1; width:100%; height:auto; display:block; }
 .ligneo-map-inner .eu-country { fill:rgba(255,255,255,0.05); stroke:rgba(122,163,255,0.35); stroke-width:0.16; }
@@ -7903,6 +7927,13 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     rgba(var(--ligneo-page-bg), 0.96) 99%,
     rgba(var(--ligneo-page-bg), 1) 100%) !important;
 }
+html.theme-light .r4-page .v5-hero {
+  padding-bottom: 40px !important;
+  background-color: #081230 !important;
+}
+html.theme-light .r4-page .v5-hero-fade {
+  background: linear-gradient(180deg, transparent 50%, #081230 100%) !important;
+}
 .r4-page .v5-hero-photo,
 .r4-page .v5-hero-tint {
   -webkit-mask-image: linear-gradient(180deg,
@@ -7919,20 +7950,16 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
     rgba(0,0,0,0) 100%);
 }
 
-/* 3) La lumière du hero se prolonge dans la bande stats : continuité parfaite */
+/* 3) Pas de halo flou au-dessus des chiffres : transition nette */
 .r4-page .v5-hero-stats { padding-top: 0 !important; }
-.r4-page .v5-hero-stats::before {
-  top: 0 !important;
-  left: 0 !important; right: 0 !important;
-  height: clamp(160px, 22vw, 300px) !important;
-  background-image:
-    linear-gradient(180deg, rgba(96,150,255,0.10) 0%, rgba(96,150,255,0.05) 38%, rgba(96,150,255,0.02) 68%, rgba(96,150,255,0) 100%) !important;
-  filter: blur(10px) !important;
+.r4-page .v5-hero-stats::before,
+.r4-page .v5-hero-stats::after {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  filter: none !important;
   box-shadow: none !important;
-  animation: none !important;
-  z-index: 0 !important;
 }
-.r4-page .v5-hero-stats::after { display: none !important; }
 
 /* 4) Adoucissement global : les fondus de section ne créent plus d'arête */
 .section-bg::before, .section-bg::after,
@@ -8137,47 +8164,10 @@ html.theme-light { --ligneo-page-bg: 245, 247, 252; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  /* Les dégradés blancs restent collés aux limites des sections :
-     le fondu démarre à la jonction avec la bande chiffres (pas plus
-     haut) et le noir remonte à la jonction avec "Ils nous font
-     confiance" (pas plus haut non plus). */
-  padding: 132px 24px 140px;
-  margin-top: -1px;
+  padding: 40px 24px 140px;
+  margin-top: 0;
   margin-bottom: -1px;
   background: transparent;
-  isolation: isolate;
-}
-html.theme-light .r4-page .ligneo-map::before {
-  content: "";
-  position: absolute;
-  inset: -1px 0;
-  z-index: -1;
-background:
-    radial-gradient(120% 60% at 50% 50%, rgba(47,95,255,0.18), transparent 72%),
-    linear-gradient(180deg,
-      #f5f7fc 0px,
-      #eef1f9 14px,
-      #dce1f0 30px,
-      #bdc6dd 48px,
-      #97a3c5 66px,
-      #717da6 84px,
-      #4d5988 100px,
-      #313c6a 114px,
-      #1c2752 125px,
-      #101a3d 134px,
-      #0b1026 141px,
-      #0b1026 calc(100% - 124px),
-      #101a3d calc(100% - 118px),
-      #1c2752 calc(100% - 110px),
-      #313c6a calc(100% - 100px),
-      #4d5988 calc(100% - 88px),
-      #717da6 calc(100% - 74px),
-      #97a3c5 calc(100% - 58px),
-      #bdc6dd calc(100% - 42px),
-      #e4e9f4 calc(100% - 24px),
-      #fbfcfe calc(100% - 8px),
-      #ffffff 100%);
-  pointer-events: none;
 }
 /* la bande "Ils nous font confiance" repart en blanc : fondu continu, sans filet */
 html.theme-light .r4-page .v5-trust {

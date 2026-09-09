@@ -88,6 +88,9 @@ export default function HomeDesktopV5() {
         ))}
       </section>
 
+      {/* ============ TRANSITION VERS CARTE ============ */}
+      <div className="v5-section-transition" aria-hidden="true" />
+
       {/* ============ MAP FRANCE + EUROPE ============ */}
       <MapLigneo size="big" />
 
