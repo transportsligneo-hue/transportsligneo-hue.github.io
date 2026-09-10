@@ -560,14 +560,24 @@ export function MapboxLiveMap({
         ))}
       </div>
 
-      {/* Badge Live */}
-      <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        Live{title ? ` · ${title}` : ""}
-      </div>
+      {/* Badge Live / Signal perdu */}
+      {metrics?.stale ? (
+        <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
+          <AlertTriangle size={12} />
+          {isAdmin && metrics.signalAgeMin != null
+            ? `Signal perdu depuis ${formatMinutesShort(metrics.signalAgeMin)}`
+            : "Signal GPS momentanément perdu"}
+          {title ? ` · ${title}` : ""}
+        </div>
+      ) : (
+        <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          Live{title ? ` · ${title}` : ""}
+        </div>
+      )}
 
       {/* Carte d'informations flottante */}
       {!hideOverlay && metrics && (
