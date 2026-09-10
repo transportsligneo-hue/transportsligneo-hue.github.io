@@ -49,6 +49,7 @@ import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
+import { pvDef } from "@/components/mission/pv-plateformes";
 import { useMissionPv, pvOf, MissionPvBadges } from "@/components/admin/MissionPvBadges";
 import { MissionTraceability } from "@/components/mission/MissionTraceability";
 import { AdminLiveControl } from "@/components/admin/AdminLiveControl";
@@ -1687,21 +1688,35 @@ function AdminMissionDetail() {
               </div>
             </div>
 
-            <label className="mb-4 flex items-start gap-3 rounded-xl border border-pro-border bg-pro-surface/60 px-3 py-2.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={Boolean(trajet.process_client_externe_requis)}
-                disabled={savingProcessExterne}
-                onChange={(e) => void toggleProcessExterne(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-pro-accent"
-              />
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold text-pro-text">Process client externe requis</span>
-                <span className="block text-[11px] text-pro-muted">
-                  Le convoyeur devra réaliser l'état des lieux dans l'outil du client (détecté automatiquement) avant la signature client.
+            {trajet.pv_digitalise && trajet.pv_digitalise !== "aucun" ? (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-pro-border bg-pro-surface/60 px-3 py-2.5">
+                <ClipboardCheck size={16} className="mt-0.5 text-pro-accent shrink-0" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-pro-text">
+                    PV externe {pvDef(trajet.pv_digitalise)?.label ?? trajet.pv_digitalise} — demandé par le client
+                  </span>
+                  <span className="block text-[11px] text-pro-muted">
+                    Activé automatiquement depuis la demande client. La plaque est reprise de la mission, rien à cocher.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </div>
+            ) : (
+            <label className="mb-4 flex items-start gap-3 rounded-xl border border-pro-border bg-pro-surface/60 px-3 py-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(trajet.process_client_externe_requis)}
+                  disabled={savingProcessExterne}
+                  onChange={(e) => void toggleProcessExterne(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-pro-accent"
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-pro-text">Process client externe requis</span>
+                  <span className="block text-[11px] text-pro-muted">
+                    Le convoyeur devra réaliser l'état des lieux dans l'outil du client (détecté automatiquement) avant la signature client.
+                  </span>
+                </span>
+              </label>
+              )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
               <div className="sm:col-span-2">
