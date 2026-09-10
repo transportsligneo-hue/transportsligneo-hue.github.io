@@ -621,12 +621,49 @@ export function MapboxLiveMap({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                 <Navigation size={11} /> {metrics.progress}%
               </span>
-              {metrics.speedKmh > 1 && (
+              {/* Statut de roulage : visible client + admin */}
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                  metrics.moving ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {metrics.moving ? <Navigation size={11} /> : <PauseCircle size={11} />}
+                {metrics.moving ? "En route" : "À l'arrêt"}
+              </span>
+
+              {/* Vitesse + fraîcheur du signal : admin uniquement */}
+              {isAdmin && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
-                  <Gauge size={11} /> {Math.round(metrics.speedKmh)} km/h
+                  <Gauge size={11} /> {metrics.speedKmh > 1 ? `${Math.round(metrics.speedKmh)} km/h` : "non disponible"}
+                </span>
+              )}
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                  <Clock size={11} />
+                  {metrics.signalAgeMin != null
+                    ? `Dernière position il y a ${formatMinutesShort(metrics.signalAgeMin)}`
+                    : "Position non disponible"}
+                </span>
+              )}
+
+              {/* Temps d'arrêt cumulé */}
+              {metrics.stoppedMin > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                  <Coffee size={11} /> {formatMinutesShort(metrics.stoppedMin)} d'arrêt
                 </span>
               )}
             </div>
+
+            {/* Prochaine étape clé */}
+            {milestone && (
+              <div className="mt-2 flex items-center gap-1.5 rounded-xl bg-[#f4f7ff] px-2.5 py-1.5 text-[11px] font-medium text-[#1c3fc4]">
+                {milestone.kind === "frontiere" ? <Flag size={11} /> : <Coffee size={11} />}
+                <span className="truncate">
+                  Prochaine étape : {milestone.label}
+                  {milestone.inMinutes ? ` · dans ~${formatMinutesShort(milestone.inMinutes)}` : ""}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}
