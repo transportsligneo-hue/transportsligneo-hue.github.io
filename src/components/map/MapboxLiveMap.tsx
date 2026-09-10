@@ -244,17 +244,74 @@ export function MapboxLiveMap({
     const refSpeed = speedKmh > 5 && speedKmh < 160 ? speedKmh : 70;
     const etaMin = Math.max(1, Math.round((remainingKm / refSpeed) * 60));
 
+    const signalAgeMin = signalAgeMinutes(last, nowTs);
+    const stale = signalAgeMin != null && signalAgeMin > SIGNAL_STALE_MIN;
+    const moving = !stale && speedKmh > 5;
+
     return {
       done: route.slice(0, bestIdx + 1),
       rest: route.slice(bestIdx),
+      bestIdx,
       remainingKm,
       totalKm: total,
       progress,
       speedKmh,
       etaMin,
       etaAt: new Date(Date.now() + etaMin * 60_000),
+      signalAgeMin,
+      stale,
+      moving,
+      stoppedMin: stoppedMinutes(points),
+      drivingMin: drivingSinceLastStopMinutes(points),
     };
-  }, [route, points, last]);
+  }, [route, points, last, nowTs]);
+
+  // ——— Prochaine étape clé (frontière / pause) — recalcul par paliers de 5 %
+  const milestoneKey = metrics ? `${Math.floor(metrics.progress / 5)}-${route.length}` : "";
+  useEffect(() => {
+    if (!metrics || !route.length) {
+      setMilestone(null);
+      return;
+    }
+    let dead = false;
+    void computeNextMilestone({
+      route,
+      index: metrics.bestIdx,
+      remainingKm: metrics.remainingKm,
+      speedKmh: metrics.speedKmh,
+      token: MAPBOX_TOKEN || null,
+      drivingSinceLastStopMin: metrics.drivingMin,
+    }).then((m) => {
+      if (!dead) setMilestone(m);
+    });
+    return () => {
+      dead = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [milestoneKey]);
+
+  // ——— Remontée des métriques au parent (client / admin)
+  useEffect(() => {
+    if (!onMetrics) return;
+    if (!metrics) {
+      onMetrics(null);
+      return;
+    }
+    onMetrics({
+      remainingKm: metrics.remainingKm,
+      totalKm: metrics.totalKm,
+      progress: metrics.progress,
+      speedKmh: metrics.speedKmh,
+      etaMin: metrics.etaMin,
+      etaAt: metrics.etaAt,
+      signalAgeMin: metrics.signalAgeMin,
+      stale: metrics.stale,
+      moving: metrics.moving,
+      stoppedMin: metrics.stoppedMin,
+      nextMilestone: milestone,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metrics, milestone]);
 
   // ——— Montage de la carte (une seule fois)
   useEffect(() => {
