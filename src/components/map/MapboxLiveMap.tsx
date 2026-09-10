@@ -3,12 +3,21 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
-import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
+import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
 import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
 import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
 import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
+import {
+  SIGNAL_STALE_MIN,
+  signalAgeMinutes,
+  stoppedMinutes,
+  drivingSinceLastStopMinutes,
+  formatMinutesShort,
+  formatDelta,
+} from "@/lib/mission-live-metrics";
+import { computeNextMilestone, type NextMilestone } from "@/lib/mission-next-step";
 export { MAPBOX_TOKEN };
 
 const STYLE_URL = "mapbox://styles/mapbox/light-v11";
