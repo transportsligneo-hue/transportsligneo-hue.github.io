@@ -46,9 +46,12 @@ const emptyRows = (): Record<Plateforme, PvRow> =>
 export function MissionPVDigitauxBlock({
   attributionId,
   mode = "admin",
+  plaque,
 }: {
   attributionId: string;
   mode?: "admin" | "driver";
+  /** Plaque de la mission — reprise automatiquement dans chaque PV. */
+  plaque?: string | null;
 }) {
   const [rows, setRows] = useState<Record<Plateforme, PvRow>>(emptyRows);
   const [loading, setLoading] = useState(true);
@@ -66,13 +69,21 @@ export function MissionPVDigitauxBlock({
       ((data as PvRow[]) || []).forEach((r) => {
         if (r.plateforme in next) next[r.plateforme] = r;
       });
+      const auto = (plaque || "").trim().toUpperCase();
+      if (auto) {
+        PV_PLATEFORMES.forEach((p) => {
+          if (!next[p.key].plaque) next[p.key] = { ...next[p.key], plaque: auto };
+        });
+      }
       setRows(next);
       setLoading(false);
     })();
     return () => {
       alive = false;
     };
-  }, [attributionId]);
+  }, [attributionId, plaque]);
+
+  const def = (p: Plateforme) => PV_PLATEFORMES.find((x) => x.key === p);
 
   const save = async (p: Plateforme) => {
     setSavingKey(p);
@@ -82,8 +93,8 @@ export function MissionPVDigitauxBlock({
       plateforme: p,
       actif: row.actif,
       url: row.url || null,
-      code: row.code || null,
-      plaque: row.plaque || null,
+      code: def(p)?.needsCode ? row.code || null : null,
+      plaque: (row.plaque || "").trim().toUpperCase() || null,
       instruction: row.instruction || null,
     };
     const { error } = await supabase
@@ -231,22 +242,25 @@ export function MissionPVDigitauxBlock({
                     className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                   />
                 </label>
+                {def.needsCode && (
+                  <label className="block text-xs font-medium text-slate-600">
+                    Code (à saisir manuellement)
+                    <input
+                      type="text"
+                      value={r.code || ""}
+                      onChange={(e) => update(key, { code: e.target.value })}
+                      placeholder="Code fourni par le client"
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono text-slate-900"
+                    />
+                  </label>
+                )}
                 <label className="block text-xs font-medium text-slate-600">
-                  Code (si nécessaire)
-                  <input
-                    type="text"
-                    value={r.code || ""}
-                    onChange={(e) => update(key, { code: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono text-slate-900"
-                  />
-                </label>
-                <label className="block text-xs font-medium text-slate-600">
-                  Plaque (si nécessaire)
+                  Plaque · reprise automatiquement de la mission
                   <input
                     type="text"
                     value={r.plaque || ""}
-                    onChange={(e) => update(key, { plaque: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono uppercase text-slate-900"
+                    onChange={(e) => update(key, { plaque: e.target.value.toUpperCase() })}
+                    className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-mono uppercase text-slate-900"
                   />
                 </label>
                 <label className="block text-xs font-medium text-slate-600">
