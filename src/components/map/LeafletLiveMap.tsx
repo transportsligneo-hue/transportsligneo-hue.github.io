@@ -31,7 +31,7 @@ export interface LiveMissionMapProps {
   /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
   role?: "admin" | "client";
   /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
-  onMetrics?: (m: unknown) => void;
+  onMetrics?: (m: import("./types").LiveMetricsSnapshot | null) => void;
   etaDeltaMin?: number | null;
 }
 

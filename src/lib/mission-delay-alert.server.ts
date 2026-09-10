@@ -13,6 +13,16 @@ function formatMin(min: number): string {
   return r === 0 ? `${h} h` : `${h} h ${String(r).padStart(2, "0")}`;
 }
 
+interface TrajetInfo {
+  numero_mission: string | null;
+  depart: string | null;
+  arrivee: string | null;
+  client_nom: string | null;
+  client_email: string | null;
+  client_telephone: string | null;
+  immatriculation: string | null;
+}
+
 export async function sendMissionDelayAlert(params: {
   attributionId: string;
   trajetId: string | null;
@@ -21,15 +31,7 @@ export async function sendMissionDelayAlert(params: {
 }): Promise<void> {
   const { attributionId, trajetId, delayMinutes, etaAt } = params;
 
-  let trajet: {
-    numero_mission: string | null;
-    depart: string | null;
-    arrivee: string | null;
-    client_nom: string | null;
-    client_email: string | null;
-    client_telephone: string | null;
-    immatriculation: string | null;
-  } | null = null;
+  let trajet: TrajetInfo | null = null;
 
   if (trajetId) {
     const { data } = await supabaseAdmin
@@ -37,7 +39,7 @@ export async function sendMissionDelayAlert(params: {
       .select("numero_mission, depart, arrivee, client_nom, client_email, client_telephone, immatriculation")
       .eq("id", trajetId)
       .maybeSingle();
-    trajet = (data as typeof trajet) ?? null;
+    trajet = (data as unknown as TrajetInfo | null) ?? null;
   }
 
   const numero = trajet?.numero_mission ?? "Mission";
