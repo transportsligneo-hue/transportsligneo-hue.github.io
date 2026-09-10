@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
-import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck } from "lucide-react";
+import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck, PauseCircle, Coffee, Flag, AlertTriangle } from "lucide-react";
 import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
+import { useMissionLiveMetrics } from "@/hooks/useMissionLiveMetrics";
+import { formatMinutesShort, formatDelta } from "@/lib/mission-live-metrics";
 
 interface MissionLiveTrackerProps {
   attributionId: string;
