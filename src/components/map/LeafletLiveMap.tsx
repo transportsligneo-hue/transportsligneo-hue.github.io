@@ -473,7 +473,7 @@ export function LeafletLiveMap({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                 <Navigation size={11} /> {metrics.progress}%
               </span>
-              {metrics.speedKmh > 1 && (
+              {role === "admin" && metrics.speedKmh > 1 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
                   <Gauge size={11} /> {Math.round(metrics.speedKmh)} km/h
                 </span>
