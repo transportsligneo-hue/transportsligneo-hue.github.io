@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
-import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck } from "lucide-react";
+import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck, PauseCircle, Coffee, Flag, AlertTriangle } from "lucide-react";
 import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
+import { useMissionLiveMetrics } from "@/hooks/useMissionLiveMetrics";
+import { formatMinutesShort, formatDelta } from "@/lib/mission-live-metrics";
 
 interface MissionLiveTrackerProps {
   attributionId: string;
@@ -64,6 +66,8 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
   const [destination, setDestination] = useState<GeoPoint | null>(null);
   const [driver, setDriver] = useState<DriverInfo | null>(null);
   const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
+  // Métriques live (rôle client : pas de vitesse ni d'horodatage précis)
+  const { metrics: live, onMetrics, delayMinutes } = useMissionLiveMetrics(attributionId);
 
   // Load trajet endpoints + driver + vehicle
   useEffect(() => {
@@ -157,6 +161,9 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
         {showMap && (
           <LiveMissionMap
             hideOverlay
+            role="client"
+            onMetrics={onMetrics}
+            etaDeltaMin={delayMinutes}
             points={displayedPoints}
             origin={origin}
             destination={destination}
@@ -184,13 +191,64 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
               <div className="flex items-end gap-3 border-y border-slate-200/70 py-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500">Arrivée</p>
-                  <p className="font-heading text-3xl font-bold text-slate-900 leading-none mt-1">{etaTime}</p>
+                  <p className="font-heading text-3xl font-bold text-slate-900 leading-none mt-1">
+                    {etaTime}
+                    {formatDelta(delayMinutes) && (
+                      <span className={`ml-1.5 text-base font-bold ${(delayMinutes ?? 0) > 15 ? "text-amber-600" : "text-slate-500"}`}>
+                        ({formatDelta(delayMinutes)})
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="ml-auto text-right">
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 flex items-center gap-1 justify-end"><Clock size={10} /> ETA</p>
                   <p className="font-heading text-lg font-semibold text-slate-800 leading-none mt-1">~{eta.etaMinutes} min</p>
                   <p className="text-[11px] text-slate-500 mt-0.5">{distLabel} restants</p>
                 </div>
+              </div>
+            )}
+
+            {/* Progression + statut de roulage (données non sensibles) */}
+            {live && !isFinished && (
+              <div className="space-y-2">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#2f5fff] to-[#1c3fc4] transition-all duration-700"
+                    style={{ width: `${live.progress}%` }}
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                    <Navigation size={11} /> {live.progress}%
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                      live.moving ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {live.moving ? <Navigation size={11} /> : <PauseCircle size={11} />}
+                    {live.moving ? "En route" : "À l'arrêt"}
+                  </span>
+                  {live.stoppedMin > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                      <Coffee size={11} /> {formatMinutesShort(live.stoppedMin)} d'arrêt
+                    </span>
+                  )}
+                </div>
+                {live.stale && (
+                  <div className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-800">
+                    <AlertTriangle size={12} /> Signal GPS momentanément perdu
+                  </div>
+                )}
+                {live.nextMilestone && (
+                  <div className="flex items-center gap-1.5 rounded-xl bg-[#f4f7ff] px-2.5 py-1.5 text-[11px] font-medium text-[#1c3fc4]">
+                    {live.nextMilestone.kind === "frontiere" ? <Flag size={11} /> : <Coffee size={11} />}
+                    <span className="truncate">
+                      Prochaine étape : {live.nextMilestone.label}
+                      {live.nextMilestone.inMinutes ? ` · dans ~${formatMinutesShort(live.nextMilestone.inMinutes)}` : ""}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 

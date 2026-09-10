@@ -22,4 +22,35 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string }>;
+  /**
+   * Visibilité des données sensibles.
+   * `admin` : vitesse km/h + horodatage précis du dernier signal.
+   * `client` (défaut) : uniquement statut en route / à l'arrêt.
+   */
+  role?: "admin" | "client";
+  /** Remonte les métriques temps réel au parent (progression, ETA, arrêts…). */
+  onMetrics?: (m: LiveMetricsSnapshot | null) => void;
+  /** Écart en minutes avec l'ETA de référence (affiché à côté de l'ETA actuel). */
+  etaDeltaMin?: number | null;
+}
+
+/** Instantané des métriques calculées par la carte (source unique de vérité). */
+export interface LiveMetricsSnapshot {
+  remainingKm: number;
+  totalKm: number;
+  /** Progression du trajet en % (0-100). */
+  progress: number;
+  speedKmh: number;
+  etaMin: number;
+  etaAt: Date;
+  /** Âge du dernier signal GPS en minutes (null si aucune position). */
+  signalAgeMin: number | null;
+  /** Signal perdu (aucune position depuis plus de 15 min). */
+  stale: boolean;
+  /** Véhicule en mouvement. */
+  moving: boolean;
+  /** Temps d'arrêt cumulé depuis le début de la mission (minutes). */
+  stoppedMin: number;
+  /** Prochaine étape clé (frontière ou pause). */
+  nextMilestone: { kind: "frontiere" | "pause"; label: string; inMinutes: number | null } | null;
 }

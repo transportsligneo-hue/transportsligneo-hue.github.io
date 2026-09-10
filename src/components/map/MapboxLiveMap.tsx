@@ -3,12 +3,21 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
-import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
+import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
 import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
 import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
 import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
+import {
+  SIGNAL_STALE_MIN,
+  signalAgeMinutes,
+  stoppedMinutes,
+  drivingSinceLastStopMinutes,
+  formatMinutesShort,
+  formatDelta,
+} from "@/lib/mission-live-metrics";
+import { computeNextMilestone, type NextMilestone } from "@/lib/mission-next-step";
 export { MAPBOX_TOKEN };
 
 const STYLE_URL = "mapbox://styles/mapbox/light-v11";
@@ -145,7 +154,11 @@ export function MapboxLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  role = "client",
+  onMetrics,
+  etaDeltaMin = null,
 }: LiveMissionMapProps) {
+  const isAdmin = role === "admin";
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const readyRef = useRef(false);
@@ -162,6 +175,13 @@ export function MapboxLiveMap({
 
   const [places, setPlaces] = useState<{ a: LL | null; b: LL | null }>({ a: null, b: null });
   const [route, setRoute] = useState<Array<[number, number]>>([]);
+  const [milestone, setMilestone] = useState<NextMilestone | null>(null);
+  // Tick pour rafraîchir la fraîcheur du signal sans recharger la page
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const last = points.length ? points[points.length - 1] : null;
 
@@ -244,17 +264,74 @@ export function MapboxLiveMap({
     const refSpeed = speedKmh > 5 && speedKmh < 160 ? speedKmh : 70;
     const etaMin = Math.max(1, Math.round((remainingKm / refSpeed) * 60));
 
+    const signalAgeMin = signalAgeMinutes(last, nowTs);
+    const stale = signalAgeMin != null && signalAgeMin > SIGNAL_STALE_MIN;
+    const moving = !stale && speedKmh > 5;
+
     return {
       done: route.slice(0, bestIdx + 1),
       rest: route.slice(bestIdx),
+      bestIdx,
       remainingKm,
       totalKm: total,
       progress,
       speedKmh,
       etaMin,
       etaAt: new Date(Date.now() + etaMin * 60_000),
+      signalAgeMin,
+      stale,
+      moving,
+      stoppedMin: stoppedMinutes(points),
+      drivingMin: drivingSinceLastStopMinutes(points),
     };
-  }, [route, points, last]);
+  }, [route, points, last, nowTs]);
+
+  // ——— Prochaine étape clé (frontière / pause) — recalcul par paliers de 5 %
+  const milestoneKey = metrics ? `${Math.floor(metrics.progress / 5)}-${route.length}` : "";
+  useEffect(() => {
+    if (!metrics || !route.length) {
+      setMilestone(null);
+      return;
+    }
+    let dead = false;
+    void computeNextMilestone({
+      route,
+      index: metrics.bestIdx,
+      remainingKm: metrics.remainingKm,
+      speedKmh: metrics.speedKmh,
+      token: MAPBOX_TOKEN || null,
+      drivingSinceLastStopMin: metrics.drivingMin,
+    }).then((m) => {
+      if (!dead) setMilestone(m);
+    });
+    return () => {
+      dead = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [milestoneKey]);
+
+  // ——— Remontée des métriques au parent (client / admin)
+  useEffect(() => {
+    if (!onMetrics) return;
+    if (!metrics) {
+      onMetrics(null);
+      return;
+    }
+    onMetrics({
+      remainingKm: metrics.remainingKm,
+      totalKm: metrics.totalKm,
+      progress: metrics.progress,
+      speedKmh: metrics.speedKmh,
+      etaMin: metrics.etaMin,
+      etaAt: metrics.etaAt,
+      signalAgeMin: metrics.signalAgeMin,
+      stale: metrics.stale,
+      moving: metrics.moving,
+      stoppedMin: metrics.stoppedMin,
+      nextMilestone: milestone,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metrics, milestone]);
 
   // ——— Montage de la carte (une seule fois)
   useEffect(() => {
@@ -483,14 +560,24 @@ export function MapboxLiveMap({
         ))}
       </div>
 
-      {/* Badge Live */}
-      <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        Live{title ? ` · ${title}` : ""}
-      </div>
+      {/* Badge Live / Signal perdu */}
+      {metrics?.stale ? (
+        <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
+          <AlertTriangle size={12} />
+          {isAdmin && metrics.signalAgeMin != null
+            ? `Signal perdu depuis ${formatMinutesShort(metrics.signalAgeMin)}`
+            : "Signal GPS momentanément perdu"}
+          {title ? ` · ${title}` : ""}
+        </div>
+      ) : (
+        <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          Live{title ? ` · ${title}` : ""}
+        </div>
+      )}
 
       {/* Carte d'informations flottante */}
       {!hideOverlay && metrics && (
@@ -501,6 +588,15 @@ export function MapboxLiveMap({
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Arrivée estimée</p>
                 <p className="text-2xl font-extrabold leading-tight text-slate-900 tabular-nums">
                   {formatEta(metrics.etaAt)}
+                  {formatDelta(etaDeltaMin) && (
+                    <span
+                      className={`ml-1.5 text-sm font-bold ${
+                        (etaDeltaMin ?? 0) > 15 ? "text-amber-600" : "text-slate-500"
+                      }`}
+                    >
+                      ({formatDelta(etaDeltaMin)})
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="text-right">
@@ -525,12 +621,49 @@ export function MapboxLiveMap({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                 <Navigation size={11} /> {metrics.progress}%
               </span>
-              {metrics.speedKmh > 1 && (
+              {/* Statut de roulage : visible client + admin */}
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                  metrics.moving ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {metrics.moving ? <Navigation size={11} /> : <PauseCircle size={11} />}
+                {metrics.moving ? "En route" : "À l'arrêt"}
+              </span>
+
+              {/* Vitesse + fraîcheur du signal : admin uniquement */}
+              {isAdmin && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
-                  <Gauge size={11} /> {Math.round(metrics.speedKmh)} km/h
+                  <Gauge size={11} /> {metrics.speedKmh > 1 ? `${Math.round(metrics.speedKmh)} km/h` : "non disponible"}
+                </span>
+              )}
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                  <Clock size={11} />
+                  {metrics.signalAgeMin != null
+                    ? `Dernière position il y a ${formatMinutesShort(metrics.signalAgeMin)}`
+                    : "Position non disponible"}
+                </span>
+              )}
+
+              {/* Temps d'arrêt cumulé */}
+              {metrics.stoppedMin > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                  <Coffee size={11} /> {formatMinutesShort(metrics.stoppedMin)} d'arrêt
                 </span>
               )}
             </div>
+
+            {/* Prochaine étape clé */}
+            {milestone && (
+              <div className="mt-2 flex items-center gap-1.5 rounded-xl bg-[#f4f7ff] px-2.5 py-1.5 text-[11px] font-medium text-[#1c3fc4]">
+                {milestone.kind === "frontiere" ? <Flag size={11} /> : <Coffee size={11} />}
+                <span className="truncate">
+                  Prochaine étape : {milestone.label}
+                  {milestone.inMinutes ? ` · dans ~${formatMinutesShort(milestone.inMinutes)}` : ""}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}

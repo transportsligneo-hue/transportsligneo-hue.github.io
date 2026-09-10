@@ -28,6 +28,11 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string }>;
+  /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
+  role?: "admin" | "client";
+  /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
+  onMetrics?: (m: import("./types").LiveMetricsSnapshot | null) => void;
+  etaDeltaMin?: number | null;
 }
 
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -126,6 +131,7 @@ export function LeafletLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  role = "client",
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -467,7 +473,7 @@ export function LeafletLiveMap({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                 <Navigation size={11} /> {metrics.progress}%
               </span>
-              {metrics.speedKmh > 1 && (
+              {role === "admin" && metrics.speedKmh > 1 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-blue-700">
                   <Gauge size={11} /> {Math.round(metrics.speedKmh)} km/h
                 </span>

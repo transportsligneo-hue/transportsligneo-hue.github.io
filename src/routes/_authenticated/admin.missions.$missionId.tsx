@@ -44,7 +44,7 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { RoleBadge } from "@/components/brand/LigneoBrand";
-import { LiveMissionMap } from "@/components/map/LiveMissionMap";
+import { AdminLiveMissionMap } from "@/components/mission/AdminLiveMissionMap";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
@@ -1232,7 +1232,8 @@ function AdminMissionDetail() {
               </div>
             </div>
             <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[430px] sm:min-h-[430px]">
-              <LiveMissionMap
+              <AdminLiveMissionMap
+                attributionId={attribution.id}
                 points={gpsPoints}
                 origin={trajet.depart}
                 destination={trajet.arrivee}
