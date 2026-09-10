@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
+import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
 
 export interface LiveGpsPoint {
   latitude: number;
@@ -441,7 +442,7 @@ export function LeafletLiveMap({
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Arrivée estimée</p>
                 <p className="text-2xl font-extrabold leading-tight text-slate-900 tabular-nums">
-                  {metrics.etaAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  {formatEta(metrics.etaAt)}
                 </p>
               </div>
               <div className="text-right">
@@ -461,7 +462,7 @@ export function LeafletLiveMap({
 
             <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-                <Clock size={11} /> {metrics.etaMin} min
+                <Clock size={11} /> {formatDureeMinutes(metrics.etaMin)}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
                 <Navigation size={11} /> {metrics.progress}%
