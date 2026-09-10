@@ -131,6 +131,7 @@ export function LeafletLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  role = "client",
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
