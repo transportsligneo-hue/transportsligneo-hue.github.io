@@ -191,7 +191,14 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
               <div className="flex items-end gap-3 border-y border-slate-200/70 py-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-slate-500">Arrivée</p>
-                  <p className="font-heading text-3xl font-bold text-slate-900 leading-none mt-1">{etaTime}</p>
+                  <p className="font-heading text-3xl font-bold text-slate-900 leading-none mt-1">
+                    {etaTime}
+                    {formatDelta(delayMinutes) && (
+                      <span className={`ml-1.5 text-base font-bold ${(delayMinutes ?? 0) > 15 ? "text-amber-600" : "text-slate-500"}`}>
+                        ({formatDelta(delayMinutes)})
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="ml-auto text-right">
                   <p className="text-[10px] uppercase tracking-wider text-slate-500 flex items-center gap-1 justify-end"><Clock size={10} /> ETA</p>
