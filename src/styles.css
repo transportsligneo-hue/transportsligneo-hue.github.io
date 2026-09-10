@@ -8164,7 +8164,7 @@ html.theme-light .r4-page .v5-hero-fade {
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  padding: 40px 24px 140px;
+  padding: 40px 24px 96px;
   margin-top: 0;
   margin-bottom: -1px;
   background: transparent;
@@ -8196,16 +8196,17 @@ html.theme-light .r4-page .v5-trust-sub {
 }
 
 
+/* En thème clair la carte garde son rendu "nuit" : sans ce fond sombre,
+   les pays et labels (blancs / bleu pâle) deviennent invisibles. */
 html.theme-light .r4-page .ligneo-map .ligneo-map-card {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
-  overflow: visible;
+  background: linear-gradient(180deg, #0b1026 0%, #0d1636 100%);
+  border: 1px solid rgba(122,163,255,0.16);
+  box-shadow: 0 24px 60px rgba(8,18,48,0.18);
+  border-radius: 28px;
+  padding: 28px 24px 20px;
+  overflow: hidden;
 }
-/* la légende (point doré isolé) n'a plus de sens sur fond clair fondu */
-html.theme-light .r4-page .ligneo-map .ligneo-map-legend { display: none; }
+html.theme-light .r4-page .ligneo-map .ligneo-map-legend { display: flex; }
 
 
 /* ============================================================
