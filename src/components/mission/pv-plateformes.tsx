@@ -21,13 +21,16 @@ export interface PvPlateformeDef {
   appScheme?: string;
   storeIos?: string;
   storeAndroid?: string;
+  /** La plateforme exige un code saisi manuellement par l'admin (en plus de la plaque). */
+  needsCode?: boolean;
 }
 
 export const PV_PLATEFORMES: PvPlateformeDef[] = [
   {
     key: "model_arval",
     label: "moDel",
-    hint: "PV digitalisé moDel (Arval) — s'ouvre dans l'application mobile.",
+    hint: "PV digitalisé moDel (Arval) — plaque automatique + code à saisir.",
+    needsCode: true,
     logo: modelLogo.url,
     url: null,
     appScheme: "model://",
@@ -37,7 +40,7 @@ export const PV_PLATEFORMES: PvPlateformeDef[] = [
   {
     key: "welcomeauto",
     label: "Welcome Auto",
-    hint: "PV digitalisé Welcome Auto — s'ouvre sur le site internet.",
+    hint: "PV digitalisé Welcome Auto — plaque du véhicule uniquement.",
     logo: welcomeAutoLogo.url,
     url: "https://www.welcomeauto.fr",
   },

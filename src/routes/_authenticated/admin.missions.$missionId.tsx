@@ -110,6 +110,7 @@ interface TrajetFull {
   numero_mission?: string | null;
   leg_index?: number | null;
   process_client_externe_requis?: boolean | null;
+  pv_digitalise?: string | null;
 
 
   depart: string;
@@ -1997,7 +1998,11 @@ function AdminMissionDetail() {
 
           {/* PV de livraison digitalisés (plateformes partenaires) */}
           <Card>
-            <MissionPVDigitauxBlock attributionId={attribution.id} mode="admin" />
+            <MissionPVDigitauxBlock
+              attributionId={attribution.id}
+              mode="admin"
+              plaque={trajet.immatriculation ?? trajet.vehicule_immatriculation ?? null}
+            />
           </Card>
 
           {/* Traçabilité double signature (départ + arrivée, convoyeur + client) */}
