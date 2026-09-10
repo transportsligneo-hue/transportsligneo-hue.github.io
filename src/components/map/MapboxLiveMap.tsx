@@ -588,6 +588,15 @@ export function MapboxLiveMap({
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Arrivée estimée</p>
                 <p className="text-2xl font-extrabold leading-tight text-slate-900 tabular-nums">
                   {formatEta(metrics.etaAt)}
+                  {formatDelta(etaDeltaMin) && (
+                    <span
+                      className={`ml-1.5 text-sm font-bold ${
+                        (etaDeltaMin ?? 0) > 15 ? "text-amber-600" : "text-slate-500"
+                      }`}
+                    >
+                      ({formatDelta(etaDeltaMin)})
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="text-right">
