@@ -43,11 +43,14 @@ type LL = { lat: number; lng: number; label?: string };
 async function resolvePlace(v: MapPlace): Promise<LL | null> {
   if (!v) return null;
   if (typeof v === "string") {
-    // 1) Géocodage Mapbox (précis, même clé publique)
+    // 1) Géocodage Mapbox (précis, même clé publique).
+    //    Aucune restriction "country=fr" : les missions sont européennes
+    //    (Espagne, Italie, Allemagne…) et une adresse étrangère était sinon
+    //    ramenée de force sur un point français → distances fausses.
     if (MAPBOX_TOKEN) {
       try {
         const r = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(v)}.json?limit=1&country=fr&language=fr&access_token=${MAPBOX_TOKEN}`,
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(v)}.json?limit=1&language=fr&access_token=${MAPBOX_TOKEN}`,
         );
         if (r.ok) {
           const d = await r.json();
