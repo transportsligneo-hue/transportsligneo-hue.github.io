@@ -66,6 +66,8 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
   const [destination, setDestination] = useState<GeoPoint | null>(null);
   const [driver, setDriver] = useState<DriverInfo | null>(null);
   const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
+  // Métriques live (rôle client : pas de vitesse ni d'horodatage précis)
+  const { metrics: live, onMetrics, delayMinutes } = useMissionLiveMetrics(attributionId);
 
   // Load trajet endpoints + driver + vehicle
   useEffect(() => {
