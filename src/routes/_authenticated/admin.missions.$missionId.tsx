@@ -44,7 +44,7 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { RoleBadge } from "@/components/brand/LigneoBrand";
-import { LiveMissionMap } from "@/components/map/LiveMissionMap";
+import { AdminLiveMissionMap } from "@/components/mission/AdminLiveMissionMap";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { MissionReport } from "@/components/MissionReport";
