@@ -161,6 +161,9 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
         {showMap && (
           <LiveMissionMap
             hideOverlay
+            role="client"
+            onMetrics={onMetrics}
+            etaDeltaMin={delayMinutes}
             points={displayedPoints}
             origin={origin}
             destination={destination}
