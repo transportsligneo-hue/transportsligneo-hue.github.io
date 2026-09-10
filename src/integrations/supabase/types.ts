@@ -4446,6 +4446,44 @@ export type Database = {
           },
         ]
       }
+      mission_eta_tracking: {
+        Row: {
+          attribution_id: string
+          created_at: string
+          initial_eta_at: string
+          initial_remaining_km: number | null
+          last_alert_at: string | null
+          last_alert_bucket: number
+          updated_at: string
+        }
+        Insert: {
+          attribution_id: string
+          created_at?: string
+          initial_eta_at: string
+          initial_remaining_km?: number | null
+          last_alert_at?: string | null
+          last_alert_bucket?: number
+          updated_at?: string
+        }
+        Update: {
+          attribution_id?: string
+          created_at?: string
+          initial_eta_at?: string
+          initial_remaining_km?: number | null
+          last_alert_at?: string | null
+          last_alert_bucket?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_eta_tracking_attribution_id_fkey"
+            columns: ["attribution_id"]
+            isOneToOne: true
+            referencedRelation: "attributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_etape_history: {
         Row: {
           attribution_id: string
