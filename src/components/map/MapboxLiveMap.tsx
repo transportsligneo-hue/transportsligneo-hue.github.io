@@ -175,6 +175,13 @@ export function MapboxLiveMap({
 
   const [places, setPlaces] = useState<{ a: LL | null; b: LL | null }>({ a: null, b: null });
   const [route, setRoute] = useState<Array<[number, number]>>([]);
+  const [milestone, setMilestone] = useState<NextMilestone | null>(null);
+  // Tick pour rafraîchir la fraîcheur du signal sans recharger la page
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const last = points.length ? points[points.length - 1] : null;
 
