@@ -208,6 +208,50 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
               </div>
             )}
 
+            {/* Progression + statut de roulage (données non sensibles) */}
+            {live && !isFinished && (
+              <div className="space-y-2">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#2f5fff] to-[#1c3fc4] transition-all duration-700"
+                    style={{ width: `${live.progress}%` }}
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                    <Navigation size={11} /> {live.progress}%
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 ${
+                      live.moving ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {live.moving ? <Navigation size={11} /> : <PauseCircle size={11} />}
+                    {live.moving ? "En route" : "À l'arrêt"}
+                  </span>
+                  {live.stoppedMin > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                      <Coffee size={11} /> {formatMinutesShort(live.stoppedMin)} d'arrêt
+                    </span>
+                  )}
+                </div>
+                {live.stale && (
+                  <div className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-800">
+                    <AlertTriangle size={12} /> Signal GPS momentanément perdu
+                  </div>
+                )}
+                {live.nextMilestone && (
+                  <div className="flex items-center gap-1.5 rounded-xl bg-[#f4f7ff] px-2.5 py-1.5 text-[11px] font-medium text-[#1c3fc4]">
+                    {live.nextMilestone.kind === "frontiere" ? <Flag size={11} /> : <Coffee size={11} />}
+                    <span className="truncate">
+                      Prochaine étape : {live.nextMilestone.label}
+                      {live.nextMilestone.inMinutes ? ` · dans ~${formatMinutesShort(live.nextMilestone.inMinutes)}` : ""}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {isFinished && (
               <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2.5 text-emerald-700">
                 <CheckCircle2 size={16} />
