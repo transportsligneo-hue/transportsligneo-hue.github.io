@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
+import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
 
 export interface LiveGpsPoint {
   latitude: number;

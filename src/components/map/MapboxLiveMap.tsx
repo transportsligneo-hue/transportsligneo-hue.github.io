@@ -8,6 +8,7 @@ import type { LiveMissionMapProps, MapPlace } from "./types";
 import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
 import { MAPBOX_TOKEN } from "@/lib/mapbox-token";
+import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
 export { MAPBOX_TOKEN };
 
 const STYLE_URL = "mapbox://styles/mapbox/light-v11";
