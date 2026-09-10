@@ -217,9 +217,12 @@ export function MapboxLiveMap({
       total += haversineKm({ lat: route[i - 1][0], lng: route[i - 1][1] }, { lat: route[i][0], lng: route[i][1] });
       cum.push(total);
     }
-    const doneKm = cum[bestIdx];
-    const remainingKm = Math.max(0, total - doneKm);
-    const progress = total > 0 ? Math.min(100, Math.round((doneKm / total) * 100)) : 0;
+    // Si aucun itinéraire routier n'a pu être calculé (fallback ligne droite),
+    // on majore d'un facteur route pour ne pas sous-estimer la distance.
+    const roadFactor = route.length <= 2 ? (total > 300 ? 1.25 : 1.3) : 1;
+    const doneKm = cum[bestIdx] * roadFactor;
+    const remainingKm = Math.max(0, total * roadFactor - doneKm);
+    const progress = total > 0 ? Math.min(100, Math.round((cum[bestIdx] / total) * 100)) : 0;
 
     let kmh = 0;
     const tail = points.slice(-8);
