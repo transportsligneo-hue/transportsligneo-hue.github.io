@@ -28,6 +28,11 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string }>;
+  /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
+  role?: "admin" | "client";
+  /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
+  onMetrics?: (m: unknown) => void;
+  etaDeltaMin?: number | null;
 }
 
 const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
