@@ -43,11 +43,14 @@ type LL = { lat: number; lng: number; label?: string };
 async function resolvePlace(v: MapPlace): Promise<LL | null> {
   if (!v) return null;
   if (typeof v === "string") {
-    // 1) Géocodage Mapbox (précis, même clé publique)
+    // 1) Géocodage Mapbox (précis, même clé publique).
+    //    Aucune restriction "country=fr" : les missions sont européennes
+    //    (Espagne, Italie, Allemagne…) et une adresse étrangère était sinon
+    //    ramenée de force sur un point français → distances fausses.
     if (MAPBOX_TOKEN) {
       try {
         const r = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(v)}.json?limit=1&country=fr&language=fr&access_token=${MAPBOX_TOKEN}`,
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(v)}.json?limit=1&language=fr&access_token=${MAPBOX_TOKEN}`,
         );
         if (r.ok) {
           const d = await r.json();
@@ -214,9 +217,12 @@ export function MapboxLiveMap({
       total += haversineKm({ lat: route[i - 1][0], lng: route[i - 1][1] }, { lat: route[i][0], lng: route[i][1] });
       cum.push(total);
     }
-    const doneKm = cum[bestIdx];
-    const remainingKm = Math.max(0, total - doneKm);
-    const progress = total > 0 ? Math.min(100, Math.round((doneKm / total) * 100)) : 0;
+    // Si aucun itinéraire routier n'a pu être calculé (fallback ligne droite),
+    // on majore d'un facteur route pour ne pas sous-estimer la distance.
+    const roadFactor = route.length <= 2 ? (total > 300 ? 1.25 : 1.3) : 1;
+    const doneKm = cum[bestIdx] * roadFactor;
+    const remainingKm = Math.max(0, total * roadFactor - doneKm);
+    const progress = total > 0 ? Math.min(100, Math.round((cum[bestIdx] / total) * 100)) : 0;
 
     let kmh = 0;
     const tail = points.slice(-8);
