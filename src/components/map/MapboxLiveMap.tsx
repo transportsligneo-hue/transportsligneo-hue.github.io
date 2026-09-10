@@ -154,7 +154,11 @@ export function MapboxLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  role = "client",
+  onMetrics,
+  etaDeltaMin = null,
 }: LiveMissionMapProps) {
+  const isAdmin = role === "admin";
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const readyRef = useRef(false);
