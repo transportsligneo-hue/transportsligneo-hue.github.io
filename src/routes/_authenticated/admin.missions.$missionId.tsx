@@ -1232,7 +1232,8 @@ function AdminMissionDetail() {
               </div>
             </div>
             <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[430px] sm:min-h-[430px]">
-              <LiveMissionMap
+              <AdminLiveMissionMap
+                attributionId={attribution.id}
                 points={gpsPoints}
                 origin={trajet.depart}
                 destination={trajet.arrivee}
