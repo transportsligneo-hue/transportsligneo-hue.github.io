@@ -327,8 +327,8 @@ export function drawDocLegalFooter(
   company?: CompanyInfo | null,
 ) {
   const top = pageH - 20;
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.4);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
   doc.line(14, top, pageW - 14, top);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
@@ -343,7 +343,7 @@ export function drawDocLegalFooter(
   if (l2) doc.text(l2, pageW / 2, top + 13.5, { align: "center" });
 }
 
-/** Titre de section navy (auto-pagination : jamais orphelin). */
+/** Titre de section clair : panneau arrondi + repère bleu (jamais orphelin). */
 export function drawSectionTitle(
   doc: jsPDF,
   pageW: number,
@@ -355,12 +355,14 @@ export function drawSectionTitle(
   const w = opts?.w ?? pageW - 28;
   // un titre doit être suivi d'au moins une ligne de contenu
   y = docEnsureSpace(doc, y, 6.5 + 9);
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(x, y, w, 6.5, "F");
-  doc.setTextColor(...DOC_WHITE);
+  doc.setFillColor(...DOC_CREAM);
+  doc.roundedRect(x, y, w, 6.8, 1.8, 1.8, "F");
+  doc.setFillColor(...DOC_GOLD);
+  doc.roundedRect(x + 2.4, y + 1.6, 1.4, 3.6, 0.7, 0.7, "F");
+  doc.setTextColor(...DOC_NAVY);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text(label.toUpperCase(), x + 4, y + 4.5);
+  doc.setFontSize(7.6);
+  doc.text(label.toUpperCase(), x + 6, y + 4.6);
   return y + 9.5;
 }
 
@@ -380,14 +382,11 @@ export function drawKeyValueRow(
   const labelW = opts?.labelW ?? Math.min(55, w * 0.42);
   y = docEnsureSpace(doc, y, h + gap);
   doc.setFillColor(...DOC_CREAM);
-  doc.rect(x, y, w, h, "F");
-  doc.setDrawColor(...DOC_LINE);
-  doc.setLineWidth(0.2);
-  doc.rect(x, y, w, h, "S");
+  doc.roundedRect(x, y, w, h, 1.6, 1.6, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.4);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text(label, x + 2.5, y + h / 2 + 1);
+  doc.setFontSize(6.9);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(label.toUpperCase(), x + 2.8, y + h / 2 + 1);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.4);
   doc.setTextColor(...DOC_TEXT);
