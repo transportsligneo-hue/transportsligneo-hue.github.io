@@ -457,8 +457,24 @@ function ProDocuments() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-3 text-pro-text-soft">
-                          {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                        <td className="px-5 py-3 text-pro-text-soft whitespace-nowrap">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-pro-text font-medium">
+                              {d.date_souhaitee
+                                ? new Date(`${dayKey(d.date_souhaitee)}T00:00:00`).toLocaleDateString("fr-FR")
+                                : new Date(d.created_at).toLocaleDateString("fr-FR")}
+                              <span className="ml-1.5 tabular-nums">{heure ?? "--:--"}</span>
+                            </span>
+                            {isDuo && d.date_retour && (
+                              <span className="text-[11px]">
+                                Retour {new Date(`${dayKey(d.date_retour)}T00:00:00`).toLocaleDateString("fr-FR")}
+                                <span className="ml-1.5 tabular-nums">{heureRetour ?? "--:--"}</span>
+                              </span>
+                            )}
+                            {!d.date_souhaitee && (
+                              <span className="text-[10px] text-pro-muted">Créé le {new Date(d.created_at).toLocaleDateString("fr-FR")}</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}`}>
