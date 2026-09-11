@@ -27,6 +27,7 @@ interface MissionRow {
   created_at: string;
   leg_type?: string | null;
   leg_index?: number | null;
+  immatriculation?: string | null;
 }
 interface VehicleRow {
   id: string; marque: string | null; modele: string | null;
