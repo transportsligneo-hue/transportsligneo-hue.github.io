@@ -553,13 +553,10 @@ function ConvoyeurMissions() {
         date: m.trajet?.date_trajet ?? null,
         heure: m.trajet?.heure_trajet ?? null,
         statut: m.statut,
-        plaque: m.trajet?.immatriculation ?? m.trajet?.vehicule_immatriculation ?? null,
+        plaque: m.trajet?.immatriculation ?? null,
         typeLabel:
-          m.trajet?.leg_type === "aller" || m.trajet?.leg_type === "retour"
-            ? "Livraison + Restitution"
-            : "Livraison simple",
-        groupKey: m.trajet?.mission_group_id ?? `solo-${m.id}`,
-        legLabel: m.trajet?.leg_type === "retour" ? "R" : m.trajet?.leg_type === "aller" ? "L" : null,
+          m.leg_type === "aller" || m.leg_type === "retour" ? "Livraison + Restitution" : "Livraison simple",
+        legLabel: m.leg_type === "retour" ? "R" : m.leg_type === "aller" ? "L" : null,
         meta: [m.trajet?.marque, m.trajet?.modele].filter(Boolean).join(" ") || m.trajet?.immatriculation || undefined,
         wrap: (children) => (
           <button type="button" onClick={() => setOpenMissionId(m.id)} className="block w-full text-left h-full">
