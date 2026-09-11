@@ -550,10 +550,13 @@ function ConvoyeurMissions() {
         numero: m.numero_mission ? displayNumero(m.numero_mission) : `MIS-${m.id.slice(0, 8).toUpperCase()}`,
         depart: m.trajet?.depart ?? "—",
         arrivee: m.trajet?.arrivee ?? "—",
-        date: m.trajet?.date_trajet
-          ? `${m.trajet.date_trajet}T${(m.trajet.heure_trajet ?? "00:00").slice(0, 5)}`
-          : null,
+        date: m.trajet?.date_trajet ?? null,
+        heure: m.trajet?.heure_trajet ?? null,
         statut: m.statut,
+        plaque: m.trajet?.immatriculation ?? null,
+        typeLabel:
+          m.leg_type === "aller" || m.leg_type === "retour" ? "Livraison + Restitution" : "Livraison simple",
+        legLabel: m.leg_type === "retour" ? "R" : m.leg_type === "aller" ? "L" : null,
         meta: [m.trajet?.marque, m.trajet?.modele].filter(Boolean).join(" ") || m.trajet?.immatriculation || undefined,
         wrap: (children) => (
           <button type="button" onClick={() => setOpenMissionId(m.id)} className="block w-full text-left h-full">

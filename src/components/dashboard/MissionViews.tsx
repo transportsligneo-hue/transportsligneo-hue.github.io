@@ -17,6 +17,8 @@ export interface MissionViewItem {
   depart: string;
   arrivee: string;
   date?: string | null;
+  /** Heure de prise en charge ("08:30", "8h30"…). Sans elle : "--:--". */
+  heure?: string | null;
   statut: string;
   statutLabel?: string;
   meta?: string;
@@ -24,8 +26,36 @@ export interface MissionViewItem {
   plaque?: string | null;
   amount?: string;
   badge?: ReactNode;
+  /** "Livraison + Restitution", "Livraison simple", "Recharge uniquement"… */
+  typeLabel?: string;
+  /** Motif affiché en petit sous une mission annulée. */
+  cancelReason?: string | null;
+  /** Identifiant de dossier : les jambes L/R d'un même dossier sont reliées. */
+  groupKey?: string;
+  /** "L" (livraison) ou "R" (restitution) — la livraison est toujours en tête. */
+  legLabel?: "L" | "R" | null;
+  /** Total du dossier, affiché sur l'encoche qui relie les deux jambes. */
+  groupTotal?: string;
   /** Enveloppe le contenu (Link typé, bouton…) fournie par la page hôte. */
   wrap?: (children: ReactNode) => ReactNode;
+}
+
+/** Normalise une heure texte en "HH:MM" ; renvoie null si inexploitable. */
+export function normalizeHeure(h?: string | null): string | null {
+  if (!h) return null;
+  const m = /^(\d{1,2})\s*[:hH]\s*(\d{0,2})/.exec(h.trim());
+  if (!m) return null;
+  return `${m[1]!.padStart(2, "0")}:${(m[2] || "00").padStart(2, "0")}`;
+}
+
+/** Clé de jour locale ("2026-08-20") sans décalage de fuseau. */
+function dayKey(d?: string | null): string {
+  if (!d) return "sans-date";
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime())
+    ? "sans-date"
+    : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
 type Theme = "light" | "dark";
@@ -103,7 +133,15 @@ const KANBAN_COLUMNS: { key: string; label: string; match: (s: string) => boolea
   { key: "terminee", label: "Terminées", match: (s) => ["livree", "terminee", "termine", "validee", "en_attente_validation", "annulee", "refusee", "cloturee", "facturee"].includes(s) },
 ];
 
-const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "Date à définir");
+/** Date locale sûre : "2026-08-20" ne doit jamais glisser d'un jour. */
+function localDate(d?: string | null): Date | null {
+  const k = dayKey(d);
+  if (k === "sans-date") return null;
+  const [y, m, day] = k.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, day ?? 1);
+}
+
+const fmtDate = (d?: string | null) => localDate(d)?.toLocaleDateString("fr-FR") ?? "Date à définir";
 
 function Shell({ item, theme, children }: { item: MissionViewItem; theme: Theme; children: ReactNode }) {
   return <>{item.wrap ? item.wrap(children) : <div className={theme === "dark" ? "block" : "block"}>{children}</div>}</>;
@@ -143,7 +181,7 @@ export function MissionViewsBody({
   const planning = useMemo(() => {
     const groups = new Map<string, MissionViewItem[]>();
     for (const i of items) {
-      const key = i.date ? new Date(i.date).toISOString().slice(0, 10) : "sans-date";
+      const key = dayKey(i.date);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(i);
     }
@@ -231,14 +269,62 @@ export function MissionViewsBody({
   }
 
   // Planning
+  const row = (i: MissionViewItem, inDuo: boolean) => (
+    <Shell key={i.id} item={i} theme={theme}>
+      <div className={`flex items-center gap-3 p-3 transition-colors ${theme === "dark" ? "hover:bg-primary/5" : "hover:bg-pro-bg-soft/70"}`}>
+        <div className={`flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded ${chip}`}>
+          <span className="text-xs font-semibold tabular-nums">{normalizeHeure(i.heure) ?? "--:--"}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            {inDuo && i.legLabel && (
+              <span className={`inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold ${
+                i.legLabel === "L" ? "bg-[#5334d6] text-white" : "bg-[#0e9f6e] text-white"
+              }`} title={i.legLabel === "L" ? "Livraison" : "Restitution"}>
+                {i.legLabel}
+              </span>
+            )}
+            <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
+            {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
+            {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+            {!inDuo && i.typeLabel && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded ${chip}`}>{i.typeLabel}</span>
+            )}
+          </div>
+          <p className={`text-sm truncate ${strong}`}>
+            {i.depart} <span className="opacity-40">→</span> {i.arrivee}
+          </p>
+          {i.cancelReason && (
+            <p className="text-[11px] mt-1 text-red-600 dark:text-red-400">Annulée : {i.cancelReason}</p>
+          )}
+        </div>
+        {i.amount && <span className={`text-sm font-semibold ${strong}`}>{i.amount}</span>}
+        <ArrowRight size={14} className="opacity-40 shrink-0" />
+      </div>
+    </Shell>
+  );
+
   return (
     <div className="space-y-3">
       {planning.map(([dateKey, list]) => {
-        const d = dateKey === "sans-date" ? null : new Date(dateKey);
+        const d = localDate(dateKey === "sans-date" ? null : dateKey);
         const label = d
           ? d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
           : "Sans date";
         const isToday = d && d.toDateString() === new Date().toDateString();
+        // Regroupe les jambes d'un même dossier : livraison (L) puis restitution (R).
+        const blocks: { key: string; items: MissionViewItem[]; total?: string; typeLabel?: string }[] = [];
+        const byGroup = new Map<string, MissionViewItem[]>();
+        for (const i of list) {
+          const gk = i.groupKey ?? `solo-${i.id}`;
+          const arr = byGroup.get(gk);
+          if (arr) arr.push(i);
+          else byGroup.set(gk, [i]);
+        }
+        for (const [gk, arr] of byGroup) {
+          arr.sort((a, b) => (a.legLabel === "R" ? 1 : 0) - (b.legLabel === "R" ? 1 : 0));
+          blocks.push({ key: gk, items: arr, total: arr[0]?.groupTotal, typeLabel: arr[0]?.typeLabel });
+        }
         return (
           <div key={dateKey} className={`${theme === "dark" ? "card-premium" : "bg-white border border-pro-border"} rounded-xl overflow-hidden`}>
             <div
@@ -253,29 +339,24 @@ export function MissionViewsBody({
               <span className={`text-[10px] ${muted}`}>{list.length} mission{list.length > 1 ? "s" : ""}</span>
             </div>
             <div className={`divide-y ${theme === "dark" ? "divide-primary/10" : "divide-pro-border"}`}>
-              {list.map((i) => (
-                <Shell key={i.id} item={i} theme={theme}>
-                  <div className={`flex items-center gap-3 p-3 transition-colors ${theme === "dark" ? "hover:bg-primary/5" : "hover:bg-pro-bg-soft/70"}`}>
-                    <div className={`flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded ${chip}`}>
-                      <span className="text-xs font-semibold tabular-nums">
-                        {i.date ? new Date(i.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
-                        {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
-                        {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+              {blocks.map((b) =>
+                b.items.length > 1 ? (
+                  <div key={b.key} className="p-2">
+                    <div className={`rounded-lg border-l-4 border-[#5334d6] ${theme === "dark" ? "border border-primary/25 bg-primary/5" : "border border-[#5334d6]/25 bg-[#5334d6]/[0.04]"}`}>
+                      <div className={`flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold ${muted}`}>
+                        <span className="text-[#5334d6]">⌐ Dossier lié</span>
+                        <span>{b.typeLabel ?? "Livraison + Restitution"}</span>
+                        {b.total && <span className={`ml-auto text-xs font-bold ${strong}`}>{b.total} total</span>}
                       </div>
-                      <p className={`text-sm truncate ${strong}`}>
-                        {i.depart} <span className="opacity-40">→</span> {i.arrivee}
-                      </p>
+                      <div className={`divide-y ${theme === "dark" ? "divide-primary/10" : "divide-[#5334d6]/15"}`}>
+                        {b.items.map((i) => row(i, true))}
+                      </div>
                     </div>
-                    {i.amount && <span className={`text-sm font-semibold ${strong}`}>{i.amount}</span>}
-                    <ArrowRight size={14} className="opacity-40 shrink-0" />
                   </div>
-                </Shell>
-              ))}
+                ) : (
+                  row(b.items[0]!, false)
+                ),
+              )}
             </div>
           </div>
         );

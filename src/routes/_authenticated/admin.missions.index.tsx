@@ -660,10 +660,15 @@ function AdminMissionsUnified() {
         numero: m.ref,
         depart: m.depart ?? "—",
         arrivee: m.arrivee ?? "—",
-        date: m.date ? `${m.date}T${(m.heure ?? "00:00").slice(0, 5)}` : null,
+        date: m.date,
+        heure: m.heure,
         statut: m.status,
         statutLabel: UNIFIED_STATUS[m.status]?.label ?? m.status,
-        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || m.clientNom || undefined,
+        plaque: m.immatriculation ?? null,
+        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.clientNom || undefined,
+        typeLabel: m.isRoundTrip ? "Livraison + Restitution" : "Livraison simple",
+        groupKey: m.groupId ?? `solo-${m.id}`,
+        legLabel: m.legType === "retour" ? "R" : m.legType === "aller" ? "L" : null,
         amount: m.prix != null ? `${Number(m.prix).toFixed(2)} €` : undefined,
         wrap: (children) => (
           <button type="button" onClick={() => setSelected(m)} className="block w-full text-left h-full">
