@@ -429,7 +429,10 @@ function ProDocuments() {
                         <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                           <div className="flex flex-col gap-1.5">
                             <span>{d.numero}</span>
-                            {isDuo && <span className="fleet-chip-duo w-fit"><Repeat size={10} /> Aller-retour</span>}
+                            <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                              {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                              {typeInfo.label}
+                            </span>
                           </div>
                         </td>
                         <td className="px-5 py-3 text-pro-text">
