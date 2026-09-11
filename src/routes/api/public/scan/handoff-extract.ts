@@ -27,7 +27,21 @@ Analyse l'image fournie et détermine son type parmi :
 - carte_grise, cpi, bon_commande, bon_livraison, pv_livraison, pv_restitution,
   mandat, facture, devis, document_constructeur, inconnu.
 Extrais tous les champs pertinents. Si un champ est illisible, laisse-le vide.
-Ne devine JAMAIS un VIN ou une immatriculation.`;
+Ne devine JAMAIS un VIN ou une immatriculation.
+
+Cas particuliers fréquents :
+- CARTE GRISE FRANÇAISE (ancienne ou nouvelle) : utilise les repères normalisés
+  A = immatriculation, B = date de 1re mise en circulation, D.1 = marque,
+  D.2 = type/variante, D.3 = modèle commercial, E = VIN (numéro d'identification),
+  P.3 = énergie (ES=essence, GO=gazole, EL=électrique, EE/EH=hybride, GP=GPL),
+  P.6 = puissance fiscale, C.1/C.4.1 = titulaire, C.3 = adresse.
+- Les anciennes cartes grises grises/beiges, pliées, tachées ou photographiées de
+  travers restent lisibles : lis chaque zone même si le fond est sale ou coloré.
+- Si le document est incliné, lis-le quand même. Si une lettre est ambiguë
+  (0/O, 1/I, 5/S, 8/B), choisis la plus probable pour un VIN (pas de I, O, Q).
+- Immatriculation : renvoie toujours le format AA-123-AA en majuscules.
+- Couleur (champ souvent absent de la carte grise) : ne l'invente pas.
+`;
 
 const EXTRACTION_TOOL = {
   type: "function" as const,
@@ -120,7 +134,7 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             method: "POST",
             headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
+              model: "google/gemini-3.8-flash",
               messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 {
@@ -169,6 +183,16 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
             const v = parsed[k];
             if (typeof v === "string" && v.trim()) fields[k] = v.trim();
           }
+
+          // Normalisation plaque / VIN (les modèles renvoient parfois sans tirets).
+          if (fields.immatriculation) {
+            const raw = fields.immatriculation.toUpperCase().replace(/[^A-Z0-9]/g, "");
+            const m = /^([A-Z]{2})(\d{3})([A-Z]{2})$/.exec(raw);
+            fields.immatriculation = m ? `${m[1]}-${m[2]}-${m[3]}` : fields.immatriculation.toUpperCase().trim();
+          }
+          if (fields.vin) fields.vin = fields.vin.toUpperCase().replace(/[^A-Z0-9]/g, "");
+          if (fields.kilometrage) fields.kilometrage = fields.kilometrage.replace(/[^\d]/g, "");
+
           const warnings = Array.isArray(parsed.warnings)
             ? (parsed.warnings as unknown[]).filter((w): w is string => typeof w === "string")
             : [];

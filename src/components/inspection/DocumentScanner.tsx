@@ -27,6 +27,10 @@ import {
 interface Props {
   onCancel: () => void;
   onScanned: (file: File) => void | Promise<void>;
+  /** Accent visuel : doré (EDL) ou bleu électrique (scan documents véhicule). */
+  accent?: "gold" | "blue";
+  /** Titre affiché en mode live. */
+  title?: string;
 }
 
 interface Pt { x: number; y: number }
@@ -192,7 +196,15 @@ function enhanceDocument(canvas: HTMLCanvasElement) {
 
 type Mode = "live" | "review";
 
-export function DocumentScanner({ onCancel, onScanned }: Props) {
+export function DocumentScanner({
+  onCancel,
+  onScanned,
+  accent = "gold",
+  title = "Scanner un document",
+}: Props) {
+  const ACC = accent === "blue" ? "#4f8cff" : "#d4af37";
+  const ACC_FG = accent === "blue" ? "#0b1026" : "#0b1026";
+  const ACC_SOFT = accent === "blue" ? "rgba(79,140,255,0.12)" : "rgba(212,175,55,0.10)";
   // fallback natif
   const fileRef = useRef<HTMLInputElement>(null);
   // caméra live
@@ -393,9 +405,9 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
     canvas.height = src.height * s;
     const ctx = canvas.getContext("2d")!;
     ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#d4af37";
+    ctx.strokeStyle = ACC;
     ctx.lineWidth = 2;
-    ctx.fillStyle = "rgba(212,175,55,0.10)";
+    ctx.fillStyle = ACC_SOFT;
     ctx.beginPath();
     corners.forEach((c, i) => {
       const x = c.x * s, y = c.y * s;
@@ -411,10 +423,10 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
       ctx.fillStyle = "#0b1026";
       ctx.fill();
       ctx.lineWidth = 3;
-      ctx.strokeStyle = "#d4af37";
+      ctx.strokeStyle = ACC;
       ctx.stroke();
     });
-  }, [corners]);
+  }, [corners, ACC, ACC_SOFT]);
 
   useEffect(() => { if (mode === "review") draw(); }, [mode, draw]);
   useEffect(() => {
@@ -499,7 +511,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
 
   /* ─────────────────── RENDER ─────────────────── */
   return (
-    <div className="fixed inset-0 z-[100] bg-[#0b1026] flex flex-col">
+    <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: accent === "blue" ? "#0d1430" : "#0b1026" }}>
       <input
         ref={fileRef}
         type="file"
@@ -513,10 +525,10 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
         <button onClick={() => { stopStream(); onCancel(); }} className="p-2 -ml-2 text-white/80 hover:text-white">
           <X size={20} />
         </button>
-        <div className="flex items-center gap-2 text-[#d4af37]">
+        <div className="flex items-center gap-2" style={{ color: ACC }}>
           <ScanLine size={18} />
           <span className="text-sm font-semibold">
-            {mode === "live" ? "Scanner un document" : "Ajuster & valider"}
+            {mode === "live" ? title : "Ajuster & valider"}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -526,7 +538,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
               className="p-2 text-white/80 hover:text-white"
               aria-label="Flash"
             >
-              {torchOn ? <Zap size={18} className="text-[#d4af37]" /> : <ZapOff size={18} />}
+              {torchOn ? <Zap size={18} style={{ color: ACC }} /> : <ZapOff size={18} />}
             </button>
           )}
         </div>
@@ -549,7 +561,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
               <div
                 className="absolute inset-0 rounded-xl border-2 transition-colors duration-200"
                 style={{
-                  borderColor: stability > 0.6 ? "#22c55e" : "#d4af37",
+                  borderColor: stability > 0.6 ? "#22c55e" : ACC,
                   boxShadow: stability > 0.6
                     ? "0 0 0 9999px rgba(0,0,0,0.55), 0 0 24px rgba(34,197,94,0.5)"
                     : "0 0 0 9999px rgba(0,0,0,0.55)",
@@ -559,8 +571,9 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
               {["tl","tr","bl","br"].map((k) => (
                 <span
                   key={k}
-                  className="absolute w-8 h-8 border-[#d4af37]"
+                  className="absolute w-8 h-8"
                   style={{
+                    borderColor: ACC,
                     top: k[0] === "t" ? -2 : "auto",
                     bottom: k[0] === "b" ? -2 : "auto",
                     left: k[1] === "l" ? -2 : "auto",
@@ -596,7 +609,7 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
                 className="h-full transition-all duration-100"
                 style={{
                   width: `${stability * 100}%`,
-                  background: stability > 0.6 ? "#22c55e" : "#d4af37",
+                  background: stability > 0.6 ? "#22c55e" : ACC,
                 }}
               />
             </div>
@@ -607,11 +620,10 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
             <div className="flex items-center justify-between gap-3">
               <button
                 onClick={() => setAutoCapture((v) => !v)}
-                className={`px-3 h-11 rounded-full text-xs font-semibold border transition ${
-                  autoCapture
-                    ? "bg-[#d4af37] text-[#0b1026] border-[#d4af37]"
-                    : "bg-white/10 text-white border-white/20"
-                }`}
+                className="px-3 h-11 rounded-full text-xs font-semibold border transition"
+                style={autoCapture
+                  ? { background: ACC, color: ACC_FG, borderColor: ACC }
+                  : { background: "rgba(255,255,255,0.1)", color: "#fff", borderColor: "rgba(255,255,255,0.2)" }}
               >
                 Auto {autoCapture ? "ON" : "OFF"}
               </button>
@@ -643,11 +655,12 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
       {/* fallback natif (en attente du picker) */}
       {mode === "live" && useNativeFallback && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4 text-white/70 px-6 text-center">
-          <CameraIcon size={48} className="text-[#d4af37]" />
+          <CameraIcon size={48} style={{ color: ACC }} />
           <p className="text-sm">Ouverture de l'appareil photo…</p>
           <button
             onClick={() => fileRef.current?.click()}
-            className="mt-2 px-5 py-3 rounded-xl bg-[#d4af37] text-[#0b1026] font-semibold"
+            className="mt-2 px-5 py-3 rounded-xl font-semibold"
+            style={{ background: ACC, color: ACC_FG }}
           >
             Ouvrir l'appareil photo
           </button>
@@ -691,7 +704,8 @@ export function DocumentScanner({ onCancel, onScanned }: Props) {
             <button
               onClick={validate}
               disabled={processing}
-              className="h-12 rounded-xl bg-[#d4af37] text-[#0b1026] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              className="h-12 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: ACC, color: ACC_FG }}
             >
               {processing ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
               Valider

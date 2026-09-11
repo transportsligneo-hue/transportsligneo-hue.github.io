@@ -763,13 +763,14 @@ export default function QuickMissionForm({
           </h2>
           {(() => {
             const applyExtracted = (f: ExtractedFields) => {
-              if (f.immatriculation && !immat) setImmat(f.immatriculation.toUpperCase());
-              if (f.vin && !vin) setVin(f.vin.toUpperCase());
-              if (f.marque && !marque) setMarque(f.marque);
-              if (f.modele && !modele) setModele(f.modele);
-              if (f.energie && !energie) setEnergie(f.energie.toLowerCase());
-              if (f.couleur && !couleur) setCouleur(f.couleur);
-              if (f.kilometrage && !km) setKm(f.kilometrage.replace(/\D/g, ""));
+              // Le document fait foi pour le véhicule : on écrase les champs.
+              if (f.immatriculation) setImmat(f.immatriculation.toUpperCase());
+              if (f.vin) setVin(f.vin.toUpperCase());
+              if (f.marque) setMarque(f.marque);
+              if (f.modele) setModele(f.modele);
+              if (f.energie) setEnergie(f.energie.toLowerCase());
+              if (f.couleur) setCouleur(f.couleur);
+              if (f.kilometrage) setKm(f.kilometrage.replace(/\D/g, ""));
               if (f.lieu_depart && !depart) setDepart(f.lieu_depart);
               if (f.lieu_arrivee && !arrivee) setArrivee(f.lieu_arrivee);
               if (f.client_nom && !contactArriveeNom) setContactArriveeNom(f.client_nom);

@@ -53,16 +53,16 @@ function ScanCodePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1026] to-[#111a3d] text-white flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-2xl bg-white/5 border border-[#d4af37]/30 p-6">
-        <div className="flex items-center gap-2 text-[#e7c76a]">
+    <div className="min-h-screen bg-[#f4f7ff] text-[#0b1026] flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 shadow-sm p-6">
+        <div className="flex items-center gap-2 text-[#2f5fff]">
           <Smartphone size={18} />
           <span className="text-xs uppercase tracking-[0.25em]">Transports Ligneo</span>
         </div>
         <h1 className="mt-3 text-xl font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>
           Code de connexion
         </h1>
-        <p className="text-white/60 text-sm mt-1">
+        <p className="text-slate-500 text-sm mt-1">
           Saisissez le code à 6 caractères affiché sur votre ordinateur.
         </p>
 
@@ -76,13 +76,13 @@ function ScanCodePage() {
             autoCapitalize="characters"
             autoComplete="one-time-code"
             placeholder="ABC123"
-            className="w-full rounded-xl bg-black/30 border border-white/15 px-4 py-4 text-center font-mono text-2xl tracking-[0.4em] text-[#e7c76a] outline-none focus:border-[#d4af37]"
+            className="w-full rounded-xl bg-[#f4f7ff] border border-slate-200 px-4 py-4 text-center font-mono text-2xl tracking-[0.4em] text-[#2f5fff] outline-none focus:border-[#4f8cff]"
           />
-          {error && <p className="text-red-300 text-xs text-center">{error}</p>}
+          {error && <p className="text-red-600 text-xs text-center">{error}</p>}
           <button
             type="submit"
             disabled={busy || code.length !== 6}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#e7c76a] text-[#0b1026] font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {busy ? <Loader2 className="animate-spin" size={16} /> : <KeyRound size={16} />}
             Continuer

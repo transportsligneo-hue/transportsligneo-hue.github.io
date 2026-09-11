@@ -85,7 +85,7 @@ export function QrHandoffButton({
       const qr = await QRCode.toDataURL(url, {
         width: 320,
         margin: 1,
-        color: { dark: "#0b1026", light: "#fdfcf8" },
+        color: { dark: "#0b1026", light: "#ffffff" },
       });
       setSession({ ...s, url });
       setQrDataUrl(qr);
@@ -159,12 +159,8 @@ export function QrHandoffButton({
     return () => { stopped = true; clearInterval(iv); };
   }, [token, post]);
 
-  // ─── Fermeture automatique après réception ──────────────────────────────
-  useEffect(() => {
-    if (received.length === 0) return;
-    const t = setTimeout(() => { void handleCloseRef.current(); }, 1600);
-    return () => clearTimeout(t);
-  }, [received.length]);
+  // La session reste ouverte après réception : le téléphone peut envoyer
+  // un autre document, l'utilisateur ferme lui-même la fenêtre.
 
   // ─── Fermeture / cleanup ─────────────────────────────────────────────────
   const handleClose = useCallback(async () => {
@@ -176,9 +172,6 @@ export function QrHandoffButton({
     receivedRef.current = [];
     setPhase("waiting");
   }, [session, post]);
-
-  const handleCloseRef = useRef(handleClose);
-  useEffect(() => { handleCloseRef.current = handleClose; }, [handleClose]);
 
   const handleRegenerate = useCallback(async () => {
     if (session) { void post({ action: "close", token: session.token }); }
@@ -200,7 +193,7 @@ export function QrHandoffButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-[#d4af37]/60 text-[#d4af37] hover:bg-[#d4af37]/10 ${className}`}
+        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-[#4f8cff]/60 text-[#2f5fff] hover:bg-[#4f8cff]/10 ${className}`}
       >
         <QrCode size={16} />
         Scanner depuis mon téléphone
@@ -211,17 +204,17 @@ export function QrHandoffButton({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[9999] bg-[#0b1026]/90 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] bg-[#0b1026]/55 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) void handleClose(); }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-gradient-to-b from-[#111a3d] to-[#0b1026] border border-[#d4af37]/40 shadow-2xl overflow-hidden">
+          <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
               <div>
-                <h3 className="text-white font-semibold tracking-wide">Scanner depuis mon téléphone</h3>
-                <p className="text-[11px] text-white/50 mt-0.5">Pré-remplissage instantané par IA</p>
+                <h3 className="text-[#0b1026] font-semibold tracking-wide">Scanner depuis mon téléphone</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">Pré-remplissage instantané du véhicule</p>
               </div>
-              <button onClick={handleClose} aria-label="Fermer" className="p-2 rounded-lg hover:bg-white/10 text-white/70">
+              <button onClick={handleClose} aria-label="Fermer" className="p-2 rounded-lg hover:bg-slate-100 text-slate-500">
                 <X size={18} />
               </button>
             </div>
@@ -229,18 +222,18 @@ export function QrHandoffButton({
             {/* Body */}
             <div className="p-6 flex flex-col items-center gap-4">
               {creating || !qrDataUrl ? (
-                <div className="h-[320px] flex flex-col items-center justify-center gap-3 text-white/60">
+                <div className="h-[320px] flex flex-col items-center justify-center gap-3 text-slate-500">
                   <Loader2 className="animate-spin" size={28} />
                   <p className="text-sm">Génération du QR code…</p>
                 </div>
               ) : (
                 <>
-                  <div className="relative rounded-xl bg-[#fdfcf8] p-3 shadow-[0_10px_40px_rgba(212,175,55,0.25)]">
+                  <div className="relative rounded-xl bg-white border border-slate-200 p-3 shadow-[0_10px_40px_rgba(79,140,255,0.20)]">
                     <img src={qrDataUrl} alt="QR code de handoff" width={280} height={280} />
                     {expired && (
-                      <div className="absolute inset-0 bg-[#0b1026]/80 rounded-xl flex flex-col items-center justify-center text-white gap-2">
+                      <div className="absolute inset-0 bg-[#0b1026]/85 rounded-xl flex flex-col items-center justify-center text-white gap-2">
                         <p className="text-sm">Session expirée</p>
-                        <button onClick={handleRegenerate} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#d4af37] text-[#0b1026] text-xs font-semibold">
+                        <button onClick={handleRegenerate} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2f5fff] text-white text-xs font-semibold">
                           <RefreshCw size={12} /> Régénérer
                         </button>
                       </div>
@@ -254,38 +247,38 @@ export function QrHandoffButton({
                   </div>
 
                   <div className="flex flex-col items-center gap-1 text-center">
-                    <p className="text-white/70 text-xs">
-                      Scannez le QR, ou allez sur <span className="text-[#e7c76a]">transportsligneo.fr/scan</span> et entrez le code :
+                    <p className="text-slate-600 text-xs">
+                      Scannez le QR, ou allez sur <span className="text-[#2f5fff] font-medium">transportsligneo.fr/scan</span> et entrez le code :
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-1.5 rounded-md bg-white/10 text-[#e7c76a] font-mono tracking-[0.35em] text-lg">
+                      <span className="px-3 py-1.5 rounded-md bg-[#f4f7ff] border border-[#4f8cff]/30 text-[#2f5fff] font-mono tracking-[0.35em] text-lg">
                         {session?.short_code}
                       </span>
                       <button
                         onClick={copyLink}
                         title="Copier le lien"
-                        className="p-2 rounded-md border border-white/20 text-white/70 hover:bg-white/10"
+                        className="p-2 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-100"
                       >
                         <Copy size={14} />
                       </button>
                     </div>
-                    <p className={`text-[11px] mt-1 ${expired ? "text-red-400" : "text-white/50"}`}>
+                    <p className={`text-[11px] mt-1 ${expired ? "text-red-500" : "text-slate-400"}`}>
                       {expired ? "Expirée" : `Expire dans ${mm}:${ss}`}
                     </p>
                   </div>
 
                   {/* Statut */}
-                  <div className="w-full mt-2 border-t border-white/10 pt-3">
+                  <div className="w-full mt-2 border-t border-slate-200 pt-3">
                     {received.length === 0 ? (
-                      <p className="text-white/50 text-xs text-center flex items-center justify-center gap-2">
+                      <p className="text-slate-500 text-xs text-center flex items-center justify-center gap-2">
                         {phase === "scanning" ? (
                           <>
-                            <Loader2 size={12} className="animate-spin text-[#e7c76a]" />
+                            <Loader2 size={12} className="animate-spin text-[#2f5fff]" />
                             Téléphone connecté · scan en cours…
                           </>
                         ) : (
                           <>
-                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#4f8cff] animate-pulse" />
                             En attente du téléphone…
                           </>
                         )}
@@ -293,8 +286,8 @@ export function QrHandoffButton({
                     ) : (
                       <ul className="space-y-1.5">
                         {received.map((d, i) => (
-                          <li key={i} className="flex items-center gap-2 text-white/80 text-xs">
-                            <Check size={14} className="text-emerald-400" />
+                          <li key={i} className="flex items-center gap-2 text-slate-700 text-xs">
+                            <Check size={14} className="text-emerald-500" />
                             <span className="flex-1">
                               {DOCUMENT_LABEL[d.document_type] ?? "Document"} · {Object.keys(d.fields).length} champs pré-remplis
                             </span>
@@ -308,17 +301,17 @@ export function QrHandoffButton({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-5 py-3 border-t border-white/10 bg-black/20">
+            <div className="flex items-center justify-between px-5 py-3 border-t border-slate-200 bg-slate-50">
               <button
                 onClick={handleRegenerate}
                 disabled={creating}
-                className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white/90 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 disabled:opacity-50"
               >
                 <RefreshCw size={12} /> Nouveau QR
               </button>
               <button
                 onClick={handleClose}
-                className="px-4 py-1.5 rounded-md bg-[#d4af37] text-[#0b1026] text-xs font-semibold hover:bg-[#e7c76a]"
+                className="px-4 py-1.5 rounded-md bg-[#2f5fff] text-white text-xs font-semibold hover:bg-[#4f8cff]"
               >
                 {received.length > 0 ? "Terminer" : "Fermer"}
               </button>
