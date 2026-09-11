@@ -250,6 +250,22 @@ function ProDocuments() {
     });
   }, [devis]);
 
+  /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  const facturesPlanning = useMemo(() => {
+    const groups = new Map<string, FactureRow[]>();
+    for (const f of filteredFactures) {
+      const key = dayKey(f.date_facture ?? f.created_at);
+      const arr = groups.get(key);
+      if (arr) arr.push(f);
+      else groups.set(key, [f]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      if (a === "sans-date") return 1;
+      if (b === "sans-date") return -1;
+      return a > b ? -1 : 1;
+    });
+  }, [filteredFactures]);
+
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
   const returnUrl = typeof window !== "undefined"
