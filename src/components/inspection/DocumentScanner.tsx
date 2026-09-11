@@ -426,7 +426,7 @@ export function DocumentScanner({
       ctx.strokeStyle = ACC;
       ctx.stroke();
     });
-  }, [corners]);
+  }, [corners, ACC, ACC_SOFT]);
 
   useEffect(() => { if (mode === "review") draw(); }, [mode, draw]);
   useEffect(() => {
