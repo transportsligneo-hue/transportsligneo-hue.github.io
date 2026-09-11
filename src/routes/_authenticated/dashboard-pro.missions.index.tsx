@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
