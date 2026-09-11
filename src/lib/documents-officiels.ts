@@ -533,9 +533,9 @@ export async function generateEdlPapierPdf(d: EdlPapierData, company?: CompanyIn
   const legendX = 140;
   const legendW = pageW - 14 - legendX;
   const legendH = schemaH + 4;
-  doc.setDrawColor(...DOC_NAVY);
-  doc.setLineWidth(0.4);
-  doc.rect(legendX, schemaTop, legendW, legendH, "S");
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(legendX, schemaTop, legendW, legendH, 2, 2, "S");
   const lx = legendX + 5;
   let ly = schemaTop + 6;
   doc.setFont("helvetica", "bold");

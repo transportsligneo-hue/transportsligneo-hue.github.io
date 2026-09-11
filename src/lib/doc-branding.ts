@@ -1,16 +1,22 @@
 import type jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Charte documentaire officielle Transports Ligneo — utilisée par TOUS les PDF. */
-export const DOC_NAVY: [number, number, number] = [11, 16, 38];
-export const DOC_NAVY_SOFT: [number, number, number] = [17, 26, 61];
-export const DOC_GOLD: [number, number, number] = [212, 175, 55];
-export const DOC_GOLD_SOFT: [number, number, number] = [231, 199, 106];
-export const DOC_TEXT: [number, number, number] = [40, 40, 50];
-export const DOC_MUTED: [number, number, number] = [110, 110, 120];
-export const DOC_LINE: [number, number, number] = [225, 220, 200];
+/**
+ * Charte documentaire officielle Transports Ligneo — utilisée par TOUS les PDF.
+ * Version claire « nouvelle génération », alignée sur les devis, factures et PV :
+ * encre profonde, bleu Ligneo en accent, panneaux gris très clairs.
+ */
+export const DOC_NAVY: [number, number, number] = [17, 22, 38];
+export const DOC_NAVY_SOFT: [number, number, number] = [12, 21, 55];
+/** Accent principal (anciennement doré) — désormais le bleu Ligneo. */
+export const DOC_GOLD: [number, number, number] = [37, 91, 235];
+export const DOC_GOLD_SOFT: [number, number, number] = [128, 134, 148];
+export const DOC_TEXT: [number, number, number] = [55, 60, 74];
+export const DOC_MUTED: [number, number, number] = [128, 134, 148];
+export const DOC_LINE: [number, number, number] = [223, 228, 238];
 export const DOC_WHITE: [number, number, number] = [255, 255, 255];
-export const DOC_CREAM: [number, number, number] = [250, 247, 239];
+/** Panneau clair des tableaux clé/valeur. */
+export const DOC_CREAM: [number, number, number] = [246, 248, 252];
 
 export interface CompanyInfo {
   raison_sociale: string | null;
@@ -148,31 +154,29 @@ export function docContentLimit(doc: jsPDF): number {
   return doc.internal.pageSize.getHeight() - DOC_FOOTER_RESERVED;
 }
 
-/** En-tête compact des pages de continuation. */
+/** En-tête compact et clair des pages de continuation. */
 function drawContinuationHeader(doc: jsPDF, ctx: DocCtx) {
   const h = 20;
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(0, 0, ctx.pageW, h, "F");
   if (ctx.logoData) {
     try {
-      doc.addImage(ctx.logoData, "PNG", 12, 3, 14, 14);
+      doc.addImage(ctx.logoData, "PNG", 14, 5, 11, 11);
     } catch {
       /* logo optionnel */
     }
   }
-  doc.setTextColor(...DOC_WHITE);
+  doc.setTextColor(...DOC_NAVY);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
-  doc.text(ctx.title.toUpperCase(), 30, h / 2 + 1);
+  doc.text(ctx.title.toUpperCase(), ctx.logoData ? 28 : 14, h / 2 + 1.2);
   if (ctx.numero) {
-    doc.setFont("helvetica", "normal");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(...DOC_GOLD);
-    doc.text(ctx.numero, ctx.pageW - 14, h / 2 + 1, { align: "right" });
+    doc.text(ctx.numero, ctx.pageW - 14, h / 2 + 1.2, { align: "right" });
   }
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.6);
-  doc.line(0, h, ctx.pageW, h);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.line(14, h, ctx.pageW - 14, h);
 }
 
 /**
@@ -228,9 +232,11 @@ function clampText(doc: jsPDF, text: string, maxW: number): string {
   return `${t}…`;
 }
 
-/** Bandeau navy + liseré or, identique sur tous les documents officiels. */
-
-
+/**
+ * En-tête clair « nouvelle génération » : logo + TRANSPORTS LIGNEO à gauche,
+ * titre du document, numéro et sous-titre à droite, filet fin de séparation.
+ * Identique au rendu des devis, factures et PV.
+ */
 export function drawDocHeader(
   doc: jsPDF,
   opts: {
@@ -245,86 +251,72 @@ export function drawDocHeader(
 ) {
   const { pageW, logoData, title, subtitle, numero, company } = opts;
   docContexts.set(doc as unknown as object, { pageW, logoData, title, numero, company });
-  const h = opts.height ?? 46;
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(0, 0, pageW, h, "F");
+  const h = opts.height ?? 40;
+  const leftX = 14;
+  const rightX = pageW - 14;
+
   if (logoData) {
     try {
-      doc.addImage(logoData, "PNG", 12, (h - 30) / 2, 30, 30);
+      doc.addImage(logoData, "PNG", leftX, 12, 14, 14);
     } catch {
       /* logo optionnel */
     }
   }
 
-  const leftX = logoData ? 47 : 14;
-  const rightX = pageW - 14;
-  const gap = 8;
-  const totalAvail = rightX - leftX - gap;
-
-  const raison = (company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase();
-  const tagline = "CONVOYAGE AUTOMOBILE — FRANCE & EUROPE";
-  const titleTxt = title.toUpperCase();
-
-  // Colonnes strictes : le bloc identité et le bloc titre ne se croisent jamais.
-  const leftW = totalAvail * 0.42;
-  const rightW = totalAvail - leftW;
-
-  // --- Bloc identité (gauche)
-  let nameSize = 14;
+  const tx = logoData ? leftX + 18 : leftX;
   doc.setFont("helvetica", "bold");
-  while (nameSize > 8 && fitTextWidth(doc, raison, nameSize) > leftW) nameSize -= 0.5;
-  doc.setTextColor(...DOC_WHITE);
-  doc.setFontSize(nameSize);
-  doc.text(clampText(doc, raison, leftW), leftX, h / 2 - 1.5);
-
-  let tagSize = 7;
+  doc.setFontSize(12.8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("TRANSPORTS ", tx, 19.6);
+  const w1 = doc.getTextWidth("TRANSPORTS ");
+  doc.setTextColor(...DOC_GOLD);
+  doc.text("LIGNEO", tx + w1, 19.6);
   doc.setFont("helvetica", "normal");
-  while (tagSize > 4.8 && fitTextWidth(doc, tagline, tagSize) > leftW) tagSize -= 0.25;
-  doc.setFontSize(tagSize);
-  doc.setTextColor(...DOC_GOLD_SOFT);
-  doc.text(clampText(doc, tagline, leftW), leftX, h / 2 + 4.5);
+  doc.setFontSize(7.6);
+  doc.setTextColor(...DOC_MUTED);
+  const baseline = company?.adresse_ville
+    ? `Convoyage automobile — ${company.adresse_ville}, France`
+    : "Convoyage automobile — France & Europe";
+  doc.text(baseline, tx, 24.4);
 
-  // --- Bloc titre (droite), sur 1 ou 2 lignes selon la longueur
-  let titleSize = 16;
+  // --- Bloc titre à droite
+  const rightW = rightX - (tx + 62);
+  const titleTxt = title.toUpperCase();
+  let titleSize = 15.5;
   doc.setFont("helvetica", "bold");
+  while (titleSize > 9 && fitTextWidth(doc, titleTxt, titleSize) > rightW) titleSize -= 0.5;
   let titleLines: string[] = [titleTxt];
-  while (titleSize > 10 && fitTextWidth(doc, titleTxt, titleSize) > rightW) titleSize -= 0.5;
   if (fitTextWidth(doc, titleTxt, titleSize) > rightW) {
-    titleSize = 12;
+    titleSize = 11;
     doc.setFontSize(titleSize);
     titleLines = (doc.splitTextToSize(titleTxt, rightW) as string[]).slice(0, 2);
   }
-
-  const twoLines = titleLines.length > 1;
-  const titleTop = twoLines ? h / 2 - 6 : h / 2 - 1.5;
   doc.setFontSize(titleSize);
-  doc.setTextColor(...DOC_WHITE);
+  doc.setTextColor(...DOC_NAVY);
   titleLines.forEach((line, i) => {
-    doc.text(clampText(doc, line, rightW), rightX, titleTop + i * (titleSize * 0.42), { align: "right" });
+    doc.text(clampText(doc, line, rightW), rightX, 19.6 + i * (titleSize * 0.44), { align: "right" });
   });
 
-  let metaY = titleTop + (twoLines ? titleSize * 0.42 : 0) + 5.5;
+  let metaY = 19.6 + (titleLines.length - 1) * (titleSize * 0.44) + 5.4;
   if (numero) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.2);
     doc.setTextColor(...DOC_GOLD);
     doc.text(clampText(doc, numero, rightW), rightX, metaY, { align: "right" });
-    metaY += 4.5;
+    metaY += 4.4;
   }
   if (subtitle) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(...DOC_GOLD_SOFT);
-    const maxSubY = h - 3;
-    if (metaY <= maxSubY) {
-      doc.text(clampText(doc, subtitle, rightW), rightX, Math.min(metaY, maxSubY), { align: "right" });
+    doc.setFontSize(7.2);
+    doc.setTextColor(...DOC_MUTED);
+    if (metaY <= h - 3) {
+      doc.text(clampText(doc, subtitle, rightW), rightX, metaY, { align: "right" });
     }
   }
 
-
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.8);
-  doc.line(0, h, pageW, h);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.line(leftX, h - 5, rightX, h - 5);
 }
 
 /** Pied de page légal dynamique (aucune mention codée en dur). */
@@ -335,8 +327,8 @@ export function drawDocLegalFooter(
   company?: CompanyInfo | null,
 ) {
   const top = pageH - 20;
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.4);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
   doc.line(14, top, pageW - 14, top);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
@@ -351,7 +343,7 @@ export function drawDocLegalFooter(
   if (l2) doc.text(l2, pageW / 2, top + 13.5, { align: "center" });
 }
 
-/** Titre de section navy (auto-pagination : jamais orphelin). */
+/** Titre de section clair : panneau arrondi + repère bleu (jamais orphelin). */
 export function drawSectionTitle(
   doc: jsPDF,
   pageW: number,
@@ -363,12 +355,14 @@ export function drawSectionTitle(
   const w = opts?.w ?? pageW - 28;
   // un titre doit être suivi d'au moins une ligne de contenu
   y = docEnsureSpace(doc, y, 6.5 + 9);
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(x, y, w, 6.5, "F");
-  doc.setTextColor(...DOC_WHITE);
+  doc.setFillColor(...DOC_CREAM);
+  doc.roundedRect(x, y, w, 6.8, 1.8, 1.8, "F");
+  doc.setFillColor(...DOC_GOLD);
+  doc.roundedRect(x + 2.4, y + 1.6, 1.4, 3.6, 0.7, 0.7, "F");
+  doc.setTextColor(...DOC_NAVY);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text(label.toUpperCase(), x + 4, y + 4.5);
+  doc.setFontSize(7.6);
+  doc.text(label.toUpperCase(), x + 6, y + 4.6);
   return y + 9.5;
 }
 
@@ -388,14 +382,11 @@ export function drawKeyValueRow(
   const labelW = opts?.labelW ?? Math.min(55, w * 0.42);
   y = docEnsureSpace(doc, y, h + gap);
   doc.setFillColor(...DOC_CREAM);
-  doc.rect(x, y, w, h, "F");
-  doc.setDrawColor(...DOC_LINE);
-  doc.setLineWidth(0.2);
-  doc.rect(x, y, w, h, "S");
+  doc.roundedRect(x, y, w, h, 1.6, 1.6, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.4);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text(label, x + 2.5, y + h / 2 + 1);
+  doc.setFontSize(6.9);
+  doc.setTextColor(...DOC_MUTED);
+  doc.text(label.toUpperCase(), x + 2.8, y + h / 2 + 1);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.4);
   doc.setTextColor(...DOC_TEXT);
