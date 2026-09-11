@@ -46,6 +46,49 @@ interface DevisRow {
   marque_retour: string | null;
   modele_retour: string | null;
   prix_retour: number | null;
+  date_souhaitee_time?: string | null;
+  heure_souhaitee: string | null;
+  date_retour: string | null;
+  heure_retour: string | null;
+  option_trajet: string | null;
+}
+
+/** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
+function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
+  const opt = (d.option_trajet ?? "").toLowerCase();
+  if (opt.includes("recharge")) {
+    return { label: "Recharge uniquement", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+  }
+  if (isDuo || opt.includes("retour") || opt.includes("restitution")) {
+    return { label: "Livraison + Restitution", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+  }
+  return { label: "Livraison simple", cls: "bg-slate-100 text-slate-700 border-slate-200" };
+}
+
+/** "08:30" à partir d'un texte d'heure libre ; null si inexploitable. */
+function fmtHeure(h?: string | null): string | null {
+  if (!h) return null;
+  const m = /^(\d{1,2})\s*[:hH]?\s*(\d{0,2})/.exec(h.trim());
+  if (!m) return null;
+  return `${m[1]!.padStart(2, "0")}:${(m[2] || "00").padStart(2, "0")}`;
+}
+
+/** Clé de jour locale sans décalage de fuseau. */
+function dayKey(d?: string | null): string {
+  if (!d) return "sans-date";
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime())
+    ? "sans-date"
+    : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+
+function dayLabel(key: string): string {
+  if (key === "sans-date") return "Sans date";
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, d ?? 1).toLocaleDateString("fr-FR", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
 }
 
 
