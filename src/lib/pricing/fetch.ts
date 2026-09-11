@@ -3,7 +3,7 @@
  * Lecture réservée aux admins par RLS → fallback silencieux sur "micro"
  * (franchise en base de TVA), qui est le régime par défaut du projet.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { getPublicPricingDisplay } from "@/lib/public-config.functions";
 import type { Regime } from "./types";
 
 export type ActiveRegime = {
