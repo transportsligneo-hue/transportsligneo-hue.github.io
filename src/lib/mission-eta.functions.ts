@@ -74,9 +74,25 @@ export const reportMissionEta = createServerFn({ method: "POST" })
       };
     }
 
-    const delay = Math.round(
+    let delay = Math.round(
       (new Date(data.etaAt).getTime() - new Date(row.initial_eta_at).getTime()) / 60_000,
     );
+
+    // Écart aberrant (mission reprogrammée, référence obsolète) : on refige
+    // la référence sur l'ETA courant au lieu d'envoyer une fausse alerte.
+    const MAX_PLAUSIBLE_DELAY_MIN = 480; // 8 h
+    if (Math.abs(delay) > MAX_PLAUSIBLE_DELAY_MIN) {
+      await supabaseAdmin
+        .from("mission_eta_tracking")
+        .update({
+          initial_eta_at: data.etaAt,
+          initial_remaining_km: data.remainingKm ?? null,
+          last_alert_bucket: 0,
+          last_alert_at: null,
+        } as never)
+        .eq("attribution_id", data.attributionId);
+      return { initialEtaAt: data.etaAt, delayMinutes: 0, thresholdMinutes: threshold };
+    }
 
     // Mission clôturée : pas d'alerte.
     const closed = ["terminee", "termine", "validee", "annulee", "refusee"].includes(
@@ -84,6 +100,7 @@ export const reportMissionEta = createServerFn({ method: "POST" })
     );
 
     const bucket = delay > 0 ? Math.floor(delay / threshold) : 0;
+
     if (!closed && bucket > (row.last_alert_bucket ?? 0)) {
       await supabaseAdmin
         .from("mission_eta_tracking")
