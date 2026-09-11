@@ -53,16 +53,29 @@ interface DevisRow {
   option_trajet: string | null;
 }
 
+/** Pastilles néon électriques : recharge = bleu, livraison simple = violet, livraison + restitution = dégradé bleu/violet. */
+const NEON_RECHARGE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
+const NEON_SIMPLE = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
+const NEON_DUO = "bg-gradient-to-r from-sky-100 to-violet-100 text-indigo-700 border-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.35)]";
+
 /** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
 function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
   const opt = (d.option_trajet ?? "").toLowerCase();
   if (opt.includes("recharge")) {
-    return { label: "Recharge uniquement", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+    return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   }
   if (isDuo || opt.includes("retour") || opt.includes("restitution")) {
-    return { label: "Livraison + Restitution", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+    return { label: "Livraison + Restitution", cls: NEON_DUO };
   }
-  return { label: "Livraison simple", cls: "bg-slate-100 text-slate-700 border-slate-200" };
+  return { label: "Livraison simple", cls: NEON_SIMPLE };
+}
+
+/** Type de prestation d'une facture, déduit de sa désignation. */
+function factureTypeInfo(f: FactureRow): { label: string; cls: string } {
+  const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
+  if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
+  if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
+  return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
 /** "08:30" à partir d'un texte d'heure libre ; null si inexploitable. */
