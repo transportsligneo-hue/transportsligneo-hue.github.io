@@ -251,7 +251,7 @@ export function drawDocHeader(
 ) {
   const { pageW, logoData, title, subtitle, numero, company } = opts;
   docContexts.set(doc as unknown as object, { pageW, logoData, title, numero, company });
-  const h = opts.height ?? 46;
+  const h = opts.height ?? 40;
   const leftX = 14;
   const rightX = pageW - 14;
 
