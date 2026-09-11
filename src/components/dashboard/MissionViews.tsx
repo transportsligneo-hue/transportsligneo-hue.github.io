@@ -339,29 +339,24 @@ export function MissionViewsBody({
               <span className={`text-[10px] ${muted}`}>{list.length} mission{list.length > 1 ? "s" : ""}</span>
             </div>
             <div className={`divide-y ${theme === "dark" ? "divide-primary/10" : "divide-pro-border"}`}>
-              {list.map((i) => (
-                <Shell key={i.id} item={i} theme={theme}>
-                  <div className={`flex items-center gap-3 p-3 transition-colors ${theme === "dark" ? "hover:bg-primary/5" : "hover:bg-pro-bg-soft/70"}`}>
-                    <div className={`flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded ${chip}`}>
-                      <span className="text-xs font-semibold tabular-nums">
-                        {i.date ? new Date(i.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
-                        {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
-                        {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+              {blocks.map((b) =>
+                b.items.length > 1 ? (
+                  <div key={b.key} className="p-2">
+                    <div className={`rounded-lg border-l-4 border-[#5334d6] ${theme === "dark" ? "border border-primary/25 bg-primary/5" : "border border-[#5334d6]/25 bg-[#5334d6]/[0.04]"}`}>
+                      <div className={`flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold ${muted}`}>
+                        <span className="text-[#5334d6]">⌐ Dossier lié</span>
+                        <span>{b.typeLabel ?? "Livraison + Restitution"}</span>
+                        {b.total && <span className={`ml-auto text-xs font-bold ${strong}`}>{b.total} total</span>}
                       </div>
-                      <p className={`text-sm truncate ${strong}`}>
-                        {i.depart} <span className="opacity-40">→</span> {i.arrivee}
-                      </p>
+                      <div className={`divide-y ${theme === "dark" ? "divide-primary/10" : "divide-[#5334d6]/15"}`}>
+                        {b.items.map((i) => row(i, true))}
+                      </div>
                     </div>
-                    {i.amount && <span className={`text-sm font-semibold ${strong}`}>{i.amount}</span>}
-                    <ArrowRight size={14} className="opacity-40 shrink-0" />
                   </div>
-                </Shell>
-              ))}
+                ) : (
+                  row(b.items[0]!, false)
+                ),
+              )}
             </div>
           </div>
         );
