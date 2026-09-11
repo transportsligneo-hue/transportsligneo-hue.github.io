@@ -66,6 +66,7 @@ const statutLabel: Record<string, string> = {
 function ProMissionsIndex() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<MissionRow[]>([]);
+  const [flags, setFlags] = useState<Record<string, MissionFlags>>({});
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("tous");
@@ -132,9 +133,20 @@ function ProMissionsIndex() {
       .not("statut", "in", "(refusee,annulee,convertie,converti,terminee,termine,livree,en_cours,validee,acceptee,archivee,archive)")
       .order("created_at", { ascending: false });
 
-    Promise.all([loadMissionRows(), devisPending, demandePending]).then(([missionRows, dRes, demRes]) => {
+    Promise.all([loadMissionRows(), devisPending, demandePending]).then(async ([missionRows, dRes, demRes]) => {
       if (cancelled) return;
       setMissions(missionRows as MissionRow[]);
+      const ids = missionRows.map((m) => m.id);
+      if (ids.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: ids });
+        if (!cancelled && flagRows) {
+          const map: Record<string, MissionFlags> = {};
+          for (const f of flagRows) {
+            map[f.mission_id] = { recharge: f.recharge_seule, motif: f.annulation_motif, incident: f.incident_titre };
+          }
+          setFlags(map);
+        }
+      }
       const pendingList: PendingItem[] = [
         ...((dRes.data ?? []) as Array<{ id: string; numero: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string; statut: string; prix_estime: number | null }>).map(d => ({
           id: `devis-${d.id}`,
