@@ -53,16 +53,29 @@ interface DevisRow {
   option_trajet: string | null;
 }
 
+/** Pastilles néon électriques : recharge = bleu, livraison simple = violet, livraison + restitution = dégradé bleu/violet. */
+const NEON_RECHARGE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
+const NEON_SIMPLE = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
+const NEON_DUO = "bg-gradient-to-r from-sky-100 to-violet-100 text-indigo-700 border-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.35)]";
+
 /** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
 function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
   const opt = (d.option_trajet ?? "").toLowerCase();
   if (opt.includes("recharge")) {
-    return { label: "Recharge uniquement", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+    return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   }
   if (isDuo || opt.includes("retour") || opt.includes("restitution")) {
-    return { label: "Livraison + Restitution", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+    return { label: "Livraison + Restitution", cls: NEON_DUO };
   }
-  return { label: "Livraison simple", cls: "bg-slate-100 text-slate-700 border-slate-200" };
+  return { label: "Livraison simple", cls: NEON_SIMPLE };
+}
+
+/** Type de prestation d'une facture, déduit de sa désignation. */
+function factureTypeInfo(f: FactureRow): { label: string; cls: string } {
+  const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
+  if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
+  if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
+  return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
 /** "08:30" à partir d'un texte d'heure libre ; null si inexploitable. */
@@ -236,6 +249,22 @@ function ProDocuments() {
       return a > b ? -1 : 1;
     });
   }, [devis]);
+
+  /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  const facturesPlanning = useMemo(() => {
+    const groups = new Map<string, FactureRow[]>();
+    for (const f of filteredFactures) {
+      const key = dayKey(f.date_facture ?? f.created_at);
+      const arr = groups.get(key);
+      if (arr) arr.push(f);
+      else groups.set(key, [f]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      if (a === "sans-date") return 1;
+      if (b === "sans-date") return -1;
+      return a > b ? -1 : 1;
+    });
+  }, [filteredFactures]);
 
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
@@ -614,14 +643,32 @@ function ProDocuments() {
                       <th className="text-right px-5 py-3 font-medium">Action</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredFactures.map((f) => {
+                  {facturesPlanning.map(([groupKey, groupRows]) => (
+                  <tbody key={groupKey}>
+                    <tr className="bg-pro-bg-soft/80 border-t border-pro-border">
+                      <td colSpan={6} className="px-5 py-2 text-[11px] uppercase tracking-wider font-semibold text-pro-text">
+                        {dayLabel(groupKey)}
+                        <span className="ml-2 normal-case font-normal text-pro-muted">
+                          {groupRows.length} facture{groupRows.length > 1 ? "s" : ""}
+                        </span>
+                      </td>
+                    </tr>
+                    {groupRows.map((f) => {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
+                      const typeInfo = factureTypeInfo(f);
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
-                          <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">{f.numero}</td>
+                          <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
+                            <div className="flex flex-col gap-1.5">
+                              <span>{f.numero}</span>
+                              <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                                {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                                {typeInfo.label}
+                              </span>
+                            </div>
+                          </td>
                           <td className="px-5 py-3 text-pro-text">
                             {f.depart && f.arrivee ? `${f.depart} → ${f.arrivee}` : (f.designation ?? "—")}
                           </td>
@@ -663,6 +710,7 @@ function ProDocuments() {
                       );
                     })}
                   </tbody>
+                  ))}
                 </table>
               </div>
             )}
