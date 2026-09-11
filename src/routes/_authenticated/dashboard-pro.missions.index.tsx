@@ -229,6 +229,12 @@ function ProMissionsIndex() {
 
   const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
+  const typeLabelFor = (m: MissionRow): string => {
+    if (flags[m.id]?.recharge) return "Recharge uniquement";
+    if (m.leg_type === "aller" || m.leg_type === "retour" || m.type_trajet === "aller_retour") return "Livraison + Restitution";
+    return "Livraison simple";
+  };
+
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
       filtered.map((m) => ({
@@ -239,7 +245,13 @@ function ProMissionsIndex() {
         date: m.date_prise_en_charge,
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
-        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || undefined,
+        meta: [
+          [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation,
+          typeLabelFor(m),
+          (m.statut === "annulee" || m.statut === "annule") && (flags[m.id]?.motif || flags[m.id]?.incident)
+            ? `Annulée : ${flags[m.id]?.motif ?? flags[m.id]?.incident}`
+            : null,
+        ].filter(Boolean).join(" · ") || undefined,
         amount: `${Number(m.prix_total ?? 0).toFixed(2)} €`,
         wrap: (children) => (
           <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block h-full">
