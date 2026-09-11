@@ -21,6 +21,7 @@ interface MissionRow {
   ville_depart: string;
   ville_arrivee: string;
   date_prise_en_charge: string;
+  heure_prise_en_charge: string | null;
   statut: string;
   prix_total: number;
   created_at: string;
@@ -84,7 +85,7 @@ function ProMissionsIndex() {
       const [{ data: directRows }, { data: profile }, { data: memberships }] = await Promise.all([
         supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, heure_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
           .or(orFilter)
           .order("created_at", { ascending: false }),
         supabase
@@ -108,7 +109,7 @@ function ProMissionsIndex() {
       if (orgIds.length > 0) {
         const { data } = await supabase
           .from("missions")
-          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
+          .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, heure_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, mission_group_id, group_reference, marque, modele, immatriculation, vin, carburant, type_trajet")
           .or(orgIds.map((id) => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(","))
           .order("created_at", { ascending: false });
         orgRows = (data ?? []) as MissionRow[];
@@ -241,6 +242,19 @@ function ProMissionsIndex() {
     return "Livraison simple";
   };
 
+  /** Dossier (clé de regroupement) + total, partagés par les jambes L/R. */
+  const groupInfo = useMemo(() => {
+    const map = new Map<string, { total: number; count: number }>();
+    for (const m of filtered) {
+      const key = m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero);
+      const cur = map.get(key) ?? { total: 0, count: 0 };
+      cur.total += Number(m.prix_total ?? 0);
+      cur.count += 1;
+      map.set(key, cur);
+    }
+    return map;
+  }, [filtered]);
+
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
       filtered.map((m) => ({
@@ -249,9 +263,21 @@ function ProMissionsIndex() {
         depart: m.ville_depart,
         arrivee: m.ville_arrivee,
         date: m.date_prise_en_charge,
+        heure: m.heure_prise_en_charge,
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
         plaque: m.immatriculation ?? flags[m.id]?.plaque ?? null,
+        typeLabel: typeLabelFor(m),
+        cancelReason:
+          (m.statut === "annulee" || m.statut === "annule")
+            ? (flags[m.id]?.motif ?? flags[m.id]?.incident ?? null)
+            : null,
+        groupKey: m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero),
+        legLabel: m.leg_type === "retour" ? "R" : m.leg_type === "aller" ? "L" : null,
+        groupTotal: (() => {
+          const g = groupInfo.get(m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero));
+          return g && g.count > 1 ? `${g.total.toFixed(2)} €` : undefined;
+        })(),
         meta: [
           [m.marque, m.modele].filter(Boolean).join(" ") || null,
           typeLabelFor(m),
@@ -267,7 +293,7 @@ function ProMissionsIndex() {
         ),
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtered, flags],
+    [filtered, flags, groupInfo],
   );
 
   return (
