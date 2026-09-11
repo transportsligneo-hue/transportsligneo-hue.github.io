@@ -269,14 +269,62 @@ export function MissionViewsBody({
   }
 
   // Planning
+  const row = (i: MissionViewItem, inDuo: boolean) => (
+    <Shell key={i.id} item={i} theme={theme}>
+      <div className={`flex items-center gap-3 p-3 transition-colors ${theme === "dark" ? "hover:bg-primary/5" : "hover:bg-pro-bg-soft/70"}`}>
+        <div className={`flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded ${chip}`}>
+          <span className="text-xs font-semibold tabular-nums">{normalizeHeure(i.heure) ?? "--:--"}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            {inDuo && i.legLabel && (
+              <span className={`inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold ${
+                i.legLabel === "L" ? "bg-[#5334d6] text-white" : "bg-[#0e9f6e] text-white"
+              }`} title={i.legLabel === "L" ? "Livraison" : "Restitution"}>
+                {i.legLabel}
+              </span>
+            )}
+            <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
+            {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
+            {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+            {!inDuo && i.typeLabel && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded ${chip}`}>{i.typeLabel}</span>
+            )}
+          </div>
+          <p className={`text-sm truncate ${strong}`}>
+            {i.depart} <span className="opacity-40">→</span> {i.arrivee}
+          </p>
+          {i.cancelReason && (
+            <p className="text-[11px] mt-1 text-red-600 dark:text-red-400">Annulée : {i.cancelReason}</p>
+          )}
+        </div>
+        {i.amount && <span className={`text-sm font-semibold ${strong}`}>{i.amount}</span>}
+        <ArrowRight size={14} className="opacity-40 shrink-0" />
+      </div>
+    </Shell>
+  );
+
   return (
     <div className="space-y-3">
       {planning.map(([dateKey, list]) => {
-        const d = dateKey === "sans-date" ? null : new Date(dateKey);
+        const d = localDate(dateKey === "sans-date" ? null : dateKey);
         const label = d
           ? d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
           : "Sans date";
         const isToday = d && d.toDateString() === new Date().toDateString();
+        // Regroupe les jambes d'un même dossier : livraison (L) puis restitution (R).
+        const blocks: { key: string; items: MissionViewItem[]; total?: string; typeLabel?: string }[] = [];
+        const byGroup = new Map<string, MissionViewItem[]>();
+        for (const i of list) {
+          const gk = i.groupKey ?? `solo-${i.id}`;
+          const arr = byGroup.get(gk);
+          if (arr) arr.push(i);
+          else byGroup.set(gk, [i]);
+        }
+        for (const [gk, arr] of byGroup) {
+          arr.sort((a, b) => (a.legLabel === "R" ? 1 : 0) - (b.legLabel === "R" ? 1 : 0));
+          blocks.push({ key: gk, items: arr, total: arr[0]?.groupTotal, typeLabel: arr[0]?.typeLabel });
+        }
         return (
           <div key={dateKey} className={`${theme === "dark" ? "card-premium" : "bg-white border border-pro-border"} rounded-xl overflow-hidden`}>
             <div
