@@ -145,6 +145,42 @@ function ProDashboard() {
     return missions;
   }, [missions, tab]);
 
+  /** Regroupe Livraison (L) + Restitution (R) d'un même dossier, L toujours en premier. */
+  const dossiers = useMemo(() => {
+    const map = new Map<string, MissionRow[]>();
+    for (const m of filteredMissions) {
+      const key = stripLegSuffix(m.numero);
+      const arr = map.get(key);
+      if (arr) arr.push(m); else map.set(key, [m]);
+    }
+    return Array.from(map.entries()).map(([key, legs]) => {
+      const ordered = [...legs].sort((a, b) => {
+        const rank = (l: MissionRow) => (l.leg_type === "retour" ? 1 : 0);
+        return rank(a) - rank(b) || (a.leg_index ?? 0) - (b.leg_index ?? 0);
+      });
+      const isDuo = ordered.length > 1;
+      return {
+        key,
+        legs: ordered,
+        isDuo,
+        total: ordered.reduce((s, l) => s + Number(l.prix_total ?? 0), 0),
+      };
+    });
+  }, [filteredMissions]);
+
+  const visibleDossiers = useMemo(() => {
+    const out: typeof dossiers = [];
+    let count = 0;
+    for (const d of dossiers) {
+      if (count >= 8) break;
+      out.push(d);
+      count += d.legs.length;
+    }
+    return out;
+  }, [dossiers]);
+
+  const visibleCount = visibleDossiers.reduce((s, d) => s + d.legs.length, 0);
+
   // Bar chart : missions par mois (6 derniers mois)
   const monthlyBars = useMemo(() => {
     const now = new Date();
