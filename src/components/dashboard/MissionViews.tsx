@@ -17,6 +17,8 @@ export interface MissionViewItem {
   depart: string;
   arrivee: string;
   date?: string | null;
+  /** Heure de prise en charge ("08:30", "8h30"…). Sans elle : "--:--". */
+  heure?: string | null;
   statut: string;
   statutLabel?: string;
   meta?: string;
@@ -24,8 +26,36 @@ export interface MissionViewItem {
   plaque?: string | null;
   amount?: string;
   badge?: ReactNode;
+  /** "Livraison + Restitution", "Livraison simple", "Recharge uniquement"… */
+  typeLabel?: string;
+  /** Motif affiché en petit sous une mission annulée. */
+  cancelReason?: string | null;
+  /** Identifiant de dossier : les jambes L/R d'un même dossier sont reliées. */
+  groupKey?: string;
+  /** "L" (livraison) ou "R" (restitution) — la livraison est toujours en tête. */
+  legLabel?: "L" | "R" | null;
+  /** Total du dossier, affiché sur l'encoche qui relie les deux jambes. */
+  groupTotal?: string;
   /** Enveloppe le contenu (Link typé, bouton…) fournie par la page hôte. */
   wrap?: (children: ReactNode) => ReactNode;
+}
+
+/** Normalise une heure texte en "HH:MM" ; renvoie null si inexploitable. */
+export function normalizeHeure(h?: string | null): string | null {
+  if (!h) return null;
+  const m = /^(\d{1,2})\s*[:hH]\s*(\d{0,2})/.exec(h.trim());
+  if (!m) return null;
+  return `${m[1]!.padStart(2, "0")}:${(m[2] || "00").padStart(2, "0")}`;
+}
+
+/** Clé de jour locale ("2026-08-20") sans décalage de fuseau. */
+function dayKey(d?: string | null): string {
+  if (!d) return "sans-date";
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime())
+    ? "sans-date"
+    : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
 type Theme = "light" | "dark";
