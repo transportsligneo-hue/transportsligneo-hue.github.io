@@ -441,6 +441,11 @@ function ProMissionsIndex() {
                           <StatusBadge kind={missionStatusKind(m.statut)}>
                             {statutLabel[m.statut] ?? missionStatusLabel(m.statut)}
                           </StatusBadge>
+                          {flags[m.id]?.recharge && (
+                            <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
+                              <Zap size={10} /> Recharge uniquement
+                            </span>
+                          )}
                         </div>
                         <div className="fleet-leg-route">
                           <MapPin size={12} className="text-[#5334d6] shrink-0" />
@@ -454,6 +459,15 @@ function ProMissionsIndex() {
                           <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
                           <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>
                         </div>
+                        {(m.statut === "annulee" || m.statut === "annule") &&
+                          (flags[m.id]?.motif || flags[m.id]?.incident) && (
+                            <div className="fleet-leg-cancel-motif">
+                              <Ban size={12} className="shrink-0 mt-0.5" />
+                              <span>
+                                Annulée : {flags[m.id]?.motif ?? flags[m.id]?.incident}
+                              </span>
+                            </div>
+                          )}
                       </Link>
                     </li>
                   ))}
