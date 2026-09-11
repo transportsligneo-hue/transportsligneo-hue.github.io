@@ -362,15 +362,23 @@ export function DocumentScanner({
 
   const goToReview = (src: HTMLCanvasElement) => {
     sourceCanvasRef.current = src;
-    const m = 0.06;
-    setCorners([
-      { x: src.width * m, y: src.height * m },
-      { x: src.width * (1 - m), y: src.height * m },
-      { x: src.width * (1 - m), y: src.height * (1 - m) },
-      { x: src.width * m, y: src.height * (1 - m) },
-    ]);
+    const detected = (() => {
+      try { return detectQuadFromCanvas(src); } catch { return null; }
+    })();
+    if (detected) {
+      setCorners(detected);
+    } else {
+      const m = 0.06;
+      setCorners([
+        { x: src.width * m, y: src.height * m },
+        { x: src.width * (1 - m), y: src.height * m },
+        { x: src.width * (1 - m), y: src.height * (1 - m) },
+        { x: src.width * m, y: src.height * (1 - m) },
+      ]);
+    }
     setMode("review");
   };
+
 
   /* ── fallback natif ── */
   const handleNativeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
