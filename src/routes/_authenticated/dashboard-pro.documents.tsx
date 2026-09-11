@@ -46,6 +46,49 @@ interface DevisRow {
   marque_retour: string | null;
   modele_retour: string | null;
   prix_retour: number | null;
+  date_souhaitee_time?: string | null;
+  heure_souhaitee: string | null;
+  date_retour: string | null;
+  heure_retour: string | null;
+  option_trajet: string | null;
+}
+
+/** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
+function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
+  const opt = (d.option_trajet ?? "").toLowerCase();
+  if (opt.includes("recharge")) {
+    return { label: "Recharge uniquement", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+  }
+  if (isDuo || opt.includes("retour") || opt.includes("restitution")) {
+    return { label: "Livraison + Restitution", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" };
+  }
+  return { label: "Livraison simple", cls: "bg-slate-100 text-slate-700 border-slate-200" };
+}
+
+/** "08:30" à partir d'un texte d'heure libre ; null si inexploitable. */
+function fmtHeure(h?: string | null): string | null {
+  if (!h) return null;
+  const m = /^(\d{1,2})\s*[:hH]?\s*(\d{0,2})/.exec(h.trim());
+  if (!m) return null;
+  return `${m[1]!.padStart(2, "0")}:${(m[2] || "00").padStart(2, "0")}`;
+}
+
+/** Clé de jour locale sans décalage de fuseau. */
+function dayKey(d?: string | null): string {
+  if (!d) return "sans-date";
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10);
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime())
+    ? "sans-date"
+    : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+
+function dayLabel(key: string): string {
+  if (key === "sans-date") return "Sans date";
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, d ?? 1).toLocaleDateString("fr-FR", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
 }
 
 
@@ -141,7 +184,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, heure_souhaitee, date_retour, heure_retour, option_trajet, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
@@ -177,6 +220,22 @@ function ProDocuments() {
       return true;
     });
   }, [factures, statutFilter, yearFilter]);
+
+  /** Vue planning : devis groupés par jour de prestation, plus récents en haut. */
+  const devisPlanning = useMemo(() => {
+    const groups = new Map<string, DevisRow[]>();
+    for (const d of devis) {
+      const key = dayKey(d.date_souhaitee ?? d.created_at);
+      const arr = groups.get(key);
+      if (arr) arr.push(d);
+      else groups.set(key, [d]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      if (a === "sans-date") return 1;
+      if (b === "sans-date") return -1;
+      return a > b ? -1 : 1;
+    });
+  }, [devis]);
 
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
@@ -340,17 +399,29 @@ function ProDocuments() {
                   <tr>
                     <th className="text-left px-5 py-3 font-medium">N°</th>
                     <th className="text-left px-5 py-3 font-medium">Trajet</th>
-                    <th className="text-left px-5 py-3 font-medium">Date</th>
+                    <th className="text-left px-5 py-3 font-medium">Date &amp; heure</th>
                     <th className="text-left px-5 py-3 font-medium">Statut</th>
                     <th className="text-right px-5 py-3 font-medium">Montant</th>
                     <th className="text-right px-5 py-3 font-medium">PDF</th>
                     <th className="text-right px-5 py-3 font-medium">Action</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {devis.map((d) => {
+                {devisPlanning.map(([groupKey, groupRows]) => (
+                <tbody key={groupKey}>
+                  <tr className="bg-pro-bg-soft/80 border-t border-pro-border">
+                    <td colSpan={7} className="px-5 py-2 text-[11px] uppercase tracking-wider font-semibold text-pro-text">
+                      {dayLabel(groupKey)}
+                      <span className="ml-2 normal-case font-normal text-pro-muted">
+                        {groupRows.length} devis
+                      </span>
+                    </td>
+                  </tr>
+                  {groupRows.map((d) => {
                     const st = devisStatutPill[d.statut] ?? { label: d.statut, cls: "bg-slate-100 text-slate-700" };
                     const isDuo = Boolean(d.depart_retour || d.immatriculation_retour || d.prix_retour);
+                    const typeInfo = devisTypeInfo(d, isDuo);
+                    const heure = fmtHeure(d.heure_souhaitee);
+                    const heureRetour = fmtHeure(d.heure_retour);
                     const vehicule = [d.marque, d.modele].filter(Boolean).join(" ");
                     const vehiculeRetour = [d.marque_retour, d.modele_retour].filter(Boolean).join(" ");
                     return (
@@ -358,7 +429,10 @@ function ProDocuments() {
                         <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                           <div className="flex flex-col gap-1.5">
                             <span>{d.numero}</span>
-                            {isDuo && <span className="fleet-chip-duo w-fit"><Repeat size={10} /> Aller-retour</span>}
+                            <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                              {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                              {typeInfo.label}
+                            </span>
                           </div>
                         </td>
                         <td className="px-5 py-3 text-pro-text">
@@ -383,8 +457,24 @@ function ProDocuments() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-3 text-pro-text-soft">
-                          {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                        <td className="px-5 py-3 text-pro-text-soft whitespace-nowrap">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-pro-text font-medium">
+                              {d.date_souhaitee
+                                ? new Date(`${dayKey(d.date_souhaitee)}T00:00:00`).toLocaleDateString("fr-FR")
+                                : new Date(d.created_at).toLocaleDateString("fr-FR")}
+                              <span className="ml-1.5 tabular-nums">{heure ?? "--:--"}</span>
+                            </span>
+                            {isDuo && d.date_retour && (
+                              <span className="text-[11px]">
+                                Retour {new Date(`${dayKey(d.date_retour)}T00:00:00`).toLocaleDateString("fr-FR")}
+                                <span className="ml-1.5 tabular-nums">{heureRetour ?? "--:--"}</span>
+                              </span>
+                            )}
+                            {!d.date_souhaitee && (
+                              <span className="text-[10px] text-pro-muted">Créé le {new Date(d.created_at).toLocaleDateString("fr-FR")}</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}`}>
@@ -455,6 +545,7 @@ function ProDocuments() {
                     );
                   })}
                 </tbody>
+                ))}
               </table>
             </div>
           )}
