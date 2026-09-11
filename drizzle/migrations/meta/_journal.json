@@ -57,6 +57,13 @@
       "when": 1789167463613,
       "tag": "0007_revoke_public_execute_security_definer",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789168969718,
+      "tag": "0008_security_fixes_definer_view_and_public_access",
+      "breakpoints": true
     }
   ]
 }
