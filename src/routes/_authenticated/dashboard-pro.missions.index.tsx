@@ -251,8 +251,9 @@ function ProMissionsIndex() {
         date: m.date_prise_en_charge,
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
+        plaque: m.immatriculation ?? flags[m.id]?.plaque ?? null,
         meta: [
-          [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation,
+          [m.marque, m.modele].filter(Boolean).join(" ") || null,
           typeLabelFor(m),
           (m.statut === "annulee" || m.statut === "annule") && (flags[m.id]?.motif || flags[m.id]?.incident)
             ? `Annulée : ${flags[m.id]?.motif ?? flags[m.id]?.incident}`
