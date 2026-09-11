@@ -3,7 +3,7 @@ import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car } from "lucide-react";
+import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car, Ban } from "lucide-react";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
@@ -48,6 +48,13 @@ interface PendingItem {
   prix_estime: number | null;
   source: "devis" | "demande";
   statut: string;
+}
+
+/** Indicateurs enrichis par mission (recharge seule, motif d'annulation, incident). */
+interface MissionFlags {
+  recharge: boolean;
+  motif: string | null;
+  incident: string | null;
 }
 
 const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "terminee", "annulee"] as const;
