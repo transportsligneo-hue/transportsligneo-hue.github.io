@@ -222,8 +222,23 @@ function ProDocuments() {
       ]);
 
       if (cancelled) return;
-      setDevis((dRes.data ?? []) as DevisRow[]);
-      setFactures((fRes.data ?? []) as FactureRow[]);
+      const devisRows = (dRes.data ?? []) as DevisRow[];
+      const factureRows = (fRes.data ?? []) as FactureRow[];
+      setDevis(devisRows);
+      setFactures(factureRows);
+
+      // Types réels des missions liées aux factures (recharge uniquement, etc.)
+      const missionIds = Array.from(new Set(factureRows.map(f => f.mission_id).filter(Boolean))) as string[];
+      if (missionIds.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: missionIds });
+        if (!cancelled && flagRows) {
+          const rech: Record<string, boolean> = {};
+          for (const fl of flagRows) {
+            if (fl.recharge_seule) rech[fl.mission_id] = true;
+          }
+          setRechargeFlags(rech);
+        }
+      }
       setLoading(false);
     })();
 
