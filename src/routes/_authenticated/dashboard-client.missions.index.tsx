@@ -83,12 +83,12 @@ function ClientMissions() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<ViewMode>(() => {
-    if (typeof window === "undefined") return "list";
-    return (localStorage.getItem("client-missions-view") as ViewMode) || "list";
+    if (typeof window === "undefined") return "planning";
+    return (localStorage.getItem("client-missions-view:planning-default") as ViewMode) || "planning";
   });
 
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("client-missions-view", view);
+    if (typeof window !== "undefined") localStorage.setItem("client-missions-view:planning-default", view);
   }, [view]);
 
   useEffect(() => {
@@ -161,7 +161,12 @@ function ClientMissions() {
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
-    return Array.from(groups.entries()).sort(([a], [b]) => (a > b ? 1 : -1));
+    // Plus récentes en haut, "sans date" en bas.
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      if (a === "sans-date") return 1;
+      if (b === "sans-date") return -1;
+      return a > b ? -1 : 1;
+    });
   }, [missions]);
 
   const kanbanColumns = useMemo(() => {
