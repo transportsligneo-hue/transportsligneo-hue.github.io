@@ -74,7 +74,7 @@ export const reportMissionEta = createServerFn({ method: "POST" })
       };
     }
 
-    let delay = Math.round(
+    const delay = Math.round(
       (new Date(data.etaAt).getTime() - new Date(row.initial_eta_at).getTime()) / 60_000,
     );
 
