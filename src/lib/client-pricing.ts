@@ -12,6 +12,7 @@ export type OptionKey =
   | "recharge_electrique"
   | "plein_essence"
   | "nettoyage"
+  | "mise_en_main"
   | "express";
 
 export interface ResolvedClientPrice {
@@ -174,6 +175,7 @@ export function computeOptionSupplements(
     recharge_electrique: "Recharge électrique",
     plein_essence: "Appoint carburant",
     nettoyage: "Nettoyage véhicule",
+    mise_en_main: "Mise en main du véhicule",
     express: "Convoyage express",
   };
   const lines: { key: OptionKey; label: string; amount: number }[] = [];

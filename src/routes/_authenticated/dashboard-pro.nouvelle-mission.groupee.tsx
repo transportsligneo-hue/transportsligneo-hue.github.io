@@ -11,7 +11,7 @@ import { lookupPlate } from "@/lib/plate.functions";
 import PlacesInput from "@/components/PlacesInput";
 import {
   ArrowLeft, Layers, Search, Loader2, Plus, X, Check, Zap, Fuel, Sparkle,
-  Clock, Send, Star, ChevronDown,
+  Clock, Send, Star, ChevronDown, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
@@ -26,6 +26,7 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
   { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
   { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
+  { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
 ];
 
 interface FavoriteAddress {
