@@ -296,7 +296,7 @@ export function DocumentScanner({
     })();
   }, [torchOn, torchSupported]);
 
-  // détection de stabilité (auto-capture)
+  // détection de stabilité + détection automatique du document (auto-capture)
   useEffect(() => {
     if (!liveReady || mode !== "live") return;
     const video = videoRef.current;
@@ -304,11 +304,28 @@ export function DocumentScanner({
     const small = document.createElement("canvas");
     small.width = 160; small.height = 90;
     const sctx = small.getContext("2d", { willReadFrequently: true })!;
+    const det = document.createElement("canvas");
+    det.width = 208; det.height = 156;
+    const dctx = det.getContext("2d", { willReadFrequently: true })!;
     let cancelled = false;
+    let frame = 0;
 
     const tick = () => {
       if (cancelled) return;
       if (video.readyState >= 2) {
+        // détection des bords du document (1 frame sur 4 : fluide et rapide)
+        if (frame % 4 === 0) {
+          try {
+            dctx.drawImage(video, 0, 0, det.width, det.height);
+            const quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
+            docQuadRef.current = quad;
+            setDocFound(!!quad);
+          } catch {
+            docQuadRef.current = null;
+          }
+        }
+        frame++;
+
         sctx.drawImage(video, 0, 0, small.width, small.height);
         const cur = sctx.getImageData(0, 0, small.width, small.height);
         const prev = prevFrameRef.current;
@@ -325,8 +342,10 @@ export function DocumentScanner({
           if (stable) {
             if (stableSinceRef.current == null) stableSinceRef.current = performance.now();
             const held = performance.now() - stableSinceRef.current;
-            setStability(Math.min(1, held / AUTO_STABLE_MS));
-            if (autoCapture && held >= AUTO_STABLE_MS) {
+            // document détecté → déclenchement bien plus rapide
+            const need = docQuadRef.current ? AUTO_DETECT_MS : AUTO_STABLE_MS;
+            setStability(Math.min(1, held / need));
+            if (autoCapture && held >= need) {
               captureFromVideo();
               return;
             }
@@ -343,6 +362,46 @@ export function DocumentScanner({
     return () => { cancelled = true; if (rafRef.current) cancelAnimationFrame(rafRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveReady, mode, autoCapture]);
+
+  // tracé du contour détecté par-dessus la vidéo (mapping object-cover)
+  useEffect(() => {
+    if (mode !== "live" || !liveReady) return;
+    let raf = 0;
+    const loop = () => {
+      const canvas = overlayCanvasRef.current;
+      const video = videoRef.current;
+      if (canvas && video) {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+        const ctx = canvas.getContext("2d");
+        const quad = docQuadRef.current;
+        if (ctx) {
+          ctx.clearRect(0, 0, w, h);
+          const vw = video.videoWidth, vh = video.videoHeight;
+          if (quad && vw && vh) {
+            const s = Math.max(w / vw, h / vh);
+            const ox = (w - vw * s) / 2, oy = (h - vh * s) / 2;
+            ctx.beginPath();
+            quad.forEach((p, i) => {
+              const x = ox + p.x * vw * s;
+              const y = oy + p.y * vh * s;
+              if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fillStyle = accent === "blue" ? "rgba(79,140,255,0.18)" : "rgba(212,175,55,0.16)";
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#22c55e";
+            ctx.stroke();
+          }
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [mode, liveReady, accent]);
+
 
   const captureFromVideo = () => {
     const video = videoRef.current;
