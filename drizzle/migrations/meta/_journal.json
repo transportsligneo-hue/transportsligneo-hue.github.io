@@ -15,6 +15,13 @@
       "when": 1789163943134,
       "tag": "0001_missions_client_flags_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789164996197,
+      "tag": "0002_add_plaque_to_missions_client_flags",
+      "breakpoints": true
     }
   ]
 }
