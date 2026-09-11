@@ -643,14 +643,32 @@ function ProDocuments() {
                       <th className="text-right px-5 py-3 font-medium">Action</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredFactures.map((f) => {
+                  {facturesPlanning.map(([groupKey, groupRows]) => (
+                  <tbody key={groupKey}>
+                    <tr className="bg-pro-bg-soft/80 border-t border-pro-border">
+                      <td colSpan={6} className="px-5 py-2 text-[11px] uppercase tracking-wider font-semibold text-pro-text">
+                        {dayLabel(groupKey)}
+                        <span className="ml-2 normal-case font-normal text-pro-muted">
+                          {groupRows.length} facture{groupRows.length > 1 ? "s" : ""}
+                        </span>
+                      </td>
+                    </tr>
+                    {groupRows.map((f) => {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
+                      const typeInfo = factureTypeInfo(f);
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
-                          <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">{f.numero}</td>
+                          <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
+                            <div className="flex flex-col gap-1.5">
+                              <span>{f.numero}</span>
+                              <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                                {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                                {typeInfo.label}
+                              </span>
+                            </div>
+                          </td>
                           <td className="px-5 py-3 text-pro-text">
                             {f.depart && f.arrivee ? `${f.depart} → ${f.arrivee}` : (f.designation ?? "—")}
                           </td>
