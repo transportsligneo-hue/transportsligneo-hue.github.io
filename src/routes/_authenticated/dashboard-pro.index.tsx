@@ -67,6 +67,7 @@ function ProDashboard() {
   const isFlotte = orgInfo?.accountType === "flotte";
 
   const [missions, setMissions] = useState<MissionRow[]>([]);
+  const [plates, setPlates] = useState<Record<string, string>>({});
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [factures, setFactures] = useState<FactureRow[]>([]);
@@ -81,7 +82,7 @@ function ProDashboard() {
       const email = user.email ?? "";
       const orFilter = `user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`;
       const [{ data: directRows }, { data: profile }, { data: memberships }, { data: devisData }, { data: facturesData }] = await Promise.all([
-        supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index").or(orFilter).order("created_at", { ascending: false }),
+        supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, immatriculation").or(orFilter).order("created_at", { ascending: false }),
         supabase.from("profiles").select("organization_id").eq("user_id", user.id).maybeSingle(),
         supabase.from("organization_members").select("organization_id").eq("user_id", user.id).eq("status", "active"),
         supabase.from("devis").select("id, numero, depart, arrivee, prix_estime, statut, created_at, paid_at, accepted_at, locked_at, mission_id").order("created_at", { ascending: false }).limit(6),
@@ -91,7 +92,7 @@ function ProDashboard() {
       let orgRows: MissionRow[] = []; let vehicleRows: VehicleRow[] = [];
       if (orgIds.length > 0) {
         const [{ data: mData }, { data: vData }] = await Promise.all([
-          supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index").or(orgIds.map(id => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(",")).order("created_at", { ascending: false }),
+          supabase.from("missions").select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, created_at, leg_type, leg_index, immatriculation").or(orgIds.map(id => `organization_id.eq.${id},fleet_organization_id.eq.${id}`).join(",")).order("created_at", { ascending: false }),
           supabase.from("vehicles").select("id, marque, modele, immatriculation, statut").in("organization_id", orgIds),
         ]);
         orgRows = (mData ?? []) as MissionRow[];
@@ -103,6 +104,15 @@ function ProDashboard() {
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       if (cancelled) return;
       setMissions(uniqueMissions);
+      const missionIds = uniqueMissions.map(m => m.id);
+      if (missionIds.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: missionIds });
+        if (!cancelled && flagRows) {
+          const map: Record<string, string> = {};
+          for (const f of flagRows) if (f.immatriculation) map[f.mission_id] = f.immatriculation;
+          setPlates(map);
+        }
+      }
       setVehicles(vehicleRows);
       setDevis((devisData ?? []) as DevisRow[]);
       setFactures((facturesData ?? []) as FactureRow[]);
@@ -339,6 +349,9 @@ function ProDashboard() {
               <div className="min-w-0">
                 <div className="v3-mono-id">{legRef(m.numero, m.leg_type, m.leg_index, m.leg_type === "aller" || m.leg_type === "retour")}</div>
                 <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
+                {(m.immatriculation ?? plates[m.id]) && (
+                  <div className="mt-1"><span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span></div>
+                )}
               </div>
               <div className="hidden md:block v3-pulse">
                 <div className="fill" style={{ width: `${pct}%` }} />
