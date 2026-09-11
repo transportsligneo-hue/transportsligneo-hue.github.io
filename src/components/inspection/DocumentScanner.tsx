@@ -196,7 +196,15 @@ function enhanceDocument(canvas: HTMLCanvasElement) {
 
 type Mode = "live" | "review";
 
-export function DocumentScanner({ onCancel, onScanned }: Props) {
+export function DocumentScanner({
+  onCancel,
+  onScanned,
+  accent = "gold",
+  title = "Scanner un document",
+}: Props) {
+  const ACC = accent === "blue" ? "#4f8cff" : "#d4af37";
+  const ACC_FG = accent === "blue" ? "#0b1026" : "#0b1026";
+  const ACC_SOFT = accent === "blue" ? "rgba(79,140,255,0.12)" : "rgba(212,175,55,0.10)";
   // fallback natif
   const fileRef = useRef<HTMLInputElement>(null);
   // caméra live
