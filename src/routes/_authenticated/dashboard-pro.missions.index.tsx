@@ -461,7 +461,9 @@ function ProMissionsIndex() {
                         </div>
                         <div className="fleet-leg-meta">
                           <span><Calendar size={10} className="inline mr-1" />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
-                          {m.immatriculation && <span className="plate-tag plate-tag--sm">{m.immatriculation}</span>}
+                          {(m.immatriculation ?? flags[m.id]?.plaque) && (
+                            <span className="plate-tag plate-tag--sm">{m.immatriculation ?? flags[m.id]?.plaque}</span>
+                          )}
                           <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
                           <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>
                         </div>
