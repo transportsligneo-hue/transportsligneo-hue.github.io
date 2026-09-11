@@ -621,8 +621,18 @@ export function DocumentScanner({
             className="absolute inset-0 w-full h-full object-cover"
           />
 
-          {/* overlay guide */}
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          {/* contour détecté automatiquement */}
+          <canvas
+            ref={overlayCanvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+          />
+
+          {/* overlay guide (masqué dès que le document est détecté) */}
+          <div
+            className="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-200"
+            style={{ opacity: docFound ? 0 : 1 }}
+          >
+
             <div className="relative w-[86%] aspect-[1/1.414] max-h-[70%]">
               {/* frame */}
               <div
