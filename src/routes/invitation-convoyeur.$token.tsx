@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getConvoyeurInvitation } from "@/lib/public-config.functions";
 import { Loader2, ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,11 +50,10 @@ function InvitationConvoyeurPage() {
 
   useEffect(() => {
     (async () => {
-      const { data, error: rpcError } = await supabase.rpc("get_convoyeur_invitation" as never, {
-        _token: token,
-      } as never);
-      const row = Array.isArray(data) ? (data[0] as InvitationInfo | undefined) : undefined;
-      if (rpcError || !row) setInvitation(null);
+      const row = (await getConvoyeurInvitation({ data: { token } }).catch(
+        () => null,
+      )) as InvitationInfo | null;
+      if (!row) setInvitation(null);
       else {
         setInvitation(row);
         setTelephone(row.telephone ?? "");

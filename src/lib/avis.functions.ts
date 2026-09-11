@@ -1,6 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
 export interface AvisPublic {
   id: string;
@@ -18,13 +16,9 @@ export interface AvisPublic {
  * colonnes d'affichage sont exposées, jamais le nom réel ni la mission liée.
  */
 export const getAvisPublics = createServerFn({ method: "GET" }).handler(async () => {
-  const supabasePublic = createClient<Database>(
-    process.env["SUPABASE_URL"]!,
-    process.env["SUPABASE_PUBLISHABLE_KEY"]!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const { data, error } = await (supabasePublic as any)
+  const { data, error } = await (supabaseAdmin as any)
     .from("avis_publics")
     .select("id, note, commentaire, nom_affiche_public, ville, type_client, date_avis")
     .order("date_avis", { ascending: false })

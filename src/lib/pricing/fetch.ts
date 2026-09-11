@@ -3,7 +3,7 @@
  * Lecture réservée aux admins par RLS → fallback silencieux sur "micro"
  * (franchise en base de TVA), qui est le régime par défaut du projet.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { getPublicPricingDisplay } from "@/lib/public-config.functions";
 import type { Regime } from "./types";
 
 export type ActiveRegime = {
@@ -18,8 +18,7 @@ export const TVA_FRANCHISE_NOTE = "TVA non applicable, article 293 B du CGI.";
 export async function fetchActiveRegime(): Promise<ActiveRegime> {
   const fallback: ActiveRegime = { regime: "micro", vatRate: 0, exemptionNote: TVA_FRANCHISE_NOTE };
   try {
-    const { data } = await supabase.rpc("get_public_pricing_display" as never);
-    const row = (Array.isArray(data) ? data[0] : data) as
+    const row = (await getPublicPricingDisplay()) as
       | { regime?: string; default_vat_rate?: number }
       | null
       | undefined;
