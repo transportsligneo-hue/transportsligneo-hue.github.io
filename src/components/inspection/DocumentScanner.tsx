@@ -219,6 +219,10 @@ export function DocumentScanner({
   const [torchSupported, setTorchSupported] = useState(false);
   const [autoCapture, setAutoCapture] = useState(true);
   const [stability, setStability] = useState(0); // 0..1
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  const docQuadRef = useRef<Pt[] | null>(null);
+  const [docFound, setDocFound] = useState(false);
+
   const [useNativeFallback, setUseNativeFallback] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
 
