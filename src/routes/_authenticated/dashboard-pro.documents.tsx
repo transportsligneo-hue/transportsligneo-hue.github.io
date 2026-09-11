@@ -144,6 +144,7 @@ interface FactureRow {
   prix_ttc: number;
   pdf_url: string | null;
   mode_paiement: string | null;
+  mission_id: string | null;
   created_at: string;
 }
 
