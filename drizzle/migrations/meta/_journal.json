@@ -22,6 +22,13 @@
       "when": 1789164996197,
       "tag": "0002_add_plaque_to_missions_client_flags",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789165624166,
+      "tag": "0003_restrict_cartes_grises_convoyeur_policy_to_authenticated",
+      "breakpoints": true
     }
   ]
 }
