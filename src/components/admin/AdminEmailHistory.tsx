@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge, Button, Table, THead, TH, TD } from "@/components/admin/AdminUI";
 import { Loader2, Mail, RefreshCw, Search, X } from "lucide-react";
@@ -165,7 +166,12 @@ export function AdminEmailHistory() {
                   {html && (
                     <div
                       className="rounded-lg border border-pro-border bg-white p-3 text-sm text-slate-800 overflow-auto"
-                      dangerouslySetInnerHTML={{ __html: html }}
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(html, {
+                          USE_PROFILES: { html: true },
+                          FORBID_TAGS: ["style", "form", "input", "button", "iframe", "object", "embed"],
+                        }),
+                      }}
                     />
                   )}
                   {docUrl && (

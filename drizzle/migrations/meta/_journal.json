@@ -36,6 +36,13 @@
       "when": 1789167073463,
       "tag": "0004_fix_client_flags_trajet_matching",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789167322009,
+      "tag": "0005_pricing_settings_super_admin_consistency",
+      "breakpoints": true
     }
   ]
 }
