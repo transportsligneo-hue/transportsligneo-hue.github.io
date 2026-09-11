@@ -259,7 +259,8 @@ function ProMissionsIndex() {
           </Link>
         ),
       })),
-    [filtered],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtered, flags],
   );
 
   return (
