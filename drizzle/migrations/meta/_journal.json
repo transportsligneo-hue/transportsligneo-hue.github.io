@@ -43,6 +43,20 @@
       "when": 1789167322009,
       "tag": "0005_pricing_settings_super_admin_consistency",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789167443813,
+      "tag": "0006_revoke_anon_execute_security_definer",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789167463613,
+      "tag": "0007_revoke_public_execute_security_definer",
+      "breakpoints": true
     }
   ]
 }
