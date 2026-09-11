@@ -710,6 +710,7 @@ function ProDocuments() {
                       );
                     })}
                   </tbody>
+                  ))}
                 </table>
               </div>
             )}
