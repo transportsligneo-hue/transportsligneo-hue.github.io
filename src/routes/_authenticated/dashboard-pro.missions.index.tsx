@@ -8,6 +8,7 @@ import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
+import { dossierTypeLabel, missionTypeLabel, isAllerRetour } from "@/lib/mission-type";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
@@ -216,12 +217,19 @@ function ProMissionsIndex() {
         const rank = (l: MissionRow) => (l.leg_type === "retour" ? 1 : 0);
         return rank(a) - rank(b) || (a.leg_index ?? 0) - (b.leg_index ?? 0);
       });
-      const isDuo = ordered.length > 1 || ordered.some(l => l.leg_type === "aller" || l.leg_type === "retour");
+      const legsMeta = ordered.map((l) => ({
+        legType: l.leg_type,
+        recharge: flags[l.id]?.recharge,
+        typeTrajet: l.type_trajet,
+      }));
+      const duoAR = isAllerRetour(legsMeta);
+      const isDuo = ordered.length > 1;
+      const typeLabel = dossierTypeLabel(legsMeta);
       const total = ordered.reduce((sum, l) => sum + Number(l.prix_total ?? 0), 0);
       const head = ordered[0]!;
-      return { key, legs: ordered, isDuo, total, head };
+      return { key, legs: ordered, isDuo, duoAR, typeLabel, total, head };
     });
-  }, [filtered]);
+  }, [filtered, flags]);
 
 
   const pendingFiltered = useMemo(() => {
@@ -236,13 +244,16 @@ function ProMissionsIndex() {
 
   const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
-  const typeLabelFor = (m: MissionRow): string => {
-    if (flags[m.id]?.recharge) return "Recharge uniquement";
-    if (m.leg_type === "aller" || m.leg_type === "retour" || m.type_trajet === "aller_retour") return "Livraison + Restitution";
-    return "Livraison simple";
-  };
+  const typeLabelFor = (m: MissionRow): string =>
+    missionTypeLabel({ legType: m.leg_type, recharge: flags[m.id]?.recharge, typeTrajet: m.type_trajet });
 
   /** Dossier (clé de regroupement) + total, partagés par les jambes L/R. */
+  const dossierMeta = useMemo(() => {
+    const map = new Map<string, { typeLabel: string; duoAR: boolean }>();
+    for (const d of dossiers) map.set(d.key, { typeLabel: d.typeLabel, duoAR: d.duoAR });
+    return map;
+  }, [dossiers]);
+
   const groupInfo = useMemo(() => {
     const map = new Map<string, { total: number; count: number }>();
     for (const m of filtered) {
@@ -267,13 +278,17 @@ function ProMissionsIndex() {
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
         plaque: m.immatriculation ?? flags[m.id]?.plaque ?? null,
-        typeLabel: typeLabelFor(m),
+        typeLabel:
+          dossierMeta.get(m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero))?.typeLabel ??
+          typeLabelFor(m),
         cancelReason:
           (m.statut === "annulee" || m.statut === "annule")
             ? (flags[m.id]?.motif ?? flags[m.id]?.incident ?? null)
             : null,
         groupKey: m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero),
-        legLabel: m.leg_type === "retour" ? "R" : m.leg_type === "aller" ? "L" : null,
+        legLabel: dossierMeta.get(m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero))?.duoAR
+          ? (m.leg_type === "retour" ? "R" : "L")
+          : null,
         groupTotal: (() => {
           const g = groupInfo.get(m.mission_group_id ?? m.group_reference ?? stripLegSuffix(m.numero));
           return g && g.count > 1 ? `${g.total.toFixed(2)} €` : undefined;
@@ -293,7 +308,7 @@ function ProMissionsIndex() {
         ),
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtered, flags, groupInfo],
+    [filtered, flags, groupInfo, dossierMeta],
   );
 
   return (
@@ -402,7 +417,7 @@ function ProMissionsIndex() {
         ) : view !== "list" ? (
           <MissionViewsBody view={view} items={viewItems} />
         ) : (
-          dossiers.map(({ key, legs, isDuo, total, head }) => {
+          dossiers.map(({ key, legs, isDuo, duoAR, typeLabel, total, head }) => {
             const elec = (head.carburant ?? "").toLowerCase().includes("elec")
               || (head.carburant ?? "").toLowerCase().includes("élec");
             const fmtDate = (d: string) =>
@@ -427,14 +442,14 @@ function ProMissionsIndex() {
                     <span className="fleet-dossier-num">{displayNumero(stripLegSuffix(head.numero))}</span>
                     {anyRecharge ? (
                       <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
-                        <Zap size={10} /> Recharge uniquement
+                        <Zap size={10} /> {typeLabel}
                       </span>
-                    ) : isDuo ? (
+                    ) : duoAR ? (
                       <span className="fleet-chip-duo" title="Dossier avec livraison + restitution">
                         <Repeat size={10} /> Livraison + Restitution
                       </span>
                     ) : (
-                      <span className="fleet-chip-simple">Livraison simple</span>
+                      <span className="fleet-chip-simple">{typeLabel}</span>
                     )}
                     {plates.map((p) => (
                       <span key={p} className="plate-tag">{p}</span>
@@ -469,7 +484,7 @@ function ProMissionsIndex() {
                         onFocus={() => prefetchMissionTracking(m.numero, m.id)}
                       >
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-[11px] text-pro-text-soft">{legRef(m.numero, m.leg_type, m.leg_index, isDuo)}</span>
+                          <span className="font-mono text-[11px] text-pro-text-soft">{legRef(m.numero, m.leg_type, m.leg_index, duoAR)}</span>
                           <MissionLegBadge leg={m.leg_type as "aller" | "retour" | "simple" | null} size="xs" />
                           <StatusBadge kind={missionStatusKind(m.statut)}>
                             {statutLabel[m.statut] ?? missionStatusLabel(m.statut)}

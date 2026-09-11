@@ -6,10 +6,10 @@ import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
   Truck, Clock, CheckCircle, PlusCircle, Loader2, ArrowUpRight, FileText,
-  Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp,
-} from "lucide-react";
+  Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp, Zap } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
+import { dossierTypeLabel, isAllerRetour } from "@/lib/mission-type";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -68,6 +68,7 @@ function ProDashboard() {
 
   const [missions, setMissions] = useState<MissionRow[]>([]);
   const [plates, setPlates] = useState<Record<string, string>>({});
+  const [recharges, setRecharges] = useState<Record<string, boolean>>({});
   const [vehicles, setVehicles] = useState<VehicleRow[]>([]);
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [factures, setFactures] = useState<FactureRow[]>([]);
@@ -109,8 +110,13 @@ function ProDashboard() {
         const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: missionIds });
         if (!cancelled && flagRows) {
           const map: Record<string, string> = {};
-          for (const f of flagRows) if (f.immatriculation) map[f.mission_id] = f.immatriculation;
+          const rech: Record<string, boolean> = {};
+          for (const f of flagRows) {
+            if (f.immatriculation) map[f.mission_id] = f.immatriculation;
+            if (f.recharge_seule) rech[f.mission_id] = true;
+          }
           setPlates(map);
+          setRecharges(rech);
         }
       }
       setVehicles(vehicleRows);
@@ -158,15 +164,18 @@ function ProDashboard() {
         const rank = (l: MissionRow) => (l.leg_type === "retour" ? 1 : 0);
         return rank(a) - rank(b) || (a.leg_index ?? 0) - (b.leg_index ?? 0);
       });
+      const legsMeta = ordered.map((l) => ({ legType: l.leg_type, recharge: recharges[l.id] }));
       const isDuo = ordered.length > 1;
       return {
         key,
         legs: ordered,
         isDuo,
+        duoAR: isAllerRetour(legsMeta),
+        typeLabel: dossierTypeLabel(legsMeta),
         total: ordered.reduce((s, l) => s + Number(l.prix_total ?? 0), 0),
       };
     });
-  }, [filteredMissions]);
+  }, [filteredMissions, recharges]);
 
   const visibleDossiers = useMemo(() => {
     const out: typeof dossiers = [];
@@ -375,7 +384,7 @@ function ProDashboard() {
             {d.isDuo && (
               <div className="v3-dossier-tie">
                 <span className="v3-dossier-tie-label">
-                  {displayNumero(d.key)} · Livraison + Restitution
+                  {displayNumero(d.key)} · {d.typeLabel}
                 </span>
                 <span className="v3-dossier-tie-total">{d.total.toFixed(0)} € total dossier</span>
               </div>
@@ -394,17 +403,27 @@ function ProDashboard() {
                 >
                   <div className="min-w-0">
                     <div className="v3-mono-id flex items-center gap-1.5">
-                      {d.isDuo && (
+                      {d.duoAR && (
                         <span className={`v3-leg-pill ${m.leg_type === "retour" ? "is-r" : "is-l"}`}>
                           {m.leg_type === "retour" ? "R" : "L"}
                         </span>
                       )}
-                      {legRef(m.numero, m.leg_type, m.leg_index, d.isDuo)}
+                      {legRef(m.numero, m.leg_type, m.leg_index, d.duoAR)}
                     </div>
                     <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
-                    {(m.immatriculation ?? plates[m.id]) && (
-                      <div className="mt-1"><span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span></div>
-                    )}
+                    <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                      {(m.immatriculation ?? plates[m.id]) && (
+                        <span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span>
+                      )}
+                      {recharges[m.id] && (
+                        <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
+                          <Zap size={10} /> Recharge uniquement
+                        </span>
+                      )}
+                      {!d.isDuo && !recharges[m.id] && (
+                        <span className="text-[10px] text-v3-muted">Livraison simple</span>
+                      )}
+                    </div>
                   </div>
                   <div className="hidden md:block v3-pulse">
                     <div className="fill" style={{ width: `${pct}%` }} />
