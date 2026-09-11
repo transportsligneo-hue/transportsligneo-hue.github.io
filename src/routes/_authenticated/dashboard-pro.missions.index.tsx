@@ -386,15 +386,22 @@ function ProMissionsIndex() {
             const plates = Array.from(
               new Set(legs.map((l) => l.immatriculation).filter(Boolean) as string[]),
             );
+            const anyRecharge = legs.some((l) => flags[l.id]?.recharge);
             return (
               <article key={key} className="fleet-dossier">
                 <header className="fleet-dossier-head">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="fleet-dossier-num">{displayNumero(stripLegSuffix(head.numero))}</span>
-                    {isDuo && (
-                      <span className="fleet-chip-duo">
-                        <Repeat size={10} /> Aller-retour
+                    {anyRecharge ? (
+                      <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
+                        <Zap size={10} /> Recharge uniquement
                       </span>
+                    ) : isDuo ? (
+                      <span className="fleet-chip-duo" title="Dossier avec livraison + restitution">
+                        <Repeat size={10} /> Livraison + Restitution
+                      </span>
+                    ) : (
+                      <span className="fleet-chip-simple">Livraison simple</span>
                     )}
                     {plates.map((p) => (
                       <span key={p} className="plate-tag">{p}</span>
