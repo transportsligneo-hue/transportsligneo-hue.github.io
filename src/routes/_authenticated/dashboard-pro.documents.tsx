@@ -282,6 +282,14 @@ function ProDocuments() {
   }, [devis]);
 
   /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  const devisByMission = useMemo(() => {
+    const map: Record<string, DevisRow> = {};
+    for (const d of devis) {
+      if (d.mission_id && !map[d.mission_id]) map[d.mission_id] = d;
+    }
+    return map;
+  }, [devis]);
+
   const facturesPlanning = useMemo(() => {
     const groups = new Map<string, FactureRow[]>();
     for (const f of filteredFactures) {
@@ -688,7 +696,7 @@ function ProDocuments() {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
-                      const typeInfo = factureTypeInfo(f);
+                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission);
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
                           <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
