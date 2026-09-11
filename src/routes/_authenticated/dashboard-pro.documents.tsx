@@ -53,10 +53,10 @@ interface DevisRow {
   option_trajet: string | null;
 }
 
-/** Pastilles néon électriques : recharge = bleu, livraison simple = violet, livraison + restitution = dégradé bleu/violet. */
-const NEON_RECHARGE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
-const NEON_SIMPLE = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
-const NEON_DUO = "bg-gradient-to-r from-sky-100 to-violet-100 text-indigo-700 border-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.35)]";
+/** Pastilles néon électriques : recharge = vert, livraison simple = bleu, livraison + restitution = violet. */
+const NEON_RECHARGE = "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.35)]";
+const NEON_SIMPLE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
+const NEON_DUO = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
 
 /** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
 function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
@@ -70,8 +70,22 @@ function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: strin
   return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
-/** Type de prestation d'une facture, déduit de sa désignation. */
-function factureTypeInfo(f: FactureRow): { label: string; cls: string } {
+/** Type de prestation d'une facture : d'abord la mission liée (recharge / retour), sinon la désignation. */
+function factureTypeInfo(
+  f: FactureRow,
+  rech: Record<string, boolean>,
+  devisByMission: Record<string, DevisRow>,
+): { label: string; cls: string } {
+  if (f.mission_id && rech[f.mission_id]) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
+  const dv = f.mission_id ? devisByMission[f.mission_id] : undefined;
+  if (dv) {
+    const opt = (dv.option_trajet ?? "").toLowerCase();
+    if (opt.includes("recharge")) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
+    if (dv.date_retour || opt.includes("retour") || opt.includes("restitution")) {
+      return { label: "Livraison + Restitution", cls: NEON_DUO };
+    }
+    return { label: "Livraison simple", cls: NEON_SIMPLE };
+  }
   const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
   if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
@@ -130,6 +144,7 @@ interface FactureRow {
   prix_ttc: number;
   pdf_url: string | null;
   mode_paiement: string | null;
+  mission_id: string | null;
   created_at: string;
 }
 
@@ -162,6 +177,7 @@ function ProDocuments() {
   const [tab, setTab] = useState<"devis" | "factures">("devis");
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [factures, setFactures] = useState<FactureRow[]>([]);
+  const [rechargeFlags, setRechargeFlags] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [payingFactureId, setPayingFactureId] = useState<string | null>(null);
@@ -206,8 +222,23 @@ function ProDocuments() {
       ]);
 
       if (cancelled) return;
-      setDevis((dRes.data ?? []) as DevisRow[]);
-      setFactures((fRes.data ?? []) as FactureRow[]);
+      const devisRows = (dRes.data ?? []) as DevisRow[];
+      const factureRows = (fRes.data ?? []) as FactureRow[];
+      setDevis(devisRows);
+      setFactures(factureRows);
+
+      // Types réels des missions liées aux factures (recharge uniquement, etc.)
+      const missionIds = Array.from(new Set(factureRows.map(f => f.mission_id).filter(Boolean))) as string[];
+      if (missionIds.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: missionIds });
+        if (!cancelled && flagRows) {
+          const rech: Record<string, boolean> = {};
+          for (const fl of flagRows) {
+            if (fl.recharge_seule) rech[fl.mission_id] = true;
+          }
+          setRechargeFlags(rech);
+        }
+      }
       setLoading(false);
     })();
 
@@ -251,6 +282,14 @@ function ProDocuments() {
   }, [devis]);
 
   /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  const devisByMission = useMemo(() => {
+    const map: Record<string, DevisRow> = {};
+    for (const d of devis) {
+      if (d.mission_id && !map[d.mission_id]) map[d.mission_id] = d;
+    }
+    return map;
+  }, [devis]);
+
   const facturesPlanning = useMemo(() => {
     const groups = new Map<string, FactureRow[]>();
     for (const f of filteredFactures) {
@@ -657,7 +696,7 @@ function ProDocuments() {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
-                      const typeInfo = factureTypeInfo(f);
+                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission);
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
                           <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
