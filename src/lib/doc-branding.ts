@@ -154,31 +154,29 @@ export function docContentLimit(doc: jsPDF): number {
   return doc.internal.pageSize.getHeight() - DOC_FOOTER_RESERVED;
 }
 
-/** En-tête compact des pages de continuation. */
+/** En-tête compact et clair des pages de continuation. */
 function drawContinuationHeader(doc: jsPDF, ctx: DocCtx) {
   const h = 20;
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(0, 0, ctx.pageW, h, "F");
   if (ctx.logoData) {
     try {
-      doc.addImage(ctx.logoData, "PNG", 12, 3, 14, 14);
+      doc.addImage(ctx.logoData, "PNG", 14, 5, 11, 11);
     } catch {
       /* logo optionnel */
     }
   }
-  doc.setTextColor(...DOC_WHITE);
+  doc.setTextColor(...DOC_NAVY);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
-  doc.text(ctx.title.toUpperCase(), 30, h / 2 + 1);
+  doc.text(ctx.title.toUpperCase(), ctx.logoData ? 28 : 14, h / 2 + 1.2);
   if (ctx.numero) {
-    doc.setFont("helvetica", "normal");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(...DOC_GOLD);
-    doc.text(ctx.numero, ctx.pageW - 14, h / 2 + 1, { align: "right" });
+    doc.text(ctx.numero, ctx.pageW - 14, h / 2 + 1.2, { align: "right" });
   }
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.6);
-  doc.line(0, h, ctx.pageW, h);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.line(14, h, ctx.pageW - 14, h);
 }
 
 /**
