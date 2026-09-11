@@ -20,6 +20,9 @@ interface MissionRow {
   date_prise_en_charge: string;
   statut: string;
   prix_total: number;
+  heure_prise_en_charge?: string | null;
+  mission_group_id?: string | null;
+  immatriculation?: string | null;
   leg_type?: string | null;
   leg_index?: number | null;
 }
@@ -38,7 +41,7 @@ function EntrepriseMissions() {
       if (!mem) { setLoading(false); return; }
       const { data } = await supabase
         .from("missions")
-        .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, prix_total, leg_type, leg_index")
+        .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, heure_prise_en_charge, statut, prix_total, leg_type, leg_index, mission_group_id, immatriculation")
         .eq("organization_id", mem.organization_id)
         .order("created_at", { ascending: false });
       setRows((data ?? []) as MissionRow[]);
@@ -56,7 +59,12 @@ function EntrepriseMissions() {
         depart: r.ville_depart,
         arrivee: r.ville_arrivee,
         date: r.date_prise_en_charge,
+        heure: r.heure_prise_en_charge ?? null,
         statut: r.statut,
+        plaque: r.immatriculation ?? null,
+        typeLabel: r.leg_type === "aller" || r.leg_type === "retour" ? "Livraison + Restitution" : "Livraison simple",
+        groupKey: r.mission_group_id ?? `solo-${r.id}`,
+        legLabel: r.leg_type === "retour" ? "R" : r.leg_type === "aller" ? "L" : null,
         amount: `${Number(r.prix_total).toFixed(2)} €`,
       })),
     [rows],
