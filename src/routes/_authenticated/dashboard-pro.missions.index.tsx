@@ -55,6 +55,7 @@ interface MissionFlags {
   recharge: boolean;
   motif: string | null;
   incident: string | null;
+  plaque: string | null;
 }
 
 const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "terminee", "annulee"] as const;
