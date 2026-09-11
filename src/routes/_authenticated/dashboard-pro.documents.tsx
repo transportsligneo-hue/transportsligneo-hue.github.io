@@ -53,10 +53,10 @@ interface DevisRow {
   option_trajet: string | null;
 }
 
-/** Pastilles néon électriques : recharge = bleu, livraison simple = violet, livraison + restitution = dégradé bleu/violet. */
-const NEON_RECHARGE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
-const NEON_SIMPLE = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
-const NEON_DUO = "bg-gradient-to-r from-sky-100 to-violet-100 text-indigo-700 border-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.35)]";
+/** Pastilles néon électriques : recharge = vert, livraison simple = bleu, livraison + restitution = violet. */
+const NEON_RECHARGE = "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.35)]";
+const NEON_SIMPLE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
+const NEON_DUO = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
 
 /** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
 function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
