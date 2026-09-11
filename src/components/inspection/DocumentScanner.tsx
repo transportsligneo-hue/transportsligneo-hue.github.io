@@ -663,7 +663,10 @@ export function DocumentScanner({
             ) : autoCapture ? (
               stability > 0.6
                 ? <><Sparkles size={12} className="text-emerald-400" /> Capture…</>
-                : <><ScanLine size={12} /> Positionnez le document</>
+                : docFound
+                  ? <><Sparkles size={12} className="text-emerald-400" /> Document détecté — ne bougez plus</>
+                  : <><ScanLine size={12} /> Positionnez le document</>
+
             ) : (
               <><CameraIcon size={12} /> Capture manuelle</>
             )}
