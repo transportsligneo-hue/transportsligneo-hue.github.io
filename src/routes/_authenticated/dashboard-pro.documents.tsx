@@ -399,17 +399,29 @@ function ProDocuments() {
                   <tr>
                     <th className="text-left px-5 py-3 font-medium">N°</th>
                     <th className="text-left px-5 py-3 font-medium">Trajet</th>
-                    <th className="text-left px-5 py-3 font-medium">Date</th>
+                    <th className="text-left px-5 py-3 font-medium">Date &amp; heure</th>
                     <th className="text-left px-5 py-3 font-medium">Statut</th>
                     <th className="text-right px-5 py-3 font-medium">Montant</th>
                     <th className="text-right px-5 py-3 font-medium">PDF</th>
                     <th className="text-right px-5 py-3 font-medium">Action</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {devis.map((d) => {
+                {devisPlanning.map(([groupKey, groupRows]) => (
+                <tbody key={groupKey}>
+                  <tr className="bg-pro-bg-soft/80 border-t border-pro-border">
+                    <td colSpan={7} className="px-5 py-2 text-[11px] uppercase tracking-wider font-semibold text-pro-text">
+                      {dayLabel(groupKey)}
+                      <span className="ml-2 normal-case font-normal text-pro-muted">
+                        {groupRows.length} devis
+                      </span>
+                    </td>
+                  </tr>
+                  {groupRows.map((d) => {
                     const st = devisStatutPill[d.statut] ?? { label: d.statut, cls: "bg-slate-100 text-slate-700" };
                     const isDuo = Boolean(d.depart_retour || d.immatriculation_retour || d.prix_retour);
+                    const typeInfo = devisTypeInfo(d, isDuo);
+                    const heure = fmtHeure(d.heure_souhaitee);
+                    const heureRetour = fmtHeure(d.heure_retour);
                     const vehicule = [d.marque, d.modele].filter(Boolean).join(" ");
                     const vehiculeRetour = [d.marque_retour, d.modele_retour].filter(Boolean).join(" ");
                     return (
