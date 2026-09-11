@@ -9,7 +9,7 @@ import {
   Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp,
 } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
-import { legRef } from "@/lib/mission-number";
+import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
