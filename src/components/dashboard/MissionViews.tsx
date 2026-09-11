@@ -265,6 +265,7 @@ export function MissionViewsBody({
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
                         {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
+                        {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
                       </div>
                       <p className={`text-sm truncate ${strong}`}>
                         {i.depart} <span className="opacity-40">→</span> {i.arrivee}
