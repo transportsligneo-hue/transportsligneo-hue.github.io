@@ -345,7 +345,7 @@ export function MissionViewsBody({
                     <div className={`rounded-lg border-l-4 border-[#5334d6] ${theme === "dark" ? "border border-primary/25 bg-primary/5" : "border border-[#5334d6]/25 bg-[#5334d6]/[0.04]"}`}>
                       <div className={`flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold ${muted}`}>
                         <span className="text-[#5334d6]">⌐ Dossier lié</span>
-                        <span>{b.typeLabel ?? "Livraison + Restitution"}</span>
+                        <span>{b.typeLabel ?? "Mission groupée"}</span>
                         {b.total && <span className={`ml-auto text-xs font-bold ${strong}`}>{b.total} total</span>}
                       </div>
                       <div className={`divide-y ${theme === "dark" ? "divide-primary/10" : "divide-[#5334d6]/15"}`}>
