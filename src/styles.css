@@ -8590,16 +8590,8 @@ body:not(.is-driver-app) :where(
 
 /* Le hero reste sombre en mode clair : ses petites légendes doivent rester visibles. */
 html.theme-light .r4-page .v5-hero .electric-neon-text,
-html.theme-light .r4-page .v5-hero .v4-accent,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
+html.theme-light .r4-page .v5-hero .v4-accent {
   color: var(--neon-blue) !important;
-}
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label {
-  text-shadow: 0 0 10px var(--neon-blue-glow), 0 0 22px rgba(91,143,255,.48) !important;
-}
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
-  filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
