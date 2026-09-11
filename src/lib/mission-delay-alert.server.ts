@@ -4,6 +4,7 @@
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { sendRawEmailServer } from "@/server/email-send";
+import { escapeHtml } from "@/lib/campaigns/render";
 
 function formatMin(min: number): string {
   const m = Math.max(0, Math.round(min));
@@ -53,6 +54,11 @@ export async function sendMissionDelayAlert(params: {
   });
   const trajetLabel = [trajet?.depart, trajet?.arrivee].filter(Boolean).join(" → ");
 
+  // Valeurs échappées pour interpolation HTML (les champs viennent de formulaires publics)
+  const numeroHtml = escapeHtml(numero);
+  const clientNomHtml = trajet?.client_nom ? escapeHtml(trajet.client_nom) : "";
+  const trajetLabelHtml = trajetLabel ? escapeHtml(trajetLabel) : "";
+
   // 1) Client — email
   if (trajet?.client_email) {
     try {
@@ -63,8 +69,8 @@ export async function sendMissionDelayAlert(params: {
         idempotencyKey: `delay-${attributionId}-${Math.round(delayMinutes)}`,
         html: `
           <div style="font-family:Helvetica,Arial,sans-serif;color:#061238;line-height:1.6">
-            <p>Bonjour${trajet.client_nom ? ` ${trajet.client_nom}` : ""},</p>
-            <p>Le convoyage <strong>${numero}</strong>${trajetLabel ? ` (${trajetLabel})` : ""} accuse
+            <p>Bonjour${clientNomHtml ? ` ${clientNomHtml}` : ""},</p>
+            <p>Le convoyage <strong>${numeroHtml}</strong>${trajetLabelHtml ? ` (${trajetLabelHtml})` : ""} accuse
             un retard estimé de <strong>${retard}</strong> sur l'horaire prévu.</p>
             <p>Nouvelle heure d'arrivée estimée : <strong>${eta}</strong>.</p>
             <p>Vous pouvez suivre la position du véhicule en temps réel depuis votre espace client.</p>
