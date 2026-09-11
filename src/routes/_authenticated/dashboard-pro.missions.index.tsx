@@ -8,6 +8,7 @@ import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
+import { dossierTypeLabel, missionTypeLabel, isAllerRetour } from "@/lib/mission-type";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 
@@ -236,11 +237,8 @@ function ProMissionsIndex() {
 
   const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
-  const typeLabelFor = (m: MissionRow): string => {
-    if (flags[m.id]?.recharge) return "Recharge uniquement";
-    if (m.leg_type === "aller" || m.leg_type === "retour" || m.type_trajet === "aller_retour") return "Livraison + Restitution";
-    return "Livraison simple";
-  };
+  const typeLabelFor = (m: MissionRow): string =>
+    missionTypeLabel({ legType: m.leg_type, recharge: flags[m.id]?.recharge, typeTrajet: m.type_trajet });
 
   /** Dossier (clé de regroupement) + total, partagés par les jambes L/R. */
   const groupInfo = useMemo(() => {
