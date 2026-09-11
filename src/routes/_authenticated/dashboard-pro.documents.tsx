@@ -221,6 +221,22 @@ function ProDocuments() {
     });
   }, [factures, statutFilter, yearFilter]);
 
+  /** Vue planning : devis groupés par jour de prestation, plus récents en haut. */
+  const devisPlanning = useMemo(() => {
+    const groups = new Map<string, DevisRow[]>();
+    for (const d of devis) {
+      const key = dayKey(d.date_souhaitee ?? d.created_at);
+      const arr = groups.get(key);
+      if (arr) arr.push(d);
+      else groups.set(key, [d]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      if (a === "sans-date") return 1;
+      if (b === "sans-date") return -1;
+      return a > b ? -1 : 1;
+    });
+  }, [devis]);
+
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
   const returnUrl = typeof window !== "undefined"
