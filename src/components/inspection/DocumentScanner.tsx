@@ -38,6 +38,8 @@ interface Pt { x: number; y: number }
 const OUT_W = 1240;
 const OUT_H = 1754; // A4
 const AUTO_STABLE_MS = 800;
+const AUTO_DETECT_MS = 320; // document détecté : capture quasi immédiate
+
 const AUTO_DIFF_THRESHOLD = 6; // moyenne différence luminance/pixel pour "stable"
 
 /* ─────────────────────── Géométrie / homographie ─────────────────────── */
