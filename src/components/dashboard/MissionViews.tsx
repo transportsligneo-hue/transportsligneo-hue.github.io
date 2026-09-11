@@ -20,6 +20,8 @@ export interface MissionViewItem {
   statut: string;
   statutLabel?: string;
   meta?: string;
+  /** Plaque d'immatriculation, affichée au format badge identique à l'admin. */
+  plaque?: string | null;
   amount?: string;
   badge?: ReactNode;
   /** Enveloppe le contenu (Link typé, bouton…) fournie par la page hôte. */
