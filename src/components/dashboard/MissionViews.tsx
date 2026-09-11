@@ -181,7 +181,7 @@ export function MissionViewsBody({
   const planning = useMemo(() => {
     const groups = new Map<string, MissionViewItem[]>();
     for (const i of items) {
-      const key = i.date ? new Date(i.date).toISOString().slice(0, 10) : "sans-date";
+      const key = dayKey(i.date);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(i);
     }
