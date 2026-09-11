@@ -8757,6 +8757,7 @@ export type Database = {
         Args: { p_mission_ids: string[] }
         Returns: {
           annulation_motif: string
+          immatriculation: string
           incident_titre: string
           mission_id: string
           recharge_seule: boolean

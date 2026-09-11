@@ -55,6 +55,7 @@ interface MissionFlags {
   recharge: boolean;
   motif: string | null;
   incident: string | null;
+  plaque: string | null;
 }
 
 const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "terminee", "annulee"] as const;
@@ -142,7 +143,12 @@ function ProMissionsIndex() {
         if (!cancelled && flagRows) {
           const map: Record<string, MissionFlags> = {};
           for (const f of flagRows) {
-            map[f.mission_id] = { recharge: f.recharge_seule, motif: f.annulation_motif, incident: f.incident_titre };
+            map[f.mission_id] = {
+              recharge: f.recharge_seule,
+              motif: f.annulation_motif,
+              incident: f.incident_titre,
+              plaque: f.immatriculation ?? null,
+            };
           }
           setFlags(map);
         }
@@ -245,8 +251,9 @@ function ProMissionsIndex() {
         date: m.date_prise_en_charge,
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
+        plaque: m.immatriculation ?? flags[m.id]?.plaque ?? null,
         meta: [
-          [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation,
+          [m.marque, m.modele].filter(Boolean).join(" ") || null,
           typeLabelFor(m),
           (m.statut === "annulee" || m.statut === "annule") && (flags[m.id]?.motif || flags[m.id]?.incident)
             ? `Annulée : ${flags[m.id]?.motif ?? flags[m.id]?.incident}`
@@ -384,7 +391,7 @@ function ProMissionsIndex() {
                 ? fmtDate(dates[0]!)
                 : `${fmtDate(dates[0]!)} → ${fmtDate(dates[dates.length - 1]!)}`;
             const plates = Array.from(
-              new Set(legs.map((l) => l.immatriculation).filter(Boolean) as string[]),
+              new Set(legs.map((l) => l.immatriculation ?? flags[l.id]?.plaque).filter(Boolean) as string[]),
             );
             const anyRecharge = legs.some((l) => flags[l.id]?.recharge);
             return (
@@ -455,7 +462,9 @@ function ProMissionsIndex() {
                         </div>
                         <div className="fleet-leg-meta">
                           <span><Calendar size={10} className="inline mr-1" />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
-                          {m.immatriculation && <span className="plate-tag plate-tag--sm">{m.immatriculation}</span>}
+                          {(m.immatriculation ?? flags[m.id]?.plaque) && (
+                            <span className="plate-tag plate-tag--sm">{m.immatriculation ?? flags[m.id]?.plaque}</span>
+                          )}
                           <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
                           <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>
                         </div>
