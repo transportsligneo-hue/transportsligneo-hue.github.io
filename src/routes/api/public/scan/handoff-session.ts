@@ -147,7 +147,12 @@ export const Route = createFileRoute("/api/public/scan/handoff-session")({
           }
 
           if (action === "close") {
-            await supabaseAdmin.from("scan_handoff_sessions").delete().eq("id", session.id);
+            // On NE supprime PAS la session : le téléphone peut encore être sur
+            // la page et renvoyer un document jusqu'à l'expiration naturelle.
+            await supabaseAdmin
+              .from("scan_handoff_sessions")
+              .update({ status: "closed" })
+              .eq("id", session.id);
             return json({ ok: true });
           }
 
