@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMissionRealtime } from "@/hooks/useMissionRealtime";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
@@ -146,13 +146,13 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
 
   // Confidentialité : après mission terminée, on n'expose pas le tracé détaillé.
   // On décime les points en ~12 jalons pour garder la forme globale du parcours.
-  const displayedPoints = (() => {
+  const displayedPoints = useMemo(() => {
     if (!isFinished || allPoints.length <= 12) return allPoints;
     const step = Math.ceil(allPoints.length / 12);
     const out = allPoints.filter((_, i) => i % step === 0);
     if (out[out.length - 1] !== allPoints[allPoints.length - 1]) out.push(allPoints[allPoints.length - 1]);
     return out;
-  })();
+  }, [isFinished, allPoints]);
 
   return (
     <div className={mapOnly ? "h-full" : "space-y-4"}>
