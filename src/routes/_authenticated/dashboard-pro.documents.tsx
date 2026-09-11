@@ -177,6 +177,7 @@ function ProDocuments() {
   const [tab, setTab] = useState<"devis" | "factures">("devis");
   const [devis, setDevis] = useState<DevisRow[]>([]);
   const [factures, setFactures] = useState<FactureRow[]>([]);
+  const [rechargeFlags, setRechargeFlags] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [payingFactureId, setPayingFactureId] = useState<string | null>(null);
