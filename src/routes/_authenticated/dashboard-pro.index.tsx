@@ -370,37 +370,56 @@ function ProDashboard() {
               <PlusCircle size={14} /> Créer une mission
             </Link>
           </div>
-        ) : filteredMissions.slice(0, 8).map(m => {
-          const st = V3_STATUS[m.statut] ?? { cls: "neutral", label: m.statut };
-          const pct = m.statut === "livree" || m.statut === "terminee" ? 100
-            : m.statut === "en_cours" ? 55
-            : m.statut === "confirmee" ? 30 : 0;
-          return (
-            <div
-              key={m.id}
-              onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
-              className="v3-trow grid items-center gap-4 cursor-pointer"
-              style={{ gridTemplateColumns: "1.7fr 1.4fr 110px 90px 34px" }}
-            >
-              <div className="min-w-0">
-                <div className="v3-mono-id">{legRef(m.numero, m.leg_type, m.leg_index, m.leg_type === "aller" || m.leg_type === "retour")}</div>
-                <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
-                {(m.immatriculation ?? plates[m.id]) && (
-                  <div className="mt-1"><span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span></div>
-                )}
+        ) : visibleDossiers.map(d => (
+          <div key={d.key} className={d.isDuo ? "v3-dossier v3-dossier--duo" : "v3-dossier"}>
+            {d.isDuo && (
+              <div className="v3-dossier-tie">
+                <span className="v3-dossier-tie-label">
+                  {displayNumero(d.key)} · Livraison + Restitution
+                </span>
+                <span className="v3-dossier-tie-total">{d.total.toFixed(0)} € total dossier</span>
               </div>
-              <div className="hidden md:block v3-pulse">
-                <div className="fill" style={{ width: `${pct}%` }} />
-                {pct > 0 && pct < 100 && <div className="dot" />}
-              </div>
-              <span className={`v3-status ${st.cls}`}>{st.label}</span>
-              <div className="v3-price text-right">{Number(m.prix_total).toFixed(0)} €</div>
-              <div className="text-v3-dim text-center"><MoreHorizontal size={16} /></div>
-            </div>
-          );
-        })}
+            )}
+            {d.legs.map(m => {
+              const st = V3_STATUS[m.statut] ?? { cls: "neutral", label: m.statut };
+              const pct = m.statut === "livree" || m.statut === "terminee" ? 100
+                : m.statut === "en_cours" ? 55
+                : m.statut === "confirmee" ? 30 : 0;
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => navigate({ to: "/dashboard-pro/missions/$missionId", params: { missionId: m.id } })}
+                  className="v3-trow grid items-center gap-4 cursor-pointer"
+                  style={{ gridTemplateColumns: "1.7fr 1.4fr 110px 90px 34px" }}
+                >
+                  <div className="min-w-0">
+                    <div className="v3-mono-id flex items-center gap-1.5">
+                      {d.isDuo && (
+                        <span className={`v3-leg-pill ${m.leg_type === "retour" ? "is-r" : "is-l"}`}>
+                          {m.leg_type === "retour" ? "R" : "L"}
+                        </span>
+                      )}
+                      {legRef(m.numero, m.leg_type, m.leg_index, d.isDuo)}
+                    </div>
+                    <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
+                    {(m.immatriculation ?? plates[m.id]) && (
+                      <div className="mt-1"><span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span></div>
+                    )}
+                  </div>
+                  <div className="hidden md:block v3-pulse">
+                    <div className="fill" style={{ width: `${pct}%` }} />
+                    {pct > 0 && pct < 100 && <div className="dot" />}
+                  </div>
+                  <span className={`v3-status ${st.cls}`}>{st.label}</span>
+                  <div className="v3-price text-right">{Number(m.prix_total).toFixed(0)} €</div>
+                  <div className="text-v3-dim text-center"><MoreHorizontal size={16} /></div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
         <div className="v3-tfoot">
-          <span>Affichage {Math.min(8, filteredMissions.length)} sur {filteredMissions.length} missions</span>
+          <span>Affichage {visibleCount} sur {filteredMissions.length} missions</span>
           <Link to="/dashboard-pro/missions" className="v3-link inline-flex items-center gap-1">
             Tout voir <ArrowUpRight size={14} />
           </Link>
