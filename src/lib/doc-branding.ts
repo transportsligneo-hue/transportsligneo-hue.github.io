@@ -232,9 +232,11 @@ function clampText(doc: jsPDF, text: string, maxW: number): string {
   return `${t}…`;
 }
 
-/** Bandeau navy + liseré or, identique sur tous les documents officiels. */
-
-
+/**
+ * En-tête clair « nouvelle génération » : logo + TRANSPORTS LIGNEO à gauche,
+ * titre du document, numéro et sous-titre à droite, filet fin de séparation.
+ * Identique au rendu des devis, factures et PV.
+ */
 export function drawDocHeader(
   doc: jsPDF,
   opts: {
@@ -250,85 +252,71 @@ export function drawDocHeader(
   const { pageW, logoData, title, subtitle, numero, company } = opts;
   docContexts.set(doc as unknown as object, { pageW, logoData, title, numero, company });
   const h = opts.height ?? 46;
-  doc.setFillColor(...DOC_NAVY);
-  doc.rect(0, 0, pageW, h, "F");
+  const leftX = 14;
+  const rightX = pageW - 14;
+
   if (logoData) {
     try {
-      doc.addImage(logoData, "PNG", 12, (h - 30) / 2, 30, 30);
+      doc.addImage(logoData, "PNG", leftX, 12, 14, 14);
     } catch {
       /* logo optionnel */
     }
   }
 
-  const leftX = logoData ? 47 : 14;
-  const rightX = pageW - 14;
-  const gap = 8;
-  const totalAvail = rightX - leftX - gap;
-
-  const raison = (company?.raison_sociale || "TRANSPORTS LIGNEO").toUpperCase();
-  const tagline = "CONVOYAGE AUTOMOBILE — FRANCE & EUROPE";
-  const titleTxt = title.toUpperCase();
-
-  // Colonnes strictes : le bloc identité et le bloc titre ne se croisent jamais.
-  const leftW = totalAvail * 0.42;
-  const rightW = totalAvail - leftW;
-
-  // --- Bloc identité (gauche)
-  let nameSize = 14;
+  const tx = logoData ? leftX + 18 : leftX;
   doc.setFont("helvetica", "bold");
-  while (nameSize > 8 && fitTextWidth(doc, raison, nameSize) > leftW) nameSize -= 0.5;
-  doc.setTextColor(...DOC_WHITE);
-  doc.setFontSize(nameSize);
-  doc.text(clampText(doc, raison, leftW), leftX, h / 2 - 1.5);
-
-  let tagSize = 7;
+  doc.setFontSize(12.8);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text("TRANSPORTS ", tx, 19.6);
+  const w1 = doc.getTextWidth("TRANSPORTS ");
+  doc.setTextColor(...DOC_GOLD);
+  doc.text("LIGNEO", tx + w1, 19.6);
   doc.setFont("helvetica", "normal");
-  while (tagSize > 4.8 && fitTextWidth(doc, tagline, tagSize) > leftW) tagSize -= 0.25;
-  doc.setFontSize(tagSize);
-  doc.setTextColor(...DOC_GOLD_SOFT);
-  doc.text(clampText(doc, tagline, leftW), leftX, h / 2 + 4.5);
+  doc.setFontSize(7.6);
+  doc.setTextColor(...DOC_MUTED);
+  const baseline = company?.adresse_ville
+    ? `Convoyage automobile — ${company.adresse_ville}, France`
+    : "Convoyage automobile — France & Europe";
+  doc.text(baseline, tx, 24.4);
 
-  // --- Bloc titre (droite), sur 1 ou 2 lignes selon la longueur
-  let titleSize = 16;
+  // --- Bloc titre à droite
+  const rightW = rightX - (tx + 62);
+  const titleTxt = title.toUpperCase();
+  let titleSize = 15.5;
   doc.setFont("helvetica", "bold");
+  while (titleSize > 9 && fitTextWidth(doc, titleTxt, titleSize) > rightW) titleSize -= 0.5;
   let titleLines: string[] = [titleTxt];
-  while (titleSize > 10 && fitTextWidth(doc, titleTxt, titleSize) > rightW) titleSize -= 0.5;
   if (fitTextWidth(doc, titleTxt, titleSize) > rightW) {
-    titleSize = 12;
+    titleSize = 11;
     doc.setFontSize(titleSize);
     titleLines = (doc.splitTextToSize(titleTxt, rightW) as string[]).slice(0, 2);
   }
-
-  const twoLines = titleLines.length > 1;
-  const titleTop = twoLines ? h / 2 - 6 : h / 2 - 1.5;
   doc.setFontSize(titleSize);
-  doc.setTextColor(...DOC_WHITE);
+  doc.setTextColor(...DOC_NAVY);
   titleLines.forEach((line, i) => {
-    doc.text(clampText(doc, line, rightW), rightX, titleTop + i * (titleSize * 0.42), { align: "right" });
+    doc.text(clampText(doc, line, rightW), rightX, 19.6 + i * (titleSize * 0.44), { align: "right" });
   });
 
-  let metaY = titleTop + (twoLines ? titleSize * 0.42 : 0) + 5.5;
+  let metaY = 19.6 + (titleLines.length - 1) * (titleSize * 0.44) + 5.4;
   if (numero) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.2);
     doc.setTextColor(...DOC_GOLD);
     doc.text(clampText(doc, numero, rightW), rightX, metaY, { align: "right" });
-    metaY += 4.5;
+    metaY += 4.4;
   }
   if (subtitle) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(...DOC_GOLD_SOFT);
-    const maxSubY = h - 3;
-    if (metaY <= maxSubY) {
-      doc.text(clampText(doc, subtitle, rightW), rightX, Math.min(metaY, maxSubY), { align: "right" });
+    doc.setFontSize(7.2);
+    doc.setTextColor(...DOC_MUTED);
+    if (metaY <= h - 3) {
+      doc.text(clampText(doc, subtitle, rightW), rightX, metaY, { align: "right" });
     }
   }
 
-
-  doc.setDrawColor(...DOC_GOLD);
-  doc.setLineWidth(0.8);
-  doc.line(0, h, pageW, h);
+  doc.setDrawColor(...DOC_LINE);
+  doc.setLineWidth(0.3);
+  doc.line(leftX, h - 5, rightX, h - 5);
 }
 
 /** Pied de page légal dynamique (aucune mention codée en dur). */
