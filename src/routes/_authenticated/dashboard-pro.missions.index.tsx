@@ -143,7 +143,12 @@ function ProMissionsIndex() {
         if (!cancelled && flagRows) {
           const map: Record<string, MissionFlags> = {};
           for (const f of flagRows) {
-            map[f.mission_id] = { recharge: f.recharge_seule, motif: f.annulation_motif, incident: f.incident_titre };
+            map[f.mission_id] = {
+              recharge: f.recharge_seule,
+              motif: f.annulation_motif,
+              incident: f.incident_titre,
+              plaque: f.immatriculation ?? null,
+            };
           }
           setFlags(map);
         }
