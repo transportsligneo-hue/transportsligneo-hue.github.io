@@ -133,7 +133,15 @@ const KANBAN_COLUMNS: { key: string; label: string; match: (s: string) => boolea
   { key: "terminee", label: "Terminées", match: (s) => ["livree", "terminee", "termine", "validee", "en_attente_validation", "annulee", "refusee", "cloturee", "facturee"].includes(s) },
 ];
 
-const fmtDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "Date à définir");
+/** Date locale sûre : "2026-08-20" ne doit jamais glisser d'un jour. */
+function localDate(d?: string | null): Date | null {
+  const k = dayKey(d);
+  if (k === "sans-date") return null;
+  const [y, m, day] = k.split("-").map(Number);
+  return new Date(y!, (m ?? 1) - 1, day ?? 1);
+}
+
+const fmtDate = (d?: string | null) => localDate(d)?.toLocaleDateString("fr-FR") ?? "Date à définir";
 
 function Shell({ item, theme, children }: { item: MissionViewItem; theme: Theme; children: ReactNode }) {
   return <>{item.wrap ? item.wrap(children) : <div className={theme === "dark" ? "block" : "block"}>{children}</div>}</>;
