@@ -8475,6 +8475,26 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-label svg {
   filter: none !important;
 }
 
+/* Boutons de l'estimateur hero : même aspect qu'en mode clair, même sur fond sombre */
+.r4-page .v5-hero-quote .dg-flat-toggle,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle {
+  background: #ffffff !important;
+  border-color: rgba(15, 21, 38, 0.12) !important;
+  color: #4a5474 !important;
+}
+.r4-page .v5-hero-quote .dg-flat-toggle:hover,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle:hover {
+  color: #1c3fc4 !important;
+  border-color: #2f5fff !important;
+}
+.r4-page .v5-hero-quote .dg-flat-toggle.is-active,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-toggle.is-active {
+  color: #ffffff !important;
+  border-color: #2f5fff !important;
+  background: linear-gradient(120deg, #2f5fff, #4f8bff) !important;
+  box-shadow: 0 16px 34px -18px rgba(47, 95, 255, 0.9) !important;
+}
+
 /* Légende "Complétez votre trajet…" plus lisible : gris clair en hero, gris foncé sur fond clair. */
 .dg-flat-hint { color: rgba(250, 247, 239, 0.85); }
 .r4-page .v5-hero-quote .dg-flat-hint { color: #9ca3af; }
@@ -8590,16 +8610,8 @@ body:not(.is-driver-app) :where(
 
 /* Le hero reste sombre en mode clair : ses petites légendes doivent rester visibles. */
 html.theme-light .r4-page .v5-hero .electric-neon-text,
-html.theme-light .r4-page .v5-hero .v4-accent,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label,
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
+html.theme-light .r4-page .v5-hero .v4-accent {
   color: var(--neon-blue) !important;
-}
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label {
-  text-shadow: 0 0 10px var(--neon-blue-glow), 0 0 22px rgba(91,143,255,.48) !important;
-}
-html.theme-light .r4-page .v5-hero-quote .dg-estimator .dg-flat-label svg {
-  filter: drop-shadow(0 0 6px var(--neon-blue-glow)) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
