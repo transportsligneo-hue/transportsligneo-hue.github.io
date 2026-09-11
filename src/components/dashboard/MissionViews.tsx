@@ -175,6 +175,7 @@ export function MissionViewsBody({
               </p>
               <div className={`flex items-center gap-3 text-[11px] flex-wrap pt-2 mt-auto border-t ${theme === "dark" ? "border-primary/10" : "border-pro-border"} ${muted}`}>
                 <span className="flex items-center gap-1"><Calendar size={11} />{fmtDate(i.date)}</span>
+                {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
                 {i.meta && <span className="truncate">{i.meta}</span>}
                 {i.amount && <span className={`ml-auto font-semibold ${strong}`}>{i.amount}</span>}
               </div>
