@@ -273,6 +273,16 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
         if (typeof v === "string" && v.trim()) fields[k] = v.trim();
       }
 
+
+      // Normalisation plaque / VIN (les modèles renvoient parfois sans tirets).
+      if (fields.immatriculation) {
+        const raw = fields.immatriculation.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const m = /^([A-Z]{2})(\d{3})([A-Z]{2})$/.exec(raw);
+        fields.immatriculation = m ? `${m[1]}-${m[2]}-${m[3]}` : fields.immatriculation.toUpperCase().trim();
+      }
+      if (fields.vin) fields.vin = fields.vin.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (fields.kilometrage) fields.kilometrage = fields.kilometrage.replace(/[^\d]/g, "");
+
       const warnings = Array.isArray(parsed.warnings)
         ? (parsed.warnings as unknown[]).filter((w): w is string => typeof w === "string")
         : [];
