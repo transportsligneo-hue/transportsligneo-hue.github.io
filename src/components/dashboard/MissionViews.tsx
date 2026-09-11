@@ -28,16 +28,21 @@ export interface MissionViewItem {
 
 type Theme = "light" | "dark";
 
-/** Mémorise le mode de vue choisi par espace. */
-export function useMissionView(storageKey: string, initial: MissionViewMode = "list") {
+/**
+ * Mémorise le mode de vue choisi par espace.
+ * Par défaut : vue Planning (dates les plus récentes en haut).
+ * Le suffixe de version réinitialise les préférences enregistrées précédemment.
+ */
+export function useMissionView(storageKey: string, initial: MissionViewMode = "planning") {
+  const key = `${storageKey}:planning-default`;
   const [view, setView] = useState<MissionViewMode>(() => {
     if (typeof window === "undefined") return initial;
-    const v = window.localStorage.getItem(storageKey) as MissionViewMode | null;
+    const v = window.localStorage.getItem(key) as MissionViewMode | null;
     return v && MISSION_VIEWS.some((x) => x.value === v) ? v : initial;
   });
   useEffect(() => {
-    if (typeof window !== "undefined") window.localStorage.setItem(storageKey, view);
-  }, [storageKey, view]);
+    if (typeof window !== "undefined") window.localStorage.setItem(key, view);
+  }, [key, view]);
   return [view, setView] as const;
 }
 
