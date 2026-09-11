@@ -5,13 +5,14 @@
  * /scan). Aucun compte requis : la validité est vérifiée côté serveur via la
  * route publique `/api/public/scan/handoff-session` (action `poll`).
  *
- * Le scanner utilisé est exactement celui de l'app Driver (`PremiumScanner`).
- * Un seul document actif par session : un nouveau scan remplace le précédent.
+ * Le scanner utilisé est le scanner automatique de l'app Driver
+ * (`DocumentScanner`, accent bleu). Plusieurs scans successifs sont possibles :
+ * chaque nouveau document remplace le précédent sur l'ordinateur.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PremiumScanner } from "@/components/scanner/PremiumScanner";
-import { CheckCircle2, Smartphone, Clock, Sparkles, Loader2, AlertTriangle } from "lucide-react";
+import { DocumentScanner } from "@/components/inspection/DocumentScanner";
+import { CheckCircle2, Smartphone, Clock, ScanLine, Loader2, AlertTriangle } from "lucide-react";
 import { DOCUMENT_LABEL, type ExtractionResult } from "@/lib/scanner/types";
 
 export const Route = createFileRoute("/scan/$token")({
@@ -102,14 +103,12 @@ function ScanHandoffPage() {
     }
   }, [token]);
 
-  const handleCapture = useCallback(async (pages: Blob[]) => {
+  const handleScanned = useCallback(async (file: File) => {
     setScannerOpen(false);
-    const blob = pages[0];
-    if (!blob) return;
     setProcessing(true);
     setError(null);
     try {
-      const dataUrl = await blobToDataUrl(blob);
+      const dataUrl = await blobToDataUrl(file);
       const res = await fetch("/api/public/scan/handoff-extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,7 +120,12 @@ function ScanHandoffPage() {
         else setError(json?.error ?? "Envoi impossible");
         return;
       }
-      setSent(json.extraction as ExtractionResult);
+      const extraction = json.extraction as ExtractionResult;
+      if (Object.keys(extraction.fields ?? {}).length === 0) {
+        setError("Document illisible : reprenez la photo bien à plat, sans reflet.");
+        return;
+      }
+      setSent(extraction);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Envoi impossible");
     } finally {
@@ -131,7 +135,7 @@ function ScanHandoffPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0b1026] to-[#111a3d] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-[#f4f7ff] flex items-center justify-center text-[#2f5fff]">
         <Loader2 className="animate-spin" size={28} />
       </div>
     );
@@ -139,15 +143,15 @@ function ScanHandoffPage() {
 
   if (fatal) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0b1026] to-[#111a3d] flex items-center justify-center p-6">
-        <div className="max-w-sm rounded-2xl bg-white/5 border border-red-400/40 p-6 text-center text-white">
-          <AlertTriangle className="mx-auto text-red-400 mb-3" size={32} />
-          <h2 className="font-semibold mb-2">Session indisponible</h2>
-          <p className="text-sm text-white/70">{fatal}</p>
-          <p className="text-xs text-white/50 mt-4">
+      <div className="min-h-screen bg-[#f4f7ff] flex items-center justify-center p-6">
+        <div className="max-w-sm rounded-2xl bg-white border border-red-200 shadow-sm p-6 text-center">
+          <AlertTriangle className="mx-auto text-red-500 mb-3" size={32} />
+          <h2 className="font-semibold mb-2 text-[#0b1026]">Session indisponible</h2>
+          <p className="text-sm text-slate-600">{fatal}</p>
+          <p className="text-xs text-slate-400 mt-4">
             Retournez sur l'ordinateur et générez un nouveau QR code.
           </p>
-          <Link to="/scan" className="inline-block mt-4 text-xs text-[#e7c76a] underline">
+          <Link to="/scan" className="inline-block mt-4 text-xs text-[#2f5fff] underline">
             Saisir un autre code
           </Link>
         </div>
@@ -159,16 +163,16 @@ function ScanHandoffPage() {
   const ss = String(remaining % 60).padStart(2, "0");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b1026] to-[#111a3d] text-white flex flex-col">
-      <header className="px-5 py-5 border-b border-white/10">
-        <div className="flex items-center gap-2 text-[#e7c76a]">
+    <div className="min-h-screen bg-[#f4f7ff] text-[#0b1026] flex flex-col">
+      <header className="px-5 py-5 bg-white border-b border-slate-200">
+        <div className="flex items-center gap-2 text-[#2f5fff]">
           <Smartphone size={18} />
           <span className="text-xs uppercase tracking-[0.25em]">Transports Ligneo</span>
         </div>
         <h1 className="mt-2 text-xl font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>
           Scanner votre document
         </h1>
-        <p className="text-white/60 text-sm mt-1">
+        <p className="text-slate-500 text-sm mt-1">
           Les champs se pré-remplissent instantanément sur votre ordinateur.
         </p>
       </header>
@@ -176,67 +180,67 @@ function ScanHandoffPage() {
       <main className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
         {!sent && !processing && (
           <div className="text-center max-w-xs">
-            <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-[#d4af37]/15 flex items-center justify-center">
-              <Sparkles className="text-[#e7c76a]" size={32} />
+            <div className="mx-auto mb-4 w-20 h-20 rounded-full bg-[#4f8cff]/12 flex items-center justify-center">
+              <ScanLine className="text-[#2f5fff]" size={32} />
             </div>
-            <p className="text-white/70 text-sm">
-              Photographiez carte grise, bon de commande, PV… l'IA détecte automatiquement le type
-              et extrait tous les champs.
+            <p className="text-slate-600 text-sm">
+              Photographiez carte grise, bon de commande, PV… la détection est automatique :
+              plaque, VIN, marque, modèle, énergie, couleur.
             </p>
           </div>
         )}
 
         {processing && (
-          <div className="flex flex-col items-center gap-2 text-white/70">
-            <Loader2 className="animate-spin" size={28} />
-            <p className="text-sm">Extraction en cours…</p>
-            <p className="text-[11px] text-white/40">Ne fermez pas cette page</p>
+          <div className="flex flex-col items-center gap-2 text-slate-500">
+            <Loader2 className="animate-spin text-[#2f5fff]" size={28} />
+            <p className="text-sm">Lecture du document…</p>
+            <p className="text-[11px] text-slate-400">Ne fermez pas cette page</p>
           </div>
         )}
 
         {sent && !processing && (
           <div className="w-full max-w-sm space-y-3">
-            <div className="flex items-center gap-3 rounded-xl bg-emerald-400/10 border border-emerald-400/40 px-4 py-3">
-              <CheckCircle2 className="text-emerald-400 flex-shrink-0" size={20} />
+            <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
+              <CheckCircle2 className="text-emerald-600 flex-shrink-0" size={20} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {DOCUMENT_LABEL[sent.document_type] ?? "Document"}
                 </p>
-                <p className="text-xs text-white/60">
+                <p className="text-xs text-slate-500">
                   {Object.keys(sent.fields).length} champs envoyés à votre ordinateur
                 </p>
               </div>
             </div>
-            <p className="text-center text-xs text-white/50">
+            <p className="text-center text-xs text-slate-500">
               Vous pouvez revenir à votre ordinateur : le formulaire est pré-rempli.
             </p>
           </div>
         )}
 
-        {error && <p className="text-red-300 text-xs text-center">{error}</p>}
+        {error && <p className="text-red-600 text-xs text-center max-w-xs">{error}</p>}
       </main>
 
-      <footer className="p-5 border-t border-white/10 bg-black/30 space-y-3">
+      <footer className="p-5 border-t border-slate-200 bg-white space-y-3">
         <button
           disabled={processing}
           onClick={openScanner}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#e7c76a] text-[#0b1026] font-semibold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-semibold shadow-[0_6px_20px_rgba(79,140,255,0.35)] disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          <Sparkles size={18} />
-          {sent ? "Remplacer le document" : "Scanner un document"}
+          <ScanLine size={18} />
+          {sent ? "Scanner un autre document" : "Scanner un document"}
         </button>
-        <p className="flex items-center justify-center gap-1.5 text-[11px] text-white/40">
+        <p className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
           <Clock size={11} />
           Session sécurisée · expire dans {mm}:{ss}
         </p>
       </footer>
 
       {scannerOpen && (
-        <PremiumScanner
+        <DocumentScanner
+          accent="blue"
           title="Scanner un document"
-          hint="Cadrez le document"
           onCancel={() => setScannerOpen(false)}
-          onCapture={handleCapture}
+          onScanned={handleScanned}
         />
       )}
     </div>
