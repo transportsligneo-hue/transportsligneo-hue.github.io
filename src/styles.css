@@ -3242,6 +3242,43 @@ body.is-driver-app .closed-link svg {
   .v3-trow:hover { background: var(--v3-surface-2); }
   .v3-tfoot { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; border-top: 1px solid var(--v3-border-soft); font-size: 12px; color: var(--v3-text-dim); }
 
+  /* Dossier lié : Livraison + Restitution */
+  .v3-dossier { border-bottom: 1px solid var(--v3-border-soft); }
+  .v3-dossier:last-child { border-bottom: none; }
+  .v3-dossier--duo {
+    position: relative;
+    margin: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--v3-blue) 32%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--v3-blue) 4%, transparent);
+    overflow: hidden;
+  }
+  .v3-dossier--duo::before {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--v3-blue), color-mix(in srgb, var(--v3-blue) 35%, transparent));
+  }
+  .v3-dossier--duo .v3-trow:last-child { border-bottom: none; }
+  .v3-dossier-tie {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 20px;
+    background: color-mix(in srgb, var(--v3-blue) 9%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--v3-blue) 18%, transparent);
+  }
+  .v3-dossier-tie-label {
+    font-family: var(--v3-font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--v3-blue);
+  }
+  .v3-dossier-tie-total { font-family: var(--v3-font-display); font-size: 12.5px; font-weight: 600; color: var(--v3-text); }
+  .v3-leg-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 5px;
+    font-size: 9.5px; font-weight: 800; line-height: 1;
+    font-family: var(--v3-font-display);
+  }
+  .v3-leg-pill.is-l { background: color-mix(in srgb, var(--v3-blue) 18%, transparent); color: var(--v3-blue); }
+  .v3-leg-pill.is-r { background: color-mix(in srgb, var(--v3-gold, #d4af37) 22%, transparent); color: var(--v3-gold, #a9821f); }
+
   .v3-mono-id { font-family: var(--v3-font-mono); font-size: 11px; color: var(--v3-text-dim); }
   .v3-price { font-family: var(--v3-font-display); font-size: 13.5px; font-weight: 600; color: var(--v3-text); }
 
