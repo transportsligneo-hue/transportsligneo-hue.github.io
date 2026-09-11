@@ -19,6 +19,8 @@
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
+import { detectQuadFromCanvas, detectQuadFromImageData } from "@/lib/scanner/detect-quad";
+
 import {
   X, ScanLine, RotateCw, Check, Loader2, Camera as CameraIcon,
   Zap, ZapOff, Sparkles, RefreshCw,
