@@ -44,6 +44,7 @@ const EMPTY_FORM = {
   sup_recharge: "",
   sup_plein: "",
   sup_nettoyage: "",
+  sup_mise_en_main: "",
   sup_express: "",
   notes: "",
 };
@@ -96,6 +97,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
       sup_recharge: r.supplements?.recharge_electrique != null ? String(r.supplements.recharge_electrique) : "",
       sup_plein: r.supplements?.plein_essence != null ? String(r.supplements.plein_essence) : "",
       sup_nettoyage: r.supplements?.nettoyage != null ? String(r.supplements.nettoyage) : "",
+      sup_mise_en_main: r.supplements?.mise_en_main != null ? String(r.supplements.mise_en_main) : "",
       sup_express: r.supplements?.express != null ? String(r.supplements.express) : "",
       notes: r.notes ?? "",
     });
@@ -115,6 +117,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     const sr = parseNum(form.sup_recharge); if (sr != null && sr > 0) supplements.recharge_electrique = sr;
     const sp = parseNum(form.sup_plein); if (sp != null && sp > 0) supplements.plein_essence = sp;
     const sn = parseNum(form.sup_nettoyage); if (sn != null && sn > 0) supplements.nettoyage = sn;
+    const sm = parseNum(form.sup_mise_en_main); if (sm != null && sm > 0) supplements.mise_en_main = sm;
     const se = parseNum(form.sup_express); if (se != null && se > 0) supplements.express = se;
 
     const basePrice = pas ?? par ?? pex ?? 0;
@@ -180,6 +183,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
       recharge_electrique: "Recharge",
       plein_essence: "Plein",
       nettoyage: "Nettoyage",
+      mise_en_main: "Mise en main",
       express: "Express",
     };
     return entries.map(([k, v]) => `${labels[k] ?? k} +${v}€`).join(" · ");
@@ -292,6 +296,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                 </AdminField>
                 <AdminField label="Nettoyage">
                   <input type="number" step="0.01" className={inp} value={form.sup_nettoyage} onChange={(e) => setForm({ ...form, sup_nettoyage: e.target.value })} placeholder="25" />
+                </AdminField>
+                <AdminField label="Mise en main">
+                  <input type="number" step="0.01" className={inp} value={form.sup_mise_en_main} onChange={(e) => setForm({ ...form, sup_mise_en_main: e.target.value })} placeholder="15" />
                 </AdminField>
                 <AdminField label="Express">
                   <input type="number" step="0.01" className={inp} value={form.sup_express} onChange={(e) => setForm({ ...form, sup_express: e.target.value })} placeholder="50" />
