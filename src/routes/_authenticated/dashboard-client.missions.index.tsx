@@ -20,6 +20,7 @@ import {
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
+import { normalizeHeure } from "@/components/dashboard/MissionViews";
 
 const friendlyStatusLabel = (statut: string): string => missionStatusLabel(statut);
 
@@ -48,7 +49,13 @@ interface Mission {
   modele: string | null;
   immatriculation: string | null;
   carburant?: string | null;
+  heure_prise_en_charge?: string | null;
+  leg_type?: string | null;
+  mission_group_id?: string | null;
 }
+
+/** Indicateurs enrichis (recharge seule, motif d'annulation). */
+interface MissionFlags { recharge: boolean; motif: string | null; incident: string | null; plaque: string | null }
 
 const STATUS_FILTERS = [
   { value: "all", label: "Toutes" },
@@ -79,6 +86,7 @@ const KANBAN_COLUMNS: { key: string; label: string; match: (s: string) => boolea
 function ClientMissions() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [flags, setFlags] = useState<Record<string, MissionFlags>>({});
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -100,7 +108,7 @@ function ClientMissions() {
 
     let q = supabase
       .from("missions")
-      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, statut, marque, modele, immatriculation, carburant")
+      .select("id, numero, ville_depart, ville_arrivee, date_prise_en_charge, heure_prise_en_charge, statut, marque, modele, immatriculation, carburant, leg_type, mission_group_id")
       .or(orFilter)
       .order("created_at", { ascending: false });
     if (filter === "archives") {
@@ -124,9 +132,27 @@ function ClientMissions() {
       .not("statut", "in", "(refusee,annulee,convertie,converti,terminee,termine,livree,en_cours,validee,acceptee,archivee,archive)")
       .order("created_at", { ascending: false });
 
-    Promise.all([q, devisPending, demandePending]).then(([mRes, dRes, demRes]) => {
+    Promise.all([q, devisPending, demandePending]).then(async ([mRes, dRes, demRes]) => {
       if (cancelled) return;
-      setMissions((mRes.data ?? []) as Mission[]);
+      const rows = (mRes.data ?? []) as Mission[];
+      setMissions(rows);
+      if (rows.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", {
+          p_mission_ids: rows.map((m) => m.id),
+        });
+        if (!cancelled && flagRows) {
+          const map: Record<string, MissionFlags> = {};
+          for (const f of flagRows) {
+            map[f.mission_id] = {
+              recharge: f.recharge_seule,
+              motif: f.annulation_motif,
+              incident: f.incident_titre,
+              plaque: f.immatriculation ?? null,
+            };
+          }
+          setFlags(map);
+        }
+      }
       const pendingList: PendingItem[] = [
         ...((dRes.data ?? []) as Array<{ id: string; numero: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string }>).map(d => ({
           id: `devis-${d.id}`,
@@ -156,8 +182,7 @@ function ClientMissions() {
   const planningGroups = useMemo(() => {
     const groups = new Map<string, Mission[]>();
     for (const m of missions) {
-      const d = m.date_prise_en_charge ? new Date(m.date_prise_en_charge) : null;
-      const key = d ? d.toISOString().slice(0, 10) : "sans-date";
+      const key = m.date_prise_en_charge ? String(m.date_prise_en_charge).slice(0, 10) : "sans-date";
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
@@ -364,7 +389,8 @@ function ClientMissions() {
         // Planning
         <div className="space-y-4">
           {planningGroups.map(([dateKey, list]) => {
-            const d = dateKey === "sans-date" ? null : new Date(dateKey);
+            const dParts = dateKey === "sans-date" ? null : dateKey.split("-").map(Number);
+            const d = dParts ? new Date(dParts[0]!, (dParts[1] ?? 1) - 1, dParts[2] ?? 1) : null;
             const label = d
               ? d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
               : "Sans date";
@@ -386,17 +412,43 @@ function ClientMissions() {
                     >
                       <div className="flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded bg-navy/60">
                         <span className="text-primary text-sm font-heading tabular-nums">
-                          {new Date(m.date_prise_en_charge).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          {normalizeHeure(m.heure_prise_en_charge) ?? "--:--"}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                          {m.leg_type === "aller" || m.leg_type === "retour" ? (
+                            <span
+                              className={`inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold ${
+                                m.leg_type === "aller" ? "bg-primary text-navy" : "bg-emerald-500 text-white"
+                              }`}
+                              title={m.leg_type === "aller" ? "Livraison" : "Restitution"}
+                            >
+                              {m.leg_type === "aller" ? "L" : "R"}
+                            </span>
+                          ) : null}
                           <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
                           <StatusBadge kind={missionStatusKind(m.statut)}>{friendlyStatusLabel(m.statut)}</StatusBadge>
+                          {(m.immatriculation ?? flags[m.id]?.plaque) && (
+                            <span className="plate-tag plate-tag--sm">{m.immatriculation ?? flags[m.id]?.plaque}</span>
+                          )}
+                          <span className="text-cream/40 text-[10px] px-1.5 py-0.5 rounded bg-navy/60">
+                            {flags[m.id]?.recharge
+                              ? "Recharge uniquement"
+                              : m.leg_type === "aller" || m.leg_type === "retour"
+                                ? "Livraison + Restitution"
+                                : "Livraison simple"}
+                          </span>
                         </div>
                         <p className="text-cream text-sm truncate">
                           {m.ville_depart} <span className="text-cream/30">→</span> {m.ville_arrivee}
                         </p>
+                        {(m.statut === "annulee" || m.statut === "annule") &&
+                          (flags[m.id]?.motif || flags[m.id]?.incident) && (
+                            <p className="text-[11px] text-red-300 mt-1">
+                              Annulée : {flags[m.id]?.motif ?? flags[m.id]?.incident}
+                            </p>
+                          )}
                       </div>
                       <ArrowRight size={14} className="text-cream/30 group-hover:text-primary shrink-0" />
                     </Link>
