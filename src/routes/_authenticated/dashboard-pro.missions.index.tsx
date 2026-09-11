@@ -390,7 +390,7 @@ function ProMissionsIndex() {
                 ? fmtDate(dates[0]!)
                 : `${fmtDate(dates[0]!)} → ${fmtDate(dates[dates.length - 1]!)}`;
             const plates = Array.from(
-              new Set(legs.map((l) => l.immatriculation).filter(Boolean) as string[]),
+              new Set(legs.map((l) => l.immatriculation ?? flags[l.id]?.plaque).filter(Boolean) as string[]),
             );
             const anyRecharge = legs.some((l) => flags[l.id]?.recharge);
             return (
