@@ -1,16 +1,22 @@
 import type jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 
-/** Charte documentaire officielle Transports Ligneo — utilisée par TOUS les PDF. */
-export const DOC_NAVY: [number, number, number] = [11, 16, 38];
-export const DOC_NAVY_SOFT: [number, number, number] = [17, 26, 61];
-export const DOC_GOLD: [number, number, number] = [212, 175, 55];
-export const DOC_GOLD_SOFT: [number, number, number] = [231, 199, 106];
-export const DOC_TEXT: [number, number, number] = [40, 40, 50];
-export const DOC_MUTED: [number, number, number] = [110, 110, 120];
-export const DOC_LINE: [number, number, number] = [225, 220, 200];
+/**
+ * Charte documentaire officielle Transports Ligneo — utilisée par TOUS les PDF.
+ * Version claire « nouvelle génération », alignée sur les devis, factures et PV :
+ * encre profonde, bleu Ligneo en accent, panneaux gris très clairs.
+ */
+export const DOC_NAVY: [number, number, number] = [17, 22, 38];
+export const DOC_NAVY_SOFT: [number, number, number] = [12, 21, 55];
+/** Accent principal (anciennement doré) — désormais le bleu Ligneo. */
+export const DOC_GOLD: [number, number, number] = [37, 91, 235];
+export const DOC_GOLD_SOFT: [number, number, number] = [128, 134, 148];
+export const DOC_TEXT: [number, number, number] = [55, 60, 74];
+export const DOC_MUTED: [number, number, number] = [128, 134, 148];
+export const DOC_LINE: [number, number, number] = [223, 228, 238];
 export const DOC_WHITE: [number, number, number] = [255, 255, 255];
-export const DOC_CREAM: [number, number, number] = [250, 247, 239];
+/** Panneau clair des tableaux clé/valeur. */
+export const DOC_CREAM: [number, number, number] = [246, 248, 252];
 
 export interface CompanyInfo {
   raison_sociale: string | null;
