@@ -216,6 +216,7 @@ export function MissionViewsBody({
                       </p>
                       <div className={`flex items-center gap-1 text-[10px] mt-2 ${muted}`}>
                         <Calendar size={10} />{fmtDate(i.date)}
+                        {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
                         {i.amount && <span className={`ml-auto font-semibold ${strong}`}>{i.amount}</span>}
                       </div>
                     </div>
