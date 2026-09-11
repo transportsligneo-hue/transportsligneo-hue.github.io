@@ -8753,6 +8753,15 @@ export type Database = {
       }
       get_formation_exam_for_driver: { Args: never; Returns: Json }
       get_formation_modules_for_driver: { Args: never; Returns: Json }
+      get_missions_client_flags: {
+        Args: { p_mission_ids: string[] }
+        Returns: {
+          annulation_motif: string
+          incident_titre: string
+          mission_id: string
+          recharge_seule: boolean
+        }[]
+      }
       get_my_contrat_status: {
         Args: never
         Returns: {

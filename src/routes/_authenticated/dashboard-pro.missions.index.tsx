@@ -3,7 +3,7 @@ import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car } from "lucide-react";
+import { Search, MapPin, Loader2, Truck, PlusCircle, Clock, FileText, ArrowRight, Calendar, Repeat, Zap, Car, Ban } from "lucide-react";
 import { prefetchMissionTracking } from "@/lib/mission-prefetch";
 import { displayNumero, legRef, stripLegSuffix } from "@/lib/mission-number";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
@@ -50,6 +50,13 @@ interface PendingItem {
   statut: string;
 }
 
+/** Indicateurs enrichis par mission (recharge seule, motif d'annulation, incident). */
+interface MissionFlags {
+  recharge: boolean;
+  motif: string | null;
+  incident: string | null;
+}
+
 const STATUTS = ["tous", "en_attente", "confirmee", "en_cours", "livree", "terminee", "annulee"] as const;
 const statutLabel: Record<string, string> = {
   tous: "Tous", en_attente: "En attente", confirmee: "Confirmée", en_cours: "En cours",
@@ -59,6 +66,7 @@ const statutLabel: Record<string, string> = {
 function ProMissionsIndex() {
   const { user } = useAuth();
   const [missions, setMissions] = useState<MissionRow[]>([]);
+  const [flags, setFlags] = useState<Record<string, MissionFlags>>({});
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("tous");
@@ -125,9 +133,20 @@ function ProMissionsIndex() {
       .not("statut", "in", "(refusee,annulee,convertie,converti,terminee,termine,livree,en_cours,validee,acceptee,archivee,archive)")
       .order("created_at", { ascending: false });
 
-    Promise.all([loadMissionRows(), devisPending, demandePending]).then(([missionRows, dRes, demRes]) => {
+    Promise.all([loadMissionRows(), devisPending, demandePending]).then(async ([missionRows, dRes, demRes]) => {
       if (cancelled) return;
       setMissions(missionRows as MissionRow[]);
+      const ids = missionRows.map((m) => m.id);
+      if (ids.length > 0) {
+        const { data: flagRows } = await supabase.rpc("get_missions_client_flags", { p_mission_ids: ids });
+        if (!cancelled && flagRows) {
+          const map: Record<string, MissionFlags> = {};
+          for (const f of flagRows) {
+            map[f.mission_id] = { recharge: f.recharge_seule, motif: f.annulation_motif, incident: f.incident_titre };
+          }
+          setFlags(map);
+        }
+      }
       const pendingList: PendingItem[] = [
         ...((dRes.data ?? []) as Array<{ id: string; numero: string; depart: string; arrivee: string; date_souhaitee: string | null; created_at: string; statut: string; prix_estime: number | null }>).map(d => ({
           id: `devis-${d.id}`,
@@ -210,6 +229,12 @@ function ProMissionsIndex() {
 
   const [view, setView] = useMissionView("ligneo:view:pro-missions:v2");
 
+  const typeLabelFor = (m: MissionRow): string => {
+    if (flags[m.id]?.recharge) return "Recharge uniquement";
+    if (m.leg_type === "aller" || m.leg_type === "retour" || m.type_trajet === "aller_retour") return "Livraison + Restitution";
+    return "Livraison simple";
+  };
+
   const viewItems = useMemo<MissionViewItem[]>(
     () =>
       filtered.map((m) => ({
@@ -220,7 +245,13 @@ function ProMissionsIndex() {
         date: m.date_prise_en_charge,
         statut: m.statut,
         statutLabel: statutLabel[m.statut] ?? m.statut,
-        meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation || undefined,
+        meta: [
+          [m.marque, m.modele].filter(Boolean).join(" ") || m.immatriculation,
+          typeLabelFor(m),
+          (m.statut === "annulee" || m.statut === "annule") && (flags[m.id]?.motif || flags[m.id]?.incident)
+            ? `Annulée : ${flags[m.id]?.motif ?? flags[m.id]?.incident}`
+            : null,
+        ].filter(Boolean).join(" · ") || undefined,
         amount: `${Number(m.prix_total ?? 0).toFixed(2)} €`,
         wrap: (children) => (
           <Link to="/dashboard-pro/missions/$missionId" params={{ missionId: m.id }} className="block h-full">
@@ -228,7 +259,8 @@ function ProMissionsIndex() {
           </Link>
         ),
       })),
-    [filtered],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtered, flags],
   );
 
   return (
@@ -354,15 +386,22 @@ function ProMissionsIndex() {
             const plates = Array.from(
               new Set(legs.map((l) => l.immatriculation).filter(Boolean) as string[]),
             );
+            const anyRecharge = legs.some((l) => flags[l.id]?.recharge);
             return (
               <article key={key} className="fleet-dossier">
                 <header className="fleet-dossier-head">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="fleet-dossier-num">{displayNumero(stripLegSuffix(head.numero))}</span>
-                    {isDuo && (
-                      <span className="fleet-chip-duo">
-                        <Repeat size={10} /> Aller-retour
+                    {anyRecharge ? (
+                      <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
+                        <Zap size={10} /> Recharge uniquement
                       </span>
+                    ) : isDuo ? (
+                      <span className="fleet-chip-duo" title="Dossier avec livraison + restitution">
+                        <Repeat size={10} /> Livraison + Restitution
+                      </span>
+                    ) : (
+                      <span className="fleet-chip-simple">Livraison simple</span>
                     )}
                     {plates.map((p) => (
                       <span key={p} className="plate-tag">{p}</span>
@@ -402,6 +441,11 @@ function ProMissionsIndex() {
                           <StatusBadge kind={missionStatusKind(m.statut)}>
                             {statutLabel[m.statut] ?? missionStatusLabel(m.statut)}
                           </StatusBadge>
+                          {flags[m.id]?.recharge && (
+                            <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">
+                              <Zap size={10} /> Recharge uniquement
+                            </span>
+                          )}
                         </div>
                         <div className="fleet-leg-route">
                           <MapPin size={12} className="text-[#5334d6] shrink-0" />
@@ -415,6 +459,15 @@ function ProMissionsIndex() {
                           <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
                           <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>
                         </div>
+                        {(m.statut === "annulee" || m.statut === "annule") &&
+                          (flags[m.id]?.motif || flags[m.id]?.incident) && (
+                            <div className="fleet-leg-cancel-motif">
+                              <Ban size={12} className="shrink-0 mt-0.5" />
+                              <span>
+                                Annulée : {flags[m.id]?.motif ?? flags[m.id]?.incident}
+                              </span>
+                            </div>
+                          )}
                       </Link>
                     </li>
                   ))}
