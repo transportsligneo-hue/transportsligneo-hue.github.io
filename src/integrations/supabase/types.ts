@@ -5068,6 +5068,7 @@ export type Database = {
           prix_locked: boolean
           prix_total: number
           remarques: string | null
+          site_id: string | null
           statut: string
           telephone: string | null
           tracking_code: string | null
@@ -5111,6 +5112,7 @@ export type Database = {
           prix_locked?: boolean
           prix_total?: number
           remarques?: string | null
+          site_id?: string | null
           statut?: string
           telephone?: string | null
           tracking_code?: string | null
@@ -5154,6 +5156,7 @@ export type Database = {
           prix_locked?: boolean
           prix_total?: number
           remarques?: string | null
+          site_id?: string | null
           statut?: string
           telephone?: string | null
           tracking_code?: string | null
@@ -5184,6 +5187,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
             referencedColumns: ["id"]
           },
         ]
@@ -5589,11 +5599,13 @@ export type Database = {
           contact_nom: string | null
           contact_telephone: string | null
           created_at: string
+          est_siege: boolean
           id: string
           nom: string
           notes: string | null
           organization_id: string
           pays: string | null
+          siret_etablissement: string | null
           updated_at: string
           ville: string | null
         }
@@ -5605,11 +5617,13 @@ export type Database = {
           contact_nom?: string | null
           contact_telephone?: string | null
           created_at?: string
+          est_siege?: boolean
           id?: string
           nom: string
           notes?: string | null
           organization_id: string
           pays?: string | null
+          siret_etablissement?: string | null
           updated_at?: string
           ville?: string | null
         }
@@ -5621,11 +5635,13 @@ export type Database = {
           contact_nom?: string | null
           contact_telephone?: string | null
           created_at?: string
+          est_siege?: boolean
           id?: string
           nom?: string
           notes?: string | null
           organization_id?: string
           pays?: string | null
+          siret_etablissement?: string | null
           updated_at?: string
           ville?: string | null
         }
@@ -5647,6 +5663,7 @@ export type Database = {
           commercial_name: string | null
           created_at: string
           created_by: string | null
+          facturation_mode: string
           id: string
           legacy_company_id: string | null
           legal_name: string
@@ -5658,6 +5675,7 @@ export type Database = {
           score_category: string
           sector: string | null
           siret: string | null
+          siret_siege: string | null
           size: string | null
           status: string
           updated_at: string
@@ -5671,6 +5689,7 @@ export type Database = {
           commercial_name?: string | null
           created_at?: string
           created_by?: string | null
+          facturation_mode?: string
           id?: string
           legacy_company_id?: string | null
           legal_name: string
@@ -5682,6 +5701,7 @@ export type Database = {
           score_category?: string
           sector?: string | null
           siret?: string | null
+          siret_siege?: string | null
           size?: string | null
           status?: string
           updated_at?: string
@@ -5695,6 +5715,7 @@ export type Database = {
           commercial_name?: string | null
           created_at?: string
           created_by?: string | null
+          facturation_mode?: string
           id?: string
           legacy_company_id?: string | null
           legal_name?: string
@@ -5706,6 +5727,7 @@ export type Database = {
           score_category?: string
           sector?: string | null
           siret?: string | null
+          siret_siege?: string | null
           size?: string | null
           status?: string
           updated_at?: string
@@ -6925,6 +6947,111 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      site_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nom: string
+          notes: string | null
+          prenom: string | null
+          role: string
+          site_id: string
+          telephone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom: string
+          notes?: string | null
+          prenom?: string | null
+          role?: string
+          site_id: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nom?: string
+          notes?: string | null
+          prenom?: string | null
+          role?: string
+          site_id?: string
+          telephone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_contacts_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_transfers: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_label: string | null
+          entity_type: string
+          from_site_id: string | null
+          id: string
+          moved_by: string | null
+          organization_id: string
+          to_site_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_label?: string | null
+          entity_type: string
+          from_site_id?: string | null
+          id?: string
+          moved_by?: string | null
+          organization_id: string
+          to_site_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_label?: string | null
+          entity_type?: string
+          from_site_id?: string | null
+          id?: string
+          moved_by?: string | null
+          organization_id?: string
+          to_site_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_transfers_from_site_id_fkey"
+            columns: ["from_site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_transfers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_transfers_to_site_id_fkey"
+            columns: ["to_site_id"]
+            isOneToOne: false
+            referencedRelation: "organization_sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppressed_emails: {
         Row: {
@@ -9032,6 +9159,7 @@ export type Database = {
         Args: { _devis_id: string }
         Returns: undefined
       }
+      user_site_ids: { Args: { _user_id: string }; Returns: string[] }
       verify_certificate: {
         Args: { _token: string }
         Returns: {
