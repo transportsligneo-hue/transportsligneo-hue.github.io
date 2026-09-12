@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2 } from "lucide-react";
+import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
     { to: "/dashboard-pro/fidelite", label: "Compte Kilomètres", icon: Gauge },
     { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
     { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+    { to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
   );
   return base;
 }

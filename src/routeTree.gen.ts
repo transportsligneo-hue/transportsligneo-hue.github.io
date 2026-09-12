@@ -103,12 +103,14 @@ import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
 import { Route as AuthenticatedDashboardProApiRouteImport } from './routes/_authenticated/dashboard-pro.api'
+import { Route as AuthenticatedDashboardProAideRouteImport } from './routes/_authenticated/dashboard-pro.aide'
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
 import { Route as AuthenticatedDashboardClientProfilRouteImport } from './routes/_authenticated/dashboard-client.profil'
 import { Route as AuthenticatedDashboardClientNouvelleReservationRouteImport } from './routes/_authenticated/dashboard-client.nouvelle-reservation'
 import { Route as AuthenticatedDashboardClientFideliteRouteImport } from './routes/_authenticated/dashboard-client.fidelite'
 import { Route as AuthenticatedDashboardClientDocumentsRouteImport } from './routes/_authenticated/dashboard-client.documents'
 import { Route as AuthenticatedDashboardClientDevisRouteImport } from './routes/_authenticated/dashboard-client.devis'
+import { Route as AuthenticatedDashboardClientAideRouteImport } from './routes/_authenticated/dashboard-client.aide'
 import { Route as AuthenticatedDashboardClientAdressesRouteImport } from './routes/_authenticated/dashboard-client.adresses'
 import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_authenticated/convoyeur.profil'
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
@@ -708,6 +710,12 @@ const AuthenticatedDashboardProApiRoute =
     path: '/api',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
+const AuthenticatedDashboardProAideRoute =
+  AuthenticatedDashboardProAideRouteImport.update({
+    id: '/aide',
+    path: '/aide',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardProAdressesRoute =
   AuthenticatedDashboardProAdressesRouteImport.update({
     id: '/adresses',
@@ -742,6 +750,12 @@ const AuthenticatedDashboardClientDevisRoute =
   AuthenticatedDashboardClientDevisRouteImport.update({
     id: '/devis',
     path: '/devis',
+    getParentRoute: () => AuthenticatedDashboardClientRoute,
+  } as any)
+const AuthenticatedDashboardClientAideRoute =
+  AuthenticatedDashboardClientAideRouteImport.update({
+    id: '/aide',
+    path: '/aide',
     getParentRoute: () => AuthenticatedDashboardClientRoute,
   } as any)
 const AuthenticatedDashboardClientAdressesRoute =
@@ -1402,12 +1416,14 @@ export interface FileRoutesByFullPath {
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
+  '/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
@@ -1591,12 +1607,14 @@ export interface FileRoutesByTo {
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
+  '/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
   '/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
@@ -1787,12 +1805,14 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/_authenticated/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
+  '/_authenticated/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
   '/_authenticated/dashboard-client/devis': typeof AuthenticatedDashboardClientDevisRoute
   '/_authenticated/dashboard-client/documents': typeof AuthenticatedDashboardClientDocumentsRoute
   '/_authenticated/dashboard-client/fidelite': typeof AuthenticatedDashboardClientFideliteRoute
   '/_authenticated/dashboard-client/nouvelle-reservation': typeof AuthenticatedDashboardClientNouvelleReservationRoute
   '/_authenticated/dashboard-client/profil': typeof AuthenticatedDashboardClientProfilRoute
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
+  '/_authenticated/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/_authenticated/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
@@ -1985,12 +2005,14 @@ export interface FileRouteTypes {
     | '/convoyeur/missions'
     | '/convoyeur/profil'
     | '/dashboard-client/adresses'
+    | '/dashboard-client/aide'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
+    | '/dashboard-pro/aide'
     | '/dashboard-pro/api'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
@@ -2174,12 +2196,14 @@ export interface FileRouteTypes {
     | '/convoyeur/missions'
     | '/convoyeur/profil'
     | '/dashboard-client/adresses'
+    | '/dashboard-client/aide'
     | '/dashboard-client/devis'
     | '/dashboard-client/documents'
     | '/dashboard-client/fidelite'
     | '/dashboard-client/nouvelle-reservation'
     | '/dashboard-client/profil'
     | '/dashboard-pro/adresses'
+    | '/dashboard-pro/aide'
     | '/dashboard-pro/api'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
@@ -2369,12 +2393,14 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/missions'
     | '/_authenticated/convoyeur/profil'
     | '/_authenticated/dashboard-client/adresses'
+    | '/_authenticated/dashboard-client/aide'
     | '/_authenticated/dashboard-client/devis'
     | '/_authenticated/dashboard-client/documents'
     | '/_authenticated/dashboard-client/fidelite'
     | '/_authenticated/dashboard-client/nouvelle-reservation'
     | '/_authenticated/dashboard-client/profil'
     | '/_authenticated/dashboard-pro/adresses'
+    | '/_authenticated/dashboard-pro/aide'
     | '/_authenticated/dashboard-pro/api'
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
@@ -3215,6 +3241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProApiRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
+    '/_authenticated/dashboard-pro/aide': {
+      id: '/_authenticated/dashboard-pro/aide'
+      path: '/aide'
+      fullPath: '/dashboard-pro/aide'
+      preLoaderRoute: typeof AuthenticatedDashboardProAideRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
     '/_authenticated/dashboard-pro/adresses': {
       id: '/_authenticated/dashboard-pro/adresses'
       path: '/adresses'
@@ -3255,6 +3288,13 @@ declare module '@tanstack/react-router' {
       path: '/devis'
       fullPath: '/dashboard-client/devis'
       preLoaderRoute: typeof AuthenticatedDashboardClientDevisRouteImport
+      parentRoute: typeof AuthenticatedDashboardClientRoute
+    }
+    '/_authenticated/dashboard-client/aide': {
+      id: '/_authenticated/dashboard-client/aide'
+      path: '/aide'
+      fullPath: '/dashboard-client/aide'
+      preLoaderRoute: typeof AuthenticatedDashboardClientAideRouteImport
       parentRoute: typeof AuthenticatedDashboardClientRoute
     }
     '/_authenticated/dashboard-client/adresses': {
@@ -4149,6 +4189,7 @@ const AuthenticatedConvoyeurRouteWithChildren =
 
 interface AuthenticatedDashboardClientRouteChildren {
   AuthenticatedDashboardClientAdressesRoute: typeof AuthenticatedDashboardClientAdressesRoute
+  AuthenticatedDashboardClientAideRoute: typeof AuthenticatedDashboardClientAideRoute
   AuthenticatedDashboardClientDevisRoute: typeof AuthenticatedDashboardClientDevisRoute
   AuthenticatedDashboardClientDocumentsRoute: typeof AuthenticatedDashboardClientDocumentsRoute
   AuthenticatedDashboardClientFideliteRoute: typeof AuthenticatedDashboardClientFideliteRoute
@@ -4163,6 +4204,8 @@ const AuthenticatedDashboardClientRouteChildren: AuthenticatedDashboardClientRou
   {
     AuthenticatedDashboardClientAdressesRoute:
       AuthenticatedDashboardClientAdressesRoute,
+    AuthenticatedDashboardClientAideRoute:
+      AuthenticatedDashboardClientAideRoute,
     AuthenticatedDashboardClientDevisRoute:
       AuthenticatedDashboardClientDevisRoute,
     AuthenticatedDashboardClientDocumentsRoute:
@@ -4224,6 +4267,7 @@ const AuthenticatedDashboardProNouvelleMissionRouteWithChildren =
 
 interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProAdressesRoute: typeof AuthenticatedDashboardProAdressesRoute
+  AuthenticatedDashboardProAideRoute: typeof AuthenticatedDashboardProAideRoute
   AuthenticatedDashboardProApiRoute: typeof AuthenticatedDashboardProApiRoute
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
@@ -4242,6 +4286,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
   {
     AuthenticatedDashboardProAdressesRoute:
       AuthenticatedDashboardProAdressesRoute,
+    AuthenticatedDashboardProAideRoute: AuthenticatedDashboardProAideRoute,
     AuthenticatedDashboardProApiRoute: AuthenticatedDashboardProApiRoute,
     AuthenticatedDashboardProConducteursRoute:
       AuthenticatedDashboardProConducteursRoute,
