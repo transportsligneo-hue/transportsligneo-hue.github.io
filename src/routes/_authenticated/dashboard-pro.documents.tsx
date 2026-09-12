@@ -738,21 +738,40 @@ function ProDocuments() {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
-                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission);
+                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission, devisById);
+                      const linkedDevis = f.devis_id ? devisById[f.devis_id] : undefined;
+                      const dk = dossierKey(f);
+                      const isPaired = (dossierCounts[dk] ?? 0) > 1;
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
                           <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                             <div className="flex flex-col gap-1.5">
                               <span>{f.numero}</span>
-                              <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
-                                {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
-                                {typeInfo.label}
-                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                                  {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                                  {typeInfo.label}
+                                </span>
+                                <MissionLegBadge leg={(f.leg_type as "aller" | "retour" | "simple" | null)} size="xs" />
+                                {f.immatriculation && (
+                                  <span className="inline-flex items-center rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-bold tracking-widest text-slate-800">
+                                    {f.immatriculation.toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                              {(linkedDevis || isPaired) && (
+                                <span className="text-[10px] font-sans text-pro-muted">
+                                  {linkedDevis ? `Devis ${linkedDevis.numero}` : null}
+                                  {linkedDevis && isPaired ? " · " : null}
+                                  {isPaired ? `Dossier ${f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? ""}` : null}
+                                </span>
+                              )}
                             </div>
                           </td>
                           <td className="px-5 py-3 text-pro-text">
                             {f.depart && f.arrivee ? `${f.depart} → ${f.arrivee}` : (f.designation ?? "—")}
                           </td>
+
                           <td className="px-5 py-3 text-pro-text-soft">
                             {f.date_facture
                               ? new Date(f.date_facture).toLocaleDateString("fr-FR")
