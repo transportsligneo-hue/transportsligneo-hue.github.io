@@ -70,14 +70,16 @@ function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: strin
   return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
-/** Type de prestation d'une facture : d'abord la mission liée (recharge / retour), sinon la désignation. */
+/** Type de prestation d'une facture : devis lié, puis mission liée, puis désignation. */
 function factureTypeInfo(
   f: FactureRow,
   rech: Record<string, boolean>,
   devisByMission: Record<string, DevisRow>,
+  devisById: Record<string, DevisRow>,
 ): { label: string; cls: string } {
   if (f.mission_id && rech[f.mission_id]) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
-  const dv = f.mission_id ? devisByMission[f.mission_id] : undefined;
+  const dv = (f.devis_id ? devisById[f.devis_id] : undefined)
+    ?? (f.mission_id ? devisByMission[f.mission_id] : undefined);
   if (dv) {
     const opt = (dv.option_trajet ?? "").toLowerCase();
     if (opt.includes("recharge")) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
@@ -86,6 +88,10 @@ function factureTypeInfo(
     }
     return { label: "Livraison simple", cls: NEON_SIMPLE };
   }
+  if (f.leg_type === "aller" || f.leg_type === "retour") {
+    return { label: "Livraison + Restitution", cls: NEON_DUO };
+  }
+
   const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
   if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
