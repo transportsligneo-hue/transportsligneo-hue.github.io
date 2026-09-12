@@ -143,6 +143,15 @@ function statutBadgeTone(s: string): string {
   }
 }
 
+function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation">) {
+  const value = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
+  if (value.includes("recharge")) return { label: "Recharge uniquement", tone: "green" };
+  if (/aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(value)) {
+    return { label: "Livraison + restitution", tone: "violet" };
+  }
+  return { label: "Livraison simple", tone: "blue" };
+}
+
 
 function isExpired(d: DevisRow): boolean {
   if (d.statut === "expire") return true;
@@ -155,6 +164,7 @@ function AdminDevisPage() {
   const [selected, setSelected] = useState<DevisRow | null>(null);
   const [editing, setEditing] = useState<DevisRow | null>(null);
   const [devis, setDevis] = useState<DevisRow[]>([]);
+  const [poByDevis, setPoByDevis] = useState<Record<string, string>>({});
   const [acceptations, setAcceptations] = useState<Record<string, AcceptationInfo>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -196,17 +206,23 @@ function AdminDevisPage() {
 
   const load = async () => {
     setLoading(true);
-    const [dRes, aRes] = await Promise.all([
+    const [dRes, aRes, poRes] = await Promise.all([
       supabase.from("devis").select("*").order("created_at", { ascending: false }),
       supabase
         .from("devis_acceptations")
         .select("devis_id, accepted_at, ip_address, user_agent, signature_url, pdf_url, montant_accepte, devis_version")
         .order("created_at", { ascending: false }),
+      supabase.from("bons_commande").select("devis_id, numero_po").not("devis_id", "is", null),
     ]);
     if (dRes.error) {
       toast.error("Chargement des devis impossible", { description: dRes.error.message });
     }
     setDevis((dRes.data as DevisRow[]) || []);
+    const poMap: Record<string, string> = {};
+    ((poRes.data ?? []) as Array<{ devis_id: string | null; numero_po: string }>).forEach((po) => {
+      if (po.devis_id) poMap[po.devis_id] = po.numero_po;
+    });
+    setPoByDevis(poMap);
     const map: Record<string, AcceptationInfo> = {};
     ((aRes.data ?? []) as AcceptationInfo[]).forEach((a) => {
       if (!map[a.devis_id]) map[a.devis_id] = a;
@@ -447,7 +463,8 @@ function AdminDevisPage() {
             const acc = acceptations[d.id];
             const vehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.modele || v.marque));
             const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
-            const isAR = /aller[-_ ]?retour/i.test(d.option_trajet ?? "");
+            const missionType = devisMissionType(d);
+            const isAR = missionType.tone === "violet";
             const brand = clientBrandOf(brands, d.email);
             const societe = cleanSociete(brand?.societe);
             const contactName = `${d.prenom ?? ""} ${d.nom ?? ""}`.trim();
@@ -459,6 +476,12 @@ function AdminDevisPage() {
                     <span className="dvx-ref">{d.numero}</span>
                     {(d.version ?? 1) > 1 && <span className="dvx-badge grey">v{d.version}</span>}
                     <span className={`dvx-badge ${statutBadgeTone(effective)}`}>{statutLabel(effective)}</span>
+                    <span className={`dvx-badge ${missionType.tone}`}>{missionType.label}</span>
+                    {poByDevis[d.id] && (
+                      <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-[13px] font-extrabold text-blue-700">
+                        N° de PO : {poByDevis[d.id]}
+                      </span>
+                    )}
                     {isAR && (
                       <span className="dvx-badge violet" title="Duo : mission Livraison (L) + mission Restitution (R)">
                         <ArrowLeftRight size={11} /> Duo L + R
@@ -543,9 +566,7 @@ function AdminDevisPage() {
 
                   <div className="min-w-0">
                     <p className="dvx-col-k">Option choisie</p>
-                    <p className="text-[13px] font-semibold capitalize text-[#14161c]">
-                      {isAR ? "Livraison + restitution" : (d.option_trajet || "—").replaceAll("_", " ").replace("aller-simple", "Livraison simple")}
-                    </p>
+                    <span className={`dvx-badge ${missionType.tone}`}>{missionType.label}</span>
                     <p className="mt-1 text-[11.5px] text-[#a3a4ac]">
                       {d.prestation || d.tarif_label || "Prestation standard"}
                     </p>

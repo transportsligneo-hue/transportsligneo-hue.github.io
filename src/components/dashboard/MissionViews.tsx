@@ -36,8 +36,17 @@ export interface MissionViewItem {
   legLabel?: "L" | "R" | null;
   /** Total du dossier, affiché sur l'encoche qui relie les deux jambes. */
   groupTotal?: string;
+  /** Numéro de bon de commande client. */
+  purchaseOrder?: string | null;
   /** Enveloppe le contenu (Link typé, bouton…) fournie par la page hôte. */
   wrap?: (children: ReactNode) => ReactNode;
+}
+
+function missionTypeBadgeClass(label?: string): string {
+  const normalized = (label ?? "").toLowerCase();
+  if (normalized.includes("recharge")) return "bg-emerald-100 text-emerald-800 border border-emerald-300";
+  if (normalized.includes("restitution")) return "bg-violet-100 text-violet-800 border border-violet-300";
+  return "bg-sky-100 text-sky-800 border border-sky-300";
 }
 
 /** Normalise une heure texte en "HH:MM" ; renvoie null si inexploitable. */
@@ -203,6 +212,16 @@ export function MissionViewsBody({
                 <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
                 {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
               </div>
+              {i.typeLabel && (
+                <span className={`self-start rounded px-2 py-0.5 text-[10px] font-semibold ${missionTypeBadgeClass(i.typeLabel)}`}>
+                  {i.typeLabel}
+                </span>
+              )}
+              {i.purchaseOrder && (
+                <span className="self-start rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] font-extrabold text-blue-700">
+                  PO {i.purchaseOrder}
+                </span>
+              )}
               <p className={`text-sm flex items-center gap-2 ${strong}`}>
                 <MapPin size={12} className="text-pro-accent shrink-0" />
                 <span className="truncate">{i.depart}</span>
@@ -247,6 +266,16 @@ export function MissionViewsBody({
                       }
                     >
                       <div className={`text-[10px] uppercase tracking-wider font-mono mb-1 ${muted}`}>{i.numero}</div>
+                      {i.typeLabel && (
+                        <span className={`mb-1.5 inline-flex rounded px-1.5 py-0.5 text-[9px] font-semibold ${missionTypeBadgeClass(i.typeLabel)}`}>
+                          {i.typeLabel}
+                        </span>
+                      )}
+                      {i.purchaseOrder && (
+                        <span className="mb-1.5 ml-1 inline-flex rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[9px] font-extrabold text-blue-700">
+                          PO {i.purchaseOrder}
+                        </span>
+                      )}
                       <p className={`text-xs leading-snug ${strong}`}>
                         <span className="truncate block">{i.depart}</span>
                         <span className="opacity-50">↓</span>
@@ -288,7 +317,12 @@ export function MissionViewsBody({
             {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
             {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
             {!inDuo && i.typeLabel && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded ${chip}`}>{i.typeLabel}</span>
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${missionTypeBadgeClass(i.typeLabel)}`}>{i.typeLabel}</span>
+            )}
+            {i.purchaseOrder && (
+              <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-extrabold text-blue-700">
+                PO {i.purchaseOrder}
+              </span>
             )}
           </div>
           <p className={`text-sm truncate ${strong}`}>

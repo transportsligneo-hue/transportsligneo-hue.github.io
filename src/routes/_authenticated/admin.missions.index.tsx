@@ -347,7 +347,7 @@ function AdminMissionsUnified() {
     });
 
     const trajetMissions: UnifiedMission[] = Array.from(deduped.values()).map((t) => {
-      const isAR = !!t.mission_group_id || t.type_mission === "aller_retour";
+      const isAR = t.type_mission === "aller_retour" || t.leg_type === "aller" || t.leg_type === "retour";
       const storedNumero = t.numero_mission ?? numeroByTrajet.get(t.id) ?? null;
       const ref = storedNumero
         ? displayNumero(storedNumero)
@@ -666,9 +666,10 @@ function AdminMissionsUnified() {
         statutLabel: UNIFIED_STATUS[m.status]?.label ?? m.status,
         plaque: m.immatriculation ?? null,
         meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.clientNom || undefined,
-        typeLabel: m.isRoundTrip ? "Livraison + Restitution" : "Livraison simple",
-        groupKey: m.groupId ?? `solo-${m.id}`,
+        typeLabel: m.rechargeSeule ? "Recharge uniquement" : m.isRoundTrip ? "Livraison + Restitution" : "Livraison simple",
+        groupKey: m.isRoundTrip && m.groupId ? m.groupId : `solo-${m.id}`,
         legLabel: m.legType === "retour" ? "R" : m.legType === "aller" ? "L" : null,
+        purchaseOrder: m.commandeRef,
         amount: m.prix != null ? `${Number(m.prix).toFixed(2)} €` : undefined,
         wrap: (children) => (
           <button type="button" onClick={() => setSelected(m)} className="block w-full text-left h-full">
@@ -1000,7 +1001,7 @@ function AdminMissionsUnified() {
                             {r.m.depart} <ArrowRight size={12} className="text-[var(--a6-dim)]" /> {r.m.arrivee}
                           </p>
                           {r.m.commandeRef && (
-                            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2F5FFF]" title="Numéro de commande / PO">
+                            <p className="mt-1 inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[12px] font-extrabold text-[#2F5FFF]" title="Numéro de commande / PO">
                               PO {r.m.commandeRef}
                             </p>
                           )}
