@@ -55,7 +55,13 @@ interface FactureRow {
   created_at: string;
   reference_client: string | null;
   reference_label: string | null;
+  devis_id: string | null;
+  mission_group_id: string | null;
+  leg_type: string | null;
+  numero_mission: string | null;
+  immatriculation: string | null;
 }
+
 
 const REFERENCE_LABEL_PRESETS = [
   "N° de PO",
