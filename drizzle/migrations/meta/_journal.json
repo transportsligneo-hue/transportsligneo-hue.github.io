@@ -71,6 +71,13 @@
       "when": 1789173974718,
       "tag": "0009_harden_b2b_pricing_and_definer_execute",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789174000919,
+      "tag": "0010_b2b_price_guard_flag",
+      "breakpoints": true
     }
   ]
 }
