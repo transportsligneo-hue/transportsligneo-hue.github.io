@@ -120,6 +120,13 @@
       "when": 1789180353585,
       "tag": "0016_harden_public_leads_otp_and_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789180388268,
+      "tag": "0017_fix_lead_rate_limit_fingerprint",
+      "breakpoints": true
     }
   ]
 }
