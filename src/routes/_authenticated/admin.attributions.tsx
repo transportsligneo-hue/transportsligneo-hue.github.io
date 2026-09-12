@@ -685,8 +685,8 @@ function AdminAttributions() {
                   {isRechargeSeule(a.trajet) && <RechargeBadge />}
                   {a.trajet?.is_test_data && <TestBadge />}
                   {a.trajet?.commande_ref && (
-                    <span className="dvx-badge blue" title="Numéro de commande / PO">
-                      PO {a.trajet.commande_ref}
+                    <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-[13px] font-extrabold text-blue-700" title="Numéro de commande / PO">
+                      N° de PO : {a.trajet.commande_ref}
                     </span>
                   )}
                   {a.trajet?.type_transport && (

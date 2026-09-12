@@ -669,6 +669,7 @@ function AdminMissionsUnified() {
         typeLabel: m.rechargeSeule ? "Recharge uniquement" : m.isRoundTrip ? "Livraison + Restitution" : "Livraison simple",
         groupKey: m.isRoundTrip && m.groupId ? m.groupId : `solo-${m.id}`,
         legLabel: m.legType === "retour" ? "R" : m.legType === "aller" ? "L" : null,
+        purchaseOrder: m.commandeRef,
         amount: m.prix != null ? `${Number(m.prix).toFixed(2)} €` : undefined,
         wrap: (children) => (
           <button type="button" onClick={() => setSelected(m)} className="block w-full text-left h-full">

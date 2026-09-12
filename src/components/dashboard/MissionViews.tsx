@@ -36,6 +36,8 @@ export interface MissionViewItem {
   legLabel?: "L" | "R" | null;
   /** Total du dossier, affiché sur l'encoche qui relie les deux jambes. */
   groupTotal?: string;
+  /** Numéro de bon de commande client. */
+  purchaseOrder?: string | null;
   /** Enveloppe le contenu (Link typé, bouton…) fournie par la page hôte. */
   wrap?: (children: ReactNode) => ReactNode;
 }
@@ -215,6 +217,11 @@ export function MissionViewsBody({
                   {i.typeLabel}
                 </span>
               )}
+              {i.purchaseOrder && (
+                <span className="self-start rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] font-extrabold text-blue-700">
+                  PO {i.purchaseOrder}
+                </span>
+              )}
               <p className={`text-sm flex items-center gap-2 ${strong}`}>
                 <MapPin size={12} className="text-pro-accent shrink-0" />
                 <span className="truncate">{i.depart}</span>
@@ -264,6 +271,11 @@ export function MissionViewsBody({
                           {i.typeLabel}
                         </span>
                       )}
+                      {i.purchaseOrder && (
+                        <span className="mb-1.5 ml-1 inline-flex rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[9px] font-extrabold text-blue-700">
+                          PO {i.purchaseOrder}
+                        </span>
+                      )}
                       <p className={`text-xs leading-snug ${strong}`}>
                         <span className="truncate block">{i.depart}</span>
                         <span className="opacity-50">↓</span>
@@ -306,6 +318,11 @@ export function MissionViewsBody({
             {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
             {!inDuo && i.typeLabel && (
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${missionTypeBadgeClass(i.typeLabel)}`}>{i.typeLabel}</span>
+            )}
+            {i.purchaseOrder && (
+              <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-extrabold text-blue-700">
+                PO {i.purchaseOrder}
+              </span>
             )}
           </div>
           <p className={`text-sm truncate ${strong}`}>
