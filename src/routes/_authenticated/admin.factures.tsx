@@ -297,6 +297,20 @@ function AdminFacturesPage() {
                     <span className={`dvx-badge ${f.type_facture === "b2b" ? "violet" : "blue"}`}>
                       {f.type_facture === "b2b" ? "B2B" : "Particulier"}
                     </span>
+                    {(f.leg_type === "aller" || f.leg_type === "retour") && (
+                      <span className={`dvx-badge ${f.leg_type === "aller" ? "blue" : "violet"}`}>
+                        {f.leg_type === "aller" ? "Livraison" : "Restitution"}
+                      </span>
+                    )}
+                    {f.immatriculation && (
+                      <span className="inline-flex items-center rounded border border-white/25 bg-white/10 px-1.5 py-0.5 text-[10.5px] font-bold tracking-widest text-white">
+                        {f.immatriculation.toUpperCase()}
+                      </span>
+                    )}
+                    {f.numero_mission && (
+                      <span className="text-[11px] text-[#a3a4ac]">Dossier {f.numero_mission}</span>
+                    )}
+
                     <span className="text-[11.5px] text-[#a3a4ac]">
                       {new Date(f.date_facture ?? f.created_at).toLocaleDateString("fr-FR", {
                         day: "2-digit", month: "short", year: "numeric",
