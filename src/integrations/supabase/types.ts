@@ -8986,6 +8986,7 @@ export type Database = {
           retour: number
         }[]
       }
+      storage_folder_uuid: { Args: { _name: string }; Returns: string }
       submit_case_study: {
         Args: { _choice: number; _module_id: string }
         Returns: Json

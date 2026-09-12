@@ -92,6 +92,13 @@
       "when": 1789174181914,
       "tag": "0012_backfill_missions_heure_and_autofill",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789177865888,
+      "tag": "0013_harden_definer_exec_and_org_logo_policies",
+      "breakpoints": true
     }
   ]
 }
