@@ -620,8 +620,8 @@ export default function QuickMissionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Type de prestation */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Type de prestation
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -650,8 +650,8 @@ export default function QuickMissionForm({
       </section>
 
       {/* Départ */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <MapPin size={14} className="text-pro-accent" /> Lieu d'enlèvement
         </h2>
 
@@ -711,8 +711,8 @@ export default function QuickMissionForm({
 
       {/* Arrivée */}
       {tripType === "recharge" ? (
-        <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-          <h2 className="text-sm font-semibold text-pro-text mb-2 flex items-center gap-1.5">
+        <section className="qm-card p-5 md:p-6">
+          <h2 className="qm-section-title mb-2">
             <MapPinned size={14} className="text-pro-accent" /> Pas de livraison
           </h2>
           <p className="text-xs text-pro-text-soft">
@@ -721,8 +721,8 @@ export default function QuickMissionForm({
           </p>
         </section>
       ) : (
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <MapPinned size={14} className="text-pro-accent" /> Lieu de livraison
         </h2>
         <div className="space-y-3">
@@ -756,9 +756,9 @@ export default function QuickMissionForm({
 
 
       {/* Véhicule */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
+      <section className="qm-card p-5 md:p-6">
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
-          <h2 className="text-sm font-semibold text-pro-text flex items-center gap-1.5">
+          <h2 className="qm-section-title">
             <Car size={14} className="text-pro-accent" /> Véhicule
           </h2>
           {(() => {
@@ -970,8 +970,8 @@ export default function QuickMissionForm({
       )}
 
       {/* Options & planning */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Options & planning
         </h2>
 
