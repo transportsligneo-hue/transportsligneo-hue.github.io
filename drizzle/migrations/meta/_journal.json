@@ -64,6 +64,13 @@
       "when": 1789168969718,
       "tag": "0008_security_fixes_definer_view_and_public_access",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789173974718,
+      "tag": "0009_harden_b2b_pricing_and_definer_execute",
+      "breakpoints": true
     }
   ]
 }
