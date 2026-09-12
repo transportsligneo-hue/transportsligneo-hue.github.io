@@ -64,10 +64,8 @@ const newRow = (): VehicleRow => ({
   arrivee: "", open: false, busy: false, options: {}, optionsOverride: false,
 });
 
-const fieldCls =
-  "w-full rounded-[9px] border border-slate-200 bg-slate-50/70 px-3 py-2.5 text-[13.5px] text-slate-900 outline-none transition focus:border-[#2f5fff] focus:bg-white";
-const labelCls =
-  "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.03em] text-slate-400";
+const fieldCls = "qm-input";
+const labelCls = "qm-label";
 
 function eur(n: number) {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
@@ -675,14 +673,14 @@ function Card({
   num, title, badge, children,
 }: { num?: string; title: string; badge?: string; children: React.ReactNode }) {
   return (
-    <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-5 md:px-6 md:py-[22px]">
+    <section className="qm-card mb-4 p-5 md:px-6 md:py-[22px]">
       <header className="mb-4 flex items-center gap-2.5">
         {num && (
-          <span className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-slate-900 text-xs font-bold text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#2f5fff] to-[#7c5cff] text-xs font-bold text-white shadow-[0_6px_14px_-6px_rgba(47,95,255,.8)]">
             {num}
           </span>
         )}
-        <h3 className="text-[15px] font-bold text-slate-900">{title}</h3>
+        <h3 className="qm-section-title">{title}</h3>
         {badge && (
           <span className="ml-auto rounded-full bg-[#eef2ff] px-3 py-1 text-[11.5px] font-bold text-[#2f5fff]">
             {badge}
