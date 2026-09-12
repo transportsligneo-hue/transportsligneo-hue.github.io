@@ -258,9 +258,11 @@ function ProDashboard() {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard-pro/nouvelle-demande"
-                      className="flex items-center gap-1.5 rounded-[9px] bg-[#2f5fff] px-4 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_2px_8px_-2px_rgba(47,95,255,0.35)] transition-colors hover:bg-[#1e4af0]"
+                      className="group flex items-center gap-1.5 rounded-[9px] bg-[#2f5fff] px-4 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_2px_8px_-2px_rgba(47,95,255,0.35)] transition-colors hover:bg-[#1e4af0]"
                     >
-                      <PlusCircle size={14} /> Demande de mission simple
+                      <PlusCircle size={14} />
+                      <span>Demande de mission simple</span>
+                      <HelpCircle size={13} className="ml-0.5 opacity-80 transition-opacity group-hover:opacity-100" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-[260px] bg-[#111a3d] text-[#fdfcf8]">
@@ -272,9 +274,11 @@ function ProDashboard() {
                 <TooltipTrigger asChild>
                   <Link
                     to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
-                    className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
+                    className="group flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
                   >
-                    <PlusCircle size={14} /> {isFlotte ? "Demande de mission groupée" : "Nouvelle mission"}
+                    <PlusCircle size={14} />
+                    <span>{isFlotte ? "Demande de mission groupée" : "Nouvelle mission"}</span>
+                    <HelpCircle size={13} className="ml-0.5 opacity-80 transition-opacity group-hover:opacity-100" />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[260px] bg-[#111a3d] text-[#fdfcf8]">
