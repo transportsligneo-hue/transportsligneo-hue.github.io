@@ -151,8 +151,14 @@ interface FactureRow {
   pdf_url: string | null;
   mode_paiement: string | null;
   mission_id: string | null;
+  devis_id: string | null;
+  mission_group_id: string | null;
+  leg_type: string | null;
+  numero_mission: string | null;
+  immatriculation: string | null;
   created_at: string;
 }
+
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
