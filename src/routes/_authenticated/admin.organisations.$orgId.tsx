@@ -9,6 +9,7 @@ import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAdd
 import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 import { OrgLogo } from "@/components/OrgLogo";
 import { OrgLogoUploader } from "@/components/OrgLogoUploader";
+import { OrgSitesTab } from "@/components/admin/OrgSitesTab";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
@@ -187,6 +188,7 @@ function OrgDetail() {
           <TabsTrigger value="missions">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="b2b">Demandes B2B ({b2bRequests.length})</TabsTrigger>
           <TabsTrigger value="members">Membres ({members.length})</TabsTrigger>
+          <TabsTrigger value="sites"><MapPin size={13} className="mr-1.5" />Sites</TabsTrigger>
           <TabsTrigger value="pricing"><Euro size={13} className="mr-1.5" />Tarification</TabsTrigger>
           <TabsTrigger value="addresses"><MapPin size={13} className="mr-1.5" />Adresses</TabsTrigger>
           <TabsTrigger value="activity">Historique ({activity.length})</TabsTrigger>
@@ -252,6 +254,10 @@ function OrgDetail() {
               })}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="sites">
+          <OrgSitesTab organizationId={org.id} facturationMode={org.facturation_mode ?? "consolidee"} />
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-3">
