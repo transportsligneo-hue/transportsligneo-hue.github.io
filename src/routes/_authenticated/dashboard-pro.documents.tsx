@@ -293,7 +293,7 @@ function ProDocuments() {
     });
   }, [devis]);
 
-  /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  /** Devis indexés par mission puis par identifiant, pour rattacher les factures. */
   const devisByMission = useMemo(() => {
     const map: Record<string, DevisRow> = {};
     for (const d of devis) {
@@ -302,6 +302,26 @@ function ProDocuments() {
     return map;
   }, [devis]);
 
+  const devisById = useMemo(() => {
+    const map: Record<string, DevisRow> = {};
+    for (const d of devis) map[d.id] = d;
+    return map;
+  }, [devis]);
+
+  /** Dossiers (livraison + restitution) comptant plusieurs factures. */
+  const dossierCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const f of factures) {
+      const key = f.mission_group_id ?? f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "");
+      if (key) counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return counts;
+  }, [factures]);
+
+  const dossierKey = (f: FactureRow) =>
+    f.mission_group_id ?? f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? f.id;
+
+  /** Vue planning : factures groupées par jour d'émission, jambes d'un même dossier côte à côte. */
   const facturesPlanning = useMemo(() => {
     const groups = new Map<string, FactureRow[]>();
     for (const f of filteredFactures) {
@@ -310,12 +330,22 @@ function ProDocuments() {
       if (arr) arr.push(f);
       else groups.set(key, [f]);
     }
+    const legRank = (f: FactureRow) => (f.leg_type === "aller" ? 0 : f.leg_type === "retour" ? 1 : 0);
+    for (const [, rows] of groups) {
+      rows.sort((a, b) => {
+        const ka = a.mission_group_id ?? a.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? a.id;
+        const kb = b.mission_group_id ?? b.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? b.id;
+        if (ka !== kb) return ka < kb ? 1 : -1;
+        return legRank(a) - legRank(b);
+      });
+    }
     return Array.from(groups.entries()).sort(([a], [b]) => {
       if (a === "sans-date") return 1;
       if (b === "sans-date") return -1;
       return a > b ? -1 : 1;
     });
   }, [filteredFactures]);
+
 
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
