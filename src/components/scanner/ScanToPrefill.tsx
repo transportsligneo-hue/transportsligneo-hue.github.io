@@ -27,7 +27,7 @@ interface Props {
   /** Conservé pour compatibilité : le scanner traite un document à la fois. */
   multiPage?: boolean;
   onExtracted: (fields: ExtractedFields, docs: ExtractionResult[]) => void;
-  variant?: "blue" | "gold" | "outline";
+  variant?: "blue" | "gold" | "outline" | "purple";
   className?: string;
   /** Affiche le petit "?" d'aide à côté du bouton. */
   help?: boolean;
@@ -97,7 +97,8 @@ export function ScanToPrefill({
   const blueCls = "bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white shadow-[0_2px_14px_rgba(79,140,255,0.35)] hover:shadow-[0_4px_22px_rgba(79,140,255,0.5)] hover:from-[#4f8cff] hover:to-[#2f5fff]";
   const goldCls = "bg-gradient-to-r from-[#d4af37] to-[#e7c76a] text-[#0b1026]";
   const outlineCls = "border border-[#4f8cff]/60 text-[#2f5fff] hover:bg-[#4f8cff]/10";
-  const skin = variant === "gold" ? goldCls : variant === "outline" ? outlineCls : blueCls;
+  const purpleCls = "bg-gradient-to-r from-[#7c5cff] to-[#a78bfa] text-white shadow-[0_2px_14px_rgba(124,92,255,0.35)] hover:shadow-[0_4px_22px_rgba(124,92,255,0.5)] hover:from-[#a78bfa] hover:to-[#7c5cff]";
+  const skin = variant === "gold" ? goldCls : variant === "outline" ? outlineCls : variant === "purple" ? purpleCls : blueCls;
 
   return (
     <div className="relative inline-flex items-center gap-1.5">
