@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Gauge, LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText, MapPin, MailCheck, RefreshCw } from "lucide-react";
+import { Gauge, LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText, MapPin, MailCheck, RefreshCw, LifeBuoy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
