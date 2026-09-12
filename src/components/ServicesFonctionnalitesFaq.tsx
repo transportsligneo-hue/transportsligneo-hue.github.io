@@ -151,7 +151,7 @@ const CATS: Cat[] = [
       {
         label: "Support dédié 7j/7",
         q: "Comment contacter le support ?",
-        a: "Notre équipe est joignable 7j/7 par téléphone au 02 48 27 40 14, par email ou via la page contact. Un interlocuteur dédié suit les comptes professionnels et flottes.",
+        a: "Notre équipe est joignable 7j/7 par téléphone au 07 82 45 61 81, par email ou via la page contact. Un interlocuteur dédié suit les comptes professionnels et flottes.",
       },
       {
         label: "Joignable rapidement",
