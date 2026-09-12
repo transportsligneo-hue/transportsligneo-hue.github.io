@@ -24,6 +24,7 @@ interface Props {
   context?: "admin_mission" | "client_reservation" | "pro_demande";
   onExtracted: (fields: ExtractedFields, docs: ExtractionResult[]) => void;
   className?: string;
+  variant?: "blue" | "purple";
 }
 
 interface Session {
@@ -42,6 +43,7 @@ export function QrHandoffButton({
   context = "admin_mission",
   onExtracted,
   className = "",
+  variant = "blue",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -193,7 +195,11 @@ export function QrHandoffButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-[#4f8cff]/60 text-[#2f5fff] hover:bg-[#4f8cff]/10 ${className}`}
+        className={
+          variant === "purple"
+            ? `inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-[#a78bfa]/60 text-[#7c5cff] hover:bg-[#a78bfa]/10 ${className}`
+            : `inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition border border-[#4f8cff]/60 text-[#2f5fff] hover:bg-[#4f8cff]/10 ${className}`
+        }
       >
         <QrCode size={16} />
         Scanner depuis mon téléphone
