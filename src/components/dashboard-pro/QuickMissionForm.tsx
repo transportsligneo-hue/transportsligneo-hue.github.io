@@ -614,14 +614,15 @@ export default function QuickMissionForm({
   }
 
 
-  const inp = "w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pro-accent/20 focus:border-pro-accent transition-colors";
-  const lbl = "block text-xs font-medium text-pro-text-soft uppercase tracking-wide mb-1.5";
+  const inp = "qm-input";
+  const lbl = "qm-label";
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Type de prestation */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Type de prestation
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -635,14 +636,11 @@ export default function QuickMissionForm({
               <button
                 key={opt.v} type="button"
                 onClick={() => setTripType(opt.v as TripOption)}
-                className={`text-left rounded-lg border px-4 py-3 transition-all ${
-                  active
-                    ? "border-pro-accent bg-pro-accent/5 ring-1 ring-pro-accent/30"
-                    : "border-pro-border hover:border-pro-accent/40 bg-white"
-                }`}
+                className={`qm-choice ${active ? "is-active" : ""}`}
               >
-                <p className="text-sm font-semibold text-pro-text">{opt.label}</p>
-                <p className="text-xs text-pro-text-soft mt-0.5">{opt.desc}</p>
+                <p className="qm-choice-title">{opt.label}</p>
+                <p className="qm-choice-desc">{opt.desc}</p>
+
               </button>
             );
           })}
@@ -650,8 +648,8 @@ export default function QuickMissionForm({
       </section>
 
       {/* Départ */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <MapPin size={14} className="text-pro-accent" /> Lieu d'enlèvement
         </h2>
 
@@ -711,8 +709,8 @@ export default function QuickMissionForm({
 
       {/* Arrivée */}
       {tripType === "recharge" ? (
-        <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-          <h2 className="text-sm font-semibold text-pro-text mb-2 flex items-center gap-1.5">
+        <section className="qm-card p-5 md:p-6">
+          <h2 className="qm-section-title mb-2">
             <MapPinned size={14} className="text-pro-accent" /> Pas de livraison
           </h2>
           <p className="text-xs text-pro-text-soft">
@@ -721,8 +719,8 @@ export default function QuickMissionForm({
           </p>
         </section>
       ) : (
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <MapPinned size={14} className="text-pro-accent" /> Lieu de livraison
         </h2>
         <div className="space-y-3">
@@ -756,9 +754,9 @@ export default function QuickMissionForm({
 
 
       {/* Véhicule */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
+      <section className="qm-card p-5 md:p-6">
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
-          <h2 className="text-sm font-semibold text-pro-text flex items-center gap-1.5">
+          <h2 className="qm-section-title">
             <Car size={14} className="text-pro-accent" /> Véhicule
           </h2>
           {(() => {
@@ -970,8 +968,8 @@ export default function QuickMissionForm({
       )}
 
       {/* Options & planning */}
-      <section className="bg-white rounded-xl border border-pro-border p-5 md:p-6">
-        <h2 className="text-sm font-semibold text-pro-text mb-3 flex items-center gap-1.5">
+      <section className="qm-card p-5 md:p-6">
+        <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Options & planning
         </h2>
 
