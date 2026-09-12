@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Building2, Receipt, Headphones, PhoneCall,
   Bot, Code2, Wrench, Calculator, IdCard, Hash, ChevronDown,
 } from "lucide-react";
+import ServicesFonctionnalitesFaq from "@/components/ServicesFonctionnalitesFaq";
 
 type Feat = { Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; label: string };
 
