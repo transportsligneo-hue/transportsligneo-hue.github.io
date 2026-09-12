@@ -6,7 +6,8 @@ import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
   Truck, Clock, CheckCircle, PlusCircle, Loader2, ArrowUpRight, FileText,
-  Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp, Zap } from "lucide-react";
+  Receipt, Car, Wrench, Users, Activity, MoreHorizontal, TrendingUp, Zap, HelpCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 import { dossierTypeLabel, isAllerRetour } from "@/lib/mission-type";
