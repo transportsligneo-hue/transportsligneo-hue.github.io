@@ -66,6 +66,7 @@ function FleetPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("tous");
+  const [siteFilter, setSiteFilter] = useState<string>("tous");
   const [draft, setDraft] = useState<Partial<Vehicle> | null>(null);
   const [selected, setSelected] = useState<Vehicle | null>(null);
   const [panelTab, setPanelTab] = useState<"general" | "documents" | "entretien" | "historique">("general");
@@ -161,16 +162,23 @@ function FleetPage() {
     if (fresh && fresh !== selected) setSelected(fresh);
   }, [vehicles]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const siteList = useMemo(
+    () => Object.entries(sites).map(([id, nom]) => ({ id, nom: nom || "Site" })),
+    [sites],
+  );
+  const multiSite = siteList.length > 1;
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return vehicles.filter((v) => {
       if (statutFilter !== "tous" && v.statut !== statutFilter) return false;
       if (statutFilter === "tous" && v.statut === "archive") return false;
+      if (multiSite && siteFilter !== "tous" && v.site_id !== siteFilter) return false;
       if (!q) return true;
       return [v.vin, v.immatriculation, v.marque, v.modele]
         .filter(Boolean).some((x) => String(x).toLowerCase().includes(q));
     });
-  }, [vehicles, search, statutFilter]);
+  }, [vehicles, search, statutFilter, siteFilter, multiSite]);
 
   const actifs = useMemo(() => vehicles.filter((v) => v.statut !== "archive"), [vehicles]);
 
