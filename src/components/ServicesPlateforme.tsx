@@ -131,6 +131,8 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
             </div>
           ))}
         </div>
+
+        <ServicesFonctionnalitesFaq />
       </section>
     </div>
   );
