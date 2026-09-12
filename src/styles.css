@@ -9034,3 +9034,87 @@ select {
 [data-admin-drawer] .admin-btn-blue [class*="text-white"] {
   color: #ffffff !important;
 }
+
+/* ============================================================
+   QM · Demandes de mission (espaces client / pro / flotte)
+   Habillage visuel uniquement — aucun impact fonctionnel.
+   ============================================================ */
+@layer components {
+  .qm-card {
+    position: relative;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 100%);
+    border: 1px solid rgba(47, 95, 255, 0.14);
+    border-radius: 20px;
+    box-shadow: 0 22px 46px -34px rgba(12, 26, 70, 0.45);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .qm-card:hover {
+    border-color: rgba(47, 95, 255, 0.26);
+    box-shadow: 0 26px 54px -32px rgba(12, 26, 70, 0.5);
+  }
+  .qm-card::before {
+    content: "";
+    position: absolute; inset: 0 0 auto 0; height: 3px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(90deg, #2f5fff, #6ea8ff 45%, #7c5cff);
+    opacity: .85;
+  }
+
+  .qm-section-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #0c1738;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .qm-section-title svg { color: #2f5fff; }
+
+  .qm-label {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5c6b91;
+    margin-bottom: 7px;
+  }
+
+  .qm-input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #dde5f6;
+    background: #fff;
+    padding: 11px 14px;
+    font-size: 14.5px;
+    color: #0c1738;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .qm-input::placeholder { color: #9aa6c2; }
+  .qm-input:hover { border-color: #c6d4f2; }
+  .qm-input:focus {
+    outline: none;
+    border-color: #2f5fff;
+    background: #fdfeff;
+    box-shadow: 0 0 0 4px rgba(47, 95, 255, 0.14);
+  }
+
+  .qm-choice {
+    text-align: left;
+    border-radius: 16px;
+    border: 1px solid #dde5f6;
+    background: #fff;
+    padding: 14px 16px;
+    transition: all .18s ease;
+  }
+  .qm-choice:hover { border-color: rgba(47,95,255,.45); transform: translateY(-1px); }
+  .qm-choice-title { font-family: 'Poppins', sans-serif; font-size: 14.5px; font-weight: 700; color: #0c1738; }
+  .qm-choice-desc { font-size: 12.5px; color: #64719a; margin-top: 2px; }
+  .qm-choice.is-active {
+    border-color: #2f5fff;
+    background: linear-gradient(135deg, rgba(47,95,255,.09), rgba(124,92,255,.08));
+    box-shadow: 0 0 0 3px rgba(47,95,255,.14);
+  }
+  .qm-choice.is-active .qm-choice-title { color: #1c3fd1; }
+}
