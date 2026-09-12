@@ -617,7 +617,8 @@ export default function QuickMissionForm({
           setDepartRetour(""); setArriveeRetour(""); setImmatRetour("");
           setMarqueRetour(""); setModeleRetour(""); setVinRetour("");
           setDateRetour(""); setHeureRetour("");
-          setOptions({}); setAutreNote(""); setPvDigitalise("aucun");
+          setSameRetourAddress(true); setSameRetourVehicle(false);
+          setOptions({}); setJokeage(false); setJokeageServices({}); setAutreNote(""); setPvDigitalise("aucun");
           setDate(""); setHeure(""); setMessage("");
           setPricing(null);
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -945,6 +946,7 @@ export default function QuickMissionForm({
                         onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
                         placeholder="AA-123-BB"
                         maxLength={15}
+                        required={!sameRetourVehicle}
                       />
                       <button
                         type="button"
