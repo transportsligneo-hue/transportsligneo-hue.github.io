@@ -334,6 +334,26 @@ function FleetPage() {
         ))}
       </div>
 
+      {/* Sélecteur de site — visible uniquement si plusieurs sites */}
+      {multiSite && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-[11.5px] font-medium text-[#70727d]">Site :</span>
+          {[{ id: "tous", nom: "Tous les sites" }, ...siteList].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSiteFilter(s.id)}
+              className={`rounded-lg border px-3.5 py-2 text-[12px] font-medium transition ${
+                siteFilter === s.id
+                  ? "border-[#2f5fff] bg-[#2f5fff]/5 text-[#2f5fff]"
+                  : "border-[#eaeaee] bg-white text-[#70727d] hover:text-[#14161c]"
+              }`}
+            >
+              {s.nom}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Barre d'outils */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1">
