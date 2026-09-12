@@ -37,13 +37,13 @@ export function PoLinkCard({ devisId, missionId }: PoLinkCardProps) {
   };
 
   return (
-    <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+    <div className="rounded-xl border-2 border-blue-500/30 bg-blue-500/5 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-widest text-emerald-500 flex items-center gap-1.5">
+          <p className="text-xs uppercase tracking-widest text-blue-600 flex items-center gap-1.5">
             <FileCheck2 size={13} /> Bon de commande client
           </p>
-          <p className="mt-1 font-semibold text-lg tabular-nums">{po.numero_po}</p>
+          <p className="mt-1 text-2xl font-extrabold text-blue-700 tabular-nums">N° de PO : {po.numero_po}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {po.montant_ht != null && <>Montant HT&nbsp;: {po.montant_ht.toFixed(2)} €&nbsp;· </>}
             {po.date_commande && <>Commandé le {new Date(po.date_commande).toLocaleDateString("fr-FR")}</>}
@@ -55,7 +55,7 @@ export function PoLinkCard({ devisId, missionId }: PoLinkCardProps) {
           <button
             type="button"
             onClick={openPdf}
-            className="text-xs px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 flex items-center gap-1"
+            className="text-xs px-3 py-1.5 rounded-lg border border-blue-500/40 text-blue-700 hover:bg-blue-500/10 flex items-center gap-1"
           >
             <ExternalLink size={12} /> PDF
           </button>
