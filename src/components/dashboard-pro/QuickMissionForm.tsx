@@ -803,8 +803,8 @@ export default function QuickMissionForm({
             };
             return (
               <div className="flex flex-wrap gap-2">
-                <ScanToPrefill label="Scanner" multiPage onExtracted={applyExtracted} />
-                <QrHandoffButton context="pro_demande" onExtracted={applyExtracted} />
+                <ScanToPrefill label="Scanner" multiPage variant="blue" onExtracted={applyExtracted} />
+                <QrHandoffButton context="pro_demande" variant="blue" onExtracted={applyExtracted} />
               </div>
             );
           })()}
@@ -885,9 +885,26 @@ export default function QuickMissionForm({
       {/* Restitution (Aller-retour) */}
       {tripType === "aller-retour" && (
         <section className="qm-card qm-card-purple p-5 md:p-6">
-          <h2 className="qm-section-title qm-section-title-purple mb-1">
-            <Car size={14} /> Véhicule restitution
-          </h2>
+          <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+            <h2 className="qm-section-title qm-section-title-purple">
+              <Car size={14} /> Véhicule restitution
+            </h2>
+            {(() => {
+              const applyExtractedRetour = (f: ExtractedFields) => {
+                if (f.immatriculation) setImmatRetour(f.immatriculation.toUpperCase());
+                if (f.vin) setVinRetour(f.vin.toUpperCase());
+                if (f.marque) setMarqueRetour(f.marque);
+                if (f.modele) setModeleRetour(f.modele);
+                toast.success("Champs restitution pré-remplis depuis le document");
+              };
+              return (
+                <div className="flex flex-wrap gap-2">
+                  <ScanToPrefill label="Scanner" multiPage variant="purple" onExtracted={applyExtractedRetour} />
+                  <QrHandoffButton context="pro_demande" variant="purple" onExtracted={applyExtractedRetour} />
+                </div>
+              );
+            })()}
+          </div>
           <p className="text-[12px] text-pro-text-soft mb-4">
             Par défaut, on reprend le véhicule à l'adresse de livraison et on le ramène au point de départ.
             Renseignez sa plaque, ou cochez ci-dessous s'il s'agit du véhicule de livraison.
