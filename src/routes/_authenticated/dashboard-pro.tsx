@@ -36,6 +36,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
     { to: "/dashboard-pro/fidelite", label: "Compte Kilomètres", icon: Gauge },
     { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
     { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+    { to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
   );
   return base;
 }

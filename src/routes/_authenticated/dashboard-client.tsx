@@ -26,6 +26,7 @@ const navItems: ProSidebarItem[] = [
   { to: "/dashboard-client/fidelite", label: "Compte Kilomètres", icon: Gauge },
   { to: "/dashboard-client/documents", label: "Mes documents", icon: FolderOpen },
   { to: "/dashboard-client/profil", label: "Mon profil", icon: UserCog },
+  { to: "/dashboard-client/aide", label: "Aide & FAQ", icon: LifeBuoy },
 ];
 
 function ClientLayout() {
