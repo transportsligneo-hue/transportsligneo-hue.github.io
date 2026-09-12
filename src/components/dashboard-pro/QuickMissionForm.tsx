@@ -803,8 +803,8 @@ export default function QuickMissionForm({
             };
             return (
               <div className="flex flex-wrap gap-2">
-                <ScanToPrefill label="Scanner" multiPage onExtracted={applyExtracted} />
-                <QrHandoffButton context="pro_demande" onExtracted={applyExtracted} />
+                <ScanToPrefill label="Scanner" multiPage variant="blue" onExtracted={applyExtracted} />
+                <QrHandoffButton context="pro_demande" variant="blue" onExtracted={applyExtracted} />
               </div>
             );
           })()}
