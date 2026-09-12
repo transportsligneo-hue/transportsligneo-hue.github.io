@@ -636,14 +636,11 @@ export default function QuickMissionForm({
               <button
                 key={opt.v} type="button"
                 onClick={() => setTripType(opt.v as TripOption)}
-                className={`text-left rounded-lg border px-4 py-3 transition-all ${
-                  active
-                    ? "border-pro-accent bg-pro-accent/5 ring-1 ring-pro-accent/30"
-                    : "border-pro-border hover:border-pro-accent/40 bg-white"
-                }`}
+                className={`qm-choice ${active ? "is-active" : ""}`}
               >
-                <p className="text-sm font-semibold text-pro-text">{opt.label}</p>
-                <p className="text-xs text-pro-text-soft mt-0.5">{opt.desc}</p>
+                <p className="qm-choice-title">{opt.label}</p>
+                <p className="qm-choice-desc">{opt.desc}</p>
+
               </button>
             );
           })}
