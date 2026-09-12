@@ -3213,13 +3213,18 @@ export type Database = {
           date_paiement: string | null
           depart: string | null
           designation: string | null
+          devis_id: string | null
           distance_km: number | null
           id: string
+          immatriculation: string | null
+          leg_type: string | null
           lien_paiement_externe: string | null
           metadata: Json
+          mission_group_id: string | null
           mission_id: string | null
           mode_paiement: string | null
           numero: string
+          numero_mission: string | null
           paid_at: string | null
           pdf_url: string | null
           prix_ht: number
@@ -3234,6 +3239,7 @@ export type Database = {
           total_ht: number | null
           total_ttc: number | null
           total_tva: number | null
+          trajet_id: string | null
           tva_taux: number
           type_facture: string
           updated_at: string
@@ -3258,13 +3264,18 @@ export type Database = {
           date_paiement?: string | null
           depart?: string | null
           designation?: string | null
+          devis_id?: string | null
           distance_km?: number | null
           id?: string
+          immatriculation?: string | null
+          leg_type?: string | null
           lien_paiement_externe?: string | null
           metadata?: Json
+          mission_group_id?: string | null
           mission_id?: string | null
           mode_paiement?: string | null
           numero: string
+          numero_mission?: string | null
           paid_at?: string | null
           pdf_url?: string | null
           prix_ht?: number
@@ -3279,6 +3290,7 @@ export type Database = {
           total_ht?: number | null
           total_ttc?: number | null
           total_tva?: number | null
+          trajet_id?: string | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
@@ -3303,13 +3315,18 @@ export type Database = {
           date_paiement?: string | null
           depart?: string | null
           designation?: string | null
+          devis_id?: string | null
           distance_km?: number | null
           id?: string
+          immatriculation?: string | null
+          leg_type?: string | null
           lien_paiement_externe?: string | null
           metadata?: Json
+          mission_group_id?: string | null
           mission_id?: string | null
           mode_paiement?: string | null
           numero?: string
+          numero_mission?: string | null
           paid_at?: string | null
           pdf_url?: string | null
           prix_ht?: number
@@ -3324,6 +3341,7 @@ export type Database = {
           total_ht?: number | null
           total_ttc?: number | null
           total_tva?: number | null
+          trajet_id?: string | null
           tva_taux?: number
           type_facture?: string
           updated_at?: string
@@ -3338,10 +3356,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "factures_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "factures_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factures_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factures_trajet_id_fkey"
+            columns: ["trajet_id"]
+            isOneToOne: false
+            referencedRelation: "trajets_safe"
             referencedColumns: ["id"]
           },
         ]

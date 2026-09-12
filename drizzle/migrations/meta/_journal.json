@@ -127,6 +127,13 @@
       "when": 1789180388268,
       "tag": "0017_fix_lead_rate_limit_fingerprint",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789184549394,
+      "tag": "0018_factures_link_devis_trajet_legs",
+      "breakpoints": true
     }
   ]
 }

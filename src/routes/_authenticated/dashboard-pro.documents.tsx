@@ -70,14 +70,16 @@ function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: strin
   return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
-/** Type de prestation d'une facture : d'abord la mission liée (recharge / retour), sinon la désignation. */
+/** Type de prestation d'une facture : devis lié, puis mission liée, puis désignation. */
 function factureTypeInfo(
   f: FactureRow,
   rech: Record<string, boolean>,
   devisByMission: Record<string, DevisRow>,
+  devisById: Record<string, DevisRow>,
 ): { label: string; cls: string } {
   if (f.mission_id && rech[f.mission_id]) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
-  const dv = f.mission_id ? devisByMission[f.mission_id] : undefined;
+  const dv = (f.devis_id ? devisById[f.devis_id] : undefined)
+    ?? (f.mission_id ? devisByMission[f.mission_id] : undefined);
   if (dv) {
     const opt = (dv.option_trajet ?? "").toLowerCase();
     if (opt.includes("recharge")) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
@@ -86,6 +88,10 @@ function factureTypeInfo(
     }
     return { label: "Livraison simple", cls: NEON_SIMPLE };
   }
+  if (f.leg_type === "aller" || f.leg_type === "retour") {
+    return { label: "Livraison + Restitution", cls: NEON_DUO };
+  }
+
   const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
   if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
@@ -145,8 +151,14 @@ interface FactureRow {
   pdf_url: string | null;
   mode_paiement: string | null;
   mission_id: string | null;
+  devis_id: string | null;
+  mission_group_id: string | null;
+  leg_type: string | null;
+  numero_mission: string | null;
+  immatriculation: string | null;
   created_at: string;
 }
+
 
 const devisStatutPill: Record<string, { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-slate-100 text-slate-700" },
@@ -281,7 +293,7 @@ function ProDocuments() {
     });
   }, [devis]);
 
-  /** Vue planning : factures groupées par jour d'émission, plus récentes en haut. */
+  /** Devis indexés par mission puis par identifiant, pour rattacher les factures. */
   const devisByMission = useMemo(() => {
     const map: Record<string, DevisRow> = {};
     for (const d of devis) {
@@ -290,6 +302,26 @@ function ProDocuments() {
     return map;
   }, [devis]);
 
+  const devisById = useMemo(() => {
+    const map: Record<string, DevisRow> = {};
+    for (const d of devis) map[d.id] = d;
+    return map;
+  }, [devis]);
+
+  /** Dossiers (livraison + restitution) comptant plusieurs factures. */
+  const dossierCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const f of factures) {
+      const key = f.mission_group_id ?? f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "");
+      if (key) counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return counts;
+  }, [factures]);
+
+  const dossierKey = (f: FactureRow) =>
+    f.mission_group_id ?? f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? f.id;
+
+  /** Vue planning : factures groupées par jour d'émission, jambes d'un même dossier côte à côte. */
   const facturesPlanning = useMemo(() => {
     const groups = new Map<string, FactureRow[]>();
     for (const f of filteredFactures) {
@@ -298,12 +330,22 @@ function ProDocuments() {
       if (arr) arr.push(f);
       else groups.set(key, [f]);
     }
+    const legRank = (f: FactureRow) => (f.leg_type === "aller" ? 0 : f.leg_type === "retour" ? 1 : 0);
+    for (const [, rows] of groups) {
+      rows.sort((a, b) => {
+        const ka = a.mission_group_id ?? a.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? a.id;
+        const kb = b.mission_group_id ?? b.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? b.id;
+        if (ka !== kb) return ka < kb ? 1 : -1;
+        return legRank(a) - legRank(b);
+      });
+    }
     return Array.from(groups.entries()).sort(([a], [b]) => {
       if (a === "sans-date") return 1;
       if (b === "sans-date") return -1;
       return a > b ? -1 : 1;
     });
   }, [filteredFactures]);
+
 
   const payingDevis = devis.find(d => d.id === payingId);
   const payingFacture = factures.find(f => f.id === payingFactureId);
@@ -696,21 +738,40 @@ function ProDocuments() {
                       const deferred = f.statut !== "payee" && isDeferredPayment(f.mode_paiement);
                       const st = deferred ? { label: "Virement différé", cls: "bg-blue-50 text-blue-700" } : factureStatutPill[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700" };
                       const amt = formatAmount(Number(f.prix_ht), Number(f.prix_ttc));
-                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission);
+                      const typeInfo = factureTypeInfo(f, rechargeFlags, devisByMission, devisById);
+                      const linkedDevis = f.devis_id ? devisById[f.devis_id] : undefined;
+                      const dk = dossierKey(f);
+                      const isPaired = (dossierCounts[dk] ?? 0) > 1;
                       return (
                         <tr key={f.id} className="border-t border-pro-border hover:bg-pro-bg-soft/60">
                           <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                             <div className="flex flex-col gap-1.5">
                               <span>{f.numero}</span>
-                              <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
-                                {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
-                                {typeInfo.label}
-                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
+                                  {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                                  {typeInfo.label}
+                                </span>
+                                <MissionLegBadge leg={(f.leg_type as "aller" | "retour" | "simple" | null)} size="xs" />
+                                {f.immatriculation && (
+                                  <span className="inline-flex items-center rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-bold tracking-widest text-slate-800">
+                                    {f.immatriculation.toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                              {(linkedDevis || isPaired) && (
+                                <span className="text-[10px] font-sans text-pro-muted">
+                                  {linkedDevis ? `Devis ${linkedDevis.numero}` : null}
+                                  {linkedDevis && isPaired ? " · " : null}
+                                  {isPaired ? `Dossier ${f.numero_mission?.replace(/(-[LR]|\.\d+)$/, "") ?? ""}` : null}
+                                </span>
+                              )}
                             </div>
                           </td>
                           <td className="px-5 py-3 text-pro-text">
                             {f.depart && f.arrivee ? `${f.depart} → ${f.arrivee}` : (f.designation ?? "—")}
                           </td>
+
                           <td className="px-5 py-3 text-pro-text-soft">
                             {f.date_facture
                               ? new Date(f.date_facture).toLocaleDateString("fr-FR")
