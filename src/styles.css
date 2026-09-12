@@ -9069,6 +9069,19 @@ select {
     display: flex; align-items: center; gap: 8px;
   }
   .qm-section-title svg { color: #2f5fff; }
+  .qm-section-title-purple svg { color: #7c5cff; }
+
+  .qm-card-purple {
+    background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+    border-color: rgba(124, 92, 255, 0.18);
+  }
+  .qm-card-purple::before {
+    background: linear-gradient(90deg, #7c5cff, #a78bfa 45%, #c4b5fd);
+  }
+  .qm-card-purple:hover {
+    border-color: rgba(124, 92, 255, 0.32);
+    box-shadow: 0 26px 54px -32px rgba(46, 16, 100, 0.45);
+  }
 
   .qm-label {
     display: block;
