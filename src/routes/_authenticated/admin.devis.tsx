@@ -143,6 +143,15 @@ function statutBadgeTone(s: string): string {
   }
 }
 
+function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation">) {
+  const value = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
+  if (value.includes("recharge")) return { label: "Recharge uniquement", tone: "green" };
+  if (/aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(value)) {
+    return { label: "Livraison + restitution", tone: "violet" };
+  }
+  return { label: "Livraison simple", tone: "blue" };
+}
+
 
 function isExpired(d: DevisRow): boolean {
   if (d.statut === "expire") return true;
@@ -447,7 +456,8 @@ function AdminDevisPage() {
             const acc = acceptations[d.id];
             const vehicules = (d.vehicules ?? []).filter((v) => v && (v.immatriculation || v.modele || v.marque));
             const initials = `${(d.prenom || "").charAt(0)}${(d.nom || "").charAt(0)}`.toUpperCase() || "?";
-            const isAR = /aller[-_ ]?retour/i.test(d.option_trajet ?? "");
+            const missionType = devisMissionType(d);
+            const isAR = missionType.tone === "violet";
             const brand = clientBrandOf(brands, d.email);
             const societe = cleanSociete(brand?.societe);
             const contactName = `${d.prenom ?? ""} ${d.nom ?? ""}`.trim();
@@ -459,6 +469,7 @@ function AdminDevisPage() {
                     <span className="dvx-ref">{d.numero}</span>
                     {(d.version ?? 1) > 1 && <span className="dvx-badge grey">v{d.version}</span>}
                     <span className={`dvx-badge ${statutBadgeTone(effective)}`}>{statutLabel(effective)}</span>
+                    <span className={`dvx-badge ${missionType.tone}`}>{missionType.label}</span>
                     {isAR && (
                       <span className="dvx-badge violet" title="Duo : mission Livraison (L) + mission Restitution (R)">
                         <ArrowLeftRight size={11} /> Duo L + R
@@ -543,9 +554,7 @@ function AdminDevisPage() {
 
                   <div className="min-w-0">
                     <p className="dvx-col-k">Option choisie</p>
-                    <p className="text-[13px] font-semibold capitalize text-[#14161c]">
-                      {isAR ? "Livraison + restitution" : (d.option_trajet || "—").replaceAll("_", " ").replace("aller-simple", "Livraison simple")}
-                    </p>
+                    <span className={`dvx-badge ${missionType.tone}`}>{missionType.label}</span>
                     <p className="mt-1 text-[11.5px] text-[#a3a4ac]">
                       {d.prestation || d.tarif_label || "Prestation standard"}
                     </p>

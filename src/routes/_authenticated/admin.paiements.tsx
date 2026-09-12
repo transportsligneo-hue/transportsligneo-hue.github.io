@@ -27,6 +27,12 @@ interface B2BRow {
 interface FactRow {
   id: string; numero: string; statut: string; type_facture: string;
   prix_ht: number; prix_tva: number; prix_ttc: number; date_facture: string | null; created_at: string;
+  mission_id: string | null; reference_label: string | null; reference_client: string | null;
+}
+
+interface FactMissionMeta {
+  missionType: "recharge" | "roundTrip" | "simple";
+  po: string | null;
 }
 
 const eur = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
@@ -36,6 +42,7 @@ function AdminPaiements() {
   const [devis, setDevis] = useState<DevisPaid[]>([]);
   const [b2b, setB2b] = useState<B2BRow[]>([]);
   const [factures, setFactures] = useState<FactRow[]>([]);
+  const [factMeta, setFactMeta] = useState<Map<string, FactMissionMeta>>(new Map());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("");
@@ -53,12 +60,61 @@ function AdminPaiements() {
           .select("id, numero, pickup_address, dropoff_address, payment_status, estimated_price_ttc, stripe_payment_intent_id, created_at")
           .order("created_at", { ascending: false }).limit(200),
         supabase.from("factures")
-          .select("id, numero, statut, type_facture, prix_ht, prix_tva, prix_ttc, date_facture, created_at")
+          .select("id, numero, statut, type_facture, prix_ht, prix_tva, prix_ttc, date_facture, created_at, mission_id, reference_label, reference_client")
           .order("created_at", { ascending: false }).limit(200),
       ]);
       setDevis((dRes.data ?? []) as DevisPaid[]);
       setB2b((bRes.data ?? []) as B2BRow[]);
-      setFactures((fRes.data ?? []) as FactRow[]);
+      const loadedFactures = (fRes.data ?? []) as FactRow[];
+      setFactures(loadedFactures);
+
+      const missionIds = Array.from(new Set(loadedFactures.map((f) => f.mission_id).filter(Boolean))) as string[];
+      const poRefs = Array.from(new Set(loadedFactures
+        .filter((f) => f.reference_label?.toLowerCase().includes("po") && f.reference_client)
+        .map((f) => f.reference_client as string)));
+      const [missionRes, trajetMissionRes, trajetPoRes] = await Promise.all([
+        missionIds.length
+          ? supabase.from("missions").select("id, devis_id, mission_group_id, leg_type, options").in("id", missionIds)
+          : Promise.resolve({ data: [] }),
+        missionIds.length
+          ? supabase.from("trajets").select("mission_id, devis_id, type_mission, options_meta, mission_group_id, leg_type, commande_ref").in("mission_id", missionIds)
+          : Promise.resolve({ data: [] }),
+        poRefs.length
+          ? supabase.from("trajets").select("mission_id, devis_id, type_mission, options_meta, mission_group_id, leg_type, commande_ref").in("commande_ref", poRefs)
+          : Promise.resolve({ data: [] }),
+      ]);
+      const missions = (missionRes.data ?? []) as Array<{ id: string; devis_id: string | null; mission_group_id: string | null; leg_type: string | null; options: unknown }>;
+      const trajets = [...(trajetMissionRes.data ?? []), ...(trajetPoRes.data ?? [])] as Array<{ mission_id: string | null; devis_id: string | null; type_mission: string | null; options_meta: unknown; mission_group_id: string | null; leg_type: string | null; commande_ref: string | null }>;
+      const devisIds = Array.from(new Set([...missions.map((m) => m.devis_id), ...trajets.map((t) => t.devis_id)].filter(Boolean))) as string[];
+      const devisRes = devisIds.length
+        ? await supabase.from("devis").select("id, option_trajet, prestation").in("id", devisIds)
+        : { data: [] };
+      const devisById = new Map(((devisRes.data ?? []) as Array<{ id: string; option_trajet: string | null; prestation: string | null }>).map((d) => [d.id, d]));
+      const nextMeta = new Map<string, FactMissionMeta>();
+      loadedFactures.forEach((facture) => {
+        const mission = missions.find((m) => m.id === facture.mission_id);
+        const linked = trajets.filter((t) =>
+          (facture.mission_id && t.mission_id === facture.mission_id) ||
+          (facture.reference_client && t.commande_ref === facture.reference_client));
+        const devisId = mission?.devis_id ?? linked.find((t) => t.devis_id)?.devis_id ?? null;
+        const devis = devisId ? devisById.get(devisId) : undefined;
+        const text = `${devis?.option_trajet ?? ""} ${devis?.prestation ?? ""} ${linked.map((t) => t.type_mission ?? "").join(" ")}`.toLowerCase();
+        const recharge = linked.some((t) => {
+          const meta = t.options_meta as Record<string, unknown> | null;
+          return meta?.recharge_seule === true || (t.type_mission ?? "").toLowerCase().startsWith("recharg");
+        }) || text.includes("recharge");
+        const roundTrip = !recharge && (
+          linked.some((t) => t.leg_type === "aller") && linked.some((t) => t.leg_type === "retour") ||
+          linked.some((t) => t.type_mission === "aller_retour") ||
+          /aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(text)
+        );
+        nextMeta.set(facture.id, {
+          missionType: recharge ? "recharge" : roundTrip ? "roundTrip" : "simple",
+          po: linked.find((t) => t.commande_ref)?.commande_ref ??
+            (facture.reference_label?.toLowerCase().includes("po") ? facture.reference_client : null),
+        });
+      });
+      setFactMeta(nextMeta);
     } finally {
       setLoading(false);
     }
@@ -328,12 +384,18 @@ function AdminPaiements() {
           <EmptyState icon={CreditCard} title="Aucune facture" />
         ) : (
           <div className="space-y-3.5">
-            {filterFact.map(f => (
+            {filterFact.map(f => {
+              const meta = factMeta.get(f.id);
+              const type = meta?.missionType ?? "simple";
+              const typeLabel = type === "recharge" ? "Recharge uniquement" : type === "roundTrip" ? "Livraison + restitution" : "Livraison simple";
+              const typeTone = type === "recharge" ? "green" : type === "roundTrip" ? "violet" : "blue";
+              return (
               <div key={f.id} className="dvx-card">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="dvx-ref">{f.numero}</span>
                     <span className={`dvx-badge ${f.type_facture === "b2b" ? "violet" : "blue"}`}>{f.type_facture}</span>
+                    <span className={`dvx-badge ${typeTone}`}>{typeLabel}</span>
                     <span className={`dvx-badge ${factStatutTone(f.statut)}`}>{f.statut}</span>
                     <span className="text-[11.5px] text-[#a3a4ac]">
                       {new Date(f.date_facture ?? f.created_at).toLocaleDateString("fr-FR")}
@@ -344,6 +406,11 @@ function AdminPaiements() {
                     <small>TTC</small>
                   </p>
                 </div>
+                {meta?.po && (
+                  <div className="mt-3 inline-flex rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-[13px] font-extrabold text-[#2f5fff]">
+                    N° de PO&nbsp;: {meta.po}
+                  </div>
+                )}
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
                   <div className="min-w-0">
                     <p className="dvx-col-k">HT</p>
@@ -355,7 +422,8 @@ function AdminPaiements() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )
       )}
