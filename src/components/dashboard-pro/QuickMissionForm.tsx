@@ -614,8 +614,9 @@ export default function QuickMissionForm({
   }
 
 
-  const inp = "w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pro-accent/20 focus:border-pro-accent transition-colors";
-  const lbl = "block text-xs font-medium text-pro-text-soft uppercase tracking-wide mb-1.5";
+  const inp = "qm-input";
+  const lbl = "qm-label";
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
