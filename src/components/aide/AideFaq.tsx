@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
   getAideCategories,
   aideHero,
@@ -169,39 +170,34 @@ export default function AideFaq({ audience = "pro" }: { audience?: AideAudience 
       )}
 
       {/* Contact */}
-      <div className="rounded-2xl bg-[#0b1026] text-white p-6 sm:p-8 relative overflow-hidden">
-        <div
-          className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[#d4af37]/15 blur-2xl"
-          aria-hidden="true"
-        />
-        <div className="relative flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+      <div className="relative overflow-hidden rounded-2xl border border-pro-border bg-white p-6 shadow-sm sm:p-8">
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-blue-600" aria-hidden="true" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
           <div className="flex-1">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-[#d4af37] font-semibold mb-1.5">
+            <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
               Une question reste sans réponse ?
             </p>
-            <h3 className="text-lg sm:text-xl font-bold">
+            <h3 className="text-lg font-bold text-pro-text sm:text-xl">
               Notre équipe vous répond 7j/7
             </h3>
-            <p className="text-sm text-white/60 mt-1.5 max-w-md">
+            <p className="mt-1.5 max-w-md text-sm text-pro-text-soft">
               Un doute sur une mission, une facture ou un document ? Contactez-nous,
               on s'occupe du reste.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <a
-              href="tel:+33248274014"
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-[#d4af37] text-[#0b1026] text-sm font-bold hover:bg-[#e7c76a] transition-colors"
-            >
-              <Phone size={15} />
-              02 48 27 40 14
-            </a>
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl border border-white/25 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-            >
-              <Mail size={15} />
-              Nous écrire
-            </Link>
+            <Button asChild className="h-11 bg-blue-600 px-5 font-bold text-primary-foreground shadow-sm hover:bg-blue-700">
+              <a href="tel:+33782456181">
+                <Phone size={15} />
+                07 82 45 61 81
+              </a>
+            </Button>
+            <Button asChild variant="outline" className="h-11 border-pro-border bg-white px-5 font-semibold text-pro-text hover:bg-pro-bg">
+              <Link to="/contact">
+                <Mail size={15} />
+                Nous écrire
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
