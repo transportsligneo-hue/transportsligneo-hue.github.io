@@ -78,7 +78,7 @@ const OPTION_LABELS: Record<string, string> = {
   plein_essence: "⛽ Appoint carburant",
   mise_en_main: "🔑 Mise en main du véhicule",
   lavage: "🧽 Lavage",
-  jokeage: "🔧 Jokéage",
+  jokeage: "🔧 Jockeyage",
   express: "⚡ Express",
   aller_retour: "↔ Aller-retour",
 };
@@ -100,7 +100,7 @@ function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): st
         .filter((value): value is string => typeof value === "string")
         .map((value) => JOKEAGE_LABELS[value] ?? value)
     : [];
-  if (jokeageServices.length > 0) labels.push(`Jokéage : ${jokeageServices.join(", ")}`);
+  if (jokeageServices.length > 0) labels.push(`Jockeyage : ${jokeageServices.join(", ")}`);
   return labels;
 }
 

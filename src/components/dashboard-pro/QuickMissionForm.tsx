@@ -884,9 +884,9 @@ export default function QuickMissionForm({
 
       {/* Restitution (Aller-retour) */}
       {tripType === "aller-retour" && (
-        <section className="bg-white rounded-xl border border-amber-200 ring-1 ring-amber-100 p-5 md:p-6">
-          <h2 className="text-sm font-semibold text-pro-text mb-1 flex items-center gap-1.5">
-            <Car size={14} className="text-amber-600" /> Véhicule restitution
+        <section className="qm-card qm-card-purple p-5 md:p-6">
+          <h2 className="qm-section-title qm-section-title-purple mb-1">
+            <Car size={14} /> Véhicule restitution
           </h2>
           <p className="text-[12px] text-pro-text-soft mb-4">
             Par défaut, on reprend le véhicule à l'adresse de livraison et on le ramène au point de départ.
@@ -1046,7 +1046,7 @@ export default function QuickMissionForm({
               />
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5 text-sm font-medium text-pro-text">
-                  <Wrench size={13} className="text-pro-accent" /> Jokéage
+                  <Wrench size={13} className="text-pro-accent" /> Jockeyage
                 </span>
                 <span className="mt-0.5 block text-xs text-pro-text-soft">
                   Déplacement du véhicule vers un prestataire pour une intervention.
