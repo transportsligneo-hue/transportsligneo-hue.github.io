@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
-  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, KeyRound,
+  Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, KeyRound, Wrench,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -77,6 +77,15 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
 ];
 
+const JOKEAGE_SERVICES = [
+  { key: "controle_technique", label: "Contrôle technique" },
+  { key: "revision", label: "Révision / entretien" },
+  { key: "lavage", label: "Lavage" },
+  { key: "garage", label: "Dépôt ou récupération au garage" },
+] as const;
+
+type JokeageService = (typeof JOKEAGE_SERVICES)[number]["key"];
+
 const VAT_RATE = 0.20;
 
 interface Props {
@@ -125,7 +134,7 @@ export default function QuickMissionForm({
   const [sameRetourAddress, setSameRetourAddress] = useState(true);
   const [departRetour, setDepartRetour] = useState("");
   const [arriveeRetour, setArriveeRetour] = useState("");
-  const [sameRetourVehicle, setSameRetourVehicle] = useState(true);
+  const [sameRetourVehicle, setSameRetourVehicle] = useState(false);
   const [immatRetour, setImmatRetour] = useState("");
   const [marqueRetour, setMarqueRetour] = useState("");
   const [modeleRetour, setModeleRetour] = useState("");
@@ -136,6 +145,8 @@ export default function QuickMissionForm({
 
   // Options
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
+  const [jokeage, setJokeage] = useState(false);
+  const [jokeageServices, setJokeageServices] = useState<Partial<Record<JokeageService, boolean>>>({});
   const [autreNote, setAutreNote] = useState("");
   const [pvDigitalise, setPvDigitalise] = useState<PvChoice>("aucun");
 
@@ -274,6 +285,10 @@ export default function QuickMissionForm({
     }
   }, [tripType]);
 
+  useEffect(() => {
+    if (tripType === "aller-retour") setSameRetourVehicle(false);
+  }, [tripType]);
+
   // Computed pricing view (incl. supplements)
   const priceView = useMemo(() => {
     if (!pricing) return null;
@@ -364,6 +379,10 @@ export default function QuickMissionForm({
       setError("Merci de renseigner la date et l'heure de restitution.");
       return;
     }
+    if (tripType === "aller-retour" && !sameRetourVehicle && !immatRetour.trim()) {
+      setError("Merci de renseigner la plaque du véhicule de restitution, ou de cocher qu'il s'agit du même véhicule.");
+      return;
+    }
 
 
     setSubmitting(true);
@@ -373,6 +392,12 @@ export default function QuickMissionForm({
         if (options[k]) optionsMeta[k] = true;
       });
       if (autreNote.trim()) optionsMeta.autre_note = autreNote.trim();
+      if (jokeage) {
+        optionsMeta.jokeage = true;
+        optionsMeta.jokeage_prestations = JOKEAGE_SERVICES
+          .filter(({ key }) => jokeageServices[key])
+          .map(({ key }) => key);
+      }
 
       const prixTtc = priceView?.ttc ?? null;
 
@@ -592,7 +617,8 @@ export default function QuickMissionForm({
           setDepartRetour(""); setArriveeRetour(""); setImmatRetour("");
           setMarqueRetour(""); setModeleRetour(""); setVinRetour("");
           setDateRetour(""); setHeureRetour("");
-          setOptions({}); setAutreNote(""); setPvDigitalise("aucun");
+          setSameRetourAddress(true); setSameRetourVehicle(false);
+          setOptions({}); setJokeage(false); setJokeageServices({}); setAutreNote(""); setPvDigitalise("aucun");
           setDate(""); setHeure(""); setMessage("");
           setPricing(null);
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -627,8 +653,8 @@ export default function QuickMissionForm({
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
-            { v: "aller-simple", label: "Aller simple", desc: "Livraison à destination" },
-            { v: "aller-retour", label: "Aller-retour", desc: "Livraison + restitution" },
+            { v: "aller-simple", label: "Livraison simple", desc: "Aller à destination" },
+            { v: "aller-retour", label: "Livraison + restitution", desc: "Aller-retour" },
             { v: "recharge", label: "Recharge uniquement", desc: "Recharge du véhicule, sans livraison" },
           ].map((opt) => {
             const active = tripType === (opt.v as TripOption);
@@ -753,11 +779,11 @@ export default function QuickMissionForm({
       )}
 
 
-      {/* Véhicule */}
+      {/* Véhicule de livraison */}
       <section className="qm-card p-5 md:p-6">
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
           <h2 className="qm-section-title">
-            <Car size={14} className="text-pro-accent" /> Véhicule
+            <Car size={14} className="text-pro-accent" /> {tripType === "aller-retour" ? "Véhicule livraison" : "Véhicule"}
           </h2>
           {(() => {
             const applyExtracted = (f: ExtractedFields) => {
@@ -860,11 +886,11 @@ export default function QuickMissionForm({
       {tripType === "aller-retour" && (
         <section className="bg-white rounded-xl border border-amber-200 ring-1 ring-amber-100 p-5 md:p-6">
           <h2 className="text-sm font-semibold text-pro-text mb-1 flex items-center gap-1.5">
-            <MapPinned size={14} className="text-amber-600" /> Restitution (trajet retour)
+            <Car size={14} className="text-amber-600" /> Véhicule restitution
           </h2>
           <p className="text-[12px] text-pro-text-soft mb-4">
             Par défaut, on reprend le véhicule à l'adresse de livraison et on le ramène au point de départ.
-            Cochez les cases si l'adresse ou le véhicule diffèrent.
+            Renseignez sa plaque, ou cochez ci-dessous s'il s'agit du véhicule de livraison.
           </p>
 
           {/* Adresse de récupération retour */}
@@ -900,19 +926,19 @@ export default function QuickMissionForm({
             <label className="flex items-start gap-2 text-sm text-pro-text cursor-pointer">
               <input
                 type="checkbox"
-                checked={!sameRetourVehicle}
-                onChange={(e) => setSameRetourVehicle(!e.target.checked)}
+                checked={sameRetourVehicle}
+                onChange={(e) => setSameRetourVehicle(e.target.checked)}
                 className="mt-0.5 h-4 w-4 accent-pro-accent"
               />
               <span>
-                Véhicule retour <em className="text-pro-text-soft">différent</em> du véhicule livré (2<sup>e</sup> plaque)
+                Même véhicule que la livraison
               </span>
             </label>
             {!sameRetourVehicle && (
               <div className="pl-6 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2">
-                    <label className={lbl}>Plaque retour</label>
+                     <label className={lbl}>Plaque restitution *</label>
                     <div className="flex gap-2">
                       <input
                         className={`${inp} uppercase`}
@@ -920,6 +946,7 @@ export default function QuickMissionForm({
                         onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
                         placeholder="AA-123-BB"
                         maxLength={15}
+                        required={!sameRetourVehicle}
                       />
                       <button
                         type="button"
@@ -1007,6 +1034,42 @@ export default function QuickMissionForm({
             );
           })}
         </div>
+
+        {!isParticulier && (
+          <div className="mb-4 rounded-lg border border-pro-border bg-white p-3">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={jokeage}
+                onChange={(e) => setJokeage(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-pro-accent"
+              />
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 text-sm font-medium text-pro-text">
+                  <Wrench size={13} className="text-pro-accent" /> Jokéage
+                </span>
+                <span className="mt-0.5 block text-xs text-pro-text-soft">
+                  Déplacement du véhicule vers un prestataire pour une intervention.
+                </span>
+              </span>
+            </label>
+            {jokeage && (
+              <div className="mt-3 grid grid-cols-1 gap-2 border-t border-pro-border pt-3 sm:grid-cols-2">
+                {JOKEAGE_SERVICES.map(({ key, label }) => (
+                  <label key={key} className="flex cursor-pointer items-center gap-2 text-sm text-pro-text">
+                    <input
+                      type="checkbox"
+                      checked={!!jokeageServices[key]}
+                      onChange={(e) => setJokeageServices((current) => ({ ...current, [key]: e.target.checked }))}
+                      className="h-4 w-4 accent-pro-accent"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* PV de livraison digitalisé (comptes professionnels) */}
         {!isParticulier && (
@@ -1107,7 +1170,7 @@ export default function QuickMissionForm({
         </p>
         <button
           type="submit"
-          disabled={submitting || !depart || !arrivee || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour))}
+          disabled={submitting || !depart || !arrivee || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}

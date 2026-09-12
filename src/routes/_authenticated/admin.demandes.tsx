@@ -78,15 +78,30 @@ const OPTION_LABELS: Record<string, string> = {
   plein_essence: "⛽ Appoint carburant",
   mise_en_main: "🔑 Mise en main du véhicule",
   lavage: "🧽 Lavage",
+  jokeage: "🔧 Jokéage",
   express: "⚡ Express",
   aller_retour: "↔ Aller-retour",
 };
 
+const JOKEAGE_LABELS: Record<string, string> = {
+  controle_technique: "Contrôle technique",
+  revision: "Révision / entretien",
+  lavage: "Lavage",
+  garage: "Dépôt ou récupération au garage",
+};
+
 function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): string[] {
   if (!meta) return [];
-  return Object.entries(meta)
+  const labels = Object.entries(meta)
     .filter(([, v]) => v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0))
     .map(([k, v]) => OPTION_LABELS[k] ?? `${k}: ${String(v)}`);
+  const jokeageServices = Array.isArray(meta.jokeage_prestations)
+    ? meta.jokeage_prestations
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => JOKEAGE_LABELS[value] ?? value)
+    : [];
+  if (jokeageServices.length > 0) labels.push(`Jokéage : ${jokeageServices.join(", ")}`);
+  return labels;
 }
 
 const statuts = ["nouvelle", "a_traiter", "convertie", "attribuee", "terminee", "annulee"];
