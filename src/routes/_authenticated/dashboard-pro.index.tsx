@@ -249,25 +249,39 @@ function ProDashboard() {
               : undefined
           }
           actions={
-            <>
+            <TooltipProvider delayDuration={150}>
               <Link to="/dashboard-pro/documents" className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]">
                 <FileText size={14} /> Exporter
               </Link>
               {isFlotte ? (
-                <Link
-                  to="/dashboard-pro/nouvelle-mission"
-                  className="flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-4 py-2.5 text-[12.5px] font-semibold text-[#70727d] transition-colors hover:border-[#dedee4] hover:text-[#14161c]"
-                >
-                  <PlusCircle size={14} /> Mission simple
-                </Link>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard-pro/nouvelle-demande"
+                      className="flex items-center gap-1.5 rounded-[9px] bg-[#2f5fff] px-4 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_2px_8px_-2px_rgba(47,95,255,0.35)] transition-colors hover:bg-[#1e4af0]"
+                    >
+                      <PlusCircle size={14} /> Demande de mission simple
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[260px] bg-[#111a3d] text-[#fdfcf8]">
+                    <p>Un seul véhicule, un trajet A → B. Idéal pour une livraison, une restitution ou une recharge ponctuelle.</p>
+                  </TooltipContent>
+                </Tooltip>
               ) : null}
-              <Link
-                to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
-                className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
-              >
-                <PlusCircle size={14} /> {isFlotte ? "Mission groupée" : "Nouvelle mission"}
-              </Link>
-            </>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
+                    className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
+                  >
+                    <PlusCircle size={14} /> {isFlotte ? "Demande de mission groupée" : "Nouvelle mission"}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[260px] bg-[#111a3d] text-[#fdfcf8]">
+                  <p>Plusieurs véhicules de votre parc à convoyer en une seule opération. Chaque véhicule génère sa propre mission.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           }
         />
       </div>
