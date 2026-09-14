@@ -434,15 +434,6 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
-    if (statut === "termine" || statut === "en_attente_validation") {
-      const m = missions.find((mm) => mm.id === id);
-      if (m?.non_roulant && !m.devisSigned) {
-        toast.error("Devis non signé", {
-          description: "Faites signer le devis au remettant (papier ou sur l'app) avant de terminer la mission.",
-        });
-        return false;
-      }
-    }
     const { queued } = await writeWithOutbox(
       { kind: "update", table: "attributions", values: { statut }, match: { id } },
       `Statut ${statut}`,
