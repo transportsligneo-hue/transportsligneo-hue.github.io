@@ -701,7 +701,9 @@ export function DocumentScanner({
                 ? <><Sparkles size={12} className="text-emerald-400" /> Capture…</>
                 : docFound
                   ? <><Sparkles size={12} className="text-emerald-400" /> Document détecté — ne bougez plus</>
-                  : <><ScanLine size={12} /> Positionnez le document</>
+                  : noDocHint
+                    ? <><ScanLine size={12} className="text-amber-300" /> Aucun document détecté</>
+                    : <><ScanLine size={12} /> Positionnez le document</>
 
             ) : (
               <><CameraIcon size={12} /> Capture manuelle</>
