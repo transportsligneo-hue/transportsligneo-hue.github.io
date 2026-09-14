@@ -13,7 +13,6 @@ import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { EdlNonRoulantFlow } from "@/components/inspection/EdlNonRoulantFlow";
-import { DevisSignatureSheet } from "@/components/mission/DevisSignatureSheet";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
@@ -127,7 +126,6 @@ function ConvoyeurMissions() {
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
   /** Parcours « véhicule non roulant » (plateau) — indépendant de l'EDL roulant. */
   const [edlNonRoulantId, setEdlNonRoulantId] = useState<string | null>(null);
-  const [devisSheetId, setDevisSheetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -643,17 +641,6 @@ function ConvoyeurMissions() {
     </EdlErrorBoundary>
   ) : null;
 
-  const devisMission = devisSheetId ? missions.find((m) => m.id === devisSheetId) : null;
-  const devisOverlay = devisMission && user && devisMission.devis_id ? (
-    <DevisSignatureSheet
-      attributionId={devisMission.id}
-      devisId={devisMission.devis_id}
-      userId={user.id}
-      numero={nrNumero(devisMission)}
-      onSigned={() => { void fetchMissions(); }}
-      onClose={() => setDevisSheetId(null)}
-    />
-  ) : null;
 
   if (loading) {
     return inspectionOverlay ?? nonRoulantOverlay ?? (
@@ -900,7 +887,6 @@ function ConvoyeurMissions() {
       <>
       {inspectionOverlay}
       {nonRoulantOverlay}
-      {devisOverlay}
       <div className="mv3-fullscreen">
         <style>{`
           .mv3-fullscreen { margin: -1rem -1rem 0; min-height: calc(100vh - 1rem); background: #060B24;
@@ -1089,7 +1075,6 @@ function ConvoyeurMissions() {
     <>
     {inspectionOverlay}
     {nonRoulantOverlay}
-    {devisOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
