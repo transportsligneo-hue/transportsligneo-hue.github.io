@@ -1007,20 +1007,7 @@ function ConvoyeurMissions() {
               >
                 {openMission.edlNonRoulantDone ? "Bon de prise en charge signé ✓" : "Bon de prise en charge"}
               </button>
-              <button
-                type="button"
-                disabled={!openMission.devis_id}
-                onClick={() => setDevisSheetId(openMission.id)}
-                className="rounded-xl border border-white/20 py-3 text-sm font-semibold text-white/85 disabled:opacity-40"
-              >
-                {openMission.devisSigned ? "Devis signé ✓" : "Faire signer le devis"}
-              </button>
             </div>
-            {!openMission.devisSigned && (
-              <p className="mt-2 text-xs text-amber-300">
-                La mission ne peut pas être terminée tant que le devis signé n'est pas rattaché.
-              </p>
-            )}
           </div>
         )}
 
