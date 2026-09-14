@@ -327,14 +327,26 @@ export function DocumentScanner({
       if (video.readyState >= 2) {
         // détection des bords du document (1 frame sur 4 : fluide et rapide)
         if (frame % 4 === 0) {
+          let quad: Pt[] | null = null;
           try {
             dctx.drawImage(video, 0, 0, det.width, det.height);
-            const quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
-            docQuadRef.current = quad;
-            setDocFound(!!quad);
+            quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
           } catch {
-            docQuadRef.current = null;
+            quad = null;
           }
+          docQuadRef.current = quad;
+          if (quad) {
+            docStreakRef.current = Math.min(DOC_STREAK_NEEDED + 2, docStreakRef.current + 1);
+            lastDocSeenRef.current = performance.now();
+          } else {
+            docStreakRef.current = 0;
+          }
+          const confirmed = docStreakRef.current >= DOC_STREAK_NEEDED;
+          setDocFound(confirmed);
+          setNoDocHint(
+            !confirmed &&
+            performance.now() - (lastDocSeenRef.current || 0) > NO_DOC_HINT_MS,
+          );
         }
         frame++;
 
