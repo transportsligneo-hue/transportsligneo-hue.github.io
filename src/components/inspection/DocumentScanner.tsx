@@ -226,7 +226,10 @@ export function DocumentScanner({
   const [stability, setStability] = useState(0); // 0..1
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const docQuadRef = useRef<Pt[] | null>(null);
+  const docStreakRef = useRef(0);
+  const lastDocSeenRef = useRef<number>(0);
   const [docFound, setDocFound] = useState(false);
+  const [noDocHint, setNoDocHint] = useState(false);
 
   const [useNativeFallback, setUseNativeFallback] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
