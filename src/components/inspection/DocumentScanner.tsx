@@ -723,6 +723,14 @@ export function DocumentScanner({
             </div>
           )}
 
+          {/* message d'aide quand rien n'est détecté */}
+          {liveReady && autoCapture && noDocHint && !docFound && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[86%] max-w-xs rounded-xl bg-black/70 backdrop-blur px-3 py-2 text-center text-[11px] leading-relaxed text-amber-200">
+              Aucun document détecté. Posez le document à plat sur un fond contrasté,
+              bien éclairé et entièrement dans le cadre.
+            </div>
+          )}
+
           {/* barre bas : auto/manuel + capture + fallback */}
           <div className="absolute inset-x-0 bottom-0 pb-[max(env(safe-area-inset-bottom),14px)] pt-4 px-6 bg-gradient-to-t from-black/85 to-transparent">
             <div className="flex items-center justify-between gap-3">
