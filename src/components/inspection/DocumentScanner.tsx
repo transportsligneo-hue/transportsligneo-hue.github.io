@@ -39,8 +39,9 @@ interface Pt { x: number; y: number }
 
 const OUT_W = 1240;
 const OUT_H = 1754; // A4
-const AUTO_STABLE_MS = 800;
-const AUTO_DETECT_MS = 320; // document détecté : capture quasi immédiate
+const AUTO_DETECT_MS = 1100; // document détecté + stable pendant ce délai avant capture
+const DOC_STREAK_NEEDED = 3; // nb de détections consécutives avant de considérer le document présent
+const NO_DOC_HINT_MS = 3500; // délai avant d'afficher "aucun document détecté"
 
 const AUTO_DIFF_THRESHOLD = 6; // moyenne différence luminance/pixel pour "stable"
 
