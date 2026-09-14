@@ -13,7 +13,6 @@ import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { EdlNonRoulantFlow } from "@/components/inspection/EdlNonRoulantFlow";
-import { DevisSignatureSheet } from "@/components/mission/DevisSignatureSheet";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionPVDigitauxBlock } from "@/components/mission/MissionPVDigitauxBlock";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
@@ -127,7 +126,6 @@ function ConvoyeurMissions() {
   const [detailTab, setDetailTab] = useState<"action" | "info" | "docs">("action");
   /** Parcours « véhicule non roulant » (plateau) — indépendant de l'EDL roulant. */
   const [edlNonRoulantId, setEdlNonRoulantId] = useState<string | null>(null);
-  const [devisSheetId, setDevisSheetId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -434,15 +432,6 @@ function ConvoyeurMissions() {
   }, [activeMissionId, missionStartTime]);
 
   const updateStatus = async (id: string, statut: string) => {
-    if (statut === "termine" || statut === "en_attente_validation") {
-      const m = missions.find((mm) => mm.id === id);
-      if (m?.non_roulant && !m.devisSigned) {
-        toast.error("Devis non signé", {
-          description: "Faites signer le devis au remettant (papier ou sur l'app) avant de terminer la mission.",
-        });
-        return false;
-      }
-    }
     const { queued } = await writeWithOutbox(
       { kind: "update", table: "attributions", values: { statut }, match: { id } },
       `Statut ${statut}`,
@@ -652,17 +641,6 @@ function ConvoyeurMissions() {
     </EdlErrorBoundary>
   ) : null;
 
-  const devisMission = devisSheetId ? missions.find((m) => m.id === devisSheetId) : null;
-  const devisOverlay = devisMission && user && devisMission.devis_id ? (
-    <DevisSignatureSheet
-      attributionId={devisMission.id}
-      devisId={devisMission.devis_id}
-      userId={user.id}
-      numero={nrNumero(devisMission)}
-      onSigned={() => { void fetchMissions(); }}
-      onClose={() => setDevisSheetId(null)}
-    />
-  ) : null;
 
   if (loading) {
     return inspectionOverlay ?? nonRoulantOverlay ?? (
@@ -909,7 +887,6 @@ function ConvoyeurMissions() {
       <>
       {inspectionOverlay}
       {nonRoulantOverlay}
-      {devisOverlay}
       <div className="mv3-fullscreen">
         <style>{`
           .mv3-fullscreen { margin: -1rem -1rem 0; min-height: calc(100vh - 1rem); background: #060B24;
@@ -997,7 +974,7 @@ function ConvoyeurMissions() {
           <div className="mx-4 mb-4 rounded-2xl border border-[#d4af37]/35 bg-[#d4af37]/[0.06] p-4">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Véhicule non roulant · plateau</p>
             <p className="mt-1 text-sm text-white/70">
-              Bon de prise en charge simplifié (arrimage, 4 photos, double signature) et devis à faire signer au remettant.
+              Bon de prise en charge simplifié : arrimage, 4 photos et double signature.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <button
@@ -1007,20 +984,7 @@ function ConvoyeurMissions() {
               >
                 {openMission.edlNonRoulantDone ? "Bon de prise en charge signé ✓" : "Bon de prise en charge"}
               </button>
-              <button
-                type="button"
-                disabled={!openMission.devis_id}
-                onClick={() => setDevisSheetId(openMission.id)}
-                className="rounded-xl border border-white/20 py-3 text-sm font-semibold text-white/85 disabled:opacity-40"
-              >
-                {openMission.devisSigned ? "Devis signé ✓" : "Faire signer le devis"}
-              </button>
             </div>
-            {!openMission.devisSigned && (
-              <p className="mt-2 text-xs text-amber-300">
-                La mission ne peut pas être terminée tant que le devis signé n'est pas rattaché.
-              </p>
-            )}
           </div>
         )}
 
@@ -1111,7 +1075,6 @@ function ConvoyeurMissions() {
     <>
     {inspectionOverlay}
     {nonRoulantOverlay}
-    {devisOverlay}
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
