@@ -249,6 +249,8 @@ export function DocumentScanner({
     rafRef.current = null;
     prevFrameRef.current = null;
     stableSinceRef.current = null;
+    docStreakRef.current = 0;
+    lastDocSeenRef.current = 0;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
