@@ -997,7 +997,7 @@ function ConvoyeurMissions() {
           <div className="mx-4 mb-4 rounded-2xl border border-[#d4af37]/35 bg-[#d4af37]/[0.06] p-4">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4af37]">Véhicule non roulant · plateau</p>
             <p className="mt-1 text-sm text-white/70">
-              Bon de prise en charge simplifié (arrimage, 4 photos, double signature) et devis à faire signer au remettant.
+              Bon de prise en charge simplifié : arrimage, 4 photos et double signature.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <button
