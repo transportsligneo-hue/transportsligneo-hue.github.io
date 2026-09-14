@@ -39,8 +39,9 @@ interface Pt { x: number; y: number }
 
 const OUT_W = 1240;
 const OUT_H = 1754; // A4
-const AUTO_STABLE_MS = 800;
-const AUTO_DETECT_MS = 320; // document détecté : capture quasi immédiate
+const AUTO_DETECT_MS = 1100; // document détecté + stable pendant ce délai avant capture
+const DOC_STREAK_NEEDED = 3; // nb de détections consécutives avant de considérer le document présent
+const NO_DOC_HINT_MS = 3500; // délai avant d'afficher "aucun document détecté"
 
 const AUTO_DIFF_THRESHOLD = 6; // moyenne différence luminance/pixel pour "stable"
 
@@ -225,7 +226,10 @@ export function DocumentScanner({
   const [stability, setStability] = useState(0); // 0..1
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const docQuadRef = useRef<Pt[] | null>(null);
+  const docStreakRef = useRef(0);
+  const lastDocSeenRef = useRef<number>(0);
   const [docFound, setDocFound] = useState(false);
+  const [noDocHint, setNoDocHint] = useState(false);
 
   const [useNativeFallback, setUseNativeFallback] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -245,6 +249,8 @@ export function DocumentScanner({
     rafRef.current = null;
     prevFrameRef.current = null;
     stableSinceRef.current = null;
+    docStreakRef.current = 0;
+    lastDocSeenRef.current = 0;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -323,14 +329,26 @@ export function DocumentScanner({
       if (video.readyState >= 2) {
         // détection des bords du document (1 frame sur 4 : fluide et rapide)
         if (frame % 4 === 0) {
+          let quad: Pt[] | null = null;
           try {
             dctx.drawImage(video, 0, 0, det.width, det.height);
-            const quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
-            docQuadRef.current = quad;
-            setDocFound(!!quad);
+            quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
           } catch {
-            docQuadRef.current = null;
+            quad = null;
           }
+          docQuadRef.current = quad;
+          if (quad) {
+            docStreakRef.current = Math.min(DOC_STREAK_NEEDED + 2, docStreakRef.current + 1);
+            lastDocSeenRef.current = performance.now();
+          } else {
+            docStreakRef.current = 0;
+          }
+          const confirmed = docStreakRef.current >= DOC_STREAK_NEEDED;
+          setDocFound(confirmed);
+          setNoDocHint(
+            !confirmed &&
+            performance.now() - (lastDocSeenRef.current || 0) > NO_DOC_HINT_MS,
+          );
         }
         frame++;
 
@@ -347,13 +365,13 @@ export function DocumentScanner({
           }
           diff /= (a.length / 4);
           const stable = diff < AUTO_DIFF_THRESHOLD;
-          if (stable) {
+          // Sans document confirmé, aucune capture automatique n'est déclenchée.
+          const docConfirmed = !!docQuadRef.current && docStreakRef.current >= DOC_STREAK_NEEDED;
+          if (stable && docConfirmed) {
             if (stableSinceRef.current == null) stableSinceRef.current = performance.now();
             const held = performance.now() - stableSinceRef.current;
-            // document détecté → déclenchement bien plus rapide
-            const need = docQuadRef.current ? AUTO_DETECT_MS : AUTO_STABLE_MS;
-            setStability(Math.min(1, held / need));
-            if (autoCapture && held >= need) {
+            setStability(Math.min(1, held / AUTO_DETECT_MS));
+            if (autoCapture && held >= AUTO_DETECT_MS) {
               captureFromVideo();
               return;
             }
@@ -683,7 +701,9 @@ export function DocumentScanner({
                 ? <><Sparkles size={12} className="text-emerald-400" /> Capture…</>
                 : docFound
                   ? <><Sparkles size={12} className="text-emerald-400" /> Document détecté — ne bougez plus</>
-                  : <><ScanLine size={12} /> Positionnez le document</>
+                  : noDocHint
+                    ? <><ScanLine size={12} className="text-amber-300" /> Aucun document détecté</>
+                    : <><ScanLine size={12} /> Positionnez le document</>
 
             ) : (
               <><CameraIcon size={12} /> Capture manuelle</>
@@ -700,6 +720,14 @@ export function DocumentScanner({
                   background: stability > 0.6 ? "#22c55e" : ACC,
                 }}
               />
+            </div>
+          )}
+
+          {/* message d'aide quand rien n'est détecté */}
+          {liveReady && autoCapture && noDocHint && !docFound && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[86%] max-w-xs rounded-xl bg-black/70 backdrop-blur px-3 py-2 text-center text-[11px] leading-relaxed text-amber-200">
+              Aucun document détecté. Posez le document à plat sur un fond contrasté,
+              bien éclairé et entièrement dans le cadre.
             </div>
           )}
 
