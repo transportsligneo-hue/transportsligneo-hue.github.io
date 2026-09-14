@@ -363,13 +363,13 @@ export function DocumentScanner({
           }
           diff /= (a.length / 4);
           const stable = diff < AUTO_DIFF_THRESHOLD;
-          if (stable) {
+          // Sans document confirmé, aucune capture automatique n'est déclenchée.
+          const docConfirmed = !!docQuadRef.current && docStreakRef.current >= DOC_STREAK_NEEDED;
+          if (stable && docConfirmed) {
             if (stableSinceRef.current == null) stableSinceRef.current = performance.now();
             const held = performance.now() - stableSinceRef.current;
-            // document détecté → déclenchement bien plus rapide
-            const need = docQuadRef.current ? AUTO_DETECT_MS : AUTO_STABLE_MS;
-            setStability(Math.min(1, held / need));
-            if (autoCapture && held >= need) {
+            setStability(Math.min(1, held / AUTO_DETECT_MS));
+            if (autoCapture && held >= AUTO_DETECT_MS) {
               captureFromVideo();
               return;
             }
