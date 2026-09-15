@@ -161,7 +161,11 @@ function ClientDashboard() {
         created_at: d.created_at,
         date_souhaitee: d.date_souhaitee,
         vehicule: [d.marque, d.modele].filter(Boolean).join(" ").trim(),
-        trajetType: (d.option_trajet || "").toLowerCase().includes("retour") ? "Livraison + Restitution" : "Livraison simple",
+        trajetType: /recharge/.test((d.option_trajet || "").toLowerCase())
+          ? "Recharge uniquement"
+          : /retour|restitution/.test((d.option_trajet || "").toLowerCase())
+            ? "Livraison + Restitution"
+            : "Livraison simple",
         distance_km: d.distance_km,
         prix: d.prix_estime != null ? Number(d.prix_estime) : null,
         status: devisStatusInfo(d),
