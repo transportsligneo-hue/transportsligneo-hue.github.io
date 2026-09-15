@@ -57,7 +57,11 @@ function factureDesignationFromDevis(devis: FactureRow): string {
   return [
     prestation,
     vehiculeLabel || null,
-    devis["option_trajet"] === "aller_retour" ? "Livraison + restitution" : "Livraison simple",
+    (() => {
+      const opt = String(devis["option_trajet"] ?? "").toLowerCase();
+      if (/recharge/.test(opt)) return "Recharge uniquement";
+      return /aller[-_ ]?retour|restitution/.test(opt) ? "Livraison + restitution" : "Livraison simple";
+    })(),
   ]
     .filter(Boolean)
     .join(" — ");
