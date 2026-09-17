@@ -80,6 +80,7 @@ import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/
 import { Route as ApiPublicAlertesFlotteTcoRouteImport } from './routes/api/public/alertes-flotte-tco'
 import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes/api/public/alertes-documents-vehicules'
 import { Route as ApiPublicAdminAlertsDispatchRouteImport } from './routes/api/public/admin-alerts-dispatch'
+import { Route as ApiFactureRevolutOrderRouteImport } from './routes/api/facture/revolut-order'
 import { Route as ApiFacturePaymentIntentRouteImport } from './routes/api/facture/payment-intent'
 import { Route as ApiFactureCheckoutRouteImport } from './routes/api/facture/checkout'
 import { Route as ApiDevisCheckoutRouteImport } from './routes/api/devis/checkout'
@@ -576,6 +577,11 @@ const ApiPublicAdminAlertsDispatchRoute =
     path: '/api/public/admin-alerts-dispatch',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiFactureRevolutOrderRoute = ApiFactureRevolutOrderRouteImport.update({
+  id: '/api/facture/revolut-order',
+  path: '/api/facture/revolut-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFacturePaymentIntentRoute = ApiFacturePaymentIntentRouteImport.update({
   id: '/api/facture/payment-intent',
   path: '/api/facture/payment-intent',
@@ -1447,6 +1453,7 @@ export interface FileRoutesByFullPath {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/facture/revolut-order': typeof ApiFactureRevolutOrderRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
@@ -1636,6 +1643,7 @@ export interface FileRoutesByTo {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/facture/revolut-order': typeof ApiFactureRevolutOrderRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
@@ -1836,6 +1844,7 @@ export interface FileRoutesById {
   '/api/devis/checkout': typeof ApiDevisCheckoutRoute
   '/api/facture/checkout': typeof ApiFactureCheckoutRoute
   '/api/facture/payment-intent': typeof ApiFacturePaymentIntentRoute
+  '/api/facture/revolut-order': typeof ApiFactureRevolutOrderRoute
   '/api/public/admin-alerts-dispatch': typeof ApiPublicAdminAlertsDispatchRoute
   '/api/public/alertes-documents-vehicules': typeof ApiPublicAlertesDocumentsVehiculesRoute
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
@@ -2036,6 +2045,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/facture/revolut-order'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/alertes-flotte-tco'
@@ -2225,6 +2235,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/facture/revolut-order'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/alertes-flotte-tco'
@@ -2424,6 +2435,7 @@ export interface FileRouteTypes {
     | '/api/devis/checkout'
     | '/api/facture/checkout'
     | '/api/facture/payment-intent'
+    | '/api/facture/revolut-order'
     | '/api/public/admin-alerts-dispatch'
     | '/api/public/alertes-documents-vehicules'
     | '/api/public/alertes-flotte-tco'
@@ -2539,6 +2551,7 @@ export interface RootRouteChildren {
   ApiDevisCheckoutRoute: typeof ApiDevisCheckoutRoute
   ApiFactureCheckoutRoute: typeof ApiFactureCheckoutRoute
   ApiFacturePaymentIntentRoute: typeof ApiFacturePaymentIntentRoute
+  ApiFactureRevolutOrderRoute: typeof ApiFactureRevolutOrderRoute
   ApiPublicAdminAlertsDispatchRoute: typeof ApiPublicAdminAlertsDispatchRoute
   ApiPublicAlertesDocumentsVehiculesRoute: typeof ApiPublicAlertesDocumentsVehiculesRoute
   ApiPublicAlertesFlotteTcoRoute: typeof ApiPublicAlertesFlotteTcoRoute
@@ -3078,6 +3091,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/admin-alerts-dispatch'
       fullPath: '/api/public/admin-alerts-dispatch'
       preLoaderRoute: typeof ApiPublicAdminAlertsDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/facture/revolut-order': {
+      id: '/api/facture/revolut-order'
+      path: '/api/facture/revolut-order'
+      fullPath: '/api/facture/revolut-order'
+      preLoaderRoute: typeof ApiFactureRevolutOrderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/facture/payment-intent': {
@@ -4477,6 +4497,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDevisCheckoutRoute: ApiDevisCheckoutRoute,
   ApiFactureCheckoutRoute: ApiFactureCheckoutRoute,
   ApiFacturePaymentIntentRoute: ApiFacturePaymentIntentRoute,
+  ApiFactureRevolutOrderRoute: ApiFactureRevolutOrderRoute,
   ApiPublicAdminAlertsDispatchRoute: ApiPublicAdminAlertsDispatchRoute,
   ApiPublicAlertesDocumentsVehiculesRoute:
     ApiPublicAlertesDocumentsVehiculesRoute,
