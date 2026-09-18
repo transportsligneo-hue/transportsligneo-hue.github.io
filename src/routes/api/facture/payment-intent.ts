@@ -20,7 +20,7 @@ export const Route = createFileRoute("/api/facture/payment-intent")({
 
         const { data: facture, error } = await supabaseAdmin
           .from("factures")
-          .select("id, numero, client_email, client_nom, client_prenom, client_societe, depart, arrivee, designation, prix_ht, prix_tva, prix_ttc, tva_taux, statut, paid_at, reference_client, reference_label, stripe_payment_intent_id")
+          .select("id, numero, client_email, client_nom, client_prenom, client_societe, depart, arrivee, designation, prix_ht, prix_tva, prix_ttc, tva_taux, statut, paid_at, reference_client, reference_label, stripe_payment_intent_id, immatriculation, date_mission, numero_mission, trajet_id")
           .eq("id", factureId)
           .maybeSingle();
 
@@ -39,8 +39,31 @@ export const Route = createFileRoute("/api/facture/payment-intent")({
         }
         const amount = Math.round(ttc * 100);
 
+        // Véhicule et date de convoyage : complétés depuis le trajet lié
+        // quand la facture ne les porte pas encore.
+        let vehicule: string | null = null;
+        let immatriculation: string | null = facture.immatriculation ?? null;
+        let dateMission: string | null = facture.date_mission ?? null;
+        if (facture.trajet_id) {
+          const { data: trajet } = await supabaseAdmin
+            .from("trajets")
+            .select("marque, modele, immatriculation, vehicule_immatriculation, date_trajet, date_souhaitee")
+            .eq("id", facture.trajet_id)
+            .maybeSingle();
+          if (trajet) {
+            vehicule = [trajet.marque, trajet.modele].filter(Boolean).join(" ") || null;
+            immatriculation =
+              immatriculation ?? trajet.immatriculation ?? trajet.vehicule_immatriculation ?? null;
+            dateMission = dateMission ?? trajet.date_trajet ?? trajet.date_souhaitee ?? null;
+          }
+        }
+
         const summary = {
           numero: facture.numero,
+          numeroMission: facture.numero_mission ?? null,
+          vehicule,
+          immatriculation: immatriculation ? String(immatriculation).toUpperCase() : null,
+          dateMission,
           depart: facture.depart,
           arrivee: facture.arrivee,
           designation: facture.designation,

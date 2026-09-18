@@ -69,6 +69,36 @@ function PaiementFacturePage() {
               <span className="pn-val">{summary.clientSociete}</span>
             </div>
           )}
+          {summary?.numeroMission && (
+            <div className="pn-row">
+              <span className="pn-label">Mission</span>
+              <span className="pn-val">{summary.numeroMission}</span>
+            </div>
+          )}
+          {summary?.vehicule && (
+            <div className="pn-row">
+              <span className="pn-label">Véhicule</span>
+              <span className="pn-val">{summary.vehicule}</span>
+            </div>
+          )}
+          {summary?.immatriculation && (
+            <div className="pn-row">
+              <span className="pn-label">Plaque</span>
+              <span className="pn-val pn-plate">{summary.immatriculation}</span>
+            </div>
+          )}
+          {summary?.dateMission && (
+            <div className="pn-row">
+              <span className="pn-label">Date de convoyage</span>
+              <span className="pn-val">
+                {new Date(`${summary.dateMission}T00:00:00`).toLocaleDateString("fr-FR", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          )}
           {summary?.designation && (
             <div className="pn-row">
               <span className="pn-label">Prestation</span>
