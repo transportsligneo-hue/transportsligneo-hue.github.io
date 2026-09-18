@@ -5,6 +5,7 @@
  */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPublicAiSettings } from "@/lib/public-config.functions";
 import { DEFAULT_AI_SETTINGS, type AiCapability, type AiSettings } from "./types";
 
 type Ctx = {
@@ -37,9 +38,7 @@ export function AiSettingsProvider({ children }: { children: ReactNode }) {
 
   const refresh = async () => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase.rpc as any)("get_ai_settings");
-      const row = Array.isArray(data) ? data[0] : data;
+      const row = await getPublicAiSettings();
       setSettings(normalize(row as Record<string, unknown> | null));
     } catch (err) {
       console.warn("[ai-settings] fetch failed, using defaults", err);

@@ -4,7 +4,7 @@
  * Supabase Realtime (optionnel).
  */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getPublicPricingDisplay, getPublicVatRates } from "@/lib/public-config.functions";
 import { DEFAULT_SETTINGS, DEFAULT_VAT_RATES, type PricingSettings, type VatRate } from "./types";
 
 type PricingContextValue = {
@@ -28,12 +28,10 @@ export function PricingProvider({ children }: { children: ReactNode }) {
 
   const refresh = async () => {
     try {
-      const [settingsRes, ratesRes] = await Promise.all([
-        supabase.rpc("get_public_pricing_display"),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase.rpc as any)("get_active_vat_rates"),
+      const [settingsRow, rates] = await Promise.all([
+        getPublicPricingDisplay(),
+        getPublicVatRates(),
       ]);
-      const settingsRow = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
       if (settingsRow) {
         setSettings({
           regime: (settingsRow.regime === "societe" ? "societe" : "micro"),
@@ -41,8 +39,8 @@ export function PricingProvider({ children }: { children: ReactNode }) {
           currency: settingsRow.currency ?? "EUR",
         });
       }
-      if (ratesRes.data) {
-        setVatRates(ratesRes.data.map((r: { id: string; rate: number | string; label: string; is_default: boolean; is_active: boolean; sort_order: number | null }) => ({
+      if (rates.length) {
+        setVatRates(rates.map((r: { id: string; rate: number | string; label: string; is_default: boolean; is_active: boolean; sort_order: number | null }) => ({
           id: r.id,
           rate: Number(r.rate),
           label: r.label,

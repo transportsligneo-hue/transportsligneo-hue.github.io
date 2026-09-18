@@ -21,38 +21,39 @@ export interface FactureSummary {
 }
 
 export const neonAppearance: Appearance = {
-  theme: "night",
+  theme: "stripe",
   variables: {
-    colorPrimary: "#4f8cff",
-    colorBackground: "rgba(255,255,255,0.06)",
-    colorText: "#ffffff",
-    colorTextPlaceholder: "#7580a3",
+    colorPrimary: "#2f5fff",
+    colorBackground: "#ffffff",
+    colorText: "#0b1230",
+    colorTextPlaceholder: "#8892ab",
     borderRadius: "12px",
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "Poppins, ui-sans-serif, system-ui, sans-serif",
     fontSizeBase: "14px",
   },
   rules: {
     ".Input": {
-      border: "1.5px solid rgba(122,163,255,0.22)",
+      border: "1.5px solid #e6e9f2",
       padding: "14px 16px",
-      backgroundColor: "rgba(255,255,255,0.06)",
+      backgroundColor: "#fbfcfe",
     },
     ".Input:focus": {
-      border: "1.5px solid #4f8cff",
-      boxShadow: "0 0 0 3px rgba(79,140,255,0.2), 0 0 16px rgba(79,140,255,0.15)",
+      border: "1.5px solid #2f5fff",
+      boxShadow: "0 0 0 3px rgba(47,95,255,0.15)",
     },
     ".Label": {
-      color: "#c3cbe8",
+      color: "#3a4260",
       fontWeight: "600",
-      fontSize: "12px",
+      fontSize: "12.5px",
     },
     ".Tab": {
-      border: "1.5px solid rgba(122,163,255,0.22)",
-      backgroundColor: "rgba(255,255,255,0.04)",
+      border: "1.5px solid #e6e9f2",
+      backgroundColor: "#ffffff",
     },
     ".Tab--selected": {
-      border: "1.5px solid #4f8cff",
-      boxShadow: "0 0 0 1px rgba(79,140,255,0.4), 0 4px 18px rgba(47,95,255,0.35)",
+      border: "1.5px solid #2f5fff",
+      backgroundColor: "#f2f5ff",
+      boxShadow: "0 6px 16px rgba(47,95,255,0.12)",
     },
   },
 };
@@ -81,8 +82,14 @@ function PayForm({ summary, returnUrl }: { summary: FactureSummary; returnUrl: s
   return (
     <form onSubmit={onSubmit} className="pn-form">
       <div className="pn-pay-header">
-        <h2>Paiement sécurisé</h2>
-        <p>Carte bancaire, Apple&nbsp;Pay, Google&nbsp;Pay ou prélèvement SEPA.</p>
+        <div>
+          <h2>Paiement sécurisé</h2>
+          <p>Carte bancaire, Apple&nbsp;Pay, Google&nbsp;Pay ou prélèvement SEPA.</p>
+        </div>
+        <div className="pn-amount-chip">
+          <div className="lbl">Montant TTC</div>
+          <div className="val">{summary.prixTtc.toFixed(2)} €</div>
+        </div>
       </div>
 
       {summary.clientEmail && (

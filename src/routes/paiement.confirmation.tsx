@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { NeonPayBackdrop } from "@/components/facture/NeonPayBackdrop";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import { CheckCircle2, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 
@@ -58,17 +57,19 @@ function ConfirmationPage() {
   }, []);
 
   return (
-    <div className="pn-page pn-page--center">
-      <NeonPayBackdrop />
-      <section className="pn-confirm-card">
-        <div className="pn-brand">
-          <div className="pn-brand-mark"><img src={logoLigneo} alt="Transports Ligneo" /></div>
-          <div className="pn-brand-word">TRANSPORTS <span>LIGNEO</span></div>
+    <div className="pn-success-screen">
+      <section className="pn-success-card">
+        <div className="pn-check-wrap">
+          <div className={`pn-check-circle${state === "pending" ? " pending" : state === "failed" ? " failed" : ""}`}>
+            {state === "pending" && <Loader2 size={44} className="animate-spin" />}
+            {state === "ok" && <CheckCircle2 size={52} />}
+            {state === "failed" && <AlertTriangle size={44} />}
+            {state === "ok" && <span className="pn-pulse-ring" />}
+          </div>
         </div>
 
         {state === "pending" && (
           <>
-            <div className="pn-confirm-icon pending"><Loader2 size={34} className="animate-spin" /></div>
             <h1>Validation du paiement…</h1>
             <p>Nous confirmons l'encaissement auprès de notre prestataire bancaire.</p>
           </>
@@ -76,30 +77,41 @@ function ConfirmationPage() {
 
         {state === "ok" && (
           <>
-            <div className="pn-confirm-icon ok"><CheckCircle2 size={38} /></div>
             <h1>Paiement confirmé</h1>
             <p>
-              {info.numero ? <>La facture <b>{info.numero}</b> est acquittée</> : "Votre paiement a bien été enregistré"}
-              {info.montant ? <> · <b>{Number(info.montant).toFixed(2)} € TTC</b></> : null}.
+              {info.numero ? <>La facture <b>{info.numero}</b> est acquittée.</> : "Votre paiement a bien été enregistré."}
             </p>
-            {info.trajet && <p className="pn-confirm-sub">{info.trajet}</p>}
-            <p className="pn-confirm-sub">
-              Un email de confirmation{info.email ? ` a été envoyé à ${info.email}` : " vous a été envoyé"} avec la facture acquittée en pièce jointe.
-            </p>
+            <div className="pn-success-info">
+              {info.numero && <div className="pn-srow"><span>Facture</span><b>{info.numero}</b></div>}
+              {info.montant != null && (
+                <div className="pn-srow amt"><span>Montant réglé</span><b>{Number(info.montant).toFixed(2)} € TTC</b></div>
+              )}
+              {info.trajet && <div className="pn-srow"><span>Trajet</span><b>{info.trajet}</b></div>}
+              <div className="pn-srow">
+                <span>Confirmation</span>
+                <b>{info.email ? info.email : "Email envoyé"}</b>
+              </div>
+            </div>
           </>
         )}
 
         {state === "failed" && (
           <>
-            <div className="pn-confirm-icon failed"><AlertTriangle size={34} /></div>
             <h1>Paiement non abouti</h1>
             <p>Le règlement n'a pas été validé par votre banque. Aucun montant n'a été débité.</p>
           </>
         )}
 
-        <a className="pn-confirm-cta" href="/">
-          Retour à l'accueil <ArrowRight size={16} />
-        </a>
+        <div className="pn-success-actions">
+          <a className="pn-btn-primary" href="/">
+            Retour à l'accueil <ArrowRight size={16} />
+          </a>
+        </div>
+
+        <div className="pn-success-brand">
+          <img src={logoLigneo} alt="Transports Ligneo" />
+          <span>TRANSPORTS LIGNEO · Convoyage automobile</span>
+        </div>
       </section>
     </div>
   );
