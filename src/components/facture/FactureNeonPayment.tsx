@@ -6,6 +6,10 @@ import { Loader2, Lock, ShieldCheck, CreditCard } from "lucide-react";
 
 export interface FactureSummary {
   numero: string;
+  numeroMission?: string | null;
+  vehicule?: string | null;
+  immatriculation?: string | null;
+  dateMission?: string | null;
   depart: string | null;
   arrivee: string | null;
   designation: string | null;
@@ -57,6 +61,58 @@ export const neonAppearance: Appearance = {
     },
   },
 };
+
+function RevolutButton({ factureId, amount }: { factureId: string; amount: number }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const start = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/facture/revolut-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ factureId, environment: getStripeEnvironment() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.checkoutUrl) {
+        setError(data?.error ?? "Revolut Pay indisponible pour le moment.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = data.checkoutUrl;
+    } catch {
+      setError("Connexion à Revolut impossible.");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="pn-form">
+      <p className="pn-revolut-note">
+        Vous allez être redirigé vers la page sécurisée Revolut Pay pour régler votre facture.
+        Le règlement est confirmé automatiquement dès l'encaissement.
+      </p>
+      {error && <p className="pn-error">{error}</p>}
+      <button type="button" className="pn-btn-pay" onClick={start} disabled={loading}>
+        {loading ? (
+          <>
+            <Loader2 size={17} className="animate-spin" /> Ouverture de Revolut…
+          </>
+        ) : (
+          <>
+            <Lock size={16} /> Payer {amount.toFixed(2)} € avec Revolut Pay
+          </>
+        )}
+      </button>
+      <p className="pn-secure-note">
+        <ShieldCheck size={14} /> Paiement traité par <b>Revolut</b> — aucune donnée bancaire n'est stockée
+        par Transports Ligneo.
+      </p>
+    </div>
+  );
+}
 
 function PayForm({ summary, returnUrl }: { summary: FactureSummary; returnUrl: string }) {
   const stripe = useStripe();
