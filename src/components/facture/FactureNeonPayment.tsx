@@ -73,7 +73,7 @@ function RevolutButton({ factureId, amount }: { factureId: string; amount: numbe
       const res = await fetch("/api/facture/revolut-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ factureId, environment: getStripeEnvironment() }),
+        body: JSON.stringify({ factureId, environment: import.meta.env.PROD ? "live" : "sandbox" }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.checkoutUrl) {
