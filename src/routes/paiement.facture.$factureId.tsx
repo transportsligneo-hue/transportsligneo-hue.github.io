@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { FactureNeonPayment, type FactureSummary } from "@/components/facture/FactureNeonPayment";
 import { NeonPayBackdrop } from "@/components/facture/NeonPayBackdrop";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import { ArrowLeft, ShieldCheck, Clock3, Building2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Clock3, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/paiement/facture/$factureId")({
   component: PaiementFacturePage,
@@ -35,76 +35,92 @@ function PaiementFacturePage() {
     <div className="pn-page">
       <NeonPayBackdrop />
 
-      <aside className="pn-summary-panel">
+      <header className="pn-topbar">
         <div className="pn-brand">
           <div className="pn-brand-mark">
             <img src={logoLigneo} alt="Transports Ligneo" />
           </div>
-          <div className="pn-brand-word">TRANSPORTS <span>LIGNEO</span></div>
-        </div>
-
-        <button type="button" className="pn-back-link" onClick={() => window.history.back()}>
-          <ArrowLeft size={14} /> Retour
-        </button>
-
-        <div className="pn-eyebrow"><span className="pn-dot" /> Règlement de facture</div>
-
-        <p className="pn-ref">Facture <b>{summary?.numero ?? "…"}</b></p>
-        <div className="pn-amount">{summary ? `${summary.prixTtc.toFixed(2)} €` : "—"}</div>
-        <p className="pn-amount-sub">
-          Montant TTC{summary?.referenceClient ? ` · Réf. ${summary.referenceClient}` : ""}
-        </p>
-
-        {(trajet || summary?.designation) && (
-          <div className="pn-route-card">
-            {trajet ? (
-              <>
-                <div className="pn-route-row">
-                  <div className="pn-route-dot-col">
-                    <span className="pn-route-dot start" />
-                    <span className="pn-route-line" />
-                  </div>
-                  <div className="pn-route-text"><span className="pn-tag">Enlèvement</span>{trajet.depart}</div>
-                </div>
-                <div className="pn-route-row">
-                  <div className="pn-route-dot-col"><span className="pn-route-dot end" /></div>
-                  <div className="pn-route-text"><span className="pn-tag">Livraison</span>{trajet.arrivee}</div>
-                </div>
-              </>
-            ) : (
-              <div className="pn-route-text"><span className="pn-tag">Prestation</span>{summary?.designation}</div>
-            )}
+          <div className="pn-brand-text">
+            <span className="pn-brand-name">TRANSPORTS <span>LIGNEO</span></span>
+            <span className="pn-brand-tag">Convoyage automobile</span>
           </div>
-        )}
+        </div>
+        <div className="pn-secure-pill">
+          <Lock size={15} /> Paiement sécurisé SSL
+        </div>
+      </header>
 
-        <div className="pn-details">
-          <div className="pn-detail-line"><span>Total HT</span><span>{summary ? `${summary.prixHt.toFixed(2)} €` : "—"}</span></div>
-          <div className="pn-detail-line">
-            <span>TVA{summary?.tvaTaux ? ` (${summary.tvaTaux} %)` : ""}</span>
-            <span>{summary ? `${summary.prixTva.toFixed(2)} €` : "—"}</span>
+      <div className="pn-wrap">
+        <aside className="pn-summary">
+          <button type="button" className="pn-back-link" onClick={() => window.history.back()}>
+            <ArrowLeft size={14} /> Retour
+          </button>
+
+          <div className="pn-kicker">Règlement de facture</div>
+          <h1>Facture {summary?.numero ?? "…"}</h1>
+
+          <div className="pn-row">
+            <span className="pn-label">Référence</span>
+            <span className="pn-val">{summary?.referenceClient ?? summary?.numero ?? "—"}</span>
           </div>
-          <div className="pn-detail-line total"><span>Total TTC</span><span>{summary ? `${summary.prixTtc.toFixed(2)} €` : "—"}</span></div>
-        </div>
+          {summary?.clientSociete && (
+            <div className="pn-row">
+              <span className="pn-label">Client</span>
+              <span className="pn-val">{summary.clientSociete}</span>
+            </div>
+          )}
+          {summary?.designation && (
+            <div className="pn-row">
+              <span className="pn-label">Prestation</span>
+              <span className="pn-val">{summary.designation}</span>
+            </div>
+          )}
 
-        {summary?.clientSociete && (
-          <p className="pn-client"><Building2 size={13} /> {summary.clientSociete}</p>
-        )}
+          {trajet && (
+            <div className="pn-route-box">
+              <div className="pn-route-line">
+                <span className="pn-rdot a" />
+                <span className="pn-route-track" />
+                <span className="pn-rdot b" />
+              </div>
+              <div className="pn-route-cities">
+                <div>
+                  <div className="pn-route-city">{trajet.depart}</div>
+                  <div className="pn-route-sub">Enlèvement</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="pn-route-city">{trajet.arrivee}</div>
+                  <div className="pn-route-sub">Livraison</div>
+                </div>
+              </div>
+            </div>
+          )}
 
-        <div className="pn-trust-row">
-          <span className="pn-trust-item"><ShieldCheck size={14} /> Paiement sécurisé</span>
-          <span className="pn-trust-item"><Clock3 size={14} /> Encaissement immédiat</span>
-        </div>
-      </aside>
+          <div className="pn-total-box">
+            <div className="pn-trow"><span>Total HT</span><span>{summary ? `${summary.prixHt.toFixed(2)} €` : "—"}</span></div>
+            <div className="pn-trow">
+              <span>TVA{summary?.tvaTaux ? ` (${summary.tvaTaux} %)` : ""}</span>
+              <span>{summary ? `${summary.prixTva.toFixed(2)} €` : "—"}</span>
+            </div>
+            <div className="pn-trow grand"><span>Total TTC</span><span>{summary ? `${summary.prixTtc.toFixed(2)} €` : "—"}</span></div>
+          </div>
 
-      <main className="pn-pay-panel">
-        {origin && (
-          <FactureNeonPayment
-            factureId={factureId}
-            returnUrlBase={`${origin}/paiement/confirmation`}
-            onSummary={setSummary}
-          />
-        )}
-      </main>
+          <div className="pn-trust-row">
+            <span className="pn-trust-item"><ShieldCheck size={14} /> Paiement sécurisé</span>
+            <span className="pn-trust-item"><Clock3 size={14} /> Encaissement immédiat</span>
+          </div>
+        </aside>
+
+        <main className="pn-pay-panel">
+          {origin && (
+            <FactureNeonPayment
+              factureId={factureId}
+              returnUrlBase={`${origin}/paiement/confirmation`}
+              onSummary={setSummary}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
