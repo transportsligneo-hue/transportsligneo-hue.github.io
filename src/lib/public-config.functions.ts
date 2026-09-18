@@ -16,6 +16,38 @@ export const getPublicPricingDisplay = createServerFn({ method: "GET" }).handler
   },
 );
 
+export type PublicVatRate = {
+  id: string;
+  rate: number | string;
+  label: string;
+  is_default: boolean;
+  is_active: boolean;
+  sort_order: number | null;
+};
+
+/** Taux de TVA actifs (affichage public). Exécuté côté serveur. */
+export const getPublicVatRates = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PublicVatRate[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabaseAdmin as any).rpc("get_active_vat_rates");
+    if (error || !Array.isArray(data)) return [];
+    return data as PublicVatRate[];
+  },
+);
+
+/** Paramètres IA globaux (feature flags). Lecture publique via le serveur. */
+export const getPublicAiSettings = createServerFn({ method: "GET" }).handler(
+  async (): Promise<Record<string, unknown> | null> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabaseAdmin as any).rpc("get_ai_settings");
+    if (error) return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    return (row ?? null) as Record<string, unknown> | null;
+  },
+);
+
 export type ConvoyeurInvitationInfo = {
   email: string;
   nom: string | null;
