@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe-client";
-import { Loader2, Lock, ShieldCheck, CreditCard } from "lucide-react";
+import { Loader2, Lock, ShieldCheck, CreditCard, Wallet } from "lucide-react";
 
 export interface FactureSummary {
   numero: string;
@@ -189,6 +189,7 @@ export function FactureNeonPayment({ factureId, returnUrlBase, onSummary }: { fa
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [summary, setSummary] = useState<FactureSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [method, setMethod] = useState<"card" | "revolut">("card");
 
   useEffect(() => {
     let alive = true;
@@ -228,8 +229,35 @@ export function FactureNeonPayment({ factureId, returnUrlBase, onSummary }: { fa
   }
 
   return (
-    <Elements stripe={getStripe()} options={{ clientSecret, appearance: neonAppearance, locale: "fr" }}>
-      <PayForm summary={summary} returnUrl={returnUrl} />
-    </Elements>
+    <div className="pn-methods-wrap">
+      <div className="pn-methods" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={method === "card"}
+          className={`pn-method ${method === "card" ? "is-active" : ""}`}
+          onClick={() => setMethod("card")}
+        >
+          <CreditCard size={16} /> Carte bancaire
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={method === "revolut"}
+          className={`pn-method ${method === "revolut" ? "is-active" : ""}`}
+          onClick={() => setMethod("revolut")}
+        >
+          <Wallet size={16} /> Revolut Pay
+        </button>
+      </div>
+
+      {method === "card" ? (
+        <Elements stripe={getStripe()} options={{ clientSecret, appearance: neonAppearance, locale: "fr" }}>
+          <PayForm summary={summary} returnUrl={returnUrl} />
+        </Elements>
+      ) : (
+        <RevolutButton factureId={factureId} amount={summary.prixTtc} />
+      )}
+    </div>
   );
 }
