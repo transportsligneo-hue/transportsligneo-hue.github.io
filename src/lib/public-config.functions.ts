@@ -36,15 +36,17 @@ export const getPublicVatRates = createServerFn({ method: "GET" }).handler(
   },
 );
 
+export type PublicAiSettingsRow = Record<string, boolean | string | number | null | Record<string, string>>;
+
 /** Paramètres IA globaux (feature flags). Lecture publique via le serveur. */
 export const getPublicAiSettings = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Record<string, unknown> | null> => {
+  async (): Promise<PublicAiSettingsRow | null> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabaseAdmin as any).rpc("get_ai_settings");
     if (error) return null;
     const row = Array.isArray(data) ? data[0] : data;
-    return (row ?? null) as Record<string, unknown> | null;
+    return (row ?? null) as PublicAiSettingsRow | null;
   },
 );
 
