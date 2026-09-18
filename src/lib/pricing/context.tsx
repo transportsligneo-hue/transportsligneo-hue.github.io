@@ -4,7 +4,7 @@
  * Supabase Realtime (optionnel).
  */
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getPublicPricingDisplay, getPublicVatRates } from "@/lib/public-config.functions";
 import { DEFAULT_SETTINGS, DEFAULT_VAT_RATES, type PricingSettings, type VatRate } from "./types";
 
 type PricingContextValue = {
