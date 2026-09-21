@@ -863,6 +863,7 @@ export function MissionCockpit({
               if ((await onMacroStatusChange("en_cours")) === false) {
                 toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
               }
+              void notifyClientEnRoute(attributionId);
               await Promise.resolve(onUpdated());
             } catch {
               toast.error("Impossible de démarrer le trajet, réessayez.");
