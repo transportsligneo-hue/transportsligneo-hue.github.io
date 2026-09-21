@@ -189,7 +189,19 @@ function ConvoyeurMissions() {
     }
   }, [inspection, openMissionId]);
 
-  useGpsTracking({ attributionId: activeMissionId, active: !!activeMissionId });
+  // Le suivi GPS ne démarre QU'À PARTIR du départ du trajet avec le véhicule
+  // (après l'état des lieux d'enlèvement). Le trajet d'approche du convoyeur
+  // vers le lieu d'enlèvement n'est jamais tracké.
+  const TRACKED_ETAPES = ["en_livraison", "arrive_destination", "arrive_livraison"];
+  const trackedMissionId = useMemo(() => {
+    const mission = missions.find((m) => m.id === activeMissionId);
+    if (!mission) return null;
+    const etape = normalizeMissionEtape(mission.etape_courante) ?? "";
+    return TRACKED_ETAPES.includes(etape) ? mission.id : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missions, activeMissionId]);
+
+  useGpsTracking({ attributionId: trackedMissionId, active: !!trackedMissionId });
 
   const fetchMissions = useCallback(async () => {
     if (!user) return;
