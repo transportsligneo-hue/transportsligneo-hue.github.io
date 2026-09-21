@@ -56,7 +56,6 @@ type ActionKind =
  */
 async function notifyClientEnRoute(attributionId: string) {
   try {
-    const { notifyClientDriverEnRoute } = await import("@/lib/push/driver-enroute.functions");
     await notifyClientDriverEnRoute({ data: { attributionId } });
   } catch (e) {
     console.warn("[MissionCockpit] notifyClientDriverEnRoute failed", e);
