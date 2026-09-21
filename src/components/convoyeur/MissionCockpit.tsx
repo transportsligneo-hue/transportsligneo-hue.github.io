@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { notifyDeliveryDone } from "@/lib/google-review.functions";
+import { notifyClientDriverEnRoute } from "@/lib/push/driver-enroute.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { writeWithOutbox } from "@/lib/offline-outbox";
 import type { ReactNode } from "react";
@@ -48,6 +49,18 @@ type ActionKind =
   | "selfie_final"
   | "cloturer"
   | "done";
+
+/**
+ * Prévient le client par SMS que le convoyeur prend la route vers l'enlèvement.
+ * Best-effort : jamais bloquant pour le convoyeur. Aucun suivi GPS ici.
+ */
+async function notifyClientEnRoute(attributionId: string) {
+  try {
+    await notifyClientDriverEnRoute({ data: { attributionId } });
+  } catch (e) {
+    console.warn("[MissionCockpit] notifyClientDriverEnRoute failed", e);
+  }
+}
 
 interface StepDef {
   key: ActionKind;
@@ -351,6 +364,7 @@ export function MissionCockpit({
           if ((await onMacroStatusChange("en_cours")) === false) {
             toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
           }
+          void notifyClientEnRoute(attributionId);
           await Promise.resolve(onUpdated());
           break;
         case "arrive_depart":
@@ -862,6 +876,7 @@ export function MissionCockpit({
               if ((await onMacroStatusChange("en_cours")) === false) {
                 toast.warning("Étape enregistrée, mais le statut général n'a pas pu être synchronisé.");
               }
+              void notifyClientEnRoute(attributionId);
               await Promise.resolve(onUpdated());
             } catch {
               toast.error("Impossible de démarrer le trajet, réessayez.");
