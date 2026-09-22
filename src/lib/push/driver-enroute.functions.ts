@@ -27,7 +27,7 @@ export const notifyClientDriverEnRoute = createServerFn({ method: "POST" })
     const { data: attr } = await supabaseAdmin
       .from("attributions")
       .select(
-        "id, numero_mission, options_completion, convoyeur:convoyeurs(user_id, nom, prenom), trajet:trajets(depart, arrivee, date_trajet, heure_depart, immatriculation, vehicule_immatriculation, client_telephone, contact_depart_tel, devis_id, demande_id)",
+        "id, numero_mission, options_completion, convoyeur:convoyeurs(user_id, nom, prenom), trajet:trajets(depart, arrivee, date_trajet, immatriculation, vehicule_immatriculation, client_telephone, contact_depart_tel, devis_id, demande_id)",
       )
       .eq("id", data.attributionId)
       .maybeSingle();
