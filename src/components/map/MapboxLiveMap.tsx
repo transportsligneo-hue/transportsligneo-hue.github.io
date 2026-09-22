@@ -371,6 +371,14 @@ export function MapboxLiveMap({
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": BRAND, "line-width": 6 },
       });
+      // Tracé réel parcouru par le convoyeur (points GPS), au-dessus de l'itinéraire
+      map.addLayer({
+        id: "ligneo-trail-line",
+        type: "line",
+        source: "ligneo-trail",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": BRAND_DARK, "line-width": 4, "line-opacity": 0.95 },
+      });
       readyRef.current = true;
       setReady(true);
       map.resize();
