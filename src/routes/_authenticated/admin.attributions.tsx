@@ -620,7 +620,7 @@ function AdminAttributions() {
   const viewGps = async (attributionId: string) => {
     const { data } = await supabase
       .from("mission_locations")
-      .select("latitude, longitude, recorded_at, accuracy")
+      .select("latitude, longitude, recorded_at, accuracy, speed")
       .eq("attribution_id", attributionId)
       .order("recorded_at", { ascending: true });
     setGpsView({ id: attributionId, points: data || [] });

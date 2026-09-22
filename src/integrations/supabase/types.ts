@@ -4631,28 +4631,34 @@ export type Database = {
           accuracy: number | null
           attribution_id: string
           created_at: string
+          heading: number | null
           id: string
           latitude: number
           longitude: number
           recorded_at: string
+          speed: number | null
         }
         Insert: {
           accuracy?: number | null
           attribution_id: string
           created_at?: string
+          heading?: number | null
           id?: string
           latitude: number
           longitude: number
           recorded_at?: string
+          speed?: number | null
         }
         Update: {
           accuracy?: number | null
           attribution_id?: string
           created_at?: string
+          heading?: number | null
           id?: string
           latitude?: number
           longitude?: number
           recorded_at?: string
+          speed?: number | null
         }
         Relationships: [
           {

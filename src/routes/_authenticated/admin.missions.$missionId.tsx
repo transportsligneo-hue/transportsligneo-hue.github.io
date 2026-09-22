@@ -420,7 +420,7 @@ function AdminMissionDetail() {
         .order("created_at", { ascending: true }),
       supabase
         .from("mission_locations")
-        .select("latitude, longitude, recorded_at, accuracy")
+        .select("latitude, longitude, recorded_at, accuracy, speed")
         .eq("attribution_id", missionId)
         .order("recorded_at", { ascending: true }),
       supabase

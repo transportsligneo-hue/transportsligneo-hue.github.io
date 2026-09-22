@@ -18,13 +18,20 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
     if (now - lastSentRef.current < intervalMs) return;
     lastSentRef.current = now;
 
-    await supabase.from("mission_locations").insert({
+    const { error } = await supabase.from("mission_locations").insert({
       attribution_id: attributionId,
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
       accuracy: position.coords.accuracy,
+      speed: Number.isFinite(position.coords.speed as number) ? position.coords.speed : null,
+      heading: Number.isFinite(position.coords.heading as number) ? position.coords.heading : null,
       recorded_at: new Date(position.timestamp).toISOString(),
     });
+    if (error) {
+      // Ne pas perdre le point suivant si l'insertion échoue (réseau, RLS…)
+      lastSentRef.current = 0;
+      console.warn("GPS insert error:", error.message);
+    }
   }, [attributionId, intervalMs]);
 
   useEffect(() => {

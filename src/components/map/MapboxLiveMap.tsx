@@ -356,6 +356,7 @@ export function MapboxLiveMap({
     map.on("load", () => {
       map.addSource("ligneo-rest", { type: "geojson", data: lineFeature([]) });
       map.addSource("ligneo-done", { type: "geojson", data: lineFeature([]) });
+      map.addSource("ligneo-trail", { type: "geojson", data: lineFeature([]) });
       map.addLayer({
         id: "ligneo-rest-line",
         type: "line",
@@ -369,6 +370,14 @@ export function MapboxLiveMap({
         source: "ligneo-done",
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": BRAND, "line-width": 6 },
+      });
+      // Tracé réel parcouru par le convoyeur (points GPS), au-dessus de l'itinéraire
+      map.addLayer({
+        id: "ligneo-trail-line",
+        type: "line",
+        source: "ligneo-trail",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": BRAND_DARK, "line-width": 4, "line-opacity": 0.95 },
       });
       readyRef.current = true;
       setReady(true);
@@ -466,20 +475,29 @@ export function MapboxLiveMap({
     }
   }, [fleet, ready]);
 
-  // ——— Tracés parcouru / restant + zoom automatique
+  // ——— Tracés parcouru / restant + trace GPS réelle + zoom automatique
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready || !metrics) return;
-    (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.rest));
-    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.done));
+    if (!map || !ready) return;
+    if (metrics) {
+      (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.rest));
+      (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.done));
+    }
 
-    if (!fittedRef.current && route.length) {
+    // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
+    const trail = points.map((p) => [p.latitude, p.longitude] as [number, number]);
+    (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(
+      lineFeature(trail.length >= 2 ? trail : []),
+    );
+
+    if (!fittedRef.current && (route.length || trail.length)) {
       fittedRef.current = true;
       const b = new mapboxgl.LngLatBounds();
       route.forEach(([lat, lng]) => b.extend([lng, lat]));
-      map.fitBounds(b, { padding: 60, duration: 0 });
+      trail.forEach(([lat, lng]) => b.extend([lng, lat]));
+      map.fitBounds(b, { padding: 60, duration: 0, maxZoom: 14 });
     }
-  }, [metrics, route, ready]);
+  }, [metrics, route, points, ready]);
 
   // ——— Véhicule : interpolation fluide + rotation
   useEffect(() => {

@@ -35,7 +35,7 @@ export function useMissionRealtime(attributionId: string | null) {
         supabase.from("attributions").select("statut, etape_courante").eq("id", attributionId).maybeSingle(),
         supabase
           .from("mission_locations")
-          .select("latitude, longitude, recorded_at, accuracy")
+          .select("latitude, longitude, recorded_at, accuracy, speed")
           .eq("attribution_id", attributionId)
           .order("recorded_at", { ascending: false })
           .limit(1),
