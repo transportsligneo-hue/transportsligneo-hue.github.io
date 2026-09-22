@@ -356,6 +356,7 @@ export function MapboxLiveMap({
     map.on("load", () => {
       map.addSource("ligneo-rest", { type: "geojson", data: lineFeature([]) });
       map.addSource("ligneo-done", { type: "geojson", data: lineFeature([]) });
+      map.addSource("ligneo-trail", { type: "geojson", data: lineFeature([]) });
       map.addLayer({
         id: "ligneo-rest-line",
         type: "line",
