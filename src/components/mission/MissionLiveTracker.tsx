@@ -107,7 +107,7 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
     let cancelled = false;
     supabase
       .from("mission_locations")
-      .select("latitude, longitude, recorded_at, accuracy")
+      .select("latitude, longitude, recorded_at, accuracy, speed")
       .eq("attribution_id", attributionId)
       .order("recorded_at", { ascending: true })
       .then(({ data }) => {

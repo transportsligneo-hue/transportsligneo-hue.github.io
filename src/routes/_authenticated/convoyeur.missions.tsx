@@ -416,7 +416,7 @@ function ConvoyeurMissions() {
     const fetchPoints = async () => {
       const { data } = await supabase
         .from("mission_locations")
-        .select("latitude, longitude, recorded_at, accuracy")
+        .select("latitude, longitude, recorded_at, accuracy, speed")
         .eq("attribution_id", activeMissionId)
         .order("recorded_at", { ascending: true });
       if (data) {
