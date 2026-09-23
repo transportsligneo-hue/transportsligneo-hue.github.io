@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { ensureLocationPermission } from "@/lib/native/bridge";
 import { isNativeApp } from "@/lib/native/bridge";
 import { toast } from "sonner";
+import { registerPlugin } from "@capacitor/core";
+import type { BackgroundGeolocationPlugin } from "@capacitor-community/background-geolocation";
+
+const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
 
 interface UseGpsTrackingOptions {
   attributionId: string | null;
@@ -15,7 +19,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
   const lastSentRef = useRef(0);
   const sendingRef = useRef(false);
 
-  const sendPosition = useCallback(async (position: GeolocationPosition) => {
+  const sendPosition = useCallback(async (position: { coords: { latitude: number; longitude: number; accuracy: number | null; speed: number | null; heading: number | null }; timestamp: number }) => {
     if (!attributionId) return;
     if (!Number.isFinite(position.coords.latitude) || !Number.isFinite(position.coords.longitude)) return;
     const now = Date.now();
@@ -71,33 +75,29 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       if (cancelled) return;
       if (!ok) { onError({ message: "Location permission denied" }); return; }
       if (!isNativeApp()) { startWeb(); return; }
-      void import("@capacitor/geolocation").then(async ({ Geolocation }) => {
+      void BackgroundGeolocation.addWatcher({
+        backgroundTitle: "Suivi de la mission Ligneo",
+        backgroundMessage: "Votre trajet avec le véhicule est en cours.",
+        distanceFilter: 15,
+        stale: false,
+        requestPermissions: true,
+      }, (position, error) => {
         if (cancelled) return;
-        const sample = async () => {
-          try {
-            const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
-            if (!cancelled) void sendPosition(position);
-          } catch (error) { if (!cancelled) onError(error as { message?: string }); }
-        };
-        try {
-          const id = await Geolocation.watchPosition({ enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
-            (position, error) => {
-              if (cancelled) return;
-              if (error) onError(error);
-              else if (position) void sendPosition(position);
-            });
-          if (cancelled) void Geolocation.clearWatch({ id });
-          else nativeWatchId = id;
-          await sample();
-          if (!cancelled) pollId = window.setInterval(() => { if (document.visibilityState === "visible") void sample(); }, Math.max(intervalMs, 15000));
-        } catch (error) { if (!cancelled) onError(error as { message?: string }); }
+        if (error) onError(error);
+        else if (position) void sendPosition({
+          coords: { latitude: position.latitude, longitude: position.longitude, accuracy: position.accuracy, speed: position.speed, heading: position.bearing },
+          timestamp: position.time ?? Date.now(),
+        });
+      }).then((id) => {
+        if (cancelled) void BackgroundGeolocation.removeWatcher({ id });
+        else nativeWatchId = id;
       }).catch(onError);
     });
 
     return () => {
       cancelled = true;
       if (pollId !== null) window.clearInterval(pollId);
-      if (nativeWatchId) void import("@capacitor/geolocation").then(({ Geolocation }) => Geolocation.clearWatch({ id: nativeWatchId ?? "" }));
+      if (nativeWatchId) void BackgroundGeolocation.removeWatcher({ id: nativeWatchId });
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;

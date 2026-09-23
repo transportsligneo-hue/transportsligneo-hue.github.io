@@ -377,7 +377,7 @@ export function MapboxLiveMap({
         type: "line",
         source: "ligneo-trail",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": BRAND_DARK, "line-width": 4, "line-opacity": 0.95 },
+        paint: { "line-color": "#2F5FFF", "line-width": 5, "line-opacity": 1, "line-blur": 0.5 },
       });
       readyRef.current = true;
       setReady(true);
