@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Radio } from "lucide-react";
-import { SIGNAL_STALE_MIN } from "@/lib/mission-live-metrics";
+import { SIGNAL_STALE_MIN, formatMinutesShort, signalAgeMinutes } from "@/lib/mission-live-metrics";
 
 const LiveMissionMap = lazy(() => import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })));
 
@@ -35,6 +35,7 @@ export function ActiveMissionsMap({
   emptyMessage = "Aucun trajet actif en ce moment.",
 }: Props) {
   const [missions, setMissions] = useState<ActiveMission[]>([]);
+  const [activeCount, setActiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -47,12 +48,18 @@ export function ActiveMissionsMap({
     let cancelled = false;
     async function load() {
       // 1) Missions actives (indépendamment de la fraîcheur GPS)
-      const { data: attribs } = await supabase
+      const { data: attribs, error: attribError } = await supabase
         .from("attributions")
         .select("id, numero_mission, statut, trajet_id, trajets(depart, arrivee, client_email)")
         .in("statut", ["en_cours", "livraison", "attribue", "en_livraison"])
         .order("created_at", { ascending: false })
         .limit(100);
+      if (attribError) {
+        console.warn("Active mission GPS lookup failed:", attribError);
+        if (!cancelled) setLoading(false);
+        return;
+      }
+      if (!cancelled) setActiveCount(attribs?.length ?? 0);
       if (!attribs || attribs.length === 0) {
         if (!cancelled) {
           setMissions([]);
@@ -62,12 +69,17 @@ export function ActiveMissionsMap({
       }
       // 2) Dernière position connue de chacune (pas de fenêtre temporelle stricte)
       const attribIds = attribs.map((a) => a.id);
-      const { data: locs } = await supabase
+      const { data: locs, error: locError } = await supabase
         .from("mission_locations")
         .select("attribution_id, latitude, longitude, recorded_at")
         .in("attribution_id", attribIds)
         .order("recorded_at", { ascending: false })
         .limit(2000);
+      if (locError) {
+        console.warn("Active mission locations lookup failed:", locError);
+        if (!cancelled) setLoading(false);
+        return;
+      }
       const latestByAttrib = new Map<string, NonNullable<typeof locs>[number]>();
       for (const p of locs ?? []) {
         if (!latestByAttrib.has(p.attribution_id)) latestByAttrib.set(p.attribution_id, p);
@@ -75,7 +87,8 @@ export function ActiveMissionsMap({
       const rows: ActiveMission[] = attribs
         .filter((a) => latestByAttrib.has(a.id))
         .map((a) => {
-          const loc = latestByAttrib.get(a.id)!;
+          const loc = latestByAttrib.get(a.id);
+          if (!loc) return null;
           const t = Array.isArray(a.trajets) ? a.trajets[0] : a.trajets;
           return {
             attributionId: a.id,
@@ -86,7 +99,7 @@ export function ActiveMissionsMap({
             longitude: loc.longitude,
             recordedAt: loc.recorded_at,
           };
-        });
+        }).filter((row): row is ActiveMission => row !== null);
       if (!cancelled) {
         setMissions(rows);
         setLoading(false);
@@ -102,6 +115,8 @@ export function ActiveMissionsMap({
   }, [scope]);
 
   const freshMissions = missions.filter((m) => now - new Date(m.recordedAt).getTime() <= SIGNAL_STALE_MIN * 60_000);
+  const oldestSignal = missions.length === 1 ? missions[0] : null;
+  const signalAge = oldestSignal ? signalAgeMinutes({ latitude: oldestSignal.latitude, longitude: oldestSignal.longitude, recorded_at: oldestSignal.recordedAt }, now) : null;
 
   const gpsPoints = useMemo(
     () =>
@@ -135,7 +150,7 @@ export function ActiveMissionsMap({
           <h3 className="text-sm font-semibold text-pro-text tracking-tight">{title}</h3>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-pro-muted">
-          <Radio size={12} /> {freshMissions.length} suivi{freshMissions.length > 1 ? "s" : ""} en direct{missions.length > freshMissions.length ? ` · ${missions.length - freshMissions.length} sans signal` : ""}
+          <Radio size={12} /> {freshMissions.length} suivi{freshMissions.length > 1 ? "s" : ""} en direct{activeCount > freshMissions.length ? ` · ${activeCount - freshMissions.length} sans signal` : ""}
         </span>
       </header>
       <div className="relative" style={{ height: 380 }}>
@@ -160,7 +175,7 @@ export function ActiveMissionsMap({
             <Loader2 className="animate-spin" size={22} />
           </div>
         )}
-        {!loading && missions.length === 0 && (
+        {!loading && activeCount === 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[401] flex justify-center">
             <div className="flex items-center gap-1.5 rounded-2xl border border-white/70 bg-white/92 px-4 py-3 text-sm text-pro-text-soft shadow-2xl backdrop-blur-xl">
               <Radio size={16} className="opacity-40" />
@@ -168,12 +183,13 @@ export function ActiveMissionsMap({
             </div>
           </div>
         )}
-        {!loading && missions.length > 0 && freshMissions.length === 0 && (
+        {!loading && activeCount > 0 && freshMissions.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-pro-bg px-5 text-center text-sm text-pro-muted">
             <Radio size={22} />
             <strong className="text-pro-text">Aucune position GPS récente</strong>
             <span>L'emplacement actuel des véhicules est inconnu.</span>
-            {missions.length === 1 && <span>Dernière position reçue le {new Date(missions[0].recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}.</span>}
+            {oldestSignal && <span className="font-semibold text-pro-text">Dernier signal il y a {formatMinutesShort(signalAge)}.</span>}
+            {oldestSignal ? <span>Dernière position reçue le {new Date(oldestSignal.recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}.</span> : <span>Aucune position transmise pour cette mission.</span>}
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@
 ## Suivi GPS Driver
 - [x] Reprendre les positions pendant toute la conduite du véhicule, même après navigation dans Driver
 - [x] Afficher le tracé réellement enregistré en bleu électrique et distinguer une ancienne position du direct
+- [x] Intégrer le module GPS Android au projet natif et afficher l'âge du dernier signal sur la carte admin
 - [ ] Installer la nouvelle version native de Driver sur le téléphone du convoyeur pour activer le suivi écran verrouillé (nouvelle compilation nécessaire)
 
 ## Paiements
