@@ -141,12 +141,13 @@ export function ActiveMissionsMap({
       <div className="relative" style={{ height: 380 }}>
         {mounted && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-50" />}>
-            {missions.length === 1 ? (
+            {missions.length === 1 && freshMissions.length === 1 ? (
               <LiveMissionMap
                 points={gpsPoints}
                 origin={missions[0].depart}
                 destination={missions[0].arrivee}
                 title={missions[0].numero ?? undefined}
+                role="admin"
                 className="absolute inset-0 !rounded-none"
               />
             ) : freshMissions.length > 0 ? (
@@ -167,9 +168,12 @@ export function ActiveMissionsMap({
             </div>
           </div>
         )}
-        {!loading && missions.length > 1 && freshMissions.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-pro-bg px-5 text-center text-sm text-pro-muted">
-            Aucune position récente reçue. L'emplacement actuel des véhicules est inconnu.
+        {!loading && missions.length > 0 && freshMissions.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-pro-bg px-5 text-center text-sm text-pro-muted">
+            <Radio size={22} />
+            <strong className="text-pro-text">Aucune position GPS récente</strong>
+            <span>L'emplacement actuel des véhicules est inconnu.</span>
+            {missions.length === 1 && <span>Dernière position reçue le {new Date(missions[0].recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}.</span>}
           </div>
         )}
       </div>
