@@ -91,6 +91,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
     let cancelled = false;
     let nativeWatchId: string | null = null;
     let pollId: number | null = null;
+    let sampleOnResume: (() => void) | null = null;
     lastSentRef.current = 0;
 
     const onError = (error: { message?: string }) => {
@@ -109,6 +110,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       };
       sample();
       pollId = window.setInterval(sample, Math.max(intervalMs, 15000));
+      sampleOnResume = sample;
       document.addEventListener("visibilitychange", sample);
     };
 
@@ -143,7 +145,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
     return () => {
       cancelled = true;
       if (pollId !== null) window.clearInterval(pollId);
-      document.removeEventListener("visibilitychange", sampleOnResume);
+      if (sampleOnResume) document.removeEventListener("visibilitychange", sampleOnResume);
       if (nativeWatchId) void BackgroundGeolocation.removeWatcher({ id: nativeWatchId });
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
