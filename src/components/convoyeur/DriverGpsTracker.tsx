@@ -21,14 +21,14 @@ export function DriverGpsTracker() {
         .select("id, etape_courante")
         .eq("convoyeur_id", driver.id)
         .in("statut", ["en_cours", "livraison", "en_livraison"])
-        .in("etape_courante", ["en_route", "sur_place", "en_livraison", "arrive_destination", "arrive_livraison"])
+        .in("etape_courante", ["en_livraison", "arrive_destination", "arrive_livraison"])
         .order("updated_at", { ascending: false })
         .limit(1);
       if (!cancelled && !error) setMissionId(data?.[0]?.id ?? null);
     };
     void refresh();
     const timer = window.setInterval(() => void refresh(), 15_000);
-    const resume = () => { void refresh(); };
+    const resume = () => { if (document.visibilityState === "visible") void refresh(); };
     document.addEventListener("visibilitychange", resume);
     const channel = supabase.channel(`driver-gps-stage-${user.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "attributions" }, () => void refresh())
