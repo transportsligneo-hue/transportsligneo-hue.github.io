@@ -5,7 +5,7 @@ import { LiveMissionMap } from "@/components/map/LiveMissionMap";
 import { Activity, Clock, Navigation, Phone, MessageSquare, Loader2, CheckCircle2, Truck, PauseCircle, Coffee, Flag, AlertTriangle } from "lucide-react";
 import { geocodeAddress, computeEta, type GeoPoint } from "@/lib/geocode";
 import { useMissionLiveMetrics } from "@/hooks/useMissionLiveMetrics";
-import { formatMinutesShort, formatDelta } from "@/lib/mission-live-metrics";
+import { formatMinutesShort, formatDelta, SIGNAL_STALE_MIN } from "@/lib/mission-live-metrics";
 
 interface MissionLiveTrackerProps {
   attributionId: string;
@@ -66,6 +66,11 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
   const [destination, setDestination] = useState<GeoPoint | null>(null);
   const [driver, setDriver] = useState<DriverInfo | null>(null);
   const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, []);
   // Métriques live (rôle client : pas de vitesse ni d'horodatage précis)
   const { metrics: live, onMetrics, delayMinutes } = useMissionLiveMetrics(attributionId);
 
@@ -132,7 +137,9 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
   const etapeLabel = rt.etape_courante && !isFinished ? ETAPE_LABELS[rt.etape_courante] ?? rt.etape_courante.replace(/_/g, " ") : null;
   const currentIdx = rt.etape_courante ? ETAPES_ORDER.findIndex((e) => e.key === rt.etape_courante) : -1;
 
-  const eta = destination && allPoints.length > 0 && !isFinished ? computeEta(allPoints, destination) : null;
+  const lastRecordedAt = allPoints[allPoints.length - 1]?.recorded_at;
+  const gpsFresh = !!lastRecordedAt && now - new Date(lastRecordedAt).getTime() <= SIGNAL_STALE_MIN * 60_000;
+  const eta = destination && gpsFresh && !isFinished ? computeEta(allPoints, destination) : null;
 
   const driverName = driver ? [driver.prenom, driver.nom].filter(Boolean).join(" ") : null;
   const vehicleLabel = vehicle ? [vehicle.marque, vehicle.modele].filter(Boolean).join(" ") : null;
@@ -209,7 +216,7 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
             )}
 
             {/* Progression + statut de roulage (données non sensibles) */}
-            {live && !isFinished && (
+            {live && gpsFresh && !isFinished && (
               <div className="space-y-2">
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                   <div
@@ -235,11 +242,6 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
                     </span>
                   )}
                 </div>
-                {live.stale && (
-                  <div className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-800">
-                    <AlertTriangle size={12} /> Signal GPS momentanément perdu
-                  </div>
-                )}
                 {live.nextMilestone && (
                   <div className="flex items-center gap-1.5 rounded-xl bg-[#f4f7ff] px-2.5 py-1.5 text-[11px] font-medium text-[#1c3fc4]">
                     {live.nextMilestone.kind === "frontiere" ? <Flag size={11} /> : <Coffee size={11} />}
@@ -249,6 +251,11 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
                     </span>
                   </div>
                 )}
+              </div>
+            )}
+            {!gpsFresh && !isFinished && (
+              <div className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-xs font-medium text-amber-800">
+                <AlertTriangle size={14} /> Position GPS non actualisée · emplacement actuel inconnu
               </div>
             )}
 

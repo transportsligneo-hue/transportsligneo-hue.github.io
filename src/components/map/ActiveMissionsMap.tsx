@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Radio } from "lucide-react";
+import { SIGNAL_STALE_MIN } from "@/lib/mission-live-metrics";
 
 const LiveMissionMap = lazy(() => import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })));
 
@@ -36,6 +37,7 @@ export function ActiveMissionsMap({
   const [missions, setMissions] = useState<ActiveMission[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     setMounted(true);
@@ -44,7 +46,6 @@ export function ActiveMissionsMap({
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setLoading(true);
       // 1) Missions actives (indépendamment de la fraîcheur GPS)
       const { data: attribs } = await supabase
         .from("attributions")
@@ -89,6 +90,7 @@ export function ActiveMissionsMap({
       if (!cancelled) {
         setMissions(rows);
         setLoading(false);
+        setNow(Date.now());
       }
     }
     load();
@@ -99,26 +101,27 @@ export function ActiveMissionsMap({
     };
   }, [scope]);
 
+  const freshMissions = missions.filter((m) => now - new Date(m.recordedAt).getTime() <= SIGNAL_STALE_MIN * 60_000);
 
   const gpsPoints = useMemo(
     () =>
-      missions.map((m) => ({
+      missions.length === 1 ? missions.map((m) => ({
         latitude: m.latitude,
         longitude: m.longitude,
         recorded_at: m.recordedAt,
         accuracy: null,
-      })),
+      })) : [],
     [missions],
   );
 
   const fleetPoints = useMemo(
     () =>
-      missions.map((m) => ({
+      freshMissions.map((m) => ({
         lat: m.latitude,
         lng: m.longitude,
         label: [m.numero, m.depart && m.arrivee ? `${m.depart} → ${m.arrivee}` : null].filter(Boolean).join(" · ") || undefined,
       })),
-    [missions],
+    [missions, now],
   );
 
   return (
@@ -126,29 +129,30 @@ export function ActiveMissionsMap({
       <header className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-pro-border">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            {freshMissions.length > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${freshMissions.length ? "bg-emerald-500" : "bg-amber-500"}`} />
           </span>
           <h3 className="text-sm font-semibold text-pro-text tracking-tight">{title}</h3>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-pro-muted">
-          <Radio size={12} /> {missions.length} position{missions.length > 1 ? "s" : ""} connue{missions.length > 1 ? "s" : ""}
+          <Radio size={12} /> {freshMissions.length} suivi{freshMissions.length > 1 ? "s" : ""} en direct{missions.length > freshMissions.length ? ` · ${missions.length - freshMissions.length} sans signal` : ""}
         </span>
       </header>
       <div className="relative" style={{ height: 380 }}>
         {mounted && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-50" />}>
-            {missions.length === 1 ? (
+            {missions.length === 1 && freshMissions.length === 1 ? (
               <LiveMissionMap
                 points={gpsPoints}
                 origin={missions[0].depart}
                 destination={missions[0].arrivee}
                 title={missions[0].numero ?? undefined}
+                role="admin"
                 className="absolute inset-0 !rounded-none"
               />
-            ) : (
+            ) : freshMissions.length > 0 ? (
               <LiveMissionMap points={[]} fleet={fleetPoints} hideOverlay className="absolute inset-0 !rounded-none" />
-            )}
+            ) : null}
           </Suspense>
         )}
         {loading && (
@@ -162,6 +166,14 @@ export function ActiveMissionsMap({
               <Radio size={16} className="opacity-40" />
               {emptyMessage}
             </div>
+          </div>
+        )}
+        {!loading && missions.length > 0 && freshMissions.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-pro-bg px-5 text-center text-sm text-pro-muted">
+            <Radio size={22} />
+            <strong className="text-pro-text">Aucune position GPS récente</strong>
+            <span>L'emplacement actuel des véhicules est inconnu.</span>
+            {missions.length === 1 && <span>Dernière position reçue le {new Date(missions[0].recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}.</span>}
           </div>
         )}
       </div>

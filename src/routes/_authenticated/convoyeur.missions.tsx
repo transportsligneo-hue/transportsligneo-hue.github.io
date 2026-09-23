@@ -768,7 +768,9 @@ function ConvoyeurMissions() {
               <div className="mv3-live-text">
                 <p className="mv3-live-title">Mission en cours</p>
                 <p className="mv3-live-sub">
-                  GPS actif · {gpsPoints.length} position{gpsPoints.length > 1 ? "s" : ""}
+                  {lastPoint && Date.now() - new Date(lastPoint.recorded_at).getTime() <= 15 * 60_000
+                    ? "GPS actif"
+                    : "GPS sans position récente"} · {gpsPoints.length} position{gpsPoints.length > 1 ? "s" : ""}
                   {getDuration() && ` · ${getDuration()}`}
                 </p>
               </div>
@@ -788,7 +790,7 @@ function ConvoyeurMissions() {
                   <div className="flex items-center justify-between text-[10px] text-white/50 px-1">
                     <span className="flex items-center gap-1">
                       <Clock size={10} />
-                      Dernière position: {new Date(lastPoint.recorded_at).toLocaleTimeString("fr-FR")}
+                      Dernière position reçue : {new Date(lastPoint.recorded_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
                     </span>
                     {lastPoint.accuracy && <span>Précision: ±{Math.round(lastPoint.accuracy)}m</span>}
                   </div>
