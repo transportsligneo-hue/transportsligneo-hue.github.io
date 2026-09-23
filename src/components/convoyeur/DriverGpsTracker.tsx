@@ -20,7 +20,7 @@ export function DriverGpsTracker() {
         .from("attributions")
         .select("id, etape_courante")
         .eq("convoyeur_id", driver.id)
-        .eq("statut", "en_cours")
+        .in("statut", ["en_cours", "livraison", "en_livraison"])
         .in("etape_courante", ["en_livraison", "arrive_destination", "arrive_livraison"])
         .order("updated_at", { ascending: false })
         .limit(1);
