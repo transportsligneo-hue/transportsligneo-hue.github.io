@@ -45,46 +45,34 @@ export function ActiveMissionsMap({
     let cancelled = false;
     async function load() {
       setLoading(true);
-      // Récup dernières positions (2h) · on regroupe côté JS
-      const sinceIso = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-      const { data: locs } = await supabase
-        .from("mission_locations")
-        .select("attribution_id, latitude, longitude, recorded_at")
-        .gte("recorded_at", sinceIso)
-        .order("recorded_at", { ascending: false })
-        .limit(500);
-      if (!locs || locs.length === 0) {
-        if (!cancelled) {
-          setMissions([]);
-          setLoading(false);
-        }
-        return;
-      }
-      const latestByAttrib = new Map<string, typeof locs[number]>();
-      for (const p of locs) {
-        if (!latestByAttrib.has(p.attribution_id)) latestByAttrib.set(p.attribution_id, p);
-      }
-      const attribIds = [...latestByAttrib.keys()];
+      // 1) Missions actives (indépendamment de la fraîcheur GPS)
       const { data: attribs } = await supabase
         .from("attributions")
         .select("id, numero_mission, statut, trajet_id, trajets(depart, arrivee, client_email)")
-        .in("id", attribIds)
-        .in("statut", ["en_cours", "livraison", "attribue", "en_livraison"]);
-      if (!attribs) {
+        .in("statut", ["en_cours", "livraison", "attribue", "en_livraison"])
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (!attribs || attribs.length === 0) {
         if (!cancelled) {
           setMissions([]);
           setLoading(false);
         }
         return;
       }
-      // Filtrage scope côté client (RLS fait déjà le gros du tri)
-      const filtered = attribs.filter((a) => {
-        if (scope === "all") return true;
-        const trajet = Array.isArray(a.trajets) ? a.trajets[0] : a.trajets;
-        void trajet;
-        return true; // scope fin non nécessaire ici : RLS restreint déjà
-      });
-      const rows: ActiveMission[] = filtered
+      // 2) Dernière position connue de chacune (pas de fenêtre temporelle stricte)
+      const attribIds = attribs.map((a) => a.id);
+      const { data: locs } = await supabase
+        .from("mission_locations")
+        .select("attribution_id, latitude, longitude, recorded_at")
+        .in("attribution_id", attribIds)
+        .order("recorded_at", { ascending: false })
+        .limit(2000);
+      const latestByAttrib = new Map<string, NonNullable<typeof locs>[number]>();
+      for (const p of locs ?? []) {
+        if (!latestByAttrib.has(p.attribution_id)) latestByAttrib.set(p.attribution_id, p);
+      }
+      const rows: ActiveMission[] = attribs
+        .filter((a) => latestByAttrib.has(a.id))
         .map((a) => {
           const loc = latestByAttrib.get(a.id)!;
           const t = Array.isArray(a.trajets) ? a.trajets[0] : a.trajets;
@@ -110,6 +98,7 @@ export function ActiveMissionsMap({
       clearInterval(t);
     };
   }, [scope]);
+
 
   const gpsPoints = useMemo(
     () =>
