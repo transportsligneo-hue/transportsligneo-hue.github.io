@@ -5,6 +5,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
 import { Minus, Plus, Crosshair, Gauge, Clock, Navigation } from "lucide-react";
 import { formatDureeMinutes, formatEta } from "@/lib/format-duration";
+import { SIGNAL_STALE_MIN, formatMinutesShort, signalAgeMinutes } from "@/lib/mission-live-metrics";
 
 export interface LiveGpsPoint {
   latitude: number;
@@ -27,7 +28,7 @@ export interface LiveMissionMapProps {
   /** Libellé affiché dans l'overlay */
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
-  fleet?: Array<{ lat: number; lng: number; label?: string }>;
+  fleet?: Array<{ lat: number; lng: number; label?: string; stale?: boolean }>;
   /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
   role?: "admin" | "client";
   /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
@@ -51,6 +52,7 @@ const MAP_CSS = `
 .ligneo-live-map .leaflet-control-attribution{ font-size:9px !important; background:rgba(255,255,255,.8) !important; }
 .ligneo-car{ will-change:transform; }
 .ligneo-car .halo{ position:absolute; inset:-14px; border-radius:50%; background:radial-gradient(circle, rgba(47,95,255,.35) 0%, rgba(47,95,255,0) 70%); animation:ligneo-halo 2s ease-out infinite; }
+.ligneo-car.is-stale .halo{display:none}.ligneo-car.is-stale svg{filter:grayscale(1);opacity:.8}
 @keyframes ligneo-halo{0%{transform:scale(.6);opacity:.9}70%{transform:scale(1.4);opacity:0}100%{opacity:0}}
 `;
 
@@ -151,6 +153,13 @@ export function LeafletLiveMap({
   const [route, setRoute] = useState<Array<[number, number]>>([]);
 
   const last = points.length ? points[points.length - 1] : null;
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNowTs(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const signalAge = signalAgeMinutes(last, nowTs);
+  const signalLost = !last || signalAge === null || signalAge > SIGNAL_STALE_MIN;
 
   // ——— Résolution des adresses
   const originKey = typeof origin === "string" ? origin : origin ? `${origin.lat},${origin.lng}` : "";
@@ -308,8 +317,12 @@ export function LeafletLiveMap({
       const existing = fleetRef.current.get(i);
       if (existing) {
         existing.setLatLng([f.lat, f.lng]);
+        existing.setIcon(carIcon(0));
+        existing.getElement()?.classList.toggle("is-stale", !!f.stale);
+        if (f.label) existing.bindTooltip(f.label, { direction: "top", offset: [0, -14] });
       } else {
         const m = L.marker([f.lat, f.lng], { icon: carIcon(0), zIndexOffset: 900 }).addTo(map);
+        m.getElement()?.classList.toggle("is-stale", !!f.stale);
         if (f.label) m.bindTooltip(f.label, { direction: "top", offset: [0, -14] });
         fleetRef.current.set(i, m);
       }
@@ -391,6 +404,7 @@ export function LeafletLiveMap({
     }
     if (!carRef.current) {
       carRef.current = L.marker(target, { icon: carIcon(headingRef.current), zIndexOffset: 1000 }).addTo(map);
+      carRef.current.getElement()?.classList.toggle("is-stale", signalLost);
       posRef.current = target;
       if (!route.length && !fittedRef.current) {
         fittedRef.current = true;
@@ -399,6 +413,7 @@ export function LeafletLiveMap({
       return;
     }
     carRef.current.setIcon(carIcon(headingRef.current));
+    carRef.current.getElement()?.classList.toggle("is-stale", signalLost);
     const from = posRef.current ?? target;
     posRef.current = target;
     if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -414,7 +429,7 @@ export function LeafletLiveMap({
       if (t < 1) animRef.current = requestAnimationFrame(step);
     };
     animRef.current = requestAnimationFrame(step);
-  }, [last, points, route.length]);
+  }, [last, points, route.length, signalLost]);
 
   const recenter = () => {
     const map = mapRef.current;
@@ -456,11 +471,18 @@ export function LeafletLiveMap({
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
         </span>
-        Live{title ? ` · ${title}` : ""}
+        {signalLost ? `Signal perdu${title ? ` · ${title}` : ""}` : `Live${title ? ` · ${title}` : ""}`}
       </div>
 
+      {signalLost && last && !hideOverlay && (
+        <div className="absolute bottom-3 left-3 right-3 z-[400] rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 sm:right-auto">
+          Dernière position connue le {new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} · position actuelle inconnue
+          {role === "admin" && signalAge !== null ? ` · il y a ${formatMinutesShort(signalAge)}` : ""}
+        </div>
+      )}
+
       {/* Carte d'informations flottante */}
-      {!hideOverlay && metrics && (
+      {!hideOverlay && metrics && !signalLost && (
         <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:w-[320px]">
           <div className="rounded-2xl border border-white/70 bg-white/92 p-3.5 shadow-2xl ring-1 ring-slate-900/5 backdrop-blur-xl">
             <div className="flex items-end justify-between gap-3">

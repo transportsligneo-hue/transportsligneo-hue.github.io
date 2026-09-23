@@ -21,7 +21,7 @@ export interface LiveMissionMapProps {
   /** Libellé affiché dans l'overlay */
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
-  fleet?: Array<{ lat: number; lng: number; label?: string }>;
+  fleet?: Array<{ lat: number; lng: number; label?: string; stale?: boolean }>;
   /**
    * Visibilité des données sensibles.
    * `admin` : vitesse km/h + horodatage précis du dernier signal.

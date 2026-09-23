@@ -115,8 +115,8 @@ export function ActiveMissionsMap({
   }, [scope]);
 
   const freshMissions = missions.filter((m) => now - new Date(m.recordedAt).getTime() <= SIGNAL_STALE_MIN * 60_000);
-  const oldestSignal = missions.length === 1 ? missions[0] : null;
-  const signalAge = oldestSignal ? signalAgeMinutes({ latitude: oldestSignal.latitude, longitude: oldestSignal.longitude, recorded_at: oldestSignal.recordedAt }, now) : null;
+  const lastKnown = missions.length === 1 ? missions[0] : null;
+  const signalAge = lastKnown ? signalAgeMinutes({ latitude: lastKnown.latitude, longitude: lastKnown.longitude, recorded_at: lastKnown.recordedAt }, now) : null;
 
   const gpsPoints = useMemo(
     () =>
@@ -131,10 +131,11 @@ export function ActiveMissionsMap({
 
   const fleetPoints = useMemo(
     () =>
-      freshMissions.map((m) => ({
+      missions.map((m) => ({
         lat: m.latitude,
         lng: m.longitude,
-        label: [m.numero, m.depart && m.arrivee ? `${m.depart} → ${m.arrivee}` : null].filter(Boolean).join(" · ") || undefined,
+        stale: now - new Date(m.recordedAt).getTime() > SIGNAL_STALE_MIN * 60_000,
+        label: [m.numero, m.depart && m.arrivee ? `${m.depart} → ${m.arrivee}` : null, `Dernier signal il y a ${formatMinutesShort(signalAgeMinutes({ latitude: m.latitude, longitude: m.longitude, recorded_at: m.recordedAt }, now))}`].filter(Boolean).join(" · "),
       })),
     [missions, now],
   );
@@ -156,7 +157,7 @@ export function ActiveMissionsMap({
       <div className="relative" style={{ height: 380 }}>
         {mounted && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-50" />}>
-            {missions.length === 1 && freshMissions.length === 1 ? (
+            {missions.length === 1 ? (
               <LiveMissionMap
                 points={gpsPoints}
                 origin={missions[0].depart}
@@ -165,7 +166,7 @@ export function ActiveMissionsMap({
                 role="admin"
                 className="absolute inset-0 !rounded-none"
               />
-            ) : freshMissions.length > 0 ? (
+            ) : missions.length > 0 ? (
               <LiveMissionMap points={[]} fleet={fleetPoints} hideOverlay className="absolute inset-0 !rounded-none" />
             ) : null}
           </Suspense>
@@ -183,13 +184,16 @@ export function ActiveMissionsMap({
             </div>
           </div>
         )}
-        {!loading && activeCount > 0 && freshMissions.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-pro-bg px-5 text-center text-sm text-pro-muted">
-            <Radio size={22} />
-            <strong className="text-pro-text">Aucune position GPS récente</strong>
-            <span>L'emplacement actuel des véhicules est inconnu.</span>
-            {oldestSignal && <span className="font-semibold text-pro-text">Dernier signal il y a {formatMinutesShort(signalAge)}.</span>}
-            {oldestSignal ? <span>Dernière position reçue le {new Date(oldestSignal.recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}.</span> : <span>Aucune position transmise pour cette mission.</span>}
+        {!loading && activeCount > 0 && missions.length === 0 && (
+          <div className="pointer-events-none absolute inset-x-3 bottom-4 z-[401] flex justify-center">
+            <div className="rounded-lg border border-pro-border bg-pro-bg px-4 py-2 text-center text-sm text-pro-text shadow-pro-card">Aucune position transmise pour ces missions.</div>
+          </div>
+        )}
+        {!loading && lastKnown && freshMissions.length === 0 && (
+          <div className="pointer-events-none absolute inset-x-3 bottom-4 z-[401] flex justify-center">
+            <div className="rounded-lg border border-pro-border bg-pro-bg px-4 py-2 text-center text-xs font-semibold text-pro-text shadow-pro-card">
+              Dernière position connue il y a {formatMinutesShort(signalAge)} · {new Date(lastKnown.recordedAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} · position actuelle inconnue
+            </div>
           </div>
         )}
       </div>
