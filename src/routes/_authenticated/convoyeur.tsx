@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
 import ScreenCaptureGuard from "@/components/convoyeur/ScreenCaptureGuard";
 import OfflineOutboxBadge from "@/components/convoyeur/OfflineOutboxBadge";
+import { DriverGpsTracker } from "@/components/convoyeur/DriverGpsTracker";
 
 export const Route = createFileRoute("/_authenticated/convoyeur")({
   component: ConvoyeurLayout,
@@ -91,6 +92,7 @@ function ConvoyeurLayout() {
 
   return (
     <ConvoyeurSidebar items={navItems}>
+      <DriverGpsTracker />
       <OfflineOutboxBadge />
       <ScreenCaptureGuard />
       {isPending && (
