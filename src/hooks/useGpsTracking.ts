@@ -2,10 +2,54 @@ import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureLocationPermission, isNativeApp } from "@/lib/native/bridge";
 import { toast } from "sonner";
-import { registerPlugin } from "@capacitor/core";
+import { CapacitorHttp, registerPlugin } from "@capacitor/core";
 import type { BackgroundGeolocationPlugin } from "@capacitor-community/background-geolocation";
 
 const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
+
+type GpsPosition = { coords: { latitude: number; longitude: number; accuracy: number | null; speed: number | null; heading: number | null }; timestamp: number };
+
+// Android throttles WebView network requests after several minutes in the background.
+// The native HTTP bridge keeps position uploads working while the foreground location
+// service is running; the browser retains the normal authenticated client path.
+async function uploadPosition(position: GpsPosition, attributionId: string, native: boolean) {
+  const row = {
+    attribution_id: attributionId,
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracy: position.coords.accuracy,
+    speed: Number.isFinite(position.coords.speed as number) ? position.coords.speed : null,
+    heading: Number.isFinite(position.coords.heading as number) ? position.coords.heading : null,
+    recorded_at: new Date(position.timestamp).toISOString(),
+  };
+
+  if (native) {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) throw error ?? new Error("Session Driver expirée");
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) throw new Error("Configuration GPS indisponible");
+    const response = await CapacitorHttp.post({
+      url: `${url}/rest/v1/mission_locations`,
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      data: row,
+      connectTimeout: 15000,
+      readTimeout: 15000,
+    });
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Envoi GPS refusé (${response.status})`);
+    }
+    return;
+  }
+
+  const { error } = await supabase.from("mission_locations").insert(row);
+  if (error) throw error;
+}
 
 interface UseGpsTrackingOptions {
   attributionId: string | null;
@@ -17,31 +61,26 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
   const watchIdRef = useRef<number | null>(null);
   const lastSentRef = useRef(0);
   const sendingRef = useRef(false);
+  const lastErrorRef = useRef(0);
 
-  const sendPosition = useCallback(async (position: { coords: { latitude: number; longitude: number; accuracy: number | null; speed: number | null; heading: number | null }; timestamp: number }) => {
+  const sendPosition = useCallback(async (position: GpsPosition) => {
     if (!attributionId) return;
     if (!Number.isFinite(position.coords.latitude) || !Number.isFinite(position.coords.longitude)) return;
     // Do not report a cached lock from an earlier journey as a current position.
-    if (!Number.isFinite(position.timestamp) || Date.now() - position.timestamp > 120_000) return;
+    if (!Number.isFinite(position.timestamp) || Math.abs(Date.now() - position.timestamp) > 120_000) return;
     const now = Date.now();
     if (sendingRef.current || now - lastSentRef.current < intervalMs) return;
     sendingRef.current = true;
 
     try {
-      const { error } = await supabase.from("mission_locations").insert({
-        attribution_id: attributionId,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        speed: Number.isFinite(position.coords.speed as number) ? position.coords.speed : null,
-        heading: Number.isFinite(position.coords.heading as number) ? position.coords.heading : null,
-        recorded_at: new Date(position.timestamp).toISOString(),
-      });
-      if (error) throw error;
+      await uploadPosition(position, attributionId, isNativeApp());
       lastSentRef.current = Date.now();
     } catch (error) {
       console.warn("GPS insert error:", error);
-      toast.error("Position non transmise", { description: "Vérifiez votre connexion internet ; la position ne s'affichera pas comme actuelle." });
+      if (Date.now() - lastErrorRef.current > 60_000) {
+        lastErrorRef.current = Date.now();
+        toast.error("Position non transmise", { description: "Vérifiez votre connexion et la localisation du téléphone." });
+      }
     } finally {
       sendingRef.current = false;
     }
@@ -70,6 +109,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       };
       sample();
       pollId = window.setInterval(sample, Math.max(intervalMs, 15000));
+      document.addEventListener("visibilitychange", sample);
     };
 
     void ensureLocationPermission().then((ok) => {
@@ -103,6 +143,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
     return () => {
       cancelled = true;
       if (pollId !== null) window.clearInterval(pollId);
+      document.removeEventListener("visibilitychange", sampleOnResume);
       if (nativeWatchId) void BackgroundGeolocation.removeWatcher({ id: nativeWatchId });
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
