@@ -34,6 +34,8 @@ const MAP_CSS = `
 .ligneo-mbx .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib{ font-size:9px; background:rgba(255,255,255,.75); }
 .ligneo-mbx-car{ will-change:transform; }
 .ligneo-mbx-car .halo{ position:absolute; inset:-8px; border-radius:50%; background:radial-gradient(circle, rgba(47,95,255,.22) 0%, rgba(47,95,255,0) 65%); animation:ligneo-mbx-halo 2.2s ease-out infinite; }
+.ligneo-mbx-car.is-stale .halo{display:none}
+.ligneo-mbx-car.is-stale img{filter:grayscale(1) drop-shadow(0 4px 7px rgba(11,16,38,.3)) !important;opacity:.8}
 @keyframes ligneo-mbx-halo{0%{transform:scale(.7);opacity:.8}70%{transform:scale(1.35);opacity:0}100%{opacity:0}}
 `;
 
@@ -457,8 +459,11 @@ export function MapboxLiveMap({
       const existing = fleetRef.current.get(i);
       if (existing) {
         existing.setLngLat([f.lng, f.lat]);
+        existing.getElement().classList.toggle("is-stale", !!f.stale);
+        existing.getElement().title = f.label ?? "";
       } else {
         const { wrap } = carEl(0, 52);
+        wrap.classList.toggle("is-stale", !!f.stale);
         if (f.label) wrap.title = f.label;
         fleetRef.current.set(i, new mapboxgl.Marker({ element: wrap }).setLngLat([f.lng, f.lat]).addTo(map));
       }
@@ -482,19 +487,19 @@ export function MapboxLiveMap({
     const map = mapRef.current;
     if (!map || !ready) return;
     (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? (signalLost ? route : metrics.rest) : []));
-    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics && !signalLost ? metrics.done : []));
+    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? metrics.done : []));
 
     // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
     const trail = points.map((p) => [p.latitude, p.longitude] as [number, number]);
     (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(
-      lineFeature(!signalLost && trail.length >= 2 ? trail : []),
+      lineFeature(trail.length >= 2 ? trail : []),
     );
 
     if (!fittedRef.current && (route.length || trail.length)) {
       fittedRef.current = true;
       const b = new mapboxgl.LngLatBounds();
-      route.forEach(([lat, lng]) => b.extend([lng, lat]));
-      if (!signalLost) trail.forEach(([lat, lng]) => b.extend([lng, lat]));
+      if (!signalLost || !trail.length) route.forEach(([lat, lng]) => b.extend([lng, lat]));
+      trail.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60, duration: 0, maxZoom: 14 });
     }
   }, [metrics, route, points, ready, signalLost]);
@@ -503,7 +508,7 @@ export function MapboxLiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    if (signalLost || !last) {
+    if (!last) {
       carRef.current?.remove();
       carRef.current = null;
       posRef.current = null;
@@ -517,6 +522,8 @@ export function MapboxLiveMap({
 
     if (!carRef.current) {
       const { wrap, inner } = carEl(headingRef.current);
+      wrap.classList.toggle("is-stale", signalLost);
+      wrap.title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
       carInnerRef.current = inner;
       carRef.current = new mapboxgl.Marker({ element: wrap }).setLngLat([target.lng, target.lat]).addTo(map);
       posRef.current = target;
@@ -527,6 +534,8 @@ export function MapboxLiveMap({
       return;
     }
 
+    carRef.current.getElement().classList.toggle("is-stale", signalLost);
+    carRef.current.getElement().title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
     if (carInnerRef.current) carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
     const from = posRef.current ?? target;
     posRef.current = target;
