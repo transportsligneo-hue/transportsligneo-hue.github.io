@@ -104,7 +104,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
         { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
       // Some mobile browsers pause watchPosition after returning from navigation.
       const sample = () => {
-        if (!cancelled && document.visibilityState === "visible")
+        if (!cancelled)
           navigator.geolocation.getCurrentPosition(sendPosition, onError,
             { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
       };
