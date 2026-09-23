@@ -46,7 +46,6 @@ export function ActiveMissionsMap({
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      if (!cancelled) setLoading((current) => current && missions.length === 0);
       // 1) Missions actives (indépendamment de la fraîcheur GPS)
       const { data: attribs } = await supabase
         .from("attributions")
@@ -106,23 +105,23 @@ export function ActiveMissionsMap({
 
   const gpsPoints = useMemo(
     () =>
-      freshMissions.map((m) => ({
+      missions.length === 1 ? missions.map((m) => ({
         latitude: m.latitude,
         longitude: m.longitude,
         recorded_at: m.recordedAt,
         accuracy: null,
-      })),
-    [missions, now],
+      })) : [],
+    [missions],
   );
 
   const fleetPoints = useMemo(
     () =>
-      missions.map((m) => ({
+      freshMissions.map((m) => ({
         lat: m.latitude,
         lng: m.longitude,
         label: [m.numero, m.depart && m.arrivee ? `${m.depart} → ${m.arrivee}` : null].filter(Boolean).join(" · ") || undefined,
       })),
-    [missions],
+    [missions, now],
   );
 
   return (
@@ -130,8 +129,8 @@ export function ActiveMissionsMap({
       <header className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-pro-border">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            {freshMissions.length > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${freshMissions.length ? "bg-emerald-500" : "bg-amber-500"}`} />
           </span>
           <h3 className="text-sm font-semibold text-pro-text tracking-tight">{title}</h3>
         </div>
@@ -150,9 +149,9 @@ export function ActiveMissionsMap({
                 title={missions[0].numero ?? undefined}
                 className="absolute inset-0 !rounded-none"
               />
-            ) : (
+            ) : freshMissions.length > 0 ? (
               <LiveMissionMap points={[]} fleet={fleetPoints} hideOverlay className="absolute inset-0 !rounded-none" />
-            )}
+            ) : null}
           </Suspense>
         )}
         {loading && (
@@ -166,6 +165,11 @@ export function ActiveMissionsMap({
               <Radio size={16} className="opacity-40" />
               {emptyMessage}
             </div>
+          </div>
+        )}
+        {!loading && missions.length > 1 && freshMissions.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-pro-bg px-5 text-center text-sm text-pro-muted">
+            Aucune position récente reçue. L'emplacement actuel des véhicules est inconnu.
           </div>
         )}
       </div>
