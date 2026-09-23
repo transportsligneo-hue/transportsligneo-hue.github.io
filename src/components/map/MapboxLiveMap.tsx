@@ -481,22 +481,20 @@ export function MapboxLiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    if (metrics) {
-      (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(signalLost ? route : metrics.rest));
-      (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(signalLost ? [] : metrics.done));
-    }
+    (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? (signalLost ? route : metrics.rest) : []));
+    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics && !signalLost ? metrics.done : []));
 
     // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
     const trail = points.map((p) => [p.latitude, p.longitude] as [number, number]);
     (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(
-      lineFeature(trail.length >= 2 ? trail : []),
+      lineFeature(!signalLost && trail.length >= 2 ? trail : []),
     );
 
     if (!fittedRef.current && (route.length || trail.length)) {
       fittedRef.current = true;
       const b = new mapboxgl.LngLatBounds();
       route.forEach(([lat, lng]) => b.extend([lng, lat]));
-      trail.forEach(([lat, lng]) => b.extend([lng, lat]));
+      if (!signalLost) trail.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60, duration: 0, maxZoom: 14 });
     }
   }, [metrics, route, points, ready, signalLost]);
