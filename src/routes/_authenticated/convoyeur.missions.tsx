@@ -9,7 +9,6 @@ import {
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter,
   Check, X, ChevronRight,
 } from "lucide-react";
-import { useGpsTracking } from "@/hooks/useGpsTracking";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
 import { EdlNonRoulantFlow } from "@/components/inspection/EdlNonRoulantFlow";
@@ -188,20 +187,6 @@ function ConvoyeurMissions() {
       localStorage.removeItem(EDL_SESSION_KEY);
     }
   }, [inspection, openMissionId]);
-
-  // Le suivi GPS ne démarre QU'À PARTIR du départ du trajet avec le véhicule
-  // (après l'état des lieux d'enlèvement). Le trajet d'approche du convoyeur
-  // vers le lieu d'enlèvement n'est jamais tracké.
-  const TRACKED_ETAPES = ["en_livraison", "arrive_destination", "arrive_livraison"];
-  const trackedMissionId = useMemo(() => {
-    const mission = missions.find((m) => m.id === activeMissionId);
-    if (!mission) return null;
-    const etape = normalizeMissionEtape(mission.etape_courante) ?? "";
-    return TRACKED_ETAPES.includes(etape) ? mission.id : null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missions, activeMissionId]);
-
-  useGpsTracking({ attributionId: trackedMissionId, active: !!trackedMissionId });
 
   const fetchMissions = useCallback(async () => {
     if (!user) return;

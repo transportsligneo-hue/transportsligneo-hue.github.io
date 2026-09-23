@@ -132,7 +132,7 @@ export function ActiveMissionsMap({
           <h3 className="text-sm font-semibold text-pro-text tracking-tight">{title}</h3>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-pro-muted">
-          <Radio size={12} /> {missions.length} live
+          <Radio size={12} /> {missions.length} position{missions.length > 1 ? "s" : ""} connue{missions.length > 1 ? "s" : ""}
         </span>
       </header>
       <div className="relative" style={{ height: 380 }}>

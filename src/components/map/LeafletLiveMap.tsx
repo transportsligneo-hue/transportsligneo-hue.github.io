@@ -137,6 +137,7 @@ export function LeafletLiveMap({
   const mapRef = useRef<L.Map | null>(null);
   const carRef = useRef<L.Marker | null>(null);
   const doneLineRef = useRef<L.Polyline | null>(null);
+  const trailLineRef = useRef<L.Polyline | null>(null);
   const restLineRef = useRef<L.Polyline | null>(null);
   const startRef = useRef<L.Marker | null>(null);
   const endRef = useRef<L.Marker | null>(null);
@@ -262,6 +263,7 @@ export function LeafletLiveMap({
       mapRef.current = null;
       carRef.current = null;
       doneLineRef.current = null;
+      trailLineRef.current = null;
       restLineRef.current = null;
       startRef.current = null;
       endRef.current = null;
@@ -357,6 +359,23 @@ export function LeafletLiveMap({
       map.fitBounds(L.latLngBounds(route as L.LatLngExpression[]).pad(0.15), { animate: false });
     }
   }, [metrics, route]);
+
+  // Real recorded GPS history, independent from the projected road itinerary.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || points.length < 2) {
+      trailLineRef.current?.remove();
+      trailLineRef.current = null;
+      return;
+    }
+    const coords = points.map((p) => [p.latitude, p.longitude] as [number, number]);
+    if (!trailLineRef.current) {
+      trailLineRef.current = L.polyline(coords, {
+        color: BRAND, weight: 5, opacity: 1, lineCap: "round", lineJoin: "round",
+      }).addTo(map);
+    } else trailLineRef.current.setLatLngs(coords);
+    trailLineRef.current.bringToFront();
+  }, [points]);
 
   // ——— Marqueur véhicule : interpolation douce + rotation
   useEffect(() => {

@@ -58,6 +58,8 @@ const config: CapacitorConfig = {
   },
   android: {
     backgroundColor: "#0b1026",
+    // Keeps the foreground location service active after the WebView is backgrounded.
+    useLegacyBridge: true,
     // Permet d'inspecter la WebView via chrome://inspect en cas de blocage
     webContentsDebuggingEnabled: true,
   },
