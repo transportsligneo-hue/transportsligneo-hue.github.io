@@ -92,7 +92,12 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       }).then((id) => {
         if (cancelled) void BackgroundGeolocation.removeWatcher({ id });
         else nativeWatchId = id;
-      }).catch(onError);
+      }).catch((error) => {
+        onError(error);
+        // Existing installations without the newly bundled native service can
+        // still report positions while the app remains open.
+        if (!cancelled) startWeb();
+      });
     });
 
     return () => {
