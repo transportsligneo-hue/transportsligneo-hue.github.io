@@ -579,10 +579,10 @@ export function MapboxLiveMap({
       </div>
 
       {/* Badge Live / Signal perdu */}
-      {metrics?.stale ? (
+      {(metrics?.stale || (!last && !fleet?.length)) ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
-          {isAdmin && metrics.signalAgeMin != null
+          {!last ? "En attente de la première position GPS" : isAdmin && metrics?.signalAgeMin != null
             ? `Dernière position reçue il y a ${formatMinutesShort(metrics.signalAgeMin)} · Signal perdu`
             : "Signal GPS perdu · Dernière position connue"}
           {title ? ` · ${title}` : ""}
