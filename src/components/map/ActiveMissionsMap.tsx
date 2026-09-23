@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Radio } from "lucide-react";
+import { SIGNAL_STALE_MIN } from "@/lib/mission-live-metrics";
 
 const LiveMissionMap = lazy(() => import("@/components/map/LiveMissionMap").then((m) => ({ default: m.LiveMissionMap })));
 
@@ -36,6 +37,7 @@ export function ActiveMissionsMap({
   const [missions, setMissions] = useState<ActiveMission[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     setMounted(true);
@@ -44,7 +46,7 @@ export function ActiveMissionsMap({
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setLoading(true);
+      if (!cancelled) setLoading((current) => current && missions.length === 0);
       // 1) Missions actives (indépendamment de la fraîcheur GPS)
       const { data: attribs } = await supabase
         .from("attributions")
@@ -89,6 +91,7 @@ export function ActiveMissionsMap({
       if (!cancelled) {
         setMissions(rows);
         setLoading(false);
+        setNow(Date.now());
       }
     }
     load();
@@ -99,16 +102,17 @@ export function ActiveMissionsMap({
     };
   }, [scope]);
 
+  const freshMissions = missions.filter((m) => now - new Date(m.recordedAt).getTime() <= SIGNAL_STALE_MIN * 60_000);
 
   const gpsPoints = useMemo(
     () =>
-      missions.map((m) => ({
+      freshMissions.map((m) => ({
         latitude: m.latitude,
         longitude: m.longitude,
         recorded_at: m.recordedAt,
         accuracy: null,
       })),
-    [missions],
+    [missions, now],
   );
 
   const fleetPoints = useMemo(
@@ -132,7 +136,7 @@ export function ActiveMissionsMap({
           <h3 className="text-sm font-semibold text-pro-text tracking-tight">{title}</h3>
         </div>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-pro-muted">
-          <Radio size={12} /> {missions.length} position{missions.length > 1 ? "s" : ""} connue{missions.length > 1 ? "s" : ""}
+          <Radio size={12} /> {freshMissions.length} suivi{freshMissions.length > 1 ? "s" : ""} en direct{missions.length > freshMissions.length ? ` · ${missions.length - freshMissions.length} sans signal` : ""}
         </span>
       </header>
       <div className="relative" style={{ height: 380 }}>

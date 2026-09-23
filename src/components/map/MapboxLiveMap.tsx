@@ -595,7 +595,7 @@ export function MapboxLiveMap({
             : "Position GPS non actualisée · emplacement actuel inconnu"}
           {title ? ` · ${title}` : ""}
         </div>
-      ) : (!fleet?.length || fleet.length > 0) && !signalLost ? (
+      ) : !signalLost ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
