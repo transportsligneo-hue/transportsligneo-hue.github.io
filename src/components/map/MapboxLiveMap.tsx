@@ -377,7 +377,7 @@ export function MapboxLiveMap({
         type: "line",
         source: "ligneo-trail",
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": "#2F5FFF", "line-width": 5, "line-opacity": 1, "line-blur": 0.5 },
+        paint: { "line-color": BRAND, "line-width": 5, "line-opacity": 1, "line-blur": 0.5 },
       });
       readyRef.current = true;
       setReady(true);
@@ -583,8 +583,8 @@ export function MapboxLiveMap({
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
           {isAdmin && metrics.signalAgeMin != null
-            ? `Signal perdu depuis ${formatMinutesShort(metrics.signalAgeMin)}`
-            : "Signal GPS momentanément perdu"}
+            ? `Dernière position reçue il y a ${formatMinutesShort(metrics.signalAgeMin)} · Signal perdu`
+            : "Signal GPS perdu · Dernière position connue"}
           {title ? ` · ${title}` : ""}
         </div>
       ) : (

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ensureLocationPermission } from "@/lib/native/bridge";
-import { isNativeApp } from "@/lib/native/bridge";
+import { ensureLocationPermission, isNativeApp } from "@/lib/native/bridge";
 import { toast } from "sonner";
 import { registerPlugin } from "@capacitor/core";
 import type { BackgroundGeolocationPlugin } from "@capacitor-community/background-geolocation";
@@ -22,6 +21,8 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
   const sendPosition = useCallback(async (position: { coords: { latitude: number; longitude: number; accuracy: number | null; speed: number | null; heading: number | null }; timestamp: number }) => {
     if (!attributionId) return;
     if (!Number.isFinite(position.coords.latitude) || !Number.isFinite(position.coords.longitude)) return;
+    // Do not report a cached lock from an earlier journey as a current position.
+    if (!Number.isFinite(position.timestamp) || Date.now() - position.timestamp > 120_000) return;
     const now = Date.now();
     if (sendingRef.current || now - lastSentRef.current < intervalMs) return;
     sendingRef.current = true;
@@ -40,7 +41,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       lastSentRef.current = Date.now();
     } catch (error) {
       console.warn("GPS insert error:", error);
-      toast.error("Position non transmise", { description: "Vérifiez votre connexion internet et gardez l'application Driver ouverte." });
+      toast.error("Position non transmise", { description: "Vérifiez votre connexion internet ; la position ne s'affichera pas comme actuelle." });
     } finally {
       sendingRef.current = false;
     }
@@ -55,7 +56,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
 
     const onError = (error: { message?: string }) => {
       console.warn("GPS error:", error.message);
-      toast.error("Position GPS indisponible", { description: "Activez la localisation précise et gardez l'application Driver ouverte pendant le trajet." });
+      toast.error("Position GPS indisponible", { description: "Activez la localisation précise sur votre téléphone." });
     };
     const startWeb = () => {
       if (!navigator.geolocation) { onError({ message: "Geolocation unavailable" }); return; }
