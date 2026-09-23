@@ -184,6 +184,8 @@ export function MapboxLiveMap({
   }, []);
 
   const last = points.length ? points[points.length - 1] : null;
+  const signalAgeMin = signalAgeMinutes(last, nowTs);
+  const signalLost = !last || signalAgeMin === null || signalAgeMin > SIGNAL_STALE_MIN;
 
   const originKey = typeof origin === "string" ? origin : origin ? `${origin.lat},${origin.lng}` : "";
   const destKey = typeof destination === "string" ? destination : destination ? `${destination.lat},${destination.lng}` : "";
@@ -289,7 +291,7 @@ export function MapboxLiveMap({
   // ——— Prochaine étape clé (frontière / pause) — recalcul par paliers de 5 %
   const milestoneKey = metrics ? `${Math.floor(metrics.progress / 5)}-${route.length}` : "";
   useEffect(() => {
-    if (!metrics || !route.length) {
+    if (!metrics || !route.length || signalLost) {
       setMilestone(null);
       return;
     }
@@ -308,7 +310,7 @@ export function MapboxLiveMap({
       dead = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [milestoneKey]);
+  }, [milestoneKey, signalLost]);
 
   // ——— Remontée des métriques au parent (client / admin)
   useEffect(() => {
@@ -480,8 +482,8 @@ export function MapboxLiveMap({
     const map = mapRef.current;
     if (!map || !ready) return;
     if (metrics) {
-      (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.rest));
-      (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics.done));
+      (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(signalLost ? route : metrics.rest));
+      (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(signalLost ? [] : metrics.done));
     }
 
     // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
@@ -497,12 +499,18 @@ export function MapboxLiveMap({
       trail.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60, duration: 0, maxZoom: 14 });
     }
-  }, [metrics, route, points, ready]);
+  }, [metrics, route, points, ready, signalLost]);
 
   // ——— Véhicule : interpolation fluide + rotation
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready || !last) return;
+    if (!map || !ready) return;
+    if (signalLost || !last) {
+      carRef.current?.remove();
+      carRef.current = null;
+      posRef.current = null;
+      return;
+    }
     const target = { lat: last.latitude, lng: last.longitude };
     const prev = points[points.length - 2];
     if (prev) {
@@ -534,7 +542,7 @@ export function MapboxLiveMap({
       if (t < 1) animRef.current = requestAnimationFrame(step);
     };
     animRef.current = requestAnimationFrame(step);
-  }, [last, points, route.length, ready]);
+  }, [last, points, route.length, ready, signalLost]);
 
   const recenter = () => {
     const map = mapRef.current;
@@ -579,15 +587,15 @@ export function MapboxLiveMap({
       </div>
 
       {/* Badge Live / Signal perdu */}
-      {(metrics?.stale || (!last && !fleet?.length)) ? (
+      {(signalLost && !fleet?.length) ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
-          {!last ? "En attente de la première position GPS" : isAdmin && metrics?.signalAgeMin != null
-            ? `Dernière position reçue il y a ${formatMinutesShort(metrics.signalAgeMin)} · Signal perdu`
-            : "Signal GPS perdu · Dernière position connue"}
+          {!last ? "Aucune position GPS reçue" : isAdmin && signalAgeMin != null
+            ? `Position non actualisée depuis ${formatMinutesShort(signalAgeMin)} · emplacement actuel inconnu`
+            : "Position GPS non actualisée · emplacement actuel inconnu"}
           {title ? ` · ${title}` : ""}
         </div>
-      ) : (
+      ) : (!fleet?.length || fleet.length > 0) && !signalLost ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -595,10 +603,15 @@ export function MapboxLiveMap({
           </span>
           Live{title ? ` · ${title}` : ""}
         </div>
-      )}
+      ) : null}
 
       {/* Carte d'informations flottante */}
-      {!hideOverlay && metrics && (
+      {!hideOverlay && signalLost && last && (
+        <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:max-w-[340px] rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 shadow-lg">
+          Position du {new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} uniquement. La position actuelle ne peut pas être déterminée.
+        </div>
+      )}
+      {!hideOverlay && metrics && !signalLost && (
         <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:w-[320px]">
           <div className="rounded-2xl border border-white/70 bg-white/92 p-3.5 shadow-2xl ring-1 ring-slate-900/5 backdrop-blur-xl">
             <div className="flex items-end justify-between gap-3">
