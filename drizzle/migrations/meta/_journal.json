@@ -141,6 +141,13 @@
       "when": 1790111902255,
       "tag": "0019_mission_locations_speed_heading",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790234939586,
+      "tag": "0020_auto_attribute_duo_legs",
+      "breakpoints": true
     }
   ]
 }
