@@ -134,7 +134,14 @@ export function CatalogueMissionCard({
     isElectricEnergie(t.vehicule_energie) ||
     guessElectricFromModel(t.marque, t.modele);
 
-  const retourLeg = (t.groupedLegs ?? []).find((l) => l.leg_type === "retour");
+  const legs = [t, ...(t.groupedLegs ?? [])];
+  const retourLeg = legs.find((l) => l.leg_type === "retour");
+  // Toujours afficher le trajet dans l'ordre Livraison puis Restitution,
+  // même si la carte est portée par la jambe retour.
+  const allerLeg = legs.find((l) => l.leg_type === "aller");
+  const routeDepart = allerLeg?.depart ?? (t.leg_type === "retour" ? t.arrivee : t.depart);
+  const routeArrivee = allerLeg?.arrivee ?? (t.leg_type === "retour" ? t.depart : t.arrivee);
+  const routeRetour = retourLeg?.arrivee ?? routeDepart;
   const dateLabel = t.date_trajet
     ? new Date(t.date_trajet).toLocaleDateString("fr-FR", { day: "2-digit", month: "long" })
     : null;
@@ -177,11 +184,11 @@ export function CatalogueMissionCard({
       <div className="cat2-route">
         <div className="cat2-stop pickup">
           <div className="cat2-eyebrow">Prise en charge du véhicule</div>
-          <div className="cat2-addr">{t.depart}</div>
+          <div className="cat2-addr">{routeDepart}</div>
         </div>
         <div className="cat2-stop delivery">
           <div className="cat2-eyebrow">Livraison du véhicule</div>
-          <div className="cat2-addr">{t.arrivee}</div>
+          <div className="cat2-addr">{routeArrivee}</div>
           {isAR && (
             <span className="cat2-tag">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
@@ -194,7 +201,7 @@ export function CatalogueMissionCard({
         {isAR && (
           <div className="cat2-stop restitution">
             <div className="cat2-eyebrow">Restitution du véhicule</div>
-            <div className="cat2-addr">{retourLeg?.arrivee ?? t.depart}</div>
+            <div className="cat2-addr">{routeRetour}</div>
           </div>
         )}
       </div>
