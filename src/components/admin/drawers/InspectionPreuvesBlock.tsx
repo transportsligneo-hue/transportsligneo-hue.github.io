@@ -14,6 +14,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DrawerSection } from "@/components/admin/AdminDetailDrawer";
 import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
+import { usePlateauPhotos } from "@/hooks/usePlateauPhotos";
 
 import {
   Camera, PenLine, FileImage, FileText, ZoomIn, Download, Loader2, X, Image as ImgIcon, ShieldCheck,
@@ -72,6 +73,7 @@ export function InspectionPreuvesBlock({
   const [docs, setDocs] = useState<SignedAsset[]>([]);
   const [carteGrise, setCarteGrise] = useState<SignedAsset[]>([]);
   const [zoom, setZoom] = useState<SignedAsset | null>(null);
+  const plateau = usePlateauPhotos(attributionId);
 
   const SIG_LABELS: Record<string, string> = {
     driver_start: "Convoyeur — Départ",
@@ -239,8 +241,22 @@ export function InspectionPreuvesBlock({
               </div>
             )}
             <Group title="Selfie convoyeur" icon={<Camera size={12} />} items={selfies} empty="Aucun selfie pris." />
-            <Group title="Photos départ" icon={<FileImage size={12} />} items={photosDepart} empty="Aucune photo de départ." />
-            <Group title="Photos arrivée" icon={<FileImage size={12} />} items={photosArrivee} empty="Aucune photo d'arrivée." />
+            {plateau.isPlateau ? (
+              <Group
+                title="Photos porte-plateau (arrimage)"
+                icon={<FileImage size={12} />}
+                items={plateau.photos.map((p) => ({
+                  key: `plateau-${p.vue}-${p.storagePath}`, url: p.url, label: p.label,
+                  bucket: "mission-documents", storagePath: p.storagePath, isImage: true,
+                }))}
+                empty="Aucune photo porte-plateau."
+              />
+            ) : (
+              <>
+                <Group title="Photos départ" icon={<FileImage size={12} />} items={photosDepart} empty="Aucune photo de départ." />
+                <Group title="Photos arrivée" icon={<FileImage size={12} />} items={photosArrivee} empty="Aucune photo d'arrivée." />
+              </>
+            )}
             <RechargePreuvesBlock attributionId={attributionId} variant="dark" />
 
             <Group title="Signatures" icon={<PenLine size={12} />} items={signatures} empty="Aucune signature enregistrée." />

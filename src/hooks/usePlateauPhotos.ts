@@ -38,7 +38,7 @@ export function usePlateauPhotos(attributionId: string | null) {
       const ordered = VIEWS.flatMap((view) => raw.filter((p) => p?.vue === view.id && p.storage_path).map((p) => ({
         vue: view.id, label: view.label, storagePath: p.storage_path as string,
       })));
-      const signed = await Promise.all(ordered.map(async (p) => {
+      const signed = await Promise.all(ordered.map(async (p): Promise<PlateauPhoto | null> => {
         const { data: asset } = await supabase.storage.from("mission-documents").createSignedUrl(p.storagePath, 3600);
         return asset?.signedUrl ? { ...p, url: asset.signedUrl } : null;
       }));
