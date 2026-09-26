@@ -14,7 +14,7 @@ const audiences = [
 
 const features = [
   { Icon: LayoutDashboard, title: "Tableau de bord dédié", desc: "Vue d'ensemble de vos missions en cours, terminées et à venir, en temps réel." },
-  { Icon: Calendar, title: "Missions groupées", desc: "Déplacez plusieurs véhicules de votre parc en une seule commande planifiée." },
+  { Icon: Calendar, title: "Planifiez plusieurs convoyages en une seule opération.", desc: "Missions groupées : plusieurs véhicules de votre parc en une seule commande planifiée." },
   { Icon: Users, title: "Utilisateurs & sites", desc: "Gérez les accès par site : chaque responsable ne voit que son périmètre." },
   { Icon: BarChart3, title: "Reporting détaillé", desc: "Coûts, délais et volumes par site, exportables en un clic." },
   { Icon: MapPin, title: "Suivi temps réel", desc: "Position GPS, statut et ETA pour chaque mission, accessibles à tout moment." },
@@ -39,11 +39,11 @@ export default function ProSegment() {
         <div className="v4-hero-panel">
           <div className="v4-row">
             <div className="v4-row-ic v"><Warehouse size={17} /></div>
-            <div className="v4-row-text"><div className="t">Gestion de flotte centralisée</div><div className="s">Tous vos véhicules, un seul tableau de bord</div></div>
+            <div className="v4-row-text"><div className="t">Pilotez 50, 100 ou 500 véhicules depuis un seul espace.</div><div className="s">Gestion de flotte centralisée</div></div>
           </div>
           <div className="v4-row">
             <div className="v4-row-ic v"><FileText size={17} /></div>
-            <div className="v4-row-text"><div className="t">Facturation consolidée</div><div className="s">Une facture mensuelle, par site</div></div>
+            <div className="v4-row-text"><div className="t">Une seule facture pour l'ensemble de vos sites.</div><div className="s">Facturation consolidée</div></div>
           </div>
           <div className="v4-row">
             <div className="v4-row-ic v"><Users size={17} /></div>

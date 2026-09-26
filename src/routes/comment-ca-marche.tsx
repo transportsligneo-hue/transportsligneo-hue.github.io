@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import CommentCaMarcheTimeline from "@/components/CommentCaMarcheTimeline";
 import Footer from "@/components/Footer";
+import CommentCaMarche5Etapes from "@/components/CommentCaMarche5Etapes";
 
 export const Route = createFileRoute("/comment-ca-marche")({
   component: CommentCaMarchePage,
@@ -22,6 +23,7 @@ function CommentCaMarchePage() {
     <>
       <Navbar />
       <main>
+        <CommentCaMarche5Etapes />
         <CommentCaMarcheTimeline />
       </main>
       <Footer />

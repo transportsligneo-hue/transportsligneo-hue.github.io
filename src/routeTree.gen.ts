@@ -20,16 +20,19 @@ import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as LoueursRouteImport } from './routes/loueurs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InscriptionProRouteImport } from './routes/inscription-pro'
 import { Route as InscriptionFlotteRouteImport } from './routes/inscription-flotte'
 import { Route as InscriptionConvoyeurRouteImport } from './routes/inscription-convoyeur'
 import { Route as InscriptionClientRouteImport } from './routes/inscription-client'
+import { Route as GestionnairesFlotteRouteImport } from './routes/gestionnaires-flotte'
 import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
 import { Route as DeveloppeursRouteImport } from './routes/developpeurs'
 import { Route as DesinscriptionRouteImport } from './routes/desinscription'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as ConcessionnairesRouteImport } from './routes/concessionnaires'
 import { Route as CommentCaMarcheRouteImport } from './routes/comment-ca-marche'
 import { Route as ChoisirCompteRouteImport } from './routes/choisir-compte'
 import { Route as CgvRouteImport } from './routes/cgv'
@@ -263,6 +266,11 @@ const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoueursRoute = LoueursRouteImport.update({
+  id: '/loueurs',
+  path: '/loueurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -288,6 +296,11 @@ const InscriptionClientRoute = InscriptionClientRouteImport.update({
   path: '/inscription-client',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GestionnairesFlotteRoute = GestionnairesFlotteRouteImport.update({
+  id: '/gestionnaires-flotte',
+  path: '/gestionnaires-flotte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevenirConvoyeurRoute = DevenirConvoyeurRouteImport.update({
   id: '/devenir-convoyeur',
   path: '/devenir-convoyeur',
@@ -311,6 +324,11 @@ const ContactRoute = ContactRouteImport.update({
 const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
   id: '/confidentialite',
   path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConcessionnairesRoute = ConcessionnairesRouteImport.update({
+  id: '/concessionnaires',
+  path: '/concessionnaires',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommentCaMarcheRoute = CommentCaMarcheRouteImport.update({
@@ -1331,16 +1349,19 @@ export interface FileRoutesByFullPath {
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
+  '/concessionnaires': typeof ConcessionnairesRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
+  '/gestionnaires-flotte': typeof GestionnairesFlotteRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/loueurs': typeof LoueursRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -1530,16 +1551,19 @@ export interface FileRoutesByTo {
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
+  '/concessionnaires': typeof ConcessionnairesRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
+  '/gestionnaires-flotte': typeof GestionnairesFlotteRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/loueurs': typeof LoueursRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -1722,16 +1746,19 @@ export interface FileRoutesById {
   '/cgv': typeof CgvRoute
   '/choisir-compte': typeof ChoisirCompteRoute
   '/comment-ca-marche': typeof CommentCaMarcheRoute
+  '/concessionnaires': typeof ConcessionnairesRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/contact': typeof ContactRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
+  '/gestionnaires-flotte': typeof GestionnairesFlotteRoute
   '/inscription-client': typeof InscriptionClientRoute
   '/inscription-convoyeur': typeof InscriptionConvoyeurRoute
   '/inscription-flotte': typeof InscriptionFlotteRoute
   '/inscription-pro': typeof InscriptionProRoute
   '/login': typeof LoginRoute
+  '/loueurs': typeof LoueursRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
@@ -1923,16 +1950,19 @@ export interface FileRouteTypes {
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
+    | '/concessionnaires'
     | '/confidentialite'
     | '/contact'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
+    | '/gestionnaires-flotte'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/loueurs'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -2122,16 +2152,19 @@ export interface FileRouteTypes {
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
+    | '/concessionnaires'
     | '/confidentialite'
     | '/contact'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
+    | '/gestionnaires-flotte'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/loueurs'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -2313,16 +2346,19 @@ export interface FileRouteTypes {
     | '/cgv'
     | '/choisir-compte'
     | '/comment-ca-marche'
+    | '/concessionnaires'
     | '/confidentialite'
     | '/contact'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
+    | '/gestionnaires-flotte'
     | '/inscription-client'
     | '/inscription-convoyeur'
     | '/inscription-flotte'
     | '/inscription-pro'
     | '/login'
+    | '/loueurs'
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
@@ -2514,16 +2550,19 @@ export interface RootRouteChildren {
   CgvRoute: typeof CgvRoute
   ChoisirCompteRoute: typeof ChoisirCompteRoute
   CommentCaMarcheRoute: typeof CommentCaMarcheRoute
+  ConcessionnairesRoute: typeof ConcessionnairesRoute
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   ContactRoute: typeof ContactRoute
   DesinscriptionRoute: typeof DesinscriptionRoute
   DeveloppeursRoute: typeof DeveloppeursRoute
   DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
+  GestionnairesFlotteRoute: typeof GestionnairesFlotteRoute
   InscriptionClientRoute: typeof InscriptionClientRoute
   InscriptionConvoyeurRoute: typeof InscriptionConvoyeurRoute
   InscriptionFlotteRoute: typeof InscriptionFlotteRoute
   InscriptionProRoute: typeof InscriptionProRoute
   LoginRoute: typeof LoginRoute
+  LoueursRoute: typeof LoueursRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ProRoute: typeof ProRoute
@@ -2673,6 +2712,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/loueurs': {
+      id: '/loueurs'
+      path: '/loueurs'
+      fullPath: '/loueurs'
+      preLoaderRoute: typeof LoueursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -2708,6 +2754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscriptionClientRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gestionnaires-flotte': {
+      id: '/gestionnaires-flotte'
+      path: '/gestionnaires-flotte'
+      fullPath: '/gestionnaires-flotte'
+      preLoaderRoute: typeof GestionnairesFlotteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/devenir-convoyeur': {
       id: '/devenir-convoyeur'
       path: '/devenir-convoyeur'
@@ -2741,6 +2794,13 @@ declare module '@tanstack/react-router' {
       path: '/confidentialite'
       fullPath: '/confidentialite'
       preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/concessionnaires': {
+      id: '/concessionnaires'
+      path: '/concessionnaires'
+      fullPath: '/concessionnaires'
+      preLoaderRoute: typeof ConcessionnairesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comment-ca-marche': {
@@ -4460,16 +4520,19 @@ const rootRouteChildren: RootRouteChildren = {
   CgvRoute: CgvRoute,
   ChoisirCompteRoute: ChoisirCompteRoute,
   CommentCaMarcheRoute: CommentCaMarcheRoute,
+  ConcessionnairesRoute: ConcessionnairesRoute,
   ConfidentialiteRoute: ConfidentialiteRoute,
   ContactRoute: ContactRoute,
   DesinscriptionRoute: DesinscriptionRoute,
   DeveloppeursRoute: DeveloppeursRoute,
   DevenirConvoyeurRoute: DevenirConvoyeurRoute,
+  GestionnairesFlotteRoute: GestionnairesFlotteRoute,
   InscriptionClientRoute: InscriptionClientRoute,
   InscriptionConvoyeurRoute: InscriptionConvoyeurRoute,
   InscriptionFlotteRoute: InscriptionFlotteRoute,
   InscriptionProRoute: InscriptionProRoute,
   LoginRoute: LoginRoute,
+  LoueursRoute: LoueursRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   ProRoute: ProRoute,
