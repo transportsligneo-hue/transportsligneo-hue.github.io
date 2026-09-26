@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, User, Sparkles, Phone } from "lucide-react";
+import { Menu, X, User, Sparkles, Phone, MapPin } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,15 +8,21 @@ import ThemePreference from "@/components/ThemePreference";
 
 type NavAccent = "purple" | "green" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
-  { to: "/", label: "Accueil" },
-  { to: "/services", label: "Nos services", search: { audience: "particuliers" } },
-  { to: "/tarifs", label: "Tarifs" },
+  { to: "/services", label: "Particuliers", search: { audience: "particuliers" } },
+  { to: "/services", label: "Professionnels", search: { audience: "pro" } },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
-  { to: "/suivi", label: "Suivi" },
-  { to: "/actualites", label: "Actualités" },
+  { to: "/tarifs", label: "Tarifs" },
   { to: "/a-propos", label: "À propos" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+const proSubLinks: ReadonlyArray<{ to: string; label: string }> = [
+  { to: "/concessionnaires", label: "Concessions" },
+  { to: "/loueurs", label: "Loueurs" },
+  { to: "/gestionnaires-flotte", label: "Gestionnaires de flotte" },
+  { to: "/developpeurs", label: "API" },
+  { to: "/login", label: "Espace Pro" },
+];
 
 function LockIcon() {
   return (
@@ -75,18 +81,26 @@ export default function Navbar() {
             <ul className="tln-links">
               {navLinks.map((l) => {
                 const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
+                const isPro = l.label === "Professionnels";
                 return (
-                  <li key={`${l.to}-${l.search?.audience ?? ""}`}>
+                  <li key={`${l.to}-${l.search?.audience ?? ""}`} className={isPro ? "tln-dd" : undefined}>
                     <Link
                       to={l.to}
                       search={l.search}
-                      activeOptions={{ exact: l.search ? false : true, includeSearch: false }}
+                      activeOptions={{ exact: true, includeSearch: true }}
                       activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accentClass}` }}
                       inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accentClass}` }}
                     >
                       {l.accent === "green" && <LockIcon />}
                       {l.label}
                     </Link>
+                    {isPro && (
+                      <div className="tln-dd-menu">
+                        {proSubLinks.map((s) => (
+                          <Link key={s.to} to={s.to}>{s.label}</Link>
+                        ))}
+                      </div>
+                    )}
                   </li>
                 );
               })}
@@ -95,6 +109,10 @@ export default function Navbar() {
             <span className="tln-sep" aria-hidden="true" />
 
             <div className="tln-actions">
+              <button type="button" onClick={goToEstimer} className="tln-devis">Obtenir un devis</button>
+              <Link to="/suivi" className="tln-track">
+                <MapPin size={13} /> Suivre mon véhicule
+              </Link>
               <a
                 href="tel:+33782456181"
                 className="nav-phone-block tln-phone"
