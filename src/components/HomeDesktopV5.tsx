@@ -44,7 +44,7 @@ export default function HomeDesktopV5() {
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-switch-btn">
                 <User size={18} /> Je suis un particulier
               </Link>
-              <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn">
+              <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn hx-switch-btn--violet">
                 <Building2 size={18} /> Je suis un professionnel
               </Link>
               <button type="button" onClick={goDevis} className="hx-switch-btn">
