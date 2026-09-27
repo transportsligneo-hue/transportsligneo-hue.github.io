@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, Building2, Car, MapPinned,
-  KeyRound, Truck, BarChart3, ArrowRight, PlayCircle, Quote,
+  KeyRound, Truck, BarChart3, ArrowRight, Quote,
 } from "lucide-react";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapLigneo from "@/components/MapLigneo";
@@ -13,7 +13,6 @@ import { scrollToDevis } from "@/lib/scroll-to-devis";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
-import filmPro from "@/assets/film-parcours-pro.mp4.asset.json";
 
 const goDevis = () => { scrollToDevis(); };
 
@@ -45,7 +44,7 @@ export default function HomeDesktopV5() {
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-switch-btn">
                 <User size={18} /> Je suis un particulier
               </Link>
-              <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn">
+              <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn hx-switch-btn--violet">
                 <Building2 size={18} /> Je suis un professionnel
               </Link>
               <button type="button" onClick={goDevis} className="hx-switch-btn">
@@ -170,15 +169,11 @@ export default function HomeDesktopV5() {
           <p>Tableau de bord → Carte → Mission → Véhicule → Documents → Facture</p>
         </div>
         <div className="hx-platform">
-          <video src={filmPro.url} controls preload="metadata" playsInline className="hx-platform-video" />
           <div className="hx-platform-steps">
             {["Tableau de bord", "Carte", "Mission", "Véhicule", "Documents", "Facture"].map((s, i) => (
               <span key={s} className="hx-step-chip"><b>{String(i + 1).padStart(2, "0")}</b>{s}</span>
             ))}
           </div>
-          <a href={filmPro.url} target="_blank" rel="noreferrer" className="v4-btn-outline hx-platform-link">
-            <PlayCircle size={16} /> Voir la plateforme en 90 secondes
-          </a>
         </div>
       </section>
 

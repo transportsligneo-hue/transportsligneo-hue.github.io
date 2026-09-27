@@ -9205,3 +9205,71 @@ select {
 .tln-dd:hover .tln-dd-menu, .tln-dd:focus-within .tln-dd-menu { opacity:1; visibility:visible; transform:none; }
 .tln-dd-menu a { display:block; padding:9px 12px; border-radius:8px; font-size:13px; color:#e6ecff; }
 .tln-dd-menu a:hover { background:rgba(79,139,255,0.18); }
+
+/* ============================================================
+   FIX LISIBILITÉ ACCUEIL (thème clair)
+   Les blocs hx-* étaient dessinés pour un fond navy : sur le fond
+   blanc cassé, leurs textes blancs devenaient illisibles.
+   ============================================================ */
+html.theme-light .r4-page .hx-benefit,
+html.theme-light .r4-page .hx-seg,
+html.theme-light .r4-page .hx-testi,
+html.theme-light .r4-page .hx-figure,
+html.theme-light .r4-page .hx-step5 {
+  background: #ffffff;
+  border-color: rgba(15, 21, 38, 0.10);
+  box-shadow: 0 1px 2px rgba(15, 21, 38, 0.04), 0 14px 34px rgba(15, 21, 38, 0.06);
+}
+html.theme-light .r4-page .hx-benefit p,
+html.theme-light .r4-page .hx-seg p,
+html.theme-light .r4-page .hx-step5 p { color: #4a5578; }
+html.theme-light .r4-page .hx-testi blockquote { color: #1f2740; }
+html.theme-light .r4-page .hx-testi figcaption { color: #2f5fff; }
+html.theme-light .r4-page .hx-testi-q { color: #2f5fff; }
+html.theme-light .r4-page .hx-figure .v { color: #0f1526; }
+html.theme-light .r4-page .hx-figure .l { color: #4a5578; }
+html.theme-light .r4-page .hx-benefit-ic,
+html.theme-light .r4-page .hx-seg-ic { color: #2f5fff; background: rgba(47, 95, 255, 0.08); border-color: rgba(47, 95, 255, 0.28); }
+html.theme-light .r4-page .hx-seg-more { color: #2f5fff; }
+html.theme-light .r4-page .hx-step-chip { color: #33406b; background: rgba(47, 95, 255, 0.07); border-color: rgba(47, 95, 255, 0.25); }
+html.theme-light .r4-page .hx-step-chip b { color: #2f5fff; }
+
+/* ============================================================
+   ESTIMATEUR HERO ACCUEIL · lisibilité garantie
+   Voile fumé sombre derrière chaque champ pour que les textes
+   blancs (départ / arrivée / placeholders) restent lisibles,
+   même sur les zones claires de la photo.
+   ============================================================ */
+.r4-page .v5-hero-quote .dg-flat-field,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field {
+  background: rgba(10, 16, 38, 0.58) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.r4-page .v5-hero-quote .dg-flat-field:hover,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field:hover,
+.r4-page .v5-hero-quote .dg-flat-field:focus-within,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-field:focus-within {
+  background: rgba(13, 20, 48, 0.72) !important;
+}
+.r4-page .v5-hero-quote .dg-flat-input::placeholder,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-input::placeholder {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+.r4-page .v5-hero-quote .dg-flat-hint,
+html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* ============================================================
+   BOUTON "JE SUIS UN PROFESSIONNEL" · violet (pas bleu)
+   ============================================================ */
+.r4-page .hx-switch-btn--violet {
+  background: rgba(124, 92, 255, 0.16);
+  border-color: rgba(167, 148, 255, 0.55);
+}
+.r4-page .hx-switch-btn--violet svg { color: #a794ff; }
+.r4-page .hx-switch-btn--violet:hover {
+  background: rgba(124, 92, 255, 0.32);
+  border-color: #a794ff;
+}
