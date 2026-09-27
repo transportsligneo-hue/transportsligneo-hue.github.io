@@ -169,15 +169,11 @@ export default function HomeDesktopV5() {
           <p>Tableau de bord → Carte → Mission → Véhicule → Documents → Facture</p>
         </div>
         <div className="hx-platform">
-          <video src={filmPro.url} controls preload="metadata" playsInline className="hx-platform-video" />
           <div className="hx-platform-steps">
             {["Tableau de bord", "Carte", "Mission", "Véhicule", "Documents", "Facture"].map((s, i) => (
               <span key={s} className="hx-step-chip"><b>{String(i + 1).padStart(2, "0")}</b>{s}</span>
             ))}
           </div>
-          <a href={filmPro.url} target="_blank" rel="noreferrer" className="v4-btn-outline hx-platform-link">
-            <PlayCircle size={16} /> Voir la plateforme en 90 secondes
-          </a>
         </div>
       </section>
 
