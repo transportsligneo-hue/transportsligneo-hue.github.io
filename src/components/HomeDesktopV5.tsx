@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, Building2, Car, MapPinned,
-  KeyRound, Truck, BarChart3, ArrowRight, PlayCircle, Quote,
+  KeyRound, Truck, BarChart3, ArrowRight, Quote,
 } from "lucide-react";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapLigneo from "@/components/MapLigneo";
@@ -13,7 +13,6 @@ import { scrollToDevis } from "@/lib/scroll-to-devis";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
-import filmPro from "@/assets/film-parcours-pro.mp4.asset.json";
 
 const goDevis = () => { scrollToDevis(); };
 
