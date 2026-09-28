@@ -98,7 +98,7 @@ export default function MobileNavbar() {
                 <li key={l.to}>
                   <Link
                     to={l.to.split("?")[0]}
-                    search={l.to.includes("audience=") ? { audience: l.to.split("audience=")[1] } : undefined}
+                    search={l.to.includes("audience=pro") ? { audience: "pro" } : l.to.includes("audience=particuliers") ? { audience: "particuliers" } : undefined}
                     activeOptions={{ exact: true, includeSearch: true }}
                     activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accent}` }}
                     inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accent}` }}
