@@ -81,8 +81,15 @@ const CATS: { title: string; items: Feat[] }[] = [
 
 export default function ServicesPlateforme({ variant = "particuliers" }: { variant?: "particuliers" | "pro" }) {
   const [open, setOpen] = useState(false);
-  const total = CATS.reduce((n, c) => n + c.items.length, 0);
   const isPro = variant === "pro";
+  const personalLabels = new Set([
+    "Devis instantané", "Commande en 2 clics", "Planification à l'avance", "Livraison simple / + restitution", "Tarifs transparents",
+    "Suivi GPS en direct", "Notifications en temps réel", "Historique complet des missions", "Convoyeur dédié",
+    "État des lieux photo 360°", "Signature électronique", "Devis & factures archivés", "Assurance tous risques incluse", "Identification des dégâts",
+    "Joignable rapidement",
+  ]);
+  const categories = isPro ? CATS : CATS.map((cat) => ({ ...cat, items: cat.items.filter((item) => personalLabels.has(item.label)) })).filter((cat) => cat.items.length);
+  const total = categories.reduce((n, c) => n + c.items.length, 0);
 
   return (
     <div className={`r4-page${isPro ? " plateforme-pro" : ""}`} style={{ minHeight: 0 }}>
@@ -91,10 +98,11 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
           <div className={`v4-hero-eyebrow${isPro ? " v" : ""}`} style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Notre plateforme
           </div>
-          <h2>Des dizaines de fonctionnalités pour un convoyage <span className={`v4-accent${isPro ? " v" : ""}`}>sans effort</span></h2>
-          <p>Réservation, suivi, documents, comptabilité : tout est centralisé dans votre espace Transports Ligneo.</p>
+          <h2>{isPro ? "Pilotez vos convoyages" : "Votre convoyage en toute simplicité"} <span className={`v4-accent${isPro ? " v" : ""}`}>avec Ligneo</span></h2>
+          <p>{isPro ? "Réservation, suivi, documents, comptabilité : tout est centralisé dans votre espace Transports Ligneo." : "Du devis à la livraison, retrouvez les informations utiles à chaque étape."}</p>
         </div>
 
+        <ServicesFonctionnalitesFaq variant={variant} />
 
         <button
           type="button"
@@ -104,7 +112,7 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
           aria-controls="plateforme-features"
         >
           <span className="feat-toggle-label">
-            {open ? "Réduire les fonctionnalités" : "Déplier toutes les fonctionnalités"}
+            {open ? "Réduire les services" : isPro ? "Découvrir les outils professionnels" : "Découvrir les services particuliers"}
             <span className="feat-toggle-count">{total}</span>
           </span>
           <span className="feat-toggle-chevron" aria-hidden="true">
@@ -117,7 +125,7 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
           className={`feat-collapse${open ? " is-open" : ""}`}
           hidden={!open}
         >
-          {CATS.map((cat) => (
+          {categories.map((cat) => (
             <div key={cat.title} className="feat-category">
               <div className="feat-cat-title">{cat.title}</div>
               <div className="feat-grid2">
@@ -132,7 +140,6 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
           ))}
         </div>
 
-        <ServicesFonctionnalitesFaq />
       </section>
     </div>
   );
