@@ -151,10 +151,10 @@ export default function HomeDesktopV5() {
         </div>
         <div className="hx-figures">
           {[
-            { v: "5000+", l: "Véhicules convoyés" },
-            { v: "120 / mois", l: "Véhicules déplacés pour une concession multi-sites" },
-            { v: "6+ ans", l: "D'expérience" },
-            { v: "7j/7", l: "Disponible" },
+            { v: "+5000", l: "Véhicules convoyés" },
+            { v: "Tout inclus", l: "Péages, carburant et assurance" },
+            { v: "+6 ans", l: "D'expérience" },
+            { v: "7/7", l: "Disponible" },
           ].map((s) => (
             <div key={s.l} className="hx-figure"><div className="v">{s.v}</div><div className="l">{s.l}</div></div>
           ))}
