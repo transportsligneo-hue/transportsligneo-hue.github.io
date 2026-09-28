@@ -3,7 +3,7 @@ import {
   Truck, Users, ArrowRight, CheckCircle2, Zap, FileText, BarChart3,
   Building2, Warehouse, Clock, LayoutDashboard, Calendar, MapPin,
 } from "lucide-react";
-import ProTimeline from "@/components/services/ProTimeline";
+import ProTimeline, { ProFilm } from "@/components/services/ProTimeline";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 
 const audiences = [
@@ -74,6 +74,8 @@ export default function ProSegment() {
           ))}
         </div>
       </div>
+
+      <ProFilm />
 
       {/* Fonctionnalités */}
       <div className="v4-section">

@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { User, Phone } from "lucide-react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
@@ -7,14 +6,12 @@ import ThemePreference from "@/components/ThemePreference";
 
 type NavAccent = "b2b" | "driver" | undefined;
 const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
-  { to: "/", label: "Accueil" },
+  { to: "/services?audience=particuliers", label: "Particuliers" },
+  { to: "/services?audience=pro", label: "Professionnels", accent: "b2b" },
+  { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/tarifs", label: "Tarifs" },
-  { to: "/services", label: "Nos services" },
-  { to: "/suivi", label: "Suivi" },
-
-  { to: "/actualites", label: "Actualités" },
   { to: "/a-propos", label: "À propos" },
-  { to: "/contact", label: "Contact" },
+  { to: "/suivi", label: "Suivre mon véhicule" },
 ] as const;
 
 const SteeringIcon = () => (
@@ -43,25 +40,9 @@ const HIDDEN_PREFIXES = [
 ];
 
 export default function MobileNavbar() {
-  const [hidden, setHidden] = useState(false);
-  const lastY = useRef(0);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  useEffect(() => {
-    lastY.current = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - lastY.current;
-      if (y < 50) setHidden(false);
-      else if (delta > 8) setHidden(true);
-      else if (delta < -8) setHidden(false);
-      lastY.current = y;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   if (HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return null;
   }
@@ -75,9 +56,7 @@ export default function MobileNavbar() {
 
   return (
     <header
-      className={`2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top transition-transform duration-300 ease-out ${
-        hidden ? "-translate-y-full" : "translate-y-0"
-      }`}
+      className="2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top"
     >
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
@@ -118,8 +97,9 @@ export default function MobileNavbar() {
               return (
                 <li key={l.to}>
                   <Link
-                    to={l.to}
-                    activeOptions={{ exact: true }}
+                    to={l.to.split("?")[0]}
+                    search={l.to.includes("audience=") ? { audience: l.to.split("audience=")[1] } : undefined}
+                    activeOptions={{ exact: true, includeSearch: true }}
                     activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accent}` }}
                     inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accent}` }}
                   >
