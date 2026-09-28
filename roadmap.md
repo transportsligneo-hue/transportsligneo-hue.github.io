@@ -1,4 +1,8 @@
 
+## Navigation et services publics
+- [ ] Harmoniser le menu public, retirer Contact du menu, arrêter son mouvement au défilement et distinguer Professionnels en violet
+- [ ] Distinguer les fonctions et FAQ particuliers/pros, rendre la FAQ repliable et remonter la vidéo pro
+
 ## Suivi GPS Driver
 - [x] Reprendre les positions pendant toute la conduite du véhicule, même après navigation dans Driver
 - [x] Afficher le tracé réellement enregistré en bleu électrique et distinguer une ancienne position du direct
