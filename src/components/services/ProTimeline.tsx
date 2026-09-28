@@ -40,7 +40,7 @@ const STEPS = [
   },
 ];
 
-export default function ProTimeline() {
+export function ProFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Lecture automatique dès que la vidéo entre dans le viewport
@@ -64,6 +64,26 @@ export default function ProTimeline() {
   }, []);
 
   return (
+    <section className="v4-section pro-film" aria-label="Parcours professionnel en vidéo">
+      <div
+        className="v4-video-wrap"
+      >
+        <video
+          ref={videoRef}
+          src={filmParcoursPro.url}
+          controls
+          muted
+          playsInline
+          preload="auto"
+          className="pro-film-video"
+        />
+      </div>
+    </section>
+  );
+}
+
+export default function ProTimeline() {
+  return (
     <div className="v4-section">
       <div className="v4-section-head">
         <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
@@ -72,7 +92,6 @@ export default function ProTimeline() {
         <h2>Quatre étapes, du devis à la livraison</h2>
         <p>Un process industrialisé et traçable, conçu pour les volumes professionnels.</p>
       </div>
-
       <ol className="pro-tl">
         {STEPS.map((s, i) => (
           <li key={s.title} className="pro-tl-item">
@@ -96,30 +115,6 @@ export default function ProTimeline() {
           </li>
         ))}
       </ol>
-
-      <div
-        className="v4-video-wrap"
-
-        style={{
-          maxWidth: 980,
-          aspectRatio: "16 / 9",
-          margin: "34px auto 0",
-          borderRadius: 24,
-          overflow: "hidden",
-          border: "1px solid rgba(122,163,255,0.25)",
-          boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
-        }}
-      >
-        <video
-          ref={videoRef}
-          src={filmParcoursPro.url}
-          controls
-          muted
-          playsInline
-          preload="auto"
-          style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      </div>
     </div>
   );
 }

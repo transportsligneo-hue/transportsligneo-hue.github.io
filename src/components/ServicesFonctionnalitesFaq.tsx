@@ -202,14 +202,22 @@ const CATS: Cat[] = [
   },
 ];
 
-export default function ServicesFonctionnalitesFaq() {
+const PERSONAL_QUESTIONS = new Set([
+  "Devis instantané", "Commande en 2 clics", "Planification à l'avance", "Livraison simple / + restitution", "Tarifs transparents",
+  "Suivi GPS en direct", "Notifications en temps réel", "Historique complet des missions", "Convoyeur dédié",
+  "État des lieux photo 360°", "Signature électronique", "Devis & factures archivés", "Assurance tous risques incluse", "Identification des dégâts", "Joignable rapidement",
+]);
+
+export default function ServicesFonctionnalitesFaq({ variant = "particuliers" }: { variant?: "particuliers" | "pro" }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return CATS;
-    return CATS.map((c) => ({
+    const audienceCats = variant === "pro" ? CATS : CATS.map((c) => ({ ...c, items: c.items.filter((it) => PERSONAL_QUESTIONS.has(it.label)) })).filter((c) => c.items.length);
+    if (!q) return audienceCats;
+    return audienceCats.map((c) => ({
       ...c,
       items: c.items.filter(
         (it) =>
@@ -218,22 +226,17 @@ export default function ServicesFonctionnalitesFaq() {
           it.a.toLowerCase().includes(q),
       ),
     })).filter((c) => c.items.length > 0);
-  }, [query]);
+  }, [query, variant]);
 
   const total = filtered.reduce((n, c) => n + c.items.length, 0);
 
   return (
-    <section className="v4-faq-section" aria-labelledby="feat-faq-title" style={{ paddingTop: 0 }}>
-      <div className="v4-faq-head">
-        <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
-          <span className="dot" />
-          FAQ fonctionnalités
-        </div>
-        <h2 id="feat-faq-title">Tout comprendre à nos fonctionnalités</h2>
-        <p style={{ color: "var(--v4-text-muted)", fontSize: 14, marginTop: 10, maxWidth: 560, marginInline: "auto" }}>
-          Chaque fonction de la plateforme expliquée simplement : cliquez sur une question pour afficher la réponse.
-        </p>
-      </div>
+    <section className="v4-faq-section services-faq" aria-label={variant === "pro" ? "Questions fréquentes professionnels" : "Questions fréquentes particuliers"}>
+      <button type="button" className="feat-toggle services-faq-toggle" onClick={() => setExpanded((value) => !value)} aria-expanded={expanded} aria-controls="services-faq-content">
+        <span className="feat-toggle-label">{variant === "pro" ? "Questions fréquentes des professionnels" : "Questions fréquentes des particuliers"}</span>
+        <span className="feat-toggle-chevron" aria-hidden="true"><ChevronDown size={18} /></span>
+      </button>
+      <div id="services-faq-content" hidden={!expanded}>
 
       <div style={{ position: "relative", maxWidth: 520, margin: "0 auto 30px" }}>
         <Search
@@ -308,6 +311,7 @@ export default function ServicesFonctionnalitesFaq() {
           </div>
         ))
       )}
+      </div>
     </section>
   );
 }

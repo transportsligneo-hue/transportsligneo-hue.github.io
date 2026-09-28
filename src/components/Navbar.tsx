@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, X, User, Sparkles, Phone, MapPin } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
@@ -9,11 +9,10 @@ import ThemePreference from "@/components/ThemePreference";
 type NavAccent = "purple" | "green" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
   { to: "/services", label: "Particuliers", search: { audience: "particuliers" } },
-  { to: "/services", label: "Professionnels", search: { audience: "pro" } },
+  { to: "/services", label: "Professionnels", search: { audience: "pro" }, accent: "purple" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/a-propos", label: "À propos" },
-  { to: "/contact", label: "Contact" },
 ] as const;
 
 const proSubLinks: ReadonlyArray<{ to: string; label: string }> = [
@@ -34,17 +33,10 @@ function LockIcon() {
 }
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
   
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   // CTA principal : Estimer · scrolle vers l'estimateur (centré) si présent, sinon → /tarifs
   const goToEstimer = () => {
@@ -64,9 +56,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`hidden 2xl:block fixed top-0 left-0 right-0 z-50 tln-shell ${
-          scrolled ? "is-scrolled" : ""
-        }`}
+        className="hidden 2xl:block fixed top-0 left-0 right-0 z-50 tln-shell"
       >
         <div className="tln-bar">
           <span className="tln-sheen" aria-hidden="true" />
