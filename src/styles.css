@@ -3652,7 +3652,7 @@ body.is-driver-app .closed-link svg {
     flex: 1 1 auto; min-width: 0;
     display: flex; align-items: center; justify-content: center;
     gap: 2px; margin: 0; padding: 0 4px; list-style: none;
-    overflow-x: auto; scrollbar-width: none;
+    overflow: visible;
   }
   .tln-links::-webkit-scrollbar { display: none; }
   .tln-links > li { list-style: none; display: flex; }
