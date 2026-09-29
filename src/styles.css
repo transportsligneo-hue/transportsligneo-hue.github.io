@@ -3659,8 +3659,8 @@ body.is-driver-app .closed-link svg {
   .tln-links > li::marker { content: none; }
 
   .tln-bar .r4-nav-link {
-    min-height: 38px; padding: 0 11px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
+    min-height: 38px; padding: 0 9px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.005em;
     white-space: nowrap;
   }
   .tln-bar .r4-nav-link.is-active {
