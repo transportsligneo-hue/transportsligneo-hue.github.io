@@ -3670,8 +3670,12 @@ body.is-driver-app .closed-link svg {
 
   .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
   .tln-bar .tln-phone { padding: 4px 8px 4px 5px; }
+  /* Sous ~1900 px, on masque la ligne « Besoin d'un conseil ? » pour tout faire tenir */
+  @media (max-width: 1899px) {
+    .tln-bar .nav-phone-number { display: none; }
+  }
   .tln-bar .nav-phone-number { font-size: 11px; }
-  .tln-bar .nav-phone-sub { font-size: 10px; }
+  .tln-bar .nav-phone-sub { font-size: 10px; white-space: nowrap; }
   .tln-bar .tln-devis, .tln-bar .tln-track { white-space: nowrap; font-size: 11.5px; padding-left: 10px; padding-right: 10px; }
   .tln-bar .tln-connect { min-height: 36px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; }
   .tln-shell.is-scrolled .tln-bar .tln-connect { min-height: 34px; }
