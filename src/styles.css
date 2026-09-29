@@ -3573,7 +3573,7 @@ body.is-driver-app .closed-link svg {
   .tln-bar {
     pointer-events: auto;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     width: 100%;
     max-width: none;
     display: flex;
@@ -3622,7 +3622,11 @@ body.is-driver-app .closed-link svg {
     50%     { background-position: 0 0, 100% 50%; }
   }
 
-  /* Reflet qui balaye la barre */
+  /* Reflet qui balaye la barre (masqué dans les coins arrondis) */
+  .tln-clip {
+    position: absolute; inset: 0; overflow: hidden;
+    border-radius: inherit; pointer-events: none; z-index: 1;
+  }
   .tln-sheen {
     position: absolute; top: 0; bottom: 0; left: -35%; width: 26%;
     background: linear-gradient(115deg, transparent, rgba(160,200,255,0.14), transparent);
