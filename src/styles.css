@@ -3655,18 +3655,19 @@ body.is-driver-app .closed-link svg {
   .tln-links > li::marker { content: none; }
 
   .tln-bar .r4-nav-link {
-    min-height: 40px; padding: 0 16px;
-    font-size: 14px; font-weight: 600; letter-spacing: 0.012em;
+    min-height: 38px; padding: 0 11px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.01em;
     white-space: nowrap;
   }
   .tln-bar .r4-nav-link.is-active {
     box-shadow: 0 4px 14px rgba(47,95,255,0.45), 0 0 18px rgba(79,140,255,0.4);
   }
-  .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 34px; font-size: 12.6px; padding: 0 13px; }
+  .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 34px; font-size: 12.4px; padding: 0 10px; }
 
-  .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
-  .tln-bar .tln-phone { padding: 5px 12px 5px 6px; }
-  .tln-bar .tln-connect { min-height: 38px; padding: 0 15px; font-size: 12px; }
+  .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 7px; }
+  .tln-bar .tln-phone { padding: 5px 10px 5px 6px; }
+  .tln-bar .tln-devis, .tln-bar .tln-track { white-space: nowrap; font-size: 12px; }
+  .tln-bar .tln-connect { min-height: 36px; padding: 0 12px; font-size: 12px; white-space: nowrap; }
   .tln-shell.is-scrolled .tln-bar .tln-connect { min-height: 34px; }
 
   @media (prefers-reduced-motion: reduce) {
