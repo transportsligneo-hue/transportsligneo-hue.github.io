@@ -7346,7 +7346,7 @@ html.theme-light .plateforme-pro .feat-item:hover { background: rgba(107,71,255,
 .mnav-pill .r4-nav-link { font-size: 14px !important; padding-left: 14px !important; padding-right: 14px !important; }
 
 /* Anti-rognage : la barre ne doit jamais déborder (Edge, zoom, écrans 1280-1600) */
-.tln-bar { overflow-x: clip; overflow-y: visible; }
+.tln-bar { overflow: visible; }
 .tln-bar-inner { min-width: 0; flex-wrap: nowrap; }
 .tln-links { flex: 1 1 auto; min-width: 0; overflow: visible !important; flex-wrap: nowrap; }
 .tln-links > li { min-width: 0; }
