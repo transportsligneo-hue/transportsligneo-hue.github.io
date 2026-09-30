@@ -4,12 +4,14 @@
  * + section plateforme + stats + CTA. Tout est scopé sous .r4-page.
  */
 import { Link } from "@tanstack/react-router";
+import { ClipboardList, ShieldCheck, MapPin, FileCheck2 } from "lucide-react";
 
 const phases = [
   {
     n: "01",
+    Icon: ClipboardList,
     tag: "Étape 1",
-    title: "Estimation & Devis",
+    title: "Estimation & devis",
     p: "Le client crée son compte ou lance directement une estimation · le compte se crée automatiquement à cette occasion. Le devis est généré et signé électroniquement, sans attendre.",
     subs: [
       "Création de compte",
@@ -20,6 +22,7 @@ const phases = [
   },
   {
     n: "02",
+    Icon: ShieldCheck,
     tag: "Étape 2",
     title: "Validation interne",
     p: "Notre équipe réceptionne le devis signé et contrôle la cohérence de la mission avant de la mettre en production.",
@@ -27,6 +30,7 @@ const phases = [
   },
   {
     n: "03",
+    Icon: MapPin,
     tag: "Étape 3",
     title: "Convoyage",
     p: "Un convoyeur certifié est attribué selon la zone et la disponibilité. Le client suit son véhicule en direct jusqu'à la livraison.",
@@ -34,10 +38,11 @@ const phases = [
   },
   {
     n: "04",
+    Icon: FileCheck2,
     tag: "Étape 4",
-    title: "Clôture & Facturation",
-    p: "État des lieux signé à la livraison, facture générée automatiquement, tout est archivé et consultable en un clic.",
-    subs: ["État des lieux signé", "Facturation automatique", "Historique centralisé"],
+    title: "Livraison & facturation",
+    p: "État des lieux photo à 360° et signature électronique à la remise du véhicule. Rapport, PV de livraison et facture sont ensuite disponibles dans l'espace client.",
+    subs: ["État des lieux 360°", "Signature de remise", "Facture automatique", "PV & documents centralisés"],
   },
 ];
 
@@ -78,48 +83,36 @@ export default function CommentCaMarcheTimeline() {
   return (
     <div className="r4-page">
       {/* ============ HERO ============ */}
-      <section className="v4-hero" style={{ paddingBottom: 40 }}>
+      <section className="ccm-hero">
         <div className="v4-hero-eyebrow" style={{ justifyContent: "center" }}>
           <span className="dot" />Notre process
         </div>
-        <h1 className="v4-h1">
-          Comment <span className="v4-accent">ça marche</span>
+        <h1>
+          Comment <span>ça marche</span>
         </h1>
         <p>
-          De la création de compte à la facture : <b className="text-[#2F5FFF]">4 grandes étapes</b>, 12 actions précises, 100 % digitalisées.
+          De la création de compte à la facture : <b>4 grandes étapes</b>, 100% digitalisées.
         </p>
-        <div style={{ marginTop: 12 }}>
-          <span className="v5-platform-pill">⚡ Plateforme digitale nouvelle génération</span>
-        </div>
       </section>
 
       {/* ============ TIMELINE 4 PHASES ============ */}
-      <section className="v5-timeline">
-        <div className="v5-timeline-track" />
-        <div className="v5-timeline-dot" />
+      <section className="ccm-timeline" aria-label="Les quatre étapes d'une mission">
         {phases.map((phase) => (
-          <div key={phase.n} className="v5-step">
-            <div className="v5-step-num">
-              <div className="n">{phase.n}</div>
-              <div className="lbl">Phase</div>
+          <div key={phase.n} className="ccm-step">
+            <div className="ccm-rail">
+              <div className="ccm-node"><strong>{phase.n}</strong><small>PHASE</small></div>
+              <div className="ccm-line" />
             </div>
-            <div className="v5-step-body">
-              <div className="v5-phase-tag">{phase.tag}</div>
+            <div className="ccm-card">
+              <span className="ccm-icon"><phase.Icon size={21} aria-hidden="true" /></span>
+              <div className="ccm-kicker">{phase.tag}</div>
               <h2>{phase.title}</h2>
               <p>{phase.p}</p>
-              <div className="v5-substeps">
-                {phase.subs.map((s, i) => (
-                  <div key={s} className="v5-substep">
-                    <span className="idx">{
-                      // numéro global : 4 + 2 + 3 + 3 cumul
-                      phase.n === "01" ? i + 1
-                      : phase.n === "02" ? i + 5
-                      : phase.n === "03" ? i + 7
-                      : i + 10
-                    }</span>{s}
-                  </div>
+              <ul className="ccm-actions">
+                {phase.subs.map((s) => (
+                  <li key={s}>{s}</li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
         ))}

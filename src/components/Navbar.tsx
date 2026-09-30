@@ -59,7 +59,6 @@ export default function Navbar() {
         className="hidden 2xl:block fixed top-0 left-0 right-0 z-50 tln-shell"
       >
         <div className="tln-bar">
-          <span className="tln-sheen" aria-hidden="true" />
 
           <div className="tln-bar-inner">
             <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
