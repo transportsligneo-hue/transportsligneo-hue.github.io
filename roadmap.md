@@ -1,3 +1,7 @@
+## Sécurité GitHub et pages publiques
+- [ ] Nettoyer les fichiers d’environnement suivis et ignorer les futures copies ; signaler la purge historique GitHub et la restauration des variables publiques
+- [ ] Figer la navigation, sortir le menu pro, adapter la page API et garder une seule timeline de 4 étapes
+
 
 ## Navigation et services publics
 - [ ] Harmoniser le menu public, retirer Contact du menu, arrêter son mouvement au défilement et distinguer Professionnels en violet
