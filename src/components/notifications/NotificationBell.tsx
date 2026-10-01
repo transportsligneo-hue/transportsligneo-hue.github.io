@@ -2,9 +2,9 @@
  * NotificationBell · cloche premium temps réel.
  * Panneau opaque, typographie contrastée, icônes typées, timestamps relatifs.
  */
-import { useEffect, useState, useCallback, useId } from "react";
+import { useEffect, useState, useCallback, useId, type ReactNode } from "react";
 import {
-  Bell, Check, ExternalLink,
+  Bell, X, ArrowRight, Pencil,
   Truck, CreditCard, FileText, MessageSquare, UserCircle, Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -108,6 +108,62 @@ export function NotificationBell({ className = "" }: { className?: string }) {
     fetchLatest();
   };
 
+
+  return <NotifPanelView user={!!user} open={open} setOpen={setOpen} unread={unread} items={items}
+    markRead={markRead} onNavigate={(to) => router.navigate({ to })} className={className} />;
+}
+
+const KEYWORDS = /(nouvelle destination|nouvelle adresse|date souhaitée|dates?|heures?|adresses?|destination|plaque)/gi;
+
+function highlight(text: string): ReactNode[] {
+  return text.split(KEYWORDS).map((part, i) =>
+    i % 2 === 1 ? <b key={i} className="font-semibold text-white/75">{part}</b> : <span key={i}>{part}</span>,
+  );
+}
+
+function kindOf(n: UserNotif): "new" | "edit" | "ops" | "other" {
+  const t = `${n.titre} ${n.type}`.toLowerCase();
+  if (t.includes("exploitation")) return "ops";
+  if (t.includes("modifi")) return "edit";
+  if (t.includes("nouvelle mission") || t.includes("disponible") || n.category === "mission") return "new";
+  return "other";
+}
+
+const KIND_STYLE = {
+  new: { bg: "rgba(47,95,255,.16)", color: "#5b83ff" },
+  edit: { bg: "rgba(255,184,92,.14)", color: "#ffb85c" },
+  ops: { bg: "rgba(93,224,255,.14)", color: "#5de0ff" },
+};
+
+function NotifPanelView({
+  user, open, setOpen, unread, items, markRead, onNavigate, className,
+}: {
+  user: boolean; open: boolean; setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
+  unread: number; items: UserNotif[]; markRead: (id: string) => void;
+  onNavigate: (to: string) => void; className: string;
+}) {
+  const [mounted, setMounted] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      const r = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
+      return () => cancelAnimationFrame(r);
+    }
+    setShown(false);
+    const t = setTimeout(() => setMounted(false), 200);
+    return () => clearTimeout(t);
+  }, [open]);
+
+  // Bloque le scroll de la page derrière
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   if (!user) return null;
 
   return (
@@ -127,92 +183,99 @@ export function NotificationBell({ className = "" }: { className?: string }) {
         )}
       </button>
 
-      {open && (
+      {mounted && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div
+            aria-hidden
+            onClick={() => setOpen(false)}
+            className={`fixed inset-0 z-40 backdrop-blur-[3px] transition-opacity duration-200 ${shown ? "opacity-100" : "opacity-0"}`}
+            style={{ background: "rgba(3,6,20,.78)" }}
+          />
           <div
             role="dialog"
             aria-label="Panneau des notifications"
-            className="fixed left-2 right-2 top-16 z-50 w-auto max-w-none sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[380px] sm:max-w-[94vw] rounded-2xl border border-white/10 bg-[#0b1230]/95 backdrop-blur-xl shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] overflow-hidden motion-safe:animate-[scale-in_0.18s_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+            className={`fixed left-3.5 right-3.5 top-16 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[390px] sm:max-w-[94vw] flex flex-col overflow-hidden rounded-[22px] text-white transition-all duration-200 ease-out ${shown ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
+            style={{
+              fontFamily: "'Poppins', sans-serif",
+              background: "linear-gradient(180deg, #0c1838 0%, #0f1e42 100%)",
+              border: "1px solid rgba(93,224,255,.14)",
+              boxShadow: "0 30px 70px -20px rgba(0,8,40,.7)",
+              maxHeight: "min(640px, calc(100vh - 6rem))",
+            }}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-[#e7c76a]/15 border border-[#e7c76a]/30 flex items-center justify-center">
-                  <Bell size={14} className="text-[#e7c76a]" />
-                </span>
-                <div>
-                  <div className="text-sm font-semibold text-[#faf7ef]">Notifications</div>
-                  <div className="text-[10px] text-[#c7cde0]">
-                    {unread > 0 ? `${unread} non lue${unread > 1 ? "s" : ""}` : "Tout est à jour"}
-                  </div>
+            <div className="flex items-center gap-3.5 px-5 pt-5 pb-4 border-b border-white/[0.08]">
+              <span
+                className="shrink-0 w-[46px] h-[46px] rounded-[13px] flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg,#2f5fff,#5de0ff)", boxShadow: "0 10px 20px -8px rgba(47,95,255,.55)" }}
+              >
+                <Bell size={21} strokeWidth={1.8} className="text-white" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[17.5px] font-extrabold leading-tight">Notifications</h3>
+                <div className="mt-0.5 flex items-center gap-1.5 text-[12.5px] font-semibold text-[#5de0ff]">
+                  <span className="relative flex w-1.5 h-1.5">
+                    <span className="absolute inset-0 rounded-full bg-[#5de0ff] animate-ping opacity-60" />
+                    <span className="relative w-1.5 h-1.5 rounded-full bg-[#5de0ff]" />
+                  </span>
+                  {unread > 0 ? `${unread} non lue${unread > 1 ? "s" : ""}` : "Tout est à jour"}
                 </div>
               </div>
-              {unread > 0 && (
-                <button
-                  onClick={markAllRead}
-                  className="text-[11px] text-[#c7cde0] hover:text-[#faf7ef] flex items-center gap-1 px-2 py-1 rounded-md hover:bg-white/8 transition"
-                >
-                  <Check size={12} /> Tout lire
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Fermer"
+                className="shrink-0 w-8 h-8 rounded-[9px] bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition"
+              >
+                <X size={14} strokeWidth={2} className="text-white/50" />
+              </button>
             </div>
 
-            <div className="max-h-[440px] overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               {items.length === 0 ? (
                 <div className="p-10 text-center">
-                  <Bell size={26} className="mx-auto text-[#c7cde0]/40 mb-2" />
-                  <p className="text-[13px] text-[#c7cde0]/70">Aucune notification.</p>
+                  <Bell size={26} className="mx-auto text-white/30 mb-2" />
+                  <p className="text-[13px] text-white/50">Aucune notification.</p>
                 </div>
               ) : (
-                <ul className="divide-y divide-white/6">
+                <ul>
                   {items.map((n) => {
+                    const kind = kindOf(n);
                     const meta = CATEGORY_META[n.category] ?? CATEGORY_META.systeme;
+                    const Icon = kind === "edit" ? Pencil : kind === "other" ? meta.Icon : Truck;
+                    const st = kind === "other" ? null : KIND_STYLE[kind];
                     const target = n.link && n.link.startsWith("/") ? n.link : null;
-                    const body = (
-                      <div
-                        className={`relative w-full flex gap-3 px-4 py-3 text-left transition ${n.lu ? "hover:bg-white/5" : "bg-white/[0.04] hover:bg-white/[0.08]"}`}
-                      >
-                        {!n.lu && (
-                          <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[#e7c76a]" />
-                        )}
-                        <span
-                          className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 ${meta.bg} ${meta.text}`}
-                        >
-                          <meta.Icon size={16} />
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-[13px] leading-snug truncate ${n.lu ? "text-[#c7cde0] font-medium" : "text-[#faf7ef] font-semibold"}`}>
-                              {n.titre}
-                            </p>
-                            {!n.lu && <span className="w-1.5 h-1.5 rounded-full bg-[#4d9aff] shrink-0 shadow-[0_0_8px_rgba(77,154,255,0.9)]" />}
-                          </div>
-                          {n.message && (
-                            <p className="text-[12px] text-[#c7cde0]/80 mt-0.5 line-clamp-2">{n.message}</p>
-                          )}
-                          <p className="text-[10px] text-[#c7cde0]/50 mt-1">{formatRelativeTime(n.created_at)}</p>
-                        </div>
-                      </div>
-                    );
                     return (
                       <li key={n.id}>
-                        {target ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              markRead(n.id);
-                              setOpen(false);
-                              router.navigate({ to: target as string });
-                            }}
-                            className="block w-full text-left"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            markRead(n.id);
+                            if (target) { setOpen(false); onNavigate(target); }
+                          }}
+                          className="relative w-full flex gap-3.5 px-5 py-4 text-left border-b border-white/[0.08] hover:bg-white/[0.04] transition"
+                        >
+                          {!n.lu && (
+                            <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: "linear-gradient(180deg,#2f5fff,#5de0ff)" }} />
+                          )}
+                          <span
+                            className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${st ? "" : `${meta.bg} ${meta.text}`}`}
+                            style={st ? { background: st.bg, color: st.color } : undefined}
                           >
-                            {body}
-                          </button>
-                        ) : (
-                          <button onClick={() => markRead(n.id)} className="block w-full">
-                            {body}
-                          </button>
-                        )}
+                            <Icon size={18} strokeWidth={1.8} />
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2.5">
+                              <p className="text-[14px] font-bold leading-snug">{n.titre}</p>
+                              <span className="shrink-0 mt-0.5 text-[10.5px] font-semibold text-white/50 whitespace-nowrap">
+                                {formatRelativeTime(n.created_at)}
+                              </span>
+                            </div>
+                            {n.message && (
+                              <p className="mt-1 text-[12.5px] leading-normal text-white/50 line-clamp-2">{highlight(n.message)}</p>
+                            )}
+                          </div>
+                        </button>
                       </li>
                     );
                   })}
@@ -220,13 +283,16 @@ export function NotificationBell({ className = "" }: { className?: string }) {
               )}
             </div>
 
-            <Link
-              to="/notifications"
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-1.5 px-4 py-3 text-[12px] font-semibold text-[#e7c76a] hover:text-[#f0d78c] border-t border-white/10 hover:bg-white/5 transition"
-            >
-              Voir toutes les notifications <ExternalLink size={12} />
-            </Link>
+            <div className="px-[18px] pt-4 pb-[18px]">
+              <Link
+                to="/notifications"
+                onClick={() => setOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-[13px] text-[13.5px] font-bold text-white transition hover:brightness-110"
+                style={{ background: "linear-gradient(120deg,#2f5fff,#5b83ff)", boxShadow: "0 14px 28px -10px rgba(47,95,255,.5)" }}
+              >
+                Voir toutes les notifications <ArrowRight size={14} strokeWidth={2} />
+              </Link>
+            </div>
           </div>
         </>
       )}
