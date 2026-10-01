@@ -8,6 +8,8 @@
 export function splitArPrice(total: number): { aller: number; retour: number } {
   const t = Math.max(0, Math.round((Number(total) || 0) * 100) / 100);
   if (t <= 0) return { aller: 0, retour: 0 };
+  // Forfait Tours aller-retour : 120 = 70 (livraison) + 50 (restitution)
+  if (t === 120) return { aller: 70, retour: 50 };
   const allerCents = Math.ceil((t * 100 * 2) / 3);
   const totalCents = Math.round(t * 100);
   const aller = Math.min(allerCents, totalCents) / 100;
