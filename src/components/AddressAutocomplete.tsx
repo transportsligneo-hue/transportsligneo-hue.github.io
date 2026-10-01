@@ -13,27 +13,11 @@ interface Suggestion {
   context: string;
 }
 
-const GOOGLE_KEY = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY as string | undefined;
+import { loadGoogle } from "@/lib/google-places";
 
-/** Google Places loader (singleton) */
-let googleLoadPromise: Promise<any> | null = null;
+/** Google Places loader (singleton partagé, clé servie par le serveur) */
 function loadGooglePlaces(): Promise<any> {
-  if (typeof window === "undefined") return Promise.reject(new Error("ssr"));
-  if ((window as any).google?.maps?.places) return Promise.resolve((window as any).google);
-  if (googleLoadPromise) return googleLoadPromise;
-  if (!GOOGLE_KEY) return Promise.reject(new Error("no-key"));
-
-  googleLoadPromise = new Promise((resolve, reject) => {
-    const cbName = `__gplaces_cb_${Date.now()}`;
-    (window as any)[cbName] = () => resolve((window as any).google);
-    const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}&libraries=places&callback=${cbName}&language=fr&region=FR`;
-    s.async = true;
-    s.defer = true;
-    s.onerror = () => reject(new Error("script-error"));
-    document.head.appendChild(s);
-  });
-  return googleLoadPromise;
+  return loadGoogle();
 }
 
 export default function AddressAutocomplete({ name, label, value, onChange, required }: AddressAutocompleteProps) {
