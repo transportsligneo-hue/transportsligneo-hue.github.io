@@ -78,3 +78,12 @@ export const getConvoyeurInvitation = createServerFn({ method: "GET" })
     const row = Array.isArray(rows) ? rows[0] : rows;
     return (row ?? null) as ConvoyeurInvitationInfo;
   });
+
+/**
+ * Clé navigateur Google Places, servie depuis les secrets du projet
+ * (jamais écrite dans un fichier versionné). Protection = restrictions de domaine.
+ */
+export const getGooglePlacesBrowserKey = createServerFn({ method: "GET" }).handler(async () => {
+  const key = process.env["GOOGLE_PLACES_BROWSER_KEY"] ?? "";
+  return { key };
+});

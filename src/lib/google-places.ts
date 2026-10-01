@@ -1,13 +1,13 @@
 // Helper Google Maps JS API (Places + Distance Matrix)
 // Chargement à la demande, singleton, fallback silencieux si pas de clé.
 
-const KEY = (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY as string | undefined;
+import { fetchGoogleKey, googleKeyMaybeAvailable } from "@/lib/google-key";
 
 let loadPromise: Promise<any> | null = null;
 let sessionToken: any = null;
 
 export function isGoogleAvailable(): boolean {
-  return !!KEY;
+  return typeof window !== "undefined" && googleKeyMaybeAvailable();
 }
 
 export function loadGoogle(): Promise<any> {
@@ -15,9 +15,13 @@ export function loadGoogle(): Promise<any> {
   const w = window as any;
   if (w.google?.maps?.places) return Promise.resolve(w.google);
   if (loadPromise) return loadPromise;
-  if (!KEY) return Promise.reject(new Error("no-key"));
 
-  loadPromise = new Promise((resolve, reject) => {
+  loadPromise = fetchGoogleKey().then((KEY) => new Promise((resolve, reject) => {
+    if (!KEY) {
+      loadPromise = null;
+      reject(new Error("no-key"));
+      return;
+    }
     const cbName = `__gplaces_cb_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     (w as any)[cbName] = () => resolve(w.google);
     const s = document.createElement("script");
@@ -29,7 +33,7 @@ export function loadGoogle(): Promise<any> {
       reject(new Error("script-error"));
     };
     document.head.appendChild(s);
-  });
+  }));
   return loadPromise;
 }
 

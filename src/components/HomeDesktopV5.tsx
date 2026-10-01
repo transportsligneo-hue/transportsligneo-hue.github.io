@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, Building2, Car, MapPinned,
-  KeyRound, Truck, BarChart3, ArrowRight, Quote,
+  KeyRound, Truck, BarChart3, ArrowRight,
 } from "lucide-react";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapLigneo from "@/components/MapLigneo";
@@ -136,19 +136,6 @@ export default function HomeDesktopV5() {
       </section>
 
       <section className="v4-section">
-        <div className="hx-testis">
-          {[
-            { q: "Réactifs, ponctuels et un suivi clair à chaque étape. Nos transferts entre sites sont devenus simples.", a: "Responsable logistique · Concession multi-sites" },
-            { q: "J'ai suivi ma voiture en direct jusqu'à la livraison, avec les photos de l'état des lieux. Rassurant.", a: "Client particulier · Tours" },
-            { q: "Une seule facture pour tous nos sites et un historique complet : un vrai gain de temps.", a: "Gestionnaire de parc · Réseau d'agences" },
-          ].map((t) => (
-            <figure key={t.a} className="hx-testi">
-              <Quote size={20} className="hx-testi-q" />
-              <blockquote>{t.q}</blockquote>
-              <figcaption>{t.a}</figcaption>
-            </figure>
-          ))}
-        </div>
         <div className="hx-figures">
           {[
             { v: "+5000", l: "Véhicules convoyés" },
