@@ -155,6 +155,13 @@
       "when": 1790869872775,
       "tag": "0021_split_ar_tours_120",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790871065158,
+      "tag": "0022_sync_trajet_prix_with_prix_client",
+      "breakpoints": true
     }
   ]
 }
