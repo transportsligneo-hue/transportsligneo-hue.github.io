@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "aadcc169-7a1f-46c2-b23f-c54ed1b9756c",
+  "asset_id": "5dc5fedf-73cd-4c86-a8d7-bb991044f5f1",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/aadcc169-7a1f-46c2-b23f-c54ed1b9756c/film-parcours-pro.mp4",
-  "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/aadcc169-7a1f-46c2-b23f-c54ed1b9756c/film-parcours-pro.mp4",
+  "url": "/__l5e/assets-v1/5dc5fedf-73cd-4c86-a8d7-bb991044f5f1/film-parcours-pro.mp4",
+  "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/5dc5fedf-73cd-4c86-a8d7-bb991044f5f1/film-parcours-pro.mp4",
   "original_filename": "film-parcours-pro.mp4",
-  "size": 59099143,
+  "size": 58790621,
   "content_type": "video/mp4",
-  "created_at": "2026-09-03T16:33:00Z"
+  "created_at": "2026-10-01T15:19:22Z"
 }
