@@ -67,6 +67,14 @@ export function ProFilm() {
     <section className="v4-section pro-film" aria-label="Parcours professionnel en vidéo">
       <div
         className="v4-video-wrap"
+        style={{
+          maxWidth: 560,
+          margin: "0 auto",
+          borderRadius: 22,
+          overflow: "hidden",
+          border: "1px solid rgba(124,92,255,0.35)",
+          boxShadow: "0 24px 60px -24px rgba(124,92,255,0.45)",
+        }}
       >
         <video
           ref={videoRef}
@@ -76,6 +84,7 @@ export function ProFilm() {
           playsInline
           preload="auto"
           className="pro-film-video"
+          style={{ display: "block", width: "100%", height: "auto" }}
         />
       </div>
     </section>
