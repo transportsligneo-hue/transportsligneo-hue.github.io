@@ -13,7 +13,7 @@ interface Suggestion {
   context: string;
 }
 
-import { loadGoogle } from "@/lib/google-places";
+import { loadGoogle, isGoogleAvailable } from "@/lib/google-places";
 
 /** Google Places loader (singleton partagé, clé servie par le serveur) */
 function loadGooglePlaces(): Promise<any> {
@@ -89,7 +89,7 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
     setLoading(true);
     try {
       let results: Suggestion[] = [];
-      if (GOOGLE_KEY) {
+      if (isGoogleAvailable()) {
         try {
           results = await fetchFromGoogle(query);
         } catch {

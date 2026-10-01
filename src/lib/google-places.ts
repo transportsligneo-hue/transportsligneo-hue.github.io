@@ -33,7 +33,7 @@ export function loadGoogle(): Promise<any> {
       reject(new Error("script-error"));
     };
     document.head.appendChild(s);
-  });
+  }));
   return loadPromise;
 }
 
