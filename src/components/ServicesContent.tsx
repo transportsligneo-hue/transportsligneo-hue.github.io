@@ -50,7 +50,7 @@ const services = [
   {
     Icon: ShieldCheck,
     title: "Assurance tous risques",
-    desc: "Chaque mission est couverte de bout en bout, sans supplément ni petites lignes en bas du devis. Vous roulez tranquille.",
+    desc: "Chaque mission est couverte du départ à l'arrivée, sans supplément ni petites lignes en bas du devis. Vous roulez tranquille.",
     tags: ["Incluse d'office", "0 frais caché"],
   },
 ];
@@ -117,8 +117,8 @@ export default function ServicesContent({
         <>
           <div className="v4-hero">
             <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
-<h1 className="v4-h1">Votre convoyage, <span className="v4-accent">de bout en bout</span>.</h1>
-            <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : nous assurons le déplacement de votre véhicule de bout en bout, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
+<h1 className="v4-h1">Votre véhicule, <span className="v4-accent">entre des mains expertes</span>.</h1>
+            <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un convoyeur professionnel prend en charge votre véhicule de l'enlèvement à la remise des clés, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
           <div className="v4-section">
@@ -142,7 +142,7 @@ export default function ServicesContent({
                 <span className="dot" />Comment ça marche&nbsp;?
               </div>
               <h2>
-                Un convoyage suivi, <em className="v4-accent" style={{ fontStyle: "normal" }}>de bout en bout</em>
+                Un convoyage maîtrisé, <em className="v4-accent" style={{ fontStyle: "normal" }}>à chaque kilomètre</em>
               </h2>
             </div>
             <div
