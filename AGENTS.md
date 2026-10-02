@@ -1,1 +1,2 @@
 - Keep the public mobile navigation and color treatment scoped below 768px in MobileNavbar and the public mobile CSS; desktop marketing and signed-in workspaces remain independent so mobile presentation changes cannot alter their workflows.
+- Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.

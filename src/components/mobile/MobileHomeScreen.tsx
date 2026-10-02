@@ -18,6 +18,8 @@ import {
   LogOut,
   Award,
   MessageCircle,
+  Car,
+  User,
 } from "lucide-react";
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
@@ -33,7 +35,7 @@ import { useAuth } from "@/hooks/useAuth";
  * Toutes les routes et le vrai simulateur (MobileDevisGenerator) restent branchés.
  */
 export default function MobileHomeScreen() {
-  const { isAuthenticated, role, user, logout } = useAuth();
+  const { isAuthenticated, role, user, logout, homeRoute } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -150,6 +152,12 @@ export default function MobileHomeScreen() {
         </div>
       </section>
 
+      <nav className="mhome-paths relative z-[3] mx-[18px] mt-4" aria-label="Choisir mon parcours">
+        <Link to="/services" search={{ audience: "particuliers" }} className="mhome-path"><User size={17} /> Je suis un particulier</Link>
+        <Link to="/services" search={{ audience: "pro" }} className="mhome-path mhome-path--pro"><Briefcase size={17} /> Je suis un professionnel</Link>
+        <Link to="/devenir-convoyeur" className="mhome-path mhome-path--driver"><Car size={17} /> Je suis convoyeur</Link>
+        <Link to={isAuthenticated ? homeRoute : "/login"} className="mhome-path"><LogIn size={17} /> Je suis déjà un client</Link>
+      </nav>
 
 
       {/* === Estimateur === */}

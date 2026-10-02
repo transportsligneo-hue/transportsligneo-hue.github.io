@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { subscribeNewsletter } from "@/lib/public-content.functions";
 import { useRegistrationGate } from "@/hooks/useRegistrationGate";
+import driverPresentation from "@/assets/presentation-driver-browser.webm.asset.json";
 
 export const Route = createFileRoute("/devenir-convoyeur")({
   component: DevenirConvoyeurPage,
@@ -68,6 +69,10 @@ function DevenirConvoyeurPage() {
               ? "Nous recherchons des convoyeurs professionnels et rigoureux pour accompagner la croissance de nos services de transport de véhicules."
               : "Nous restons volontairement sélectifs pour garantir la qualité de service sur chaque mission. Laissez-nous votre email : nous vous recontactons en priorité dès qu'une place se libère ou que nos besoins évoluent."}
           </p>
+
+          <div className="dc-film">
+            <video src={driverPresentation.url} controls playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
+          </div>
 
           <div className="dc-card">
             {loading ? (

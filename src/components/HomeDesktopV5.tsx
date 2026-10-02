@@ -3,6 +3,7 @@ import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, Building2, Car, MapPinned,
   KeyRound, Truck, BarChart3, ArrowRight,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import DevisGenerator from "@/components/DevisGenerator";
 import MapLigneo from "@/components/MapLigneo";
 import AvisSection from "@/components/public/AvisSection";
@@ -17,6 +18,7 @@ import logoTransak from "@/assets/transakauto-new.png.asset.json";
 const goDevis = () => { scrollToDevis(); };
 
 export default function HomeDesktopV5() {
+  const { isAuthenticated, homeRoute } = useAuth();
   return (
     <div className="r4-page">
       {/* ============ HERO ============ */}
@@ -47,11 +49,11 @@ export default function HomeDesktopV5() {
               <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn hx-switch-btn--violet">
                 <Building2 size={18} /> Je suis un professionnel
               </Link>
-              <button type="button" onClick={goDevis} className="hx-switch-btn">
-                <Car size={18} /> Obtenir un devis
-              </button>
-              <Link to="/suivi" className="hx-switch-btn">
-                <MapPinned size={18} /> Je suis déjà client
+              <Link to="/devenir-convoyeur" className="hx-switch-btn hx-switch-btn--driver">
+                <Car size={18} /> Je suis convoyeur
+              </Link>
+              <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn">
+                <MapPinned size={18} /> Je suis déjà un client
               </Link>
             </div>
           </div>
