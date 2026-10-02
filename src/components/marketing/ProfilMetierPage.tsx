@@ -25,6 +25,7 @@ export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, ben
             <Link to="/contact" className="v4-btn-outline">Parler à un conseiller</Link>
           </div>
         </R4Hero>
+        <ProPresentations />
         <section className="v4-section">
           <div className="hx-benefits hx-benefits--3">
             {benefits.map((b) => (
@@ -45,7 +46,6 @@ export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, ben
             </div>
           )}
         </section>
-        <ProPresentations />
       </main>
       <Footer />
     </>
