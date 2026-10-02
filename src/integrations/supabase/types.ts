@@ -830,6 +830,74 @@ export type Database = {
           },
         ]
       }
+      avis_paiement_emails: {
+        Row: {
+          created_at: string
+          email_id: string
+          email_subject: string | null
+          erreur: string | null
+          nb_lignes: number
+        }
+        Insert: {
+          created_at?: string
+          email_id: string
+          email_subject?: string | null
+          erreur?: string | null
+          nb_lignes?: number
+        }
+        Update: {
+          created_at?: string
+          email_id?: string
+          email_subject?: string | null
+          erreur?: string | null
+          nb_lignes?: number
+        }
+        Relationships: []
+      }
+      avis_paiement_lignes: {
+        Row: {
+          created_at: string
+          date_avis: string | null
+          email_id: string
+          email_subject: string | null
+          facture_id: string | null
+          id: string
+          montant: number | null
+          numero_facture: string
+          resultat: string
+        }
+        Insert: {
+          created_at?: string
+          date_avis?: string | null
+          email_id: string
+          email_subject?: string | null
+          facture_id?: string | null
+          id?: string
+          montant?: number | null
+          numero_facture: string
+          resultat: string
+        }
+        Update: {
+          created_at?: string
+          date_avis?: string | null
+          email_id?: string
+          email_subject?: string | null
+          facture_id?: string | null
+          id?: string
+          montant?: number | null
+          numero_facture?: string
+          resultat?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avis_paiement_lignes_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       b2b_actions_history: {
         Row: {
           action_type: string
