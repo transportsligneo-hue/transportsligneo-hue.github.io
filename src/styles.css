@@ -9398,7 +9398,7 @@ body .tln-sheen { display: none; }
   .mhome-root #mobile-devis { margin-top: 0; padding-top: 16px; scroll-margin-top: 72px; }
   .mhome-root .dg-flat { transform: none; }
   .mhome-root .dg-flat-field { background: var(--public-mobile-surface); border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent); border-radius: 8px; }
-  .mhome-root .dg-flat-input { color: var(--public-mobile-text); }
+  .mhome-root .dg-flat-input { color: var(--public-mobile-text); color-scheme: dark; }
   .mhome-root .dg-flat-input::placeholder { color: var(--public-mobile-muted); opacity: 1; }
   .mhome-root .dg-flat-label, .mhome-root .dg-flat-label svg { color: var(--public-mobile-cyan); }
   .mhome-root .dg-flat-trust span { border-radius: 8px; }
@@ -9426,7 +9426,7 @@ body .tln-sheen { display: none; }
   html.theme-light .mhome-root { background: var(--public-mobile-bg) !important; color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root :is(.text-white,.text-cream) { color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-field { background: var(--public-mobile-surface) !important; border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important; }
-  html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input { color: var(--public-mobile-text) !important; }
+  html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input { color: var(--public-mobile-text) !important; color-scheme: dark; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input::placeholder { color: var(--public-mobile-muted) !important; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-toggle { background: var(--public-mobile-surface) !important; color: var(--public-mobile-text) !important; border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important; }
   /* The older light-theme rules turn these home-page details white even on the navy mobile shell. */
