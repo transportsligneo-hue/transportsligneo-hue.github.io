@@ -9389,6 +9389,14 @@ body .tln-sheen { display: none; }
   .r4-page .v4-engag-split > * { min-width: 0; }
   .r4-page .v4-engag-split .ligneo-map { max-width: 100%; min-width: 0; }
   .r4-page .v4-engag-split .ligneo-map svg { max-width: 100%; height: auto; }
+  .r4-page:has(.ccm-hero) { background: var(--public-mobile-bg); color: var(--public-mobile-text); }
+  .r4-page .ccm-hero h1 { color: var(--public-mobile-text); }
+  .r4-page .ccm-hero h1 span, .r4-page .ccm-hero p b { color: #89b8ff; }
+  .r4-page .ccm-hero p { color: var(--public-mobile-muted); }
+  .r4-page .ccm-card { background: var(--public-mobile-surface); border-color: rgba(93,224,255,.18); }
+  .r4-page .ccm-card h2, .r4-page .ccm-actions li { color: var(--public-mobile-text); }
+  .r4-page .ccm-card p { color: var(--public-mobile-muted); }
+  .r4-page .ccm-actions { border-color: rgba(93,224,255,.18); }
   html.theme-light .mhome-root { background: var(--public-mobile-bg) !important; color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root :is(.text-white,.text-cream) { color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-field { background: var(--public-mobile-surface) !important; border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important; }
@@ -9399,6 +9407,8 @@ body .tln-sheen { display: none; }
   html.theme-light .r4-page :is(.v4-h1,.v4-section-head h2,.v4-b2b-hero h1,.v4-hero h1,.v4-hero h2,.v4-split-text h2,.v4-cta-box h2,.v4-svc-card h3,.v4-aud-card h3,.v4-feat-card h3,.v4-row-text .t) { color: var(--public-mobile-text) !important; }
   html.theme-light .r4-page :is(.v4-hero p,.v4-section-head p,.v4-b2b-hero p,.v4-split-text p,.v4-svc-card p,.v4-aud-card p,.v4-feat-card p) { color: var(--public-mobile-muted) !important; }
   html.theme-light .r4-page :is(.v4-hero-panel,.v4-svc-card,.v4-aud-card,.v4-feat-card,.v4-value-card,.v4-glass,.v4-tl-body) { background: var(--public-mobile-surface) !important; border-color: rgba(93,224,255,.17) !important; }
+  html.theme-light .r4-page .ccm-hero h1, html.theme-light .r4-page .ccm-card h2, html.theme-light .r4-page .ccm-actions li { color: var(--public-mobile-text) !important; }
+  html.theme-light .r4-page .ccm-hero p, html.theme-light .r4-page .ccm-card p { color: var(--public-mobile-muted) !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mnav-sheet { transition: none; }
