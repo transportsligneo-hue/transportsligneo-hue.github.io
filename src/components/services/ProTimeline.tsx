@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import filmParcoursPro from "@/assets/presentation-professionnels-voix.mp4.asset.json";
 import filmDriver from "@/assets/presentation-driver-browser.webm.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
 import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 import proPoster from "@/assets/presentation-professionnels-poster.jpg.asset.json";
+import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
 
 const STEPS = [
   {
