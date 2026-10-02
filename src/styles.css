@@ -3716,6 +3716,18 @@ body.is-driver-app .closed-link svg {
   html.theme-light .tln-bar .r4-nav-link { color: var(--r4-text-muted) !important; text-shadow: none !important; }
   html.theme-light .tln-bar .r4-nav-link:hover { color: #ffffff !important; background: linear-gradient(120deg, rgba(47,95,255,0.22), rgba(79,140,255,0.14)) !important; }
   html.theme-light .tln-bar .r4-nav-link.is-active { color: #ffffff !important; background: linear-gradient(120deg, var(--r4-blue), var(--r4-blue-bright)) !important; }
+  /* Dans cette même layer, l'accents violet/vert gardent leur couleur propre à l'état actif. */
+  html.theme-light .tln-bar .r4-nav-link.nav-accent-purple.is-active {
+    color: #ffffff !important;
+    background: linear-gradient(120deg, #8b6bff, #c4b1ff) !important;
+    box-shadow: 0 0 0 1px rgba(220,208,255,0.7), 0 6px 26px rgba(124,92,255,0.85), 0 0 44px rgba(167,139,250,0.85) !important;
+    animation: r4PurplePulse 2.4s ease-in-out infinite !important;
+  }
+  html.theme-light .tln-bar .r4-nav-link.nav-accent-green.is-active {
+    color: #ffffff !important;
+    background: linear-gradient(120deg, rgba(110,255,205,0.6), rgba(53,200,152,0.95)) !important;
+    animation: r4GreenPulse 2.4s ease-in-out infinite !important;
+  }
   html.theme-light .tln-bar .nav-phone-block {
     background: linear-gradient(120deg, rgba(0,243,255,0.14), rgba(5,18,45,0.62)) !important;
     border-color: rgba(0,243,255,0.32) !important;
