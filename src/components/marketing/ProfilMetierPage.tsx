@@ -3,6 +3,7 @@ import { Check, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import R4Hero from "@/components/marketing/R4Hero";
+import { ProPresentations } from "@/components/services/ProTimeline";
 
 interface Props {
   eyebrow: string;
@@ -44,6 +45,7 @@ export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, ben
             </div>
           )}
         </section>
+        <ProPresentations />
       </main>
       <Footer />
     </>

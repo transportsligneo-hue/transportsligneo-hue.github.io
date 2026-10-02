@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import filmParcoursPro from "@/assets/film-parcours-pro.mp4.asset.json";
+import filmParcoursPro from "@/assets/presentation-professionnels-voix.mp4.asset.json";
+import filmDriver from "@/assets/presentation-driver-browser.webm.asset.json";
+import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
+import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 
 const STEPS = [
   {
@@ -86,6 +89,29 @@ export function ProFilm() {
           className="pro-film-video"
           style={{ display: "block", width: "100%", height: "auto" }}
         />
+      </div>
+    </section>
+  );
+}
+
+/** Présentations publiques des métiers, indépendantes des missions Driver. */
+export function ProPresentations() {
+  return (
+    <section className="pro-presentations v4-section" aria-label="Présentations vidéo Ligneo">
+      <div className="v4-section-head">
+        <h2>Découvrez Transports Ligneo</h2>
+      </div>
+      <div className="pro-presentations-grid">
+        <div className="pro-presentation pro-presentation--business">
+          <h3>Pour les professionnels</h3>
+          <video src={filmParcoursPro.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
+          <img src={proLogo.url} alt="Transports Ligneo" className="pro-presentation-logo" loading="lazy" />
+        </div>
+        <div className="pro-presentation pro-presentation--driver">
+          <h3>Découvrez l’espace Driver</h3>
+          <video src={filmDriver.url} controls playsInline preload="metadata" aria-label="Présentation de l’espace Driver" />
+          <img src={driverLogo.url} alt="Transports Ligneo Driver" className="pro-presentation-logo" loading="lazy" />
+        </div>
       </div>
     </section>
   );
