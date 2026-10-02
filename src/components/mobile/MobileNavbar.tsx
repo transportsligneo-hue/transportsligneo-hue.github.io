@@ -1,118 +1,82 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { User, Phone } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Menu, Phone, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
-import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
+import { Button } from "@/components/ui/button";
 
-type NavAccent = "b2b" | "driver" | undefined;
-const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent }> = [
-  { to: "/services?audience=particuliers", label: "Particuliers" },
-  { to: "/services?audience=pro", label: "Professionnels", accent: "b2b" },
+type NavAccent = "b2b" | undefined;
+const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: { audience: "pro" | "particuliers" } }> = [
+  { to: "/services", label: "Particuliers", search: { audience: "particuliers" } },
+  { to: "/services", label: "Professionnels", search: { audience: "pro" }, accent: "b2b" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/a-propos", label: "À propos" },
   { to: "/suivi", label: "Suivre mon véhicule" },
 ] as const;
 
-const SteeringIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <rect x="3" y="11" width="18" height="7" rx="2" />
-    <path d="M5 11V8a7 7 0 0 1 14 0v3" />
-    <circle cx="8" cy="14.5" r="1" />
-    <circle cx="16" cy="14.5" r="1" />
-  </svg>
-);
-
-
 const HIDDEN_PREFIXES = [
-  "/convoyeur",
-  "/admin",
-  "/dashboard-",
-  "/entreprise",
-  "/flotte",
-  "/attente-validation",
-  "/login",
-  "/inscription",
-  "/choisir-compte",
-  "/mot-de-passe-oublie",
-  "/reset-password",
-  "/scan",
+  "/convoyeur", "/admin", "/dashboard-", "/entreprise", "/flotte",
+  "/attente-validation", "/login", "/inscription", "/choisir-compte",
+  "/mot-de-passe-oublie", "/reset-password", "/scan",
 ];
 
 export default function MobileNavbar() {
-  const { isAuthenticated, role } = useAuth();
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  if (HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
-    return null;
-  }
+  const [open, setOpen] = useState(false);
+  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onEscape);
+    return () => { document.body.style.overflow = previous; document.removeEventListener("keydown", onEscape); };
+  }, [open]);
 
-  const goEspace = () => {
-    if (!isAuthenticated) return navigate({ to: "/login" });
-    if (role === "admin" || role === "super_admin") navigate({ to: "/admin" });
-    else if (role === "convoyeur") navigate({ to: "/convoyeur" });
-    else navigate({ to: "/dashboard-client" });
-  };
+  if (HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
 
   return (
-    <header
-      className="2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top"
-    >
+    <header className="2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top">
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
-          <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3 overflow-visible">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
-            <span
-              className="font-black text-[15px] sm:text-[17px] tracking-[0.02em] uppercase text-white whitespace-nowrap"
-              style={{ fontFamily: "'Poppins', sans-serif" }}
-            >
-              TRANSPORTS{" "}
-              <span className="text-[#6ea1ff] [text-shadow:0_0_12px_rgba(91,143,255,0.85)]">LIGNEO</span>
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 overflow-hidden" aria-label="Transports Ligneo · Accueil">
+            <img src={logoLigneo} alt="" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
+            <span className="mnav-wordmark truncate font-black text-[15px] sm:text-[17px] uppercase">
+              TRANSPORTS <span>LIGNEO</span>
             </span>
           </Link>
-
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <a
-              href="tel:+33782456181"
-              className="nav-phone-block mnav-phone-compact"
-              aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
-            >
-              <span className="nav-phone-icon">
-                <Phone size={13} strokeWidth={2.4} />
-                <span className="nav-phone-pulse" aria-hidden="true" />
-                <span className="nav-phone-pulse nav-phone-pulse-delay" aria-hidden="true" />
-              </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact" aria-label="Appeler Transports Ligneo au 07 82 45 61 81">
+              <span className="nav-phone-icon"><Phone size={13} strokeWidth={2.4} /></span>
               <span className="mnav-phone-label">Appeler</span>
             </a>
-            <ThemePreference variant="compact" />
-
-
+            <div className="hidden md:block"><ThemePreference variant="compact" /></div>
+            <Button type="button" variant="ghost" size="icon" className="mnav-menu-trigger md:hidden" aria-label={open ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+              {open ? <X /> : <Menu />}
+            </Button>
           </div>
         </div>
-        <nav className="px-3 pb-2">
+        <nav className="hidden md:block px-3 pb-2" aria-label="Navigation du site">
           <ul className="r4-nav-pill mnav-pill no-scrollbar">
-            {links.map((l) => {
-              const accent =
-                l.accent === "b2b" ? " nav-accent-purple" : l.accent === "driver" ? " nav-accent-green" : "";
-              return (
-                <li key={l.to}>
-                  <Link
-                    to={l.to.split("?")[0]}
-                    search={l.to.includes("audience=pro") ? { audience: "pro" } : l.to.includes("audience=particuliers") ? { audience: "particuliers" } : undefined}
-                    activeOptions={{ exact: true, includeSearch: true }}
-                    activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${accent}` }}
-                    inactiveProps={{ className: `r4-nav-link whitespace-nowrap${accent}` }}
-                  >
-                    {l.accent === "driver" && <SteeringIcon />}
-                    {l.label}
-                  </Link>
-                </li>
-              );
-            })}
+            {links.map((link) => <li key={`${link.to}-${link.search?.audience ?? ""}`}>
+              <Link to={link.to} search={link.search} activeOptions={{ exact: true, includeSearch: true }}
+                activeProps={{ className: `r4-nav-link is-active whitespace-nowrap${link.accent === "b2b" ? " nav-accent-purple" : ""}` }}
+                inactiveProps={{ className: `r4-nav-link whitespace-nowrap${link.accent === "b2b" ? " nav-accent-purple" : ""}` }}>
+                {link.label}
+              </Link>
+            </li>)}
           </ul>
         </nav>
-
       </div>
+      {open && <div className="md:hidden fixed inset-0 top-14 z-[-1] mnav-scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
+      <nav className={`md:hidden mnav-sheet${open ? " is-open" : ""}`} aria-label="Menu du site" aria-hidden={!open}>
+        {links.map((link) => <Link key={`${link.to}-${link.search?.audience ?? ""}`} to={link.to} search={link.search} tabIndex={open ? 0 : -1}
+          className={`mnav-sheet-link${link.accent === "b2b" ? " is-pro" : ""}`} onClick={() => setOpen(false)}>
+          {link.label}
+        </Link>)}
+        <ThemePreference variant="full" />
+      </nav>
     </header>
   );
 }
