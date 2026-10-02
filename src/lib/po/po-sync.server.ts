@@ -156,6 +156,14 @@ async function processMessage(id: string, supabaseAdmin: AdminClient, result: Sy
   const msg = await gmailGet<GmailMessage>(`/users/me/messages/${id}?format=full`);
   const subject = headerValue(msg, "Subject");
   const receivedAt = msg.internalDate ? new Date(Number(msg.internalDate)).toISOString() : null;
+  if (subject && /avis de paiement\s+groupe\s+cat/i.test(subject)) {
+    result.skipped++;
+    await supabaseAdmin.from("po_import_logs").insert({
+      email_id: id, email_subject: subject, resultat: "ignore",
+      details: { raison: "avis de paiement (traité séparément)" },
+    } as never);
+    return;
+  }
 
   const parts = flattenParts(msg.payload);
   const pdfPart = parts.find(
