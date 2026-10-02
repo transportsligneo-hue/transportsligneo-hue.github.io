@@ -3,6 +3,7 @@ import filmParcoursPro from "@/assets/presentation-professionnels-voix.mp4.asset
 import filmDriver from "@/assets/presentation-driver-browser.webm.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
 import driverLogo from "@/assets/logo-video-driver.png.asset.json";
+import proPoster from "@/assets/presentation-professionnels-poster.jpg.asset.json";
 
 const STEPS = [
   {
@@ -82,6 +83,7 @@ export function ProFilm() {
         <video
           ref={videoRef}
           src={filmParcoursPro.url}
+          poster={proPoster.url}
           controls
           muted
           playsInline
@@ -104,7 +106,7 @@ export function ProPresentations() {
       <div className="pro-presentations-grid">
         <div className="pro-presentation pro-presentation--business">
           <h3>Pour les professionnels</h3>
-          <video src={filmParcoursPro.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
+          <video src={filmParcoursPro.url} poster={proPoster.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
           <img src={proLogo.url} alt="Transports Ligneo" className="pro-presentation-logo" loading="lazy" />
         </div>
         <div className="pro-presentation pro-presentation--driver">
