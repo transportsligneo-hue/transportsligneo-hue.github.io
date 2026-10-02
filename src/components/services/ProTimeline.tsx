@@ -70,14 +70,12 @@ export function ProFilm() {
   return (
     <section className="v4-section pro-film" aria-label="Parcours professionnel en vidéo">
       <div
-        className="v4-video-wrap"
+        className="v4-video-wrap film-neon"
         style={{
-          maxWidth: 560,
+          maxWidth: 760,
           margin: "0 auto",
           borderRadius: 22,
           overflow: "hidden",
-          border: "1px solid rgba(124,92,255,0.35)",
-          boxShadow: "0 24px 60px -24px rgba(124,92,255,0.45)",
         }}
       >
         <video
