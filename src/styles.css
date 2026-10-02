@@ -9349,10 +9349,10 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
 .dc-film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
 
 /* Contour néon des vidéos de présentation — même traitement que l'espace convoyeur, couleur par audience */
-.film-neon { border: 1px solid color-mix(in srgb, var(--film-neon) 60%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--film-neon) 22%, transparent), 0 0 26px -4px color-mix(in srgb, var(--film-neon) 50%, transparent), 0 24px 60px -24px color-mix(in srgb, var(--film-neon) 55%, transparent); }
+.film-neon { border: 1.5px solid color-mix(in srgb, var(--film-neon) 90%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--film-neon) 45%, transparent), 0 0 10px -1px color-mix(in srgb, var(--film-neon) 75%, transparent), 0 0 30px -2px color-mix(in srgb, var(--film-neon) 60%, transparent), 0 0 70px -8px color-mix(in srgb, var(--film-neon) 55%, transparent), 0 24px 60px -24px color-mix(in srgb, var(--film-neon) 55%, transparent); }
 .pro-film { --film-neon: var(--v4-violet-glow, #a794ff); }
 .particuliers-film { --film-neon: var(--home-particulier, #4f8eff); }
-.dc-film { --film-neon: var(--home-driver); }
+.dc-film { --film-neon: var(--home-driver); border-width: 1.5px; border-color: color-mix(in srgb, var(--home-driver) 90%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--home-driver) 45%, transparent), 0 0 10px -1px color-mix(in srgb, var(--home-driver) 75%, transparent), 0 0 30px -2px color-mix(in srgb, var(--home-driver) 60%, transparent), 0 0 70px -8px color-mix(in srgb, var(--home-driver) 55%, transparent), 0 24px 60px -24px color-mix(in srgb, var(--home-driver) 55%, transparent); }
 /* Public professional presentations: the two films stay on marketing pages. */
 .r4-page .pro-presentations { --presentation-business: var(--v4-violet-glow, #a794ff); --presentation-driver: var(--home-driver); }
 .r4-page .pro-presentations-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); max-width: 1150px; margin-inline: auto; }
