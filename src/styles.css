@@ -2078,14 +2078,12 @@ body.is-driver-app .closed-link svg {
     min-height: 46px;
     padding: 0.3rem 1rem 0.3rem 0.35rem;
     border-radius: 999px;
-    border: 1px solid rgba(0,243,255,0.55);
-    background: linear-gradient(120deg, rgba(0,243,255,0.24), rgba(5,18,45,0.62));
+    border: 1px solid rgba(0,243,255,0.32);
+    background: linear-gradient(120deg, rgba(0,243,255,0.14), rgba(5,18,45,0.62));
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.12),
-      0 0 0 1px rgba(0,243,255,0.22),
-      0 8px 26px -12px rgba(0,180,255,0.85),
-      0 0 26px rgba(0,243,255,0.45);
-    animation: navPhoneGlow 2.6s ease-in-out infinite;
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 4px 14px -8px rgba(0,180,255,0.4),
+      0 0 10px rgba(0,243,255,0.15);
     transition: border-color .3s ease, background .3s ease, transform .3s ease, box-shadow .3s ease;
     overflow: hidden;
   }
@@ -2104,13 +2102,13 @@ body.is-driver-app .closed-link svg {
     pointer-events: none;
   }
   .nav-phone-block:hover {
-    border-color: rgba(0,255,255,0.95);
+    border-color: rgba(0,255,255,0.6);
     transform: translateY(-1px);
-    background: linear-gradient(120deg, rgba(0,243,255,0.42), rgba(8,28,70,0.68));
+    background: linear-gradient(120deg, rgba(0,243,255,0.28), rgba(8,28,70,0.68));
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.16),
-      0 12px 34px -14px rgba(0,200,255,1),
-      0 0 48px rgba(0,243,255,0.85);
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      0 8px 22px -10px rgba(0,200,255,0.6),
+      0 0 16px rgba(0,243,255,0.3);
   }
   .nav-phone-block:hover::after { transform: translateX(120%); }
   .nav-phone-icon {
@@ -2125,14 +2123,14 @@ body.is-driver-app .closed-link svg {
     border: 1px solid rgba(255,255,255,0.9);
     color: #002a14;
     flex-shrink: 0;
-    box-shadow: 0 0 20px rgba(0,255,127,0.95);
+    box-shadow: 0 0 7px rgba(0,255,127,0.35);
   }
 
   .nav-phone-pulse {
     position: absolute;
     inset: -4px;
     border-radius: 999px;
-    border: 1px solid rgba(0,255,127,0.75);
+    border: 1px solid rgba(0,255,127,0.35);
     animation: navPhonePulse 2.2s ease-out infinite;
     pointer-events: none;
   }
@@ -3718,12 +3716,24 @@ body.is-driver-app .closed-link svg {
   html.theme-light .tln-bar .r4-nav-link { color: var(--r4-text-muted) !important; text-shadow: none !important; }
   html.theme-light .tln-bar .r4-nav-link:hover { color: #ffffff !important; background: linear-gradient(120deg, rgba(47,95,255,0.22), rgba(79,140,255,0.14)) !important; }
   html.theme-light .tln-bar .r4-nav-link.is-active { color: #ffffff !important; background: linear-gradient(120deg, var(--r4-blue), var(--r4-blue-bright)) !important; }
+  /* Dans cette même layer, l'accents violet/vert gardent leur couleur propre à l'état actif. */
+  html.theme-light .tln-bar .r4-nav-link.nav-accent-purple.is-active {
+    color: #ffffff !important;
+    background: linear-gradient(120deg, #8b6bff, #c4b1ff) !important;
+    box-shadow: 0 0 0 1px rgba(220,208,255,0.7), 0 6px 26px rgba(124,92,255,0.85), 0 0 44px rgba(167,139,250,0.85) !important;
+    animation: r4PurplePulse 2.4s ease-in-out infinite !important;
+  }
+  html.theme-light .tln-bar .r4-nav-link.nav-accent-green.is-active {
+    color: #ffffff !important;
+    background: linear-gradient(120deg, rgba(110,255,205,0.6), rgba(53,200,152,0.95)) !important;
+    animation: r4GreenPulse 2.4s ease-in-out infinite !important;
+  }
   html.theme-light .tln-bar .nav-phone-block {
-    background: linear-gradient(120deg, rgba(0,243,255,0.24), rgba(5,18,45,0.62)) !important;
-    border-color: rgba(0,243,255,0.55) !important;
+    background: linear-gradient(120deg, rgba(0,243,255,0.14), rgba(5,18,45,0.62)) !important;
+    border-color: rgba(0,243,255,0.32) !important;
     color: #ffffff !important;
   }
-  html.theme-light .tln-bar .nav-phone-number { color: #00f3ff !important; text-shadow: 0 0 14px rgba(0,243,255,0.9) !important; }
+  html.theme-light .tln-bar .nav-phone-number { color: #00f3ff !important; text-shadow: 0 0 5px rgba(0,243,255,0.35) !important; }
   html.theme-light .tln-bar .nav-phone-sub { color: #00ff7f !important; }
 
 
@@ -5907,7 +5917,7 @@ html.theme-light .nav-phone-block {
   border-color: rgba(0,243,255,0.45) !important;
   color: #0f1526 !important;
 }
-html.theme-light .nav-phone-number { color: #008ea8 !important; text-shadow: 0 0 10px rgba(0,243,255,0.5) !important; }
+html.theme-light .nav-phone-number { color: #008ea8 !important; text-shadow: 0 0 4px rgba(0,243,255,0.3) !important; }
 html.theme-light .nav-phone-sub { color: #00a05a !important; }
 html.theme-light .mnav-phone-label { color: #008ea8 !important; }
 html.theme-light .mnav-bar {
@@ -8714,6 +8724,20 @@ body:not(.is-driver-app) :where(
 }
 @keyframes ligneoBlueFlow { to { background-position: 240% 0; } }
 
+/* Les accents de nav gardent leur couleur propre à l'état actif
+   (sinon la règle bleue générale ci-dessus écrase le violet). */
+body:not(.is-driver-app) .r4-nav-link.nav-accent-purple.is-active {
+  background-image: linear-gradient(120deg, #8b6bff, #c4b1ff) !important;
+  background-size: auto !important;
+  box-shadow: 0 0 0 1px rgba(220,208,255,0.7), 0 6px 26px rgba(124,92,255,0.85), 0 0 44px rgba(167,139,250,0.85) !important;
+  animation: r4PurplePulse 2.4s ease-in-out infinite !important;
+}
+body:not(.is-driver-app) .r4-nav-link.nav-accent-green.is-active {
+  background-image: linear-gradient(120deg, rgba(110,255,205,0.6), rgba(53,200,152,0.95)) !important;
+  background-size: auto !important;
+  animation: r4GreenPulse 2.4s ease-in-out infinite !important;
+}
+
 /* Le hero reste sombre en mode clair : ses petites légendes doivent rester visibles. */
 html.theme-light .r4-page .v5-hero .electric-neon-text,
 html.theme-light .r4-page .v5-hero .v4-accent {
@@ -9570,3 +9594,51 @@ body .tln-sheen { display: none; }
 .notif-neon-icon svg { filter: drop-shadow(0 0 4px rgba(var(--neon-rgb),.8)); }
 .notif-neon-title { color: var(--neon-soft); text-shadow: 0 0 10px rgba(var(--neon-rgb),.55), 0 0 20px rgba(var(--neon-rgb),.3); }
 .notif-neon-bar { background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb),.75); }
+
+/* Couleur néon par défaut du toaster (bleu) ; les classes neon-green/neon-blue la surchargent */
+.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
+
+/* Bouton d'action des notifications (ex. « Valider ») : vivant, néon, réactif */
+.ligneo-neon-toaster [data-sonner-toast] [data-button] {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: .3px;
+  color: #04102e !important;
+  background: linear-gradient(120deg, var(--neon), var(--neon-soft)) !important;
+  border: 1px solid rgba(var(--neon-rgb),.65) !important;
+  border-radius: 10px !important;
+  padding: 7px 16px !important;
+  box-shadow: 0 4px 16px -4px rgba(var(--neon-rgb),.55), 0 0 14px rgba(var(--neon-rgb),.35), inset 0 1px 0 rgba(255,255,255,.35) !important;
+  transition: transform .18s ease, box-shadow .25s ease, filter .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.4) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:hover {
+  transform: translateY(-1px) scale(1.03);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 24px -6px rgba(var(--neon-rgb),.8), 0 0 22px rgba(var(--neon-rgb),.55), inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:hover::after { transform: translateX(120%); }
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:active { transform: scale(.97); }
+.ligneo-neon-toaster [data-sonner-toast] [data-cancel] {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  color: rgba(255,255,255,.75) !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 10px !important;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-cancel]:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.25) !important;
+}
