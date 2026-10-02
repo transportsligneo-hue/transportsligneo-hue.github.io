@@ -48,25 +48,8 @@ const STEPS = [
 export function ProFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Lecture automatique dès que la vidéo entre dans le viewport
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.35 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
+  // Lecture automatique avec le son, dès que la vidéo entre dans le viewport
+  useAutoplayWithSound(videoRef);
 
   return (
     <section className="v4-section pro-film" aria-label="Parcours professionnel en vidéo">
