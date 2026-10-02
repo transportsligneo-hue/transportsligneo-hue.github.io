@@ -9343,6 +9343,32 @@ body .tln-sheen { display: none; }
 .r4-page .ccm-actions { border-top: 1px solid #e6e9f4; padding-top: 17px; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 22px; }
 .r4-page .ccm-actions li { color: #0d1330; display: flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 600; }
 .r4-page .ccm-actions li::before { content: ''; width: 7px; height: 7px; background: #2f5fff; border-radius: 50%; flex: 0 0 7px; }
+/* The lower sections on the light timeline page need their own light-surface contrast. */
+@media (min-width: 768px) {
+  .r4-page:has(.ccm-hero) {
+    --ccm-ink: #0d1330;
+    --ccm-muted: #505b73;
+    --ccm-panel: #fff;
+    --ccm-border: #dbe3f4;
+  }
+  .r4-page:has(.ccm-hero) .v4-section-head h2,
+  .r4-page:has(.ccm-hero) .v5-feat-card :is(h3,h4),
+  .r4-page:has(.ccm-hero) .v4-cta-box h2 { color: var(--ccm-ink); }
+  .r4-page:has(.ccm-hero) .v4-section-head p,
+  .r4-page:has(.ccm-hero) .v5-feat-card p,
+  .r4-page:has(.ccm-hero) .v4-cta-box p,
+  .r4-page:has(.ccm-hero) .v4-stat .l,
+  .r4-page:has(.ccm-hero) .v5-trust-row { color: var(--ccm-muted); }
+  .r4-page:has(.ccm-hero) .v5-feat-card {
+    background: var(--ccm-panel);
+    border-color: var(--ccm-border);
+  }
+  .r4-page:has(.ccm-hero) .v4-cta-box {
+    background: var(--ccm-panel);
+    border-color: var(--ccm-border);
+  }
+  .r4-page:has(.ccm-hero) .v4-btn-outline { color: #1c3fc4; border-color: #2f5fff; }
+}
 @media(max-width: 720px) { .developer-page { padding-top: 110px; } .developer-grid, .developer-code { grid-template-columns: 1fr; } .developer-code > div { padding: 0; } .developer-code > div:first-child { border-right: 0; border-bottom: 1px solid #ffffff33; padding-bottom: 24px; margin-bottom: 24px; } .developer-gate { margin-inline: 16px; } .r4-page .ccm-step { gap: 16px; } .r4-page .ccm-rail { width: 60px; flex-basis: 60px; } .r4-page .ccm-node { width: 60px; height: 60px; } .r4-page .ccm-card { padding: 26px 18px; } .r4-page .ccm-actions { grid-template-columns: 1fr; } }
 @media(prefers-reduced-motion: reduce) { .r4-page .ccm-line { animation: none; } .r4-page .ccm-card, .r4-page .ccm-icon, .developer-button { transition: none; } }
 

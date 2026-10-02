@@ -253,7 +253,7 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
                 )}
               </div>
             )}
-            {!gpsFresh && !isFinished && (
+            {lastRecordedAt && !gpsFresh && !isFinished && (
               <div className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-xs font-medium text-amber-800">
                 <AlertTriangle size={14} /> Position GPS non actualisée · emplacement actuel inconnu
               </div>
