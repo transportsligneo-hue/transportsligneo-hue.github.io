@@ -9398,7 +9398,7 @@ body .tln-sheen { display: none; }
   .mhome-root #mobile-devis { margin-top: 0; padding-top: 16px; scroll-margin-top: 72px; }
   .mhome-root .dg-flat { transform: none; }
   .mhome-root .dg-flat-field { background: var(--public-mobile-surface); border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent); border-radius: 8px; }
-  .mhome-root .dg-flat-input { color: var(--public-mobile-text); }
+  html .mhome-root .dg-estimator--flat input.dg-flat-input { color: var(--public-mobile-text) !important; color-scheme: dark; }
   .mhome-root .dg-flat-input::placeholder { color: var(--public-mobile-muted); opacity: 1; }
   .mhome-root .dg-flat-label, .mhome-root .dg-flat-label svg { color: var(--public-mobile-cyan); }
   .mhome-root .dg-flat-trust span { border-radius: 8px; }
@@ -9426,15 +9426,30 @@ body .tln-sheen { display: none; }
   html.theme-light .mhome-root { background: var(--public-mobile-bg) !important; color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root :is(.text-white,.text-cream) { color: var(--public-mobile-text) !important; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-field { background: var(--public-mobile-surface) !important; border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important; }
-  html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input { color: var(--public-mobile-text) !important; }
+  html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input { color: var(--public-mobile-text) !important; color-scheme: dark; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-input::placeholder { color: var(--public-mobile-muted) !important; }
   html.theme-light .mhome-root .dg-estimator--flat .dg-flat-toggle { background: var(--public-mobile-surface) !important; color: var(--public-mobile-text) !important; border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important; }
+  /* The older light-theme rules turn these home-page details white even on the navy mobile shell. */
+  .mhome-root .dg-flat-trust span,
+  html.theme-light .mhome-root .dg-flat-trust span {
+    background: var(--public-mobile-surface) !important;
+    border-color: color-mix(in srgb,var(--public-mobile-cyan) 22%,transparent) !important;
+    color: var(--public-mobile-text) !important;
+  }
+  html.theme-light .mhome-root .mhome-hero .neon-accent { color: var(--public-mobile-blue) !important; }
+  .mhome-root .dg-flat-hint,
+  html.theme-light .mhome-root .dg-flat-hint { color: var(--public-mobile-muted) !important; }
   html.theme-light .r4-page { background: var(--public-mobile-bg) !important; color: var(--public-mobile-text) !important; }
   html.theme-light .r4-page :is(.v4-h1,.v4-section-head h2,.v4-b2b-hero h1,.v4-hero h1,.v4-hero h2,.v4-split-text h2,.v4-cta-box h2,.v4-svc-card h3,.v4-aud-card h3,.v4-feat-card h3,.v4-row-text .t) { color: var(--public-mobile-text) !important; }
   html.theme-light .r4-page :is(.v4-hero p,.v4-section-head p,.v4-b2b-hero p,.v4-split-text p,.v4-svc-card p,.v4-aud-card p,.v4-feat-card p) { color: var(--public-mobile-muted) !important; }
   html.theme-light .r4-page :is(.v4-hero-panel,.v4-svc-card,.v4-aud-card,.v4-feat-card,.v4-value-card,.v4-glass,.v4-tl-body) { background: var(--public-mobile-surface) !important; border-color: rgba(93,224,255,.17) !important; }
   html.theme-light .r4-page .ccm-hero h1, html.theme-light .r4-page .ccm-card h2, html.theme-light .r4-page .ccm-actions li { color: var(--public-mobile-text) !important; }
   html.theme-light .r4-page .ccm-hero p, html.theme-light .r4-page .ccm-card p { color: var(--public-mobile-muted) !important; }
+}
+/* The compact public header is also used between tablet and desktop widths. */
+@media (min-width: 768px) and (max-width: 1535px) {
+  .mnav-bar .mnav-wordmark span,
+  html.theme-light .mnav-bar .mnav-wordmark span { color: var(--neon-blue) !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mnav-sheet { transition: none; }
