@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { User, Users2, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
 import filmParcoursMission from "@/assets/presentation-particuliers-voix.mp4.asset.json";
+import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
 
@@ -67,25 +68,8 @@ export default function ServicesContent({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Lecture automatique dès que la vidéo entre dans le viewport
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.35 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, [audience]);
+  // Lecture automatique avec le son, dès que la vidéo entre dans le viewport
+  useAutoplayWithSound(videoRef, audience === "particuliers");
 
   return (
     <div className="r4-page">
@@ -143,7 +127,6 @@ export default function ServicesContent({
                 ref={videoRef}
                 src={filmParcoursMission.url}
                 controls
-                muted
                 playsInline
                 preload="auto"
                 style={{ display: "block", width: "100%", height: "auto" }}
