@@ -9289,6 +9289,16 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
 .r4-page .hx-switch-btn--driver:hover { background: color-mix(in srgb, var(--home-driver) 28%, transparent); border-color: var(--home-driver); }
 .dc-film { width: 100%; margin: 0 auto 28px; border: 1px solid color-mix(in srgb, var(--home-driver) 45%, transparent); border-radius: 8px; overflow: hidden; background: var(--background); box-shadow: 0 16px 40px -24px var(--home-driver); }
 .dc-film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
+/* Public professional presentations: the two films stay on marketing pages. */
+.r4-page .pro-presentations { --presentation-business: var(--v4-blue-bright); --presentation-driver: var(--home-driver); }
+.r4-page .pro-presentations-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); max-width: 1150px; margin-inline: auto; }
+.r4-page .pro-presentation { min-width: 0; text-align: center; }
+.r4-page .pro-presentation h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--foreground); margin-bottom: 16px; }
+.r4-page .pro-presentation video { display: block; width: 100%; aspect-ratio: 16 / 9; background: var(--v4-navy); object-fit: contain; border: 1px solid var(--presentation-business); border-radius: 8px; box-shadow: 0 16px 36px -24px var(--presentation-business); }
+.r4-page .pro-presentation--driver video { border-color: var(--presentation-driver); box-shadow: 0 16px 36px -24px var(--presentation-driver); }
+.r4-page .pro-presentation-logo { display: block; width: clamp(72px, 10vw, 112px); aspect-ratio: 1; object-fit: cover; margin: 16px auto 0; border-radius: 8px; transform: rotate(-8deg); box-shadow: 0 12px 28px -12px var(--presentation-business); }
+.r4-page .pro-presentation--driver .pro-presentation-logo { transform: rotate(8deg); box-shadow: 0 12px 28px -12px var(--presentation-driver); }
+@media (max-width: 767px) { .r4-page .pro-presentations-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; } }
 @media (max-width: 767px) {
   .mhome-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .mhome-path { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 58px; padding: 9px 10px; border-radius: 8px; background: color-mix(in srgb, var(--public-mobile-blue) 12%, transparent); border: 1px solid color-mix(in srgb, var(--public-mobile-blue) 42%, transparent); color: var(--public-mobile-text); font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.25; }

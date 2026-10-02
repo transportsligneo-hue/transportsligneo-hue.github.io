@@ -15,6 +15,8 @@ export const Route = createFileRoute("/services")({
       { name: "description", content: "Convoyage automobile pour particuliers et professionnels : livraison, transferts inter-agences, partenariats, rapatriement." },
       { property: "og:title", content: "Nos services · Transports Ligneo" },
       { property: "og:description", content: "Des solutions de convoyage pour particuliers et professionnels." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://transportsligneo.fr/services" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/services" }],
