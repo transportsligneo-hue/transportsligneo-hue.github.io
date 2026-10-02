@@ -3,7 +3,7 @@
  * positionnement responsive (top-center mobile / top-right desktop), animations 60fps
  * respectant prefers-reduced-motion. Compatible avec tous les appels `toast.*` existants.
  */
-import { Toaster as Sonner } from "sonner";
+import { Toaster as Sonner, toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { detectActor, variantFromRole } from "@/lib/neon-notifications";
@@ -34,6 +34,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
     return () => mo.disconnect();
   }, [variant]);
 
+  // Fermeture au clic en dehors d'un toast
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("[data-sonner-toast]")) return;
+      if (wrapRef.current?.querySelector("[data-sonner-toast]")) toast.dismiss();
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
     const onChange = () => setIsMobile(mq.matches);
@@ -51,7 +62,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       gap={12}
       offset={isMobile ? 16 : 20}
       swipeDirections={isMobile ? ["top", "left", "right"] : ["right"]}
-      duration={5000}
+      duration={3500}
       closeButton
       toastOptions={{
         unstyled: false,
