@@ -9274,6 +9274,31 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
   border-color: #a794ff;
 }
 
+/* Driver accent shared by the public home paths. */
+:root {
+  --home-driver: #2ee671;
+  --home-driver-soft: color-mix(in srgb, var(--home-driver) 16%, transparent);
+  --home-pro: #a794ff;
+}
+.r4-page .hx-switch-btn--driver {
+  background: var(--home-driver-soft);
+  border-color: color-mix(in srgb, var(--home-driver) 60%, transparent);
+  color: var(--public-mobile-text);
+}
+.r4-page .hx-switch-btn--driver svg { color: var(--home-driver); filter: drop-shadow(0 0 6px var(--home-driver)); }
+.r4-page .hx-switch-btn--driver:hover { background: color-mix(in srgb, var(--home-driver) 28%, transparent); border-color: var(--home-driver); }
+.dc-film { width: 100%; margin: 0 auto 28px; border: 1px solid color-mix(in srgb, var(--home-driver) 45%, transparent); border-radius: 8px; overflow: hidden; background: var(--background); box-shadow: 0 16px 40px -24px var(--home-driver); }
+.dc-film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
+@media (max-width: 767px) {
+  .mhome-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .mhome-path { display: flex; align-items: center; gap: 7px; min-width: 0; min-height: 58px; padding: 9px 10px; border-radius: 8px; background: color-mix(in srgb, var(--public-mobile-blue) 12%, transparent); border: 1px solid color-mix(in srgb, var(--public-mobile-blue) 42%, transparent); color: var(--public-mobile-text); font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; line-height: 1.25; }
+  .mhome-path svg { flex: none; color: var(--public-mobile-blue); }
+  .mhome-path--pro { background: color-mix(in srgb, var(--home-pro) 18%, transparent); border-color: color-mix(in srgb, var(--home-pro) 60%, transparent); }
+  .mhome-path--pro svg { color: var(--home-pro); }
+  .mhome-path--driver { background: var(--home-driver-soft); border-color: color-mix(in srgb, var(--home-driver) 60%, transparent); }
+  .mhome-path--driver svg { color: var(--home-driver); filter: drop-shadow(0 0 5px var(--home-driver)); }
+}
+
 /* Navigation public: fixed footprint and dropdown above the clipped bar. */
 body .tln-shell, body .tln-bar, body .tln-brand { transform: none !important; transition: none !important; }
 body .tln-bar { overflow: visible !important; }

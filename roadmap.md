@@ -1,4 +1,5 @@
 ## Sécurité GitHub et pages publiques
+- [x] Rétablir les accès convoyeur et client depuis l’accueil et présenter la vidéo Driver sans rouvrir les inscriptions
 - [ ] Nettoyer les fichiers d’environnement suivis et ignorer les futures copies ; signaler la purge historique GitHub et la restauration des variables publiques
 - [ ] Figer la navigation, sortir le menu pro, adapter la page API et garder une seule timeline de 4 étapes
 

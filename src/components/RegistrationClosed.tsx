@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Lock, ArrowRight } from "lucide-react";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
+import driverPresentation from "@/assets/presentation-driver-browser.webm.asset.json";
 
 const LABELS: Record<RegistrationClosedProps["kind"], string> = {
   client: "compte particulier",
@@ -17,7 +18,7 @@ export function RegistrationClosed({ kind }: RegistrationClosedProps) {
   const isApp = useIsMobileAppShell();
   return (
     <div className={`auth-shell flex items-center justify-center px-4 py-10 ${isApp ? "driver-closed" : ""}`}>
-      <div className="max-w-md w-full auth-fade-in registration-closed-card">
+      <div className={`w-full auth-fade-in registration-closed-card ${kind === "convoyeur" ? "max-w-2xl" : "max-w-md"}`}>
         <div className="auth-card p-8 text-center space-y-4">
           <div className="mx-auto h-14 w-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center closed-lock-ring">
             <Lock className="text-white/80 closed-lock-icon" size={28} />
@@ -26,6 +27,11 @@ export function RegistrationClosed({ kind }: RegistrationClosedProps) {
           <p className="auth-subtle text-sm leading-relaxed closed-message">
             Les inscriptions pour un {LABELS[kind]} sont momentanément fermées. Revenez bientôt ou contactez-nous.
           </p>
+          {kind === "convoyeur" && (
+            <div className="dc-film">
+              <video src={driverPresentation.url} controls playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
+            </div>
+          )}
           <div className="text-white/50 text-xs space-y-1 pt-3 border-t border-white/10 closed-contact">
             <p>Pour toute question : contact@transportsligneo.fr</p>
           </div>
