@@ -56,6 +56,8 @@ export default function ProSegment() {
         </div>
       </div>
 
+      <ProFilm />
+
       {/* Pour qui */}
       <div className="v4-section">
         <div className="v4-section-head">
@@ -75,7 +77,6 @@ export default function ProSegment() {
         </div>
       </div>
 
-      <ProFilm />
 
       {/* Fonctionnalités */}
       <div className="v4-section">
