@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { User, Users2, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
-import filmParcoursMission from "@/assets/film-parcours-mission.mp4.asset.json";
+import filmParcoursMission from "@/assets/presentation-particuliers-voix.mp4.asset.json";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
 
