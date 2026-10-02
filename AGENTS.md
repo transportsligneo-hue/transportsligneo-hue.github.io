@@ -1,0 +1,1 @@
+- Keep the public mobile navigation and color treatment scoped below 768px in MobileNavbar and the public mobile CSS; desktop marketing and signed-in workspaces remain independent so mobile presentation changes cannot alter their workflows.

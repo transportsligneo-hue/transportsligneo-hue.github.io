@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import ProfilMetierPage from "@/components/marketing/ProfilMetierPage";
 
 const T = "Convoyage pour loueurs · Transports Ligneo";
-const D = "Automatisez les rotations de véhicules entre agences : repositionnement, fins de contrat, pics saisonniers, et API partenaires.";
+const description = "Automatisez les rotations de véhicules entre agences : repositionnement, fins de contrat, pics saisonniers, et API partenaires.";
 
 export const Route = createFileRoute("/loueurs")({
   component: () => (
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/loueurs")({
       eyebrow="Loueurs"
       title="Automatisez les rotations de véhicules"
       accent="entre agences."
-      subtitle={D}
+      subtitle="Automatisez les rotations de véhicules entre agences : repositionnement, fins de contrat, pics saisonniers, et API partenaires."
       benefits={[
         { t: "Repositionnement entre agences", d: "Rééquilibrez votre parc là où la demande se trouve." },
         { t: "Planifiez plusieurs convoyages en une seule opération", d: "Missions groupées pour vos rotations." },
@@ -29,8 +29,8 @@ export const Route = createFileRoute("/loueurs")({
   ),
   head: () => ({
     meta: [
-      { title: T }, { name: "description", content: D },
-      { property: "og:title", content: T }, { property: "og:description", content: D },
+      { title: T }, { name: "description", content: description },
+      { property: "og:title", content: T }, { property: "og:description", content: description },
       { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     ],
   }),
