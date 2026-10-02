@@ -9582,3 +9582,51 @@ body .tln-sheen { display: none; }
 .notif-neon-icon svg { filter: drop-shadow(0 0 4px rgba(var(--neon-rgb),.8)); }
 .notif-neon-title { color: var(--neon-soft); text-shadow: 0 0 10px rgba(var(--neon-rgb),.55), 0 0 20px rgba(var(--neon-rgb),.3); }
 .notif-neon-bar { background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb),.75); }
+
+/* Couleur néon par défaut du toaster (bleu) ; les classes neon-green/neon-blue la surchargent */
+.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
+
+/* Bouton d'action des notifications (ex. « Valider ») : vivant, néon, réactif */
+.ligneo-neon-toaster [data-sonner-toast] [data-button] {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: .3px;
+  color: #04102e !important;
+  background: linear-gradient(120deg, var(--neon), var(--neon-soft)) !important;
+  border: 1px solid rgba(var(--neon-rgb),.65) !important;
+  border-radius: 10px !important;
+  padding: 7px 16px !important;
+  box-shadow: 0 4px 16px -4px rgba(var(--neon-rgb),.55), 0 0 14px rgba(var(--neon-rgb),.35), inset 0 1px 0 rgba(255,255,255,.35) !important;
+  transition: transform .18s ease, box-shadow .25s ease, filter .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,.4) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:hover {
+  transform: translateY(-1px) scale(1.03);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 24px -6px rgba(var(--neon-rgb),.8), 0 0 22px rgba(var(--neon-rgb),.55), inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:hover::after { transform: translateX(120%); }
+.ligneo-neon-toaster [data-sonner-toast] [data-button]:active { transform: scale(.97); }
+.ligneo-neon-toaster [data-sonner-toast] [data-cancel] {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  color: rgba(255,255,255,.75) !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 10px !important;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-cancel]:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.25) !important;
+}
