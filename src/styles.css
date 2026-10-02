@@ -9345,7 +9345,7 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
 }
 .r4-page .hx-switch-btn--driver svg { color: var(--home-driver); filter: drop-shadow(0 0 6px var(--home-driver)); }
 .r4-page .hx-switch-btn--driver:hover { background: color-mix(in srgb, var(--home-driver) 28%, transparent); border-color: var(--home-driver); }
-.dc-film { width: 100%; margin: 0 auto 28px; border: 1px solid color-mix(in srgb, var(--home-driver) 45%, transparent); border-radius: 8px; overflow: hidden; background: var(--background); box-shadow: 0 16px 40px -24px var(--home-driver); }
+.dc-film { width: 100%; margin: 0 auto 28px; border: 1px solid color-mix(in srgb, var(--home-driver) 60%, transparent); border-radius: 8px; overflow: hidden; background: var(--background); box-shadow: 0 0 0 1px color-mix(in srgb, var(--home-driver) 22%, transparent), 0 0 26px -4px color-mix(in srgb, var(--home-driver) 50%, transparent), 0 24px 60px -24px color-mix(in srgb, var(--home-driver) 55%, transparent); }
 .dc-film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
 
 /* Contour néon des vidéos de présentation — même traitement que l'espace convoyeur, couleur par audience */
