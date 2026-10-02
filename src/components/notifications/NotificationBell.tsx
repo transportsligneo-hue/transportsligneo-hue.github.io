@@ -12,6 +12,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelativeTime } from "@/lib/notify";
+import { neonClass, resolveTone, variantFromRole, type NeonVariant } from "@/lib/neon-notifications";
 
 interface UserNotif {
   id: string;
@@ -35,7 +36,7 @@ const CATEGORY_META: Record<string, { Icon: LucideIcon; bg: string; text: string
 };
 
 export function NotificationBell({ className = "" }: { className?: string }) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const router = useRouter();
   const channelId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [open, setOpen] = useState(false);
@@ -110,7 +111,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
 
 
   return <NotifPanelView user={!!user} open={open} setOpen={setOpen} unread={unread} items={items}
-    markRead={markRead} onNavigate={(to) => router.navigate({ to })} className={className} />;
+    variant={variantFromRole(role)} markRead={markRead} onNavigate={(to) => router.navigate({ to })} className={className} />;
 }
 
 const KEYWORDS = /(nouvelle destination|nouvelle adresse|date souhaitée|dates?|heures?|adresses?|destination|plaque)/gi;
@@ -129,15 +130,11 @@ function kindOf(n: UserNotif): "new" | "edit" | "ops" | "other" {
   return "other";
 }
 
-const KIND_STYLE = {
-  new: { bg: "rgba(47,95,255,.16)", color: "#5b83ff" },
-  edit: { bg: "rgba(255,184,92,.14)", color: "#ffb85c" },
-  ops: { bg: "rgba(93,224,255,.14)", color: "#5de0ff" },
-};
 
 function NotifPanelView({
-  user, open, setOpen, unread, items, markRead, onNavigate, className,
+  user, open, setOpen, unread, items, markRead, onNavigate, className, variant,
 }: {
+  variant: NeonVariant;
   user: boolean; open: boolean; setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   unread: number; items: UserNotif[]; markRead: (id: string) => void;
   onNavigate: (to: string) => void; className: string;
@@ -243,7 +240,7 @@ function NotifPanelView({
                     const kind = kindOf(n);
                     const meta = CATEGORY_META[n.category] ?? CATEGORY_META.systeme;
                     const Icon = kind === "edit" ? Pencil : kind === "other" ? meta.Icon : Truck;
-                    const st = kind === "other" ? null : KIND_STYLE[kind];
+                    const tone = neonClass(resolveTone(variant, undefined, `${n.titre} ${n.type} ${n.message ?? ""}`));
                     const target = n.link && n.link.startsWith("/") ? n.link : null;
                     return (
                       <li key={n.id}>
@@ -253,20 +250,19 @@ function NotifPanelView({
                             markRead(n.id);
                             if (target) { setOpen(false); onNavigate(target); }
                           }}
-                          className="relative w-full flex gap-3.5 px-5 py-4 text-left border-b border-white/[0.08] hover:bg-white/[0.04] transition"
+                          className={`${tone} relative w-full flex gap-3.5 px-5 py-4 text-left border-b border-white/[0.08] hover:bg-white/[0.04] transition`}
                         >
                           {!n.lu && (
-                            <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: "linear-gradient(180deg,#2f5fff,#5de0ff)" }} />
+                            <span className="notif-neon-bar absolute left-0 top-0 bottom-0 w-[3px]" />
                           )}
                           <span
-                            className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${st ? "" : `${meta.bg} ${meta.text}`}`}
-                            style={st ? { background: st.bg, color: st.color } : undefined}
+                            className="notif-neon-icon shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
                           >
                             <Icon size={18} strokeWidth={1.8} />
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2.5">
-                              <p className="text-[14px] font-bold leading-snug">{n.titre}</p>
+                              <p className="notif-neon-title text-[14px] font-bold leading-snug">{n.titre}</p>
                               <span className="shrink-0 mt-0.5 text-[10.5px] font-semibold text-white/50 whitespace-nowrap">
                                 {formatRelativeTime(n.created_at)}
                               </span>

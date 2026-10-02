@@ -3,13 +3,47 @@
  * positionnement responsive (top-center mobile / top-right desktop), animations 60fps
  * respectant prefers-reduced-motion. Compatible avec tous les appels `toast.*` existants.
  */
-import { Toaster as Sonner } from "sonner";
-import { useEffect, useState } from "react";
+import { Toaster as Sonner, toast } from "sonner";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { detectActor, variantFromRole } from "@/lib/neon-notifications";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [isMobile, setIsMobile] = useState(false);
+  const { role } = useAuth();
+  const variant = variantFromRole(role);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Admin : bascule chaque toast en vert si le texte concerne un convoyeur/expéditeur.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const apply = () => {
+      el.querySelectorAll<HTMLElement>("[data-sonner-toast]").forEach((t) => {
+        if (t.classList.contains("neon-green") || t.classList.contains("neon-blue")) return;
+        let tone = variant === "driver" ? "neon-green" : "neon-blue";
+        if (variant === "admin") tone = detectActor(t.textContent ?? "") === "driver" ? "neon-green" : "neon-blue";
+        t.classList.add(tone);
+      });
+    };
+    apply();
+    const mo = new MutationObserver(apply);
+    mo.observe(el, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [variant]);
+
+  // Fermeture au clic en dehors d'un toast
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("[data-sonner-toast]")) return;
+      if (wrapRef.current?.querySelector("[data-sonner-toast]")) toast.dismiss();
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -20,6 +54,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   }, []);
 
   return (
+    <div ref={wrapRef} className="ligneo-neon-toaster" data-neon-variant={variant}>
     <Sonner
       position={isMobile ? "top-center" : "top-right"}
       expand
@@ -27,7 +62,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       gap={12}
       offset={isMobile ? 16 : 20}
       swipeDirections={isMobile ? ["top", "left", "right"] : ["right"]}
-      duration={5000}
+      duration={3500}
       closeButton
       toastOptions={{
         unstyled: false,
@@ -78,6 +113,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
+    </div>
   );
 };
 
