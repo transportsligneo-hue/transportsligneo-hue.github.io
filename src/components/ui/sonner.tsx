@@ -4,12 +4,35 @@
  * respectant prefers-reduced-motion. Compatible avec tous les appels `toast.*` existants.
  */
 import { Toaster as Sonner } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { detectActor, variantFromRole } from "@/lib/neon-notifications";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [isMobile, setIsMobile] = useState(false);
+  const { role } = useAuth();
+  const variant = variantFromRole(role);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Admin : bascule chaque toast en vert si le texte concerne un convoyeur/expéditeur.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const apply = () => {
+      el.querySelectorAll<HTMLElement>("[data-sonner-toast]").forEach((t) => {
+        if (t.classList.contains("neon-green") || t.classList.contains("neon-blue")) return;
+        let tone = variant === "driver" ? "neon-green" : "neon-blue";
+        if (variant === "admin") tone = detectActor(t.textContent ?? "") === "driver" ? "neon-green" : "neon-blue";
+        t.classList.add(tone);
+      });
+    };
+    apply();
+    const mo = new MutationObserver(apply);
+    mo.observe(el, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [variant]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -20,6 +43,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   }, []);
 
   return (
+    <div ref={wrapRef} className="ligneo-neon-toaster" data-neon-variant={variant}>
     <Sonner
       position={isMobile ? "top-center" : "top-right"}
       expand
@@ -78,6 +102,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
+    </div>
   );
 };
 
