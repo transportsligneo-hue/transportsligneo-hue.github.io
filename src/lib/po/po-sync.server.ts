@@ -577,3 +577,134 @@ export async function reconcileAllPo(): Promise<{ rapproches: number; reapplique
 }
 
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Avis de paiement GROUPE CAT (même libellé Gmail) → factures marquées payées
+// ─────────────────────────────────────────────────────────────────────────────
+
+const AVIS_SUBJECT_RE = /avis de paiement\s+groupe\s+cat\s+du\s+(\d{2})\.(\d{2})\.(\d{4})/i;
+
+export type AvisSyncResult = {
+  avis_traites: number;
+  factures_payees: number;
+  deja_payees: number;
+  a_verifier: number;
+  messages: string[];
+};
+
+/** Extrait les numéros de facture (colonne « Vos Réf. ») — ignore « Total Virement ». */
+export function extractFactureNumbers(text: string): { numero: string; key: string }[] {
+  const out = new Map<string, { numero: string; key: string }>();
+  for (const line of text.split(/\r?\n/)) {
+    if (/total\s+virement/i.test(line) && !/TLG-\d{4}/i.test(line)) continue;
+    const re = /\b([A-Z]{1,4})\s*-\s*TLG\s*-\s*(\d{4})\s*-\s*#?\s*(\d{1,6})\b/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(line))) {
+      const key = `TLG-${m[2]}-#${Number(m[3])}`;
+      if (!out.has(key)) out.set(key, { numero: `${m[1].toUpperCase()}-${key}`, key });
+    }
+  }
+  return [...out.values()];
+}
+
+async function findFacture(supabaseAdmin: AdminClient, key: string) {
+  const { data } = await supabaseAdmin
+    .from("factures")
+    .select("id, numero, statut")
+    .ilike("numero", `%${key}`)
+    .limit(2);
+  return data && data.length === 1 ? data[0] : null;
+}
+
+async function markPaid(supabaseAdmin: AdminClient, factureId: string, dateAvis: string | null) {
+  await supabaseAdmin
+    .from("factures")
+    .update({
+      statut: "payee",
+      date_paiement: dateAvis ?? new Date().toISOString().slice(0, 10),
+      paid_at: new Date().toISOString(),
+      mode_paiement: "virement",
+    } as never)
+    .eq("id", factureId)
+    .neq("statut", "payee");
+}
+
+export async function syncAvisPaiementFromGmail(maxMessages = 30): Promise<AvisSyncResult> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const result: AvisSyncResult = { avis_traites: 0, factures_payees: 0, deja_payees: 0, a_verifier: 0, messages: [] };
+
+  // 1) Relance la file « à vérifier » : une facture créée depuis peut maintenant correspondre.
+  const { data: pending } = await supabaseAdmin
+    .from("avis_paiement_lignes")
+    .select("id, numero_facture, date_avis")
+    .eq("resultat", "a_verifier");
+  for (const p of pending ?? []) {
+    const key = p.numero_facture.replace(/^[A-Z]{1,4}-/i, "");
+    const f = await findFacture(supabaseAdmin, key);
+    if (!f) continue;
+    if (f.statut !== "payee") { await markPaid(supabaseAdmin, f.id, p.date_avis); result.factures_payees++; }
+    await supabaseAdmin.from("avis_paiement_lignes").update({ resultat: "resolu", facture_id: f.id } as never).eq("id", p.id);
+  }
+
+  const labelId = await resolveLabelId();
+  if (!labelId) return result;
+  const q = encodeURIComponent('subject:"Avis de paiement GROUPE CAT"');
+  const list = await gmailGet<{ messages?: { id: string }[] }>(
+    `/users/me/messages?labelIds=${encodeURIComponent(labelId)}&q=${q}&maxResults=${Math.min(maxMessages, 100)}`,
+  );
+  const ids = (list.messages ?? []).map((m) => m.id);
+  if (!ids.length) return result;
+
+  const { data: done } = await supabaseAdmin.from("avis_paiement_emails").select("email_id").in("email_id", ids);
+  const doneSet = new Set((done ?? []).map((r) => r.email_id));
+
+  for (const id of ids) {
+    if (doneSet.has(id)) continue;
+    let subject: string | null = null;
+    try {
+      const msg = await gmailGet<GmailMessage>(`/users/me/messages/${id}?format=full`);
+      subject = headerValue(msg, "Subject");
+      const sm = subject ? AVIS_SUBJECT_RE.exec(subject) : null;
+      if (!sm) continue; // pas un avis de paiement : laissé au flux PO
+      const dateAvis = `${sm[3]}-${sm[2]}-${sm[1]}`;
+
+      const pdfPart = flattenParts(msg.payload).find(
+        (p) => /\.pdf$/i.test(p.filename ?? "") && p.body?.attachmentId &&
+          /avis\s*de\s*paiement/i.test(p.filename ?? ""),
+      ) ?? flattenParts(msg.payload).find((p) => /\.pdf$/i.test(p.filename ?? "") && p.body?.attachmentId);
+      if (!pdfPart) throw new Error("pièce jointe « Avis de paiement » introuvable");
+
+      const att = await gmailGet<{ data?: string }>(`/users/me/messages/${id}/attachments/${pdfPart.body!.attachmentId}`);
+      if (!att.data) throw new Error("pièce jointe vide");
+      const text = await pdfToText(base64UrlToBytes(att.data));
+      const numbers = extractFactureNumbers(text);
+
+      for (const n of numbers) {
+        const f = await findFacture(supabaseAdmin, n.key);
+        let resultat: "payee" | "deja_payee" | "a_verifier";
+        if (!f) { resultat = "a_verifier"; result.a_verifier++; }
+        else if (f.statut === "payee") { resultat = "deja_payee"; result.deja_payees++; }
+        else { await markPaid(supabaseAdmin, f.id, dateAvis); resultat = "payee"; result.factures_payees++; }
+        await supabaseAdmin.from("avis_paiement_lignes").upsert({
+          email_id: id, email_subject: subject, date_avis: dateAvis,
+          numero_facture: n.numero, facture_id: f?.id ?? null, resultat,
+        } as never, { onConflict: "email_id,numero_facture", ignoreDuplicates: true });
+      }
+      await supabaseAdmin.from("avis_paiement_emails").insert({
+        email_id: id, email_subject: subject, nb_lignes: numbers.length,
+        erreur: numbers.length ? null : "aucun numéro de facture trouvé",
+      } as never);
+      result.avis_traites++;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[AVIS] traitement échoué", id, message);
+      result.messages.push(`Avis ${subject ?? id} : ${message}`);
+    }
+  }
+  if (result.avis_traites) {
+    result.messages.push(
+      `${result.avis_traites} avis de paiement · ${result.factures_payees} facture(s) payée(s) · ${result.a_verifier} à vérifier`,
+    );
+  }
+  return result;
+}
