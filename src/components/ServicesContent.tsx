@@ -127,7 +127,6 @@ export default function ServicesContent({
                 ref={videoRef}
                 src={filmParcoursMission.url}
                 controls
-                muted
                 playsInline
                 preload="auto"
                 style={{ display: "block", width: "100%", height: "auto" }}
