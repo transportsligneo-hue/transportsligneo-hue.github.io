@@ -9290,7 +9290,7 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
 .dc-film { width: 100%; margin: 0 auto 28px; border: 1px solid color-mix(in srgb, var(--home-driver) 45%, transparent); border-radius: 8px; overflow: hidden; background: var(--background); box-shadow: 0 16px 40px -24px var(--home-driver); }
 .dc-film video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; }
 /* Public professional presentations: the two films stay on marketing pages. */
-.r4-page .pro-presentations { --presentation-business: var(--v4-blue-bright); --presentation-driver: var(--home-driver); }
+.r4-page .pro-presentations { --presentation-business: var(--v4-violet-glow, #a794ff); --presentation-driver: var(--home-driver); }
 .r4-page .pro-presentations-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); max-width: 1150px; margin-inline: auto; }
 .r4-page .pro-presentation { min-width: 0; text-align: center; }
 .r4-page .pro-presentation h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: var(--foreground); margin-bottom: 16px; }
