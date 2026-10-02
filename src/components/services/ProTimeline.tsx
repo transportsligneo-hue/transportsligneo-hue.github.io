@@ -67,7 +67,6 @@ export function ProFilm() {
           src={filmParcoursPro.url}
           poster={proPoster.url}
           controls
-          muted
           playsInline
           preload="auto"
           className="pro-film-video"
