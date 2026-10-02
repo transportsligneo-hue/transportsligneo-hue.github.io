@@ -121,21 +121,6 @@ export default function ServicesContent({
             <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un convoyeur professionnel prend en charge votre véhicule de l'enlèvement à la remise des clés, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
-          <div className="v4-section">
-            <div className="v4-services-grid">
-              {services.map(({ Icon, title, desc, tags }) => (
-                <div key={title} className="v4-svc-card">
-                  <div className="v4-svc-ic"><Icon size={22} strokeWidth={2} /></div>
-                  <h2>{title}</h2>
-                  <p>{desc}</p>
-                  <div className="v4-svc-tags">
-                    {tags.map((t) => <span key={t} className="v4-svc-tag">{t}</span>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <section className="v4-section" style={{ textAlign: "center" }}>
             <div className="v4-section-head">
 <div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
@@ -167,6 +152,21 @@ export default function ServicesContent({
               />
             </div>
           </section>
+
+          <div className="v4-section">
+            <div className="v4-services-grid">
+              {services.map(({ Icon, title, desc, tags }) => (
+                <div key={title} className="v4-svc-card">
+                  <div className="v4-svc-ic"><Icon size={22} strokeWidth={2} /></div>
+                  <h2>{title}</h2>
+                  <p>{desc}</p>
+                  <div className="v4-svc-tags">
+                    {tags.map((t) => <span key={t} className="v4-svc-tag">{t}</span>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           <ServicesPlateforme />
         </>
