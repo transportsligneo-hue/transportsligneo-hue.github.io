@@ -103,7 +103,24 @@ function AdminFacturesPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchFactures(); }, []);
+  useEffect(() => { fetchFactures(); fetchAvis(); }, []);
+
+  const [avisByFacture, setAvisByFacture] = useState<Record<string, string>>({});
+  const [aVerifier, setAVerifier] = useState<{ id: string; numero_facture: string; date_avis: string | null }[]>([]);
+  const fetchAvis = async () => {
+    const { data } = await supabase
+      .from("avis_paiement_lignes")
+      .select("id, numero_facture, facture_id, date_avis, resultat")
+      .order("created_at", { ascending: false });
+    const map: Record<string, string> = {};
+    const pending: { id: string; numero_facture: string; date_avis: string | null }[] = [];
+    for (const l of data ?? []) {
+      if (l.facture_id && !map[l.facture_id]) map[l.facture_id] = l.date_avis ?? "";
+      if (l.resultat === "a_verifier") pending.push(l);
+    }
+    setAvisByFacture(map);
+    setAVerifier(pending);
+  };
 
   const handleStatut = async (id: string, statut: string) => {
     const { error } = await supabase.from("factures").update({ statut }).eq("id", id);
@@ -220,7 +237,8 @@ function AdminFacturesPage() {
   };
 
   const filtered = factures.filter(f => {
-    if (statutFilter && f.statut !== statutFilter) return false;
+    if (statutFilter === "a_exporter") { if (f.statut === "payee" || f.statut === "annulee") return false; }
+    else if (statutFilter && f.statut !== statutFilter) return false;
     if (typeFilter && f.type_facture !== typeFilter) return false;
     if (search) {
       const q = search.toLowerCase();
@@ -249,6 +267,19 @@ function AdminFacturesPage() {
         <KpiCard label="En attente" value={eur(pending)} tone="warning" />
       </div>
 
+      {aVerifier.length > 0 && (
+        <Card className="mb-4">
+          <p className="text-sm font-semibold mb-2">À vérifier — numéros présents dans un avis de paiement GROUPE CAT sans facture correspondante</p>
+          <div className="flex flex-wrap gap-2">
+            {aVerifier.map(l => (
+              <span key={l.id} className="dvx-badge orange">
+                {l.numero_facture}{l.date_avis ? ` · avis du ${new Date(l.date_avis).toLocaleDateString("fr-FR")}` : ""}
+              </span>
+            ))}
+          </div>
+        </Card>
+      )}
+
       <Card className="mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex-1 min-w-[200px]">
@@ -261,6 +292,7 @@ function AdminFacturesPage() {
           </Select>
           <Select value={statutFilter} onChange={(e) => setStatutFilter(e.target.value)} className="text-sm">
             <option value="">Tous statuts</option>
+            <option value="a_exporter">Non payées · À exporter</option>
             {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </Select>
         </div>
@@ -297,9 +329,17 @@ function AdminFacturesPage() {
                       value={f.numero}
                       onSaved={(next: string) => setFactures((list) => list.map((x) => x.id === f.id ? { ...x, numero: next } : x))}
                     />
-                    <span className={`dvx-badge ${tone}`}>
-                      {STATUTS.find(s => s.value === f.statut)?.label ?? f.statut}
-                    </span>
+                    {f.statut === "payee" ? (
+                      <span className="dvx-badge green inline-flex items-center gap-1" title={avisByFacture[f.id] ? `Avis de paiement GROUPE CAT${avisByFacture[f.id] ? " du " + new Date(avisByFacture[f.id]).toLocaleDateString("fr-FR") : ""}` : undefined}>
+                        <CheckCircle2 size={12} /> Payée
+                      </span>
+                    ) : f.statut === "annulee" ? (
+                      <span className={`dvx-badge ${tone}`}>Annulée</span>
+                    ) : (
+                      <span className={`dvx-badge ${tone}`}>
+                        {f.statut === "en_retard" ? "En retard · " : ""}Non payée · À exporter
+                      </span>
+                    )}
                     <span className={`dvx-badge ${f.type_facture === "b2b" ? "violet" : "blue"}`}>
                       {f.type_facture === "b2b" ? "B2B" : "Particulier"}
                     </span>
