@@ -121,7 +121,7 @@ export default function ServicesContent({
             <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un convoyeur professionnel prend en charge votre véhicule de l'enlèvement à la remise des clés, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
-          <section className="v4-section" style={{ textAlign: "center" }}>
+          <section className="v4-section particuliers-film" style={{ textAlign: "center" }}>
             <div className="v4-section-head">
 <div className="v4-hero-eyebrow" style={{ display: "inline-flex", marginBottom: 14 }}>
                 <span className="dot" />Comment ça marche&nbsp;?
@@ -131,14 +131,12 @@ export default function ServicesContent({
               </h2>
             </div>
             <div
-              className="v4-video-wrap"
+              className="v4-video-wrap film-neon"
               style={{
                 maxWidth: 980,
                 margin: "0 auto",
                 borderRadius: 24,
                 overflow: "hidden",
-                border: "1px solid rgba(122,163,255,0.25)",
-                boxShadow: "0 24px 60px -24px rgba(11,16,38,0.45)",
               }}
             >
               <video
