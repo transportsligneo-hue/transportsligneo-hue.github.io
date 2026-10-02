@@ -102,10 +102,10 @@ export default function Navbar() {
               <Link to="/suivi" className="tln-track">
                 <MapPin size={13} /> Suivre mon véhicule
               </Link>
-              <a
-                href="tel:+33782456181"
+              <Link
+                to="/contact"
                 className="nav-phone-block tln-phone"
-                aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+                aria-label="Contact · Transports Ligneo · 07 82 45 61 81"
               >
                 <span className="nav-phone-icon">
                   <Phone size={15} strokeWidth={2.25} />
@@ -118,7 +118,7 @@ export default function Navbar() {
                     07 82 45 61 81 · 7j/7
                   </span>
                 </span>
-              </a>
+              </Link>
               <ThemePreference variant="compact" />
               <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
                 <User size={13} />
@@ -149,10 +149,10 @@ export default function Navbar() {
                 </li>
               ))}
               <li>
-                <a
-                  href="tel:+33782456181"
+                <Link
+                  to="/contact"
                   className="nav-phone-block"
-                  aria-label="Appeler Transports Ligneo · 07 82 45 61 81"
+                  aria-label="Contact · Transports Ligneo · 07 82 45 61 81"
                 >
                   <span className="nav-phone-icon">
                     <Phone size={15} strokeWidth={2.25} />
@@ -165,7 +165,7 @@ export default function Navbar() {
                       07 82 45 61 81 · 7j/7
                     </span>
                   </span>
-                </a>
+                </Link>
               </li>
               <li>
                 <ThemePreference variant="full" />
