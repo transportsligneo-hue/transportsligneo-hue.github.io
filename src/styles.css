@@ -5905,7 +5905,7 @@ html.theme-light .nav-phone-block {
   border-color: rgba(0,243,255,0.45) !important;
   color: #0f1526 !important;
 }
-html.theme-light .nav-phone-number { color: #008ea8 !important; text-shadow: 0 0 10px rgba(0,243,255,0.5) !important; }
+html.theme-light .nav-phone-number { color: #008ea8 !important; text-shadow: 0 0 4px rgba(0,243,255,0.3) !important; }
 html.theme-light .nav-phone-sub { color: #00a05a !important; }
 html.theme-light .mnav-phone-label { color: #008ea8 !important; }
 html.theme-light .mnav-bar {
