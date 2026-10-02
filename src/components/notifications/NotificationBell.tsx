@@ -130,11 +130,6 @@ function kindOf(n: UserNotif): "new" | "edit" | "ops" | "other" {
   return "other";
 }
 
-const KIND_STYLE = {
-  new: { bg: "rgba(47,95,255,.16)", color: "#5b83ff" },
-  edit: { bg: "rgba(255,184,92,.14)", color: "#ffb85c" },
-  ops: { bg: "rgba(93,224,255,.14)", color: "#5de0ff" },
-};
 
 function NotifPanelView({
   user, open, setOpen, unread, items, markRead, onNavigate, className, variant,
