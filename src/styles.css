@@ -3858,6 +3858,12 @@ body.is-driver-app .closed-link svg {
   --v4-ok:#4ad0a0;
 }
 
+/* Un .r4-page imbriqué dans un autre .r4-page ne doit pas s'étendre sur
+   toute la hauteur de l'écran (sinon bande vide géante entre le hero et
+   la section suivante sur les pages métier). */
+.r4-page .r4-page { min-height: 0; }
+
+
 @keyframes v4PulseGlow {
   0%,100%{text-shadow:0 0 18px rgba(91,143,255,0.8),0 0 40px rgba(91,143,255,0.5);}
   50%{text-shadow:0 0 26px rgba(91,143,255,1),0 0 54px rgba(91,143,255,0.7);}
