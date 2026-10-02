@@ -14,9 +14,9 @@ export const Route = createFileRoute('/api/public/hooks/gmail-po-sync')({
         }
 
         try {
-          const { syncPoFromGmail } = await import('@/lib/po/po-sync.server')
-          const result = await syncPoFromGmail(40)
-          return Response.json({ ok: true, ...result })
+          const { syncPoFromGmail, syncAvisPaiementFromGmail } = await import('@/lib/po/po-sync.server')
+          const [result, avis] = await Promise.all([syncPoFromGmail(40), syncAvisPaiementFromGmail(30)])
+          return Response.json({ ok: true, ...result, avis })
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err)
           console.error('[gmail-po-sync] échec', message)

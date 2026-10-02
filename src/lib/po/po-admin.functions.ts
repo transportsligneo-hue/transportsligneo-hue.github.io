@@ -151,8 +151,9 @@ export const searchDevisForPo = createServerFn({ method: "POST" })
 /** Import manuel depuis l'admin (bouton « Synchroniser Gmail »). */
 export const runGmailPoSync = createServerFn({ method: "POST" }).handler(async () => {
   await verifyAdminAccess();
-  const { syncPoFromGmail, reconcileAllPo } = await import("@/lib/po/po-sync.server");
-  const res = await syncPoFromGmail(40);
+  const { syncPoFromGmail, reconcileAllPo, syncAvisPaiementFromGmail } = await import("@/lib/po/po-sync.server");
+  const [res, avis] = await Promise.all([syncPoFromGmail(40), syncAvisPaiementFromGmail(30)]);
+  res.messages.push(...avis.messages);
   const rec = await reconcileAllPo();
   if (rec.rapproches || rec.reappliques) {
     res.rapproches += rec.rapproches;

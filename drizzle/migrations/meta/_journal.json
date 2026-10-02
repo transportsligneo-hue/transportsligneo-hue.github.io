@@ -162,6 +162,13 @@
       "when": 1790871065158,
       "tag": "0022_sync_trajet_prix_with_prix_client",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790976310817,
+      "tag": "0023_avis_paiement_cat",
+      "breakpoints": true
     }
   ]
 }
