@@ -594,7 +594,7 @@ export function MapboxLiveMap({
       </div>
 
       {/* Badge Live / Signal perdu */}
-      {(signalLost && !fleet?.length) ? (
+      {(signalLost && !fleet?.length && (last || isAdmin)) ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
           {!last ? "Aucune position GPS reçue" : isAdmin && signalAgeMin != null

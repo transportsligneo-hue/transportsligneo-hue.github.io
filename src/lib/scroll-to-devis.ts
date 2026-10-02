@@ -3,9 +3,9 @@
  * centré dans le viewport. À utiliser pour tous les boutons "Estimer / Estimer mon trajet".
  */
 export function scrollToDevis() {
-  const el =
-    document.getElementById("mobile-devis") ||
-    document.getElementById("devis");
+  const el = ["mobile-devis", "devis"]
+    .map((id) => document.getElementById(id))
+    .find((node) => node && node.getClientRects().length > 0);
   if (!el) return false;
   el.scrollIntoView({ behavior: "smooth", block: "center" });
   return true;
