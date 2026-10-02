@@ -9383,7 +9383,8 @@ body .tln-sheen { display: none; }
 }
 @media (max-width: 767px) {
   .mnav-bar { background: var(--public-mobile-bg) !important; border-bottom-color: color-mix(in srgb,var(--public-mobile-cyan) 24%,transparent) !important; }
-  .mnav-wordmark { font-family: 'Poppins', sans-serif; color: var(--public-mobile-text); }
+  .mnav-bar .mnav-wordmark,
+  html.theme-light .mnav-bar .mnav-wordmark { font-family: 'Poppins', sans-serif; color: var(--public-mobile-text) !important; }
   .mnav-bar .mnav-wordmark span,
   html.theme-light .mnav-bar .mnav-wordmark span { color: var(--public-mobile-blue) !important; }
   .mnav-menu-trigger { color: var(--public-mobile-text); background: var(--public-mobile-surface); border: 1px solid color-mix(in srgb,var(--public-mobile-cyan) 24%,transparent); border-radius: 8px; }
@@ -9449,6 +9450,8 @@ body .tln-sheen { display: none; }
 }
 /* The compact public header is also used between tablet and desktop widths. */
 @media (min-width: 768px) and (max-width: 1535px) {
+  .mnav-bar .mnav-wordmark,
+  html.theme-light .mnav-bar .mnav-wordmark { color: var(--public-mobile-text) !important; }
   .mnav-bar .mnav-wordmark span,
   html.theme-light .mnav-bar .mnav-wordmark span { color: var(--neon-blue) !important; }
 }
