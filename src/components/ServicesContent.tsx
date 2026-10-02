@@ -133,7 +133,7 @@ export default function ServicesContent({
             <div
               className="v4-video-wrap film-neon"
               style={{
-                maxWidth: 980,
+                maxWidth: 760,
                 margin: "0 auto",
                 borderRadius: 24,
                 overflow: "hidden",
