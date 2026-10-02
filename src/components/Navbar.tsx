@@ -6,9 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 import ThemePreference from "@/components/ThemePreference";
 
-type NavAccent = "purple" | "green" | undefined;
+type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
-  { to: "/services", label: "Particuliers", search: { audience: "particuliers" } },
+  { to: "/services", label: "Particuliers", search: { audience: "particuliers" }, accent: "blue" },
   { to: "/services", label: "Professionnels", search: { audience: "pro" }, accent: "purple" },
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/tarifs", label: "Tarifs" },
@@ -69,7 +69,7 @@ export default function Navbar() {
 
             <ul className="tln-links">
               {navLinks.map((l) => {
-                const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : "";
+                const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : l.accent === "blue" ? " nav-accent-blue" : "";
                 const isPro = l.label === "Professionnels";
                 return (
                   <li key={`${l.to}-${l.search?.audience ?? ""}`} className={isPro ? "tln-dd" : undefined}>
