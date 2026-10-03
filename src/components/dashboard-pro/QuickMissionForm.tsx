@@ -11,6 +11,7 @@ import { notifyAdmin } from "@/lib/admin-notifications";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
+import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { lookupPlate } from "@/lib/plate.functions";
 import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
 import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
@@ -262,7 +263,12 @@ export default function QuickMissionForm({
         return;
       }
       const tt: TripType = tripType === "aller-retour" ? "aller_retour" : tripType === "express" ? "express" : "aller_simple";
-      const std = calculateBasePrice(depart, arrivee, tt);
+      let std = calculateBasePrice(depart, arrivee, tt);
+      if (std.base <= 0) {
+        const km = await resolveDistanceKm(depart, arrivee);
+        if (cancelled) return;
+        std = calculateBasePrice(depart, arrivee, tt, km);
+      }
       if (std.base > 0) {
         setPricing({ base: std.base, baseLabel: std.label, supplements: {} });
       } else {

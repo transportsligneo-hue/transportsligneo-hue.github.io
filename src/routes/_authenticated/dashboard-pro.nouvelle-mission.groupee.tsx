@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
+import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
 import { isValidVinFormat, normalizeVin } from "@/lib/vin";
 import { lookupPlate } from "@/lib/plate.functions";
@@ -223,7 +224,11 @@ function GroupedMissionForm() {
             continue;
           }
         } catch { /* fallback standard */ }
-        const std = calculateBasePrice(depart, arr, "aller_simple");
+        let std = calculateBasePrice(depart, arr, "aller_simple");
+        if (std.base <= 0) {
+          const km = await resolveDistanceKm(depart, arr);
+          std = calculateBasePrice(depart, arr, "aller_simple", km);
+        }
         if (std.base > 0) out[r.key] = std.base;
       }
       if (!cancelled) { setPrices(out); setPricing(false); }

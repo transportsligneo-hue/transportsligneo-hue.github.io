@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, ArrowRight, Loader2, Building2, MapPin, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { estimateB2BPrice, B2B_VEHICLE_LABELS, B2B_URGENCY_LABELS, type B2BVehicleType, type B2BUrgency } from "@/lib/b2b-pricing";
+import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { toast } from "sonner";
 import { B2BEmbeddedCheckout } from "@/components/b2b/B2BEmbeddedCheckout";
 
@@ -86,6 +87,19 @@ function TransportPonctuelPage() {
     }
   }, []);
 
+  const [resolvedKm, setResolvedKm] = useState<number | null>(null);
+  useEffect(() => {
+    setResolvedKm(null);
+    if (!form.pickupAddress || !form.dropoffAddress) return;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      resolveDistanceKm(form.pickupAddress, form.dropoffAddress).then((km) => {
+        if (!cancelled) setResolvedKm(km);
+      });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.pickupAddress, form.dropoffAddress]);
+
   const estimate = useMemo(() => {
     if (!form.pickupAddress || !form.dropoffAddress) return null;
     return estimateB2BPrice({
@@ -94,8 +108,8 @@ function TransportPonctuelPage() {
       vehicleType: form.vehicleType,
       vehicleRunning: form.vehicleRunning === "oui",
       urgency: form.urgency,
-    });
-  }, [form.pickupAddress, form.dropoffAddress, form.vehicleType, form.vehicleRunning, form.urgency]);
+    }, resolvedKm);
+  }, [form.pickupAddress, form.dropoffAddress, form.vehicleType, form.vehicleRunning, form.urgency, resolvedKm]);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((f) => ({ ...f, [key]: value }));
