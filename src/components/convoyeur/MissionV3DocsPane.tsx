@@ -149,7 +149,7 @@ export function MissionV3DocsPane({
     try {
       const blob = await generateEdlPapierPdf({ ...edlContext, variant });
       const ref = (edlContext.numero || "mission").replace(/[^a-zA-Z0-9-]/g, "");
-      downloadBlob(blob, `EDL-${variant === "livraison" ? "Livraison" : "Restitution"}-${ref}.pdf`);
+      await downloadBlob(blob, `EDL-${variant === "livraison" ? "Livraison" : "Restitution"}-${ref}.pdf`);
     } catch {
       toast.error("Génération du PDF impossible");
     } finally {

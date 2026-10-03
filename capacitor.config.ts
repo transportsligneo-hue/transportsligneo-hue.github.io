@@ -36,7 +36,7 @@ const config: CapacitorConfig = {
       launchAutoHide: false,
       backgroundColor: "#0b1026",
       showSpinner: true,
-      spinnerColor: "#e7c76a",
+      spinnerColor: "#4f8cff",
       androidSpinnerStyle: "large",
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
