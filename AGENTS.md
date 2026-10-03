@@ -3,3 +3,6 @@
 - Reuse public presentation assets in marketing pages only, with shared video markup for the three professional profiles, to keep their films consistent without affecting signed-in workspaces.
 - Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
+- Keep document scans on the shared inspection scanner and reject unreliable automatic crop corners; incorrect crops must never cut off document details.
+- Route generated and stored mission PDF exports through the shared file downloader, preferring native sharing on mobile; object-URL clicks are unreliable in installed apps.
+- Keep the web loading screen in the root layout with its own brand tokens, so light/dark themes and workspace accents cannot recolor it.
