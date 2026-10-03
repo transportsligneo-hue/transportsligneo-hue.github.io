@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link, useRouter } from "@tanstack/react-router";
+import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatRelativeTime } from "@/lib/notify";
@@ -181,7 +182,7 @@ function NotifPanelView({
         )}
       </button>
 
-      {mounted && (
+      {mounted && createPortal(
         <>
           <div
             aria-hidden
@@ -193,7 +194,7 @@ function NotifPanelView({
             role="dialog"
             aria-label="Panneau des notifications"
             onClick={(e) => e.stopPropagation()}
-            className={`fixed left-3.5 right-3.5 top-16 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[390px] sm:max-w-[94vw] flex flex-col overflow-hidden rounded-[22px] text-white transition-all duration-200 ease-out ${shown ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
+             className={`notif-panel fixed left-3.5 right-3.5 top-16 z-[101] sm:left-auto sm:right-4 sm:top-16 sm:w-[390px] sm:max-w-[calc(100vw-2rem)] flex flex-col overflow-hidden rounded-[22px] text-white transition-all duration-200 ease-out ${shown ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}`}
             style={{
               fontFamily: "'Poppins', sans-serif",
               background: "linear-gradient(180deg, #0c1838 0%, #0f1e42 100%)",
@@ -291,7 +292,7 @@ function NotifPanelView({
               </Link>
             </div>
           </div>
-        </>
+        </>, document.body
       )}
     </div>
   );

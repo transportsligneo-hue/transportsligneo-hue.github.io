@@ -38,7 +38,7 @@ export function ChecklistBlock({
                 type="button"
                 onClick={() => toggle(i)}
                 className={`w-full flex items-start gap-3 text-left rounded-xl border px-3 py-2.5 transition-all ${
-                  checked ? "border-emerald-300 bg-emerald-50" : "border-pro-border hover:border-[#2F5FFF]/40"
+                  checked ? "driver-training-correct border-emerald-300 bg-emerald-50" : "border-pro-border hover:border-[#2F5FFF]/40"
                 }`}
               >
                 {checked ? (

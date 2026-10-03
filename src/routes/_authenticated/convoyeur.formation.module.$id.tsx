@@ -54,7 +54,7 @@ function ModulePage() {
     <div className="space-y-4">
       <header className="rounded-2xl border border-pro-border bg-white p-5">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#B8862A]">
+          <span className="driver-training-accent text-[11px] font-semibold uppercase tracking-[0.18em]">
             Module {module.order_index}
             {module.tag ? ` · ${module.tag}` : ""}
           </span>
@@ -79,7 +79,7 @@ function ModulePage() {
             <ul className="mt-2 space-y-1">
               {module.objectives.map((o, i) => (
                 <li key={i} className="text-sm text-pro-text-soft flex gap-2">
-                  <span className="text-[#B8862A]">•</span>
+                   <span className="driver-training-accent">•</span>
                   {o}
                 </li>
               ))}
@@ -106,9 +106,9 @@ function ModulePage() {
               href={module.resource_url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-pro-border px-3 py-2 text-xs font-medium text-pro-text hover:border-[#B8862A]/50"
+               className="inline-flex items-center gap-2 rounded-lg border border-pro-border px-3 py-2 text-xs font-medium text-pro-text hover:border-[#2F5FFF]/50"
             >
-              <Download size={14} className="text-[#B8862A]" /> {module.resource_label ?? "Ressource à télécharger"}
+               <Download size={14} className="driver-training-accent" /> {module.resource_label ?? "Ressource à télécharger"}
             </a>
           )}
         </div>
@@ -139,7 +139,7 @@ function ModulePage() {
           <Link
             to="/convoyeur/formation/module/$id"
             params={{ id: prev.id }}
-            className="inline-flex items-center gap-2 rounded-xl border border-pro-border bg-white px-4 py-2.5 text-sm font-medium text-pro-text"
+             className="driver-training-secondary inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium"
           >
             <ArrowLeft size={15} /> Module précédent
           </Link>
@@ -153,7 +153,7 @@ function ModulePage() {
             if (next) navigate({ to: "/convoyeur/formation/module/$id", params: { id: next.id } });
             else navigate({ to: "/convoyeur/formation" });
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#0B1338] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#111a3d]"
+           className="driver-training-button inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
         >
           {next ? "Module suivant" : "Terminer le parcours"} <ArrowRight size={15} />
         </button>

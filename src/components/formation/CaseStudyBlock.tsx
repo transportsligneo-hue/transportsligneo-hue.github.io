@@ -43,9 +43,9 @@ export function CaseStudyBlock({
               selected === i
                 ? feedback
                   ? feedback.correct
-                    ? "border-emerald-400 bg-emerald-50 text-emerald-900"
-                    : "border-red-300 bg-red-50 text-red-900"
-                  : "border-[#2F5FFF] bg-[#2F5FFF]/5"
+                    ? "driver-training-correct border-emerald-400 bg-emerald-50 text-emerald-900"
+                    : "driver-training-incorrect border-red-300 bg-red-50 text-red-900"
+                  : "driver-training-selected border-[#2F5FFF] bg-[#2F5FFF]/5 text-pro-text"
                 : "border-pro-border hover:border-[#2F5FFF]/40 text-pro-text-soft"
             }`}
           >
@@ -57,7 +57,7 @@ export function CaseStudyBlock({
       {feedback && (
         <div
           className={`mt-4 rounded-xl p-4 text-sm flex gap-3 ${
-            feedback.correct ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"
+            feedback.correct ? "driver-training-correct bg-emerald-50 text-emerald-900" : "driver-training-pending bg-amber-50 text-amber-900"
           }`}
         >
           {feedback.correct ? <CheckCircle2 size={18} className="shrink-0" /> : <XCircle size={18} className="shrink-0" />}
