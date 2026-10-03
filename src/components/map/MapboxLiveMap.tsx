@@ -536,7 +536,7 @@ export function MapboxLiveMap({
 
     if (!carRef.current) {
       const { wrap, inner } = carEl(headingRef.current);
-      wrap.classList.toggle("is-stale", signalLost);
+      wrap.classList.toggle("is-stale", signalLost && !completed);
       wrap.title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
       carInnerRef.current = inner;
       carRef.current = new mapboxgl.Marker({ element: wrap }).setLngLat([target.lng, target.lat]).addTo(map);
@@ -548,7 +548,7 @@ export function MapboxLiveMap({
       return;
     }
 
-    carRef.current.getElement().classList.toggle("is-stale", signalLost);
+    carRef.current.getElement().classList.toggle("is-stale", signalLost && !completed);
     carRef.current.getElement().title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
     if (carInnerRef.current) carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
     const from = posRef.current ?? target;
@@ -607,8 +607,20 @@ export function MapboxLiveMap({
         ))}
       </div>
 
-      {/* Badge Live / Signal perdu */}
-      {(signalLost && !fleet?.length && (last || isAdmin)) ? (
+      {/* Badge Live / Signal perdu / Mission terminée */}
+      {completed ? (
+        <div
+          className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur"
+          style={{
+            background: "linear-gradient(135deg, #0c1838, #0f1e42)",
+            border: "1px solid rgba(46,230,113,.55)",
+            boxShadow: "0 6px 18px rgba(11,16,38,.35), 0 0 14px rgba(46,230,113,.35)",
+          }}
+        >
+          <BadgeCheck size={13} style={{ color: "#2ee671", filter: "drop-shadow(0 0 4px rgba(46,230,113,.8))" }} />
+          Mission terminée{title ? ` · ${title}` : ""}
+        </div>
+      ) : (signalLost && !fleet?.length && (last || isAdmin)) ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
           {!last ? "Aucune position GPS reçue" : isAdmin && signalAgeMin != null
