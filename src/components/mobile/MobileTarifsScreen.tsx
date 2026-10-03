@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import { MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
-import DevisGenerator from "@/components/DevisGenerator";
+import DevisGenerator, { type DevisGeneratorPrefill } from "@/components/DevisGenerator";
 
 /**
  * MobileTarifsScreen · page Tarifs dédiée mobile, ambiance navy/or
