@@ -3,7 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
-import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle } from "lucide-react";
+import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle, BadgeCheck, Route } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
 import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
@@ -37,6 +37,8 @@ const MAP_CSS = `
 .ligneo-mbx-car.is-stale .halo{display:none}
 .ligneo-mbx-car.is-stale img{filter:grayscale(1) drop-shadow(0 4px 7px rgba(11,16,38,.3)) !important;opacity:.8}
 @keyframes ligneo-mbx-halo{0%{transform:scale(.7);opacity:.8}70%{transform:scale(1.35);opacity:0}100%{opacity:0}}
+.ligneo-mbx-done{ animation:ligneo-mbx-done-in .5s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes ligneo-mbx-done-in{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
 `;
 
 
@@ -159,6 +161,8 @@ export function MapboxLiveMap({
   role = "client",
   onMetrics,
   etaDeltaMin = null,
+  completed = false,
+  completedPlaque = null,
 }: LiveMissionMapProps) {
   const isAdmin = role === "admin";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -188,6 +192,18 @@ export function MapboxLiveMap({
   const last = points.length ? points[points.length - 1] : null;
   const signalAgeMin = signalAgeMinutes(last, nowTs);
   const signalLost = !last || signalAgeMin === null || signalAgeMin > SIGNAL_STALE_MIN;
+
+  // Distance réellement parcourue (somme des segments GPS) — carte de synthèse.
+  const distanceKm = useMemo(() => {
+    let d = 0;
+    for (let i = 1; i < points.length; i++) {
+      d += haversineKm(
+        { lat: points[i - 1].latitude, lng: points[i - 1].longitude },
+        { lat: points[i].latitude, lng: points[i].longitude },
+      );
+    }
+    return d;
+  }, [points]);
 
   const originKey = typeof origin === "string" ? origin : origin ? `${origin.lat},${origin.lng}` : "";
   const destKey = typeof destination === "string" ? destination : destination ? `${destination.lat},${destination.lng}` : "";
@@ -522,7 +538,7 @@ export function MapboxLiveMap({
 
     if (!carRef.current) {
       const { wrap, inner } = carEl(headingRef.current);
-      wrap.classList.toggle("is-stale", signalLost);
+      wrap.classList.toggle("is-stale", signalLost && !completed);
       wrap.title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
       carInnerRef.current = inner;
       carRef.current = new mapboxgl.Marker({ element: wrap }).setLngLat([target.lng, target.lat]).addTo(map);
@@ -534,7 +550,7 @@ export function MapboxLiveMap({
       return;
     }
 
-    carRef.current.getElement().classList.toggle("is-stale", signalLost);
+    carRef.current.getElement().classList.toggle("is-stale", signalLost && !completed);
     carRef.current.getElement().title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
     if (carInnerRef.current) carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
     const from = posRef.current ?? target;
@@ -593,8 +609,20 @@ export function MapboxLiveMap({
         ))}
       </div>
 
-      {/* Badge Live / Signal perdu */}
-      {(signalLost && !fleet?.length && (last || isAdmin)) ? (
+      {/* Badge Live / Signal perdu / Mission terminée */}
+      {completed ? (
+        <div
+          className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur"
+          style={{
+            background: "linear-gradient(135deg, #0c1838, #0f1e42)",
+            border: "1px solid rgba(46,230,113,.55)",
+            boxShadow: "0 6px 18px rgba(11,16,38,.35), 0 0 14px rgba(46,230,113,.35)",
+          }}
+        >
+          <BadgeCheck size={13} style={{ color: "#2ee671", filter: "drop-shadow(0 0 4px rgba(46,230,113,.8))" }} />
+          Mission terminée{title ? ` · ${title}` : ""}
+        </div>
+      ) : (signalLost && !fleet?.length && (last || isAdmin)) ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
           <AlertTriangle size={12} />
           {!last ? "Aucune position GPS reçue" : isAdmin && signalAgeMin != null
@@ -613,9 +641,60 @@ export function MapboxLiveMap({
       ) : null}
 
       {/* Carte d'informations flottante */}
-      {!hideOverlay && signalLost && last && (
+      {!hideOverlay && !completed && signalLost && last && (
         <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:max-w-[340px] rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 shadow-lg">
           Position du {new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} uniquement. La position actuelle ne peut pas être déterminée.
+        </div>
+      )}
+
+      {/* Synthèse mission terminée */}
+      {!hideOverlay && completed && (
+        <div className="ligneo-mbx-done absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:w-[320px]">
+          <div
+            className="rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl"
+            style={{
+              background: "linear-gradient(135deg, rgba(12,24,56,.96), rgba(15,30,66,.96))",
+              border: "1px solid rgba(79,142,255,.45)",
+              boxShadow: "0 14px 34px rgba(11,16,38,.45), 0 0 18px rgba(79,142,255,.28)",
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <span
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                style={{ background: "rgba(46,230,113,.14)", border: "1px solid rgba(46,230,113,.5)" }}
+              >
+                <BadgeCheck size={18} style={{ color: "#2ee671", filter: "drop-shadow(0 0 5px rgba(46,230,113,.8))" }} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-extrabold tracking-wide text-white" style={{ textShadow: "0 0 10px rgba(46,230,113,.45)" }}>
+                  Mission terminée
+                </p>
+                <p className="text-[10.5px] font-medium text-slate-300">
+                  {last
+                    ? `Livrée le ${new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}`
+                    : "Trajet achevé"}
+                </p>
+              </div>
+            </div>
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+              {completedPlaque && (
+                <span
+                  className="inline-flex items-center rounded-md px-2 py-1 tracking-widest text-white"
+                  style={{ background: "rgba(47,95,255,.28)", border: "1px solid rgba(79,142,255,.6)", boxShadow: "0 0 10px rgba(79,142,255,.35)" }}
+                >
+                  {completedPlaque}
+                </span>
+              )}
+              {distanceKm >= 1 && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-slate-200" style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.16)" }}>
+                  <Route size={11} /> {distanceKm >= 100 ? Math.round(distanceKm) : distanceKm.toFixed(1)} km parcourus
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-1" style={{ background: "rgba(46,230,113,.12)", border: "1px solid rgba(46,230,113,.4)", color: "#7cf2a8" }}>
+                Suivi GPS clôturé
+              </span>
+            </div>
+          </div>
         </div>
       )}
       {!hideOverlay && metrics && !signalLost && (

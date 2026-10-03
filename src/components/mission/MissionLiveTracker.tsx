@@ -174,6 +174,7 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
             points={displayedPoints}
             origin={origin}
             destination={destination}
+            completed={isFinished}
             className={mapOnly ? "h-full min-h-full !rounded-none" : "h-[320px] sm:h-[480px]"}
           />
         )}

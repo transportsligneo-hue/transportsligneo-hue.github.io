@@ -1239,6 +1239,8 @@ function AdminMissionDetail() {
                 destination={trajet.arrivee}
                 title={missionNumber}
                 className="h-full min-h-full w-full !rounded-none"
+                completed={attribution.statut === "termine"}
+                completedPlaque={plaquePrincipale || null}
               />
             </div>
             </div>
