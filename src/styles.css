@@ -9870,3 +9870,44 @@ body .tln-sheen { display: none; }
   .dg-estimator .dg-price-summary .flex { gap: 14px; }
   .dg-estimator .dg-journey .dg-journey-content { padding-block: 20px; }
 }
+.dg-estimator .dg-journey .dg-profile-choice {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  text-align: left;
+}
+.dg-estimator .dg-journey .dg-profile-choice span { display: block; white-space: normal; }
+.dg-estimator .dg-journey .dg-profile-choice span:first-child {
+  font-family: 'Poppins', var(--font-sans);
+  font-size: 14px;
+  line-height: 1.35;
+}
+.dg-estimator .dg-journey .dg-profile-choice span:last-child {
+  color: var(--dg-muted) !important;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.dg-estimator .dg-journey .dg-profile-choice:has(.text-neon-blue) span:first-child { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-close { color: var(--dg-muted) !important; }
+.dg-estimator .dg-journey .dg-journey-close:hover { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-content button:not(.dg-profile-choice):not([class*="from-[#"]) {
+  white-space: normal;
+  height: auto;
+  color: var(--dg-ink);
+}
+.dg-estimator .dg-journey .dg-journey-content button[class*="text-neon-blue"] { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-content button[class*="text-cream/70"] { color: var(--dg-muted) !important; }
+.dg-estimator .dg-journey .dg-journey-footer button:not(:disabled)[class*="from-[#"] { color: var(--dg-surface) !important; }
+.dg-estimator .dg-price-summary,
+.dg-estimator .dg-price-summary * { min-width: 0; }
+.dg-estimator .dg-price-summary .font-heading { font-family: 'Poppins', var(--font-sans); }
+.dg-estimator .dg-flat-hint { color: var(--dg-muted); }
+@media (max-width: 767px) {
+  .dg-estimator--flat .dg-flat { transform: none; }
+  .dg-estimator .dg-price-summary { width: 100%; }
+  .dg-estimator .dg-journey .dg-journey-header,
+  .dg-estimator .dg-journey .dg-journey-footer { background: var(--dg-paper) !important; }
+  .dg-estimator .dg-journey .dg-journey-content button { font-size: 12px; }
+  .dg-estimator .dg-journey .dg-journey-content .dg-profile-choice { padding: 12px 14px; }
+}

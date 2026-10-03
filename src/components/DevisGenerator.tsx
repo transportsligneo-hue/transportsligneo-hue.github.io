@@ -1024,8 +1024,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
             <p className="dg-price-note mt-4 pt-4 border-t text-[13px] leading-relaxed">
               <Sparkles size={11} className="inline mr-1.5 text-neon-blue" />
-              Vous pouvez commander votre convoyage directement depuis cet estimateur.
-              Après validation de votre estimation, vous pouvez confirmer votre demande en quelques clics.
+              Votre tarif est affiché. Continuez vers le devis pour préciser votre véhicule et vos coordonnées.
             </p>
           </div>
         )}
@@ -1056,7 +1055,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
                   <Sparkles size={11} /> Demande de devis
                 </span>
-                <Button variant="ghost" onClick={() => setStep(0)} className="text-cream/50 hover:text-cream text-xs uppercase tracking-wider">Fermer</Button>
+                <Button variant="ghost" onClick={() => setStep(0)} className="dg-journey-close text-xs uppercase">Fermer</Button>
               </div>
               <div className="flex items-center gap-2 text-xs uppercase tracking-[0.08em]">
                 {["Trajet", "Véhicule", "Coordonnées", "Récap"].map((label, i) => {
@@ -1091,7 +1090,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                             key={opt.id}
                             type="button"
                             onClick={() => setClientType(opt.id)}
-                            className={`dg-profile-choice text-left rounded-md border px-4 py-3 transition-colors ${active ? "border-neon-blue bg-neon-blue/[0.07]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}
+                            className={`dg-profile-choice h-auto text-left rounded-md border px-4 py-3 transition-colors ${active ? "border-neon-blue bg-neon-blue/[0.07]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}
                           >
                             <span className={`block font-heading text-sm tracking-wide ${active ? "text-neon-blue" : "text-cream"}`}>{opt.label}</span>
                             <span className="block text-xs text-cream/75 mt-1 leading-snug">{opt.hint}</span>
@@ -1242,7 +1241,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                           type="button"
                           onClick={handleSivLookup}
                           disabled={plaqueInconnue || sivLoading || !immatriculation}
-                          className="px-5 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 hover:to-neon-blue-strong/25 hover:border-neon-blue disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(91,143,255,0.15)]"
+                          className="h-auto px-5 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 hover:to-neon-blue-strong/25 hover:border-neon-blue disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(91,143,255,0.15)]"
                         >
                           {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                           {sivLoading ? "Recherche..." : "Rechercher"}
@@ -1358,7 +1357,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                             type="button"
                             onClick={handleSivRetourLookup}
                             disabled={sivRetourLoading || !immatRetour}
-                            className="px-4 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                            className="h-auto px-4 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
                           >
                             {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                             {sivRetourLoading ? "..." : "Rechercher"}
