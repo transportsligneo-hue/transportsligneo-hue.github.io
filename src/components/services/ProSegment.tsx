@@ -132,7 +132,7 @@ export default function ProSegment() {
                   </li>
                 ))}
               </ul>
-              <Link to="/contact" search={{ audience: "pro", formule: "ponctuel" }} className="pf-btn solid">
+              <Link to="/tarifs" search={{ audience: "pro" }} className="pf-btn solid">
                 Commander un transport
                 <ArrowRight className="h-4 w-4" />
               </Link>
