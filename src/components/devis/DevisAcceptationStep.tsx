@@ -33,7 +33,7 @@ const CGV_TEXT = `Article 1 · Objet
 Les présentes Conditions Générales de Vente régissent les prestations de convoyage automobile fournies par Transports Ligneo.
 
 Article 2 · Acceptation du devis
-Le devis devient ferme et définitif après acceptation expresse par le client (case à cocher et validation par code de signature unique reçu par e-mail). Le montant accepté est ferme et ne peut être modifié sans nouvelle acceptation.
+Le devis devient ferme et définitif après acceptation expresse par le client (case à cocher et validation par code de signature unique reçu par e-mail ou SMS). Le montant accepté est ferme et ne peut être modifié sans nouvelle acceptation.
 
 Article 3 · Prix
 Les prix indiqués sont en euros TTC, péages et carburant inclus, sauf mention contraire.
@@ -89,6 +89,7 @@ export function DevisAcceptationStep({
   // OTP state
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const [maskedEmail, setMaskedEmail] = useState<string>("");
+  const [channel, setChannel] = useState<"email" | "sms">("email");
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [resendAt, setResendAt] = useState<number>(0);
@@ -156,17 +157,20 @@ export function DevisAcceptationStep({
     }
   };
 
-  const sendCode = async (isResend = false) => {
+  const sendCode = async (isResend = false, via: "email" | "sms" = channel) => {
     setSending(true);
+    setChannel(via);
     try {
-      const res = await requestOtp({ data: { devisId } });
+      const res = await requestOtp({ data: { devisId, channel: via } });
       setMaskedEmail(res.maskedEmail);
       setExpiresAt(new Date(res.expiresAt).getTime());
       setResendAt(Date.now() + 60_000); // 60 s avant renvoi
       setDigits(["", "", "", "", "", ""]);
       setPhase("otp");
-      toast.success(isResend ? "Nouveau code envoyé" : "Code envoyé par e-mail", {
-        description: `Un code à 6 chiffres a été envoyé à ${res.maskedEmail}.`,
+      toast.success(isResend ? "Nouveau code envoyé" : via === "sms" ? "Code envoyé par SMS" : "Code envoyé par e-mail", {
+        description: via === "sms"
+          ? `Un code à 6 chiffres a été envoyé au ${res.maskedEmail}.`
+          : `Un code à 6 chiffres a été envoyé à ${res.maskedEmail}. Pensez à vérifier vos spams.`,
       });
       setTimeout(() => focusIndex(0), 60);
     } catch (e) {
@@ -215,7 +219,7 @@ export function DevisAcceptationStep({
         acceptedAtLabel,
         otpProof: {
           email,
-          method: "Code de validation par e-mail (OTP 6 chiffres)",
+          method: channel === "sms" ? "Code de validation par SMS (OTP 6 chiffres)" : "Code de validation par e-mail (OTP 6 chiffres)",
           acceptedAtLabel,
           ipAddress: (res as any).ipAddress ?? null,
           userAgent: (res as any).userAgent ?? null,
@@ -524,12 +528,20 @@ export function DevisAcceptationStep({
               Annuler
             </button>
             <button
-              onClick={() => checked && sendCode(false)}
+              onClick={() => checked && sendCode(false, "email")}
               disabled={!checked || sending}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >
               <Mail size={14} />
-              {sending ? "Envoi…" : "Signer par e-mail"}
+              {sending && channel === "email" ? "Envoi…" : "Code par e-mail"}
+            </button>
+            <button
+              onClick={() => checked && sendCode(false, "sms")}
+              disabled={!checked || sending}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-[#2f5fff] text-[#2f5fff] bg-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold transition-all hover:bg-[#2f5fff]/10 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Smartphone size={14} />
+              {sending && channel === "sms" ? "Envoi…" : "Code par SMS"}
             </button>
             {!isFlotte && (
               <button
@@ -543,7 +555,7 @@ export function DevisAcceptationStep({
           </div>
           <p className="text-[10px] text-[#667085]/80 leading-relaxed text-right">
             {isFlotte
-              ? "Signature Flotte · validation par code de signature unique reçu par e-mail (obligatoire)."
+              ? "Signature Flotte · validation par code de signature unique reçu par e-mail ou SMS, au choix (obligatoire)."
               : "Signature manuscrite instantanée · aucun code à attendre."}
           </p>
         </>
@@ -585,9 +597,14 @@ export function DevisAcceptationStep({
             </button>
           </div>
           <p className="text-xs text-[#667085]">
-            Un code à 6 chiffres vient d'être envoyé à <span className="text-[#0a1638] font-medium">{maskedEmail}</span>.
+            Un code à 6 chiffres vient d'être envoyé {channel === "sms" ? "par SMS au" : "à"} <span className="text-[#0a1638] font-medium">{maskedEmail}</span>.
             Valable {Math.floor(secondsLeft / 60)} min {String(secondsLeft % 60).padStart(2, "0")}s.
           </p>
+          {channel === "email" && (
+            <p className="text-xs rounded-lg border border-[#2f5fff]/25 bg-[#2f5fff]/5 px-3 py-2 text-[#344054]">
+              Vous ne le voyez pas ? Pensez à regarder dans vos <strong>spams</strong> ou courriers indésirables.
+            </p>
+          )}
 
           <div className="flex justify-center gap-2 sm:gap-3">
             {digits.map((d, i) => (
