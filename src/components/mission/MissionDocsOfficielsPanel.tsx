@@ -415,10 +415,17 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   };
 
   const openStored = async (url: string) => {
-    if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
-    const { data } = await supabase.storage.from("mission-documents").createSignedUrl(url, 300);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-    else toast.error("Document indisponible");
+    try {
+      const signedUrl = /^https?:/.test(url)
+        ? url
+        : (await supabase.storage.from("mission-documents").createSignedUrl(url, 300)).data?.signedUrl;
+      if (!signedUrl) throw new Error("Lien indisponible");
+      const response = await fetch(signedUrl);
+      if (!response.ok) throw new Error("Document indisponible");
+      await downloadBlob(await response.blob(), url.split("/").pop()?.split("?")[0] || "document.pdf");
+    } catch {
+      toast.error("Document indisponible");
+    }
   };
 
   const generatePv = async () => {

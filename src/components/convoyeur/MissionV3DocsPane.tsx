@@ -116,9 +116,18 @@ export function MissionV3DocsPane({
 
   const openStored = async (url: string) => {
     if (!url) return;
-    if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
-    const { data } = await supabase.storage.from("mission-documents").createSignedUrl(url, 300);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    try {
+      const signedUrl = /^https?:/.test(url)
+        ? url
+        : (await supabase.storage.from("mission-documents").createSignedUrl(url, 300)).data?.signedUrl;
+      if (!signedUrl) throw new Error("Lien indisponible");
+      const response = await fetch(signedUrl);
+      if (!response.ok) throw new Error("Document indisponible");
+      const filename = url.split("/").pop()?.split("?")[0] || "document.pdf";
+      await downloadBlob(await response.blob(), filename);
+    } catch {
+      toast.error("Impossible d’ouvrir le document");
+    }
   };
 
   const uploadFor = async (key: string, docType: string, file: File) => {
