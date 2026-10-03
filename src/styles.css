@@ -9596,14 +9596,16 @@ body .tln-sheen { display: none; }
   color: var(--neon) !important;
 }
 .ligneo-neon-toaster [data-sonner-toast] [data-icon] svg { width: 18px; height: 18px; filter: drop-shadow(0 0 5px rgba(var(--neon-rgb),.85)); }
-/* Une petite coche cerclée de vert, au centre du grand anneau coloré. */
-.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon] svg,
-.ligneo-neon-toaster [data-sonner-toast] [data-icon] svg.ligneo-check-icon { color: var(--success-check); filter: drop-shadow(0 0 5px var(--success-check)); }
-.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon] { --success-check: #2ee671; }
-.ligneo-neon-toaster [data-sonner-toast] [data-icon] { --success-check: #2ee671; }
-.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon]::after {
-  content: ""; position: absolute; inset: 10px; border: 1px solid var(--success-check);
-  border-radius: 50%; box-shadow: 0 0 9px rgba(46,230,113,.65); pointer-events: none;
+/* La coche verte seule, grande comme l'ancien anneau : plus de cercle autour. */
+.ligneo-neon-toaster [data-sonner-toast] [data-icon]:has(svg.ligneo-check-icon) {
+  --success-check: #2ee671;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.ligneo-neon-toaster [data-sonner-toast] [data-icon] svg.ligneo-check-icon {
+  width: 40px; height: 40px; color: var(--success-check);
+  filter: drop-shadow(0 0 6px var(--success-check)) drop-shadow(0 0 14px rgba(46,230,113,.45));
 }
 .ligneo-neon-toaster [data-sonner-toast].neon-green [data-title],
 .ligneo-neon-toaster [data-sonner-toast].neon-blue [data-title],
