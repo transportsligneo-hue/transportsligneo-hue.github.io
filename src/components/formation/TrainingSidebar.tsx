@@ -18,17 +18,17 @@ export function TrainingSidebar({
 }) {
   return (
     <div className="rounded-2xl border border-pro-border bg-white overflow-hidden">
-      <div className="bg-[#0B1338] p-4 text-white">
-        <p className="text-[11px] uppercase tracking-[0.18em] text-[#E7C76A] font-semibold flex items-center gap-2">
+      <div className="driver-training-hero p-4">
+        <p className="driver-training-accent text-[11px] uppercase tracking-[0.18em] font-semibold flex items-center gap-2">
           <GraduationCap size={14} /> Formation convoyeur
         </p>
-        <div className="mt-3 flex items-center justify-between text-xs text-white/80">
+        <div className="mt-3 flex items-center justify-between text-xs driver-training-copy">
           <span>Progression globale</span>
-          <span className="font-semibold text-white">{percent}%</span>
+          <span className="font-semibold">{percent}%</span>
         </div>
         <div className="mt-2 h-2 rounded-full bg-white/15 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#B8862A] to-[#E7C76A] transition-all duration-700"
+            className="h-full rounded-full driver-training-progress transition-all duration-700"
             style={{ width: `${percent}%` }}
           />
         </div>
@@ -51,7 +51,7 @@ export function TrainingSidebar({
                 {st === "done" ? (
                   <CheckCircle2 size={16} className="text-emerald-600" />
                 ) : st === "in_progress" ? (
-                  <Clock3 size={16} className="text-[#B8862A]" />
+                  <Clock3 size={16} className="driver-training-accent" />
                 ) : (
                   <Circle size={16} className="text-pro-muted" />
                 )}

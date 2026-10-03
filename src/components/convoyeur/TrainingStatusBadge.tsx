@@ -17,7 +17,7 @@ const STYLES: Record<TrainingStatut, { label: string; className: string }> = {
   },
   en_cours: {
     label: "Formation en cours",
-    className: "border-amber-300/40 bg-amber-500/15 text-amber-100",
+    className: "driver-training-in-progress",
   },
   validee: {
     label: "Formation validée",

@@ -59,7 +59,7 @@ function FormationLayout() {
         <button
           type="button"
           onClick={() => setTool(tool === "glossary" ? "none" : "glossary")}
-          className="rounded-lg border border-pro-border bg-white px-3 py-2 text-xs font-medium text-pro-text hover:border-[#B8862A]/50"
+           className="rounded-lg border border-pro-border bg-white px-3 py-2 text-xs font-medium text-pro-text hover:border-[#2F5FFF]/40"
         >
           Glossaire
         </button>
@@ -104,7 +104,7 @@ function FormationLayout() {
           <dl className="grid gap-3 sm:grid-cols-2">
             {glossary.map((g) => (
               <div key={g.term} className="rounded-xl border border-pro-border p-3">
-                <dt className="text-sm font-semibold text-[#0B1338]">{g.term}</dt>
+                 <dt className="text-sm font-semibold text-pro-text">{g.term}</dt>
                 <dd className="text-xs text-pro-text-soft mt-1 leading-relaxed">{g.definition}</dd>
               </div>
             ))}

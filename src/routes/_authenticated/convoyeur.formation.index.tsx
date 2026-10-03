@@ -71,9 +71,9 @@ function FormationHome() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-2xl overflow-hidden border border-pro-border bg-[#0B1338] text-white p-6">
+      <section className="driver-training-hero rounded-2xl overflow-hidden border border-pro-border p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[#E7C76A] font-semibold flex items-center gap-2">
+          <p className="driver-training-accent text-[11px] uppercase tracking-[0.22em] font-semibold flex items-center gap-2">
             <GraduationCap size={14} /> Espace formation interne
           </p>
           <TrainingStatusBadge
@@ -82,34 +82,34 @@ function FormationHome() {
           />
         </div>
         <h1 className="mt-2 text-2xl font-semibold">Bienvenue {firstName} 👋</h1>
-        <p className="mt-2 text-sm text-white/75 max-w-2xl leading-relaxed">
+        <p className="mt-2 text-sm driver-training-copy max-w-2xl leading-relaxed">
           « Cette formation, c'est ce qui garantit la même qualité de service sur chaque mission Ligneo. Elle couvre
           l'essentiel du terrain : conformité de vos documents, états des lieux, sécurité, incidents et clôture de
           mission. Prenez le temps, elle vous protège autant qu'elle protège nos clients. »
         </p>
-        <p className="mt-2 text-xs text-[#E7C76A]">— Responsable exploitation, Transports Ligneo</p>
+        <p className="mt-2 text-xs driver-training-accent">— Responsable exploitation, Transports Ligneo</p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           {nextModule && (
             <Link
               to="/convoyeur/formation/module/$id"
               params={{ id: nextModule.id }}
-              className="rounded-xl bg-gradient-to-r from-[#B8862A] to-[#E7C76A] text-[#0B1338] text-sm font-semibold px-5 py-2.5 flex items-center gap-2"
+              className="driver-training-button rounded-xl text-sm font-semibold px-5 py-2.5 flex items-center gap-2"
             >
               <PlayCircle size={16} />
               {completedCount === 0 ? "Commencer la formation" : "Reprendre où je me suis arrêté"}
             </Link>
           )}
-          <span className="text-sm text-white/70">
+          <span className="text-sm driver-training-copy">
             {completedCount}/{modules.length} modules · {percent}%
           </span>
         </div>
       </section>
 
       {allDone && (
-        <section className="rounded-2xl border border-[#B8862A]/40 bg-gradient-to-r from-[#0B1338] to-[#111a3d] text-white p-6 text-center">
-          <Sparkles className="mx-auto text-[#E7C76A]" />
+        <section className="driver-training-hero rounded-2xl border p-6 text-center">
+          <Sparkles className="mx-auto driver-training-accent" />
           <h2 className="mt-2 text-xl font-semibold">Félicitations {firstName}, formation terminée !</h2>
-          <p className="text-sm text-white/75 mt-1">
+          <p className="text-sm driver-training-copy mt-1">
             Vous avez validé les {modules.length} modules. Votre attestation interne est disponible.
           </p>
           <button
@@ -123,7 +123,7 @@ function FormationHome() {
                 modulesCount: modules.length,
               })
             }
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#E7C76A] text-[#0B1338] text-sm font-semibold px-5 py-2.5"
+            className="driver-training-button mt-4 inline-flex items-center gap-2 rounded-xl text-sm font-semibold px-5 py-2.5"
           >
             <Award size={16} /> Télécharger mon attestation
           </button>
@@ -141,7 +141,7 @@ function FormationHome() {
               className="text-left rounded-2xl border border-pro-border bg-white p-4 hover:border-[#2F5FFF]/40 hover:shadow-sm transition-all"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#B8862A]">
+                <span className="driver-training-accent text-[11px] font-semibold uppercase tracking-wider">
                   Module {m.order_index} {m.tag ? `· ${m.tag}` : ""}
                 </span>
                 <span
@@ -149,7 +149,7 @@ function FormationHome() {
                     st === "done"
                       ? "bg-emerald-100 text-emerald-700"
                       : st === "in_progress"
-                        ? "bg-amber-100 text-amber-700"
+                        ? "driver-training-in-progress"
                         : "bg-pro-bg-soft text-pro-muted"
                   }`}
                 >
@@ -168,24 +168,24 @@ function FormationHome() {
 
       {tourStep !== null && TOUR[tourStep] && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 overscroll-contain"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4 overscroll-contain"
           style={{
             paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
             paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)",
           }}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
+          <div role="dialog" aria-modal="true" aria-labelledby="driver-tour-title" className="driver-tour-panel w-full max-w-sm rounded-2xl p-5 shadow-2xl">
             <div className="flex items-start justify-between">
-              <h3 className="text-sm font-semibold text-pro-text">{TOUR[tourStep].title}</h3>
-              <button type="button" onClick={closeTour}><X size={16} className="text-pro-muted" /></button>
+              <h3 id="driver-tour-title" className="text-sm font-semibold">{TOUR[tourStep].title}</h3>
+              <button type="button" aria-label="Fermer" onClick={closeTour}><X size={16} /></button>
             </div>
-            <p className="mt-2 text-sm text-pro-text-soft">{TOUR[tourStep].text}</p>
+            <p className="mt-2 text-sm driver-tour-copy">{TOUR[tourStep].text}</p>
             <div className="mt-4 flex items-center justify-between">
-              <span className="text-xs text-pro-muted">{tourStep + 1}/{TOUR.length}</span>
+              <span className="text-xs driver-tour-copy">{tourStep + 1}/{TOUR.length}</span>
               <button
                 type="button"
                 onClick={() => (tourStep + 1 < TOUR.length ? setTourStep(tourStep + 1) : closeTour())}
-                className="rounded-lg bg-[#0B1338] text-white text-xs font-semibold px-4 py-2"
+                className="driver-training-button rounded-lg text-xs font-semibold px-4 py-2"
               >
                 {tourStep + 1 < TOUR.length ? "Suivant" : "C'est parti"}
               </button>
