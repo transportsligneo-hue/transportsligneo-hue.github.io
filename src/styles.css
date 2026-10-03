@@ -10026,6 +10026,31 @@ html.theme-light .driver-shell {
   box-shadow: 0 6px 22px rgba(47, 125, 255, 0.25);
 }
 .driver-shell .driver-training-button:hover { filter: brightness(1.12); }
+.driver-shell .driver-training-secondary {
+  background: var(--driver-surface) !important;
+  color: var(--driver-text) !important;
+  border-color: var(--driver-border-strong) !important;
+}
+.driver-shell .driver-training-secondary:hover { border-color: var(--driver-training-blue) !important; }
+.driver-shell .driver-training-selected {
+  background: var(--driver-surface-strong) !important;
+  color: var(--driver-text) !important;
+  border-color: var(--driver-training-blue) !important;
+}
+.driver-shell .driver-training-correct {
+  background: var(--driver-surface-strong) !important;
+  color: var(--driver-text) !important;
+  border-color: var(--driver-border-strong) !important;
+}
+.driver-shell .driver-training-incorrect {
+  background: var(--driver-surface-strong) !important;
+  color: var(--driver-text) !important;
+  border-color: var(--driver-border-strong) !important;
+}
+.driver-shell .driver-training-pending {
+  background: var(--driver-surface-strong) !important;
+  color: var(--driver-text) !important;
+}
 .driver-shell .driver-training-progress { background: linear-gradient(90deg, #2f7dff, #67c1ff); }
 .driver-shell .driver-training-in-progress {
   background: var(--driver-surface-strong);
