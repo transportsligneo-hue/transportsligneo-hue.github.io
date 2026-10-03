@@ -9559,9 +9559,13 @@ body .tln-sheen { display: none; }
 }
 
 /* ===== Notifications néon unifiées (toasts + panneau) ===== */
+/* Base avant les variantes : la variante de chaque bandeau doit l'emporter. */
+.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
 .neon-green { --neon: #2ee671; --neon-soft: #5fffa0; --neon-rgb: 46,230,113; }
 .neon-blue  { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
 .neon-violet { --neon: #ad84ff; --neon-soft: #d2baff; --neon-rgb: 173,132,255; }
+.ligneo-neon-toaster [data-sonner-toast].neon-green { --neon: #2ee671; --neon-soft: #5fffa0; --neon-rgb: 46,230,113; }
+.ligneo-neon-toaster [data-sonner-toast].neon-violet { --neon: #ad84ff; --neon-soft: #d2baff; --neon-rgb: 173,132,255; }
 .ligneo-neon-toaster [data-sonner-toast].neon-green,
 .ligneo-neon-toaster [data-sonner-toast].neon-blue,
 .ligneo-neon-toaster [data-sonner-toast].neon-violet {
@@ -9571,7 +9575,7 @@ body .tln-sheen { display: none; }
   border-radius: 16px !important;
   box-shadow: 0 20px 45px -14px rgba(0,8,40,.65), 0 0 18px -5px rgba(var(--neon-rgb),.42), inset 0 1px 0 rgba(var(--neon-rgb),.14) !important;
   align-items: center !important;
-  animation: ligneo-toast-arrive .32s cubic-bezier(.2,.8,.2,1) both;
+  animation: ligneo-toast-arrive .32s ease-out both;
 }
 .ligneo-neon-toaster [data-sonner-toast].neon-green::before,
 .ligneo-neon-toaster [data-sonner-toast].neon-blue::before,
@@ -9613,15 +9617,12 @@ body .tln-sheen { display: none; }
 .notif-neon-title { color: var(--neon-soft); text-shadow: 0 0 10px rgba(var(--neon-rgb),.55), 0 0 20px rgba(var(--neon-rgb),.3); }
 .notif-neon-bar { background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb),.75); }
 
-@keyframes ligneo-toast-arrive { from { opacity: 0; filter: brightness(.8); } to { opacity: 1; filter: brightness(1); } }
+@keyframes ligneo-toast-arrive { from { filter: brightness(.65); } to { filter: brightness(1); } }
 @media (prefers-reduced-motion: reduce) {
   .ligneo-neon-toaster [data-sonner-toast].neon-green,
   .ligneo-neon-toaster [data-sonner-toast].neon-blue,
   .ligneo-neon-toaster [data-sonner-toast].neon-violet { animation: none; }
 }
-
-/* Couleur néon par défaut du toaster (bleu) ; les classes neon-green/neon-blue la surchargent */
-.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
 
 /* Bouton d'action des notifications (ex. « Valider ») : vivant, néon, réactif */
 .ligneo-neon-toaster [data-sonner-toast] [data-button] {
