@@ -11,7 +11,7 @@ import {
   RESERVATION_OPTIONS,
   type TripType,
 } from "@/lib/reservation-pricing";
-import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
+import { resolveDistanceKm } from "@/lib/resolve-distance";
 
 const STEPS = ["Trajet", "Options", "Véhicule", "Coordonnées", "Confirmation"];
 
@@ -78,10 +78,9 @@ export default function TunnelReservation({ onClose }: Props) {
   useEffect(() => {
     setGoogleDistance(null);
     if (!form.ville_depart || !form.ville_arrivee) return;
-    if (!isGoogleAvailable()) return;
     let cancelled = false;
     setDistanceLoading(true);
-    getGoogleDistanceKm(form.ville_depart, form.ville_arrivee)
+    resolveDistanceKm(form.ville_depart, form.ville_arrivee)
       .then((km) => { if (!cancelled) setGoogleDistance(km); })
       .finally(() => { if (!cancelled) setDistanceLoading(false); });
     return () => { cancelled = true; };

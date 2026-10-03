@@ -44,8 +44,8 @@ export interface B2BEstimate {
   isEstimable: boolean;
 }
 
-export function estimateB2BPrice(input: B2BEstimateInput): B2BEstimate {
-  const distance = getDistance(input.pickup, input.dropoff);
+export function estimateB2BPrice(input: B2BEstimateInput, distOverride?: number | null): B2BEstimate {
+  const distance = distOverride ?? getDistance(input.pickup, input.dropoff);
   const breakdown: string[] = [];
 
   if (distance == null || distance === 0) {
