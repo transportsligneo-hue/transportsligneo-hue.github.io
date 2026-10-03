@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, ArrowRight, Loader2, Building2, MapPin, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { estimateB2BPrice, B2B_VEHICLE_LABELS, B2B_URGENCY_LABELS, type B2BVehicleType, type B2BUrgency } from "@/lib/b2b-pricing";
+import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { toast } from "sonner";
 import { B2BEmbeddedCheckout } from "@/components/b2b/B2BEmbeddedCheckout";
 
