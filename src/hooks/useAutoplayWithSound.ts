@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from "react";
 
 /**
- * Lecture automatique une seule fois par vidéo et par session de navigation,
+ * Lecture automatique une seule fois par vidéo et par navigateur,
  * avec le son activé par défaut. La lecture manuelle reste disponible ensuite.
  * Les navigateurs bloquent la lecture avec son sans interaction : on tente
  * d'abord le son, puis on bascule en muet et on réactive le son au premier
@@ -21,7 +21,7 @@ export function useAutoplayWithSound(
     const storageKey = `ligneo:film-autoplayed:${video.getAttribute("src") ?? video.currentSrc}`;
     let alreadyStarted = false;
     try {
-      alreadyStarted = sessionStorage.getItem(storageKey) === "1";
+      alreadyStarted = localStorage.getItem(storageKey) === "1";
     } catch {
       // La lecture reste possible si le stockage du navigateur est indisponible.
     }
@@ -33,7 +33,7 @@ export function useAutoplayWithSound(
     const markStarted = () => {
       alreadyStarted = true;
       try {
-        sessionStorage.setItem(storageKey, "1");
+        localStorage.setItem(storageKey, "1");
       } catch {
         // Le garde-fou en mémoire suffit pour cette visite de la page.
       }
