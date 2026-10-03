@@ -9763,3 +9763,151 @@ body .tln-sheen { display: none; }
   background: rgba(255,255,255,.12) !important;
   border-color: rgba(255,255,255,.25) !important;
 }
+
+/* Estimateur Ligneo : le tarif et les quatre étapes du devis gardent un contraste
+   constant, quel que soit le thème du reste du site. */
+:root {
+  --dg-ink: #101d37;
+  --dg-muted: #43516d;
+  --dg-line: #cbd8ed;
+  --dg-paper: #f7faff;
+  --dg-surface: #ffffff;
+  --dg-blue: #2459dc;
+  --dg-blue-bright: #4f8cff;
+  --dg-blue-pale: #e9f1ff;
+}
+.dg-estimator .dg-price-summary {
+  background: var(--dg-paper);
+  border-color: var(--dg-line);
+  color: var(--dg-ink);
+  box-shadow: 0 16px 42px -30px var(--dg-blue);
+  font-family: 'Poppins', var(--font-sans);
+}
+.dg-estimator .dg-price-summary p,
+.dg-estimator .dg-price-summary strong { color: var(--dg-ink) !important; }
+.dg-estimator .dg-price-summary p[class*="uppercase"] { color: var(--dg-muted) !important; font-weight: 700; }
+.dg-estimator .dg-price-summary .text-neon-blue { color: var(--dg-blue) !important; font-weight: 700; }
+.dg-estimator .dg-price-summary .dg-price-benefits,
+.dg-estimator .dg-price-summary .dg-price-note { border-color: var(--dg-line); }
+.dg-estimator .dg-price-summary .dg-benefit {
+  color: var(--dg-ink) !important;
+  background: var(--dg-surface);
+  border: 1px solid var(--dg-line);
+}
+.dg-estimator .dg-price-summary .dg-benefit svg { color: var(--dg-blue) !important; }
+.dg-estimator .dg-price-summary .dg-price-note { color: var(--dg-muted) !important; }
+.dg-estimator .dg-price-summary .dg-price-note svg { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey { background: color-mix(in srgb, var(--navy) 77%, transparent); }
+.dg-estimator .dg-journey-panel {
+  background: var(--dg-paper);
+  border-color: var(--dg-line);
+  box-shadow: 0 35px 100px -25px color-mix(in srgb, var(--navy) 70%, transparent);
+  color: var(--dg-ink);
+  font-family: 'Poppins', var(--font-sans);
+}
+.dg-estimator .dg-journey-header,
+.dg-estimator .dg-journey-footer {
+  background: var(--dg-paper);
+  border-color: var(--dg-line);
+}
+.dg-estimator .dg-journey h3,
+.dg-estimator .dg-journey h4,
+.dg-estimator .dg-journey p,
+.dg-estimator .dg-journey label,
+.dg-estimator .dg-journey span,
+.dg-estimator .dg-journey strong,
+.dg-estimator .dg-journey em { color: var(--dg-ink) !important; }
+.dg-estimator .dg-journey p[class*="text-cream/"],
+.dg-estimator .dg-journey span[class*="text-cream/"],
+.dg-estimator .dg-journey label[class*="text-cream/"],
+.dg-estimator .dg-journey em[class*="text-cream/"] { color: var(--dg-muted) !important; }
+.dg-estimator .dg-journey .text-neon-blue,
+.dg-estimator .dg-journey a { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-label {
+  color: var(--dg-muted) !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.dg-estimator .dg-journey .dg-journey-input,
+.dg-estimator .dg-journey input:not([type="checkbox"]),
+.dg-estimator .dg-journey select,
+.dg-estimator .dg-journey textarea {
+  background: var(--dg-surface) !important;
+  border: 1px solid var(--dg-line) !important;
+  color: var(--dg-ink) !important;
+  color-scheme: light;
+  font-size: 14px;
+}
+.dg-estimator .dg-journey input::placeholder,
+.dg-estimator .dg-journey textarea::placeholder { color: var(--dg-muted) !important; opacity: .8; }
+.dg-estimator .dg-journey input:focus,
+.dg-estimator .dg-journey select:focus,
+.dg-estimator .dg-journey textarea:focus { outline: 2px solid var(--dg-blue-bright); outline-offset: 1px; }
+.dg-estimator .dg-journey .dg-profile-choice,
+.dg-estimator .dg-journey .dg-recap,
+.dg-estimator .dg-journey .dg-journey-section {
+  background: var(--dg-surface) !important;
+  border-color: var(--dg-line) !important;
+}
+.dg-estimator .dg-journey .dg-profile-choice:has(.text-neon-blue) {
+  background: var(--dg-blue-pale) !important;
+  border-color: var(--dg-blue) !important;
+  box-shadow: inset 3px 0 0 var(--dg-blue);
+}
+.dg-estimator .dg-journey .dg-profile-choice span:first-child,
+.dg-estimator .dg-journey .dg-recap strong { font-weight: 600; }
+.dg-estimator .dg-journey .dg-benefit { background: var(--dg-blue-pale); border: 1px solid var(--dg-line); color: var(--dg-ink) !important; }
+.dg-estimator .dg-journey .dg-benefit svg { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey button[class*="from-[#"],
+.dg-estimator .dg-journey a[class*="from-[#"] { background: var(--dg-blue) !important; color: var(--dg-surface) !important; }
+.dg-estimator .dg-journey button[class*="from-[#"] span,
+.dg-estimator .dg-journey a[class*="from-[#"] span { color: var(--dg-surface) !important; }
+.dg-estimator .dg-journey button:disabled { opacity: .55; }
+.dg-estimator .dg-journey .dg-journey-footer button:first-child { border-color: var(--dg-line); color: var(--dg-ink) !important; }
+@media (max-width: 640px) {
+  .dg-estimator .dg-price-summary .flex { gap: 14px; }
+  .dg-estimator .dg-journey .dg-journey-content { padding-block: 20px; }
+}
+.dg-estimator .dg-journey .dg-profile-choice {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  text-align: left;
+}
+.dg-estimator .dg-journey .dg-profile-choice span { display: block; white-space: normal; }
+.dg-estimator .dg-journey .dg-profile-choice span:first-child {
+  font-family: 'Poppins', var(--font-sans);
+  font-size: 14px;
+  line-height: 1.35;
+}
+.dg-estimator .dg-journey .dg-profile-choice span:last-child {
+  color: var(--dg-muted) !important;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.dg-estimator .dg-journey .dg-profile-choice:has(.text-neon-blue) span:first-child { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-close { color: var(--dg-muted) !important; }
+.dg-estimator .dg-journey .dg-journey-close:hover { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-content button:not(.dg-profile-choice):not([class*="from-[#"]) {
+  white-space: normal;
+  height: auto;
+  color: var(--dg-ink);
+}
+.dg-estimator .dg-journey .dg-journey-content button[class*="text-neon-blue"] { color: var(--dg-blue) !important; }
+.dg-estimator .dg-journey .dg-journey-content button[class*="text-cream/70"] { color: var(--dg-muted) !important; }
+.dg-estimator .dg-journey .dg-journey-footer button:not(:disabled)[class*="from-[#"] { color: var(--dg-surface) !important; }
+.dg-estimator .dg-price-summary,
+.dg-estimator .dg-price-summary * { min-width: 0; }
+.dg-estimator .dg-price-summary .font-heading { font-family: 'Poppins', var(--font-sans); }
+.dg-estimator .dg-flat-hint { color: var(--dg-muted); }
+@media (max-width: 767px) {
+  .dg-estimator--flat .dg-flat { transform: none; }
+  .dg-estimator .dg-price-summary { width: 100%; }
+  .dg-estimator .dg-journey .dg-journey-header,
+  .dg-estimator .dg-journey .dg-journey-footer { background: var(--dg-paper) !important; }
+  .dg-estimator .dg-journey .dg-journey-content button { font-size: 12px; }
+  .dg-estimator .dg-journey .dg-journey-content .dg-profile-choice { padding: 12px 14px; }
+}

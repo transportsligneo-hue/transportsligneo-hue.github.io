@@ -23,6 +23,7 @@ import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type ClientType = "particulier" | "pro_ponctuel" | "pro_recurrent" | "flotte";
 
@@ -429,7 +430,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
   // inputBare retiré : la barre principale utilise des styles inline premium
-  const inputCard = "w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-cream text-sm placeholder:text-cream/40 focus:border-[#5fb6ff]/60 focus:outline-none focus:ring-1 focus:ring-[#5fb6ff]/30 transition-all";
+  const inputCard = "dg-journey-input w-full rounded-md px-4 py-3 text-sm transition-all";
   const selectCard = inputCard + " appearance-none";
 
   async function handleSubmit() {
@@ -622,7 +623,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       <div className={isHero || isFlat ? "relative z-30" : "relative z-30 max-w-5xl mx-auto"}>
         {/* Halo doré · uniquement variante bar (le hero gère son propre fond) */}
         {!isHero && !isFlat && (
-          <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-[#e7c76a]/20 via-[#5fb6ff]/10 to-[#d4af37]/20 blur-xl opacity-70" />
+          <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-neon-blue/20 via-[#5fb6ff]/10 to-neon-blue-strong/20 blur-xl opacity-70" />
         )}
 
         {isFlat ? (
@@ -691,26 +692,26 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 { v: "aller-simple", l: "Livraison simple" },
                 { v: "aller-retour", l: "Livraison + restitution" },
               ].map((o) => (
-                <button
+                <Button variant="ghost"
                   key={o.v}
                   type="button"
                   onClick={() => setOption(o.v as typeof option)}
                   className={`dg-flat-toggle${option === o.v ? " is-active" : ""}`}
                 >
                   {o.l}
-                </button>
+                </Button>
               ))}
             </div>
 
             {/* CTA principal */}
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
               disabled={!isComplete}
               className="dg-flat-cta mt-4"
             >
-              <Send size={15} /> <span>Obtenir mon prix</span>
-            </button>
+              <Send size={15} /> <span>Continuer vers mon devis</span>
+            </Button>
 
             {/* Bandeau de réassurance */}
             <div className="dg-flat-trust">
@@ -744,8 +745,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Départ / Arrivée · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
-                <label htmlFor={`${inputId}-departure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
-                  <MapPin size={11} className="text-[#e7c76a]" /> Départ
+                <label htmlFor={`${inputId}-departure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-neon-blue font-heading mb-2">
+                  <MapPin size={11} className="text-neon-blue" /> Départ
                 </label>
                 <PlacesInput
                   inputId={`${inputId}-departure`}
@@ -757,8 +758,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-[#60a5fa]/40 transition-colors px-4 py-3.5 rounded-2xl relative">
-                <label htmlFor={`${inputId}-arrival`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
-                  <MapPinned size={11} className="text-[#e7c76a]" /> Arrivée
+                <label htmlFor={`${inputId}-arrival`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-neon-blue font-heading mb-2">
+                  <MapPinned size={11} className="text-neon-blue" /> Arrivée
                 </label>
                 <PlacesInput
                   inputId={`${inputId}-arrival`}
@@ -780,8 +781,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
             {/* Véhicule · pleine largeur */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
-              <label htmlFor={`${inputId}-vehicle`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
-                <Car size={11} className="text-[#e7c76a]" /> Véhicule
+              <label htmlFor={`${inputId}-vehicle`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-neon-blue font-heading mb-2">
+                <Car size={11} className="text-neon-blue" /> Véhicule
               </label>
               <select
                 id={`${inputId}-vehicle`}
@@ -798,8 +799,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             {/* Date / Heure · 2 colonnes */}
             <div className="grid grid-cols-2 gap-3 mt-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label htmlFor={`${inputId}-date`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
-                  <Calendar size={11} className="text-[#e7c76a]" /> Date *
+                <label htmlFor={`${inputId}-date`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-neon-blue font-heading mb-2">
+                  <Calendar size={11} className="text-neon-blue" /> Date *
                 </label>
                 <input
                   id={`${inputId}-date`}
@@ -810,8 +811,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[#e7c76a] font-heading mb-2">
-                  <Clock size={11} className="text-[#e7c76a]" /> Heure *
+                <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-neon-blue font-heading mb-2">
+                  <Clock size={11} className="text-neon-blue" /> Heure *
                 </label>
                 <input
                   id={`${inputId}-heure`}
@@ -824,14 +825,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             {/* CTA principal · pleine largeur, bleu électrique */}
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
               disabled={!isComplete}
               className="mt-5 w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[12px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              <Send size={14} /> Obtenir mon prix
-            </button>
+              <Send size={14} /> Continuer vers mon devis
+            </Button>
 
             {/* Choix de prestation · discret en bas */}
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
@@ -839,7 +840,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 { v: "aller-simple", l: "Livraison simple" },
                 { v: "aller-retour", l: "Livraison + restitution" },
               ].map((o) => (
-                <button
+                <Button variant="ghost"
                   key={o.v}
                   type="button"
                   onClick={() => setOption(o.v as typeof option)}
@@ -850,7 +851,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   }`}
                 >
                   {o.l}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -868,19 +869,19 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
                   { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
                 ].map((o) => (
-                  <button
+                  <Button variant="ghost"
                     key={o.v}
                     type="button"
                     onClick={() => setOption(o.v as typeof option)}
                     className={`rounded-xl px-3 py-2.5 border text-left transition ${
                       option === o.v
-                        ? "border-[#e7c76a] bg-[#e7c76a]/10 text-[#e7c76a] shadow-[0_0_0_1px_rgba(231,199,106,0.25)]"
+                        ? "border-neon-blue bg-neon-blue/10 text-neon-blue shadow-[0_0_0_1px_rgba(91,143,255,0.25)]"
                         : "border-white/10 bg-white/[0.03] text-cream/75 hover:border-white/25"
                     }`}
                   >
                     <span className="block text-[11px] sm:text-xs font-heading tracking-wide">{o.l}</span>
                     <span className="block text-[9px] sm:text-[10px] uppercase tracking-[0.18em] opacity-70 mt-0.5">{o.s}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -905,22 +906,22 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
 
               <div className="hidden md:flex flex-col items-center justify-center px-1">
-                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
-                <span className="my-2 h-9 w-9 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_8px_25px_-8px_rgba(231,199,106,0.7)]">
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-neon-blue/40 to-transparent" />
+                <span className="my-2 h-9 w-9 rounded-full grid place-items-center bg-gradient-to-br from-neon-blue to-neon-blue-strong text-[#0b1026] shadow-[0_8px_25px_-8px_rgba(91,143,255,0.7)]">
                   <ArrowRight size={16} strokeWidth={2.5} />
                 </span>
-                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-[#e7c76a]/40 to-transparent" />
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-neon-blue/40 to-transparent" />
               </div>
               <div className="md:hidden flex items-center justify-center -my-1">
-                <span className="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-[#e7c76a] to-[#d4af37] text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(231,199,106,0.7)]">
+                <span className="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-neon-blue to-neon-blue-strong text-[#0b1026] shadow-[0_6px_18px_-6px_rgba(91,143,255,0.7)]">
                   <ArrowRight size={14} strokeWidth={2.5} className="rotate-90" />
                 </span>
               </div>
 
-              <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-[#e7c76a]/40 transition-colors px-5 py-4">
+              <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] hover:border-neon-blue/40 transition-colors px-5 py-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="h-7 w-7 rounded-full grid place-items-center bg-[#e7c76a]/15 border border-[#e7c76a]/30">
-                    <MapPinned size={13} className="text-[#e7c76a]" />
+                  <span className="h-7 w-7 rounded-full grid place-items-center bg-neon-blue/15 border border-neon-blue/30">
+                    <MapPinned size={13} className="text-neon-blue" />
                   </span>
                   <label htmlFor={`${inputId}-arrival`} className="text-[10px] uppercase tracking-[0.22em] text-cream/65 font-heading">Adresse d'arrivée</label>
                 </div>
@@ -939,37 +940,37 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <div className="mt-5 grid grid-cols-2 md:grid-cols-[1.1fr_1fr_0.9fr_auto] gap-3 md:gap-4 items-end">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 relative">
                 <label htmlFor={`${inputId}-vehicle`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                  <Car size={11} className="text-[#e7c76a]" /> Véhicule
+                  <Car size={11} className="text-neon-blue" /> Véhicule
                 </label>
                 <select id={`${inputId}-vehicle`} value={vehicleType} onChange={e => setVehicleType(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm appearance-none pr-5 cursor-pointer focus:outline-none">
                   <option value="">Sélectionner</option>
                   {VEHICLE_TYPES.map(v => <option key={v.value} value={v.value} >{v.label}</option>)}
                 </select>
-                <ChevronDown size={12} className="absolute right-3 bottom-4 text-[#e7c76a]/60 pointer-events-none" />
+                <ChevronDown size={12} className="absolute right-3 bottom-4 text-neon-blue/60 pointer-events-none" />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label htmlFor={`${inputId}-date`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                  <Calendar size={11} className="text-[#e7c76a]" /> Date *
+                  <Calendar size={11} className="text-neon-blue" /> Date *
                 </label>
                 <input id={`${inputId}-date`} type="date" value={date} onChange={e => setDate(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
                 <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
-                  <Clock size={11} className="text-[#e7c76a]" /> Heure de livraison *
+                  <Clock size={11} className="text-neon-blue" /> Heure de livraison *
                 </label>
                 <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
               </div>
-              <button
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={!isComplete}
                 className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
               >
-                <Send size={14} /> Obtenir mon prix
-              </button>
+                <Send size={14} /> Continuer vers mon devis
+              </Button>
             </div>
           </div>
         )}
@@ -979,36 +980,36 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
         {/* Détail prix EN LIVE · visible immédiatement, sans clic */}
         {isComplete && pricing && distance !== null && (
-          <div className="mt-4 rounded-2xl border border-[#5fb6ff]/15 bg-white/[0.03] backdrop-blur-md px-5 py-4 animate-fade-in">
+          <div className="dg-price-summary mt-5 rounded-lg border px-5 py-5 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</p>
-                <p className="font-heading text-3xl gold-gradient-text leading-none">{priceHT} €</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</p>
+                <p className="font-heading text-3xl text-neon-blue leading-none">{priceHT} €</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">TVA</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">TVA</p>
                 <p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</p>
-                <p className="font-heading text-xl text-[#e7c76a]">{priceTTC} €</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</p>
+                <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
               </div>
 
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Distance</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">Distance</p>
                 <p className="font-heading text-base text-cream/85">{distance} km</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Durée estimée</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">Durée estimée</p>
                 <p className="font-heading text-base text-cream/85">{distance > 0 ? estimateDuration(distance) : " · "}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-cream/45">Tarif appliqué</p>
+                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">Tarif appliqué</p>
                 <p className="font-heading text-base text-cream/85">{pricing.label}</p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
+            <div className="dg-price-benefits mt-4 pt-4 border-t flex flex-wrap gap-2 text-[11px]">
               {[
                 { Icon: RouteIcon, label: "Péages inclus" },
                 { Icon: Fuel, label: "Carburant inclus" },
@@ -1016,15 +1017,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 { Icon: User, label: "Convoyeur professionnel" },
                 { Icon: Sparkles, label: "Suivi temps réel" },
               ].map(({ Icon, label }) => (
-                <strong key={label} className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]">
-                  <Icon size={11} className="text-emerald-600" /> {label}
+                <strong key={label} className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5">
+                  <Icon size={11} className="text-neon-blue" /> {label}
                 </strong>
               ))}
             </div>
-            <p className="mt-3 pt-3 border-t border-white/10 text-[12px] text-cream/75 leading-relaxed">
-              <Sparkles size={11} className="inline mr-1.5 text-[#e7c76a]" />
-              Vous pouvez commander votre convoyage directement depuis cet estimateur.
-              Après validation de votre estimation, vous pouvez confirmer votre demande en quelques clics.
+            <p className="dg-price-note mt-4 pt-4 border-t text-[13px] leading-relaxed">
+              <Sparkles size={11} className="inline mr-1.5 text-neon-blue" />
+              Votre tarif est affiché. Continuez vers le devis pour préciser votre véhicule et vos coordonnées.
             </p>
           </div>
         )}
@@ -1034,37 +1034,37 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           </p>
         )}
         {isComplete && distance === null && !distanceLoading && departure && arrival && (
-          <p className="mt-3 text-amber-300/80 text-xs text-center">
+          <p className="mt-3 text-neon-blue text-xs text-center">
             Distance non calculable automatiquement. Vous pouvez continuer votre demande, nous confirmerons le tarif manuellement.
           </p>
         )}
         {!isComplete && (
           <p className="dg-flat-hint mt-3 text-xs text-center tracking-wide">
-            Complétez votre trajet pour voir le prix en direct
+            Renseignez votre trajet pour afficher votre tarif
           </p>
         )}
       </div>
 
       {/* === MODAL MULTI-ÉTAPES === */}
       {step > 0 && !submitted && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
+        <div className="dg-journey fixed inset-0 z-[100] flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 backdrop-blur-sm animate-fade-in">
+          <div className="dg-journey-panel relative w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto rounded-lg border">
             {/* Stepper */}
-            <div className="sticky top-0 z-10 bg-gradient-to-b from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 pt-6 pb-4 border-b border-white/5">
+            <div className="dg-journey-header sticky top-0 z-10 px-5 md:px-10 pt-6 pb-4 border-b">
               <div className="flex items-center justify-between mb-4">
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
                   <Sparkles size={11} /> Demande de devis
                 </span>
-                <button onClick={() => setStep(0)} className="text-cream/50 hover:text-cream text-xs uppercase tracking-wider">Fermer</button>
+                <Button variant="ghost" onClick={() => setStep(0)} className="dg-journey-close text-xs uppercase">Fermer</Button>
               </div>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.08em]">
                 {["Trajet", "Véhicule", "Coordonnées", "Récap"].map((label, i) => {
                   const idx = i + 1;
                   const active = step === idx; const done = step > idx;
                   return (
                     <div key={label} className="flex items-center gap-2 flex-1">
-                      <div className={`flex items-center gap-2 ${active ? "text-[#e7c76a]" : done ? "text-[#5fb6ff]" : "text-cream/35"}`}>
-                        <span className={`h-6 w-6 rounded-full grid place-items-center text-[11px] font-heading border ${active ? "border-[#e7c76a] bg-[#e7c76a]/10" : done ? "border-[#5fb6ff] bg-[#5fb6ff]/10" : "border-white/15"}`}>
+                      <div className={`flex items-center gap-2 ${active ? "text-neon-blue" : done ? "text-[#5fb6ff]" : "text-cream/35"}`}>
+                        <span className={`h-6 w-6 rounded-full grid place-items-center text-[11px] font-heading border ${active ? "border-neon-blue bg-neon-blue/10" : done ? "border-[#5fb6ff] bg-[#5fb6ff]/10" : "border-white/15"}`}>
                           {done ? "✓" : idx}
                         </span>
                         <span className="hidden sm:inline">{label}</span>
@@ -1076,25 +1076,25 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               </div>
             </div>
 
-            <div className="px-6 md:px-10 py-6">
+            <div className="dg-journey-content px-5 md:px-10 py-6">
               {/* STEP 1 · Trajet (récap modifiable) */}
               {step === 1 && (
                 <div className="space-y-5 animate-fade-in">
                   <div>
-                    <h4 className="font-heading text-lg text-cream tracking-wide mb-3">Vous êtes…</h4>
+                    <h4 className="font-heading text-xl text-cream tracking-wide mb-3">Vous êtes…</h4>
                     <div className="grid sm:grid-cols-2 gap-2.5">
                       {CLIENT_TYPES.map(opt => {
                         const active = clientType === opt.id;
                         return (
-                          <button
+                          <Button variant="ghost"
                             key={opt.id}
                             type="button"
                             onClick={() => setClientType(opt.id)}
-                            className={`text-left rounded-2xl border px-4 py-3 transition-colors ${active ? "border-[#e7c76a] bg-[#e7c76a]/[0.07]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}
+                            className={`dg-profile-choice h-auto text-left rounded-md border px-4 py-3 transition-colors ${active ? "border-neon-blue bg-neon-blue/[0.07]" : "border-white/10 bg-white/[0.02] hover:border-white/25"}`}
                           >
-                            <span className={`block font-heading text-sm tracking-wide ${active ? "text-[#e7c76a]" : "text-cream"}`}>{opt.label}</span>
-                            <span className="block text-[11px] text-cream/50 mt-1 leading-snug">{opt.hint}</span>
-                          </button>
+                            <span className={`block font-heading text-sm tracking-wide ${active ? "text-neon-blue" : "text-cream"}`}>{opt.label}</span>
+                            <span className="block text-xs text-cream/75 mt-1 leading-snug">{opt.hint}</span>
+                          </Button>
                         );
                       })}
                     </div>
@@ -1104,44 +1104,44 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         : "Facturation différée : aucun paiement en ligne, une facture vous est adressée selon vos conditions de règlement."}
                     </p>
                   </div>
-                  <h4 className="font-heading text-lg text-cream tracking-wide">Confirmez votre trajet</h4>
+                  <h4 className="font-heading text-xl text-cream tracking-wide">Confirmez votre trajet</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ *</label>
+                      <label className="dg-journey-label block mb-1.5">Départ *</label>
                        <PlacesInput value={departure} onChange={setDeparture} className={inputCard} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée *</label>
+                      <label className="dg-journey-label block mb-1.5">Arrivée *</label>
                        <PlacesInput value={arrival} onChange={setArrival} className={inputCard} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Date souhaitée *</label>
+                      <label className="dg-journey-label block mb-1.5">Date souhaitée *</label>
                       <input type="date" required value={date} onChange={e => setDate(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Heure de livraison souhaitée *</label>
+                      <label className="dg-journey-label block mb-1.5">Heure de livraison souhaitée *</label>
                       <input type="time" required value={heure} onChange={e => setHeure(e.target.value)} className={inputCard + " [color-scheme:dark]"} />
                     </div>
                   </div>
 
                   {/* Bloc Restitution (Aller-retour uniquement) */}
                   {option === "aller-retour" && (
-                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
+                    <div className="dg-journey-section rounded-md border p-4 space-y-3">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Restitution</p>
+                        <p className="font-heading text-xs tracking-[0.2em] uppercase text-neon-blue">Restitution</p>
                         <label className="inline-flex items-center gap-2 text-[11px] text-cream/70 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={sameDestination}
                             onChange={e => setSameDestination(e.target.checked)}
-                            className="accent-[#e7c76a]"
+                            className="accent-neon-blue"
                           />
                           Même destination que la livraison
                         </label>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Départ restitution</label>
+                          <label className="dg-journey-label block mb-1.5">Départ restitution</label>
                           <PlacesInput
                             value={departRetour || arrival}
                             onChange={setDepartRetour}
@@ -1150,7 +1150,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                           />
                         </div>
                         <div>
-                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Arrivée restitution</label>
+                          <label className="dg-journey-label block mb-1.5">Arrivée restitution</label>
                           {sameDestination ? (
                             <div className="relative">
                               <input
@@ -1183,7 +1183,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                     </div>
                   )}
                   <div>
-                    <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Instructions particulières</label>
+                    <label className="dg-journey-label block mb-1.5">Instructions particulières</label>
                     <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3}
                       placeholder="Code d'accès, contact sur place, contraintes horaires..."
                       className={inputCard + " resize-none"} />
@@ -1195,7 +1195,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {step === 2 && (
                 <div className="space-y-5 animate-fade-in">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <h4 className="font-heading text-lg text-cream tracking-wide">Informations véhicule</h4>
+                    <h4 className="font-heading text-xl text-cream tracking-wide">Informations véhicule</h4>
                     {(() => {
                       const applyScan = (f: ExtractedFields) => {
                         if (f.immatriculation && !immatriculation) setImmatriculation(f.immatriculation.toUpperCase());
@@ -1228,7 +1228,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <div className="grid sm:grid-cols-2 gap-4">
                     {/* 1. Plaque d'immatriculation · en premier */}
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque d'immatriculation</label>
+                      <label className="dg-journey-label block mb-1.5">Plaque d'immatriculation</label>
                       <div className="flex gap-2">
                         <input
                           value={immatriculation}
@@ -1237,15 +1237,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                           disabled={plaqueInconnue}
                           className={inputCard + " uppercase tracking-widest disabled:opacity-50 flex-1"}
                         />
-                        <button
+                        <Button variant="ghost"
                           type="button"
                           onClick={handleSivLookup}
                           disabled={plaqueInconnue || sivLoading || !immatriculation}
-                          className="px-5 py-3 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:from-[#e7c76a]/35 hover:to-[#d4af37]/25 hover:border-[#e7c76a] disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(231,199,106,0.15)]"
+                          className="h-auto px-5 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 hover:to-neon-blue-strong/25 hover:border-neon-blue disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(91,143,255,0.15)]"
                         >
                           {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                           {sivLoading ? "Recherche..." : "Rechercher"}
-                        </button>
+                        </Button>
                       </div>
                       {sivMsg && (
                         <p className={`mt-2 text-[11px] ${sivMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>
@@ -1264,7 +1264,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 2. VIN optionnel */}
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
+                      <label className="dg-journey-label block mb-1.5">
                         VIN <span className="text-cream/40 normal-case tracking-normal">(optionnel)</span>
                       </label>
                       <input
@@ -1278,7 +1278,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 3. Infos auto-remplies */}
                     {(annee || puissance || finition) && (
-                      <div className="sm:col-span-2 p-3 rounded-xl border border-[#e7c76a]/20 bg-[#e7c76a]/[0.04] text-[11px] text-cream/70 grid grid-cols-2 gap-x-3 gap-y-1">
+                      <div className="sm:col-span-2 p-3 rounded-xl border border-neon-blue/20 bg-neon-blue/[0.04] text-[11px] text-cream/70 grid grid-cols-2 gap-x-3 gap-y-1">
                         {annee && <div><span className="text-cream/45">Année :</span> {annee}</div>}
                         {puissance && <div><span className="text-cream/45">Puissance :</span> {puissance}</div>}
                         {finition && <div className="col-span-2"><span className="text-cream/45">Finition :</span> {finition}</div>}
@@ -1287,11 +1287,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 4. Marque / Modèle */}
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque *</label>
+                      <label className="dg-journey-label block mb-1.5">Marque *</label>
                       <input value={marque} onChange={e => setMarque(e.target.value)} placeholder="Ex: Peugeot" className={inputCard} />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle *</label>
+                      <label className="dg-journey-label block mb-1.5">Modèle *</label>
                       <input value={modele} onChange={e => setModele(e.target.value)} placeholder="Ex: 308" className={inputCard} />
                     </div>
                     <p className="sm:col-span-2 text-[11px] text-cream/45">
@@ -1301,7 +1301,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 5. Type véhicule */}
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Type de véhicule *</label>
+                      <label className="dg-journey-label block mb-1.5">Type de véhicule *</label>
                       <div className="relative">
                         <select value={vehicleType} onChange={e => setVehicleType(e.target.value)} className={selectCard}>
                           <option value="">Sélectionner</option>
@@ -1313,7 +1313,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 6. Carburant */}
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Carburant</label>
+                      <label className="dg-journey-label block mb-1.5">Carburant</label>
                       <div className="relative">
                         <select value={energy} onChange={e => setEnergy(e.target.value)} className={selectCard}>
                           <option value="">Sélectionner</option>
@@ -1325,15 +1325,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                     {/* 7. État du véhicule */}
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">État du véhicule</label>
+                      <label className="dg-journey-label block mb-1.5">État du véhicule</label>
                       <div className="grid grid-cols-2 gap-3">
                         {[{v:"oui",l:"Roulant"},{v:"non",l:"Non roulant"}].map(o => (
-                          <button key={o.v} type="button" onClick={() => setRunning(o.v as "oui" | "non")}
+                          <Button variant="ghost" key={o.v} type="button" onClick={() => setRunning(o.v as "oui" | "non")}
                             className={`px-4 py-3 rounded-xl border text-sm transition ${
                               running === o.v
                                 ? "border-[#5fb6ff] bg-[#5fb6ff]/10 text-[#5fb6ff]"
                                 : "border-white/10 bg-white/[0.03] text-cream/70 hover:border-white/25"
-                            }`}>{o.l}</button>
+                            }`}>{o.l}</Button>
                         ))}
                       </div>
                     </div>
@@ -1341,11 +1341,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
                   {/* Véhicule de restitution (Aller-retour uniquement) */}
                   {option === "aller-retour" && (
-                    <div className="rounded-2xl border border-[#e7c76a]/25 bg-[#e7c76a]/[0.03] p-4 space-y-3">
-                      <p className="font-heading text-xs tracking-[0.2em] uppercase text-[#e7c76a]">Véhicule de restitution</p>
+                    <div className="dg-journey-section rounded-md border p-4 space-y-3">
+                      <p className="font-heading text-xs tracking-[0.2em] uppercase text-neon-blue">Véhicule de restitution</p>
                       <p className="text-[10px] text-cream/50 -mt-1">Laissez vide si c'est le même véhicule que la livraison.</p>
                       <div>
-                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Plaque restitution</label>
+                        <label className="dg-journey-label block mb-1.5">Plaque restitution</label>
                         <div className="flex gap-2">
                           <input
                             value={immatRetour}
@@ -1353,15 +1353,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                             placeholder="AA-123-AA"
                             className={inputCard + " uppercase tracking-widest flex-1"}
                           />
-                          <button
+                          <Button variant="ghost"
                             type="button"
                             onClick={handleSivRetourLookup}
                             disabled={sivRetourLoading || !immatRetour}
-                            className="px-4 py-3 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider hover:from-[#e7c76a]/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
+                            className="h-auto px-4 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
                           >
                             {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                             {sivRetourLoading ? "..." : "Rechercher"}
-                          </button>
+                          </Button>
                         </div>
                         {sivRetourMsg && (
                           <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>{sivRetourMsg.text}</p>
@@ -1369,15 +1369,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Marque</label>
+                          <label className="dg-journey-label block mb-1.5">Marque</label>
                           <input value={marqueRetour} onChange={e => setMarqueRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
                         </div>
                         <div>
-                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Modèle</label>
+                          <label className="dg-journey-label block mb-1.5">Modèle</label>
                           <input value={modeleRetour} onChange={e => setModeleRetour(e.target.value)} className={inputCard} placeholder="Optionnel" />
                         </div>
                         <div className="sm:col-span-2">
-                          <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">VIN <span className="text-cream/40 normal-case">(optionnel)</span></label>
+                          <label className="dg-journey-label block mb-1.5">VIN <span className="text-cream/40 normal-case">(optionnel)</span></label>
                           <input value={vinRetour} onChange={e => setVinRetour(normalizeVin(e.target.value))} className={inputCard + " uppercase tracking-widest"} maxLength={17} />
                         </div>
                       </div>
@@ -1389,39 +1389,39 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {/* STEP 3 · Coordonnées */}
               {step === 3 && (
                 <div className="space-y-5 animate-fade-in">
-                  <h4 className="font-heading text-lg text-cream tracking-wide">Vos coordonnées</h4>
+                  <h4 className="font-heading text-xl text-cream tracking-wide">Vos coordonnées</h4>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Prénom *</label>
+                      <label className="dg-journey-label block mb-1.5">Prénom *</label>
                       <input value={prenom} onChange={e => setPrenom(e.target.value)} className={inputCard} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Nom *</label>
+                      <label className="dg-journey-label block mb-1.5">Nom *</label>
                       <input value={nom} onChange={e => setNom(e.target.value)} className={inputCard} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Email *</label>
+                      <label className="dg-journey-label block mb-1.5">Email *</label>
                       <input type="email" value={email} onChange={e => setEmail(e.target.value)} className={inputCard} required />
                     </div>
                     <div>
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Téléphone *</label>
+                      <label className="dg-journey-label block mb-1.5">Téléphone *</label>
                       <input type="tel" value={telephone} onChange={e => setTelephone(e.target.value)} className={inputCard} required />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">Société {isPro ? "*" : "(si professionnel)"}</label>
+                      <label className="dg-journey-label block mb-1.5">Société {isPro ? "*" : "(si professionnel)"}</label>
                       <input value={societe} onChange={e => setSociete(e.target.value)} className={inputCard} placeholder={isPro ? "Raison sociale" : "Optionnel"} required={isPro} />
                     </div>
                   </div>
 
                   {/* Bloc compte client · masqué dans les dashboards (utilisateur déjà connecté) */}
                   {!hideAccountStep && (
-                    <div className="mt-2 rounded-2xl border border-[#5fb6ff]/25 bg-[#5fb6ff]/[0.04] p-5 space-y-4">
+                    <div className="dg-journey-section mt-2 rounded-md border p-5 space-y-4">
                       <div className="flex items-start gap-3">
                         <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
                           <Lock size={14} className="text-[#5fb6ff]" />
                         </div>
                         <div>
-                          <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
+                          <p className="text-sm font-semibold text-cream">Votre espace client (optionnel)</p>
                           <p className="text-cream/55 text-xs mt-1 leading-relaxed">
                             Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
                             dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email · vos devis y seront rattachés automatiquement.
@@ -1429,7 +1429,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         </div>
                       </div>
                       <div>
-                        <label className="text-[11px] uppercase tracking-[0.18em] text-cream/55 mb-1.5 block">
+                        <label className="dg-journey-label block mb-1.5">
                           <Lock size={11} className="inline mr-1" /> Mot de passe (optionnel)
                         </label>
                         <input
@@ -1468,28 +1468,28 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               {/* STEP 4 · Récap */}
               {step === 4 && (
                 <div className="space-y-5 animate-fade-in">
-                  <h4 className="font-heading text-lg text-cream tracking-wide">Récapitulatif</h4>
-                  <div className="rounded-2xl border border-[#5fb6ff]/20 bg-white/[0.03] p-5 space-y-3 text-sm">
+                  <h4 className="font-heading text-xl text-cream tracking-wide">Récapitulatif</h4>
+                  <div className="dg-recap rounded-md border p-5 space-y-3 text-sm">
                     <div className="grid grid-cols-2 gap-3">
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Trajet</em><strong className="font-normal text-[13px] text-white/90">{departure || "—"} → {arrival || "—"}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Distance</em><strong className="font-normal text-[13px] text-white/90">{distance != null ? `${distance} km${distance > 0 ? ` · ${estimateDuration(distance)}` : ""}` : "À confirmer"}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Profil</em><strong className="font-normal text-[13px] text-white/90">{CLIENT_TYPES.find(c => c.id === clientType)?.label}{paiementImmediat ? " · paiement en ligne" : " · facturation différée"}</strong></div>
-                      <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Trajet</em><strong className="font-normal text-[13px] text-white/90">{departure || "—"} → {arrival || "—"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Distance</em><strong className="font-normal text-[13px] text-white/90">{distance != null ? `${distance} km${distance > 0 ? ` · ${estimateDuration(distance)}` : ""}` : "À confirmer"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Profil</em><strong className="font-normal text-[13px] text-white/90">{CLIENT_TYPES.find(c => c.id === clientType)?.label}{paiementImmediat ? " · paiement en ligne" : " · facturation différée"}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
                     </div>
                     {pricing && (
-                      <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Prix" : "Prix HT"}</em><strong className="font-heading font-normal text-xl gold-gradient-text">{priceHT} €</strong></div>
-                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">TVA</em><strong className="font-heading font-normal text-base text-white/85">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
-                        <div><em className="not-italic block text-[10px] uppercase tracking-[0.18em] text-cream/45">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="font-heading font-normal text-xl text-[#e7c76a]">{priceTTC} €</strong></div>
+                      <div className="pt-3 mt-3 border-t border-border grid grid-cols-3 gap-3">
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceHT} €</strong></div>
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">TVA</em><strong className="block font-medium text-sm text-cream">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
                       </div>
                     )}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
-                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><RouteIcon size={11} className="text-emerald-600" /> Péages inclus</strong>
-                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Fuel size={11} className="text-emerald-600" /> Carburant inclus</strong>
-                      <strong className="font-normal inline-flex items-center gap-1.5 rounded-full bg-[#f7f7f9] border border-black/5 px-3 py-1.5 text-[#3d4355]"><Shield size={11} className="text-emerald-600" /> Assurance incluse</strong>
+                      <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><RouteIcon size={11} className="text-neon-blue" /> Péages inclus</strong>
+                      <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><Fuel size={11} className="text-neon-blue" /> Carburant inclus</strong>
+                      <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><Shield size={11} className="text-neon-blue" /> Assurance incluse</strong>
                     </div>
                   </div>
                 </div>
@@ -1498,17 +1498,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </div>
 
             {/* Footer navigation */}
-            <div className="sticky bottom-0 bg-gradient-to-t from-[#061238] to-[#061238]/95 backdrop-blur px-6 md:px-10 py-4 border-t border-white/5 flex items-center justify-between gap-3">
-              <button
+            <div className="dg-journey-footer sticky bottom-0 px-5 md:px-10 py-4 border-t flex items-center justify-between gap-3">
+              <Button variant="ghost"
                 type="button"
                 onClick={() => setStep(s => Math.max(1, s - 1))}
                 disabled={step === 1 || sending}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-cream/70 hover:text-cream hover:border-white/25 text-xs uppercase tracking-[0.18em] disabled:opacity-30"
               >
                 <ArrowLeft size={13} /> Retour
-              </button>
+              </Button>
               {step < 4 ? (
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={() => setStep(s => Math.min(4, s + 1))}
                   disabled={
@@ -1519,18 +1519,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#5fb6ff] to-[#3b82f6] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(95,182,255,0.6)] hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Continuer <ArrowRight size={13} />
-                </button>
+                </Button>
               ) : (
                 <div className="flex flex-col items-end gap-2">
                   {accountError && <p className="text-red-300 text-[11px]">{accountError}</p>}
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={handleSubmit}
                     disabled={sending}
                     className="inline-flex items-center gap-2 px-7 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase shadow-[0_8px_30px_-8px_rgba(59,130,246,0.6)] hover:brightness-110 disabled:opacity-50"
                   >
                     {sending ? <><Loader2 size={13} className="animate-spin" /> Envoi…</> : <><Send size={13} /> Confirmer ma demande</>}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -1540,19 +1540,19 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
       {/* === Confirmation === */}
       {submitted && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-8 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-xl rounded-3xl border border-[#60a5fa]/25 bg-gradient-to-br from-[#061238] via-[#0a1f5c] to-[#061238] p-8 md:p-10 text-center shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)]">
-            <div className="w-16 h-16 rounded-full border border-[#e7c76a]/40 bg-[#e7c76a]/10 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="text-[#e7c76a]" size={30} />
+        <div className="dg-journey fixed inset-0 z-[100] flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 backdrop-blur-sm animate-fade-in">
+          <div className="dg-journey-panel relative w-full max-w-xl rounded-lg border p-8 md:p-10 text-center">
+            <div className="w-16 h-16 rounded-full border border-neon-blue/40 bg-neon-blue/10 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="text-neon-blue" size={30} />
             </div>
-            <h3 className="font-heading text-xl text-[#e7c76a] tracking-[0.15em] uppercase mb-2">Devis envoyé</h3>
+            <h3 className="font-heading text-xl text-neon-blue tracking-[0.15em] uppercase mb-2">Devis envoyé</h3>
             {savedDevis && <p className="text-cream/70 text-xs tracking-wider uppercase mb-4">N° {savedDevis.numero}</p>}
-            <p className="text-cream/70 text-sm leading-relaxed max-w-md mx-auto">
+            <p className="text-cream/90 text-sm leading-relaxed max-w-md mx-auto">
               Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email
               et notre équipe vous recontactera dans les plus brefs délais.
             </p>
 
-            <div className="mt-6 rounded-2xl border border-[#5fb6ff]/30 bg-[#5fb6ff]/[0.05] p-5 text-left">
+            <div className="dg-journey-section mt-6 rounded-md border p-5 text-left">
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-[#5fb6ff]/15 p-2 mt-0.5">
                   <MailCheck size={16} className="text-[#5fb6ff]" />
@@ -1580,12 +1580,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
               {savedDevis && (
-                <button onClick={handleDownloadPdf}
+                <Button variant="ghost" onClick={handleDownloadPdf}
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-heading text-xs tracking-[0.2em] uppercase hover:brightness-110">
                   <Download size={13} /> Télécharger le PDF
-                </button>
+                </Button>
               )}
-              <button
+              <Button variant="ghost"
                 onClick={() => {
                   setSubmitted(false); setStep(0); setSavedDevis(null);
                   setNom(""); setPrenom(""); setTelephone(""); setEmail(""); setComment("");
@@ -1594,7 +1594,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 }}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-white/15 text-cream/80 hover:text-cream hover:border-white/30 font-heading text-xs tracking-[0.2em] uppercase">
                 <FileText size={13} /> Nouvelle estimation
-              </button>
+              </Button>
             </div>
           </div>
         </div>
