@@ -5,6 +5,11 @@ import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/contact")({
+  // Préremplissage B2B : /contact?audience=pro&formule=ponctuel|flotte
+  validateSearch: (search: Record<string, unknown>): { audience?: "pro"; formule?: "ponctuel" | "flotte" } => ({
+    audience: search.audience === "pro" ? "pro" : undefined,
+    formule: search.formule === "ponctuel" || search.formule === "flotte" ? search.formule : undefined,
+  }),
   component: ContactPage,
   head: () => ({
     meta: [
