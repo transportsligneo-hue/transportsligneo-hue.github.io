@@ -538,10 +538,12 @@ function MesFacturesEtDevis() {
                 prixTtc={Number(active.prix_estime)}
                 dateSouhaitee={active.date_souhaitee}
                 onAccepted={() => {
-                  setStep(active.vehicule_docs_completed ? "pay" : "docs");
+                  const s = active.vehicule_docs_completed ? "pay" : "docs";
+                  setStep(s);
+                  persistFlow(active.id, s);
                   refresh();
                 }}
-                onCancel={() => setActiveId(null)}
+                onCancel={closeFlow}
               />
             ) : step === "docs" ? (
               <VehiculeDocsStep
@@ -551,6 +553,7 @@ function MesFacturesEtDevis() {
                 initialVersoUrl={active.carte_grise_verso_url}
                 onCompleted={() => {
                   setStep("pay");
+                  persistFlow(active.id, "pay");
                   refresh();
                 }}
               />
