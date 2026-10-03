@@ -47,7 +47,7 @@ export interface ShowToastInput {
 }
 
 const CheckIcon = (
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+  <svg className="ligneo-check-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="9" strokeWidth="1.8" />
     <path d="m8 12 2.5 2.5L16 9" />
   </svg>
