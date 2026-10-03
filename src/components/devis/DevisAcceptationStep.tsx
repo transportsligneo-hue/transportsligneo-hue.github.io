@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw, PenLine } from "lucide-react";
+import { FileCheck2, ShieldCheck, X, ArrowLeft, Mail, KeyRound, XCircle, CheckCircle2, RotateCw, PenLine, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -451,10 +451,10 @@ export function DevisAcceptationStep({
           <ShieldCheck className="text-[#4f8cff]" size={18} />
         </div>
         <div className="text-sm">
-          <p className="font-semibold text-[#0a1638]">Signature électronique par code e-mail</p>
+          <p className="font-semibold text-[#0a1638]">Signature électronique par code e-mail ou SMS</p>
           <p className="text-[#667085] mt-1 text-xs leading-relaxed">
             Vérifiez le récapitulatif, acceptez les CGV puis validez votre devis avec un
-            code à 6 chiffres reçu par e-mail. Horodatage, adresse IP et vérification du
+            code à 6 chiffres reçu par e-mail ou par SMS, au choix. Horodatage, adresse IP et vérification du
             code sont archivés comme preuve légale.
           </p>
         </div>
