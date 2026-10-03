@@ -619,7 +619,8 @@ async function findFacture(supabaseAdmin: AdminClient, key: string) {
   // Le PDF (et les lignes déjà enregistrées) peuvent indiquer #84 alors que la facture est #084.
   // Chercher les deux formes ensemble pour ne jamais payer une facture en cas d'ambiguïté.
   const match = /^TLG-(\d{4})-#(\d{1,6})$/.exec(key);
-  const paddedKey = match ? `TLG-${match[1]}-#${match[2].padStart(3, "0")}` : key;
+  if (!match) return null;
+  const paddedKey = `TLG-${match[1]}-#${match[2].padStart(3, "0")}`;
   const candidates = [...new Set([key, paddedKey])];
   const { data } = await supabaseAdmin
     .from("factures")
