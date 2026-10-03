@@ -36,7 +36,7 @@ const CATEGORY_META: Record<string, { Icon: LucideIcon; bg: string; text: string
 };
 
 export function NotificationBell({ className = "" }: { className?: string }) {
-  const { user, role } = useAuth();
+  const { user, role, typeClient } = useAuth();
   const router = useRouter();
   const channelId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [open, setOpen] = useState(false);
@@ -111,7 +111,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
 
 
   return <NotifPanelView user={!!user} open={open} setOpen={setOpen} unread={unread} items={items}
-    variant={variantFromRole(role)} markRead={markRead} onNavigate={(to) => router.navigate({ to })} className={className} />;
+    variant={variantFromRole(role)} clientType={typeClient} markRead={markRead} onNavigate={(to) => router.navigate({ to })} className={className} />;
 }
 
 const KEYWORDS = /(nouvelle destination|nouvelle adresse|date souhaitée|dates?|heures?|adresses?|destination|plaque)/gi;
@@ -132,9 +132,10 @@ function kindOf(n: UserNotif): "new" | "edit" | "ops" | "other" {
 
 
 function NotifPanelView({
-  user, open, setOpen, unread, items, markRead, onNavigate, className, variant,
+  user, open, setOpen, unread, items, markRead, onNavigate, className, variant, clientType,
 }: {
   variant: NeonVariant;
+  clientType: string | null;
   user: boolean; open: boolean; setOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   unread: number; items: UserNotif[]; markRead: (id: string) => void;
   onNavigate: (to: string) => void; className: string;
@@ -240,7 +241,7 @@ function NotifPanelView({
                     const kind = kindOf(n);
                     const meta = CATEGORY_META[n.category] ?? CATEGORY_META.systeme;
                     const Icon = kind === "edit" ? Pencil : kind === "other" ? meta.Icon : Truck;
-                    const tone = neonClass(resolveTone(variant, undefined, `${n.titre} ${n.type} ${n.message ?? ""}`));
+                    const tone = neonClass(resolveTone(variant, undefined, `${n.titre} ${n.type} ${n.message ?? ""}`, clientType));
                     const target = n.link && n.link.startsWith("/") ? n.link : null;
                     return (
                       <li key={n.id}>

@@ -9559,33 +9559,55 @@ body .tln-sheen { display: none; }
 }
 
 /* ===== Notifications néon unifiées (toasts + panneau) ===== */
+/* Base avant les variantes : la variante de chaque bandeau doit l'emporter. */
+.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
 .neon-green { --neon: #2ee671; --neon-soft: #5fffa0; --neon-rgb: 46,230,113; }
 .neon-blue  { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
+.neon-violet { --neon: #ad84ff; --neon-soft: #d2baff; --neon-rgb: 173,132,255; }
+.ligneo-neon-toaster [data-sonner-toast].neon-green { --neon: #2ee671; --neon-soft: #5fffa0; --neon-rgb: 46,230,113; }
+.ligneo-neon-toaster [data-sonner-toast].neon-violet { --neon: #ad84ff; --neon-soft: #d2baff; --neon-rgb: 173,132,255; }
 .ligneo-neon-toaster [data-sonner-toast].neon-green,
-.ligneo-neon-toaster [data-sonner-toast].neon-blue {
+.ligneo-neon-toaster [data-sonner-toast].neon-blue,
+.ligneo-neon-toaster [data-sonner-toast].neon-violet {
   font-family: 'Poppins', sans-serif !important;
   background: linear-gradient(180deg,#0c1838 0%,#0f1e42 100%) !important;
-  border: 1px solid rgba(var(--neon-rgb),.22) !important;
+  border: 1px solid rgba(var(--neon-rgb),.42) !important;
   border-radius: 16px !important;
-  box-shadow: 0 20px 45px -14px rgba(0,8,40,.65), 0 0 0 1px rgba(var(--neon-rgb),.06) !important;
+  box-shadow: 0 20px 45px -14px rgba(0,8,40,.65), 0 0 18px -5px rgba(var(--neon-rgb),.42), inset 0 1px 0 rgba(var(--neon-rgb),.14) !important;
   align-items: center !important;
+  animation: ligneo-toast-arrive .32s ease-out both;
 }
 .ligneo-neon-toaster [data-sonner-toast].neon-green::before,
-.ligneo-neon-toaster [data-sonner-toast].neon-blue::before {
+.ligneo-neon-toaster [data-sonner-toast].neon-blue::before,
+.ligneo-neon-toaster [data-sonner-toast].neon-violet::before {
   content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px;
   background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb),.7);
 }
 .ligneo-neon-toaster [data-sonner-toast].neon-green [data-icon],
-.ligneo-neon-toaster [data-sonner-toast].neon-blue [data-icon] {
-  width: 38px !important; height: 38px !important; border-radius: 50% !important;
-  background: rgba(var(--neon-rgb),.14) !important;
-  border: 1px solid rgba(var(--neon-rgb),.4) !important;
-  box-shadow: 0 0 0 4px rgba(var(--neon-rgb),.08), 0 0 16px rgba(var(--neon-rgb),.35) !important;
+.ligneo-neon-toaster [data-sonner-toast].neon-blue [data-icon],
+.ligneo-neon-toaster [data-sonner-toast].neon-violet [data-icon] {
+  position: relative;
+  flex: 0 0 42px !important;
+  width: 42px !important; height: 42px !important; border-radius: 50% !important;
+  display: flex !important; align-items: center; justify-content: center;
+  background: rgba(var(--neon-rgb),.11) !important;
+  border: 1px solid rgba(var(--neon-rgb),.65) !important;
+  box-shadow: 0 0 0 4px rgba(var(--neon-rgb),.08), 0 0 18px rgba(var(--neon-rgb),.4), inset 0 0 12px rgba(var(--neon-rgb),.12) !important;
   color: var(--neon) !important;
 }
-.ligneo-neon-toaster [data-sonner-toast] [data-icon] svg { filter: drop-shadow(0 0 4px rgba(var(--neon-rgb),.8)); }
+.ligneo-neon-toaster [data-sonner-toast] [data-icon] svg { width: 18px; height: 18px; filter: drop-shadow(0 0 5px rgba(var(--neon-rgb),.85)); }
+/* Une petite coche cerclée de vert, au centre du grand anneau coloré. */
+.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon] svg,
+.ligneo-neon-toaster [data-sonner-toast] [data-icon] svg.ligneo-check-icon { color: var(--success-check); filter: drop-shadow(0 0 5px var(--success-check)); }
+.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon] { --success-check: #2ee671; }
+.ligneo-neon-toaster [data-sonner-toast] [data-icon] { --success-check: #2ee671; }
+.ligneo-neon-toaster [data-sonner-toast][data-type="success"] [data-icon]::after {
+  content: ""; position: absolute; inset: 10px; border: 1px solid var(--success-check);
+  border-radius: 50%; box-shadow: 0 0 9px rgba(46,230,113,.65); pointer-events: none;
+}
 .ligneo-neon-toaster [data-sonner-toast].neon-green [data-title],
-.ligneo-neon-toaster [data-sonner-toast].neon-blue [data-title] {
+.ligneo-neon-toaster [data-sonner-toast].neon-blue [data-title],
+.ligneo-neon-toaster [data-sonner-toast].neon-violet [data-title] {
   font-size: 14.5px !important; font-weight: 800 !important; letter-spacing: .2px;
   color: var(--neon-soft) !important;
   text-shadow: 0 0 10px rgba(var(--neon-rgb),.75), 0 0 22px rgba(var(--neon-rgb),.4);
@@ -9601,8 +9623,12 @@ body .tln-sheen { display: none; }
 .notif-neon-title { color: var(--neon-soft); text-shadow: 0 0 10px rgba(var(--neon-rgb),.55), 0 0 20px rgba(var(--neon-rgb),.3); }
 .notif-neon-bar { background: var(--neon); box-shadow: 0 0 10px rgba(var(--neon-rgb),.75); }
 
-/* Couleur néon par défaut du toaster (bleu) ; les classes neon-green/neon-blue la surchargent */
-.ligneo-neon-toaster [data-sonner-toast] { --neon: #4f8eff; --neon-soft: #8fb6ff; --neon-rgb: 79,142,255; }
+@keyframes ligneo-toast-arrive { from { filter: brightness(.65); } to { filter: brightness(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .ligneo-neon-toaster [data-sonner-toast].neon-green,
+  .ligneo-neon-toaster [data-sonner-toast].neon-blue,
+  .ligneo-neon-toaster [data-sonner-toast].neon-violet { animation: none; }
+}
 
 /* Bouton d'action des notifications (ex. « Valider ») : vivant, néon, réactif */
 .ligneo-neon-toaster [data-sonner-toast] [data-button] {
