@@ -71,20 +71,15 @@ export function VehiculeDocsStep({
   const save = async () => {
     if (!canSave) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("devis")
-      .update({
-        vin: vin.trim().toUpperCase(),
-        carte_grise_recto_url: rectoUrl,
-        carte_grise_verso_url: versoUrl,
-        vehicule_docs_completed: true,
-      })
-      .eq("id", devisId);
-    setSaving(false);
-    if (error) {
-      toast.error("Sauvegarde échouée");
+    try {
+      const { saveVehiculeDocs } = await import("@/lib/vehicule-docs.functions");
+      await saveVehiculeDocs({ data: { devisId, vin, recto: rectoUrl!, verso: versoUrl ?? null } });
+    } catch (e) {
+      setSaving(false);
+      toast.error("Sauvegarde échouée", { description: e instanceof Error ? e.message : undefined });
       return;
     }
+    setSaving(false);
     toast.success("Documents véhicule enregistrés");
     onCompleted();
   };
