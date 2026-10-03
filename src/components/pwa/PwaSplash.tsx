@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 
 /**
- * Splash screen affiché uniquement quand l'app est ouverte en mode PWA installée
- * (display-mode: standalone) · comme une application native. Animation courte du
- * logo Ligneo doré sur fond bleu nuit, puis fondu de sortie.
+ * Écran de chargement partagé entre le site web, la PWA et l'app native.
  */
 export default function PwaSplash() {
   const [visible, setVisible] = useState(false);
@@ -11,13 +9,6 @@ export default function PwaSplash() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      // iOS Safari
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-
-    if (!isStandalone) return;
-
     setVisible(true);
     // Verrouille le scroll pendant l'anim
     const prevOverflow = document.body.style.overflow;
@@ -43,7 +34,6 @@ export default function PwaSplash() {
       aria-hidden="true"
       className={`pwa-splash ${leaving ? "pwa-splash--leaving" : ""}`}
     >
-      <div className="pwa-splash__halo" />
       <div className="pwa-splash__mark">
         <img
           src="/logo-ligneo.png"
@@ -54,8 +44,8 @@ export default function PwaSplash() {
           draggable={false}
         />
         <div className="pwa-splash__wordmark">
-          <span className="pwa-splash__brand">TRANSPORTS&nbsp;<span style={{ color: "#4f8cff" }}>LIGNEO</span></span>
-          <span className="pwa-splash__tagline">Convoyage automobile</span>
+          <span className="pwa-splash__brand"><span>TRANSPORTS</span> <span className="pwa-splash__electric">LIGNEO</span></span>
+          <span className="pwa-splash__tagline">Votre logistique automobile sur toute la ligne</span>
         </div>
       </div>
       <div className="pwa-splash__progress" />

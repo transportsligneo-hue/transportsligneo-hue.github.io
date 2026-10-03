@@ -2799,9 +2799,13 @@ body.is-driver-app .closed-link svg {
 }
 
 /* ===========================================================
-   PWA splash — écran d'ouverture façon app native (mode standalone)
+   Écran d'ouverture Ligneo — web, PWA et application native
    =========================================================== */
 .pwa-splash {
+  --splash-navy: #0b1026;
+  --splash-white: #fdfcf8;
+  --splash-electric: #4f8cff;
+  --splash-muted: #a9bbda;
   position: fixed;
   inset: 0;
   z-index: 2147483000;
@@ -2812,9 +2816,8 @@ body.is-driver-app .closed-link svg {
   gap: 1.5rem;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
-  background:
-    radial-gradient(120% 80% at 50% 15%, #1a2456 0%, #0b1026 55%, #05081a 100%);
-  color: #fdfcf8;
+  background: var(--splash-navy);
+  color: var(--splash-white);
   overflow: hidden;
   animation: pwaSplashIn 220ms ease-out both;
   will-change: opacity;
@@ -2828,7 +2831,7 @@ body.is-driver-app .closed-link svg {
   width: 480px;
   height: 480px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212,175,55,0.28) 0%, rgba(212,175,55,0) 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 25%, transparent) 0%, transparent 65%);
   filter: blur(20px);
   animation: pwaSplashHalo 2.4s ease-in-out infinite;
 }
@@ -2851,7 +2854,7 @@ body.is-driver-app .closed-link svg {
   min-width: 148px;
   min-height: 148px;
   object-fit: contain;
-  filter: drop-shadow(0 12px 40px rgba(212,175,55,0.35));
+  filter: drop-shadow(0 12px 40px color-mix(in srgb, var(--splash-electric) 35%, transparent));
   animation:
     pwaSplashLogoSettle 900ms cubic-bezier(0.22, 1, 0.36, 1) both,
     pwaSplashPulse 1.8s ease-in-out 900ms infinite;
@@ -2869,17 +2872,25 @@ body.is-driver-app .closed-link svg {
 
 .pwa-splash__brand {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.1rem;
-  letter-spacing: 0.32em;
-  color: #fdfcf8;
+  font-size: clamp(0.9rem, 3vw, 1.3rem);
+  letter-spacing: 0;
+  color: var(--splash-white);
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--splash-electric) 18%, transparent);
+}
+.pwa-splash__electric {
+  color: var(--splash-electric);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--splash-electric) 55%, transparent);
 }
 
 .pwa-splash__tagline {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 0.72rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #d4af37;
+  letter-spacing: 0;
+  text-align: center;
+  padding-inline: 1rem;
+  color: var(--splash-muted);
 }
 
 .pwa-splash__progress {
@@ -2888,7 +2899,7 @@ body.is-driver-app .closed-link svg {
   width: 88px;
   height: 2px;
   border-radius: 2px;
-  background: rgba(255,255,255,0.08);
+  background: color-mix(in srgb, var(--splash-white) 12%, transparent);
   overflow: hidden;
 }
 .pwa-splash__progress::after {
@@ -2896,7 +2907,7 @@ body.is-driver-app .closed-link svg {
   display: block;
   width: 40%;
   height: 100%;
-  background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--splash-electric) 50%, transparent 100%);
   animation: pwaSplashProgress 1.2s ease-in-out infinite;
 }
 
@@ -2917,8 +2928,8 @@ body.is-driver-app .closed-link svg {
   100% { transform: scale(1); }
 }
 @keyframes pwaSplashPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 12px 40px rgba(212,175,55,0.35)); }
-  50%      { transform: scale(1.04); filter: drop-shadow(0 16px 55px rgba(212,175,55,0.55)); }
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 12px 40px color-mix(in srgb, var(--splash-electric) 35%, transparent)); }
+  50%      { transform: scale(1.04); filter: drop-shadow(0 16px 55px color-mix(in srgb, var(--splash-electric) 55%, transparent)); }
 }
 @keyframes pwaSplashHalo {
   0%, 100% { opacity: 0.55; transform: scale(1); }

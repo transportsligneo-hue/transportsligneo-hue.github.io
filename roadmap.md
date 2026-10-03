@@ -5,3 +5,6 @@
 - [x] Vidéos de présentation : garder le premier démarrage automatique avec son, sans relancer automatiquement chaque vidéo ensuite ; lecture manuelle toujours possible.
 - [x] Services pro : « Échanger avec un conseiller » en néon bleu électrique ; « Commander un transport » → /tarifs?audience=pro avec estimateur pré-sélectionné sur Professionnel ponctuel (desktop + mobile) ; « Demander une étude flotte » → /contact?audience=pro&formule=flotte.
 - [x] Estimateur tarifs : prix lisible sur fond clair avec accents bleus, bouton « Continuer vers mon devis », étapes et confirmation de devis contrastées dans les deux thèmes.
+- [x] Scanner client : fiabiliser le cadrage du scanner partagé avec l'état des lieux et la sortie du document.
+- [x] Documents Driver : ouvrir ou partager les PDF sur mobile, y compris dans l'application installée.
+- [x] Chargement web et application : logo conservé, TRANSPORTS blanc et LIGNEO bleu électrique, animation sobre.

@@ -168,3 +168,18 @@ export function detectQuadFromCanvas(src: HTMLCanvasElement): QuadPt[] | null {
   if (!quad) return null;
   return quad.map((p) => ({ x: p.x * src.width, y: p.y * src.height }));
 }
+
+/** Refuse un recadrage présélectionné si les bords détectés sont incomplets. */
+export function isReliableDocumentQuad(quad: QuadPt[], width: number, height: number): boolean {
+  if (quad.length !== 4 || width <= 0 || height <= 0) return false;
+  if (quad.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y))) return false;
+  const xs = quad.map((p) => p.x / width), ys = quad.map((p) => p.y / height);
+  const left = Math.min(...xs), right = Math.max(...xs);
+  const top = Math.min(...ys), bottom = Math.max(...ys);
+  if (left < 0.015 || top < 0.015 || right > 0.985 || bottom > 0.985) return false;
+  if (right - left < 0.42 || bottom - top < 0.42) return false;
+  const cross = (a: QuadPt, b: QuadPt, c: QuadPt) =>
+    (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+  const turns = quad.map((p, i) => cross(p, quad[(i + 1) % 4], quad[(i + 2) % 4]));
+  return turns.every((v) => v > 0) || turns.every((v) => v < 0);
+}

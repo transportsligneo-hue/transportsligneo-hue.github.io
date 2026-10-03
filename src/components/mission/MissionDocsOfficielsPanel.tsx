@@ -309,7 +309,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         },
       }, company);
 
-      downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
+      await downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -338,7 +338,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
           client: signatures[signatureKind(`edl_${v}` as SignatureDocType, "client")] ?? null,
         },
       }, company);
-      downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
+      await downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -376,7 +376,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             null,
         },
       }, company);
-      downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
+      await downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -408,17 +408,24 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
           mandataire: signatures[signatureKind("mandat", "mandataire")] ?? null,
         },
       }, company);
-      downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
+      await downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
   };
 
   const openStored = async (url: string) => {
-    if (/^https?:/.test(url)) { window.open(url, "_blank"); return; }
-    const { data } = await supabase.storage.from("mission-documents").createSignedUrl(url, 300);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-    else toast.error("Document indisponible");
+    try {
+      const signedUrl = /^https?:/.test(url)
+        ? url
+        : (await supabase.storage.from("mission-documents").createSignedUrl(url, 300)).data?.signedUrl;
+      if (!signedUrl) throw new Error("Lien indisponible");
+      const response = await fetch(signedUrl);
+      if (!response.ok) throw new Error("Document indisponible");
+      await downloadBlob(await response.blob(), url.split("/").pop()?.split("?")[0] || "document.pdf");
+    } catch {
+      toast.error("Document indisponible");
+    }
   };
 
   const generatePv = async () => {
@@ -458,7 +465,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         url_fichier: path,
       });
       if (insErr) throw insErr;
-      downloadBlob(blob, filename);
+      await downloadBlob(blob, filename);
       toast.success("Passage à vide généré et attaché à la mission");
       setShowPvForm(false);
       setPvForm({ vehicule_type: "", vehicule_modele: "", vehicule_immat: "", motif: "", heures: "", distance_km: "" });

@@ -1085,13 +1085,31 @@ export async function generateCharteDiscretionPdf(
   return doc.output("blob");
 }
 
-export function downloadBlob(blob: Blob, filename: string) {
+export async function downloadBlob(blob: Blob, filename: string): Promise<void> {
+  const { isNativeApp, shareNativeFile } = await import("@/lib/native/bridge");
+  if (isNativeApp() && await shareNativeFile(blob, filename)) return;
+
+  // iOS / Android installed PWAs cannot reliably download object URLs. Their
+  // file share sheet offers Save to Files as well as opening the PDF.
+  const file = new File([blob], filename, { type: blob.type || "application/pdf" });
+  if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: filename });
+      return;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  a.target = "_blank";
+  a.rel = "noopener";
+  document.body.appendChild(a);
   a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /** Couleurs réexportées pour les consommateurs. */

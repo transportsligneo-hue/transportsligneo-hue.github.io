@@ -19,7 +19,7 @@
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { detectQuadFromCanvas, detectQuadFromImageData } from "@/lib/scanner/detect-quad";
+import { detectQuadFromCanvas, detectQuadFromImageData, isReliableDocumentQuad } from "@/lib/scanner/detect-quad";
 
 import {
   X, ScanLine, RotateCw, Check, Loader2, Camera as CameraIcon,
@@ -331,8 +331,16 @@ export function DocumentScanner({
         if (frame % 4 === 0) {
           let quad: Pt[] | null = null;
           try {
+            // Conserver les proportions de la caméra pour ne pas fausser les coins.
+            if (video.videoWidth && video.videoHeight) {
+              const height = Math.max(40, Math.round(det.width * video.videoHeight / video.videoWidth));
+              if (det.height !== height) det.height = height;
+            }
             dctx.drawImage(video, 0, 0, det.width, det.height);
-            quad = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
+            const candidate = detectQuadFromImageData(dctx.getImageData(0, 0, det.width, det.height));
+            quad = candidate && isReliableDocumentQuad(
+              candidate.map((p) => ({ x: p.x * det.width, y: p.y * det.height })), det.width, det.height,
+            ) ? candidate : null;
           } catch {
             quad = null;
           }
@@ -435,7 +443,7 @@ export function DocumentScanner({
     const vw = video.videoWidth, vh = video.videoHeight;
     if (!vw || !vh) return;
     const src = document.createElement("canvas");
-    const maxSide = 1800;
+    const maxSide = 2560;
     const ratio = Math.min(1, maxSide / Math.max(vw, vh));
     src.width = Math.round(vw * ratio);
     src.height = Math.round(vh * ratio);
@@ -450,10 +458,15 @@ export function DocumentScanner({
     const detected = (() => {
       try { return detectQuadFromCanvas(src); } catch { return null; }
     })();
-    if (detected) {
-      setCorners(detected);
+    if (detected && isReliableDocumentQuad(detected, src.width, src.height)) {
+      const cx = detected.reduce((sum, p) => sum + p.x, 0) / 4;
+      const cy = detected.reduce((sum, p) => sum + p.y, 0) / 4;
+      setCorners(detected.map((p) => ({
+        x: Math.max(0, Math.min(src.width - 1, cx + (p.x - cx) * 1.035)),
+        y: Math.max(0, Math.min(src.height - 1, cy + (p.y - cy) * 1.035)),
+      })));
     } else {
-      const m = 0.06;
+      const m = 0.025;
       setCorners([
         { x: src.width * m, y: src.height * m },
         { x: src.width * (1 - m), y: src.height * m },
@@ -471,17 +484,19 @@ export function DocumentScanner({
     e.target.value = "";
     if (!f) { onCancel(); return; }
     const img = new Image();
+    const objectUrl = URL.createObjectURL(f);
     img.onload = () => {
       const src = document.createElement("canvas");
-      const maxSide = 1800;
+      const maxSide = 2560;
       const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
       src.width = Math.round(img.width * ratio);
       src.height = Math.round(img.height * ratio);
       src.getContext("2d")!.drawImage(img, 0, 0, src.width, src.height);
       goToReview(src);
+      URL.revokeObjectURL(objectUrl);
     };
-    img.onerror = () => onCancel();
-    img.src = URL.createObjectURL(f);
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); onCancel(); };
+    img.src = objectUrl;
   };
 
   /* ── review : dessin poignées ── */
