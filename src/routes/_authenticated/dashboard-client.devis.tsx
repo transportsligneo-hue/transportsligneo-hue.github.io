@@ -162,17 +162,59 @@ function MesFacturesEtDevis() {
     ? `${window.location.origin}/dashboard-client/devis?paye=1`
     : "/";
 
+  // Persistance de la fenêtre de signature : un rechargement de page
+  // (ou la redirection retour du paiement) rouvre le devis à la bonne étape.
+  const FLOW_STORAGE_KEY = "ligneo:devis-flow";
+  const persistFlow = (id: string | null, s: "acceptation" | "docs" | "pay") => {
+    try {
+      if (id) sessionStorage.setItem(FLOW_STORAGE_KEY, JSON.stringify({ id, step: s }));
+      else sessionStorage.removeItem(FLOW_STORAGE_KEY);
+    } catch { /* stockage indisponible : on ignore */ }
+  };
+  const closeFlow = () => { setActiveId(null); persistFlow(null, "acceptation"); };
+
+  // Restaure la fenêtre après rechargement, une fois les devis chargés.
+  useEffect(() => {
+    if (loading || activeId) return;
+    try {
+      // Retour de paiement réussi : on ne rouvre pas la fenêtre.
+      if (typeof window !== "undefined" && window.location.search.includes("paye=1")) {
+        sessionStorage.removeItem(FLOW_STORAGE_KEY);
+        return;
+      }
+      const raw = sessionStorage.getItem(FLOW_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { id?: string; step?: string };
+      const d = devis.find((x) => x.id === saved.id);
+      if (!d) { sessionStorage.removeItem(FLOW_STORAGE_KEY); return; }
+      setActiveId(d.id);
+      setStep(
+        saved.step === "docs" || saved.step === "pay"
+          ? saved.step
+          : d.locked_at
+            ? d.vehicule_docs_completed ? "pay" : "docs"
+            : "acceptation",
+      );
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, devis]);
+
   const openFlow = async (d: DevisRow) => {
     setActiveId(d.id);
     try {
       const status = await getStatus({ data: { devisId: d.id } });
       if (status.requiresAcceptation || !d.locked_at) {
         setStep("acceptation");
+        persistFlow(d.id, "acceptation");
       } else {
-        setStep(d.vehicule_docs_completed ? "pay" : "docs");
+        const s = d.vehicule_docs_completed ? "pay" : "docs";
+        setStep(s);
+        persistFlow(d.id, s);
       }
     } catch {
-      setStep(d.locked_at ? (d.vehicule_docs_completed ? "pay" : "docs") : "acceptation");
+      const s = d.locked_at ? (d.vehicule_docs_completed ? "pay" : "docs") : "acceptation";
+      setStep(s);
+      persistFlow(d.id, s);
     }
   };
 
@@ -460,7 +502,7 @@ function MesFacturesEtDevis() {
         <div className="client-sign-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-auto">
           <div className="client-sign-modal max-w-2xl w-full p-6 sm:p-8 my-8 relative">
             <button
-              onClick={() => setActiveId(null)}
+              onClick={closeFlow}
               className="absolute top-4 right-4 text-cream/60 hover:text-cream transition-colors"
               aria-label="Fermer"
             >
@@ -501,10 +543,12 @@ function MesFacturesEtDevis() {
                 prixTtc={Number(active.prix_estime)}
                 dateSouhaitee={active.date_souhaitee}
                 onAccepted={() => {
-                  setStep(active.vehicule_docs_completed ? "pay" : "docs");
+                  const s = active.vehicule_docs_completed ? "pay" : "docs";
+                  setStep(s);
+                  persistFlow(active.id, s);
                   refresh();
                 }}
-                onCancel={() => setActiveId(null)}
+                onCancel={closeFlow}
               />
             ) : step === "docs" ? (
               <VehiculeDocsStep
@@ -514,6 +558,7 @@ function MesFacturesEtDevis() {
                 initialVersoUrl={active.carte_grise_verso_url}
                 onCompleted={() => {
                   setStep("pay");
+                  persistFlow(active.id, "pay");
                   refresh();
                 }}
               />

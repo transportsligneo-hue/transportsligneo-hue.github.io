@@ -8,13 +8,14 @@
  * - Sauvegarde sur la table devis + flag vehicule_docs_completed
  */
 import { useState } from "react";
-import { Upload, Loader2, CheckCircle2, AlertTriangle, Camera, FileText } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertTriangle, Camera, FileText, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BUCKET_CARTES_GRISES, carteGriseDevisPath } from "@/lib/storage-buckets";
 import { compressImage } from "@/lib/image-compression";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
+import { lookupVinByPlate } from "@/lib/plate-vin.functions";
 
 
 interface Props {
@@ -36,10 +37,34 @@ export function VehiculeDocsStep({
 }: Props) {
   const { user } = useAuth();
   const [vin, setVin] = useState(initialVin ?? "");
+  const [plate, setPlate] = useState("");
+  const [lookingUp, setLookingUp] = useState(false);
   const [rectoUrl, setRectoUrl] = useState<string | null>(initialRectoUrl ?? null);
   const [versoUrl, setVersoUrl] = useState<string | null>(initialVersoUrl ?? null);
   const [uploading, setUploading] = useState<"recto" | "verso" | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const searchByPlate = async () => {
+    const p = plate.trim();
+    if (p.length < 5) {
+      toast.error("Saisissez une plaque valide (ex : AB-123-CD)");
+      return;
+    }
+    setLookingUp(true);
+    try {
+      const res = await lookupVinByPlate({ data: { plate: p } });
+      if (res.ok && res.vin) {
+        setVin(res.vin);
+        toast.success("VIN retrouvé automatiquement");
+      } else {
+        toast.error(res.error ?? "VIN introuvable — saisissez-le manuellement");
+      }
+    } catch {
+      toast.error("Recherche impossible — saisissez le VIN manuellement");
+    } finally {
+      setLookingUp(false);
+    }
+  };
 
   const vinValid = VIN_REGEX.test(vin.trim());
   const canSave = vinValid && !!rectoUrl && !saving;
@@ -94,6 +119,35 @@ export function VehiculeDocsStep({
             Renseignez le VIN et envoyez la carte grise pour finaliser votre commande.
           </p>
         </div>
+      </div>
+
+      {/* Recherche par plaque */}
+      <div>
+        <label className="text-cream/70 text-xs uppercase tracking-wider mb-2 block">
+          Plaque d'immatriculation
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={plate}
+            onChange={(e) => setPlate(e.target.value.toUpperCase())}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); searchByPlate(); } }}
+            placeholder="AB-123-CD"
+            className="flex-1 px-3 py-2.5 rounded-lg bg-navy-dark border border-cream/20 text-cream font-mono text-sm focus:border-primary outline-none uppercase"
+          />
+          <button
+            type="button"
+            onClick={searchByPlate}
+            disabled={lookingUp}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary/50 text-primary text-xs font-heading uppercase tracking-wider hover:bg-primary/10 transition-colors disabled:opacity-40"
+          >
+            {lookingUp ? <Loader2 className="animate-spin" size={14} /> : <Search size={14} />}
+            Retrouver le VIN
+          </button>
+        </div>
+        <p className="text-cream/40 text-[11px] mt-1.5">
+          Le VIN se remplit tout seul — vous pouvez aussi le saisir à la main ci-dessous.
+        </p>
       </div>
 
       {/* VIN */}
