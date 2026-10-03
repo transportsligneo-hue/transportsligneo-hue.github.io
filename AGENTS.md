@@ -1,4 +1,5 @@
 - Keep the public mobile navigation and color treatment scoped below 768px in MobileNavbar and the public mobile CSS; desktop marketing and signed-in workspaces remain independent so mobile presentation changes cannot alter their workflows.
 - Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
 - Reuse public presentation assets in marketing pages only, with shared video markup for the three professional profiles, to keep their films consistent without affecting signed-in workspaces.
+- Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
