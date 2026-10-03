@@ -7,6 +7,9 @@ import DevisGenerator from "@/components/DevisGenerator";
  * cohérente avec MobileHomeScreen. Reprend le simulateur réel.
  */
 export default function MobileTarifsScreen() {
+  const { audience } = useSearch({ from: "/tarifs" });
+  const devisPrefill: DevisGeneratorPrefill | undefined = audience === "pro" ? { clientType: "pro_ponctuel" } : undefined;
+
 
   return (
     <div
@@ -37,7 +40,7 @@ export default function MobileTarifsScreen() {
 
       {/* Simulateur réel */}
       <div className="relative z-[3] mx-[18px] mt-5">
-        <DevisGenerator variant="flat" />
+        <DevisGenerator variant="flat" prefill={devisPrefill} />
       </div>
 
       {/* Grille tarifaire */}
