@@ -132,7 +132,7 @@ export default function ProSegment() {
                   </li>
                 ))}
               </ul>
-              <Link to="/contact?audience=pro&formule=ponctuel" className="pf-btn solid">
+              <Link to="/contact" search={{ audience: "pro", formule: "ponctuel" }} className="pf-btn solid">
                 Commander un transport
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -158,7 +158,7 @@ export default function ProSegment() {
                   </li>
                 ))}
               </ul>
-              <Link to="/contact?audience=pro&formule=flotte" className="pf-btn outline">
+              <Link to="/contact" search={{ audience: "pro", formule: "flotte" }} className="pf-btn outline">
                 Demander une étude flotte
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -173,7 +173,7 @@ export default function ProSegment() {
               <strong>Un conseiller dédié vous répond sous 24 h ouvrées.</strong>
               <span>Étude gratuite, tarifs préférentiels dès le premier échange.</span>
             </div>
-            <Link to="/contact?audience=pro" className="pf-band-btn">
+            <Link to="/contact" search={{ audience: "pro" }} className="pf-band-btn">
               Échanger avec un conseiller
               <ArrowRight size={16} />
             </Link>
