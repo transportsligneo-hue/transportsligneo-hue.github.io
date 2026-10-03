@@ -4608,6 +4608,32 @@ html.theme-light .v5-section-transition {
   --pro-accent-deep: #5334d6;
 }
 
+/* Espaces professionnels : états et actions violets, jamais ambrés. */
+.dashboard-shell-light {
+  --pro-gold: #7c5cff;
+  --v3-gold: #7c5cff;
+  --v3-gold-deep: #5334d6;
+  --v3-gold-soft: #f2eeff;
+  --v3-gold-line: #d9d0ff;
+}
+.dashboard-shell-light .v3-kpi-grad.gold,
+.dashboard-shell-light .v3-cta-gold {
+  background: linear-gradient(150deg, #f2eeff, var(--pro-surface));
+  border-color: #d9d0ff;
+}
+.dashboard-shell-light .v3-kpi-grad.gold::before { background: radial-gradient(circle, #7c5cff, transparent 70%); }
+.dashboard-shell-light .v3-btn-gold { background: linear-gradient(120deg, #a56aff, #7c5cff); box-shadow: 0 10px 22px #7c5cff40; }
+.dashboard-shell-light .bg-amber-50,
+.dashboard-shell-light .bg-amber-100,
+.dashboard-shell-light .bg-amber-200 { background-color: #f2eeff !important; }
+.dashboard-shell-light .text-amber-500,
+.dashboard-shell-light .text-amber-600,
+.dashboard-shell-light .text-amber-700,
+.dashboard-shell-light .text-amber-900 { color: #5334d6 !important; }
+.dashboard-shell-light .border-amber-200,
+.dashboard-shell-light .border-amber-300 { border-color: #d9d0ff !important; }
+.dashboard-shell-light .fill-amber-500 { fill: #7c5cff !important; }
+
 /* === Services · Notre plateforme === */
 .plateforme-section { max-width: 1220px; margin: 0 auto; padding: 40px 32px 90px; }
 .plateforme-head { text-align: center; margin-bottom: 50px; }
