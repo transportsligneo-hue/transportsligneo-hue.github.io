@@ -178,34 +178,33 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Défi actif le plus récent
-    const { data: challenge, error: chErr } = await supabaseAdmin
+    // Tous les codes encore valides : si le client a reçu plusieurs envois
+    // (renvoi, changement e-mail/SMS), n'importe lequel non expiré est accepté.
+    const { data: actives, error: chErr } = await supabaseAdmin
       .from("devis_otp_challenges")
       .select("id, code_hash, attempts, max_attempts, expires_at, consumed_at, email, method, created_at")
       .eq("devis_id", devis.id)
       .eq("client_user_id", userId)
       .is("consumed_at", null)
+      .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(10);
 
     if (chErr) throw new Error("Vérification impossible");
-    if (!challenge) throw new Error("Aucun code en cours, redemandez un envoi.");
-    if (new Date(challenge.expires_at).getTime() < Date.now()) {
-      throw new Error("Code expiré, redemandez un envoi.");
-    }
-    if (challenge.attempts >= challenge.max_attempts) {
-      throw new Error("Trop de tentatives, redemandez un nouveau code.");
-    }
+    if (!actives || actives.length === 0) throw new Error("Code expiré ou absent, redemandez un envoi.");
+    const usable = actives.filter((c) => c.attempts < c.max_attempts);
+    if (usable.length === 0) throw new Error("Trop de tentatives, redemandez un nouveau code.");
 
     const submittedHash = await sha256Hex(data.code);
-    if (submittedHash !== challenge.code_hash) {
+    const challenge = usable.find((c) => c.code_hash === submittedHash);
+    if (!challenge) {
+      const latest = usable[0];
       await supabaseAdmin
         .from("devis_otp_challenges")
-        .update({ attempts: challenge.attempts + 1 })
-        .eq("id", challenge.id);
-      const remaining = Math.max(0, challenge.max_attempts - (challenge.attempts + 1));
-      throw new Error(`Code incorrect. ${remaining} tentative(s) restante(s).`);
+        .update({ attempts: latest.attempts + 1 })
+        .eq("id", latest.id);
+      const remaining = Math.max(0, latest.max_attempts - (latest.attempts + 1));
+      throw new Error(`Code incorrect. Utilisez le dernier code reçu. ${remaining} tentative(s) restante(s).`);
     }
 
     // ---- Code valide : on signe le devis ----
