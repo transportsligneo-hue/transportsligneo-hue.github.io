@@ -9,3 +9,4 @@
 - [x] Documents Driver : ouvrir ou partager les PDF sur mobile, y compris dans l'application installée.
 - [x] Chargement web et application : logo conservé, TRANSPORTS blanc et LIGNEO bleu électrique, animation sobre.
 - [x] Espace Driver PC : fenêtres et cartes opaques, texte contrasté, accents bleus/verts électriques ; espace pro sans doré avec accents violets électriques.
+- [x] Audit lisibilité : fenêtre de notifications non coupée par la barre latérale, boutons et réponses de formation Driver contrastés en clair et sombre.

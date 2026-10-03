@@ -42,7 +42,7 @@ export function QuizBlock({
     <section className="rounded-2xl border border-pro-border bg-white p-5">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-semibold text-pro-text flex items-center gap-2">
-          <Trophy size={16} className="text-[#B8862A]" /> Quiz de validation
+          <Trophy size={16} className="driver-training-accent" /> Quiz de validation
         </h3>
         <span className="text-xs text-pro-muted">
           Score minimum {PASS_SCORE}% · {attempts} tentative{attempts > 1 ? "s" : ""}
@@ -72,11 +72,11 @@ export function QuizBlock({
                       onClick={() => setAnswers((a) => ({ ...a, [i]: ci }))}
                       className={`w-full text-left rounded-lg border px-3 py-2 text-sm transition-all ${
                         isGood
-                          ? "border-emerald-400 bg-emerald-50 text-emerald-900"
+                           ? "driver-training-correct border-emerald-400 bg-emerald-50 text-emerald-900"
                           : isBadPick
-                            ? "border-red-300 bg-red-50 text-red-900"
+                             ? "driver-training-incorrect border-red-300 bg-red-50 text-red-900"
                             : picked
-                              ? "border-[#2F5FFF] bg-[#2F5FFF]/5 text-pro-text"
+                               ? "driver-training-selected border-[#2F5FFF] bg-[#2F5FFF]/5 text-pro-text"
                               : "border-pro-border hover:border-[#2F5FFF]/40 text-pro-text-soft"
                       }`}
                     >
@@ -102,7 +102,7 @@ export function QuizBlock({
             type="button"
             disabled={!allAnswered || loading}
             onClick={() => void submit()}
-            className="rounded-xl bg-[#0B1338] text-white text-sm font-semibold px-5 py-2.5 disabled:opacity-40 hover:bg-[#111a3d] transition-colors flex items-center gap-2"
+              className="driver-training-button rounded-xl text-sm font-semibold px-5 py-2.5 disabled:opacity-40 transition-colors flex items-center gap-2"
           >
             {loading && <Loader2 size={14} className="animate-spin" />} Valider le quiz
           </button>
