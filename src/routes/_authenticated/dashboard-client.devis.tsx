@@ -207,7 +207,9 @@ function MesFacturesEtDevis() {
         persistFlow(d.id, s);
       }
     } catch {
-      setStep(d.locked_at ? (d.vehicule_docs_completed ? "pay" : "docs") : "acceptation");
+      const s = d.locked_at ? (d.vehicule_docs_completed ? "pay" : "docs") : "acceptation";
+      setStep(s);
+      persistFlow(d.id, s);
     }
   };
 
@@ -495,7 +497,7 @@ function MesFacturesEtDevis() {
         <div className="client-sign-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-auto">
           <div className="client-sign-modal max-w-2xl w-full p-6 sm:p-8 my-8 relative">
             <button
-              onClick={() => setActiveId(null)}
+              onClick={closeFlow}
               className="absolute top-4 right-4 text-cream/60 hover:text-cream transition-colors"
               aria-label="Fermer"
             >
