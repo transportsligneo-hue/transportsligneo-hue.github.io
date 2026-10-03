@@ -1548,7 +1548,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <h3 className="font-heading text-xl text-neon-blue tracking-[0.15em] uppercase mb-2">Devis envoyé</h3>
             {savedDevis && <p className="text-cream/70 text-xs tracking-wider uppercase mb-4">N° {savedDevis.numero}</p>}
             <p className="text-cream/90 text-sm leading-relaxed max-w-md mx-auto">
-              Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email
+              Merci pour votre demande. Un récapitulatif vient de vous être envoyé par email (pensez à vérifier vos spams)
               et notre équipe vous recontactera dans les plus brefs délais.
             </p>
 
@@ -1563,7 +1563,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   </p>
                   <p className="text-cream/60 text-xs leading-relaxed">
                     {accountCreated
-                      ? <>Nous venons de vous envoyer un lien de vérification à <strong className="text-cream/90">{email}</strong>. Cliquez dessus pour activer votre compte et retrouver votre devis dans votre espace client.</>
+                      ? <>Nous venons de vous envoyer un lien de vérification à <strong className="text-cream/90">{email}</strong>. Cliquez dessus pour activer votre compte et retrouver votre devis dans votre espace client. Pas reçu ? Pensez à regarder dans vos spams.</>
                       : <>Un compte existe déjà avec <strong className="text-cream/90">{email}</strong>. Connectez-vous pour retrouver votre devis.</>
                     }
                   </p>

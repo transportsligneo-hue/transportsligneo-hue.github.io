@@ -125,7 +125,7 @@ function InscriptionPro() {
             </div>
             <h1 className="auth-title text-xl md:text-2xl">Compte pro créé</h1>
             <p className="auth-subtle text-sm leading-relaxed">
-              Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous à votre espace B2B.
+              Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous à votre espace B2B. Pas reçu ? Pensez à regarder dans vos spams.
             </p>
             <Link to="/login" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
               Aller à la connexion →
