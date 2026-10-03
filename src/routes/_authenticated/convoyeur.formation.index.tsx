@@ -13,6 +13,10 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
     meta: [
       { title: "Formation convoyeur — Transports Ligneo" },
       { name: "description", content: "Parcours de formation interne des convoyeurs Transports Ligneo." },
+      { property: "og:title", content: "Formation convoyeur — Transports Ligneo" },
+      { property: "og:description", content: "Parcours de formation interne des convoyeurs Transports Ligneo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: FormationHome,
