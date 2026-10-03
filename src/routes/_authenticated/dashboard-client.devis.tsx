@@ -177,6 +177,11 @@ function MesFacturesEtDevis() {
   useEffect(() => {
     if (loading || activeId) return;
     try {
+      // Retour de paiement réussi : on ne rouvre pas la fenêtre.
+      if (typeof window !== "undefined" && window.location.search.includes("paye=1")) {
+        sessionStorage.removeItem(FLOW_STORAGE_KEY);
+        return;
+      }
       const raw = sessionStorage.getItem(FLOW_STORAGE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw) as { id?: string; step?: string };
