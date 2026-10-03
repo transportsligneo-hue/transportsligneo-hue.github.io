@@ -107,6 +107,7 @@ export interface DevisGeneratorPrefill {
   email?: string;
   telephone?: string;
   societe?: string;
+  clientType?: ClientType;
 }
 
 export interface DevisGeneratorProps {
@@ -249,7 +250,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const [telephone, setTelephone] = useState(prefill?.telephone ?? "");
   const [email, setEmail] = useState(prefill?.email ?? "");
   const [societe, setSociete] = useState(prefill?.societe ?? "");
-  const [clientType, setClientType] = useState<ClientType>("particulier");
+  const [clientType, setClientType] = useState<ClientType>(prefill?.clientType ?? "particulier");
   const isPro = clientType !== "particulier";
   const paiementImmediat = clientType === "particulier" || clientType === "pro_ponctuel";
   const [comment, setComment] = useState("");

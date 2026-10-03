@@ -1,10 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
-import DevisGenerator from "@/components/DevisGenerator";
+import DevisGenerator, { type DevisGeneratorPrefill } from "@/components/DevisGenerator";
 import MobileTarifsScreen from "@/components/mobile/MobileTarifsScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/tarifs")({
+  // Préremplissage B2B : /tarifs?audience=pro sélectionne le profil pro ponctuel
+  validateSearch: (search: Record<string, unknown>): { audience?: "pro" } => ({
+    audience: search.audience === "pro" ? "pro" : undefined,
+  }),
   component: TarifsPage,
   head: () => ({
     meta: [
@@ -19,6 +23,8 @@ export const Route = createFileRoute("/tarifs")({
 });
 
 function TarifsPage() {
+  const { audience } = useSearch({ from: "/tarifs" });
+  const devisPrefill: DevisGeneratorPrefill | undefined = audience === "pro" ? { clientType: "pro_ponctuel" } : undefined;
   return (
     <>
       {/* Mobile · écran dédié navy */}
@@ -41,7 +47,7 @@ function TarifsPage() {
 
         {/* ============ ESTIMATEUR (fusionné dans le fond de page) ============ */}
         <section className="v4-section" style={{ maxWidth: 1040, paddingTop: 0 }}>
-          <DevisGenerator variant="flat" />
+          <DevisGenerator variant="flat" prefill={devisPrefill} />
         </section>
 
         {/* ============ GRILLE TARIFAIRE RÉELLE ============ */}

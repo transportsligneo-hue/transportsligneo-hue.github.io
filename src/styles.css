@@ -7350,10 +7350,17 @@ html.theme-light .r4-page .pro-tl-body ul li { color:#4a5470; }
 .pf-band-text strong { font-family:var(--font-heading, inherit); font-size:15.5px; font-weight:700; color:#faf7ef; }
 .pf-band-text span { font-size:12.5px; color:rgba(250,247,239,0.65); }
 .pf-band-btn { display:inline-flex; align-items:center; gap:9px; padding:13px 26px; border-radius:999px;
-  font-weight:700; font-size:13.5px; color:#0b1026; white-space:nowrap;
-  background:linear-gradient(120deg,#d4af37,#e7c76a);
-  box-shadow:0 12px 30px rgba(212,175,55,0.32); transition:transform .25s ease, box-shadow .25s ease; }
-.pf-band-btn:hover { transform:translateY(-2px); box-shadow:0 16px 40px rgba(212,175,55,0.45); }
+  font-weight:700; font-size:13.5px; color:#ffffff; white-space:nowrap; position:relative; overflow:hidden;
+  background:linear-gradient(120deg,#2f5fff,#4f8eff);
+  box-shadow:0 0 0 1px rgba(79,142,255,0.55), 0 12px 32px rgba(47,95,255,0.45);
+  transition:transform .25s ease, box-shadow .25s ease; }
+.pf-band-btn::after { content:""; position:absolute; top:0; bottom:0; width:46%;
+  left:-60%; transform:skewX(-18deg);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transition:left .55s ease; }
+.pf-band-btn:hover { transform:translateY(-2px);
+  box-shadow:0 0 0 1px rgba(79,142,255,0.8), 0 16px 44px rgba(47,95,255,0.6), 0 0 24px rgba(47,95,255,0.45); }
+.pf-band-btn:hover::after { left:110%; }
 
 @media (max-width:900px) {
   .pro-formule-grid { grid-template-columns:1fr; }

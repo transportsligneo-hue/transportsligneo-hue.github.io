@@ -1,12 +1,15 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import { MapPin, Phone, ShieldCheck, Zap, CheckCircle2, ArrowRight, Fuel, Route as RouteIcon, Clock, Car } from "lucide-react";
-import DevisGenerator from "@/components/DevisGenerator";
+import DevisGenerator, { type DevisGeneratorPrefill } from "@/components/DevisGenerator";
 
 /**
  * MobileTarifsScreen · page Tarifs dédiée mobile, ambiance navy/or
  * cohérente avec MobileHomeScreen. Reprend le simulateur réel.
  */
 export default function MobileTarifsScreen() {
+  const { audience } = useSearch({ from: "/tarifs" });
+  const devisPrefill: DevisGeneratorPrefill | undefined = audience === "pro" ? { clientType: "pro_ponctuel" } : undefined;
+
 
   return (
     <div
@@ -37,7 +40,7 @@ export default function MobileTarifsScreen() {
 
       {/* Simulateur réel */}
       <div className="relative z-[3] mx-[18px] mt-5">
-        <DevisGenerator variant="flat" />
+        <DevisGenerator variant="flat" prefill={devisPrefill} />
       </div>
 
       {/* Grille tarifaire */}
