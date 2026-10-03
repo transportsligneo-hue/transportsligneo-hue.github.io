@@ -2,6 +2,7 @@
 // Chargement à la demande, singleton, fallback silencieux si pas de clé.
 
 import { fetchGoogleKey, googleKeyMaybeAvailable } from "@/lib/google-key";
+import { looksForeign } from "@/lib/geocode";
 
 let loadPromise: Promise<any> | null = null;
 let sessionToken: any = null;
@@ -72,7 +73,7 @@ export async function getAutocompleteSuggestions(input: string): Promise<PlaceSu
           {
             input,
             sessionToken,
-            componentRestrictions: { country: ["fr", "be", "lu", "ch", "es", "it", "de", "nl", "pt", "gb"] },
+            // Pas de restriction pays : France, Europe et hors d'Europe.
             language: "fr",
           },
           (preds: any[] | null) => {
@@ -92,7 +93,31 @@ export async function getAutocompleteSuggestions(input: string): Promise<PlaceSu
       // bascule fallback
     }
   }
-  return await fetchFromFrenchApi(input);
+  if (looksForeign(input)) {
+    const world = await fetchFromPhoton(input);
+    if (world.length > 0) return world;
+  }
+  const fr = await fetchFromFrenchApi(input);
+  if (fr.length > 0) return fr;
+  return await fetchFromPhoton(input);
+}
+
+async function fetchFromPhoton(input: string): Promise<PlaceSuggestion[]> {
+  try {
+    const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=6&lang=fr`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.features ?? []).map((f: any) => {
+      const p = f.properties ?? {};
+      const street = [p.housenumber, p.street].filter(Boolean).join(" ");
+      const label = [street || p.name, [p.postcode, p.city].filter(Boolean).join(" "), p.country]
+        .filter(Boolean)
+        .join(", ");
+      return { label, secondary: p.country ?? "" };
+    }).filter((s: PlaceSuggestion) => s.label);
+  } catch {
+    return [];
+  }
 }
 
 
@@ -117,7 +142,6 @@ export async function getGoogleDistanceKm(from: string, to: string): Promise<num
           destinations: [to],
           travelMode: g.maps.TravelMode.DRIVING,
           unitSystem: g.maps.UnitSystem.METRIC,
-          region: "FR",
         },
         (resp: any, status: string) => {
           if (status !== "OK") return resolve(null);

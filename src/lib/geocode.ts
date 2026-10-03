@@ -29,14 +29,41 @@ function writeCache(key: string, value: GeoPoint) {
   }
 }
 
-const FOREIGN_HINTS =
-  /\b(espagne|spain|portugal|italie|italy|allemagne|germany|belgique|belgium|suisse|switzerland|pays[- ]bas|netherlands|luxembourg|royaume[- ]uni|angleterre|united kingdom|maroc|pologne|autriche|danemark|suede|norvege|irlande|republique tcheque|slovaquie|hongrie|roumanie)\b/i;
+const FOREIGN_HINTS = new RegExp(
+  "\\b(" +
+    [
+      // Europe
+      "espagne|spain|espana|portugal|italie|italy|italia|allemagne|germany|deutschland|belgique|belgium|belgie|suisse|switzerland|schweiz|svizzera",
+      "pays[- ]bas|netherlands|nederland|hollande|luxembourg|royaume[- ]uni|angleterre|ecosse|pays de galles|united kingdom|england|scotland|wales|irlande|ireland",
+      "pologne|poland|polska|autriche|austria|osterreich|danemark|denmark|suede|sweden|norvege|norway|finlande|finland|islande|iceland",
+      "republique tcheque|tchequie|czechia|czech republic|slovaquie|slovakia|hongrie|hungary|roumanie|romania|bulgarie|bulgaria|grece|greece",
+      "croatie|croatia|slovenie|slovenia|serbie|serbia|bosnie|montenegro|albanie|albania|macedoine|kosovo|estonie|estonia|lettonie|latvia|lituanie|lithuania",
+      "ukraine|moldavie|bielorussie|russie|russia|turquie|turkey|turkiye|chypre|cyprus|malte|malta|monaco|andorre|andorra|liechtenstein|saint[- ]marin",
+      // Hors Europe
+      "maroc|morocco|algerie|algeria|tunisie|tunisia|libye|egypte|egypt|senegal|cote d'?ivoire|mali|cameroun|afrique du sud",
+      "emirats|emirates|dubai|abu dhabi|qatar|arabie saoudite|saudi|israel|liban|jordanie",
+      "etats[- ]unis|united states|usa|canada|quebec|mexique|mexico|bresil|brazil|argentine|chine|china|japon|japan|inde|india|australie|australia",
+      // Grandes villes étrangères fréquentes
+      "bruxelles|brussels|anvers|antwerpen|liege|charleroi|geneve|geneva|lausanne|zurich|bale|basel|berne|amsterdam|rotterdam|la haye|eindhoven",
+      "londres|london|manchester|birmingham|dublin|madrid|barcelone|barcelona|valence|valencia|seville|malaga|bilbao|lisbonne|lisboa|porto",
+      "rome|roma|milan|milano|turin|torino|naples|florence|venise|munich|munchen|berlin|francfort|frankfurt|hambourg|hamburg|cologne|koln|stuttgart|dusseldorf",
+      "vienne autriche|wien|prague|praha|varsovie|warszawa|budapest|bucarest|copenhague|stockholm|oslo|helsinki|athenes|istanbul",
+      "casablanca|marrakech|rabat|tanger|fes|agadir|alger|oran|tunis|sfax",
+    ].join("|") +
+    ")\\b",
+  "i",
+);
+
+/** Code pays ISO en fin d'adresse ("…, 1000 Bruxelles, BE") ou code postal préfixé ("D-80331", "CH-1201"). */
+const FOREIGN_CODE = /(,\s*(be|ch|de|es|it|nl|lu|gb|uk|ie|pt|at|dk|se|no|fi|pl|cz|sk|hu|ro|bg|gr|hr|si|ma|dz|tn|us|ae)\s*$)|\b(b|d|ch|e|i|nl|l|a|dk|s|n|pl|cz|p)-\d{3,5}\b/i;
 
 /** Une adresse manifestement étrangère ne doit jamais passer par l'API française. */
 export function looksForeign(address: string): boolean {
-  return FOREIGN_HINTS.test(
-    address.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
-  );
+  const s = (address ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (!s.trim()) return false;
+  // Une adresse explicitement « France » reste française.
+  if (/\bfrance\b/i.test(s) && !FOREIGN_CODE.test(s)) return false;
+  return FOREIGN_HINTS.test(s) || FOREIGN_CODE.test(s.trim());
 }
 
 async function geocodeFR(address: string): Promise<GeoPoint | null> {
