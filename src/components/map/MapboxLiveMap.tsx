@@ -3,7 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { geocodeAddress } from "@/lib/geocode";
 import { haversineKm } from "@/lib/geo/haversine";
-import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle } from "lucide-react";
+import { Minus, Plus, Crosshair, Gauge, Clock, Navigation, AlertTriangle, Flag, Coffee, PauseCircle, BadgeCheck, Route } from "lucide-react";
 import type { LiveMissionMapProps, MapPlace } from "./types";
 import vehicleMarkerImg from "@/assets/ligneo-gps-car.png";
 
@@ -159,6 +159,8 @@ export function MapboxLiveMap({
   role = "client",
   onMetrics,
   etaDeltaMin = null,
+  completed = false,
+  completedPlaque = null,
 }: LiveMissionMapProps) {
   const isAdmin = role === "admin";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -188,6 +190,18 @@ export function MapboxLiveMap({
   const last = points.length ? points[points.length - 1] : null;
   const signalAgeMin = signalAgeMinutes(last, nowTs);
   const signalLost = !last || signalAgeMin === null || signalAgeMin > SIGNAL_STALE_MIN;
+
+  // Distance réellement parcourue (somme des segments GPS) — carte de synthèse.
+  const distanceKm = useMemo(() => {
+    let d = 0;
+    for (let i = 1; i < points.length; i++) {
+      d += haversineKm(
+        { lat: points[i - 1].latitude, lng: points[i - 1].longitude },
+        { lat: points[i].latitude, lng: points[i].longitude },
+      );
+    }
+    return d;
+  }, [points]);
 
   const originKey = typeof origin === "string" ? origin : origin ? `${origin.lat},${origin.lng}` : "";
   const destKey = typeof destination === "string" ? destination : destination ? `${destination.lat},${destination.lng}` : "";
