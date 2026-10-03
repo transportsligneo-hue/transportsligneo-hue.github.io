@@ -100,67 +100,84 @@ export default function ProSegment() {
       {/* Timeline */}
       <ProTimeline />
 
-      {/* Deux solutions */}
+      {/* Formule B2B unifiée — deux voies, un seul interlocuteur, cap sur le contact */}
       <div className="v4-section">
         <div className="v4-section-head">
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
-            <span className="dot" />Deux solutions
+            <span className="dot" />Formules B2B
           </div>
-          <h2>Choisissez votre formule</h2>
-          <p>Transport ponctuel avec paiement en ligne, ou partenariat flotte sur-mesure pour grands comptes, concessions et loueurs.</p>
+          <h2>Deux façons de travailler ensemble</h2>
+          <p>Une course immédiate ou un partenariat sur-mesure : dans les deux cas, tout commence par un échange avec notre équipe.</p>
         </div>
-        <div className="grid gap-7 lg:grid-cols-2">
-          <article className="card-premium-light group relative flex flex-col overflow-hidden p-9 transition-all duration-500 hover:-translate-y-1">
-            <div className="pro-card-topline" />
-            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#8b3ff5]/40 bg-[#8b3ff5]/10 text-[#8b3ff5]">
-              <Truck className="h-6 w-6" />
-            </div>
-            <div className="mb-3 text-[10px] font-heading uppercase tracking-[0.28em] text-[#8b3ff5]">Solution 1</div>
-            <h3 className="font-heading text-2xl lg:text-[26px] text-[#0b1026]">Transport ponctuel B2B</h3>
-            <p className="mt-4 text-[#0b1026]/65 leading-relaxed">
-              Pour garages, concessions et professionnels auto qui veulent commander une course rapidement avec paiement en ligne sécurisé.
-            </p>
-            <ul className="mt-7 space-y-3 text-[14px] text-[#0b1026]/80">
-              {["Devis instantané avec estimateur", "Paiement en ligne sécurisé", "Confirmation immédiate", "Suivi opérationnel temps réel"].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8b3ff5]" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-9 flex-1" />
-            <Link to="/b2b/transport-ponctuel" className="pro-btn-solid">
-              Demander un transport
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <p className="mt-4 text-center text-[11px] text-[#0b1026]/50 tracking-wide">Estimation et paiement en moins de 3 minutes</p>
-          </article>
 
-          <article className="card-premium-light group relative flex flex-col overflow-hidden p-9 transition-all duration-500 hover:-translate-y-1">
-            <div className="pro-card-topline" />
-            <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#8b3ff5]/40 bg-[#8b3ff5]/10 text-[#8b3ff5]">
-              <Users className="h-6 w-6" />
+        <div className="pro-formule-panel">
+          <div className="pro-formule-top">
+            <div className="pf-eyebrow">Comptes professionnels · Transports Ligneo</div>
+            <h3>Un seul interlocuteur, quel que soit votre besoin.</h3>
+          </div>
+
+          <div className="pro-formule-grid">
+            <div className="pf-voie">
+              <div className="pf-voie-head">
+                <div className="pf-ic"><Truck size={20} /></div>
+                <span className="pf-chip">À la course</span>
+              </div>
+              <h4>Transport ponctuel</h4>
+              <p>Pour garages, concessions et professionnels auto : commandez une course en quelques minutes.</p>
+              <ul>
+                {["Devis instantané avec estimateur", "Paiement en ligne sécurisé", "Confirmation immédiate", "Suivi opérationnel temps réel"].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8b3ff5]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/contact?audience=pro&formule=ponctuel" className="pf-btn solid">
+                Commander un transport
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link to="/b2b/transport-ponctuel" className="pf-more">
+                Voir le détail de l'offre <ArrowRight size={13} />
+              </Link>
             </div>
-            <div className="mb-3 text-[10px] font-heading uppercase tracking-[0.28em] text-[#8b3ff5]">Solution 2</div>
-            <h3 className="font-heading text-2xl lg:text-[26px] text-[#0b1026]">Partenariat flotte B2B</h3>
-            <p className="mt-4 text-[#0b1026]/65 leading-relaxed">
-              Pour entreprises, loueurs, concessions et grands comptes qui souhaitent une solution récurrente avec tarifs négociés.
-            </p>
-            <ul className="mt-7 space-y-3 text-[14px] text-[#0b1026]/80">
-              {["Étude personnalisée gratuite", "Tarifs volumes négociés", "Account manager dédié", "Facturation centralisée mensuelle"].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8b3ff5]" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-9 flex-1" />
-            <Link to="/b2b/partenariat-flotte" className="pro-btn-outline">
-              Demander une étude flotte
-              <ArrowRight className="h-4 w-4" />
+
+            <div className="pf-divider" aria-hidden="true"><span>ou</span></div>
+
+            <div className="pf-voie">
+              <div className="pf-voie-head">
+                <div className="pf-ic"><Users size={20} /></div>
+                <span className="pf-chip">Sur-mesure</span>
+              </div>
+              <h4>Partenariat flotte</h4>
+              <p>Pour loueurs, concessions et grands comptes : une solution récurrente pensée pour votre parc.</p>
+              <ul>
+                {["Étude personnalisée gratuite", "Tarifs volumes négociés", "Account manager dédié", "Facturation centralisée mensuelle"].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#8b3ff5]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/contact?audience=pro&formule=flotte" className="pf-btn outline">
+                Demander une étude flotte
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link to="/b2b/partenariat-flotte" className="pf-more">
+                Voir le détail de l'offre <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="pro-formule-band">
+            <div className="pf-band-text">
+              <strong>Un conseiller dédié vous répond sous 24 h ouvrées.</strong>
+              <span>Étude gratuite, tarifs préférentiels dès le premier échange.</span>
+            </div>
+            <Link to="/contact?audience=pro" className="pf-band-btn">
+              Échanger avec un conseiller
+              <ArrowRight size={16} />
             </Link>
-            <p className="mt-4 text-center text-[11px] text-[#0b1026]/50 tracking-wide">Réponse commerciale sous 24h ouvrées</p>
-          </article>
+          </div>
         </div>
       </div>
 
