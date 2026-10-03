@@ -2,8 +2,7 @@
  * VehiculeDocsStep · étape obligatoire avant paiement d'un devis.
  *
  * - Saisie VIN (validation 17 caractères, pas de I/O/Q)
- * - Upload carte grise recto (obligatoire)
- * - Upload verso (optionnel)
+ * - Upload carte grise recto (obligatoire) — le verso n'est pas demandé
  * - Compression côté client + caméra mobile
  * - Sauvegarde sur la table devis + flag vehicule_docs_completed
  */
@@ -32,7 +31,6 @@ export function VehiculeDocsStep({
   devisId,
   initialVin,
   initialRectoUrl,
-  initialVersoUrl,
   onCompleted,
 }: Props) {
   const { user } = useAuth();
@@ -40,8 +38,7 @@ export function VehiculeDocsStep({
   const [plate, setPlate] = useState("");
   const [lookingUp, setLookingUp] = useState(false);
   const [rectoUrl, setRectoUrl] = useState<string | null>(initialRectoUrl ?? null);
-  const [versoUrl, setVersoUrl] = useState<string | null>(initialVersoUrl ?? null);
-  const [uploading, setUploading] = useState<"recto" | "verso" | null>(null);
+  const [uploading, setUploading] = useState<"recto" | null>(null);
   const [saving, setSaving] = useState(false);
 
   const searchByPlate = async () => {
@@ -69,7 +66,7 @@ export function VehiculeDocsStep({
   const vinValid = VIN_REGEX.test(vin.trim());
   const canSave = vinValid && !!rectoUrl && !saving;
 
-  const upload = async (file: File, kind: "recto" | "verso") => {
+  const upload = async (file: File, kind: "recto") => {
     if (!user) {
       toast.error("Connexion requise");
       return;
@@ -82,8 +79,7 @@ export function VehiculeDocsStep({
         .from(BUCKET_CARTES_GRISES)
         .upload(path, compressed, { upsert: true, contentType: "image/jpeg" });
       if (error) throw error;
-      if (kind === "recto") setRectoUrl(path);
-      else setVersoUrl(path);
+      setRectoUrl(path);
       toast.success(`Carte grise ${kind} envoyée`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erreur upload";
@@ -98,7 +94,7 @@ export function VehiculeDocsStep({
     setSaving(true);
     try {
       const { saveVehiculeDocs } = await import("@/lib/vehicule-docs.functions");
-      await saveVehiculeDocs({ data: { devisId, vin, recto: rectoUrl!, verso: versoUrl ?? null } });
+      await saveVehiculeDocs({ data: { devisId, vin, recto: rectoUrl!, verso: null } });
     } catch (e) {
       setSaving(false);
       toast.error("Sauvegarde échouée", { description: e instanceof Error ? e.message : undefined });
@@ -178,21 +174,13 @@ export function VehiculeDocsStep({
         </div>
       </div>
 
-      {/* Recto */}
+      {/* Recto — seul face demandée */}
       <UploadCard
         label="Carte grise · Recto"
         required
         currentPath={rectoUrl}
         uploading={uploading === "recto"}
         onFile={(f) => upload(f, "recto")}
-      />
-
-      {/* Verso */}
-      <UploadCard
-        label="Carte grise · Verso (optionnel)"
-        currentPath={versoUrl}
-        uploading={uploading === "verso"}
-        onFile={(f) => upload(f, "verso")}
       />
 
       {/* Checklist */}
