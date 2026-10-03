@@ -1421,7 +1421,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                           <Lock size={14} className="text-[#5fb6ff]" />
                         </div>
                         <div>
-                          <p className="font-heading text-sm text-cream tracking-wide">Votre espace client (optionnel)</p>
+                          <p className="text-sm font-semibold text-cream">Votre espace client (optionnel)</p>
                           <p className="text-cream/55 text-xs mt-1 leading-relaxed">
                             Définissez un mot de passe pour suivre votre devis, votre mission et vos documents
                             dans un espace sécurisé. Vous pouvez aussi laisser vide et créer un compte plus tard avec le même email · vos devis y seront rattachés automatiquement.
@@ -1480,10 +1480,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
                     </div>
                     {pricing && (
-                      <div className="pt-3 mt-3 border-t border-white/10 grid grid-cols-3 gap-3">
-                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</em><strong className="font-heading font-normal text-xl text-neon-blue">{priceHT} €</strong></div>
-                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">TVA</em><strong className="font-heading font-normal text-base text-white/85">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
-                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="font-heading font-normal text-xl text-neon-blue">{priceTTC} €</strong></div>
+                      <div className="pt-3 mt-3 border-t border-border grid grid-cols-3 gap-3">
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceHT} €</strong></div>
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">TVA</em><strong className="block font-medium text-sm text-cream">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
+                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
                       </div>
                     )}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
