@@ -169,7 +169,7 @@ function InscriptionFlotte() {
             </div>
             <h1 className="auth-title text-xl md:text-2xl">Compte flotte créé</h1>
             <p className="auth-subtle text-sm leading-relaxed">
-              Vérifiez votre boîte mail pour confirmer votre adresse. Notre équipe commerciale vous contactera sous 24 h pour finaliser votre contrat-cadre.
+              Vérifiez votre boîte mail pour confirmer votre adresse (pensez aussi à regarder dans vos spams). Notre équipe commerciale vous contactera sous 24 h pour finaliser votre contrat-cadre.
             </p>
             <Link to="/login" className="auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
               Aller à la connexion →

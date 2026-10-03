@@ -69,7 +69,7 @@ function ClientLayout() {
           options: { emailRedirectTo: `${window.location.origin}/auth/email-confirmation` },
         });
         if (error) throw error;
-        toast.success("Email de confirmation renvoyé.");
+        toast.success("Email de confirmation renvoyé.", { description: "Pensez à vérifier vos spams." });
       } catch (e: any) {
         toast.error(e?.message || "Impossible de renvoyer l'email");
       } finally {
@@ -88,7 +88,7 @@ function ClientLayout() {
           </h1>
           <p className="text-pro-muted text-sm leading-relaxed">
             {emailNotConfirmed
-              ? `Vérifiez votre boîte mail (${user?.email}) et cliquez sur le lien de confirmation pour activer votre espace.`
+              ? `Vérifiez votre boîte mail (${user?.email}) et cliquez sur le lien de confirmation pour activer votre espace. Pas reçu ? Pensez à regarder dans vos spams.`
               : "Votre compte est en cours de finalisation. Rafraîchissez la page dans quelques instants."}
           </p>
           <div className="flex flex-col gap-2">

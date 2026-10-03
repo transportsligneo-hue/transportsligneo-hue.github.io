@@ -56,7 +56,7 @@ function MotDePasseOublie() {
             <h2 className="auth-title text-lg">Email envoyé</h2>
             <p className="auth-subtle text-sm">
               Si un compte existe pour <strong className="text-white">{email}</strong>, vous recevrez un lien
-              de réinitialisation dans quelques instants. Pensez à vérifier vos spams.
+              de réinitialisation dans quelques instants. Pas reçu ? Pensez à regarder dans vos spams ou courriers indésirables.
             </p>
             <Link to="/login" className="auth-btn-primary mt-2">
               <ArrowLeft size={14} /> Retour à la connexion
