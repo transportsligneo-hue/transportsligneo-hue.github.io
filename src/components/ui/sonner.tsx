@@ -6,33 +6,31 @@
 import { Toaster as Sonner, toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { detectActor, variantFromRole } from "@/lib/neon-notifications";
+import { neonClass, resolveTone, variantFromRole } from "@/lib/neon-notifications";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [isMobile, setIsMobile] = useState(false);
-  const { role } = useAuth();
+  const { role, typeClient } = useAuth();
   const variant = variantFromRole(role);
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  // Admin : bascule chaque toast en vert si le texte concerne un convoyeur/expéditeur.
+  // Les classes explicites de showToast priment ; les appels toast.* héritent du profil.
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
     const apply = () => {
       el.querySelectorAll<HTMLElement>("[data-sonner-toast]").forEach((t) => {
-        if (t.classList.contains("neon-green") || t.classList.contains("neon-blue")) return;
-        let tone = variant === "driver" ? "neon-green" : "neon-blue";
-        if (variant === "admin") tone = detectActor(t.textContent ?? "") === "driver" ? "neon-green" : "neon-blue";
-        t.classList.add(tone);
+        if (t.classList.contains("neon-green") || t.classList.contains("neon-blue") || t.classList.contains("neon-violet")) return;
+        t.classList.add(neonClass(resolveTone(variant, undefined, t.textContent ?? "", typeClient)));
       });
     };
     apply();
     const mo = new MutationObserver(apply);
     mo.observe(el, { childList: true, subtree: true });
     return () => mo.disconnect();
-  }, [variant]);
+  }, [variant, typeClient]);
 
   // Fermeture au clic en dehors d'un toast
   useEffect(() => {
