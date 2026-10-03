@@ -471,6 +471,8 @@ export function resolveLocalDeptTariff(
   _distanceKm: number,
   option: string,
 ): LocalTariff | null {
+  const cross = resolveCrossDeptTariff(departure, arrival, option);
+  if (cross) return cross;
   const zDep = resolveAddrZone(departure);
   const zArr = resolveAddrZone(arrival);
   if (!zDep || !zArr) return null;
@@ -497,4 +499,37 @@ export function resolveLocalDeptTariff(
     return { price: simple, label, finalPrice: Math.round(simple * 1.2), multiplierLabel: "+20% express", hasExtra: true };
   }
   return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
+}
+
+/**
+ * Forfaits inter-départements (dans les deux sens), applicables à tous les clients.
+ * Tours / Indre-et-Loire (37) ↔ Le Mans / Sarthe (72) : 120 € aller, 180 € aller-retour.
+ */
+const CROSS_DEPT_TARIFFS: { a: string; b: string; label: string; simple: number; retour: number }[] = [
+  { a: "37", b: "72", label: "Forfait Tours ↔ Le Mans", simple: 120, retour: 180 },
+];
+
+function deptOf(address: string): string | null {
+  const s = (address || "").toLowerCase();
+  const cp = extractPostalCode(address);
+  if (cp && !cp.startsWith("20")) return cp.slice(0, 2);
+  if (/\ble mans\b|\bsarthe\b/.test(s)) return "72";
+  if (/\btours\b|indre-et-loire/.test(s)) return "37";
+  const z = resolveAddrZone(address);
+  return z?.dept ?? null;
+}
+
+export function resolveCrossDeptTariff(departure: string, arrival: string, option: string): LocalTariff | null {
+  const d1 = deptOf(departure);
+  const d2 = deptOf(arrival);
+  if (!d1 || !d2 || d1 === d2) return null;
+  const t = CROSS_DEPT_TARIFFS.find((x) => (x.a === d1 && x.b === d2) || (x.a === d2 && x.b === d1));
+  if (!t) return null;
+  if (option === "aller-retour") {
+    return { price: t.simple, label: t.label, finalPrice: t.retour, multiplierLabel: "Livraison + Restitution", hasExtra: true };
+  }
+  if (option === "express") {
+    return { price: t.simple, label: t.label, finalPrice: Math.round(t.simple * 1.2), multiplierLabel: "+20% express", hasExtra: true };
+  }
+  return { price: t.simple, label: t.label, finalPrice: t.simple, multiplierLabel: "", hasExtra: false };
 }
