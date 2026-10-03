@@ -471,6 +471,8 @@ export function resolveLocalDeptTariff(
   _distanceKm: number,
   option: string,
 ): LocalTariff | null {
+  const cross = resolveCrossDeptTariff(departure, arrival, option);
+  if (cross) return cross;
   const zDep = resolveAddrZone(departure);
   const zArr = resolveAddrZone(arrival);
   if (!zDep || !zArr) return null;
