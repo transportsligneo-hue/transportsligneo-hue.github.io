@@ -34,9 +34,10 @@ function maskEmail(email: string): string {
 /* -------------------------------------------------------------------------- */
 export const requestDevisOtp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { devisId: string }) => {
+  .inputValidator((input: { devisId: string; channel?: "email" | "sms" }) => {
     if (!input?.devisId || typeof input.devisId !== "string") throw new Error("devisId requis");
-    return input;
+    const channel = input.channel === "sms" ? "sms" : "email";
+    return { devisId: input.devisId, channel } as { devisId: string; channel: "email" | "sms" };
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId, claims } = context;
@@ -44,7 +45,7 @@ export const requestDevisOtp = createServerFn({ method: "POST" })
 
     const { data: devis, error: devisErr } = await supabase
       .from("devis")
-      .select("id, numero, email, prenom, depart, arrivee, prix_estime, locked_at, statut")
+      .select("id, numero, email, telephone, prenom, depart, arrivee, prix_estime, locked_at, statut")
       .eq("id", data.devisId)
       .single();
     if (devisErr || !devis) throw new Error("Devis introuvable ou accès refusé");
@@ -53,6 +54,10 @@ export const requestDevisOtp = createServerFn({ method: "POST" })
 
     const recipient = (devis.email ?? jwtEmail ?? "").toLowerCase();
     if (!recipient) throw new Error("Adresse e-mail introuvable pour ce devis");
+    const phone = (devis.telephone ?? "").trim();
+    if (data.channel === "sms" && phone.replace(/\D/g, "").length < 10) {
+      throw new Error("Aucun numéro de téléphone valide sur ce devis. Choisissez l'e-mail.");
+    }
 
     // Rate-limit : max N envois par fenêtre glissante
     const since = new Date(Date.now() - RESEND_WINDOW_MINUTES * 60_000).toISOString();
@@ -88,12 +93,33 @@ export const requestDevisOtp = createServerFn({ method: "POST" })
         client_user_id: userId,
         email: recipient,
         code_hash: codeHash,
-        method: "email",
+        method: data.channel,
+        phone: data.channel === "sms" ? phone : null,
         expires_at: expiresAt.toISOString(),
         ip_address: ip,
         user_agent: userAgent,
       });
     if (insertErr) throw new Error(`Création du code échouée : ${insertErr.message}`);
+
+    if (data.channel === "sms") {
+      const { sendSms } = await import("@/lib/sms.server");
+      const res = await sendSms({
+        to: phone,
+        body: `Transports Ligneo : votre code de signature du devis ${devis.numero} est ${code}. Valable ${CODE_TTL_MINUTES} min. Ne le communiquez à personne.`,
+      });
+      if (!res.ok) {
+        console.error("[devis-otp] send sms failed", res.error);
+        throw new Error("Envoi du code par SMS impossible, essayez par e-mail.");
+      }
+      const d = phone.replace(/\D/g, "");
+      return {
+        ok: true,
+        channel: "sms" as const,
+        maskedEmail: `•• •• •• ${d.slice(-4, -2)} ${d.slice(-2)}`,
+        expiresAt: expiresAt.toISOString(),
+        ttlSeconds: CODE_TTL_MINUTES * 60,
+      };
+    }
 
     // Envoi e-mail (jamais bloquant)
     try {
@@ -119,6 +145,7 @@ export const requestDevisOtp = createServerFn({ method: "POST" })
 
     return {
       ok: true,
+      channel: "email" as const,
       maskedEmail: maskEmail(recipient),
       expiresAt: expiresAt.toISOString(),
       ttlSeconds: CODE_TTL_MINUTES * 60,
@@ -154,7 +181,7 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
     // Défi actif le plus récent
     const { data: challenge, error: chErr } = await supabaseAdmin
       .from("devis_otp_challenges")
-      .select("id, code_hash, attempts, max_attempts, expires_at, consumed_at, email, created_at")
+      .select("id, code_hash, attempts, max_attempts, expires_at, consumed_at, email, method, created_at")
       .eq("devis_id", devis.id)
       .eq("client_user_id", userId)
       .is("consumed_at", null)
@@ -211,7 +238,7 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
         montant_accepte: devis.prix_estime,
         cgv_version: CGV_VERSION,
         statut: "accepte",
-        validation_method: "email_otp",
+        validation_method: challenge.method === "sms" ? "sms_otp" : "email_otp",
         otp_sent_at: challenge.created_at,
         otp_verified_at: now.toISOString(),
       })
@@ -236,7 +263,7 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
       await supabase.rpc("create_admin_notification", {
         _type: "devis",
         _titre: `Signature reçue — devis ${devis.numero}`,
-        _message: `${clientEmail} a signé le devis ${devis.numero} par code OTP e-mail (${Number(devis.prix_estime).toFixed(2)} € TTC) · ${devis.depart} → ${devis.arrivee}`,
+        _message: `${clientEmail} a signé le devis ${devis.numero} par code OTP ${challenge.method === "sms" ? "SMS" : "e-mail"} (${Number(devis.prix_estime).toFixed(2)} € TTC) · ${devis.depart} → ${devis.arrivee}`,
         _link: "/admin/devis",
         _entity_type: "devis",
         _entity_id: devis.id,
