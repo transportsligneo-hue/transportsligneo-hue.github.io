@@ -309,7 +309,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         },
       }, company);
 
-      downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
+      await downloadBlob(blob, `Fiche-mission-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -338,7 +338,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
           client: signatures[signatureKind(`edl_${v}` as SignatureDocType, "client")] ?? null,
         },
       }, company);
-      downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
+      await downloadBlob(blob, `EDL-${v === "livraison" ? "Livraison" : "Restitution"}-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -376,7 +376,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             null,
         },
       }, company);
-      downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
+      await downloadBlob(blob, `${pvNumero(v, refSafe, version)}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -408,7 +408,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
           mandataire: signatures[signatureKind("mandat", "mandataire")] ?? null,
         },
       }, company);
-      downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
+      await downloadBlob(blob, `Mandat-recuperation-${refSafe}.pdf`);
     } catch {
       toast.error("Génération impossible");
     } finally { setBusy(null); }
@@ -458,7 +458,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         url_fichier: path,
       });
       if (insErr) throw insErr;
-      downloadBlob(blob, filename);
+      await downloadBlob(blob, filename);
       toast.success("Passage à vide généré et attaché à la mission");
       setShowPvForm(false);
       setPvForm({ vehicule_type: "", vehicule_modele: "", vehicule_immat: "", motif: "", heures: "", distance_km: "" });
