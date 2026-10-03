@@ -9949,9 +9949,16 @@ body .tln-sheen { display: none; }
   font-family: inherit;
   animation: client-sign-in 0.35s ease-out;
 }
-.client-sign-modal input, .client-sign-modal textarea {
+.client-sign-modal { color-scheme: dark; }
+.client-sign-modal input, .client-sign-modal textarea, .client-sign-modal select {
   background: rgba(255, 255, 255, 0.06);
-  color: #f4f7ff;
+  color: #f4f7ff !important;
+  -webkit-text-fill-color: #f4f7ff;
+  caret-color: #4f8cff;
+}
+.client-sign-modal input::placeholder, .client-sign-modal textarea::placeholder {
+  color: rgba(244, 247, 255, 0.35);
+  -webkit-text-fill-color: rgba(244, 247, 255, 0.35);
 }
 .client-sign-modal canvas { background: #ffffff; border-radius: 12px; }
 @keyframes client-sign-in {
