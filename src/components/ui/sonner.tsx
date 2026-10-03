@@ -62,6 +62,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
       swipeDirections={isMobile ? ["top", "left", "right"] : ["right"]}
       duration={3500}
       closeButton
+      icons={{
+        success: (
+          <svg className="ligneo-check-icon" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m4.5 12.5 5 5.5L19.5 7" />
+          </svg>
+        ),
+      }}
       toastOptions={{
         unstyled: false,
         classNames: {
@@ -97,7 +104,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "!bg-white/8 !text-[#c7cde0] hover:!bg-white/14",
             "!rounded-lg !px-3 !py-1.5 !text-xs !font-medium !border-white/10",
           ].join(" "),
-          success: "!border-[#3dd68c]/40 !shadow-[0_20px_50px_-20px_rgba(61,214,140,0.35)] [&_[data-icon]]:!bg-[#3dd68c]/15 [&_[data-icon]]:!text-[#7ee5b0] [&_[data-icon]]:!border-[#3dd68c]/30",
+          success: "!border-[#3dd68c]/40 !shadow-[0_20px_50px_-20px_rgba(61,214,140,0.35)]",
           error: "!border-[#ef4a4a]/40 !shadow-[0_20px_50px_-20px_rgba(239,74,74,0.4)] [&_[data-icon]]:!bg-[#ef4a4a]/15 [&_[data-icon]]:!text-[#ff8a8a] [&_[data-icon]]:!border-[#ef4a4a]/30",
           warning: "!border-[#f5b544]/40 !shadow-[0_20px_50px_-20px_rgba(245,181,68,0.35)] [&_[data-icon]]:!bg-[#f5b544]/15 [&_[data-icon]]:!text-[#ffd989] [&_[data-icon]]:!border-[#f5b544]/30",
           info: "!border-[#4d9aff]/40 !shadow-[0_20px_50px_-20px_rgba(77,154,255,0.35)] [&_[data-icon]]:!bg-[#4d9aff]/15 [&_[data-icon]]:!text-[#a8caff] [&_[data-icon]]:!border-[#4d9aff]/30",

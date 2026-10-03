@@ -9597,7 +9597,9 @@ body .tln-sheen { display: none; }
 }
 .ligneo-neon-toaster [data-sonner-toast] [data-icon] svg { width: 18px; height: 18px; filter: drop-shadow(0 0 5px rgba(var(--neon-rgb),.85)); }
 /* La coche verte seule, grande comme l'ancien anneau : plus de cercle autour. */
-.ligneo-neon-toaster [data-sonner-toast] [data-icon]:has(svg.ligneo-check-icon) {
+.ligneo-neon-toaster [data-sonner-toast] [data-icon]:has(svg.ligneo-check-icon),
+.ligneo-neon-toaster [data-sonner-toast][class] [data-icon]:has(svg.ligneo-check-icon) {
+  outline: none !important;
   --success-check: #2ee671;
   background: transparent !important;
   border: none !important;
