@@ -18,6 +18,20 @@ export default function Contact() {
   });
   const [status, setStatus] = useState<FormStatus>("idle");
 
+  // Préremplissage depuis la page Formules B2B : ?audience=pro&formule=ponctuel|flotte
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("audience") === "pro") setProfil("pro");
+    const formule = params.get("formule");
+    const prefills: Record<string, string> = {
+      ponctuel: "Bonjour, nous souhaitons commander un transport ponctuel pour notre entreprise.",
+      flotte: "Bonjour, nous souhaitons étudier un partenariat flotte (tarifs négociés, facturation centralisée).",
+    };
+    const message = formule ? prefills[formule] : undefined;
+    if (message) setForm((prev) => (prev.message ? prev : { ...prev, message }));
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
