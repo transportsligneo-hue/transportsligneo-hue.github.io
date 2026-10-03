@@ -32,6 +32,10 @@ export interface LiveMissionMapProps {
   onMetrics?: (m: LiveMetricsSnapshot | null) => void;
   /** Écart en minutes avec l'ETA de référence (affiché à côté de l'ETA actuel). */
   etaDeltaMin?: number | null;
+  /** Mission terminée : masque les alertes de signal et affiche une carte de synthèse. */
+  completed?: boolean;
+  /** Plaque affichée sur la carte de synthèse (mission terminée). */
+  completedPlaque?: string | null;
 }
 
 /** Instantané des métriques calculées par la carte (source unique de vérité). */
