@@ -96,11 +96,11 @@ function ConvoyeurLayout() {
       <OfflineOutboxBadge />
       <ScreenCaptureGuard />
       {isPending && (
-        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex items-start gap-3">
-          <span className="text-amber-600 text-lg leading-none">⏳</span>
+         <div className="driver-pending-notice mb-4 rounded-lg border px-4 py-3 text-sm flex items-start gap-3">
+           <span className="text-lg leading-none">⏳</span>
           <div>
             <p className="font-semibold">Votre compte est en attente de validation.</p>
-            <p className="text-amber-800/90 mt-0.5">
+             <p className="mt-0.5">
               Vous pouvez déposer vos documents dès maintenant. Vous pourrez accepter des missions disponibles une fois vos documents validés par notre équipe.
             </p>
           </div>

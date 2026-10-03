@@ -875,8 +875,8 @@ body.is-driver-app .closed-link svg {
     --driver-bg: #041B52;
     --driver-bg-2: #0D2E7A;
     --driver-bg-3: #1343A9;
-    --driver-surface: rgba(255, 255, 255, 0.07);
-    --driver-surface-strong: rgba(255, 255, 255, 0.12);
+    --driver-surface: #102d66;
+    --driver-surface-strong: #163a78;
     --driver-border: rgba(103, 193, 255, 0.22);
     --driver-border-strong: rgba(103, 193, 255, 0.50);
     --driver-text: #FFFFFF;
@@ -885,7 +885,7 @@ body.is-driver-app .closed-link svg {
     --driver-accent: #2F7DFF;       /* primary electric */
     --driver-accent-2: #4EA8FF;     /* neon */
     --driver-accent-3: #67C1FF;     /* glow */
-    --driver-gold: #E7C15A;
+    --driver-gold: #67c1ff;
     --driver-accent-soft: rgba(47, 125, 255, 0.22);
     --driver-glow: 0 0 24px rgba(78, 168, 255, 0.45);
 
@@ -901,21 +901,21 @@ body.is-driver-app .closed-link svg {
     -webkit-font-smoothing: antialiased;
   }
   .driver-shell .bg-pro-bg,
-  .driver-shell .bg-pro-bg-soft { background-color: transparent !important; }
+  .driver-shell .bg-pro-bg-soft { background-color: var(--driver-surface) !important; }
   .driver-shell .text-pro-text { color: var(--driver-text) !important; font-family: 'Inter', system-ui, sans-serif; }
   .driver-shell .text-pro-text-soft { color: var(--driver-text-soft) !important; }
   .driver-shell .text-pro-muted { color: var(--driver-muted) !important; }
   .driver-shell .border-pro-border,
   .driver-shell .border-pro-border\/60 { border-color: var(--driver-border) !important; }
 
-  /* Cartes blanches → glass premium lumineux (toutes opacités) */
+  /* Surfaces opaques : aucune page sous-jacente ne transparaît dans les cartes et fenêtres */
   .driver-shell .bg-white,
   .driver-shell .bg-white\/95,
   .driver-shell .bg-white\/90,
   .driver-shell .bg-white\/80,
   .driver-shell .bg-white\/70 {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)) !important;
-    backdrop-filter: blur(24px) saturate(180%);
+    background: var(--driver-surface) !important;
+    backdrop-filter: none;
     border-color: var(--driver-border) !important;
   }
   .driver-shell .shadow-sm,
@@ -928,8 +928,8 @@ body.is-driver-app .closed-link svg {
 
   /* Sticky bar premium glass utilisé dans les détails de mission driver */
   .driver-sticky-bar {
-    background: linear-gradient(180deg, rgba(13, 46, 122, 0.85), rgba(4, 27, 82, 0.80)) !important;
-    backdrop-filter: blur(24px) saturate(180%);
+    background: var(--driver-bg) !important;
+    backdrop-filter: none;
     border-bottom: 1px solid var(--driver-border);
   }
 
@@ -937,7 +937,7 @@ body.is-driver-app .closed-link svg {
   .driver-shell input,
   .driver-shell select,
   .driver-shell textarea {
-    background: rgba(255,255,255,0.06) !important;
+    background: var(--driver-surface-strong) !important;
     color: var(--driver-text) !important;
     border-color: var(--driver-border) !important;
   }
@@ -967,12 +967,12 @@ body.is-driver-app .closed-link svg {
   .driver-shell .text-emerald-800 { color: var(--driver-accent-3) !important; }
   .driver-shell .bg-emerald-100 { background: rgba(47, 125, 255, 0.20) !important; }
 
-  /* Amber alerts → premium warm */
-  .driver-shell .bg-amber-50 { background: rgba(231, 193, 90, 0.10) !important; }
-  .driver-shell .border-amber-200 { border-color: rgba(231, 193, 90, 0.32) !important; }
+  /* États en attente : bleu électrique, sans doré */
+  .driver-shell .bg-amber-50 { background: var(--driver-surface) !important; }
+  .driver-shell .border-amber-200 { border-color: var(--driver-border-strong) !important; }
   .driver-shell .text-amber-700,
   .driver-shell .text-amber-800,
-  .driver-shell .text-amber-900 { color: #f0d27a !important; }
+  .driver-shell .text-amber-900 { color: var(--driver-accent-3) !important; }
 
   /* Red destructive → tone down for dark */
   .driver-shell .bg-red-50 { background: rgba(239, 68, 68, 0.10) !important; }
@@ -994,10 +994,10 @@ body.is-driver-app .closed-link svg {
 
   /* Premium driver utilities */
   .driver-card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    background: var(--driver-surface);
     border: 1px solid var(--driver-border);
     border-radius: 1.5rem;
-    backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: none;
     box-shadow:
       0 22px 50px -24px rgba(4, 27, 82, 0.85),
       0 0 0 1px rgba(103, 193, 255, 0.06),
@@ -1022,13 +1022,13 @@ body.is-driver-app .closed-link svg {
   .driver-cta:active { transform: scale(0.97); }
   .driver-cta:hover { filter: brightness(1.08); box-shadow: 0 16px 40px -10px rgba(47, 125, 255, 0.80), 0 0 32px rgba(103, 193, 255, 0.40); }
   .driver-secondary-cta {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+    background: var(--driver-surface);
     color: var(--driver-text);
     border: 1px solid var(--driver-border);
     font-weight: 600;
     border-radius: 1.125rem;
     min-height: 56px;
-    backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: none;
     transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
   }
   .driver-secondary-cta:active { transform: scale(0.97); }
@@ -1059,7 +1059,7 @@ body.is-driver-app .closed-link svg {
     content: ""; width: 6px; height: 6px; border-radius: 9999px;
     background: currentColor;
   }
-  .driver-status--pending { color: #f0d27a; background: rgba(231,193,90,0.12); border-color: rgba(231,193,90,0.40); box-shadow: 0 0 14px rgba(231,193,90,0.25); }
+  .driver-status--pending { color: var(--driver-accent-3); background: var(--driver-surface-strong); border-color: var(--driver-border-strong); box-shadow: var(--driver-glow); }
   .driver-status--upcoming { color: #A8C2FF; background: rgba(168,194,255,0.10); border-color: rgba(168,194,255,0.35); }
   .driver-status--enroute { color: #67C1FF; background: rgba(78,168,255,0.14); border-color: rgba(103,193,255,0.50); box-shadow: 0 0 18px rgba(78,168,255,0.35); }
   .driver-status--enroute::before { animation: driver-pulse 1.6s ease-in-out infinite; }
@@ -1126,7 +1126,7 @@ body.is-driver-app .closed-link svg {
   }
   .brex-pill--gold   { color: #bcd4ff; border-color: rgba(120,165,255,0.32); background: rgba(59,130,246,0.10); }
   .brex-pill--blue   { color: #93c5fd; border-color: rgba(59,130,246,0.32);  background: rgba(59,130,246,0.12); }
-  .brex-pill--amber  { color: #f5c46b; border-color: rgba(245,158,11,0.30);  background: rgba(245,158,11,0.08); }
+  .brex-pill--amber  { color: var(--driver-accent-3); border-color: var(--driver-border-strong); background: var(--driver-surface-strong); }
   .brex-pill--green  { color: #7ee2b8; border-color: rgba(16,185,129,0.30);  background: rgba(16,185,129,0.08); }
   .brex-pill--red    { color: #ff9a9a; border-color: rgba(239,68,68,0.30);   background: rgba(239,68,68,0.08); }
   .brex-pill--muted  { color: var(--driver-muted); }
@@ -4608,6 +4608,32 @@ html.theme-light .v5-section-transition {
   --pro-accent-deep: #5334d6;
 }
 
+/* Espaces professionnels : états et actions violets, jamais ambrés. */
+.dashboard-shell-light {
+  --pro-gold: #7c5cff;
+  --v3-gold: #7c5cff;
+  --v3-gold-deep: #5334d6;
+  --v3-gold-soft: #f2eeff;
+  --v3-gold-line: #d9d0ff;
+}
+.dashboard-shell-light .v3-kpi-grad.gold,
+.dashboard-shell-light .v3-cta-gold {
+  background: linear-gradient(150deg, #f2eeff, var(--pro-surface));
+  border-color: #d9d0ff;
+}
+.dashboard-shell-light .v3-kpi-grad.gold::before { background: radial-gradient(circle, #7c5cff, transparent 70%); }
+.dashboard-shell-light .v3-btn-gold { background: linear-gradient(120deg, #a56aff, #7c5cff); box-shadow: 0 10px 22px #7c5cff40; }
+.dashboard-shell-light .bg-amber-50,
+.dashboard-shell-light .bg-amber-100,
+.dashboard-shell-light .bg-amber-200 { background-color: #f2eeff !important; }
+.dashboard-shell-light .text-amber-500,
+.dashboard-shell-light .text-amber-600,
+.dashboard-shell-light .text-amber-700,
+.dashboard-shell-light .text-amber-900 { color: #5334d6 !important; }
+.dashboard-shell-light .border-amber-200,
+.dashboard-shell-light .border-amber-300 { border-color: #d9d0ff !important; }
+.dashboard-shell-light .fill-amber-500 { fill: #7c5cff !important; }
+
 /* === Services · Notre plateforme === */
 .plateforme-section { max-width: 1220px; margin: 0 auto; padding: 40px 32px 90px; }
 .plateforme-head { text-align: center; margin-bottom: 50px; }
@@ -5980,7 +6006,7 @@ html.theme-light .driver-shell {
   --driver-text: #0f1526;
   --driver-text-soft: #47506e;
   --driver-muted: #6b7590;
-  --driver-gold: #b8862a;
+  --driver-gold: #2f5fff;
   --driver-accent-soft: rgba(47,95,255,0.10);
   --driver-glow: 0 10px 30px -18px rgba(47,95,255,0.45);
   background:
@@ -6221,7 +6247,7 @@ html.theme-light .driver-chip-purple { background: rgba(124,58,237,0.10); border
 
 /* Statuts */
 html.theme-light .driver-status { backdrop-filter: none; box-shadow: none; }
-html.theme-light .driver-status--pending { color: #8a6206; background: rgba(184,134,42,0.12); border-color: rgba(184,134,42,0.30); }
+html.theme-light .driver-status--pending { color: #1c3fc4; background: #eef3ff; border-color: rgba(47,95,255,0.30); }
 html.theme-light .driver-status--upcoming { color: #47506e; background: rgba(15,21,38,0.05); border-color: rgba(15,21,38,0.12); }
 html.theme-light .driver-status--enroute,
 html.theme-light .driver-status--inprogress { color: #1c3fc4; background: rgba(47,95,255,0.10); border-color: rgba(47,95,255,0.30); }
@@ -6253,7 +6279,7 @@ html.theme-light .brex-pill--blue,
 html.theme-light .brex-pill--live { background: rgba(47,95,255,0.10); border-color: rgba(47,95,255,0.26); color: #1c3fc4; }
 html.theme-light .brex-pill--green { background: rgba(16,185,129,0.10); border-color: rgba(16,185,129,0.28); color: #047857; }
 html.theme-light .brex-pill--amber,
-html.theme-light .brex-pill--gold { background: rgba(184,134,42,0.12); border-color: rgba(184,134,42,0.30); color: #8a6206; }
+html.theme-light .brex-pill--gold { background: #eef3ff; border-color: rgba(47,95,255,0.30); color: #1c3fc4; }
 html.theme-light .brex-pill--red { background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.28); color: #b91c1c; }
 
 /* Classes Tailwind arbitraires "bleu nuit" utilisées dans les écrans driver */
@@ -9964,4 +9990,69 @@ body .tln-sheen { display: none; }
 @keyframes client-sign-in {
   from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: none; }
+}
+
+/* Driver PC : surfaces opaques et accents électriques dans les deux thèmes. */
+.driver-shell {
+  --driver-training-panel: #0b2252;
+  --driver-training-ink: #f4f8ff;
+  --driver-training-soft: #c8d9ff;
+  --driver-training-blue: #67c1ff;
+  --driver-training-button: #397cff;
+  --driver-training-button-ink: #ffffff;
+}
+html.theme-light .driver-shell {
+  --driver-training-panel: #ffffff;
+  --driver-training-ink: #0f1526;
+  --driver-training-soft: #47506e;
+  --driver-training-blue: #1c3fc4;
+  --driver-training-button: #2f5fff;
+  --driver-training-button-ink: #ffffff;
+}
+.driver-shell .driver-training-hero,
+.driver-shell .driver-tour-panel {
+  background: var(--driver-training-panel) !important;
+  color: var(--driver-training-ink) !important;
+  border: 1px solid var(--driver-border);
+  backdrop-filter: none;
+}
+.driver-shell .driver-training-accent { color: var(--driver-training-blue) !important; }
+.driver-shell .driver-training-copy,
+.driver-shell .driver-tour-copy { color: var(--driver-training-soft) !important; }
+.driver-shell .driver-training-button {
+  background: var(--driver-training-button) !important;
+  color: var(--driver-training-button-ink) !important;
+  border: 1px solid var(--driver-training-button);
+  box-shadow: 0 6px 22px rgba(47, 125, 255, 0.25);
+}
+.driver-shell .driver-training-button:hover { filter: brightness(1.12); }
+.driver-shell .driver-training-progress { background: linear-gradient(90deg, #2f7dff, #67c1ff); }
+.driver-shell .driver-training-in-progress {
+  background: var(--driver-surface-strong);
+  color: var(--driver-training-blue);
+  border: 1px solid var(--driver-border-strong);
+}
+html.theme-light .driver-shell .driver-training-in-progress { background: #eef3ff; }
+.driver-shell .driver-pending-notice {
+  background: var(--driver-surface);
+  color: var(--driver-text);
+  border-color: var(--driver-border-strong);
+}
+.driver-shell .driver-pending-notice p + p { color: var(--driver-text-soft); }
+.driver-shell .bg-amber-500\/10,
+.driver-shell .bg-amber-300\/10,
+.driver-shell .bg-amber-300\/20 { background-color: var(--driver-surface-strong) !important; }
+.driver-shell .bg-amber-500,
+.driver-shell .bg-amber-300 { background-color: var(--driver-accent-2) !important; }
+.driver-shell .border-amber-300\/40,
+.driver-shell .border-amber-300\/70,
+.driver-shell .border-amber-400\/40 { border-color: var(--driver-border-strong) !important; }
+.driver-shell .text-amber-100,
+.driver-shell .text-amber-200,
+.driver-shell .text-amber-500,
+.driver-shell .text-amber-600 { color: var(--driver-training-blue) !important; }
+html.theme-light .driver-shell .bg-pro-bg,
+html.theme-light .driver-shell .bg-pro-bg-soft { background: #f5f7fc !important; }
+@media (min-width: 768px) {
+  .driver-shell .driver-nav-surface { background: var(--driver-bg) !important; backdrop-filter: none; }
 }
