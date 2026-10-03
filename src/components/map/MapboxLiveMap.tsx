@@ -193,8 +193,9 @@ export function MapboxLiveMap({
   const signalAgeMin = signalAgeMinutes(last, nowTs);
   const signalLost = !last || signalAgeMin === null || signalAgeMin > SIGNAL_STALE_MIN;
 
-  // Distance réellement parcourue (somme des segments GPS) — carte de synthèse.
-  const distanceKm = useMemo(() => {
+  // Distance de la mission : itinéraire routier réel (précis), sinon somme des
+  // segments GPS (sous-estime car ligne droite entre points espacés).
+  const gpsKm = useMemo(() => {
     let d = 0;
     for (let i = 1; i < points.length; i++) {
       d += haversineKm(
@@ -204,6 +205,14 @@ export function MapboxLiveMap({
     }
     return d;
   }, [points]);
+  const routeKm = useMemo(() => {
+    let d = 0;
+    for (let i = 1; i < route.length; i++) {
+      d += haversineKm({ lat: route[i - 1][0], lng: route[i - 1][1] }, { lat: route[i][0], lng: route[i][1] });
+    }
+    return d;
+  }, [route]);
+  const distanceKm = routeKm >= 1 ? routeKm : gpsKm;
 
   const originKey = typeof origin === "string" ? origin : origin ? `${origin.lat},${origin.lng}` : "";
   const destKey = typeof destination === "string" ? destination : destination ? `${destination.lat},${destination.lng}` : "";
