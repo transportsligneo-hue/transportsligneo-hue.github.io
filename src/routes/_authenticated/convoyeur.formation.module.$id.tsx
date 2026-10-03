@@ -72,8 +72,8 @@ function ModulePage() {
           <span>Mise à jour {new Date(module.last_updated).toLocaleDateString("fr-FR")}</span>
         </div>
         {module.objectives.length > 0 && (
-          <div className="mt-4 rounded-xl bg-[#0B1338]/[0.04] border border-pro-border p-4">
-            <p className="text-xs font-semibold text-[#0B1338] flex items-center gap-1.5">
+         <div className="driver-training-objectives mt-4 rounded-xl border border-pro-border p-4">
+             <p className="text-xs font-semibold text-pro-text flex items-center gap-1.5">
               <Target size={13} className="text-[#2F5FFF]" /> Objectifs du module
             </p>
             <ul className="mt-2 space-y-1">

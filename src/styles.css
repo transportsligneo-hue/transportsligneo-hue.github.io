@@ -10051,6 +10051,18 @@ html.theme-light .driver-shell {
   background: var(--driver-surface-strong) !important;
   color: var(--driver-text) !important;
 }
+.driver-shell .driver-training-pending .text-amber-900 { color: var(--driver-text) !important; }
+.driver-shell .driver-training-objectives {
+  background: var(--driver-surface-strong);
+  color: var(--driver-text);
+}
+.driver-shell .driver-training-glossary { text-decoration-color: var(--driver-training-blue); }
+.driver-shell .driver-training-tooltip {
+  background: var(--driver-training-panel);
+  color: var(--driver-training-ink);
+  border-color: var(--driver-border-strong);
+}
+.driver-shell .driver-training-dot { background: var(--driver-training-blue); }
 .driver-shell .driver-training-progress { background: linear-gradient(90deg, #2f7dff, #67c1ff); }
 .driver-shell .driver-training-in-progress {
   background: var(--driver-surface-strong);

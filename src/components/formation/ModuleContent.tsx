@@ -10,13 +10,13 @@ function GlossaryTerm({ term, definition }: { term: string; definition: string }
         onClick={() => setOpen((o) => !o)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="underline decoration-dotted decoration-2 underline-offset-4 decoration-[#B8862A] text-inherit font-medium"
+        className="driver-training-glossary underline decoration-dotted decoration-2 underline-offset-4 text-inherit font-medium"
       >
         {term}
       </button>
       {open && (
-        <span className="absolute z-30 left-0 top-full mt-1 w-64 rounded-lg bg-[#0B1338] text-white text-xs leading-relaxed p-3 shadow-xl border border-[#B8862A]/40">
-          <span className="block text-[#E7C76A] font-semibold mb-1">{term}</span>
+        <span className="driver-training-tooltip absolute z-30 left-0 top-full mt-1 w-64 rounded-lg text-xs leading-relaxed p-3 shadow-xl border">
+          <span className="driver-training-accent block font-semibold mb-1">{term}</span>
           {definition}
         </span>
       )}
@@ -54,7 +54,7 @@ export function ModuleContent({ content }: { content: string }) {
       <ul key={k} className="space-y-1.5 my-3">
         {bullets.map((b, i) => (
           <li key={i} className="flex gap-2 text-sm text-pro-text-soft leading-relaxed">
-            <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#B8862A] shrink-0" />
+            <span className="driver-training-dot mt-[7px] h-1.5 w-1.5 rounded-full shrink-0" />
             <span>{renderInline(b, `${k}-${i}`)}</span>
           </li>
         ))}
@@ -83,7 +83,7 @@ export function ModuleContent({ content }: { content: string }) {
     }
     if (line.startsWith("!! ")) {
       out.push(
-        <div key={k} className="my-4 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
+        <div key={k} className="driver-training-pending my-4 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
           <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-900 leading-relaxed">
             <span className="font-semibold block mb-0.5">Point de vigilance</span>
