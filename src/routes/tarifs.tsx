@@ -23,6 +23,8 @@ export const Route = createFileRoute("/tarifs")({
 });
 
 function TarifsPage() {
+  const { audience } = useSearch({ from: "/tarifs" });
+  const devisPrefill: DevisGeneratorPrefill | undefined = audience === "pro" ? { clientType: "pro_ponctuel" } : undefined;
   return (
     <>
       {/* Mobile · écran dédié navy */}
@@ -45,7 +47,7 @@ function TarifsPage() {
 
         {/* ============ ESTIMATEUR (fusionné dans le fond de page) ============ */}
         <section className="v4-section" style={{ maxWidth: 1040, paddingTop: 0 }}>
-          <DevisGenerator variant="flat" />
+          <DevisGenerator variant="flat" prefill={devisPrefill} />
         </section>
 
         {/* ============ GRILLE TARIFAIRE RÉELLE ============ */}
