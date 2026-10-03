@@ -16,7 +16,7 @@ export function variantFromRole(role: AppRole | string | null | undefined): Neon
   return "client";
 }
 
-const DRIVER_WORDS = /(convoyeur|driver|chauffeur|exp[ée]diteur|accept[ée]e? par|prise en charge|[ée]tat des lieux|edl|en route|trajet d[ée]marr|candidature|disponibilit)/i;
+const DRIVER_WORDS = /(convoyeur|driver|chauffeur|accept[ée]e? par|prise en charge|[ée]tat des lieux|edl|en route|trajet d[ée]marr|candidature|disponibilit)/i;
 const PRO_WORDS = /(flotte|gestionnaire|professionnel|\bpro\b|\bb2b\b|entreprise|soci[ée]t[ée]|concessionnaire|loueur|parc automobile|groupe cat|cat france)/i;
 
 /** Détecte l'acteur concerné d'après un texte (utilisé côté admin). */
@@ -48,7 +48,8 @@ export interface ShowToastInput {
 
 const CheckIcon = (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 6L9 17l-5-5" />
+    <circle cx="12" cy="12" r="9" strokeWidth="1.8" />
+    <path d="m8 12 2.5 2.5L16 9" />
   </svg>
 );
 
