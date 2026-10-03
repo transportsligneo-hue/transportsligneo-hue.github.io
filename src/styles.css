@@ -9991,3 +9991,68 @@ body .tln-sheen { display: none; }
   from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: none; }
 }
+
+/* Driver PC : surfaces opaques et accents électriques dans les deux thèmes. */
+.driver-shell {
+  --driver-training-panel: #0b2252;
+  --driver-training-ink: #f4f8ff;
+  --driver-training-soft: #c8d9ff;
+  --driver-training-blue: #67c1ff;
+  --driver-training-button: #397cff;
+  --driver-training-button-ink: #ffffff;
+}
+html.theme-light .driver-shell {
+  --driver-training-panel: #ffffff;
+  --driver-training-ink: #0f1526;
+  --driver-training-soft: #47506e;
+  --driver-training-blue: #1c3fc4;
+  --driver-training-button: #2f5fff;
+  --driver-training-button-ink: #ffffff;
+}
+.driver-shell .driver-training-hero,
+.driver-shell .driver-tour-panel {
+  background: var(--driver-training-panel) !important;
+  color: var(--driver-training-ink) !important;
+  border: 1px solid var(--driver-border);
+  backdrop-filter: none;
+}
+.driver-shell .driver-training-accent { color: var(--driver-training-blue) !important; }
+.driver-shell .driver-training-copy,
+.driver-shell .driver-tour-copy { color: var(--driver-training-soft) !important; }
+.driver-shell .driver-training-button {
+  background: var(--driver-training-button) !important;
+  color: var(--driver-training-button-ink) !important;
+  border: 1px solid var(--driver-training-button);
+  box-shadow: 0 6px 22px rgba(47, 125, 255, 0.25);
+}
+.driver-shell .driver-training-button:hover { filter: brightness(1.12); }
+.driver-shell .driver-training-progress { background: linear-gradient(90deg, #2f7dff, #67c1ff); }
+.driver-shell .driver-training-in-progress {
+  background: var(--driver-surface-strong);
+  color: var(--driver-training-blue);
+  border: 1px solid var(--driver-border-strong);
+}
+html.theme-light .driver-shell .driver-training-in-progress { background: #eef3ff; }
+.driver-shell .driver-pending-notice {
+  background: var(--driver-surface);
+  color: var(--driver-text);
+  border-color: var(--driver-border-strong);
+}
+.driver-shell .driver-pending-notice p + p { color: var(--driver-text-soft); }
+.driver-shell .bg-amber-500\/10,
+.driver-shell .bg-amber-300\/10,
+.driver-shell .bg-amber-300\/20 { background-color: var(--driver-surface-strong) !important; }
+.driver-shell .bg-amber-500,
+.driver-shell .bg-amber-300 { background-color: var(--driver-accent-2) !important; }
+.driver-shell .border-amber-300\/40,
+.driver-shell .border-amber-300\/70,
+.driver-shell .border-amber-400\/40 { border-color: var(--driver-border-strong) !important; }
+.driver-shell .text-amber-100,
+.driver-shell .text-amber-200,
+.driver-shell .text-amber-500,
+.driver-shell .text-amber-600 { color: var(--driver-training-blue) !important; }
+html.theme-light .driver-shell .bg-pro-bg,
+html.theme-light .driver-shell .bg-pro-bg-soft { background: #f5f7fc !important; }
+@media (min-width: 768px) {
+  .driver-shell .driver-nav-surface { background: var(--driver-bg) !important; backdrop-filter: none; }
+}

@@ -8,3 +8,4 @@
 - [x] Scanner client : fiabiliser le cadrage du scanner partagé avec l'état des lieux et la sortie du document.
 - [x] Documents Driver : ouvrir ou partager les PDF sur mobile, y compris dans l'application installée.
 - [x] Chargement web et application : logo conservé, TRANSPORTS blanc et LIGNEO bleu électrique, animation sobre.
+- [x] Espace Driver PC : fenêtres et cartes opaques, texte contrasté, accents bleus/verts électriques ; espace pro sans doré avec accents violets électriques.
