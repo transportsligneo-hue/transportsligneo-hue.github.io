@@ -166,7 +166,7 @@ function MesFacturesEtDevis() {
     setActiveId(d.id);
     try {
       const status = await getStatus({ data: { devisId: d.id } });
-      if (status.requiresAcceptation) {
+      if (status.requiresAcceptation || !d.locked_at) {
         setStep("acceptation");
       } else {
         setStep(d.vehicule_docs_completed ? "pay" : "docs");
@@ -457,8 +457,8 @@ function MesFacturesEtDevis() {
       )}
 
       {active && (
-        <div className="fixed inset-0 bg-navy/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-auto">
-          <div className="bg-navy-dark border border-primary/30 rounded-xl max-w-2xl w-full p-6 my-8 relative">
+        <div className="client-sign-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-auto">
+          <div className="client-sign-modal max-w-2xl w-full p-6 sm:p-8 my-8 relative">
             <button
               onClick={() => setActiveId(null)}
               className="absolute top-4 right-4 text-cream/60 hover:text-cream transition-colors"

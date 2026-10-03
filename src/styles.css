@@ -9922,3 +9922,39 @@ body .tln-sheen { display: none; }
   .dg-estimator .dg-journey .dg-journey-content button { font-size: 12px; }
   .dg-estimator .dg-journey .dg-journey-content .dg-profile-choice { padding: 12px 14px; }
 }
+
+/* Fenêtre signature → documents → paiement de l'espace client : palette fixe,
+   opaque et lisible quel que soit le thème. */
+.client-sign-overlay {
+  background: rgba(6, 10, 26, 0.82);
+  backdrop-filter: blur(8px);
+}
+.client-sign-modal {
+  --navy: #0b1026;
+  --navy-light: #16204a;
+  --cream: #f4f7ff;
+  --primary: #4f8cff;
+  --primary-foreground: #ffffff;
+  --background: #0b1026;
+  --foreground: #f4f7ff;
+  --muted-foreground: #a9bbda;
+  --border: rgba(79, 140, 255, 0.25);
+  --input: rgba(79, 140, 255, 0.3);
+  --card: #111a3d;
+  color: #f4f7ff;
+  background: linear-gradient(160deg, #111a3d 0%, #0b1026 70%);
+  border: 1px solid rgba(79, 140, 255, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(79, 140, 255, 0.08), 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 60px -20px rgba(79, 140, 255, 0.45);
+  font-family: inherit;
+  animation: client-sign-in 0.35s ease-out;
+}
+.client-sign-modal input, .client-sign-modal textarea {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f7ff;
+}
+.client-sign-modal canvas { background: #ffffff; border-radius: 12px; }
+@keyframes client-sign-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
