@@ -31,7 +31,6 @@ export function VehiculeDocsStep({
   devisId,
   initialVin,
   initialRectoUrl,
-  initialVersoUrl,
   onCompleted,
 }: Props) {
   const { user } = useAuth();
