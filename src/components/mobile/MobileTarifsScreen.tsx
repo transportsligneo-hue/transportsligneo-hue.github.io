@@ -93,7 +93,7 @@ export default function MobileTarifsScreen() {
           Toujours inclus
         </div>
         <h2 className="text-[20px] font-extrabold text-white leading-tight mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
-          Transparence <span className="text-[color:var(--v4-blue-bright)]">totale</span>
+          Transparence <span className="text-[color:var(--neon-blue-strong)]">totale</span>
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <MiniIncluded icon={<Fuel size={16} className="text-[#8fb4ff]" />} title="Péages & carburant" />
@@ -112,7 +112,7 @@ export default function MobileTarifsScreen() {
           Le détail
         </div>
         <h2 className="text-[20px] font-extrabold text-white leading-tight mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
-          Comment est calculé <span className="text-[color:var(--v4-blue-bright)]">votre prix</span>
+          Comment est calculé <span className="text-[color:var(--neon-blue-strong)]">votre prix</span>
         </h2>
         <div className="flex flex-col gap-2.5">
           <FactorRow icon={<RouteIcon size={15} />} title="La distance" desc="Calculée entre l'enlèvement et la livraison." />
@@ -133,7 +133,7 @@ export default function MobileTarifsScreen() {
             Une question ?
           </div>
           <h3 className="text-[18px] font-extrabold text-white mb-1.5" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            Parlez à un <span className="text-[color:var(--v4-blue-bright)]">conseiller</span>
+            Parlez à un <span className="text-[color:var(--neon-blue-strong)]">conseiller</span>
           </h3>
           <p className="text-[12.5px] text-[#dbe3ff] mb-4">Volume, trajet particulier : nous adaptons le devis à votre besoin.</p>
           <Link
