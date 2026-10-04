@@ -17,8 +17,8 @@ interface ThemeCtx {
 }
 
 const ThemeContext = createContext<ThemeCtx>({
-  theme: "dark",
-  preference: "system",
+  theme: "light",
+  preference: "light",
   setTheme: () => {},
   setPreference: () => {},
   toggleTheme: () => {},
@@ -39,13 +39,13 @@ function systemTheme(): LigneoTheme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // SSR : on rend toujours le thème sombre (thème historique), puis on
-  // réhydrate la préférence de l'appareil côté client.
-  const [theme, setThemeState] = useState<LigneoTheme>("dark");
-  const [preference, setPreferenceState] = useState<LigneoThemePreference>("system");
+  // SSR : thème clair par défaut, puis réhydratation du choix mémorisé.
+  const [theme, setThemeState] = useState<LigneoTheme>("light");
+  const [preference, setPreferenceState] = useState<LigneoThemePreference>("light");
 
   useEffect(() => {
-    let pref: LigneoThemePreference = "system";
+    // Mode clair par défaut ; le sombre uniquement sur choix explicite.
+    let pref: LigneoThemePreference = "light";
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored === "light" || stored === "dark" || stored === "system") pref = stored;

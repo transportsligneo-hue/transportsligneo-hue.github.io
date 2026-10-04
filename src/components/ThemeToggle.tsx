@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Bascule thème sombre (par défaut) / thème clair bleu électrique.
+ * Bascule thème clair (par défaut) / thème sombre.
  * Le choix est mémorisé sur l'appareil.
  */
 export default function ThemeToggle({ variant = "compact", className = "" }: Props) {
