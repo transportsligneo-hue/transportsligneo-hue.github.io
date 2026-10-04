@@ -11102,3 +11102,14 @@ html.theme-light .r4-page .engag-map-card .ligneo-map { padding:0 !important; ma
 .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements-location { color: var(--audience-accent); }
 html .r4-page .engag-map-card .ligneo-map-inner .ligneo-map-svg { transform:scale(1.45) translateY(3%) !important; }
 html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements-location { color: var(--audience-accent) !important; }
+
+/* Carte pro : France et base Tours en violet néon électrique (particuliers inchangés) */
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .fr-country { fill: rgba(124,92,255,0.22); stroke: #a794ff; }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .line-fr { stroke: rgba(167,148,255,0.45); }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .dot-fr,
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .travel-fr { fill: #a794ff; }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .travel-dot { filter: drop-shadow(0 0 1.2px rgba(167,148,255,0.95)) drop-shadow(0 0 2.4px rgba(167,148,255,0.55)); }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .hub-ring { stroke: #a794ff; }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .hub-dot { fill: #a794ff; }
+.r4-page.services-engagements[data-audience="pro"] .ligneo-map-legend-dot { background: #a794ff; box-shadow: 0 0 8px rgba(167,148,255,0.9); }
+.r4-page.services-engagements[data-audience="pro"] .hx-map-card { border-color: rgba(167,148,255,0.28); }
