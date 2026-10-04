@@ -10328,3 +10328,9 @@ html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-item { color:
 html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-item:hover { color: #ffffff; background: rgba(127,166,255,.10); }
 html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-ic { background: #17224a; border-color: #24305c; color: #9dbaff; }
 html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-logout { color: #ff8a9a; }
+html.theme-dark .dashboard-shell-light .card-premium,
+html.theme-dark .admin-shell .card-premium { background: #111a3d !important; border-color: #24305c !important; }
+html.theme-dark .dashboard-shell-light[data-account-type="client"] { --cream: #e8edfb; --navy: #e8edfb; }
+html.theme-dark .dashboard-shell-light :is(label, .text-cream, .text-cream\/70, .text-cream\/60, .text-cream\/50) { color: #b7c1e0; }
+html.theme-dark .dashboard-shell-light :is(h1, h2, h3, .font-heading) { color: #e8edfb; }
+html.theme-dark .dashboard-shell-light aside :is(.bg-white) { background-color: #17224a !important; }
