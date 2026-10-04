@@ -1,3 +1,4 @@
+import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -350,6 +351,9 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
             <Calendar size={12} /> {new Date(mission.date_prise_en_charge).toLocaleDateString("fr-FR")}
           </span>
           <span className="font-heading mission-text text-2xl font-semibold">{Number(mission.prix_total).toFixed(2)} €</span>
+        </div>
+        <div className="mt-4">
+          <SendTrackingCodeButton missionId={mission.id} />
         </div>
         {attributionId && (
           <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border mission-divider sm:h-[430px] sm:min-h-[430px]">

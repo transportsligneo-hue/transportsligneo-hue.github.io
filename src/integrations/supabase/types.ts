@@ -5185,6 +5185,7 @@ export type Database = {
           statut: string
           telephone: string | null
           tracking_code: string | null
+          tracking_recipient_email: string | null
           type_trajet: string
           updated_at: string
           user_id: string
@@ -5229,6 +5230,7 @@ export type Database = {
           statut?: string
           telephone?: string | null
           tracking_code?: string | null
+          tracking_recipient_email?: string | null
           type_trajet?: string
           updated_at?: string
           user_id: string
@@ -5273,6 +5275,7 @@ export type Database = {
           statut?: string
           telephone?: string | null
           tracking_code?: string | null
+          tracking_recipient_email?: string | null
           type_trajet?: string
           updated_at?: string
           user_id?: string
@@ -7189,6 +7192,47 @@ export type Database = {
           reason?: string
         }
         Relationships: []
+      }
+      tracking_code_sends: {
+        Row: {
+          actor_role: string
+          created_at: string
+          error_message: string | null
+          id: string
+          mission_id: string
+          recipient_email: string
+          sent_by: string | null
+          status: string
+        }
+        Insert: {
+          actor_role: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          mission_id: string
+          recipient_email: string
+          sent_by?: string | null
+          status: string
+        }
+        Update: {
+          actor_role?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          mission_id?: string
+          recipient_email?: string
+          sent_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_code_sends_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trajets: {
         Row: {

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -40,6 +40,10 @@ const STATUT_LABEL: Record<string, { label: string; color: string }> = {
 
 function SuiviPage() {
   const [numero, setNumero] = useState("");
+  useEffect(() => {
+    const n = new URLSearchParams(window.location.search).get("numero");
+    if (n) setNumero(n.slice(0, 40));
+  }, []);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);

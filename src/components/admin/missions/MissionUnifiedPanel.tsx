@@ -1,3 +1,4 @@
+import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
@@ -229,6 +230,11 @@ export function MissionUnifiedPanel({
                   <ExternalLink size={13} /> Fiche mission complète
                 </Link>
               )}
+              <SendTrackingCodeButton
+                trajetId={mission.id}
+                label="Envoyer le code de suivi au destinataire"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold border border-[var(--a6-border)] bg-white text-[var(--a6-text)]"
+              />
             </div>
           )}
         </header>
