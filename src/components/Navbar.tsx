@@ -5,6 +5,7 @@ import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
 import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
+import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
@@ -61,6 +62,8 @@ export default function Navbar() {
             <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
               <LigneoLockup size="md" />
             </Link>
+
+            <OctobreRoseBadge />
 
             <span className="tln-sep" aria-hidden="true" />
 
