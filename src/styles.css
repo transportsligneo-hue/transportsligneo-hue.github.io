@@ -5439,14 +5439,14 @@ html.theme-light .v5-section-transition {
 .dc-waitlist-form { text-align: left; }
 .dc-waitlist-label { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa6c9; margin-bottom: 10px; }
 .dc-waitlist-input-wrap { position: relative; margin-bottom: 16px; }
-.dc-waitlist-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #4f8cff; pointer-events: none; }
+.dc-waitlist-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #3ee6a0; pointer-events: none; }
 .dc-waitlist-input {
   width: 100%; padding: 15px 16px 15px 44px; border-radius: 14px; border: 1px solid rgba(122,163,255,0.3);
   background: rgba(6,10,24,0.45); color: #fff; font-size: 15px; outline: none;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .dc-waitlist-input::placeholder { color: #7b88b3; }
-.dc-waitlist-input:focus { border-color: #4f8cff; box-shadow: 0 0 0 3px rgba(79,140,255,0.18); }
+.dc-waitlist-input:focus { border-color: #3ee6a0; box-shadow: 0 0 0 3px rgba(62,230,160,0.18); }
 .dc-waitlist-input:disabled { opacity: .6; cursor: not-allowed; }
 .dc-btn-primary:disabled { opacity: .65; cursor: not-allowed; }
 .dc-waitlist-error {
