@@ -29,6 +29,7 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string; stale?: boolean }>;
+  worldOverview?: boolean;
   /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
   role?: "admin" | "client";
   /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
