@@ -594,10 +594,23 @@ export default function MobileDevisGenerator() {
                       ? "En attente"
                       : "Choisir un trajet"}
                   </span>
-                </div>
-              </div>
+                 </div>
+               </div>
 
-              {/* CTA "Voir mon tarif" */}
+               {offHours && (
+                 <div
+                   className="mt-3 flex items-start gap-2.5 rounded-[14px] px-3.5 py-3"
+                   style={{ background: "rgba(63,123,255,0.12)", border: "1px solid rgba(122,163,255,0.35)" }}
+                 >
+                   <Clock size={14} className="mt-0.5 shrink-0 text-[#4f8cff]" />
+                   <p className="text-[12px] leading-relaxed text-[#c7d2f2]">
+                     <strong className="text-[#4f8cff]">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
+                     Majoration de <strong className="text-[#4f8cff]">+30&nbsp;%</strong> déjà incluse dans le prix affiché.
+                   </p>
+                 </div>
+               )}
+
+               {/* CTA "Voir mon tarif" */}
               <button
                 type="button"
                 disabled={!pricing}
