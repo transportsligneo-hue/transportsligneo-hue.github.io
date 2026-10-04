@@ -10684,3 +10684,7 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
   .r4-page .hx-split-map .hx-map-card svg,
   .r4-page .hx-split-map .hx-map-card img { width:100%; height:auto; }
 }
+@media (min-width: 1081px) {
+  .r4-page .hx-split-map .hx-map-card .ligneo-map { flex:1; justify-content:center; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-card { aspect-ratio:auto; flex:1; transform:scale(1.35); transform-origin:center; }
+}
