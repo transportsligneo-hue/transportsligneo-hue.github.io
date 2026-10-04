@@ -10844,8 +10844,19 @@ html:not(.theme-dark) .dpm-table tr.is-alert td { color: #dc2626; }
 body .tln-dd-menu .demo-req-btn { display:flex; align-items:center; gap:6px; width:100%; padding:9px 12px; border-radius:8px; border:0; background:transparent; color:#e6ecff; font-size:13px; font-weight:600; text-align:left; cursor:pointer; box-shadow:none; }
 body .tln-dd-menu .demo-req-btn:hover { background:rgba(168,85,247,0.22); color:#e2d8ff; text-shadow:0 0 8px rgba(167,139,250,0.7); }
 
-/* Accueil · titres « Un convoyage… » / « Un parcours… » en gris foncé élégant (mode clair) */
-html.theme-light .r4-page .hx-split-head h2 { color: #3e4759; }
+/* Accueil · titres avec voile bleu + dernier mot bleu électrique
+   (même rendu que « Ils nous confient leurs véhicules ») */
+.r4-page .v4-section-head h2,
+.r4-page .v4-faq-head h2,
+.r4-page .v4-cta-box h2 {
+  text-shadow: 0 0 26px rgba(91, 143, 255, 0.6), 0 0 56px rgba(91, 143, 255, 0.32);
+}
+html.theme-light .r4-page .v4-section-head h2,
+html.theme-light .r4-page .v4-faq-head h2,
+html.theme-light .r4-page .v4-cta-box h2 {
+  color: #0b1026;
+  text-shadow: 0 0 22px rgba(91, 143, 255, 0.35), 0 0 48px rgba(91, 143, 255, 0.18);
+}
 
 /* ===== Annotations photo EDL ===== */
 .pa-wrap{position:relative;display:block;width:100%;line-height:0;}
