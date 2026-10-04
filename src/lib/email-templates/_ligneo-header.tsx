@@ -37,8 +37,9 @@ const NAVY = '#0a1638'
 const NAVY_2 = '#132a6b'
 const BLUE = '#2f5fff'
 const BLUE_LIGHT = '#6ea1ff'
-const GOLD = '#b8862a'
-const GOLD_LIGHT = '#e8c976'
+// Accent historique « gold » remplacé par le bleu électrique de la charte.
+const GOLD = '#2f5fff'
+const GOLD_LIGHT = '#6ea1ff'
 const PAGE_BG = '#ffffff'
 const CARD_BG = '#f7f9fc'
 const CARD_BORDER = '#e7ebf3'
@@ -232,6 +233,9 @@ export function LigneoEmailShell({
                 <a href={`https://${LIGNEO_SITE_URL.replace('www.', '')}`} style={footerLink}>
                   transportsligneo.fr
                 </a>
+              </Text>
+              <Text style={{ ...footerLine, marginTop: '10px', color: BLUE, fontWeight: 600, fontStyle: 'italic' }}>
+                Votre logistique automobile sur toute la ligne
               </Text>
               <Text style={{ ...footerLine, marginTop: '12px' }}>
                 Vous recevez cet email suite à une action sur votre compte Transports Ligneo.

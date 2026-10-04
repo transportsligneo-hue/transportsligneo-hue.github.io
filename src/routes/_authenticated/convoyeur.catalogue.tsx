@@ -472,7 +472,7 @@ function ConvoyeurCatalogue() {
         </div>
 
         {!validated && (
-          <div className="mx-4 rounded-xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+          <div className="mx-4 rounded-xl border border-sky-300/40 bg-sky-500/10 px-4 py-3 text-xs text-sky-100">
             Votre compte doit être validé pour candidater aux missions.
           </div>
         )}

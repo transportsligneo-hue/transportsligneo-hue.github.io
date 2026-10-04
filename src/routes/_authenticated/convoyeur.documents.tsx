@@ -43,7 +43,7 @@ interface DocRow {
 function statutBadge(s: string) {
   if (isConvoyeurDocApproved(s)) return { label: "Approuvé", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle };
   if (s === "refuse") return { label: "Refusé", cls: "bg-red-50 text-red-700 border-red-200", icon: AlertCircle };
-  return { label: "En attente", cls: "bg-amber-50 text-amber-700 border-amber-200", icon: Loader2 };
+  return { label: "En attente", cls: "bg-sky-50 text-sky-700 border-sky-200", icon: Loader2 };
 }
 
 function ConvoyeurDocuments() {
@@ -188,8 +188,8 @@ function ConvoyeurDocuments() {
       </div>
 
       {!convoyeurId && (
-        <div className="p-4 rounded-xl border bg-amber-50 border-amber-200 flex items-start gap-2">
-          <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+        <div className="p-4 rounded-xl border bg-sky-50 border-sky-200 flex items-start gap-2">
+          <AlertCircle size={16} className="text-sky-600 mt-0.5 shrink-0" />
           <p className="text-sm text-pro-text">
             Votre fiche convoyeur n'est pas encore créée : l'envoi de documents est indisponible.
             Contactez l'équipe Transports Ligneo pour finaliser votre inscription.
@@ -232,12 +232,12 @@ function ConvoyeurDocuments() {
       <div className={`p-4 rounded-xl border ${
         validatedCount === requiredCount
           ? "bg-emerald-50 border-emerald-200"
-          : "bg-amber-50 border-amber-200"
+          : "bg-sky-50 border-sky-200"
       }`}>
         <div className="flex items-center gap-2">
           {validatedCount === requiredCount
             ? <CheckCircle size={16} className="text-emerald-600" />
-            : <AlertCircle size={16} className="text-amber-600" />}
+            : <AlertCircle size={16} className="text-sky-600" />}
           <p className="text-sm font-medium text-pro-text">
             {validatedCount}/{requiredCount} documents requis validés
           </p>
