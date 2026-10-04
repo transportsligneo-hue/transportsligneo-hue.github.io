@@ -29,13 +29,13 @@ export default function HomeDesktopV5() {
 
         <div className="v5-hero-grid">
           <div>
-            <div className="v4-hero-eyebrow"><span className="dot" />Transports Ligneo · Convoyage automobile</div>
+            <div className="v4-hero-eyebrow"><span className="dot" />Transports Ligneo · Convoyage et logistique automobile</div>
             <h1 className="v5-hero-h1 hx-title">
               Votre véhicule doit aller quelque part ?{" "}
               <span className="v4-accent">Ligneo s'occupe du reste.</span>
             </h1>
             <p className="hx-sub">
-              Convoyage automobile France &amp; Europe · Assurance incluse · Suivi GPS · État des lieux
+              Convoyage et logistique automobile France &amp; Europe · Assurance incluse · Suivi GPS · État des lieux
             </p>
 
             <div className="hx-switch">
