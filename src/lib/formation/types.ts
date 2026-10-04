@@ -15,6 +15,7 @@ export type TrainingModule = {
   resource_label: string | null;
   checklist_items: string[];
   case_study: CaseStudy;
+  case_studies?: CaseStudy[];
   quiz_questions: QuizQuestion[];
   last_updated: string;
 };

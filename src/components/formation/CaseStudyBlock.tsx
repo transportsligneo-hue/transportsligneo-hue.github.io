@@ -7,7 +7,11 @@ export function CaseStudyBlock({
   moduleId,
   caseStudy,
   initialAnswer,
+  caseIndex = 0,
+  total = 1,
 }: {
+  caseIndex?: number;
+  total?: number;
   moduleId: string;
   caseStudy: CaseStudy;
   initialAnswer: number | null;
@@ -21,7 +25,7 @@ export function CaseStudyBlock({
   const choose = async (i: number) => {
     setSelected(i);
     setLoading(true);
-    const { data, error } = await supabase.rpc("submit_case_study", { _module_id: moduleId, _choice: i });
+    const { data, error } = await supabase.rpc("submit_case_study_at", { _module_id: moduleId, _case_index: caseIndex, _choice: i });
     setLoading(false);
     if (!error && data) setFeedback(data as unknown as { correct: boolean; feedback: string });
   };
@@ -29,7 +33,7 @@ export function CaseStudyBlock({
   return (
     <section className="rounded-2xl border border-pro-border bg-white p-5">
       <h3 className="text-sm font-semibold text-pro-text flex items-center gap-2 mb-2">
-        <Puzzle size={16} className="text-[#2F5FFF]" /> Étude de cas
+        <Puzzle size={16} className="text-[#2F5FFF]" /> Étude de cas{total > 1 ? ` ${caseIndex + 1}/${total}` : ""}
       </h3>
       <p className="text-sm text-pro-text-soft leading-relaxed mb-4">{caseStudy.scenario}</p>
       <div className="space-y-2">

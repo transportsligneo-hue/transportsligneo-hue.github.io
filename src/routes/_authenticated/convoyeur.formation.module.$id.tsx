@@ -1,3 +1,4 @@
+import { PASS_SCORE } from "@/lib/formation/types";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Clock3, Download, Loader2, Target, Video, CheckCircle2 } from "lucide-react";
@@ -122,9 +123,9 @@ function ModulePage() {
         />
       )}
 
-      {module.case_study?.scenario && (
-        <CaseStudyBlock moduleId={module.id} caseStudy={module.case_study} initialAnswer={p?.case_study_answer ?? null} />
-      )}
+      {(module.case_studies?.length ? module.case_studies : module.case_study?.scenario ? [module.case_study] : []).map((cs, ci, all) => (
+        <CaseStudyBlock key={`${module.id}-${ci}`} moduleId={module.id} caseStudy={cs} caseIndex={ci} total={all.length} initialAnswer={null} />
+      ))}
 
       <QuizBlock
         moduleId={module.id}
@@ -149,7 +150,7 @@ function ModulePage() {
         <button
           type="button"
           onClick={async () => {
-            await markCompleted(module.id);
+            if ((p?.quiz_score ?? 0) >= PASS_SCORE) await markCompleted(module.id);
             if (next) navigate({ to: "/convoyeur/formation/module/$id", params: { id: next.id } });
             else navigate({ to: "/convoyeur/formation" });
           }}
