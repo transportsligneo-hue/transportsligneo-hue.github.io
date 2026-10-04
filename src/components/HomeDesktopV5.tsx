@@ -1,3 +1,4 @@
+import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, BriefcaseBusiness, CarFront, House,
@@ -71,6 +72,7 @@ export default function HomeDesktopV5() {
                 <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
                 Contact
               </Link>
+              <DemoRequestButton />
             </div>
           </div>
 
