@@ -19,10 +19,11 @@ import { usePlateauPhotos } from "@/hooks/usePlateauPhotos";
 import {
   Camera, PenLine, FileImage, FileText, ZoomIn, Download, Loader2, X, Image as ImgIcon, ShieldCheck,
 } from "lucide-react";
+import { AnnotatedPhoto, parseAnnotations, type PhotoAnnotation } from "@/components/inspection/PhotoAnnotations";
 
 interface Selfie { id: string; storage_path: string; taken_at: string; }
 interface Signature { id: string; kind: string; signer_name: string; signed_at: string; signature_data: string | null; }
-interface InspectionPhoto { id: string; vue_type: string; url_photo: string; created_at: string; inspection_type: string; notes: string | null; }
+interface InspectionPhoto { id: string; vue_type: string; url_photo: string; created_at: string; inspection_type: string; notes: string | null; annotations?: unknown; }
 interface MissionDoc { id: string; nom_fichier: string; type_document: string; url_fichier: string; created_at: string; }
 
 interface SignedAsset {
@@ -33,6 +34,7 @@ interface SignedAsset {
   bucket: string;
   storagePath: string;
   isImage: boolean;
+  annotations?: PhotoAnnotation[];
 }
 
 const BUCKETS = {
@@ -91,7 +93,7 @@ export function InspectionPreuvesBlock({
 
     const [sR, igR, sigR, dR] = await Promise.all([
       supabase.from("mission_selfies" as never).select("id,storage_path,taken_at").eq("attribution_id" as never, attributionId as never).order("taken_at", { ascending: false }),
-      supabase.from("inspections").select("id,type,inspection_photos(id,vue_type,url_photo,created_at,notes)").eq("attribution_id", attributionId),
+      supabase.from("inspections").select("id,type,inspection_photos(id,vue_type,url_photo,created_at,notes,annotations)").eq("attribution_id", attributionId),
       supabase.from("mission_signatures" as never).select("id,kind,signer_name,signed_at,signature_data").eq("attribution_id" as never, attributionId as never),
       supabase.from("mission_documents").select("id,nom_fichier,type_document,url_fichier,created_at").eq("attribution_id", attributionId).order("created_at", { ascending: false }),
     ]);
@@ -122,6 +124,7 @@ export function InspectionPreuvesBlock({
         label: p.vue_type || "Photo véhicule",
         sublabel: new Date(p.row.created_at).toLocaleString("fr-FR"),
         bucket: BUCKETS.inspection, storagePath: p.row.url_photo, isImage: true,
+        annotations: parseAnnotations(p.row.annotations),
       };
       return { ...asset, _type: p.type };
     }));
@@ -180,7 +183,13 @@ export function InspectionPreuvesBlock({
     <div className="group relative rounded-lg overflow-hidden border border-white/10 bg-black/30">
       {a.isImage && a.url ? (
         <button onClick={() => setZoom(a)} className="block w-full aspect-square">
-          <img src={a.url} alt={a.label} className="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy" />
+          {a.annotations?.length ? (
+            <span className="w-full h-full flex items-center justify-center">
+              <AnnotatedPhoto src={a.url} alt={a.label} annotations={a.annotations} compact className="pa-fit" />
+            </span>
+          ) : (
+            <img src={a.url} alt={a.label} className="w-full h-full object-cover group-hover:scale-105 transition" loading="lazy" />
+          )}
         </button>
       ) : (
         <div className="w-full aspect-square flex flex-col items-center justify-center text-white/50 gap-1">
@@ -282,12 +291,18 @@ export function InspectionPreuvesBlock({
             <p className="text-sm font-semibold">{zoom.label}</p>
             {zoom.sublabel && <p className="text-xs text-white/60">{zoom.sublabel}</p>}
           </div>
-          <img
-            src={zoom.url}
-            alt={zoom.label}
-            className="max-w-full max-h-full object-contain rounded"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {zoom.annotations?.length ? (
+            <div className="pa-lightbox" onClick={(e) => e.stopPropagation()}>
+              <AnnotatedPhoto src={zoom.url} alt={zoom.label} annotations={zoom.annotations} showMeta />
+            </div>
+          ) : (
+            <img
+              src={zoom.url}
+              alt={zoom.label}
+              className="max-w-full max-h-full object-contain rounded"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); download(zoom); }}
             className="absolute bottom-4 right-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm flex items-center gap-2"
