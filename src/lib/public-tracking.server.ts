@@ -71,15 +71,21 @@ export async function trackMission(input: {
   const numero = input.numero.trim().toUpperCase();
   const code = normalizeCode(input.code);
 
-  const { data: mission } = await supabaseAdmin
+  // Un numéro peut couvrir plusieurs lignes (aller + retour) : on prend la ligne
+  // dont le code correspond.
+  const { data: candidates } = await supabaseAdmin
     .from("missions")
     .select(
       "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, updated_at, tracking_code",
     )
     .ilike("numero", numero)
-    .maybeSingle();
+    .limit(5);
 
-  const ok = !!mission && (mission.tracking_code ?? "").toUpperCase() === code && code.length > 0;
+  const mission = (candidates ?? []).find(
+    (m) => (m.tracking_code ?? "").toUpperCase() === code && code.length > 0,
+  );
+
+  const ok = !!mission;
 
   if (!ok) {
     const windowExpired =
