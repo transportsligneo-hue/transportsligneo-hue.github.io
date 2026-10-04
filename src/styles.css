@@ -10872,3 +10872,7 @@ html.theme-light .r4-page .hx-split-head h2 { color: #3e4759; }
 .pa-del{border:0;background:rgba(228,80,74,.15);color:#ff8a85;border-radius:8px;padding:6px;cursor:pointer;}
 @keyframes pa-draw{from{stroke-dashoffset:100;}to{stroke-dashoffset:0;}}
 @keyframes pa-chip{from{opacity:0;transform:translateX(-50%) translateY(-4px) scale(.85);}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}}
+.pa-fit{display:inline-block;width:auto;height:100%;max-width:100%;}
+.pa-fit .pa-img{width:auto;height:100%;max-width:100%;}
+.edl-cmp-thumb .pa-fit img{width:auto;height:100%;object-fit:fill}
+.pa-lightbox{width:min(92vw,1100px);max-height:100%;}
