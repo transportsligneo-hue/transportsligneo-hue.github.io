@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, Search, Users, Shield, IdCard, Building2, UserRound,
-  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare,
+  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare, Pencil, Save,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +76,7 @@ function AdminUtilisateurs() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | UserCategory>("all");
   const [selected, setSelected] = useState<UnifiedUser | null>(null);
 
   useEffect(() => { void loadUsers(); }, []);
@@ -294,7 +295,6 @@ function AdminUtilisateurs() {
   );
 
   function renderRow(u: UnifiedUser) {
-              {[u].map((u) => {
                 const r = roleLabels[u.role] ?? roleLabels.client;
                 const Icon = r.icon;
                 return (
@@ -348,18 +348,105 @@ function AdminUtilisateurs() {
                     </TableCell>
                   </TableRow>
                 );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+  }
+}
 
-      <UserDetailDrawer
-        user={selected}
-        onClose={() => setSelected(null)}
-        onChanged={() => { void loadUsers(); }}
-      />
-    </div>
+type UserCategory = "equipe" | "convoyeur" | "flotte" | "pro" | "particulier";
+const CATEGORY_ORDER: UserCategory[] = ["equipe", "convoyeur", "flotte", "pro", "particulier"];
+const CATEGORY_META: Record<UserCategory, { label: string; tone: "blue" | "green" | "purple" | "amber" | "red" }> = {
+  equipe: { label: "Équipe Ligneo", tone: "amber" },
+  convoyeur: { label: "Convoyeurs", tone: "green" },
+  flotte: { label: "Clients flotte", tone: "purple" },
+  pro: { label: "Clients professionnels", tone: "purple" },
+  particulier: { label: "Clients particuliers", tone: "blue" },
+};
+function categoryOf(u: UnifiedUser): UserCategory {
+  if (["super_admin", "admin", "manager"].includes(u.role)) return "equipe";
+  if (u.role === "convoyeur" || u.role === "sous_traitant") return "convoyeur";
+  if (u.type_client === "flotte") return "flotte";
+  if (u.type_client === "b2b" || u.organization_id || u.societe) return "pro";
+  return "particulier";
+}
+
+function IdentityEditor({ user, onSaved }: { user: UnifiedUser; onSaved: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const init = () => ({
+    prenom: user.prenom ?? "", nom: user.nom ?? "", email: user.email ?? "",
+    telephone: user.telephone ?? "", adresse: user.adresse ?? "",
+    societe: user.societe ?? "", siret: user.siret ?? "",
+  });
+  const [form, setForm] = useState(init);
+  useEffect(() => { setForm(init()); setEditing(false); }, [user.user_id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isConvoyeur = user.role === "convoyeur" || user.role === "sous_traitant" || user.source === "convoyeur";
+
+  async function save() {
+    if (!form.nom.trim() && !form.prenom.trim()) { toast.error("Nom ou prénom requis"); return; }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { toast.error("Email invalide"); return; }
+    setSaving(true);
+    try {
+      const clean = (v: string) => v.trim().slice(0, 200) || null;
+      const errors: string[] = [];
+      if (user.source === "profile") {
+        const { error } = await supabase.from("profiles").update({
+          prenom: form.prenom.trim(), nom: form.nom.trim(), email: clean(form.email),
+          telephone: clean(form.telephone), adresse: clean(form.adresse),
+          societe: clean(form.societe), siret: clean(form.siret),
+        } as never).eq("user_id", user.user_id);
+        if (error) errors.push(error.message);
+      }
+      if (isConvoyeur) {
+        const { error } = await supabase.from("convoyeurs").update({
+          prenom: form.prenom.trim(), nom: form.nom.trim(), email: clean(form.email),
+          telephone: clean(form.telephone),
+          ...(user.source === "convoyeur" ? { ville: clean(form.adresse) } : {}),
+        } as never).eq("user_id", user.user_id);
+        if (error) errors.push(error.message);
+      }
+      if (errors.length) toast.error(errors[0]);
+      else { toast.success("Informations enregistrées"); setEditing(false); onSaved(); }
+    } finally { setSaving(false); }
+  }
+
+  if (!editing) {
+    return (
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50">
+          <Pencil size={14} className="mr-1" /> Modifier les informations
+        </Button>
+      </div>
+    );
+  }
+
+  const field = (key: keyof ReturnType<typeof init>, label: string, type = "text") => (
+    <label className="flex flex-col gap-1">
+      <span className="text-[10px] font-medium uppercase tracking-wider text-slate-600">{label}</span>
+      <Input type={type} value={form[key]} maxLength={200}
+        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        className="bg-white text-slate-900" />
+    </label>
+  );
+
+  return (
+    <DrawerSection title="Modifier l'identité" icon={<Pencil size={12} />}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {field("prenom", "Prénom")}
+        {field("nom", "Nom")}
+        {field("email", "Email", "email")}
+        {field("telephone", "Téléphone", "tel")}
+        <div className="sm:col-span-2">{field("adresse", user.source === "convoyeur" ? "Ville" : "Adresse")}</div>
+        {user.source === "profile" && !isConvoyeur && field("societe", "Société")}
+        {user.source === "profile" && !isConvoyeur && field("siret", "SIRET")}
+      </div>
+      <p className="mt-3 text-xs text-slate-500">L'email modifié ici est l'email de contact ; l'identifiant de connexion reste inchangé.</p>
+      <div className="mt-3 flex justify-end gap-2">
+        <Button size="sm" variant="outline" disabled={saving} onClick={() => { setForm(init()); setEditing(false); }} className="bg-white text-slate-700">Annuler</Button>
+        <Button size="sm" disabled={saving} onClick={save} className="bg-blue-600 hover:bg-blue-700 text-white">
+          {saving ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Save size={14} className="mr-1" />} Enregistrer
+        </Button>
+      </div>
+    </DrawerSection>
   );
 }
 
