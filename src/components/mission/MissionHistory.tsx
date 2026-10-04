@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { humanizeActivity } from "@/lib/activity-humanizer";
+import { humanizeAction } from "@/lib/activity-humanizer";
 
 type Row = { id: string; action: string; actor_label: string | null; created_at: string; metadata: unknown };
 
@@ -27,8 +27,7 @@ export function MissionHistory({ missionId, createdAt }: { missionId: string; cr
         {rows.map((r) => (
           <li key={r.id} className="flex flex-wrap gap-x-3">
             <span className="text-muted-foreground tabular-nums">{fmt(r.created_at)}</span>
-            <span>{safeHuman(r.action)}</span>
-            {r.actor_label && <span className="text-muted-foreground">— {r.actor_label}</span>}
+            <span>{r.actor_label ? `${r.actor_label} ` : ""}{humanizeAction(r.action, "mission", r.metadata as never)}</span>
           </li>
         ))}
         {createdAt && (
@@ -42,11 +41,3 @@ export function MissionHistory({ missionId, createdAt }: { missionId: string; cr
   );
 }
 
-function safeHuman(action: string): string {
-  try {
-    const h = (humanizeActivity as unknown as (a: string) => unknown)(action);
-    return typeof h === "string" ? h : action.replace(/[._]/g, " ");
-  } catch {
-    return action.replace(/[._]/g, " ");
-  }
-}
