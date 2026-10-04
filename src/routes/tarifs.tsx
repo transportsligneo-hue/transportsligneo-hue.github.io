@@ -124,7 +124,7 @@ function TarifsPage() {
             <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
               <span className="dot" />Transparence totale
             </div>
-            <h2>Ce qui est toujours inclus</h2>
+            <h2>Ce qui est toujours <span className="audience-accent">inclus</span></h2>
             <p>Aucune surprise à la livraison : le prix affiché est le prix final.</p>
           </div>
           <div className="v4-services-grid">
@@ -153,7 +153,7 @@ function TarifsPage() {
             <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
               <span className="dot" />Le détail
             </div>
-            <h2>Comment est calculé votre prix</h2>
+            <h2>Comment est calculé <span className="audience-accent">votre prix</span></h2>
           </div>
           <div className="v4-services-grid">
             {[
@@ -178,7 +178,7 @@ function TarifsPage() {
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Une question sur un tarif ?
           </div>
-          <h2>Parlez à un conseiller</h2>
+          <h2>Parlez à un <span className="audience-accent">conseiller</span></h2>
           <p>Volume important, trajet particulier : nous adaptons le devis à votre besoin.</p>
           <Link to="/contact" className="v4-btn-primary">Contacter un conseiller</Link>
         </div>

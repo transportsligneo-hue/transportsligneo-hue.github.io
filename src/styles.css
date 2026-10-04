@@ -11058,3 +11058,10 @@ html.theme-dark .r4-page:has(.ccm-hero) .ccm-hero .v4-hero-eyebrow,
 html.theme-dark .r4-page:has(.ccm-hero) .ccm-hero h1 span,
 html.theme-dark .r4-page:has(.ccm-hero) .ccm-hero p b { color: var(--v4-blue-bright); }
 html.theme-dark .r4-page:has(.ccm-hero) .ccm-node { color: var(--v4-blue-bright); }
+
+/* Fins de titres des sections publiques : bleu par défaut, violet pour les pros. */
+.r4-page :is(.v4-section-head h2, .v4-cta-box h2) .audience-accent,
+html.theme-light .r4-page :is(.v4-section-head h2, .v4-cta-box h2) .audience-accent {
+  color: var(--audience-accent) !important;
+  text-shadow: 0 0 16px var(--audience-glow), 0 0 30px var(--audience-glow);
+}

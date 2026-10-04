@@ -103,7 +103,7 @@ export default function CommentCaMarcheTimeline() {
       <section className="ccm-demos" aria-labelledby="ccm-demos-title">
         <div className="v4-section-head">
           <div className="v4-hero-eyebrow"><span className="dot" />En vidéo</div>
-          <h2 id="ccm-demos-title">Commander une mission sur Ligneo</h2>
+          <h2 id="ccm-demos-title">Commander une mission sur <span className="audience-accent">Ligneo</span></h2>
         </div>
         <div className="ccm-demos-grid">
           <div className="ccm-demo ccm-demo--particulier">
@@ -149,7 +149,7 @@ export default function CommentCaMarcheTimeline() {
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Plateforme complète
           </div>
-          <h2>Gérez votre flotte en toute simplicité</h2>
+          <h2>Gérez votre flotte en toute <span className="audience-accent">simplicité</span></h2>
           <p>
             Bien plus qu'un service de convoyage : une véritable plateforme
             digitale pour piloter votre parc, vos missions et vos documents
@@ -188,7 +188,7 @@ export default function CommentCaMarcheTimeline() {
         <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
           <span className="dot" />Prêt à démarrer ?
         </div>
-        <h2>Prêt à simplifier la gestion de vos véhicules ?</h2>
+        <h2>Prêt à simplifier la gestion de <span className="audience-accent">vos véhicules</span> ?</h2>
         <p>Obtenez un devis en 30 secondes ou parlez directement à un conseiller. Sans engagement.</p>
         <div className="v5-cta-buttons">
           <Link to="/tarifs" className="v4-btn-primary">Demander un devis</Link>

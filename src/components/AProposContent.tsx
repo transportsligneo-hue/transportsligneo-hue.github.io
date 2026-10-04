@@ -53,7 +53,7 @@ export default function AProposContent() {
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Nos valeurs
           </div>
-          <h2>Ce qui nous guide au quotidien</h2>
+          <h2>Ce qui nous guide au <span className="audience-accent">quotidien</span></h2>
         </div>
         <div className="v4-values-grid">
           {valeurs.map(({ Icon, title, desc }) => (
@@ -71,7 +71,7 @@ export default function AProposContent() {
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Notre parcours
           </div>
-          <h2>Quelques étapes clés</h2>
+          <h2>Quelques étapes <span className="audience-accent">clés</span></h2>
         </div>
         <div className="v4-timeline">
           <div className="v4-tl-track" aria-hidden="true" />
@@ -99,7 +99,7 @@ export default function AProposContent() {
         <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
           <span className="dot" />Rejoignez l'aventure
         </div>
-        <h2>Envie de travailler avec nous ?</h2>
+        <h2>Envie de travailler <span className="audience-accent">avec nous</span> ?</h2>
         <p>Que vous soyez un particulier ou un professionnel, parlons de votre prochain convoyage.</p>
         <Link to="/contact" className="v4-btn-primary">Nous contacter</Link>
       </div>

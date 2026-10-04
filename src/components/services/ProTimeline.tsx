@@ -84,7 +84,7 @@ export function ProPresentations() {
   return (
     <section className="pro-presentations v4-section" aria-label="Présentations vidéo Ligneo">
       <div className="v4-section-head">
-        <h2>Découvrez Transports Ligneo</h2>
+        <h2>Découvrez Transports <span className="audience-accent">Ligneo</span></h2>
       </div>
       <div className="pro-presentations-grid">
         <div className="pro-presentation pro-presentation--business">
