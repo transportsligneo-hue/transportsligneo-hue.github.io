@@ -19,5 +19,5 @@
 - [x] Pastilles orange/jaunes des espaces connectés remplacées par les couleurs de la charte (bleu, violet pour pro).
 - [x] Admin : barre d'outils des missions sur téléphone, 6 confirmations sensibles avec la fenêtre Ligneo, bandeau cookies compact sur téléphone.
 - [x] Audit de l'espace particulier (compte existant), ordinateur et téléphone, clair et sombre.
-- [ ] Mode sombre pro : finitions (carte société du menu, onglets, chiffres du bandeau).
-- [ ] Statuts, e-mails et SMS : contrôle en lecture seule.
+- [x] Mode sombre pro : finitions (carte société du menu, onglets, chiffres du bandeau).
+- [x] Statuts, e-mails et SMS : contrôle en lecture seule. (rapport livré)
