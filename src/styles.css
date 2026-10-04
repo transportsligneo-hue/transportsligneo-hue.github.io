@@ -8452,10 +8452,10 @@ body:has(.dc-page) .ligneo-footer-blend::before { display: none; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  padding: 24px 16px 40px;
+  padding: 72px 16px;
   margin-top: 0;
   margin-bottom: -1px;
-  background: transparent;
+  /* le bandeau bleu nuit fondu (défini dans la règle de base) s'applique aussi en clair */
 }
 /* la bande "Ils nous font confiance" repart en blanc : fondu continu, sans filet */
 html.theme-light .r4-page .v5-trust {
