@@ -7,8 +7,8 @@ import { Link } from "@tanstack/react-router";
 import { ClipboardList, ShieldCheck, MapPin, FileCheck2 } from "lucide-react";
 import demoParticulier from "@/assets/demo-ligneo-particuliers-2.mp4.asset.json";
 import demoParticulierPoster from "@/assets/demo-ligneo-particuliers-poster.jpg.asset.json";
-import demoLoueurs from "@/assets/demo-ligneo-loueurs.mp4.asset.json";
-import demoLoueursPoster from "@/assets/demo-ligneo-loueurs-poster.jpg.asset.json";
+import demoProfessionnels from "@/assets/demo-ligneo-professionnels-son.mp4.asset.json";
+import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-son-poster.jpg.asset.json";
 import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 
 const phases = [
@@ -112,7 +112,7 @@ export default function CommentCaMarcheTimeline() {
           </div>
           <div className="ccm-demo ccm-demo--pro">
             <h3>Pour les professionnels</h3>
-            <PresentationDemoFilm src={demoLoueurs.url} poster={demoLoueursPoster.url} label="Démonstration de commande d’une mission pour les professionnels" />
+            <PresentationDemoFilm src={demoProfessionnels.url} poster={demoProfessionnelsPoster.url} label="Démonstration de commande d’une mission pour les professionnels" />
           </div>
         </div>
       </section>

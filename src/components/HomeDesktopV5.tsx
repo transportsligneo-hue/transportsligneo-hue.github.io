@@ -60,7 +60,7 @@ export default function HomeDesktopV5() {
               </Link>
               <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn hx-switch-btn--client">
                 <span className="hx-switch-icon"><MapPinned size={19} strokeWidth={1.8} /></span>
-                <span className="hx-switch-label">Je suis déjà un client</span>
+                <span className="hx-switch-label">Mon espace client</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
             </div>
