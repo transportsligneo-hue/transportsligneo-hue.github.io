@@ -76,7 +76,7 @@ export default function FleetPageHeader({
           ) : null}
         </div>
 
-        {actions ? <div className="flex flex-shrink-0 flex-wrap gap-2.5">{actions}</div> : null}
+        {actions ? <div className="flex min-w-0 max-w-full flex-wrap gap-2.5">{actions}</div> : null}
       </div>
 
       {stats && stats.length > 0 ? (
