@@ -11,6 +11,8 @@ export const Route = createFileRoute("/a-propos")({
       { name: "description", content: "Découvrez l'histoire, la mission et les valeurs de Transports Ligneo, spécialiste du convoyage automobile depuis Tours." },
       { property: "og:title", content: "À propos · Transports Ligneo" },
       { property: "og:description", content: "Notre histoire, nos valeurs, notre fondateur et nos chiffres clés." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://transportsligneo.fr/a-propos" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/a-propos" }],
