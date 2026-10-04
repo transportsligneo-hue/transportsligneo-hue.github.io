@@ -158,6 +158,7 @@ export function MapboxLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  worldOverview = false,
   role = "client",
   onMetrics,
   etaDeltaMin = null,
@@ -375,8 +376,8 @@ export function MapboxLiveMap({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: STYLE_URL,
-      center: [2.3, 46.8],
-      zoom: 4.6,
+       center: worldOverview ? [8, 22] : [2.3, 46.8],
+       zoom: worldOverview ? 1.5 : 4.6,
       attributionControl: true,
       cooperativeGestures: false,
       antialias: true,
@@ -499,13 +500,13 @@ export function MapboxLiveMap({
         fleetRef.current.delete(i);
       }
     });
-    if (!fittedRef.current && fleet.length) {
+     if (!worldOverview && !fittedRef.current && fleet.length) {
       fittedRef.current = true;
       const b = new mapboxgl.LngLatBounds();
       fleet.forEach((f) => b.extend([f.lng, f.lat]));
       map.fitBounds(b, { padding: 70, duration: 0, maxZoom: 12 });
     }
-  }, [fleet, ready]);
+   }, [fleet, ready, worldOverview]);
 
   // ——— Tracés parcouru / restant + trace GPS réelle + zoom automatique
   useEffect(() => {

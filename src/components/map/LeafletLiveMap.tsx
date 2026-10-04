@@ -29,6 +29,7 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string; stale?: boolean }>;
+  worldOverview?: boolean;
   /** `admin` : vitesse visible. `client` (défaut) : vitesse masquée. */
   role?: "admin" | "client";
   /** Non utilisé ici (rendu de secours) — accepté pour compatibilité. */
@@ -133,6 +134,7 @@ export function LeafletLiveMap({
   hideOverlay = false,
   title,
   fleet,
+  worldOverview = false,
   role = "client",
 }: LiveMissionMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -259,8 +261,8 @@ export function LeafletLiveMap({
       document.head.appendChild(s);
     }
     const map = L.map(containerRef.current, {
-      center: [46.8, 2.3],
-      zoom: 6,
+       center: worldOverview ? [22, 8] : [46.8, 2.3],
+       zoom: worldOverview ? 2 : 6,
       zoomControl: false,
       attributionControl: true,
     });
@@ -333,11 +335,11 @@ export function LeafletLiveMap({
         fleetRef.current.delete(i);
       }
     });
-    if (!fittedRef.current && fleet.length) {
+     if (!worldOverview && !fittedRef.current && fleet.length) {
       fittedRef.current = true;
       map.fitBounds(L.latLngBounds(fleet.map((f) => [f.lat, f.lng] as L.LatLngExpression)).pad(0.2), { animate: false });
     }
-  }, [fleet]);
+   }, [fleet, worldOverview]);
 
   // ——— Polylignes parcouru / restant
   useEffect(() => {

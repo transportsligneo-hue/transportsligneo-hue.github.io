@@ -22,6 +22,8 @@ export interface LiveMissionMapProps {
   title?: string;
   /** Mode flotte : dernières positions de plusieurs missions (marqueurs voiture) */
   fleet?: Array<{ lat: number; lng: number; label?: string; stale?: boolean }>;
+  /** Tableau d'exploitation : conserver la vue mondiale même avec des véhicules visibles. */
+  worldOverview?: boolean;
   /**
    * Visibilité des données sensibles.
    * `admin` : vitesse km/h + horodatage précis du dernier signal.

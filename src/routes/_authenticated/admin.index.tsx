@@ -26,7 +26,7 @@ import {
   AdminSection,
   AdminEmpty,
 } from "@/components/admin/ui";
-import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
+import { ExploitationOverview } from "@/components/admin/dashboard/ExploitationOverview";
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import { PageHeader } from "@/components/admin/AdminUI";
@@ -36,6 +36,14 @@ import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWi
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminDashboard,
+  head: () => ({ meta: [
+    { title: "Tableau de bord exploitation | Transports Ligneo" },
+    { name: "description", content: "Supervision des missions et de l'activité de Transports Ligneo." },
+    { property: "og:title", content: "Tableau de bord exploitation | Transports Ligneo" },
+    { property: "og:description", content: "Supervision des missions et de l'activité de Transports Ligneo." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 const statutLabel: Record<string, string> = {
@@ -326,7 +334,7 @@ function AdminDashboard() {
       <MissionsAtRiskWidget />
 
       {/* === Carte trajets en cours === */}
-      <ActiveMissionsMap scope="all" title="Trajets en cours (temps réel)" />
+       <ExploitationOverview />
 
 
       {/* === ALERTES === */}
