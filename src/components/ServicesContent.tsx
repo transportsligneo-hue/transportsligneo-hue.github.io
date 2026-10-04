@@ -67,7 +67,7 @@ export default function ServicesContent({
   onAudienceChange?: (a: Audience) => void;
 }) {
   return (
-    <div className="r4-page">
+    <div className="r4-page" data-audience={audience}>
       {/* Toggle Particuliers / Professionnels */}
       <div className="v4-tabs" role="tablist" aria-label="Audience">
         <button

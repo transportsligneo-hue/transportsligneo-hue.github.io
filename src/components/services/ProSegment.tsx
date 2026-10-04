@@ -30,7 +30,7 @@ export default function ProSegment() {
       <div className="v4-b2b-hero">
         <div>
           <div className="v4-hero-eyebrow v"><span className="dot" />Solutions professionnelles</div>
-          <h1>Le convoyage à l'échelle de <span className="v4-accent v">votre flotte</span>.</h1>
+           <h1>Le convoyage à l'échelle de <span className="v4-accent v">votre flotte</span>.</h1>
           <p>Concessions, loueurs, gestionnaires de parc : une plateforme dédiée pour piloter vos convoyages, votre facturation et vos équipes depuis un seul espace.</p>
           <div className="v4-hero-actions">
             <Link to="/contact" className="v4-btn-primary v">Devenir partenaire</Link>
@@ -65,7 +65,7 @@ export default function ProSegment() {
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Pour qui ?
           </div>
-          <h2>Une solution pour chaque professionnel</h2>
+           <h2>Une solution pour <span className="audience-accent">chaque professionnel</span></h2>
         </div>
         <div className="v4-audience-grid">
           {audiences.map(({ Icon, title, desc }) => (
@@ -85,7 +85,7 @@ export default function ProSegment() {
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Fonctionnalités
           </div>
-          <h2>Une plateforme pensée pour les pros</h2>
+           <h2>Une plateforme <span className="audience-accent">pensée pour les pros</span></h2>
         </div>
         <div className="v4-feat-grid">
           {features.map(({ Icon, title, desc }) => (
@@ -107,7 +107,7 @@ export default function ProSegment() {
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Formules B2B
           </div>
-          <h2>Deux façons de travailler ensemble</h2>
+           <h2>Deux façons de travailler <span className="audience-accent">ensemble</span></h2>
           <p>Une course immédiate ou un partenariat sur-mesure : dans les deux cas, tout commence par un échange avec notre équipe.</p>
         </div>
 
@@ -191,7 +191,7 @@ export default function ProSegment() {
         <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
           <span className="dot" />Devenir partenaire
         </div>
-        <h2>Discutons de vos besoins de convoyage</h2>
+         <h2>Discutons de vos besoins de <span className="audience-accent">convoyage</span></h2>
         <p>Un conseiller dédié vous accompagne pour construire une offre adaptée à votre volume et à vos contraintes.</p>
         <Link to="/contact" className="v4-btn-primary v">Demander un rendez-vous</Link>
       </div>
