@@ -708,11 +708,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <label htmlFor={`${inputId}-date`} className="dg-flat-label"><Calendar size={12} /> Date *</label>
                 <input id={`${inputId}-date`} type="date" value={date} onChange={e => setDate(e.target.value)} className="dg-flat-input" />
               </div>
-              <div className="dg-flat-field">
-                <label htmlFor={`${inputId}-heure`} className="dg-flat-label"><Clock size={12} /> Heure *</label>
-                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
-              </div>
-            </div>
+               <div className="dg-flat-field">
+                 <label htmlFor={`${inputId}-heure`} className="dg-flat-label"><Clock size={12} /> Heure *</label>
+                 <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
+               </div>
+             </div>
+
+             {offHoursNotice && <div className="mt-4">{offHoursNotice}</div>}
 
             {/* Options de prestation · bascule */}
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
