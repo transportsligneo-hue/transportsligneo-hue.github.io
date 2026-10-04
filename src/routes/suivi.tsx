@@ -66,6 +66,10 @@ function SuiviPage() {
     try {
       const res = await trackMissionPublic({ data: { numero: value, code: codeValue } });
       setResult(res);
+      // On efface les champs après la recherche : rien ne doit sembler
+      // pré-rempli, le champ repart avec son aide de saisie (#XXX).
+      setNumero("");
+      setCode("");
       if (!res.found) {
         setError(
           res.blocked
