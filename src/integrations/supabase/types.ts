@@ -5355,6 +5355,7 @@ export type Database = {
       module_progress: {
         Row: {
           attempts_count: number
+          case_answers: Json
           case_study_answer: number | null
           checklist_state: Json
           completed: boolean
@@ -5368,6 +5369,7 @@ export type Database = {
         }
         Insert: {
           attempts_count?: number
+          case_answers?: Json
           case_study_answer?: number | null
           checklist_state?: Json
           completed?: boolean
@@ -5381,6 +5383,7 @@ export type Database = {
         }
         Update: {
           attempts_count?: number
+          case_answers?: Json
           case_study_answer?: number | null
           checklist_state?: Json
           completed?: boolean
@@ -5404,6 +5407,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          case_studies: Json
           case_study: Json
           checklist_items: Json
           content: string
@@ -5423,6 +5427,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          case_studies?: Json
           case_study?: Json
           checklist_items?: Json
           content?: string
@@ -5442,6 +5447,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          case_studies?: Json
           case_study?: Json
           checklist_items?: Json
           content?: string
@@ -9273,6 +9279,10 @@ export type Database = {
       storage_folder_uuid: { Args: { _name: string }; Returns: string }
       submit_case_study: {
         Args: { _choice: number; _module_id: string }
+        Returns: Json
+      }
+      submit_case_study_at: {
+        Args: { _case_index: number; _choice: number; _module_id: string }
         Returns: Json
       }
       submit_formation_exam: {
