@@ -11091,3 +11091,9 @@ html.theme-light .r4-page :is(.v4-section-head h2, .v4-cta-box h2) .audience-acc
   color: var(--audience-accent) !important;
   text-shadow: 0 0 16px var(--audience-glow), 0 0 30px var(--audience-glow);
 }
+
+/* Carte des engagements (Services) : même encadrement bleu nuit que l'accueil, sans fondu */
+.r4-page .engag-map-card .ligneo-map,
+html.theme-light .r4-page .engag-map-card .ligneo-map { padding:0 !important; margin:0; background:transparent !important; }
+.r4-page .engag-map-card .ligneo-map-card { max-width:100% !important; width:100%; aspect-ratio:193/141; }
+.r4-page .engag-map-card .ligneo-map-legend { bottom:2px; }
