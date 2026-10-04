@@ -10455,12 +10455,7 @@ html.theme-dark .dashboard-shell-light .v3-status.wait { color: #c9bbff; }
   box-shadow: 0 0 0 3px rgba(79,140,255,0.16), 0 0 22px rgba(79,140,255,0.28);
   background: rgba(79,140,255,0.06);
 }
-.r4-page .suivi-prefix {
-  color: #4f8cff;
-  font-weight: 600;
-  text-shadow: 0 0 10px rgba(79,140,255,0.55);
-}
-/* Tiret et dièse du préfixe : bleu électrique vif, marque clairement où taper */
+.r4-page .suivi-prefix,
 .r4-page .suivi-prefix-dash,
 .r4-page .suivi-prefix-hash {
   color: #67b6ff;
@@ -10520,14 +10515,14 @@ html.theme-light .r4-page input.suivi-field:focus {
   background: #f4f7ff;
 }
 html.theme-light .r4-page .suivi-prefix,
-html.theme-light .r4-page .suivi-txt-depart {
-  color: #1c3fc4;
-  text-shadow: none;
-}
 html.theme-light .r4-page .suivi-prefix-dash,
 html.theme-light .r4-page .suivi-prefix-hash {
   color: #2f5fff;
   font-weight: 700;
+  text-shadow: none;
+}
+html.theme-light .r4-page .suivi-txt-depart {
+  color: #1c3fc4;
   text-shadow: none;
 }
 html.theme-light .r4-page .suivi-input {
