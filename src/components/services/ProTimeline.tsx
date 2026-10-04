@@ -1,7 +1,9 @@
 import { useRef } from "react";
 import filmParcoursPro from "@/assets/presentation-professionnels-voix-v2.mp4.asset.json";
-import demoProfessionnels from "@/assets/demo-ligneo-professionnels-commande.mp4.asset.json";
-import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-commande-poster.jpg.asset.json";
+import presentationPro from "@/assets/demo-ligneo-professionnels-commande.mp4.asset.json";
+import presentationProPoster from "@/assets/demo-ligneo-professionnels-commande-poster.jpg.asset.json";
+import demoProfessionnels from "@/assets/demo-ligneo-professionnels-son-faststart.mp4.asset.json";
+import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-son-poster.jpg.asset.json";
 import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
 import proPoster from "@/assets/presentation-professionnels-poster-v2.jpg.asset.json";
@@ -66,8 +68,8 @@ export function ProFilm() {
       >
         <video
           ref={videoRef}
-          src={filmParcoursPro.url}
-          poster={proPoster.url}
+          src={presentationPro.url}
+          poster={presentationProPoster.url}
           controls
           playsInline
           preload="auto"
@@ -89,7 +91,7 @@ export function ProPresentations() {
       <div className="pro-presentations-grid">
         <div className="pro-presentation pro-presentation--business">
           <h3>Pour les professionnels</h3>
-          <video src={filmParcoursPro.url} poster={proPoster.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
+          <video src={presentationPro.url} poster={presentationProPoster.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
           <img src={proLogo.url} alt="Transports Ligneo" className="pro-presentation-logo" loading="lazy" />
         </div>
         <div className="pro-presentation pro-presentation--demo">
