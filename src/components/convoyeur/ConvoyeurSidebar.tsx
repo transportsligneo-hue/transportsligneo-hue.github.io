@@ -64,8 +64,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         <div className="px-5 py-5 border-b border-[rgba(52,230,140,0.18)] flex items-center gap-3">
           <img src={driverBadge.url} alt="Transports Ligneo Driver" className="h-12 w-12 rounded-xl object-cover shrink-0 shadow-[0_0_16px_rgba(52,230,140,0.35)]" />
           <div className="min-w-0 flex-1">
-            <h2 className="driver-brand-title text-sm font-bold tracking-[0.12em] uppercase truncate">Transports Ligneo</h2>
-            <p className="text-[10px] font-bold tracking-[0.22em] text-[#34E68C] uppercase">Driver</p>
+            <h2 className="driver-brand-title text-[13px] font-bold tracking-[0.08em] uppercase leading-tight">Transports Ligneo</h2>
+            <p className="text-[10px] font-bold tracking-[0.22em] text-[#34E68C] uppercase" style={{ textShadow: "0 0 10px rgba(52,230,140,0.75)" }}>Driver</p>
             {user?.email && <p className="driver-brand-mail text-[11px] truncate mt-0.5">{user.email}</p>}
           </div>
           <div className="shrink-0 text-[#34E68C]"><NotificationBell /></div>
@@ -184,8 +184,8 @@ function DriverBrand({ size = "md" }: { size?: "sm" | "md" }) {
     <span className="flex items-center gap-2.5 min-w-0">
       <img src={driverBadge.url} alt="Transports Ligneo Driver" className={`${size === "sm" ? "h-8 w-8" : "h-10 w-10"} rounded-lg object-cover shrink-0`} />
       <span className="min-w-0 leading-tight">
-        <span className="driver-brand-title block text-xs font-bold tracking-[0.12em] uppercase truncate">Transports Ligneo</span>
-        <span className="block text-[9px] font-bold tracking-[0.22em] text-[#34E68C] uppercase">Driver</span>
+        <span className="driver-brand-title block text-[11px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">Transports Ligneo</span>
+        <span className="block text-[9px] font-bold tracking-[0.22em] text-[#34E68C] uppercase" style={{ textShadow: "0 0 8px rgba(52,230,140,0.75)" }}>Driver</span>
       </span>
     </span>
   );
