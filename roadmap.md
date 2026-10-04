@@ -22,3 +22,4 @@
 - [x] Mode sombre pro : finitions (carte société du menu, onglets, chiffres du bandeau).
 - [x] Statuts, e-mails et SMS : contrôle en lecture seule. (rapport livré)
 - [x] E-mails : slogan en pied de page, accent doré remplacé par le bleu ; pastilles « En attente » convoyeur passées du jaune au bleu.
+- [x] Page /suivi : préfixe MIS-TLG-2026- visible et champ à remplir (#XXX), champs effacés après recherche, statuts différenciés (attente bleu, en route violet, livrée vert, annulée rouge), adresses et prise en charge en bleu néon électrique, clair et sombre vérifiés à l'écran.

@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { createFileRoute, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense, useState } from "react";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -31,23 +30,17 @@ export const Route = createFileRoute("/suivi")({
   }),
 });
 
+// Statuts publics : bleu en attente, violet en route, vert livré, rouge annulé.
 const STATUT_LABEL: Record<string, { label: string; color: string }> = {
-  en_attente: { label: "En attente de prise en charge", color: "#d9b54a" },
-  en_cours: { label: "En cours de convoyage", color: "#4f8cff" },
+  en_attente: { label: "En attente de prise en charge", color: "#4f8cff" },
+  en_cours: { label: "En cours de convoyage", color: "#7c5cff" },
   livree: { label: "Véhicule livré", color: "#22c55e" },
   annulee: { label: "Mission annulée", color: "#ef4444" },
 };
+const STATUT_FALLBACK = { label: "Mission suivie", color: "#4f8cff" };
 
 function SuiviPage() {
   const [numero, setNumero] = useState("");
-  useEffect(() => {
-    const n = new URLSearchParams(window.location.search).get("numero");
-    if (!n) return;
-    // Le lien de l'e-mail porte le numéro complet (MIS-TLG-2026-#116) : on ne
-    // pré-remplit que la fin, le préfixe est déjà affiché dans le champ.
-    const suffix = n.toUpperCase().replace(/^MIS-TLG-\d{4}-/i, "");
-    setNumero(suffix.slice(0, 40));
-  }, []);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
@@ -73,6 +66,10 @@ function SuiviPage() {
     try {
       const res = await trackMissionPublic({ data: { numero: value, code: codeValue } });
       setResult(res);
+      // On efface les champs après la recherche : rien ne doit sembler
+      // pré-rempli, le champ repart avec son aide de saisie (#XXX).
+      setNumero("");
+      setCode("");
       if (!res.found) {
         setError(
           res.blocked
@@ -87,7 +84,7 @@ function SuiviPage() {
     }
   };
 
-  const statut = result?.statut ? STATUT_LABEL[result.statut] : null;
+  const statut = result?.statut ? (STATUT_LABEL[result.statut] ?? STATUT_FALLBACK) : null;
 
   return (
     <>
@@ -111,10 +108,10 @@ function SuiviPage() {
             <label htmlFor="numero-mission" className="sr-only">
               Numéro de mission
             </label>
-            <div className="flex flex-1 items-center gap-0 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 focus-within:border-[#4f8cff]">
+            <div className="suivi-field flex flex-1 items-center gap-0 px-4">
               <span
                 aria-hidden="true"
-                className="shrink-0 text-[15px] text-[#6f7ba0] select-none"
+                className="suivi-prefix shrink-0 select-none text-[15px]"
               >
                 MIS-TLG-2026-
               </span>
@@ -125,8 +122,8 @@ function SuiviPage() {
                 onChange={(e) =>
                   setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-/i, "").slice(0, 40))
                 }
-                placeholder="#116"
-                className="w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:outline-none"
+                placeholder="#XXX"
+                className="suivi-input w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] focus:outline-none"
               />
             </div>
             <label htmlFor="code-confidentiel" className="sr-only">
@@ -139,7 +136,7 @@ function SuiviPage() {
               autoComplete="off"
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="Code ex. A7K9P2"
-              className="w-full rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] tracking-[0.18em] text-white placeholder:tracking-normal placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none sm:w-[190px]"
+              className="suivi-field suivi-input w-full px-4 py-3.5 text-[15px] tracking-[0.18em] focus:outline-none sm:w-[190px]"
             />
             <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
@@ -158,24 +155,31 @@ function SuiviPage() {
             <div className="rounded-2xl border border-[#7aa3ff]/20 bg-white/[0.03] p-6">
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <span
-                  className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                  style={{ background: `${statut.color}1f`, color: statut.color }}
+                  className="suivi-badge inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
+                  style={{
+                    background: `${statut.color}1f`,
+                    color: statut.color,
+                    border: `1px solid ${statut.color}44`,
+                    boxShadow: `0 0 18px -6px ${statut.color}`,
+                  }}
                 >
                   <PackageCheck size={14} /> {statut.label}
                 </span>
                 <span className="text-[12.5px] text-[#9aa6c9]">Mission {result.numero}</span>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex items-start gap-2.5 text-[13.5px] text-[#c7d0e8]">
-                  <MapPin size={16} className="mt-0.5 shrink-0 text-[#4f8cff]" />
-                  <span>
-                    {result.ville_depart || "Départ"} → {result.ville_arrivee || "Arrivée"}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex items-start gap-2.5 text-[13.5px]">
+                  <MapPin size={16} className="suivi-ico mt-0.5 shrink-0" />
+                  <span className="suivi-txt-depart">
+                    {result.ville_depart || "Départ"}
                   </span>
+                  <span className="shrink-0 text-[#8fa0c4]">→</span>
+                  <span className="suivi-txt-arrivee">{result.ville_arrivee || "Arrivée"}</span>
                 </div>
-                <div className="flex items-start gap-2.5 text-[13.5px] text-[#c7d0e8]">
-                  <Clock size={16} className="mt-0.5 shrink-0 text-[#d9b54a]" />
-                  <span>
+                <div className="flex items-start gap-2.5 text-[13.5px]">
+                  <Clock size={16} className="suivi-ico suivi-ico-horloge mt-0.5 shrink-0" />
+                  <span className="suivi-txt-horloge">
                     {result.date_prise_en_charge
                       ? `Prise en charge prévue le ${new Date(result.date_prise_en_charge).toLocaleDateString("fr-FR")}`
                       : "Date de prise en charge à confirmer"}
