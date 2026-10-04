@@ -1,10 +1,11 @@
 import { useRef } from "react";
 import filmParcoursPro from "@/assets/presentation-professionnels-voix-v2.mp4.asset.json";
-import filmDriver from "@/assets/presentation-driver-browser.webm.asset.json";
+import demoLoueurs from "@/assets/demo-ligneo-loueurs.mp4.asset.json";
+import demoLoueursPoster from "@/assets/demo-ligneo-loueurs-poster.jpg.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
-import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 import proPoster from "@/assets/presentation-professionnels-poster-v2.jpg.asset.json";
 import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
+import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 
 const STEPS = [
   {
@@ -90,10 +91,9 @@ export function ProPresentations() {
           <video src={filmParcoursPro.url} poster={proPoster.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
           <img src={proLogo.url} alt="Transports Ligneo" className="pro-presentation-logo" loading="lazy" />
         </div>
-        <div className="pro-presentation pro-presentation--driver">
-          <h3>Découvrez l’espace Driver</h3>
-          <video src={filmDriver.url} controls playsInline preload="metadata" aria-label="Présentation de l’espace Driver" />
-          <img src={driverLogo.url} alt="Transports Ligneo Driver" className="pro-presentation-logo" loading="lazy" />
+        <div className="pro-presentation pro-presentation--demo">
+          <h3>Commander une mission professionnelle</h3>
+          <PresentationDemoFilm src={demoLoueurs.url} poster={demoLoueursPoster.url} label="Démonstration Ligneo : commander une mission professionnelle" />
         </div>
       </div>
     </section>

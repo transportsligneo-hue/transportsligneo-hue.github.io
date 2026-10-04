@@ -1,7 +1,7 @@
-import { useRef } from "react";
 import { User, Users2, Car, MapPin, Plane, Star, Camera, ShieldCheck, HeartHandshake, KeyRound } from "lucide-react";
-import filmParcoursMission from "@/assets/presentation-particuliers-voix.mp4.asset.json";
-import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
+import demoParticulier from "@/assets/demo-ligneo-particuliers-2.mp4.asset.json";
+import demoParticulierPoster from "@/assets/demo-ligneo-particuliers-poster.jpg.asset.json";
+import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
 
@@ -66,11 +66,6 @@ export default function ServicesContent({
   audience?: Audience;
   onAudienceChange?: (a: Audience) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Lecture automatique avec le son, dès que la vidéo entre dans le viewport
-  useAutoplayWithSound(videoRef, audience === "particuliers");
-
   return (
     <div className="r4-page">
       {/* Toggle Particuliers / Professionnels */}
@@ -123,13 +118,11 @@ export default function ServicesContent({
                 overflow: "hidden",
               }}
             >
-              <video
-                ref={videoRef}
-                src={filmParcoursMission.url}
-                controls
-                playsInline
-                preload="auto"
-                style={{ display: "block", width: "100%", height: "auto" }}
+              <PresentationDemoFilm
+                src={demoParticulier.url}
+                poster={demoParticulierPoster.url}
+                label="Démonstration Ligneo : commander une mission en tant que particulier"
+                className="presentation-demo-video"
               />
             </div>
           </section>

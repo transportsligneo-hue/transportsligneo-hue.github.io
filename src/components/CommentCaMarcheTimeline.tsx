@@ -5,6 +5,11 @@
  */
 import { Link } from "@tanstack/react-router";
 import { ClipboardList, ShieldCheck, MapPin, FileCheck2 } from "lucide-react";
+import demoParticulier from "@/assets/demo-ligneo-particuliers-2.mp4.asset.json";
+import demoParticulierPoster from "@/assets/demo-ligneo-particuliers-poster.jpg.asset.json";
+import demoLoueurs from "@/assets/demo-ligneo-loueurs.mp4.asset.json";
+import demoLoueursPoster from "@/assets/demo-ligneo-loueurs-poster.jpg.asset.json";
+import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 
 const phases = [
   {
@@ -93,6 +98,23 @@ export default function CommentCaMarcheTimeline() {
         <p>
           De la création de compte à la facture : <b>4 grandes étapes</b>, 100% digitalisées.
         </p>
+      </section>
+
+      <section className="ccm-demos" aria-labelledby="ccm-demos-title">
+        <div className="v4-section-head">
+          <div className="v4-hero-eyebrow"><span className="dot" />En vidéo</div>
+          <h2 id="ccm-demos-title">Commander une mission sur Ligneo</h2>
+        </div>
+        <div className="ccm-demos-grid">
+          <div className="ccm-demo ccm-demo--particulier">
+            <h3>Pour les particuliers</h3>
+            <PresentationDemoFilm src={demoParticulier.url} poster={demoParticulierPoster.url} label="Démonstration de commande d’une mission pour les particuliers" />
+          </div>
+          <div className="ccm-demo ccm-demo--pro">
+            <h3>Pour les professionnels</h3>
+            <PresentationDemoFilm src={demoLoueurs.url} poster={demoLoueursPoster.url} label="Démonstration de commande d’une mission pour les professionnels" />
+          </div>
+        </div>
       </section>
 
       {/* ============ TIMELINE 4 PHASES ============ */}
