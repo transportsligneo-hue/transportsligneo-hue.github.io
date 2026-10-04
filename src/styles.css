@@ -4557,7 +4557,10 @@ html.theme-light .v5-section-transition {
 /* ============================================================
    MapLigneo · reproduction fidèle carte-finale.html
    ============================================================ */
-.ligneo-map { width:100%; display:flex; flex-direction:column; align-items:center; padding:24px 16px; }
+/* Bandeau pleine largeur : fond bleu nuit avec fondu doux en haut et en bas,
+   il se fond dans le fond clair comme dans le fond sombre, sans délimitation */
+.ligneo-map { width:100%; display:flex; flex-direction:column; align-items:center; padding:72px 16px;
+  background:linear-gradient(180deg, rgba(11,16,38,0) 0%, #0b1026 14%, #0b1026 86%, rgba(11,16,38,0) 100%); }
 /* Bandeau 16/9 : carte entière visible, sans cadre, fondue dans le fond de la page */
 .ligneo-map-card { position:relative; width:100%; background:transparent;
   border:0; border-radius:0; padding:0; overflow:visible;
@@ -4565,11 +4568,7 @@ html.theme-light .v5-section-transition {
   display:flex; align-items:center; justify-content:center; }
 .ligneo-map-big .ligneo-map-card { max-width:1100px; }
 .ligneo-map-small .ligneo-map-card { max-width:420px; }
-/* halo nuit derrière la carte : fondu vers le transparent aux bords,
-   elle se fond ainsi dans le fond clair comme dans le fond sombre */
-.ligneo-map-card::before { display:block !important; content:""; position:absolute; inset:-6% -10%;
-  background:radial-gradient(60% 78% at 50% 50%, rgba(11,16,38,0.96) 0%, rgba(11,16,38,0.72) 46%, rgba(11,16,38,0) 78%);
-  pointer-events:none; }
+.ligneo-map-card::before { display: none !important; content: none !important; }
 .ligneo-map-card::after { display: none !important; content: none !important; }
 .ligneo-map-inner { position:relative; z-index:1; width:100%; height:100%; }
 .ligneo-map-inner .ligneo-map-svg { position:relative; z-index:1; width:100%; height:100%; display:block; }
