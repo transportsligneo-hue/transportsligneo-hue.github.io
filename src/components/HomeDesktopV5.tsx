@@ -44,16 +44,24 @@ export default function HomeDesktopV5() {
 
             <div className="hx-switch">
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-switch-btn">
-                <User size={18} /> Je suis un particulier
+                <span className="hx-switch-icon"><User size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-label">Je suis un particulier</span>
+                <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
               <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn hx-switch-btn--violet">
-                <Building2 size={18} /> Je suis un professionnel
+                <span className="hx-switch-icon"><Building2 size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-label">Je suis un professionnel</span>
+                <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
               <Link to="/devenir-convoyeur" className="hx-switch-btn hx-switch-btn--driver">
-                <Car size={18} /> Je suis convoyeur
+                <span className="hx-switch-icon"><Car size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-label">Je suis convoyeur</span>
+                <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
-              <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn">
-                <MapPinned size={18} /> Je suis déjà un client
+              <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn hx-switch-btn--client">
+                <span className="hx-switch-icon"><MapPinned size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-label">Je suis déjà un client</span>
+                <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
             </div>
           </div>
