@@ -55,7 +55,7 @@ function DevenirConvoyeurPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar driverBadge />
       <main className="dc-page">
         <div className="dc-wrap">
           <div className="dc-eyebrow"><span className="dot" />{gate?.convoyeur ? "Recrutement ouvert" : "Réseau Ligneo"}</div>
