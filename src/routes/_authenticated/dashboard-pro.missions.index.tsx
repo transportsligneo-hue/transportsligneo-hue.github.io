@@ -74,6 +74,9 @@ function ProMissionsIndex() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("tous");
   const [search, setSearch] = useState("");
+  const [period, setPeriod] = useState<string>("");
+  const [plate, setPlate] = useState<string>("");
+  const [city, setCity] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
@@ -189,6 +192,12 @@ function ProMissionsIndex() {
   const filtered = useMemo(() => {
     let list = missions;
     if (filter !== "tous") list = list.filter(m => m.statut === filter);
+    if (period) {
+      const since = Date.now() - Number(period) * 86400000;
+      list = list.filter(m => new Date(m.date_prise_en_charge).getTime() >= since);
+    }
+    if (plate) list = list.filter(m => (m.immatriculation ?? "").toUpperCase() === plate);
+    if (city) list = list.filter(m => m.ville_depart === city || m.ville_arrivee === city);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(m =>
@@ -201,7 +210,24 @@ function ProMissionsIndex() {
       );
     }
     return list;
-  }, [missions, filter, search]);
+  }, [missions, filter, search, period, plate, city]);
+
+  const plateOptions = useMemo(
+    () => Array.from(new Set(missions.map(m => (m.immatriculation ?? "").toUpperCase()).filter(Boolean))).sort(),
+    [missions],
+  );
+  const cityOptions = useMemo(
+    () => Array.from(new Set(missions.flatMap(m => [m.ville_depart, m.ville_arrivee]).filter(Boolean))).sort(),
+    [missions],
+  );
+  const PERIOD_LABEL: Record<string, string> = { "7": "7 derniers jours", "30": "30 derniers jours", "90": "3 derniers mois" };
+  const chips = [
+    filter !== "tous" && { key: "statut", label: `Statut : ${statutLabel[filter]}`, clear: () => setFilter("tous") },
+    period && { key: "period", label: PERIOD_LABEL[period], clear: () => setPeriod("") },
+    plate && { key: "plate", label: `Véhicule : ${plate}`, clear: () => setPlate("") },
+    city && { key: "city", label: `Ville : ${city}`, clear: () => setCity("") },
+    search.trim() && { key: "q", label: `« ${search.trim()} »`, clear: () => setSearch("") },
+  ].filter(Boolean) as { key: string; label: string; clear: () => void }[];
 
   /** Regroupe les jambes Livraison + Restitution d'un même dossier. */
   const dossiers = useMemo(() => {
@@ -355,6 +381,38 @@ function ProMissionsIndex() {
           ))}
         </div>
         <MissionViewSwitcher view={view} onChange={setView} className="md:ml-auto self-start" />
+      </div>
+
+      <div className="pp-filterbar flex flex-wrap items-center gap-2">
+        <select value={period} onChange={(e) => setPeriod(e.target.value)} className="pp-filter-select" aria-label="Période">
+          <option value="">Toutes les dates</option>
+          <option value="7">7 derniers jours</option>
+          <option value="30">30 derniers jours</option>
+          <option value="90">3 derniers mois</option>
+        </select>
+        <select value={plate} onChange={(e) => setPlate(e.target.value)} className="pp-filter-select" aria-label="Véhicule">
+          <option value="">Tous les véhicules</option>
+          {plateOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <select value={city} onChange={(e) => setCity(e.target.value)} className="pp-filter-select" aria-label="Ville">
+          <option value="">Toutes les villes</option>
+          {cityOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <span className="pp-help" tabIndex={0} title="Combinez plusieurs filtres. Chaque filtre actif apparaît en puce : cliquez sur × pour le retirer.">?</span>
+        {chips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 w-full">
+            {chips.map((c) => (
+              <button key={c.key} type="button" onClick={c.clear} className="pp-chip" aria-label={`Retirer le filtre ${c.label}`}>
+                {c.label} <span aria-hidden>×</span>
+              </button>
+            ))}
+            {chips.length > 1 && (
+              <button type="button" className="pp-chip-clear" onClick={() => { setFilter("tous"); setPeriod(""); setPlate(""); setCity(""); setSearch(""); }}>
+                Tout effacer
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {!loading && filter === "tous" && pendingFiltered.length > 0 && (
