@@ -3,6 +3,7 @@ import { Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
 import ThemePreference from "@/components/ThemePreference";
+import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Button } from "@/components/ui/button";
 
 type NavAccent = "b2b" | undefined;
