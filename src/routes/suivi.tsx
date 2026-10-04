@@ -1,3 +1,4 @@
+import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
