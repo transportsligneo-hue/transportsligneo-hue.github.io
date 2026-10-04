@@ -853,10 +853,10 @@ body.is-driver-app .closed-link svg {
   .role-driver-soft   { background-color: rgba(5, 150, 105, 0.10); }
   .role-driver-border { border-color: rgba(5, 150, 105, 0.25); }
 
-  .role-client-bg     { background-color: #ea7c1c; }
-  .role-client-text   { color: #ea7c1c; }
-  .role-client-soft   { background-color: rgba(234, 124, 28, 0.10); }
-  .role-client-border { border-color: rgba(234, 124, 28, 0.25); }
+  .role-client-bg     { background-color: #2f5fff; }
+  .role-client-text   { color: #2f5fff; }
+  .role-client-soft   { background-color: rgba(47, 95, 255, 0.10); }
+  .role-client-border { border-color: rgba(47, 95, 255, 0.25); }
 
   .role-partner-bg     { background-color: #7c3aed; }
   .role-partner-text   { color: #7c3aed; }
@@ -10310,3 +10310,27 @@ html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-violet-700, 
 @media (max-width: 767px) {
   .cookie-banner-compact { max-height: 42vh; overflow-y: auto; }
 }
+
+/* Mode sombre : jetons v3 et navigation des espaces connectés */
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) {
+  --v3-bg: #0b1026; --v3-surface: #111a3d; --v3-border: #24305c; --v3-border-soft: #1b2650;
+  --v3-text: #e8edfb; --v3-text-muted: #a9b4d6; --v3-text-dim: #7f8bb3;
+  --v3-blue-soft: rgba(79,140,255,.14); --v3-ok-soft: rgba(24,179,130,.14); --v3-warn-soft: rgba(79,140,255,.14);
+  --v3-danger-soft: rgba(208,71,63,.16); --v3-violet-soft: rgba(124,92,255,.16);
+  --v3-shadow: 0 1px 0 rgba(255,255,255,.03), 0 14px 34px rgba(0,0,0,.45);
+}
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .v3-kpi-grad { background: linear-gradient(150deg, #17224a 0%, #111a3d 60%) !important; border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.v3-cta-gold) { background: linear-gradient(150deg, #1d1a4a, #111a3d) !important; border-color: #3a2f7a !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.v3-card, .v3-kpi-grad) .text-v3 { color: #e8edfb !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .text-v3 { color: #e8edfb; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.bg-white\/92, .bg-white\/70, .bg-white\/60) { background-color: rgba(17,26,61,.92) !important; border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-item { color: #b7c1e0; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-item:hover { color: #ffffff; background: rgba(127,166,255,.10); }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-ic { background: #17224a; border-color: #24305c; color: #9dbaff; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .lig-nav-logout { color: #ff8a9a; }
+html.theme-dark .dashboard-shell-light .card-premium,
+html.theme-dark .admin-shell .card-premium { background: #111a3d !important; border-color: #24305c !important; }
+html.theme-dark .dashboard-shell-light[data-account-type="client"] { --cream: #e8edfb; --navy: #e8edfb; }
+html.theme-dark .dashboard-shell-light :is(label, .text-cream, .text-cream\/70, .text-cream\/60, .text-cream\/50) { color: #b7c1e0; }
+html.theme-dark .dashboard-shell-light :is(h1, h2, h3, .font-heading) { color: #e8edfb; }
+html.theme-dark .dashboard-shell-light aside :is(.bg-white) { background-color: #17224a !important; }
