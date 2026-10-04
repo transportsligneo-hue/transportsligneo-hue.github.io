@@ -9467,30 +9467,30 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
 }
 .r4-page .hx-switch-btn--driver svg { color: var(--home-driver); filter: drop-shadow(0 0 6px var(--home-driver)); }
 .r4-page .hx-switch-btn--driver:hover { background: color-mix(in srgb, var(--home-driver) 28%, transparent); border-color: var(--home-driver); }
-/* Four desktop audience paths: quiet glass surfaces with a precise colored response. */
+/* Four desktop audience paths: crisp pictograms and a color-matched illuminated response. */
 .r4-page .v5-hero .hx-switch { gap: 10px; margin-top: 20px; }
 .r4-page .v5-hero .hx-switch-btn {
   --path-accent: var(--home-particulier, #4f8eff);
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
   min-width: 0;
-  min-height: 66px;
-  padding: 10px 13px;
+  min-height: 68px;
+  padding: 10px 14px;
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--path-accent) 65%, transparent);
-  background: color-mix(in srgb, var(--path-accent) 18%, var(--v4-navy));
+  background: color-mix(in srgb, var(--path-accent) 14%, var(--v4-navy));
   color: var(--public-mobile-text);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 8%, transparent), 0 0 16px -7px color-mix(in srgb, var(--path-accent) 68%, transparent), 0 8px 22px -14px var(--v4-navy);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 13%, transparent), 0 0 14px -9px var(--path-accent);
   backdrop-filter: blur(12px);
   font-family: 'Poppins', sans-serif;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
   text-decoration: none;
-  transition: transform .22s ease, border-color .22s ease, background-color .22s ease, box-shadow .22s ease;
+  transition: transform .3s ease, border-color .3s ease, background-color .3s ease, box-shadow .3s ease;
 }
 .r4-page .v5-hero .hx-switch-btn--violet { --path-accent: var(--home-pro); }
 .r4-page .v5-hero .hx-switch-btn--driver { --path-accent: var(--home-driver); }
@@ -9504,40 +9504,54 @@ html.theme-light .r4-page .v5-hero-quote .dg-flat-hint {
   opacity: .7;
   transition: width .22s ease, opacity .22s ease;
 }
+.r4-page .v5-hero .hx-switch-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 15%, color-mix(in srgb, var(--path-accent) 18%, transparent) 50%, transparent 85%);
+  transform: translateX(-120%);
+  transition: transform .65s ease;
+}
 .r4-page .v5-hero .hx-switch-icon {
   position: relative;
-  flex: 0 0 36px;
-  width: 36px;
-  height: 36px;
+  z-index: 1;
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
   display: grid;
   place-items: center;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--path-accent) 24%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--path-accent) 18%, var(--v4-navy));
   border: 1px solid color-mix(in srgb, var(--path-accent) 55%, transparent);
   color: var(--path-accent);
-  transition: background-color .22s ease, transform .22s ease;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 17%, transparent), 0 0 12px -7px var(--path-accent);
+  transition: background-color .3s ease, transform .3s ease, box-shadow .3s ease;
 }
-.r4-page .v5-hero .hx-switch-icon svg { color: var(--path-accent); }
-.r4-page .v5-hero .hx-switch-label { position: relative; min-width: 0; flex: 1; }
+.r4-page .v5-hero .hx-switch-icon svg { color: var(--path-accent); filter: drop-shadow(0 0 4px color-mix(in srgb, var(--path-accent) 45%, transparent)); }
+.r4-page .v5-hero .hx-switch-label { position: relative; z-index: 1; min-width: 0; flex: 1; }
 .r4-page .v5-hero .hx-switch-arrow {
+  position: relative;
+  z-index: 1;
   flex: none;
   color: var(--path-accent) !important;
   opacity: .65;
   transition: transform .22s ease, opacity .22s ease;
 }
 .r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible) {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   border-color: var(--path-accent);
-  background: color-mix(in srgb, var(--path-accent) 14%, var(--v4-navy));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 12%, transparent), 0 14px 30px -17px var(--path-accent), 0 0 0 1px color-mix(in srgb, var(--path-accent) 18%, transparent);
+  background: color-mix(in srgb, var(--path-accent) 25%, var(--v4-navy));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 22%, transparent), 0 0 0 1px color-mix(in srgb, var(--path-accent) 42%, transparent), 0 0 18px color-mix(in srgb, var(--path-accent) 55%, transparent), 0 0 36px color-mix(in srgb, var(--path-accent) 29%, transparent), 0 14px 30px -12px var(--path-accent);
 }
 .r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible)::before { width: 3px; opacity: 1; }
-.r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible) .hx-switch-icon { background: color-mix(in srgb, var(--path-accent) 23%, transparent); transform: scale(1.06); }
+.r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible)::after { transform: translateX(120%); }
+.r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible) .hx-switch-icon { background: color-mix(in srgb, var(--path-accent) 32%, var(--v4-navy)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--public-mobile-text) 28%, transparent), 0 0 16px color-mix(in srgb, var(--path-accent) 65%, transparent); transform: scale(1.07); }
 .r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible) .hx-switch-arrow { opacity: 1; transform: translateX(3px); }
 .r4-page .v5-hero .hx-switch-btn:focus-visible { outline: 2px solid var(--path-accent); outline-offset: 3px; }
 .r4-page .v5-hero .hx-switch-btn:active { transform: translateY(1px) scale(.985); background: color-mix(in srgb, var(--path-accent) 25%, var(--v4-navy)); box-shadow: inset 0 2px 10px color-mix(in srgb, var(--v4-navy) 45%, transparent); transition-duration: .08s; }
 @media (prefers-reduced-motion: reduce) {
-  .r4-page .v5-hero .hx-switch-btn, .r4-page .v5-hero .hx-switch-btn::before,
+  .r4-page .v5-hero .hx-switch-btn, .r4-page .v5-hero .hx-switch-btn::before, .r4-page .v5-hero .hx-switch-btn::after,
   .r4-page .v5-hero .hx-switch-icon, .r4-page .v5-hero .hx-switch-arrow { transition: none; }
   .r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible, :active),
   .r4-page .v5-hero .hx-switch-btn:is(:hover, :focus-visible) .hx-switch-icon,

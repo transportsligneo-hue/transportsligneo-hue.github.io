@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import {
-  MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, Building2, Car, MapPinned,
+  MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, BriefcaseBusiness, CarFront, House,
   KeyRound, Truck, BarChart3, ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,22 +44,22 @@ export default function HomeDesktopV5() {
 
             <div className="hx-switch">
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-switch-btn">
-                <span className="hx-switch-icon"><User size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-icon"><User size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Je suis un particulier</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
               <Link to="/services" search={{ audience: "pro" }} className="hx-switch-btn hx-switch-btn--violet">
-                <span className="hx-switch-icon"><Building2 size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-icon"><BriefcaseBusiness size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Je suis un professionnel</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
               <Link to="/devenir-convoyeur" className="hx-switch-btn hx-switch-btn--driver">
-                <span className="hx-switch-icon"><Car size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-icon"><CarFront size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Je suis convoyeur</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
               <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn hx-switch-btn--client">
-                <span className="hx-switch-icon"><MapPinned size={19} strokeWidth={1.8} /></span>
+                <span className="hx-switch-icon"><House size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Mon espace client</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
