@@ -541,7 +541,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         carburant: energy || null,
         prestation: null, option_trajet: option,
         date_souhaitee: date || null, heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice, prix_base: pricing.price,
+        prix_estime: priceTTC, prix_base: pricing.price,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
         message: comment || null,
@@ -560,7 +560,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         marque, modele,
         immatriculation: plaqueInconnue ? "" : immatriculation,
         carburant: energy,
-        prix_estime: pricing.finalPrice,
+        prix_estime: priceTTC,
         distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
@@ -571,7 +571,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           plaqueInconnue && "Plaque: à confirmer",
           isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
           isAR && retourImmat && `Plaque retour: ${retourImmat}`,
-          `Estimation: ${pricing.finalPrice}€`,
+          `Estimation: ${priceTTC}€`,
           `Distance: ${distance}km`,
           comment,
         ].filter(Boolean).join(" | "),
@@ -588,10 +588,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       await notifyAdmin({
         type: "estimation",
         titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
-        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        message: `${departure} → ${arrival} · ${distance} km · ${priceTTC} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
+        metadata: { email, telephone, prix: priceTTC, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
       });
 
       const devisData: DevisData = {
@@ -602,7 +602,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         type_vehicule: vehicleType, marque, modele, carburant: energy,
         prestation: "", option_trajet: option,
         date_souhaitee: date || null, heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice, tarif_label: pricing.label,
+        prix_estime: priceTTC, tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel,
         message: comment, created_at: devisRow?.created_at,
       };
@@ -614,12 +614,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             templateName: "devis-client",
             recipientEmail: email,
             idempotencyKey: `devis-${devisRow?.id || devisData.numero}`,
-            templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: pricing.finalPrice, optionTrajet: option },
+            templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: priceTTC, optionTrajet: option },
           }),
           sendTransactionalEmail({
             templateName: "devis-cree-admin",
             idempotencyKey: `admin-devis-${devisRow?.id || devisData.numero}`,
-            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || " · ", prix: pricing.finalPrice },
+            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || " · ", prix: priceTTC },
           }),
         ]);
         if (devisRow?.id) await supabase.from("devis").update({ email_envoye: true }).eq("id", devisRow.id);
