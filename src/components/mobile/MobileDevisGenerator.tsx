@@ -303,7 +303,7 @@ export default function MobileDevisGenerator() {
         option_trajet: option,
         date_souhaitee: date || null,
         heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         prix_base: pricing.price,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
@@ -317,14 +317,14 @@ export default function MobileDevisGenerator() {
         heure_souhaitee: heure,
         marque, modele, immatriculation,
         carburant: energy,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           prestation && `Prestation: ${prestation}`,
           option && `Option: ${option}`,
-          `Estimation: ${pricing.finalPrice}€`,
+          `Estimation: ${displayPrice ?? 0}€`,
           `Distance: ${distance}km`,
           option === "aller-retour" && `Retour: ${sameRetourAddress ? `${arrival} → ${departure}` : `${departRetour || "?"} → ${arriveeRetour || "?"}`}${dateRetour ? ` le ${dateRetour}` : ""}${heureRetour ? ` à ${heureRetour}` : ""}`,
           option === "aller-retour" && !sameRetourVehicle && `Véhicule retour: ${[marqueRetour, modeleRetour].filter(Boolean).join(" ")}${immatRetour ? ` (${immatRetour})` : ""}${vinRetour ? ` VIN ${vinRetour}` : ""}`,
@@ -337,11 +337,11 @@ export default function MobileDevisGenerator() {
       await notifyAdmin({
         type: "estimation",
         titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
-        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        message: `${departure} → ${arrival} · ${distance} km · ${displayPrice ?? 0} €`,
         link: "/admin/devis",
         entityType: "devis",
         entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, source: "mobile" },
+        metadata: { email, telephone, prix: displayPrice ?? 0, distance, option, source: "mobile" },
       });
 
       const devisData: DevisData = {
@@ -355,7 +355,7 @@ export default function MobileDevisGenerator() {
         prestation, option_trajet: option,
         date_souhaitee: date || null,
         heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel,
         message: comment,
@@ -371,7 +371,7 @@ export default function MobileDevisGenerator() {
           templateData: {
             prenom, nom, numero: devisData.numero,
             depart: departure, arrivee: arrival,
-            distance, prix: pricing.finalPrice,
+            distance, prix: displayPrice ?? 0,
             optionTrajet: option,
           },
         });
@@ -766,7 +766,7 @@ export default function MobileDevisGenerator() {
                     <p className="text-cream/45 text-[11px]">{distance} km · {estimateDuration(distance!)}</p>
                   </div>
                   <p className="font-heading gold-gradient-text text-2xl ml-3 shrink-0">
-                    {pricing.finalPrice}€
+                    {displayPrice ?? 0}€
                   </p>
                 </div>
               </div>
