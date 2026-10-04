@@ -149,7 +149,7 @@ function ModulePage() {
         <button
           type="button"
           onClick={async () => {
-            await markCompleted(module.id);
+            if ((p?.quiz_score ?? 0) >= PASS_SCORE) await markCompleted(module.id);
             if (next) navigate({ to: "/convoyeur/formation/module/$id", params: { id: next.id } });
             else navigate({ to: "/convoyeur/formation" });
           }}
