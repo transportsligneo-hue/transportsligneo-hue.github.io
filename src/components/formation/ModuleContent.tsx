@@ -36,7 +36,14 @@ function renderInline(text: string, key: string) {
     last = m.index + m[0].length;
   }
   if (last < text.length) parts.push(text.slice(last));
-  return parts;
+  // Gras : **texte**
+  return parts.flatMap((p, pi) =>
+    typeof p !== "string"
+      ? [p]
+      : p.split(/\*\*(.+?)\*\*/g).map((s, si) =>
+          si % 2 === 1 ? <strong key={`${key}-b${pi}-${si}`} className="font-semibold text-pro-text">{s}</strong> : s,
+        ),
+  );
 }
 
 /**
