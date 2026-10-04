@@ -10751,7 +10751,7 @@ html.theme-dark .demo-req-modal.demo-req-modal--pro { background:linear-gradient
 html.theme-dark .demo-req-modal--pro .demo-req-title { color:#fff !important; }
 html.theme-dark .demo-req-modal--pro .demo-req-title span { color:#c084fc; }
 html.theme-dark .demo-req-modal--pro .demo-req-sub, html.theme-dark .demo-req-features li { color:#dbe3ff; }
-html.theme-dark .demo-req-eyebrow { color:#d8b4fe; }
+html.theme-dark .demo-req-eyebrow { color:#e9d5ff; background:linear-gradient(135deg,rgba(139,63,245,.3),rgba(217,70,239,.25)); border-color:rgba(192,132,252,.6); box-shadow:0 0 14px rgba(139,63,245,.35); }
 html.theme-dark .demo-req-badges span { color:#9cc4ff; border-color:rgba(103,182,255,.4); background:rgba(103,182,255,.1); }
 html.theme-dark .demo-req-modal--pro .demo-req-form input { background:rgba(11,16,38,.6); color:#fff; border-color:rgba(168,85,247,.35); }
 html.theme-dark .demo-req-modal--pro .demo-req-form input::placeholder { color:rgba(219,231,255,.55); }
