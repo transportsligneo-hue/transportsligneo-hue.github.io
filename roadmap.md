@@ -30,7 +30,8 @@
 - [x] Calendrier mois/semaine
 - [x] Rapports + récap mensuel + export CSV
 - [ ] Comparaison EDL départ/arrivée avec alerte anomalie
-- [ ] Reprise rapide (plaque auto + adresses d'une mission similaire)
-- [ ] Filtres combinables avec puces (missions + parc)
+- [x] Reprise rapide (plaque → dernier trajet du véhicule)
+- [x] Filtres combinables avec puces (missions)
+- [ ] Filtres combinables sur le parc
 - [ ] Rôles Administrateur/Logistique/Comptabilité + invitations
 - [ ] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide, accès démo
