@@ -108,10 +108,10 @@ function SuiviPage() {
             <label htmlFor="numero-mission" className="sr-only">
               Numéro de mission
             </label>
-            <div className="flex flex-1 items-center gap-0 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 focus-within:border-[#4f8cff]">
+            <div className="suivi-field flex flex-1 items-center gap-0 px-4">
               <span
                 aria-hidden="true"
-                className="shrink-0 text-[15px] text-[#6f7ba0] select-none"
+                className="suivi-prefix shrink-0 select-none text-[15px]"
               >
                 MIS-TLG-2026-
               </span>
@@ -122,8 +122,8 @@ function SuiviPage() {
                 onChange={(e) =>
                   setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-/i, "").slice(0, 40))
                 }
-                placeholder="#116"
-                className="w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:outline-none"
+                placeholder="#XXX"
+                className="suivi-input w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] focus:outline-none"
               />
             </div>
             <label htmlFor="code-confidentiel" className="sr-only">
@@ -136,7 +136,7 @@ function SuiviPage() {
               autoComplete="off"
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="Code ex. A7K9P2"
-              className="w-full rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] tracking-[0.18em] text-white placeholder:tracking-normal placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none sm:w-[190px]"
+              className="suivi-field suivi-input w-full px-4 py-3.5 text-[15px] tracking-[0.18em] focus:outline-none sm:w-[190px]"
             />
             <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
