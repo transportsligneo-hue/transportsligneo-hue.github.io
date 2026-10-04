@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy, UserCog, CalendarDays, BarChart3 } from "lucide-react";
+import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy, UserCog, CalendarDays, BarChart3, Network } from "lucide-react";
 import { useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
@@ -19,16 +20,17 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro")({
 
 function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[] {
   const base: ProSidebarItem[] = [
-    { to: "/dashboard-pro", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
+    { to: "/dashboard-pro", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
     { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
     { to: "/dashboard-pro/nouvelle-mission", label: "Nouvelle mission", icon: PlusCircle },
     { to: "/dashboard-pro/calendrier", label: "Calendrier", icon: CalendarDays },
     { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
   ];
-  // Section Flotte : véhicules + conducteurs, réservée aux comptes Flotte
+  // Section Flotte : véhicules + conducteurs + sites, réservée aux comptes Flotte
   if (accountType === "flotte") {
     base.push(
       { to: "/dashboard-pro/flotte", label: "Parc véhicules", icon: Car },
+      { to: "/dashboard-pro/sites", label: "Sites & agences", icon: Network },
       { to: "/dashboard-pro/conducteurs", label: "Conducteurs", icon: Users },
     );
   }
@@ -51,6 +53,16 @@ function ProLayout() {
   const apercu = isApercuMode();
   const accountType = (apercu ? apercuAccountType() : null) ?? orgInfo?.accountType ?? "b2b_standard";
   const navItems = useMemo(() => buildNavItems(accountType), [accountType]);
+  const queryClient = useQueryClient();
+
+  // Un compte pro sans société rattachée en reçoit une (administrateur) :
+  // sans cela import CSV, sites et équipe restent inaccessibles.
+  useEffect(() => {
+    if (apercu || !isAuthenticated || orgInfo === undefined || orgInfo.orgId) return;
+    supabase.rpc("ensure_my_organization").then(({ data }) => {
+      if (data) queryClient.invalidateQueries({ queryKey: ["current-org-account-type"] });
+    });
+  }, [apercu, isAuthenticated, orgInfo, queryClient]);
 
   useEffect(() => {
     if (isLoading || apercu) return;
