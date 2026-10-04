@@ -252,6 +252,13 @@ function RecoveryLinkRedirect() {
   return null;
 }
 
+/** Fine barre de progression en haut pendant les changements de page. */
+function NavigationProgress() {
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
+  if (!isLoading) return null;
+  return <div className="nav-progress" aria-hidden="true" />;
+}
+
 function RootComponent() {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -271,6 +278,7 @@ function RootComponent() {
 
 
               <PublicChrome />
+              <NavigationProgress />
               <Outlet />
               <PublicMobileBottomNav />
               <PwaProvider />
