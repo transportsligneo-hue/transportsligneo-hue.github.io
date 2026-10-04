@@ -10891,7 +10891,7 @@ html.theme-light .r4-page .v4-cta-box h2 {
 /* Hero action buttons v3 */
 .hb-wrap{max-width:560px;margin-bottom:12px}
 .hb-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.hb-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:11px 12px;border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(10px);text-decoration:none;transition:transform .18s ease,background .22s ease,box-shadow .22s ease}
+.hb-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:11px 12px;border-radius:13px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,rgba(255,255,255,.03)),color-mix(in srgb,var(--c) 3%,transparent));border:1px solid color-mix(in srgb,var(--c) 26%,transparent);backdrop-filter:blur(10px);text-decoration:none;transition:transform .18s ease,background .22s ease,box-shadow .22s ease,border-color .22s ease}
 .hb-btn::after{content:'';position:absolute;inset:0;border-radius:13px;padding:1px;background:linear-gradient(135deg,var(--c),transparent 60%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .22s ease;pointer-events:none}
 .hb-btn:hover{transform:translateY(-2px);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));box-shadow:0 10px 20px rgba(0,0,0,.3)}
 .hb-btn:hover::after{opacity:1}
