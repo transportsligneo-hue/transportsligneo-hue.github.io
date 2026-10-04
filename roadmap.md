@@ -15,3 +15,9 @@
 - [x] Espace Driver PC : fenêtres et cartes opaques, texte contrasté, accents bleus/verts électriques ; espace pro sans doré avec accents violets électriques.
 - [x] Audit lisibilité : fenêtre de notifications non coupée par la barre latérale, boutons et réponses de formation Driver contrastés en clair et sombre.
 - [x] Tableau de bord admin : carte d’exploitation visible même sans position GPS, missions en cours et prochaines missions compactes et repliables sur le côté.
+- [x] Mode sombre optionnel dans l'administration et les espaces particulier, pro et flotte (bouton de thème dans chaque menu).
+- [x] Pastilles orange/jaunes des espaces connectés remplacées par les couleurs de la charte (bleu, violet pour pro).
+- [x] Admin : barre d'outils des missions sur téléphone, 6 confirmations sensibles avec la fenêtre Ligneo, bandeau cookies compact sur téléphone.
+- [x] Audit de l'espace particulier (compte existant), ordinateur et téléphone, clair et sombre.
+- [ ] Mode sombre pro : finitions (carte société du menu, onglets, chiffres du bandeau).
+- [ ] Statuts, e-mails et SMS : contrôle en lecture seule.
