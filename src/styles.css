@@ -10248,3 +10248,7 @@ html.theme-light .driver-shell [class*="from-[#3d2a10]"] {
 /* Mode sombre : boutons blancs passés en sombre gardent un texte lisible */
 html.theme-dark .driver-shell .bg-white.text-slate-700,
 html.theme-dark .driver-shell .bg-white .text-slate-500 { color: #dbe6ff !important; }
+html.theme-light .driver-shell [class*="bg-[#1"] .text-white,
+html.theme-light .driver-shell [class*="from-[#1"] .text-white,
+html.theme-light .driver-shell [class*="from-[#2"].text-white,
+html.theme-light .driver-shell .driver-cta-catalogue { color: #ffffff !important; }
