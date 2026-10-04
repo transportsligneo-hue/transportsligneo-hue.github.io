@@ -10521,6 +10521,10 @@ html.theme-light .r4-page .suivi-prefix-hash {
   font-weight: 700;
   text-shadow: none;
 }
+html.theme-light .r4-page .suivi-txt-depart {
+  color: #1c3fc4;
+  text-shadow: none;
+}
 html.theme-light .r4-page .suivi-input {
   color: #2450e0;
   text-shadow: none;
