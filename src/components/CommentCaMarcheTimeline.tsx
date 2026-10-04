@@ -139,6 +139,9 @@ export default function CommentCaMarcheTimeline() {
           </div>
         ))}
       </section>
+      <div className="v5-cta-buttons" style={{ justifyContent: "center", margin: "8px 0 24px" }}>
+        <Link to="/tarifs" className="v4-btn-primary">Voir les tarifs</Link>
+      </div>
 
       {/* ============ PLATEFORME COMPLÈTE ============ */}
       <section className="v4-section">
