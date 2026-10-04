@@ -51,7 +51,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="hidden 2xl:block fixed top-0 left-0 right-0 z-50 tln-shell"
+        className="hidden xl:block fixed top-0 left-0 right-0 z-50 tln-shell"
       >
         <div className="tln-bar">
 
@@ -109,7 +109,7 @@ export default function Navbar() {
 
         {/* Menu compact */}
         {mobileOpen && (
-          <div className="2xl:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
+          <div className="xl:hidden bg-navy/98 backdrop-blur-md border-t border-primary/20 pb-6">
             <ul className="flex flex-col items-center gap-6 pt-6">
               {navLinks.map((l) => (
                 <li key={`${l.to}-${l.search?.audience ?? ""}`}>

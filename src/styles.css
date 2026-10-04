@@ -7302,7 +7302,7 @@ html.theme-light .theme-pref--compact .theme-pref-btn.is-active { color: #ffffff
 /* ============ SERVICES : onglets Particuliers / Professionnels ============ */
 /* Hauteur réservée sous la barre de navigation fixe (mobile / tablette par défaut) */
 .r4-page { --tln-nav-h: 122px; }
-@media (min-width: 1536px) { .r4-page { --tln-nav-h: 92px; } }
+@media (min-width: 1280px) { .r4-page { --tln-nav-h: 92px; } }
 .r4-page .v4-tabs {
   display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
   padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 28px) 16px 0;
@@ -8657,7 +8657,7 @@ body .tln-bar .r4-nav-link {
 
 /* Navbar : liens élargis qui occupent toute la largeur utile, jamais rognés */
 body .tln-links > li { flex: 0 0 auto !important; }
-body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; justify-content: flex-start !important; padding-left: 0 !important; padding-right: 0 !important; }
+body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
 body .tln-links::-webkit-scrollbar { display: none !important; }
 body .tln-bar-inner { gap: 8px !important; }
 @media (max-width: 1700px) {
