@@ -98,6 +98,7 @@ import { Route as AuthenticatedEntrepriseMembresRouteImport } from './routes/_au
 import { Route as AuthenticatedEntrepriseFacturesRouteImport } from './routes/_authenticated/entreprise.factures'
 import { Route as AuthenticatedDashboardProTcoRouteImport } from './routes/_authenticated/dashboard-pro.tco'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
+import { Route as AuthenticatedDashboardProRapportsRouteImport } from './routes/_authenticated/dashboard-pro.rapports'
 import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
@@ -106,6 +107,7 @@ import { Route as AuthenticatedDashboardProFideliteRouteImport } from './routes/
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
+import { Route as AuthenticatedDashboardProCalendrierRouteImport } from './routes/_authenticated/dashboard-pro.calendrier'
 import { Route as AuthenticatedDashboardProApiRouteImport } from './routes/_authenticated/dashboard-pro.api'
 import { Route as AuthenticatedDashboardProAideRouteImport } from './routes/_authenticated/dashboard-pro.aide'
 import { Route as AuthenticatedDashboardProAdressesRouteImport } from './routes/_authenticated/dashboard-pro.adresses'
@@ -680,6 +682,12 @@ const AuthenticatedDashboardProSocieteRoute =
     path: '/societe',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
+const AuthenticatedDashboardProRapportsRoute =
+  AuthenticatedDashboardProRapportsRouteImport.update({
+    id: '/rapports',
+    path: '/rapports',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardProNouvelleMissionRoute =
   AuthenticatedDashboardProNouvelleMissionRouteImport.update({
     id: '/nouvelle-mission',
@@ -726,6 +734,12 @@ const AuthenticatedDashboardProConducteursRoute =
   AuthenticatedDashboardProConducteursRouteImport.update({
     id: '/conducteurs',
     path: '/conducteurs',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProCalendrierRoute =
+  AuthenticatedDashboardProCalendrierRouteImport.update({
+    id: '/calendrier',
+    path: '/calendrier',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProApiRoute =
@@ -1452,6 +1466,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
+  '/dashboard-pro/calendrier': typeof AuthenticatedDashboardProCalendrierRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
@@ -1460,6 +1475,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
+  '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -1647,12 +1663,14 @@ export interface FileRoutesByTo {
   '/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
+  '/dashboard-pro/calendrier': typeof AuthenticatedDashboardProCalendrierRoute
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
   '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
+  '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -1849,6 +1867,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/adresses': typeof AuthenticatedDashboardProAdressesRoute
   '/_authenticated/dashboard-pro/aide': typeof AuthenticatedDashboardProAideRoute
   '/_authenticated/dashboard-pro/api': typeof AuthenticatedDashboardProApiRoute
+  '/_authenticated/dashboard-pro/calendrier': typeof AuthenticatedDashboardProCalendrierRoute
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
@@ -1857,6 +1876,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
+  '/_authenticated/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/_authenticated/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/_authenticated/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -2053,6 +2073,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/adresses'
     | '/dashboard-pro/aide'
     | '/dashboard-pro/api'
+    | '/dashboard-pro/calendrier'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
@@ -2061,6 +2082,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/missions'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/nouvelle-mission'
+    | '/dashboard-pro/rapports'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
     | '/entreprise/factures'
@@ -2248,12 +2270,14 @@ export interface FileRouteTypes {
     | '/dashboard-pro/adresses'
     | '/dashboard-pro/aide'
     | '/dashboard-pro/api'
+    | '/dashboard-pro/calendrier'
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
     | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
+    | '/dashboard-pro/rapports'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
     | '/entreprise/factures'
@@ -2449,6 +2473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/adresses'
     | '/_authenticated/dashboard-pro/aide'
     | '/_authenticated/dashboard-pro/api'
+    | '/_authenticated/dashboard-pro/calendrier'
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
@@ -2457,6 +2482,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/missions'
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/nouvelle-mission'
+    | '/_authenticated/dashboard-pro/rapports'
     | '/_authenticated/dashboard-pro/societe'
     | '/_authenticated/dashboard-pro/tco'
     | '/_authenticated/entreprise/factures'
@@ -3258,6 +3284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProSocieteRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
+    '/_authenticated/dashboard-pro/rapports': {
+      id: '/_authenticated/dashboard-pro/rapports'
+      path: '/rapports'
+      fullPath: '/dashboard-pro/rapports'
+      preLoaderRoute: typeof AuthenticatedDashboardProRapportsRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
     '/_authenticated/dashboard-pro/nouvelle-mission': {
       id: '/_authenticated/dashboard-pro/nouvelle-mission'
       path: '/nouvelle-mission'
@@ -3312,6 +3345,13 @@ declare module '@tanstack/react-router' {
       path: '/conducteurs'
       fullPath: '/dashboard-pro/conducteurs'
       preLoaderRoute: typeof AuthenticatedDashboardProConducteursRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/calendrier': {
+      id: '/_authenticated/dashboard-pro/calendrier'
+      path: '/calendrier'
+      fullPath: '/dashboard-pro/calendrier'
+      preLoaderRoute: typeof AuthenticatedDashboardProCalendrierRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/api': {
@@ -4349,6 +4389,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProAdressesRoute: typeof AuthenticatedDashboardProAdressesRoute
   AuthenticatedDashboardProAideRoute: typeof AuthenticatedDashboardProAideRoute
   AuthenticatedDashboardProApiRoute: typeof AuthenticatedDashboardProApiRoute
+  AuthenticatedDashboardProCalendrierRoute: typeof AuthenticatedDashboardProCalendrierRoute
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
@@ -4357,6 +4398,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
   AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
+  AuthenticatedDashboardProRapportsRoute: typeof AuthenticatedDashboardProRapportsRoute
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProTcoRoute: typeof AuthenticatedDashboardProTcoRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
@@ -4368,6 +4410,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProAdressesRoute,
     AuthenticatedDashboardProAideRoute: AuthenticatedDashboardProAideRoute,
     AuthenticatedDashboardProApiRoute: AuthenticatedDashboardProApiRoute,
+    AuthenticatedDashboardProCalendrierRoute:
+      AuthenticatedDashboardProCalendrierRoute,
     AuthenticatedDashboardProConducteursRoute:
       AuthenticatedDashboardProConducteursRoute,
     AuthenticatedDashboardProDevisInstantaneRoute:
@@ -4383,6 +4427,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProNouvelleDemandeRoute,
     AuthenticatedDashboardProNouvelleMissionRoute:
       AuthenticatedDashboardProNouvelleMissionRouteWithChildren,
+    AuthenticatedDashboardProRapportsRoute:
+      AuthenticatedDashboardProRapportsRoute,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
     AuthenticatedDashboardProTcoRoute: AuthenticatedDashboardProTcoRoute,
