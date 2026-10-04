@@ -11031,6 +11031,10 @@ html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg
 .r4-page[data-audience="pro"] .v4-faq-item.v4-open { border-color: color-mix(in srgb, var(--audience-accent) 42%, transparent); }
 .r4-page[data-audience="pro"] .plateforme-head h2 { text-shadow: 0 0 22px var(--audience-glow); }
 .r4-page[data-audience="pro"] .plateforme-head h2 .v4-accent { color: var(--audience-accent); }
+.r4-page[data-audience="pro"] .plateforme-head h2 .v4-accent {
+  animation: none !important;
+  text-shadow: 0 0 16px var(--audience-glow), 0 0 30px var(--audience-glow) !important;
+}
 .r4-page[data-audience="pro"] .v4-faq-head h2 { text-shadow: 0 0 22px var(--audience-glow); }
 .r4-page.services-engagements .v4-svc-ic {
   color: var(--audience-accent);
