@@ -27,7 +27,7 @@ export const inviteTeamMember = createServerFn({ method: 'POST' })
       .single()
     if (error || !inv) throw new Error("Vous n'avez pas les droits pour inviter dans cette société.")
 
-    const { data: org } = await context.supabase.from('organizations').select('name').eq('id', data.orgId).maybeSingle()
+    const { data: org } = await context.supabase.from('organizations').select('legal_name, commercial_name').eq('id', data.orgId).maybeSingle()
     const { data: me } = await context.supabase.from('profiles').select('prenom, nom').eq('id', context.userId).maybeSingle()
     const origin = /^https:\/\/([a-z0-9-]+\.)*(lovable\.app|transportsligneo\.fr)$/.test(data.origin) || data.origin.startsWith('http://localhost')
       ? data.origin
@@ -39,7 +39,7 @@ export const inviteTeamMember = createServerFn({ method: 'POST' })
       recipientEmail: data.email,
       idempotencyKey: `invite-${inv.token}`,
       templateData: {
-        societe: (org as { name?: string } | null)?.name,
+        societe: (org as { legal_name?: string; commercial_name?: string | null } | null)?.commercial_name || (org as { legal_name?: string } | null)?.legal_name,
         role: ROLE_LABEL[data.role],
         invitant: [me?.prenom, me?.nom].filter(Boolean).join(' ') || undefined,
         lien: `${origin}/invitation-equipe/${inv.token}`,
