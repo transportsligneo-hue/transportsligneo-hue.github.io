@@ -6113,14 +6113,19 @@ html.theme-light .r4-page .v4-feat-card { background:#ffffff; }
 html.theme-light .r4-page .v4-feat-ic { border:1px solid rgba(15,21,38,0.10); }
 html.theme-light .r4-page .v4-feat-card :is(h3,h4) { color:#0f1526; }
 html.theme-light .r4-page .v4-glass { background:#ffffff; }
-html.theme-light .r4-page .v4-contact-card { background:linear-gradient(165deg,#141e45 0%,#0d1330 55%,#0a0f26 100%); color:#fff;
-  border:1px solid rgba(122,163,255,0.22); }
-html.theme-light .r4-page .v4-contact-card > p { color:#9db1d9; }
-html.theme-light .r4-page .v4-c-label { color:#8ea6d8; }
-html.theme-light .r4-page .v4-c-value { color:#fff; }
-html.theme-light .r4-page .v4-contact-tile { background:rgba(255,255,255,0.035); border:1px solid rgba(122,163,255,0.16); }
-html.theme-light .r4-page .v4-contact-title span { color:#7fb0ff; }
-html.theme-light .r4-page .v4-contact-title { color:#fff; }
+html.theme-light .r4-page .v4-contact-card { background:#fdfcf8; color:#0f1526;
+  border:1px solid rgba(15,21,38,0.08); box-shadow:0 18px 44px -22px rgba(15,21,38,0.22); }
+html.theme-light .r4-page .v4-contact-card::before { background:radial-gradient(circle, rgba(63,123,255,0.10), transparent 70%); }
+html.theme-light .r4-page .v4-contact-card > p { color:#5a6a8c; }
+html.theme-light .r4-page .v4-c-label { color:#5a6a8c; }
+html.theme-light .r4-page .v4-c-value { color:#2450e0; font-weight:600; }
+html.theme-light .r4-page .v4-contact-tile { background:rgba(63,123,255,0.05); border:1px solid rgba(63,123,255,0.16); }
+html.theme-light .r4-page .v4-contact-tile:hover, html.theme-light .r4-page .v4-contact-tile:focus-visible { border-color:rgba(63,123,255,0.5); background:rgba(63,123,255,0.09); }
+html.theme-light .r4-page .v4-contact-tile:hover .v4-c-value, html.theme-light .r4-page .v4-contact-tile:focus-visible .v4-c-value { color:#2450e0; text-shadow:none; }
+html.theme-light .r4-page .v4-contact-tile:hover .v4-c-ic, html.theme-light .r4-page .v4-contact-tile:focus-visible .v4-c-ic { color:#2450e0; }
+html.theme-light .r4-page .v4-c-arrow { color:#2450e0; }
+html.theme-light .r4-page .v4-contact-title span { color:#2450e0; }
+html.theme-light .r4-page .v4-contact-title { color:#0f1526; }
 html.theme-light .r4-page .v4-form-tabs .t.active { color:#0f1526; }
 html.theme-light .r4-page .v4-field input, .r4-page .v4-field textarea, .r4-page .v4-field select { color:#0f1526; }
 html.theme-light .r4-page .v4-field input:focus, .r4-page .v4-field textarea:focus, .r4-page .v4-field select:focus { border-color:rgba(15,21,38,0.10); }
