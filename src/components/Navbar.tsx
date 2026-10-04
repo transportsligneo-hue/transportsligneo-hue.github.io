@@ -4,6 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
+import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
