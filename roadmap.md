@@ -33,5 +33,6 @@
 - [x] Reprise rapide (plaque → dernier trajet du véhicule)
 - [x] Filtres combinables avec puces (missions)
 - [x] Filtres combinables sur le parc
-- [ ] Rôles Administrateur/Logistique/Comptabilité + invitations
-- [ ] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide, accès démo
+- [x] Rôles Administrateur/Logistique/Comptabilité + invitations
+- [x] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide
+- [ ] Accès démo (attend choix utilisateur)
