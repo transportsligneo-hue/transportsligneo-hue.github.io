@@ -10,15 +10,15 @@ const engagements = [
   { icon: GraduationCap, title: "Professionnalisme", text: "Convoyeurs professionnels, formés en continu, tenue professionnelle." },
 ];
 
-export default function Engagements() {
+export default function Engagements({ audience = "particuliers" }: { audience?: "particuliers" | "pro" }) {
   return (
-    <div className="r4-page" style={{ minHeight: 0 }}>
+    <div className="r4-page services-engagements" data-audience={audience} style={{ minHeight: 0 }}>
       <section id="engagements" className="v4-section" style={{ paddingTop: 40, paddingBottom: 90 }}>
         <div className="v4-section-head">
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Nos engagements
           </div>
-          <h2>Sécurité, ponctualité et <span className="v4-accent">transparence</span></h2>
+          <h2>Sécurité, ponctualité et <span className="audience-accent">transparence</span></h2>
           <p>Une exigence à chaque mission.</p>
         </div>
 
@@ -29,7 +29,7 @@ export default function Engagements() {
               return (
                 <div key={i} className="v4-svc-card" style={{ padding: 20 }}>
                   <div className="v4-svc-ic" style={{ width: 40, height: 40, marginBottom: 12 }}>
-                    <Icon size={18} color="#8fb4ff" strokeWidth={2} />
+                    <Icon size={18} strokeWidth={2} />
                   </div>
                   <h3 style={{ fontSize: 14 }}>{e.title}</h3>
                   <p style={{ fontSize: 12.5 }}>{e.text}</p>
@@ -41,7 +41,7 @@ export default function Engagements() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <MapLigneo size="small" />
             <div style={{ marginTop: 20, textAlign: "center" }}>
-              <p style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff", letterSpacing: "0.15em", fontSize: 16 }}>
+              <p className="engagements-location" style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, letterSpacing: "0.15em", fontSize: 16 }}>
                 Basé à Tours (37)
               </p>
               <p style={{ color: "var(--v4-text-muted)", fontSize: 12, marginTop: 4 }}>
