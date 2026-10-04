@@ -99,23 +99,34 @@ function SuiviPage() {
             Où en est <span className="v4-accent">mon véhicule</span> ?
           </h1>
           <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
-            Saisissez votre numéro de mission (juste le chiffre suffit, ex. 116) et votre code
-            confidentiel, tous deux indiqués dans l'e-mail de suivi. Aucune information personnelle
-            n'est affichée sur cette page.
+            Tapez seulement le numéro de mission avec le dièse (ex. #116 ou #260) et votre code
+            confidentiel, tous deux indiqués dans l'e-mail de suivi. Le début du numéro est déjà
+            pré-écrit. Aucune information personnelle n'est affichée sur cette page.
           </p>
 
           <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row">
             <label htmlFor="numero-mission" className="sr-only">
               Numéro de mission
             </label>
-            <input
-              id="numero-mission"
-              value={numero}
-              maxLength={40}
-              onChange={(e) => setNumero(e.target.value)}
-              placeholder="N° de mission, ex. 116"
-              className="flex-1 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none"
-            />
+            <div className="flex flex-1 items-center gap-0 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 focus-within:border-[#4f8cff]">
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-[15px] text-[#6f7ba0] select-none"
+              >
+                MIS-TLG-2026-
+              </span>
+              <input
+                id="numero-mission"
+                value={numero}
+                maxLength={40}
+                inputMode="numeric"
+                onChange={(e) =>
+                  setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-/i, "").slice(0, 40))
+                }
+                placeholder="#116"
+                className="w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:outline-none"
+              />
+            </div>
             <label htmlFor="code-confidentiel" className="sr-only">
               Code confidentiel
             </label>
