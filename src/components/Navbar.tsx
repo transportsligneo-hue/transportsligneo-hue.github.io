@@ -59,11 +59,10 @@ export default function Navbar() {
         <div className="tln-bar">
 
           <div className="tln-bar-inner">
-            <Link to="/" className="tln-brand" aria-label="Accueil · Transports Ligneo">
+            <Link to="/" className="tln-brand tln-brand--col" aria-label="Accueil · Transports Ligneo">
               <LigneoLockup size="md" />
+              <OctobreRoseBadge />
             </Link>
-
-            <OctobreRoseBadge />
 
             <span className="tln-sep" aria-hidden="true" />
 

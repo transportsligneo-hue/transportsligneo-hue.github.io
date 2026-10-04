@@ -3671,6 +3671,10 @@ body.is-driver-app .closed-link svg {
     flex-shrink: 0; display: flex; align-items: center;
     transition: transform .35s cubic-bezier(.34,1.56,.64,1), filter .35s ease;
   }
+  .tln-brand--col { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .tln-brand--col .or-ribbon { padding: 3px 9px; font-size: 9px; letter-spacing: .14em; }
+  .tln-shell.is-scrolled .tln-brand--col { gap: 2px; }
+  .tln-shell.is-scrolled .tln-brand--col .or-ribbon { padding: 2px 8px; }
   .tln-brand:hover { transform: translateY(-1px) scale(1.02); filter: drop-shadow(0 0 14px rgba(79,140,255,0.55)); }
   .tln-shell.is-scrolled .tln-brand { transform: scale(0.92); }
 
