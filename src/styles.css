@@ -10334,3 +10334,15 @@ html.theme-dark .dashboard-shell-light[data-account-type="client"] { --cream: #e
 html.theme-dark .dashboard-shell-light :is(label, .text-cream, .text-cream\/70, .text-cream\/60, .text-cream\/50) { color: #b7c1e0; }
 html.theme-dark .dashboard-shell-light :is(h1, h2, h3, .font-heading) { color: #e8edfb; }
 html.theme-dark .dashboard-shell-light aside :is(.bg-white) { background-color: #17224a !important; }
+/* Admin v6 : ambre/doré remplacés par le bleu de la charte, et jetons sombres */
+.adm6, [class*="a6-"] { --a6-gold: #2f5fff; --a6-gold-soft: #eaf0ff; --a6-warn: #2450e0; --a6-warn-soft: #eaf0ff; }
+html.theme-dark .admin-shell {
+  --a6-bg: #0b1026; --a6-surface: #111a3d; --a6-border: #24305c; --a6-border-soft: #1b2650;
+  --a6-text: #e8edfb; --a6-muted: #a9b4d6; --a6-dim: #7f8bb3;
+  --a6-blue: #7fa6ff; --a6-blue-soft: rgba(79,140,255,.14); --a6-gold: #7fa6ff; --a6-gold-soft: rgba(79,140,255,.14);
+  --a6-ok-soft: rgba(24,179,130,.14); --a6-warn: #9dbaff; --a6-warn-soft: rgba(79,140,255,.14);
+  --a6-red-soft: rgba(210,69,69,.16); --a6-violet-soft: rgba(124,92,255,.16);
+}
+html.theme-dark .admin-shell .a6-chip:not(.active) { background: #111a3d; color: #b7c1e0; border-color: #24305c; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) nav.fixed.bottom-0 { background: rgba(11,16,38,.96) !important; border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) nav.fixed.bottom-0 :is(a, button) { color: #b7c1e0; }
