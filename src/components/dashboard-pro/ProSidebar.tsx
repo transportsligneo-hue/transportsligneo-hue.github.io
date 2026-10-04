@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import ThemeToggle from "@/components/ThemeToggle";
 import { LogOut, Menu, X, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -192,6 +193,7 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
             </nav>
 
             <div className="lig-nav p-3 border-t border-pro-border">
+              <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
               <button onClick={() => logout()} className="lig-nav-logout">
                 <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion
