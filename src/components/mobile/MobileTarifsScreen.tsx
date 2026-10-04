@@ -73,7 +73,7 @@ export default function MobileTarifsScreen() {
           <PriceCard
             title="Options"
             lines={[
-              { l: "Express (24h), soir, week-end", p: "+20 %" },
+              { l: "Express (24h) : +20 % · soir, week-end : +30 %", p: "" },
               { l: "Lavage intérieur", p: "Sur devis" },
               { l: "Lavage intérieur + extérieur", p: "Sur devis" },
               { l: "Stockage véhicules", p: "Sur devis" },
