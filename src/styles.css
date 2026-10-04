@@ -3700,7 +3700,11 @@ body.is-driver-app .closed-link svg {
   .tln-shell.is-scrolled .tln-bar .r4-nav-link { min-height: 34px; font-size: 12.6px; padding: 0 13px; }
 
   .tln-actions { flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
-  .tln-bar .tln-phone { padding: 5px 12px 5px 6px; }
+  .tln-bar .tln-phone { min-height: 34px; padding: 0 14px 0 6px; gap: 8px; }
+  .tln-bar .tln-phone .nav-phone-icon { width: 24px; height: 24px; }
+  .tln-bar .tln-phone .nav-phone-pulse { inset: -2px; }
+  .tln-bar .tln-phone .nav-phone-number { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1; }
+  .tln-shell.is-scrolled .tln-bar .tln-phone { min-height: 32px; }
   .tln-bar .tln-connect { min-height: 38px; padding: 0 15px; font-size: 12px; }
   .tln-shell.is-scrolled .tln-bar .tln-connect { min-height: 34px; }
 
