@@ -5597,6 +5597,53 @@ export type Database = {
         }
         Relationships: []
       }
+      org_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          organization_id: string
+          role: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          role: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          role?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_member_sites: {
         Row: {
           created_at: string
@@ -7573,6 +7620,24 @@ export type Database = {
           },
         ]
       }
+      user_alert_preferences: {
+        Row: {
+          prefs: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          prefs?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          prefs?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_notifications: {
         Row: {
           category: string
@@ -8594,6 +8659,7 @@ export type Database = {
       }
       accept_convoyeur_invitation: { Args: { _token: string }; Returns: Json }
       accept_mission_fixe: { Args: { _trajet_id: string }; Returns: string }
+      accept_org_invitation: { Args: { _token: string }; Returns: string }
       acknowledge_mission_alert: {
         Args: { _alert_id: string }
         Returns: undefined
@@ -9127,6 +9193,19 @@ export type Database = {
       is_privileged_writer: { Args: never; Returns: boolean }
       is_public_app_setting_key: { Args: { _key: string }; Returns: boolean }
       is_validated_convoyeur: { Args: { _user_id: string }; Returns: boolean }
+      list_org_members: {
+        Args: { _org_id: string }
+        Returns: {
+          email: string
+          id: string
+          joined_at: string
+          member_role: string
+          nom: string
+          prenom: string
+          status: string
+          user_id: string
+        }[]
+      }
       log_activity: {
         Args: {
           _action: string

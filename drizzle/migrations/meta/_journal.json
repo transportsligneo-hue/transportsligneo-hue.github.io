@@ -204,6 +204,13 @@
       "when": 1791144054752,
       "tag": "0028_module_completion_requires_full_quiz",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791149224698,
+      "tag": "0029_pro_team_roles_invites_alerts",
+      "breakpoints": true
     }
   ]
 }
