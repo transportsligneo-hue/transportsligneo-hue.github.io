@@ -21,3 +21,4 @@
 - [x] Audit de l'espace particulier (compte existant), ordinateur et téléphone, clair et sombre.
 - [x] Mode sombre pro : finitions (carte société du menu, onglets, chiffres du bandeau).
 - [x] Statuts, e-mails et SMS : contrôle en lecture seule. (rapport livré)
+- [x] E-mails : slogan en pied de page, accent doré remplacé par le bleu ; pastilles « En attente » convoyeur passées du jaune au bleu.

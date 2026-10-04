@@ -16,7 +16,7 @@ export type StatutConvoyeur = "valide" | "en_attente" | "a_corriger" | "en_verif
 
 const CONFIG: Record<StatutConvoyeur, { label: string; dot: string; bg: string; text: string; ring: string; Icon: typeof CheckCircle2 }> = {
   valide:     { label: "Profil validé",           dot: "bg-emerald-500", bg: "bg-emerald-50",  text: "text-emerald-700",  ring: "ring-emerald-200",  Icon: CheckCircle2 },
-  en_attente: { label: "Documents en attente",    dot: "bg-amber-400",   bg: "bg-amber-50",    text: "text-amber-700",    ring: "ring-amber-200",    Icon: Clock },
+  en_attente: { label: "Documents en attente",    dot: "bg-sky-400",   bg: "bg-sky-50",    text: "text-sky-700",    ring: "ring-sky-200",    Icon: Clock },
   a_corriger: { label: "Documents à corriger",    dot: "bg-orange-500",  bg: "bg-orange-50",   text: "text-orange-700",   ring: "ring-orange-200",   Icon: AlertTriangle },
   en_verif:   { label: "En cours de vérification",dot: "bg-blue-500",    bg: "bg-blue-50",     text: "text-blue-700",     ring: "ring-blue-200",     Icon: Search },
   refuse:     { label: "Profil refusé",           dot: "bg-red-500",     bg: "bg-red-50",      text: "text-red-700",      ring: "ring-red-200",      Icon: XCircle },

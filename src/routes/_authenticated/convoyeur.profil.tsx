@@ -102,7 +102,7 @@ function ConvoyeurProfil() {
   };
   const statutStyle: Record<string, string> = {
     valide: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    en_attente: "bg-amber-50 text-amber-700 border-amber-200",
+    en_attente: "bg-sky-50 text-sky-700 border-sky-200",
     refuse: "bg-red-50 text-red-700 border-red-200",
     suspendu: "bg-gray-100 text-gray-600 border-gray-200",
   };
@@ -134,13 +134,13 @@ function ConvoyeurProfil() {
             <div className="flex items-start justify-between flex-wrap gap-3">
               <div>
                 <h2 className="font-semibold text-sm text-pro-text flex items-center gap-2">
-                  <Trophy size={16} className="text-amber-500" /> Mon niveau convoyeur
+                  <Trophy size={16} className="text-sky-500" /> Mon niveau convoyeur
                 </h2>
                 <p className="text-pro-text-soft text-xs mt-1">
                   Votre niveau détermine les missions auxquelles vous pouvez candidater.
                 </p>
               </div>
-              <span className="text-xs px-3 py-1 rounded-full border font-semibold bg-amber-50 text-amber-700 border-amber-200">
+              <span className="text-xs px-3 py-1 rounded-full border font-semibold bg-sky-50 text-sky-700 border-sky-200">
                 {niveauLabel(p.current)}
               </span>
             </div>
