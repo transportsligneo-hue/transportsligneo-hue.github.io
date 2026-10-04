@@ -10756,3 +10756,33 @@ html.theme-dark .demo-req-badges span { color:#9cc4ff; border-color:rgba(103,182
 html.theme-dark .demo-req-modal--pro .demo-req-form input { background:rgba(11,16,38,.6); color:#fff; border-color:rgba(168,85,247,.35); }
 html.theme-dark .demo-req-modal--pro .demo-req-form input::placeholder { color:rgba(219,231,255,.55); }
 html.theme-dark .demo-req-modal--pro .demo-req-close { color:#d8b4fe; }
+
+/* ============================================================
+   Accueil · accents bleu néon électrique sur les titres & chiffres
+   ============================================================ */
+.r4-page .v4-section-head h2 .hx-neon,
+.r4-page .v4-faq-head h2 .hx-neon,
+.r4-page .v4-cta-box h2 .hx-neon {
+  color: #6ea1ff;
+  text-shadow: 0 0 18px rgba(79, 139, 255, 0.55), 0 0 36px rgba(47, 95, 255, 0.3);
+  font-style: normal;
+}
+.r4-page .hx-figure .v {
+  color: #8fb4ff !important;
+  text-shadow: 0 0 18px rgba(79, 139, 255, 0.55), 0 0 36px rgba(47, 95, 255, 0.3);
+}
+html.theme-light .r4-page .v4-section-head h2 .hx-neon,
+html.theme-light .r4-page .v4-faq-head h2 .hx-neon,
+html.theme-light .r4-page .v4-cta-box h2 .hx-neon {
+  color: #2f5fff !important;
+  text-shadow: 0 0 14px rgba(47, 95, 255, 0.25);
+}
+html.theme-light .r4-page .hx-figure .v {
+  color: #2f5fff !important;
+  text-shadow: 0 0 12px rgba(47, 95, 255, 0.18);
+}
+html.theme-light .r4-page .v5-trust-label .hx-neon {
+  color: #2f5fff !important;
+  -webkit-text-fill-color: #2f5fff;
+  text-shadow: 0 0 14px rgba(47, 95, 255, 0.25);
+}
