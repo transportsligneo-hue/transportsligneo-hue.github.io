@@ -8453,7 +8453,7 @@ body:has(.dc-page) .ligneo-footer-blend::before { display: none; }
    ============================================================ */
 html.theme-light .r4-page .ligneo-map {
   position: relative;
-  padding: 40px 24px 96px;
+  padding: 24px 16px 40px;
   margin-top: 0;
   margin-bottom: -1px;
   background: transparent;
