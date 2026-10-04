@@ -1,6 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -31,23 +29,14 @@ export const Route = createFileRoute("/suivi")({
   }),
 });
 
+// Statuts publics : bleu en attente, violet en route, vert livré, rouge annulé.
 const STATUT_LABEL: Record<string, { label: string; color: string }> = {
-  en_attente: { label: "En attente de prise en charge", color: "#d9b54a" },
-  en_cours: { label: "En cours de convoyage", color: "#4f8cff" },
+  en_attente: { label: "En attente de prise en charge", color: "#4f8cff" },
+  en_cours: { label: "En cours de convoyage", color: "#7c5cff" },
   livree: { label: "Véhicule livré", color: "#22c55e" },
   annulee: { label: "Mission annulée", color: "#ef4444" },
 };
-
-function SuiviPage() {
-  const [numero, setNumero] = useState("");
-  useEffect(() => {
-    const n = new URLSearchParams(window.location.search).get("numero");
-    if (!n) return;
-    // Le lien de l'e-mail porte le numéro complet (MIS-TLG-2026-#116) : on ne
-    // pré-remplit que la fin, le préfixe est déjà affiché dans le champ.
-    const suffix = n.toUpperCase().replace(/^MIS-TLG-\d{4}-/i, "");
-    setNumero(suffix.slice(0, 40));
-  }, []);
+const STATUT_FALLBACK = { label: "Mission suivie", color: "#4f8cff" };
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
