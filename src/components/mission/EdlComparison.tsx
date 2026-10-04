@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, ArrowLeftRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AnnotatedPhoto, parseAnnotations, type PhotoAnnotation } from "@/components/inspection/PhotoAnnotations";
 
-interface Photo { vue_type: string; url: string; zone_id: string | null; notes: string | null }
+interface Photo { vue_type: string; url: string; zone_id: string | null; notes: string | null; annotations: PhotoAnnotation[] }
 
 const VUE_LABEL = (v: string) =>
   v.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -28,10 +29,10 @@ export function EdlComparison({ attributionId }: { attributionId: string }) {
       if (!list.some((i) => i.type === "arrivee")) { setReady(true); return; }
       const { data: raw } = await supabase
         .from("inspection_photos")
-        .select("inspection_id, vue_type, url_photo, zone_id, notes, created_at")
+        .select("inspection_id, vue_type, url_photo, zone_id, notes, created_at, annotations")
         .in("inspection_id", list.map((i) => i.id))
         .order("created_at", { ascending: true });
-      const rows = ((raw ?? []) as { inspection_id: string; vue_type: string; url_photo: string; zone_id: string | null; notes: string | null }[])
+      const rows = ((raw ?? []) as { inspection_id: string; vue_type: string; url_photo: string; zone_id: string | null; notes: string | null; annotations: unknown }[])
         .filter((p) => !p.vue_type.startsWith("signature"));
       const toSign = Array.from(new Set(rows.filter((p) => !/^https?:\/\//i.test(p.url_photo)).map((p) => p.url_photo)));
       const signed = new Map<string, string>();
@@ -43,7 +44,7 @@ export function EdlComparison({ attributionId }: { attributionId: string }) {
       for (const p of rows) {
         const url = /^https?:\/\//i.test(p.url_photo) ? p.url_photo : signed.get(p.url_photo) ?? "";
         const target = list.find((i) => i.id === p.inspection_id)?.type === "arrivee" ? a : d;
-        target.push({ vue_type: p.vue_type, url, zone_id: p.zone_id, notes: p.notes });
+        target.push({ vue_type: p.vue_type, url, zone_id: p.zone_id, notes: p.notes, annotations: parseAnnotations(p.annotations) });
       }
       if (!cancelled) { setDepart(d); setArrivee(a); setReady(true); }
     })();
@@ -87,7 +88,9 @@ export function EdlComparison({ attributionId }: { attributionId: string }) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {newDamages.map((p, i) => p.url && (
             <a key={i} href={p.url} target="_blank" rel="noreferrer" className="edl-cmp-thumb edl-cmp-thumb--alert">
-              <img src={p.url} alt={`Dégât ${VUE_LABEL(p.vue_type)}`} loading="lazy" />
+              {p.annotations.length
+                ? <AnnotatedPhoto src={p.url} alt={`Dégât ${VUE_LABEL(p.vue_type)}`} annotations={p.annotations} compact className="pa-fit" />
+                : <img src={p.url} alt={`Dégât ${VUE_LABEL(p.vue_type)}`} loading="lazy" />}
             </a>
           ))}
         </div>
@@ -102,7 +105,9 @@ export function EdlComparison({ attributionId }: { attributionId: string }) {
               <span className="text-xs mission-text-soft">{VUE_LABEL(v)}</span>
               {[d, a].map((p, i) => (
                 <div key={i} className="edl-cmp-thumb">
-                  {p?.url ? <img src={p.url} alt={`${VUE_LABEL(v)} ${i ? "arrivée" : "départ"}`} loading="lazy" /> : <span className="text-[11px] mission-text-soft">—</span>}
+                  {p?.url ? (p.annotations.length
+                    ? <AnnotatedPhoto src={p.url} alt={`${VUE_LABEL(v)} ${i ? "arrivée" : "départ"}`} annotations={p.annotations} compact className="pa-fit" />
+                    : <img src={p.url} alt={`${VUE_LABEL(v)} ${i ? "arrivée" : "départ"}`} loading="lazy" />) : <span className="text-[11px] mission-text-soft">—</span>}
                 </div>
               ))}
             </div>

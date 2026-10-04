@@ -11,3 +11,4 @@
 - Keep the admin dashboard's operational map in a dedicated overview component, reusing the mission map engine and existing mission tables, so its collapsible mission lists do not alter other workspaces.
 - Keep the extended, locally retouched hero photo scoped to the desktop home presentation so mobile and other marketing pages retain their original framing.
 - Dark mode for admin, client and pro workspaces is a scoped CSS layer under `html.theme-dark` targeting `.admin-shell` / `.dashboard-shell-light`; light stays the default so existing workspace markup is untouched.
+- EDL photo anomaly annotations live in inspection_photos.annotations (fractional x/y, category, author, time) and render via the shared PhotoAnnotations component in every workspace, so markers stay identical across screens; only the driver EDL edits them.

@@ -1,3 +1,4 @@
+import { AnnotatedPhoto, parseAnnotations, type PhotoAnnotation } from "@/components/inspection/PhotoAnnotations";
 /**
  * MissionClientGallery · affiche côté client toutes les preuves visuelles d'une mission :
  * - Photos d'inspection (départ / arrivée) avec signed URLs
@@ -23,7 +24,7 @@ interface Props {
 }
 
 
-interface PhotoItem { id: string; vue_type: string; url: string; type: "depart" | "arrivee" }
+interface PhotoItem { id: string; vue_type: string; url: string; type: "depart" | "arrivee"; annotations: PhotoAnnotation[] }
 interface DocItem { id: string; nom: string; type: string; created_at: string; signedUrl: string | null }
 
 const PAGE_SIZE = 12;
@@ -99,9 +100,9 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
       const inspTypeById = new Map(inspList.map(i => [i.id, i.type]));
       const { data: rawRes } = await supabase
         .from("inspection_photos")
-        .select("id, inspection_id, vue_type, url_photo")
+        .select("id, inspection_id, vue_type, url_photo, annotations")
         .in("inspection_id", inspList.map(i => i.id));
-      const raw = (rawRes as { id: string; inspection_id: string; vue_type: string; url_photo: string }[] | null) ?? [];
+      const raw = (rawRes as { id: string; inspection_id: string; vue_type: string; url_photo: string; annotations: unknown }[] | null) ?? [];
 
       const pathsToSign = Array.from(new Set(raw.filter(p => !/^https?:\/\//.test(p.url_photo)).map(p => p.url_photo)));
       const signedMap = new Map<string, string>();
@@ -119,6 +120,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
           vue_type: p.vue_type,
           url,
           type: inspTypeById.get(p.inspection_id) === "arrivee" ? "arrivee" : "depart",
+          annotations: parseAnnotations(p.annotations),
         });
       }
       if (cancelled) return;
@@ -281,7 +283,16 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
           <button className="absolute top-4 right-4 text-cream/80 hover:text-cream" aria-label="Fermer">
             <X size={28} />
           </button>
-          <img src={lightbox} alt="Aperçu" className="max-h-full max-w-full object-contain rounded shadow-2xl" />
+          {(() => {
+            const ann = photos.find(p => p.url === lightbox)?.annotations ?? [];
+            return ann.length ? (
+              <div className="pa-lightbox" onClick={(e) => e.stopPropagation()}>
+                <AnnotatedPhoto src={lightbox} alt="Aperçu" annotations={ann} />
+              </div>
+            ) : (
+              <img src={lightbox} alt="Aperçu" className="max-h-full max-w-full object-contain rounded shadow-2xl" />
+            );
+          })()}
         </div>
       )}
     </>
@@ -339,13 +350,13 @@ function Grid({ items, onOpen }: { items: PhotoItem[]; onOpen: (url: string) => 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {items.map(p => (
-        <ImgTile key={p.id} url={p.url} label={vueLabel(p.vue_type)} onClick={() => onOpen(p.url)} />
+        <ImgTile key={p.id} url={p.url} label={vueLabel(p.vue_type)} annotations={p.annotations} onClick={() => onOpen(p.url)} />
       ))}
     </div>
   );
 }
 
-function ImgTile({ url, label, onClick }: { url: string; label: string; onClick: () => void }) {
+function ImgTile({ url, label, onClick, annotations }: { url: string; label: string; onClick: () => void; annotations?: PhotoAnnotation[] }) {
   const filename = `${label.replace(/[^a-z0-9]+/gi, "_").toLowerCase() || "piece"}.${
     url.startsWith("data:image/png") ? "png" : url.startsWith("data:") ? "jpg" : (url.split("?")[0].split(".").pop() || "jpg")
   }`;
@@ -392,7 +403,13 @@ function ImgTile({ url, label, onClick }: { url: string; label: string; onClick:
         className="absolute inset-0 w-full h-full"
         aria-label={`Agrandir ${label}`}
       >
-        <img src={url} alt={label} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
+        {annotations?.length ? (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <AnnotatedPhoto src={url} alt={label} annotations={annotations} compact className="pa-fit" />
+          </span>
+        ) : (
+          <img src={url} alt={label} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform group-hover:scale-105" />
+        )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy via-navy/70 to-transparent p-2">
           <p className="text-cream text-[10px] uppercase tracking-wider truncate text-left">{label}</p>
         </div>

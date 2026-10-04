@@ -3986,6 +3986,7 @@ export type Database = {
       }
       inspection_photos: {
         Row: {
+          annotations: Json
           created_at: string
           file_size_bytes: number | null
           id: string
@@ -3996,6 +3997,7 @@ export type Database = {
           zone_id: string | null
         }
         Insert: {
+          annotations?: Json
           created_at?: string
           file_size_bytes?: number | null
           id?: string
@@ -4006,6 +4008,7 @@ export type Database = {
           zone_id?: string | null
         }
         Update: {
+          annotations?: Json
           created_at?: string
           file_size_bytes?: number | null
           id?: string
