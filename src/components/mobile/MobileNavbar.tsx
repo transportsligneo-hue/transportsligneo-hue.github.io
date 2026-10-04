@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
+import logoDriver from "@/assets/logo-driver.png.asset.json";
 import ThemePreference from "@/components/ThemePreference";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export default function MobileNavbar() {
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2 overflow-hidden" aria-label="Transports Ligneo · Accueil">
-            <img src={logoLigneo()} alt="" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
+            <img src={pathname === "/devenir-convoyeur" ? logoDriver.url : logoLigneo()} alt="" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
             <span className="min-w-0 flex flex-col gap-[3px]">
               <span className="mnav-wordmark truncate font-black text-[15px] sm:text-[17px] uppercase">
                 TRANSPORTS <span>LIGNEO</span>
