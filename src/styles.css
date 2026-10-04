@@ -10675,7 +10675,7 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
 .pp-help:hover,.pp-help:focus-visible{box-shadow:0 0 8px rgba(168,85,247,.55)}
 
 /* Accueil : carte agrandie, même hauteur que les deux blocs de gauche (desktop) */
-@media (min-width: 1024px) {
+@media (min-width: 1081px) {
   .r4-page .hx-split { grid-template-columns:minmax(0,1fr) 440px; align-items:stretch; gap:32px; }
   .r4-page .hx-split-map { position:static; display:flex; }
   .r4-page .hx-split-map .hx-map-card { flex:1; display:flex; flex-direction:column; justify-content:center; padding:20px 20px 24px; }
