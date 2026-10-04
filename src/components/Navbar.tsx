@@ -81,9 +81,13 @@ export default function Navbar() {
                     </Link>
                     {isPro && (
                       <div className="tln-dd-menu">
-                        {proSubLinks.map((s) => (
-                          <Link key={s.to} to={s.to}>{s.label}</Link>
-                        ))}
+                        {proSubLinks.map((s) =>
+                          s.demo ? (
+                            <DemoRequestButton key={s.to} className="tln-dd-demo-btn" />
+                          ) : (
+                            <Link key={s.to} to={s.to}>{s.label}</Link>
+                          )
+                        )}
                       </div>
                     )}
                   </li>
