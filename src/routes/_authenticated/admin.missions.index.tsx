@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { confirmToast } from "@/lib/confirm-toast";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -515,7 +516,7 @@ function AdminMissionsUnified() {
       return row ? row.status !== "terminee" && row.status !== "annulee" : true;
     });
     if (!openIds.length) return toast.error("Missions clôturées : attribution verrouillée");
-    if (!window.confirm(`Attribuer ${openIds.length} mission(s) à ${nom} ?`)) return;
+    if (!(await confirmToast(`Attribuer ${openIds.length} mission(s) à ${nom} ?`))) return;
     ids = openIds;
     setLotBusy(true);
     let ok = 0;

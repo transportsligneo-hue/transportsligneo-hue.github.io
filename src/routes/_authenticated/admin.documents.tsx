@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { confirmToast } from "@/lib/confirm-toast";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -127,7 +128,7 @@ function AdminDocuments() {
   };
 
   const deleteDoc = async (doc: Document) => {
-    if (!window.confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
+    if (!(await confirmToast(`Supprimer définitivement "${doc.nom_fichier}" ?`))) return;
     if (doc.url_fichier && !doc.url_fichier.startsWith("http")) {
       await supabase.storage.from("convoyeur-documents").remove([doc.url_fichier]);
     }

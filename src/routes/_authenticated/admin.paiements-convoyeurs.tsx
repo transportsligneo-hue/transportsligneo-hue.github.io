@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { confirmToast } from "@/lib/confirm-toast";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -603,7 +604,7 @@ function ReglagesTab({
   }
 
   async function deletePenalite(p: CatalogPenalite) {
-    if (!window.confirm(`Supprimer définitivement la pénalité « ${p.libelle} » ?`)) return;
+    if (!(await confirmToast(`Supprimer définitivement la pénalité « ${p.libelle} » ?`))) return;
     const { error } = await supabase.from("catalogue_penalites").delete().eq("id", p.id);
     if (error) return toast.error(error.message);
     toast.success("Pénalité supprimée");

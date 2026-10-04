@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import ThemeToggle from "@/components/ThemeToggle";
 import { ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -137,6 +138,7 @@ export function AdminSidebar({ items, children }: Props) {
         {renderNav(undefined, collapsed)}
 
         <div className={`lig-nav border-t border-pro-border ${collapsed ? "p-2" : "p-3"}`}>
+          <ThemeToggle variant={collapsed ? "compact" : "full"} className="mb-2 w-full justify-start" />
           <button
             onClick={() => logout()}
             className={`lig-nav-logout${collapsed ? " justify-center px-0" : ""}`}
@@ -186,6 +188,7 @@ export function AdminSidebar({ items, children }: Props) {
             {renderNav(() => setMobileOpen(false))}
 
             <div className="lig-nav p-3 border-t border-pro-border">
+              <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
               <button onClick={() => logout()} className="lig-nav-logout">
                 <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion

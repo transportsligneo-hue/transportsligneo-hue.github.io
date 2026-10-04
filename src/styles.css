@@ -10253,3 +10253,60 @@ html.theme-light .driver-shell [class*="from-[#1"] .text-white,
 html.theme-light .driver-shell [class*="from-[#2"].text-white,
 html.theme-light .driver-shell .driver-cta-catalogue { color: #ffffff !important; }
 html.theme-light .driver-shell .driver-on-dark, html.theme-light .driver-shell span.driver-on-dark { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
+
+/* ============================================================
+   Mode sombre des espaces connectés Admin / Pro / Flotte / Particulier
+   Activé uniquement par html.theme-dark ; le mode clair reste le défaut.
+   ============================================================ */
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) {
+  --pro-bg: #0b1026;
+  --pro-surface: #111a3d;
+  --pro-border: #24305c;
+  --pro-text: #e8edfb;
+  --pro-text-soft: #a9b4d6;
+  --cream: #e8edfb;
+  --navy: #e8edfb;
+  background: #0b1026 !important;
+  color: #e8edfb;
+  color-scheme: dark;
+}
+html.theme-dark .admin-shell { background: #0b1026; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.bg-white, .bg-pro-bg, .bg-pro-surface, .bg-card, .bg-background, .bg-white\/95, .bg-white\/90, .bg-white\/80) { background-color: #111a3d !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) .bg-pro-bg,
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) main { background-color: #0b1026; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.bg-pro-bg-soft, .bg-pro-surface-2, .bg-slate-50, .bg-slate-100, .bg-gray-50, .bg-gray-100, .bg-zinc-50, .bg-neutral-50, .bg-muted, .bg-blue-50, .bg-sky-50, .bg-indigo-50) { background-color: #17224a !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.hover\:bg-pro-bg-soft, .hover\:bg-slate-50, .hover\:bg-gray-50, .hover\:bg-slate-100, .hover\:bg-pro-surface-2):hover { background-color: #1d2a5a !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-pro-text, .text-slate-900, .text-slate-800, .text-gray-900, .text-gray-800, .text-foreground, .text-black, .text-\[\#0f1526\], .text-\[\#14161c\]) { color: #e8edfb !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-pro-text-soft, .text-slate-700, .text-slate-600, .text-gray-700, .text-gray-600, .text-muted-foreground) { color: #b7c1e0 !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-pro-muted, .text-slate-500, .text-slate-400, .text-gray-500, .text-gray-400) { color: #8d99c2 !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.border-pro-border, .border-slate-200, .border-slate-100, .border-gray-200, .border-gray-100, .border-border, .border-pro-border\/60) { border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.divide-slate-100, .divide-slate-200, .divide-gray-100, .divide-gray-200) > * + * { border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-pro-accent, .text-\[\#2f5fff\], .text-\[\#2F5FFF\], .text-blue-600, .text-blue-700) { color: #7fa6ff !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+  background-color: #0e1634 !important; color: #e8edfb !important; border-color: #2a3768 !important;
+}
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(input, textarea)::placeholder { color: #7380aa !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.shadow-pro-card, .shadow-sm, .shadow) { box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 8px 24px -16px rgba(0,0,0,0.7) !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) table thead { background-color: #17224a; }
+/* Fenêtres ouvertes hors des espaces (rendues dans body) */
+html.theme-dark [role="dialog"]:is(.bg-white, .bg-background),
+html.theme-dark [data-radix-popper-content-wrapper] .bg-white,
+html.theme-dark [data-radix-popper-content-wrapper] .bg-popover { background-color: #111a3d !important; color: #e8edfb; }
+
+/* Pastilles ambrées/orange des espaces connectés → couleurs de la charte */
+:is(.admin-shell, .dashboard-shell-light) :is(.bg-amber-50, .bg-amber-100, .bg-orange-50, .bg-orange-100, .bg-yellow-50, .bg-yellow-100) { background-color: #eaf0ff !important; }
+:is(.admin-shell, .dashboard-shell-light) :is(.text-amber-500, .text-amber-600, .text-amber-700, .text-amber-800, .text-orange-500, .text-orange-600, .text-orange-700, .text-yellow-600, .text-yellow-700, .text-yellow-800) { color: #2450e0 !important; }
+:is(.admin-shell, .dashboard-shell-light) :is(.border-amber-200, .border-amber-300, .border-orange-200, .border-orange-300, .border-yellow-200, .border-yellow-300) { border-color: #c9d7ff !important; }
+:is(.admin-shell, .dashboard-shell-light) :is(.bg-amber-500, .bg-orange-500, .bg-yellow-500, .bg-amber-400, .bg-yellow-400) { background-color: #2f5fff !important; }
+.dashboard-shell-light[data-account-type]:not([data-account-type="client"]) :is(.bg-amber-50, .bg-amber-100, .bg-orange-50, .bg-orange-100, .bg-yellow-50, .bg-yellow-100) { background-color: #f2eeff !important; }
+.dashboard-shell-light[data-account-type]:not([data-account-type="client"]) :is(.text-amber-500, .text-amber-600, .text-amber-700, .text-orange-500, .text-orange-600, .text-orange-700, .text-yellow-700) { color: #5334d6 !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.bg-amber-50, .bg-amber-100, .bg-orange-50, .bg-orange-100, .bg-yellow-50, .bg-yellow-100, .bg-emerald-50, .bg-green-50, .bg-red-50, .bg-rose-50, .bg-violet-50, .bg-purple-50) { background-color: rgba(127,166,255,0.12) !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-amber-500, .text-amber-600, .text-amber-700, .text-orange-600, .text-orange-700, .text-yellow-700) { color: #9dbaff !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-emerald-700, .text-green-700, .text-emerald-800) { color: #5ee6a8 !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-red-700, .text-rose-700, .text-red-600) { color: #ff8a9a !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) :is(.text-violet-700, .text-purple-700) { color: #b9a6ff !important; }
+
+/* Bandeau cookies compact sur téléphone */
+@media (max-width: 767px) {
+  .cookie-banner-compact { max-height: 42vh; overflow-y: auto; }
+}

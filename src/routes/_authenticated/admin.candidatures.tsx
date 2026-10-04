@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { confirmToast } from "@/lib/confirm-toast";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,7 +129,7 @@ function AdminCandidatures() {
   }), [offers]);
 
   const award = async (id: string) => {
-    if (!confirm("Attribuer la mission à ce convoyeur ?\nToutes les autres candidatures seront refusées.")) return;
+    if (!(await confirmToast("Attribuer la mission à ce convoyeur ?\nToutes les autres candidatures seront refusées."))) return;
     setBusy(id);
     const { error } = await supabase.rpc("admin_award_offer", { _offre_id: id });
     setBusy(null);

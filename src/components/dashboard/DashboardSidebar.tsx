@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import ThemeToggle from "@/components/ThemeToggle";
 import { LogOut, X, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,6 +111,7 @@ export function DashboardSidebar({ title, subtitle, items, shellClass, children 
         </nav>
 
         <div className="p-4 border-t border-primary/15">
+          <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
           <button
             onClick={() => logout()}
             className="flex items-center gap-3 px-4 py-2.5 rounded text-sm text-cream/60 hover:text-destructive hover:bg-destructive/10 transition-colors w-full"
