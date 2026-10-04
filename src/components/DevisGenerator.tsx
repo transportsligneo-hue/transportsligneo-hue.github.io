@@ -1018,10 +1018,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <p className="text-xs uppercase tracking-[0.1em] text-cream/75">TVA</p>
                 <p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</p>
-                <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
-              </div>
+               <div>
+                 <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</p>
+                 <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
+               </div>
+               {offHoursNotice && <div className="w-full mt-3 md:col-span-full">{offHoursNotice}</div>}
 
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
@@ -1519,9 +1520,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <div className="pt-3 mt-3 border-t border-border grid grid-cols-3 gap-3">
                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceHT} €</strong></div>
                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">TVA</em><strong className="block font-medium text-sm text-cream">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
-                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
-                      </div>
-                    )}
+                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
+                       </div>
+                     )}
+                     {offHoursNotice && <div className="mt-3">{offHoursNotice}</div>}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
                       <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><RouteIcon size={11} className="text-neon-blue" /> Péages inclus</strong>
                       <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><Fuel size={11} className="text-neon-blue" /> Carburant inclus</strong>
