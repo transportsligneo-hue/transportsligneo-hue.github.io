@@ -39,7 +39,7 @@ import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/docum
 
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import {
   EDL_PREMIUM_SEQUENCE,
   EDL_TOTAL_STEPS,
@@ -1485,7 +1485,7 @@ export function EdlPremiumFlow({
         </button>
 
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <img src={logoLigneo} alt="Ligneo" className="w-9 h-9 object-contain shrink-0" />
+          <img src={logoLigneo()} alt="Ligneo" className="w-9 h-9 object-contain shrink-0" />
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold truncate">
               {EDL_SECTION_LABEL[currentStep.section]}
@@ -2203,7 +2203,7 @@ function BrandLoader({ label = "Envoi sécurisé…", compact = false }: { label
         style={compact ? { width: 72, height: 72 } : undefined}
       >
         <div className="edl-brand-loader__logo">
-          <img src={logoLigneo} alt="Ligneo" style={compact ? { width: 40, height: 40 } : undefined} />
+          <img src={logoLigneo()} alt="Ligneo" style={compact ? { width: 40, height: 40 } : undefined} />
         </div>
       </div>
       {!compact && <span className="edl-brand-loader__label">{label}</span>}

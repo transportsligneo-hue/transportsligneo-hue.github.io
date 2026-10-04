@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Lock, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPassword,
@@ -105,7 +105,7 @@ function ResetPassword() {
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
           <Link to="/" className="inline-block mb-4">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
+            <img src={logoLigneo()} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
           <h1 className="auth-title text-2xl md:text-3xl">Nouveau mot de passe</h1>
         </div>

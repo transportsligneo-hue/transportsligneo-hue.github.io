@@ -1,4 +1,4 @@
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 interface Props {
   /** Texte affiché sous le logo (ex : "Calcul du tarif…") */
@@ -27,7 +27,7 @@ export function LogoLoader({ label, fullScreen = false, size = 64, className = "
           style={{ animationDuration: "2.2s", animationDirection: "reverse" }}
         />
         <div className="absolute inset-[12px] rounded-full bg-[#0b1026] flex items-center justify-center overflow-hidden animate-pulse" style={{ animationDuration: "2s" }}>
-          <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain p-1" />
+          <img src={logoLigneo()} alt="Transports Ligneo" className="w-full h-full object-contain p-1" />
         </div>
       </div>
       {label && (

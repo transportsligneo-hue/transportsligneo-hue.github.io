@@ -1,4 +1,4 @@
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import logoDriver from "@/assets/ligneo-driver-badge.png.asset.json";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 
@@ -40,7 +40,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "", 
         }}
       >
         <img
-          src={driverBadge ? logoDriver.url : logoLigneo}
+          src={driverBadge ? logoDriver.url : logoLigneo()}
           alt="Transports Ligneo"
           width={s.badge}
           height={s.badge}

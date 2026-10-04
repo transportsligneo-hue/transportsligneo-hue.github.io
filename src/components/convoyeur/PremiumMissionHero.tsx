@@ -3,7 +3,7 @@ import {
   Bell, ChevronRight, Check, MapPinned, ClipboardCheck, Truck, PackageCheck,
   ClipboardList, ShieldCheck, Loader2,
 } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export interface PremiumMissionHeroData {
   numeroMission: string | null;
@@ -83,7 +83,7 @@ export function PremiumMissionHero({
           <div className="flex items-start gap-4">
             <div className="shrink-0 flex flex-col items-center">
               <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
-                <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain" />
+                <img src={logoLigneo()} alt="Transports Ligneo" className="w-full h-full object-contain" />
               </div>
               <div className="hidden sm:block mt-1 font-serif text-[10px] tracking-[0.18em] text-[var(--gold)] text-center leading-tight">
                 TRANSPORTS<br/>LIGNEO

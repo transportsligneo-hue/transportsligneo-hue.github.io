@@ -1,4 +1,4 @@
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export type LigneoRole = "admin" | "driver" | "client" | "partner";
 
@@ -57,7 +57,7 @@ export function LigneoBrand({ role, compact = false, variant = "light" }: Props)
     <div className="flex items-center gap-2.5 min-w-0">
       <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-black/5 shrink-0 bg-[#0b1026] flex items-center justify-center p-0.5">
         <img
-          src={logoLigneo}
+          src={logoLigneo()}
           alt="Transports Ligneo"
           className="w-full h-full object-contain"
           loading="lazy"

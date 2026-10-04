@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Shield, Clock, CheckCircle2, Zap, Phone, Mail, Globe, ArrowRight, ArrowUp, Linkedin } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import { openCookiePreferences } from "@/lib/cookie-consent";
 import NewsletterForm from "@/components/public/NewsletterForm";
 import StoreBadges from "@/components/public/StoreBadges";
@@ -103,7 +103,7 @@ export default function Footer() {
               className="h-11 w-11 overflow-hidden rounded-xl animate-[ligneoLogoGlow_3s_ease-in-out_infinite]"
               style={{ boxShadow: "0 0 0 1px rgba(122,163,255,0.4), 0 0 16px rgba(63,123,255,0.4)" }}
             >
-              <img src={logoLigneo} alt="Transports Ligneo" className="h-full w-full object-cover" loading="lazy" />
+              <img src={logoLigneo()} alt="Transports Ligneo" className="h-full w-full object-cover" loading="lazy" />
             </div>
             <span
               className="font-heading text-[15px] font-extrabold tracking-[0.03em] text-white"

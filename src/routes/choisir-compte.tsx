@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, UserCheck, Building2, Truck, ArrowRight } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export const Route = createFileRoute("/choisir-compte")({
   component: ChoisirCompte,
@@ -34,7 +34,7 @@ function ChoisirCompte() {
       <div className="w-full max-w-5xl auth-fade-in">
         <div className="text-center mb-10">
           <Link to="/" className="inline-block mb-5">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-14 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
+            <img src={logoLigneo()} alt="Transports Ligneo" className="h-14 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
           <div className="auth-eyebrow justify-center">Créer un compte</div>
           <h1 className="auth-title text-3xl md:text-[42px]">

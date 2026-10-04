@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, CheckCircle, ArrowLeft } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export const Route = createFileRoute("/mot-de-passe-oublie")({
   component: MotDePasseOublie,
@@ -42,7 +42,7 @@ function MotDePasseOublie() {
       <div className="w-full max-w-md auth-fade-in">
         <div className="text-center mb-6">
           <Link to="/" className="inline-block mb-4">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
+            <img src={logoLigneo()} alt="Transports Ligneo" className="h-16 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
           <h1 className="auth-title text-2xl md:text-3xl">Mot de passe oublié</h1>
           <p className="auth-subtle text-sm mt-1.5">Recevez un lien de réinitialisation</p>

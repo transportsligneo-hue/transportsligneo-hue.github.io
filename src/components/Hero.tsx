@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export default function Hero() {
   return (
@@ -13,7 +13,7 @@ export default function Hero() {
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24 pb-16">
         <div>
           <img
-            src={logoLigneo}
+            src={logoLigneo()}
             alt="Transports Ligneo"
             className="mx-auto w-80 md:w-[28rem] mb-8"
             width={636}
