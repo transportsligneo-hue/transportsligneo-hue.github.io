@@ -113,16 +113,16 @@ function SuiviPage() {
                 aria-hidden="true"
                 className="suivi-prefix shrink-0 select-none text-[15px]"
               >
-                MIS-TLG-2026<span className="suivi-prefix-dash">-</span>
+                MIS-TLG-2026<span className="suivi-prefix-dash">-</span><span className="suivi-prefix-hash">#</span>
               </span>
               <input
                 id="numero-mission"
                 value={numero}
                 maxLength={40}
                 onChange={(e) =>
-                  setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-/i, "").slice(0, 40))
+                  setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-#?/i, "").slice(0, 40))
                 }
-                placeholder="#XXX"
+                placeholder="XXX"
                 className="suivi-input w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] focus:outline-none"
               />
             </div>
