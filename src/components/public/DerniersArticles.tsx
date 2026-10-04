@@ -15,7 +15,7 @@ export default function DerniersArticles() {
           <span className="dot" />
           Actualités
         </div>
-        <h2 id="actus-title">Le journal du convoyage</h2>
+        <h2 id="actus-title">Le journal <span className="hx-neon">du convoyage</span></h2>
       </div>
 
       <div className="mx-auto grid max-w-[1180px] gap-5 px-5 sm:grid-cols-2 lg:grid-cols-3">

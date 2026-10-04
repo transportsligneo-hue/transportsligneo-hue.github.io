@@ -151,7 +151,7 @@ export default function HomeDesktopV5() {
 
       {/* ============ PREUVE SOCIALE ============ */}
       <section className="v5-trust">
-        <div className="v5-trust-label">Ils nous confient leurs véhicules</div>
+        <div className="v5-trust-label">Ils nous confient leurs <span className="hx-neon">véhicules</span></div>
         <div className="v5-trust-sub">Partenaires & clients de référence</div>
         <div className="v5-marquee-mask">
           <div className="v5-marquee-track">
@@ -182,7 +182,7 @@ export default function HomeDesktopV5() {
       <section className="v4-section">
         <div className="v4-section-head">
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}><span className="dot" />La plateforme</div>
-          <h2>Découvrez votre espace Ligneo</h2>
+          <h2>Découvrez votre espace <span className="hx-neon">Ligneo</span></h2>
           <p>Tableau de bord → Carte → Mission → Véhicule → Documents → Facture</p>
         </div>
         <div className="hx-platform">
@@ -199,7 +199,7 @@ export default function HomeDesktopV5() {
 
       {/* ============ CTA FINAL ============ */}
       <div className="v4-cta-box">
-        <h2>Votre véhicule doit être déplacé ?</h2>
+        <h2>Votre véhicule doit être <span className="hx-neon">déplacé</span> ?</h2>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
           <button type="button" onClick={goDevis} className="v4-btn-primary">Obtenir mon devis</button>
           <Link to="/suivi" className="v4-btn-outline">Suivre mon véhicule</Link>

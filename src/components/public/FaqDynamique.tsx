@@ -32,7 +32,7 @@ export default function FaqDynamique() {
           <span className="dot" />
           FAQ
         </div>
-        <h2 id="faq-title">Questions fréquentes</h2>
+        <h2 id="faq-title"><span className="hx-neon">Questions fréquentes</span></h2>
       </div>
       {items.map((f, i) => (
         <div key={f.id} className={`v4-faq-item ${open === i ? "v4-open" : ""}`}>
