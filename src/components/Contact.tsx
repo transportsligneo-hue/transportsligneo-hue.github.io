@@ -10,7 +10,7 @@ const EMAILJS_PUBLIC_KEY = "tTvDX_OgATR0pXFUr";
 type FormStatus = "idle" | "sending" | "success" | "error";
 type Profil = "particulier" | "pro";
 
-export default function Contact() {
+export default function Contact({ onProfilChange }: { onProfilChange?: (profil: Profil) => void }) {
   const [profil, setProfil] = useState<Profil>("particulier");
   const [form, setForm] = useState({
     nom: "", prenom: "", telephone: "", email: "", message: "",
@@ -22,7 +22,10 @@ export default function Contact() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("audience") === "pro") setProfil("pro");
+    if (params.get("audience") === "pro") {
+      setProfil("pro");
+      onProfilChange?.("pro");
+    }
     const formule = params.get("formule");
     const prefills: Record<string, string> = {
       ponctuel: "Bonjour, nous souhaitons commander un transport ponctuel pour notre entreprise.",
@@ -30,7 +33,7 @@ export default function Contact() {
     };
     const message = formule ? prefills[formule] : undefined;
     if (message) setForm((prev) => (prev.message ? prev : { ...prev, message }));
-  }, []);
+  }, [onProfilChange]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -138,8 +141,8 @@ ${form.message}`;
 
         <form onSubmit={handleSubmit} className="v4-glass v4-form-card">
           <div className="v4-form-tabs">
-            <button type="button" className={`t ${profil === "particulier" ? "active" : ""}`} onClick={() => setProfil("particulier")}>Particulier</button>
-            <button type="button" className={`t t-pro ${profil === "pro" ? "active" : ""}`} onClick={() => setProfil("pro")}>Professionnel</button>
+             <button type="button" className={`t ${profil === "particulier" ? "active" : ""}`} onClick={() => { setProfil("particulier"); onProfilChange?.("particulier"); }}>Particulier</button>
+             <button type="button" className={`t t-pro ${profil === "pro" ? "active" : ""}`} onClick={() => { setProfil("pro"); onProfilChange?.("pro"); }}>Professionnel</button>
           </div>
           <p className="intro">
             {profil === "pro"

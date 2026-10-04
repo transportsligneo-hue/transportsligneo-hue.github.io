@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Contact from "@/components/Contact";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
+import { useState } from "react";
 
 export const Route = createFileRoute("/contact")({
   // Préremplissage B2B : /contact?audience=pro&formule=ponctuel|flotte
@@ -24,12 +25,13 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const [profil, setProfil] = useState<"particulier" | "pro">("particulier");
   return (
     <>
       <Navbar />
       <main>
-        <Contact />
-        <FAQ />
+         <Contact onProfilChange={setProfil} />
+         <FAQ audience={profil} />
       </main>
       <Footer />
     </>
