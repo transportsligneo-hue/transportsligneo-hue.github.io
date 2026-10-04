@@ -40,7 +40,7 @@ export default function LigneoLockup({ size = "md", tag = null, className = "", 
         }}
       >
         <img
-          src={driverBadge ? logoDriver.url : logoLigneo}
+          src={driverBadge ? logoDriver.url : logoLigneo()}
           alt="Transports Ligneo"
           width={s.badge}
           height={s.badge}
