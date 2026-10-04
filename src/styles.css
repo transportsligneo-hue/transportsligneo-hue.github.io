@@ -10234,3 +10234,17 @@ html.theme-light .driver-shell .bg-pro-bg-soft { background: #f5f7fc !important;
 @media (min-width: 768px) {
   .driver-shell .driver-nav-surface { background: var(--driver-bg) !important; backdrop-filter: none; }
 }
+
+/* Audit lisibilité Driver — mode clair : les cartes restées bleu nuit gardent un texte clair,
+   le logo garde un « TRANSPORTS » lisible, plus d'accent orange. */
+html.theme-light .driver-shell [class*="from-[#0"] .text-white,
+html.theme-light .driver-shell [class*="bg-[#0"] .text-white { color: #ffffff !important; }
+html.theme-light .driver-shell .ligneo-lockup-transport { color: #0f1526 !important; }
+html.theme-light .driver-shell [class*="from-[#3d2a10]"] {
+  background: linear-gradient(135deg, #12306e, #0b1d4a) !important;
+  border-color: rgba(96,165,250,0.4) !important;
+}
+.driver-shell .text-\[\#f59e0b\] { color: #60a5fa !important; }
+/* Mode sombre : boutons blancs passés en sombre gardent un texte lisible */
+html.theme-dark .driver-shell .bg-white.text-slate-700,
+html.theme-dark .driver-shell .bg-white .text-slate-500 { color: #dbe6ff !important; }
