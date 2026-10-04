@@ -4,7 +4,7 @@ import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
   MapPin, MapPinned, Clock, Car, Fuel, Calendar, ChevronDown, Send, Loader2,
   CheckCircle, User, Download, Shield, Route as RouteIcon,
-  Sparkles, ArrowRight, ArrowLeft, FileText, Lock, MailCheck
+  Sparkles, ArrowRight, ArrowLeft, FileText, Lock, MailCheck, Phone
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -1043,6 +1043,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             Renseignez votre trajet pour afficher votre tarif
           </p>
         )}
+        <div className="dg-call-row">
+          <a href="tel:+33782456181" className="dg-call-btn" aria-label="Appeler Transports Ligneo au 07 82 45 61 81">
+            <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
+            Appeler
+          </a>
+        </div>
       </div>
 
       {/* === MODAL MULTI-ÉTAPES === */}
