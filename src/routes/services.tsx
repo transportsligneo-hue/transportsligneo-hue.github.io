@@ -35,7 +35,7 @@ function ServicesPage() {
           audience={audience}
           onAudienceChange={(a) => navigate({ to: "/services", search: { audience: a } })}
         />
-        <Engagements />
+        <Engagements audience={audience} />
       </main>
       <Footer />
     </>
