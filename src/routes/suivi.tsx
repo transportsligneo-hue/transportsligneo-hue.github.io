@@ -84,7 +84,7 @@ function SuiviPage() {
     }
   };
 
-  const statut = result?.statut ? STATUT_LABEL[result.statut] : null;
+  const statut = result?.statut ? (STATUT_LABEL[result.statut] ?? STATUT_FALLBACK) : null;
 
   return (
     <>
