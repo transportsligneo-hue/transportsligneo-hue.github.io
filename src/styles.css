@@ -10839,3 +10839,7 @@ html:not(.theme-dark) .dpm-tab.is-on { color: #fff; }
 html:not(.theme-dark) .dpm-cal-d, html:not(.theme-dark) .dpm-team li { background: rgba(17,26,61,.04); }
 html:not(.theme-dark) .dpm-role.r-A { color: #7c3aed; } html:not(.theme-dark) .dpm-role.r-L { color: #2f5fff; } html:not(.theme-dark) .dpm-role.r-C { color: #a21caf; }
 html:not(.theme-dark) .dpm-table tr.is-alert td { color: #dc2626; }
+
+/* "Demander une démo" dans le menu déroulant Professionnels — même rendu que les liens */
+body .tln-dd-menu .demo-req-btn { display:flex; align-items:center; gap:6px; width:100%; padding:9px 12px; border-radius:8px; border:0; background:transparent; color:#e6ecff; font-size:13px; font-weight:600; text-align:left; cursor:pointer; box-shadow:none; }
+body .tln-dd-menu .demo-req-btn:hover { background:rgba(168,85,247,0.22); color:#e2d8ff; text-shadow:0 0 8px rgba(167,139,250,0.7); }

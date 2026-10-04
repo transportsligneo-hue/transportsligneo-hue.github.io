@@ -4,6 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
+import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
@@ -14,12 +15,13 @@ const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; s
   { to: "/a-propos", label: "À propos" },
 ] as const;
 
-const proSubLinks: ReadonlyArray<{ to: string; label: string }> = [
+const proSubLinks: ReadonlyArray<{ to: string; label: string; demo?: boolean }> = [
   { to: "/concessionnaires", label: "Concessions" },
   { to: "/loueurs", label: "Loueurs" },
   { to: "/gestionnaires-flotte", label: "Gestionnaires de flotte" },
   { to: "/developpeurs", label: "API" },
   { to: "/login", label: "Espace Pro" },
+  { to: "/demo-pro", label: "Demander une démo", demo: true },
 ];
 
 function LockIcon() {
@@ -80,9 +82,13 @@ export default function Navbar() {
                     </Link>
                     {isPro && (
                       <div className="tln-dd-menu">
-                        {proSubLinks.map((s) => (
-                          <Link key={s.to} to={s.to}>{s.label}</Link>
-                        ))}
+                        {proSubLinks.map((s) =>
+                          s.demo ? (
+                            <DemoRequestButton key={s.to} className="tln-dd-demo-btn" />
+                          ) : (
+                            <Link key={s.to} to={s.to}>{s.label}</Link>
+                          )
+                        )}
                       </div>
                     )}
                   </li>
