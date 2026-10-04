@@ -87,7 +87,7 @@ export default function HomeDesktopV5() {
         <div className="hx-split">
           <div className="hx-split-left">
             <div className="v4-section-head hx-split-head">
-              <h2>Un convoyage <span className="hx-neon">sans stress</span>, du départ à l'arrivée</h2>
+              <h2>Un convoyage sans stress, <span className="hx-neon">du départ à l'arrivée</span></h2>
             </div>
             <div className="hx-benefits">
               {[
