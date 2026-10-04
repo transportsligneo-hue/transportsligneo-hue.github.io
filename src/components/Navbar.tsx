@@ -3,7 +3,6 @@ import { Menu, X, User, Sparkles, MapPin } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
-import { scrollToDevis } from "@/lib/scroll-to-devis";
 import ThemePreference from "@/components/ThemePreference";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
@@ -39,11 +38,7 @@ export default function Navbar() {
   
 
   // CTA principal : Estimer · scrolle vers l'estimateur (centré) si présent, sinon → /tarifs
-  const goToEstimer = () => {
-    setMobileOpen(false);
-    if (scrollToDevis()) return;
-    navigate({ to: "/tarifs", hash: "devis" });
-  };
+
 
   const goToEspace = () => {
     setMobileOpen(false);
@@ -98,7 +93,6 @@ export default function Navbar() {
             <span className="tln-sep" aria-hidden="true" />
 
             <div className="tln-actions">
-              <button type="button" onClick={goToEstimer} className="tln-devis">Obtenir un devis</button>
               <Link to="/suivi" className="tln-track">
                 <MapPin size={13} /> Suivre mon véhicule
               </Link>

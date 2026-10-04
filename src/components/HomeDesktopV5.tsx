@@ -49,14 +49,19 @@ export default function HomeDesktopV5() {
                 <span className="hx-switch-label">Je suis un professionnel</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
-              <Link to="/devenir-convoyeur" className="hx-switch-btn hx-switch-btn--driver">
+              <Link to="/devenir-convoyeur" className="hx-switch-btn hx-switch-btn--driver hx-switch-btn--calm">
                 <span className="hx-switch-icon"><CarFront size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Je suis convoyeur</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
-              <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn hx-switch-btn--client">
+              <Link to={isAuthenticated ? homeRoute : "/login"} className="hx-switch-btn hx-switch-btn--client hx-switch-btn--calm">
                 <span className="hx-switch-icon"><House size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Mon espace client</span>
+                <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
+              </Link>
+              <Link to="/suivi" className="hx-switch-btn hx-switch-btn--track hx-switch-btn--calm">
+                <span className="hx-switch-icon"><MapPin size={24} strokeWidth={2.1} aria-hidden="true" /></span>
+                <span className="hx-switch-label">Suivre mon véhicule</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
             </div>
