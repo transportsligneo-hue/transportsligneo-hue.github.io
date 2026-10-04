@@ -184,8 +184,8 @@ function DriverBrand({ size = "md" }: { size?: "sm" | "md" }) {
     <span className="flex items-center gap-2.5 min-w-0">
       <img src={driverBadge.url} alt="Transports Ligneo Driver" className={`${size === "sm" ? "h-8 w-8" : "h-10 w-10"} rounded-lg object-cover shrink-0`} />
       <span className="min-w-0 leading-tight">
-        <span className="driver-brand-title block text-xs font-bold tracking-[0.12em] uppercase truncate">Transports Ligneo</span>
-        <span className="block text-[9px] font-bold tracking-[0.22em] text-[#34E68C] uppercase">Driver</span>
+        <span className="driver-brand-title block text-[11px] font-bold tracking-[0.08em] uppercase whitespace-nowrap">Transports Ligneo</span>
+        <span className="block text-[9px] font-bold tracking-[0.22em] text-[#34E68C] uppercase" style={{ textShadow: "0 0 8px rgba(52,230,140,0.75)" }}>Driver</span>
       </span>
     </span>
   );
