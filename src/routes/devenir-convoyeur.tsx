@@ -68,8 +68,8 @@ function DevenirConvoyeurPage() {
           <div className="dc-eyebrow"><span className="dot" />{gate?.convoyeur ? "Recrutement ouvert" : "Réseau Ligneo"}</div>
           <h1>
             {gate?.convoyeur
-              ? <>Rejoignez le réseau de convoyeurs <span className="accent">Ligneo</span>.</>
-              : <>Notre réseau de convoyeurs est <span className="accent">complet</span>.</>}
+              ? <>Rejoignez le réseau de convoyeurs <span className="accent">Ligneo</span><span className="accent">.</span></>
+              : <>Notre réseau de convoyeurs est <span className="accent">complet</span><span className="accent">.</span></>}
           </h1>
           <p className="dc-lead">
             {gate?.convoyeur
