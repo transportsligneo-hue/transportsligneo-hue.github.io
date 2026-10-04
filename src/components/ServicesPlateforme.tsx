@@ -92,7 +92,7 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
   const total = categories.reduce((n, c) => n + c.items.length, 0);
 
   return (
-    <div className={`r4-page${isPro ? " plateforme-pro" : ""}`} style={{ minHeight: 0 }}>
+    <div className={`r4-page${isPro ? " plateforme-pro" : ""}`} data-audience={variant} style={{ minHeight: 0 }}>
       <section className="plateforme-section">
         <div className="plateforme-head">
           <div className={`v4-hero-eyebrow${isPro ? " v" : ""}`} style={{ justifyContent: "center", width: "100%" }}>

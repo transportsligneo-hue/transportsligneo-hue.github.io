@@ -11,16 +11,16 @@ const faqs = [
   { q: "Proposez-vous un service de plein de carburant ?", a: "Oui, nous pouvons effectuer le plein pour le client final à 2,20 €/L (carburant) ou 1,30 €/kWh (électrique)." },
 ];
 
-export default function FAQ() {
+export default function FAQ({ audience = "particulier" }: { audience?: "particulier" | "pro" }) {
   const [open, setOpen] = useState(0);
   return (
-    <div className="r4-page">
+    <div className="r4-page" data-audience={audience === "pro" ? "pro" : "particuliers"}>
       <div className="v4-faq-section">
         <div className="v4-faq-head">
           <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />FAQ
           </div>
-          <h2>Questions fréquentes</h2>
+           <h2>Questions <span className="audience-accent">fréquentes</span></h2>
         </div>
         {faqs.map((f, i) => (
           <div key={f.q} className={`v4-faq-item ${open === i ? "v4-open" : ""}`}>

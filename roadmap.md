@@ -35,5 +35,5 @@
 - [x] Filtres combinables sur le parc
 - [x] Rôles Administrateur/Logistique/Comptabilité + invitations
 - [x] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide
-- [ ] Accès démo (attend choix utilisateur)
+- [x] Accès démo privé sur invitation avec demande publique et gestion admin.
 - [x] Titres accueil + FAQ : voile bleu + dernier mot bleu électrique (gris #3e4759 retiré), vérifié à l0027écran en clair.
