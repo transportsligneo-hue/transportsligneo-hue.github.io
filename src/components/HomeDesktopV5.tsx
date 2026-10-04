@@ -36,7 +36,7 @@ export default function HomeDesktopV5() {
               <span className="v4-accent">Ligneo s'occupe du reste.</span>
             </h1>
             <p className="hx-sub">
-              Convoyage et logistique automobile France &amp; Europe · Assurance incluse · Suivi GPS · État des lieux
+              Convoyage et logistique automobile France &amp; Europe · Assurance, carburant et péage inclus · Suivi GPS · État des lieux
             </p>
 
             <div className="hx-switch">
