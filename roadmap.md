@@ -23,3 +23,4 @@
 - [x] Statuts, e-mails et SMS : contrôle en lecture seule. (rapport livré)
 - [x] E-mails : slogan en pied de page, accent doré remplacé par le bleu ; pastilles « En attente » convoyeur passées du jaune au bleu.
 - [x] Page /suivi : préfixe MIS-TLG-2026- visible et champ à remplir (#XXX), champs effacés après recherche, statuts différenciés (attente bleu, en route violet, livrée vert, annulée rouge), adresses et prise en charge en bleu néon électrique, clair et sombre vérifiés à l'écran.
+- [x] Page /suivi : infos véhicule (marque, modèle, immatriculation) et nom du destinataire affichés, sans téléphone ni e-mail — vérifié à l'écran (mission #116 : RENAULT RENAULT 5, HK-970-VH, AVEM / Mmm BAISSON Sabine).
