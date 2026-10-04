@@ -851,10 +851,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={e => setHeure(e.target.value)}
                   className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
-              </div>
-            </div>
+               </div>
+             </div>
 
-            {/* CTA principal · pleine largeur, bleu électrique */}
+             {offHoursNotice && <div className="mt-3">{offHoursNotice}</div>}
+
+             {/* CTA principal · pleine largeur, bleu électrique */}
             <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
@@ -990,10 +992,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                   <Clock size={11} className="text-neon-blue" /> Heure de livraison *
                 </label>
-                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
-                  className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
-              </div>
-              <Button variant="ghost"
+                 <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
+                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
+               </div>
+               {offHoursNotice && <div className="col-span-2 md:col-span-3">{offHoursNotice}</div>}
+               <Button variant="ghost"
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={!isComplete}
