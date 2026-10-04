@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, User, Sparkles, Phone, MapPin } from "lucide-react";
+import { Menu, X, User, Sparkles, MapPin } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
