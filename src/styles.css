@@ -6137,9 +6137,6 @@ html.theme-light .r4-page .v4-faq-item { background:#ffffff; }
 html.theme-light .r4-page .v4-faq-q { color:#0f1526; }
 html.theme-light .r4-page .v4-faq-q .plus { border:1px solid rgba(15,21,38,0.10); }
 
-html.theme-light .r4-page .v5-trust { border-top:1px solid rgba(15,21,38,0.10); border-bottom:1px solid rgba(15,21,38,0.10); }
-html.theme-light .r4-page .v5-logo-item { border:1px solid rgba(15,21,38,0.10); }
-html.theme-light .r4-page .v5-logo-item:hover { border-color:rgba(15,21,38,0.10); }
 html.theme-light .r4-page .v5-feat-card { background:#ffffff; }
 html.theme-light .r4-page .v5-feat-card:hover { border-color:rgba(15,21,38,0.10); }
 html.theme-light .r4-page .v5-feat-ic { border:1px solid rgba(15,21,38,0.10); }
