@@ -3681,7 +3681,7 @@ body.is-driver-app .closed-link svg {
 
 .tln-links {
     flex: 1 1 auto; min-width: 0;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: flex-start;
     gap: 5px; margin: 0; padding: 0 6px; list-style: none;
     overflow-x: auto; scrollbar-width: none;
   }
@@ -7257,7 +7257,7 @@ html.theme-light .theme-pref-btn.is-active { background: #2f5fff; color: #ffffff
 }
 .theme-pref--compact .theme-pref-btn {
   gap: 0;
-  padding: 3px 5px;
+  padding: 2px 4px;
   border-radius: 999px;
   font-size: 0;
   font-weight: 700;
@@ -7266,7 +7266,7 @@ html.theme-light .theme-pref-btn.is-active { background: #2f5fff; color: #ffffff
   background: transparent;
   transition: color .18s ease, background .18s ease, box-shadow .18s ease;
 }
-.theme-pref--compact .theme-pref-btn svg { width: 11px; height: 11px; margin: 0; }
+.theme-pref--compact .theme-pref-btn svg { width: 10px; height: 10px; margin: 0; }
 .theme-pref--compact .theme-pref-btn:hover {
   color: #ffffff;
   background: rgba(79,140,255,0.12);
@@ -8657,7 +8657,7 @@ body .tln-bar .r4-nav-link {
 
 /* Navbar : liens élargis qui occupent toute la largeur utile, jamais rognés */
 body .tln-links > li { flex: 0 0 auto !important; }
-body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
+body .tln-links { overflow-x: auto !important; scrollbar-width: none !important; justify-content: flex-start !important; padding-left: 0 !important; padding-right: 0 !important; }
 body .tln-links::-webkit-scrollbar { display: none !important; }
 body .tln-bar-inner { gap: 8px !important; }
 @media (max-width: 1700px) {
