@@ -11100,3 +11100,5 @@ html.theme-light .r4-page .engag-map-card .ligneo-map { padding:0 !important; ma
 .r4-page .engag-map-card .ligneo-map-inner { overflow:hidden; border-radius:18px; }
 .r4-page .engag-map-card .ligneo-map-svg { transform:scale(1.4) translateY(4%); transform-origin:50% 50%; }
 .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements-location { color: var(--audience-accent); }
+html .r4-page .engag-map-card .ligneo-map-inner .ligneo-map-svg { transform:scale(1.45) translateY(3%) !important; }
+html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements-location { color: var(--audience-accent) !important; }
