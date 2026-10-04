@@ -23,7 +23,7 @@ const Email = ({ numero, code, destinataire, suiviUrl }: Props) => (
     />
     <SimpleCard
       title="Comment accéder au suivi ?"
-      subtitle="1. Cliquez sur « Suivre mon véhicule ». 2. Saisissez le numéro de mission et le code confidentiel ci-dessus. 3. La carte affiche la position de votre véhicule pendant le convoyage. Aucun compte n'est nécessaire. Ne partagez ce code qu'avec les personnes concernées."
+      subtitle="1. Cliquez sur « Suivre mon véhicule ». 2. Tapez le numéro de mission : le début (MIS-TLG-2026-) est déjà pré-écrit, il ne reste que le numéro avec le dièse (ex. #116). Saisissez ensuite le code confidentiel ci-dessus. 3. La carte affiche la position de votre véhicule pendant le convoyage. Aucun compte n'est nécessaire. Ne partagez ce code qu'avec les personnes concernées."
     />
   </LigneoEmailShell>
 )
