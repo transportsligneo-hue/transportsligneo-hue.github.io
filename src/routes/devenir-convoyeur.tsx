@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { subscribeNewsletter } from "@/lib/public-content.functions";
 import { useRegistrationGate } from "@/hooks/useRegistrationGate";
 import driverPresentation from "@/assets/presentation-driver-browser.webm.asset.json";
+import logoDriver from "@/assets/logo-driver.png.asset.json";
 
 export const Route = createFileRoute("/devenir-convoyeur")({
   component: DevenirConvoyeurPage,
@@ -56,7 +57,13 @@ function DevenirConvoyeurPage() {
   return (
     <>
       <Navbar driverBadge />
-      <main className="dc-page">
+      <main className="dc-page relative">
+        <img
+          src={logoDriver.url}
+          alt="Transports Ligneo Driver"
+          className="pointer-events-none absolute hidden lg:block select-none"
+          style={{ left: "7%", top: "90px", width: "260px", transform: "rotate(-12deg)", borderRadius: "28px", filter: "drop-shadow(0 0 24px rgba(52,211,153,0.35))", zIndex: 1 }}
+        />
         <div className="dc-wrap">
           <div className="dc-eyebrow"><span className="dot" />{gate?.convoyeur ? "Recrutement ouvert" : "Réseau Ligneo"}</div>
           <h1>
