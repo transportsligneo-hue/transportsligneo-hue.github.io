@@ -68,8 +68,13 @@ export async function trackMission(input: {
     return { found: false, blocked: true };
   }
 
-  const numero = input.numero.trim().toUpperCase();
   const code = normalizeCode(input.code);
+
+  // Le visiteur peut taper le numéro complet (MIS-TLG-2026-#116) ou juste le
+  // numéro court (116) : on normalise vers la recherche la plus souple.
+  const rawNumero = input.numero.trim().toUpperCase();
+  const shortMatch = rawNumero.match(/^#?(\d{1,5})$/);
+  const numeroPattern = shortMatch ? `%#${shortMatch[1]}` : rawNumero;
 
   // Un numéro peut couvrir plusieurs lignes (aller + retour) : on prend la ligne
   // dont le code correspond.
@@ -78,7 +83,7 @@ export async function trackMission(input: {
     .select(
       "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, updated_at, tracking_code",
     )
-    .ilike("numero", numero)
+    .ilike("numero", numeroPattern)
     .limit(5);
 
   const mission = (candidates ?? []).find(
