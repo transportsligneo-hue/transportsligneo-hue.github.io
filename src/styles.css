@@ -9333,7 +9333,7 @@ select {
 }
 
 /* ============ Refonte UX accueil (hx-*) ============ */
-.r4-page .v5-hero--bright .v5-hero-photo { background-position: 30% 28%; filter: brightness(1.25) saturate(1.05); }
+.r4-page .v5-hero--bright .v5-hero-photo { background-position: 20% 28%; filter: brightness(1.25) saturate(1.05); }
 .r4-page .v5-hero--bright .v5-hero-tint { background: linear-gradient(90deg, rgba(6,12,40,0.78) 0%, rgba(6,12,40,0.45) 40%, rgba(6,12,40,0.12) 70%, transparent 100%) !important; mix-blend-mode: normal; }
 .r4-page .v5-hero--bright .v5-hero-grid { grid-template-columns: 1.05fr 1fr; }
 .r4-page .hx-title { font-size: clamp(36px, 3.4vw, 52px); }
