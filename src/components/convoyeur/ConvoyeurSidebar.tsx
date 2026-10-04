@@ -5,7 +5,6 @@ import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import ThemeToggle from "@/components/ThemeToggle";
-import LigneoLockup from "@/components/brand/LigneoLockup";
 import driverBadge from "@/assets/ligneo-driver-badge.png.asset.json";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
