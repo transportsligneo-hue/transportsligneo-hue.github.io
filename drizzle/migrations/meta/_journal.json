@@ -218,6 +218,13 @@
       "when": 1791150055709,
       "tag": "0030_pro_demo_access",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1791151847473,
+      "tag": "0031_inspection_photo_annotations",
+      "breakpoints": true
     }
   ]
 }
