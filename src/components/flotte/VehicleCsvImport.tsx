@@ -39,9 +39,14 @@ export function VehicleCsvImport({ orgId }: { orgId: string }) {
           kilometrage: r.kilometrage ? Number(r.kilometrage.replace(/\s/g, "")) || null : null,
         }));
       if (!rows.length) { toast.error("Aucun véhicule trouvé. Colonnes attendues : immatriculation, marque, modele, vin, energie, couleur, kilometrage."); return; }
-      const { error } = await supabase.from("vehicles").insert(rows);
+      const { data: existing } = await supabase.from("vehicles").select("immatriculation").eq("organization_id", orgId);
+      const known = new Set((existing ?? []).map((v: { immatriculation: string | null }) => v.immatriculation?.toUpperCase()).filter(Boolean));
+      const fresh = rows.filter((r) => !r.immatriculation || !known.has(r.immatriculation));
+      const skipped = rows.length - fresh.length;
+      if (!fresh.length) { toast.info(`Tous les véhicules (${skipped}) sont déjà dans votre parc.`); return; }
+      const { error } = await supabase.from("vehicles").insert(fresh);
       if (error) toast.error("Import impossible : " + error.message);
-      else toast.success(`${rows.length} véhicule(s) importé(s)`);
+      else toast.success(`${fresh.length} véhicule(s) importé(s)${skipped ? ` · ${skipped} déjà présent(s) ignoré(s)` : ""}`);
     } finally {
       setBusy(false);
       if (ref.current) ref.current.value = "";
@@ -54,8 +59,10 @@ export function VehicleCsvImport({ orgId }: { orgId: string }) {
       <button type="button" disabled={busy} onClick={() => ref.current?.click()}
         title="Fichier CSV (Excel : Enregistrer sous > CSV) avec les colonnes immatriculation, marque, modele, vin, energie, couleur, kilometrage"
         className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#eaeaee] bg-white px-3.5 py-2 text-[12px] font-semibold text-[#14161c] hover:border-[#2f5fff]">
-        <Upload size={14} /> {busy ? "Import…" : "Importer un fichier"}
+        <Upload size={14} /> {busy ? "Import…" : "Importer plusieurs véhicules (CSV)"}
       </button>
+      <a href={"data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent("immatriculation;marque;modele;vin;energie;couleur;kilometrage\nAB-123-CD;Renault;Clio;VF1XXXXXXXXXXXXXX;Essence;Blanc;45000\n")}
+        download="modele-import-vehicules.csv" className="text-[12px] font-semibold text-pro-accent underline">Modèle CSV</a>
     </>
   );
 }
