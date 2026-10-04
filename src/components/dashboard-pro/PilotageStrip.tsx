@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CalendarDays, Euro, Layers, PlusCircle, Timer, Truck } from "lucide-react";
+import { HelpTip } from "./HelpTip";
 import { computePilotage, euro, useProMissions } from "@/hooks/useProMissions";
 
 /** Bandeau « comprendre sa situation en 5 secondes » : 4 indicateurs + raccourcis. */
@@ -20,7 +21,7 @@ export function PilotageStrip({ isFlotte }: { isFlotte: boolean }) {
         <div className={`pp-kpi ${k.late > 0 ? "pp-kpi-alert" : ""}`}>
           <AlertTriangle size={18} className="pp-kpi-ico" />
           <span className="pp-kpi-val">{k.late}</span>
-          <span className="pp-kpi-lbl">Missions à surveiller</span>
+          <span className="pp-kpi-lbl">Missions à surveiller <HelpTip text="Missions en retard sur la date prévue ou signalées avec un incident." /></span>
         </div>
         <div className="pp-kpi">
           <Euro size={18} className="pp-kpi-ico" />

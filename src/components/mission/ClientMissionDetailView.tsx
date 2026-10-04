@@ -1,3 +1,4 @@
+import { MissionHistory } from "./MissionHistory";
 import { EdlComparison } from "@/components/mission/EdlComparison";
 import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
 import { Link } from "@tanstack/react-router";
@@ -374,6 +375,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       )}
 
       {attributionId && <EdlComparison attributionId={attributionId} />}
+
+      <MissionHistory missionId={missionId} createdAt={mission?.created_at} />
 
       {attributionId && hasProofs && (
         <div className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
