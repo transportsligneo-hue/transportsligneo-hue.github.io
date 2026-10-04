@@ -60,6 +60,13 @@ export default function HomeDesktopV5() {
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
               </Link>
             </div>
+
+            <div className="hx-contact-row">
+              <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
+                <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
+                Contact
+              </Link>
+            </div>
           </div>
 
           <div id="devis" className="v5-hero-quote scroll-mt-32">
