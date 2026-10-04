@@ -1,5 +1,5 @@
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
-import logoDriver from "@/assets/ligneo-driver-badge.png.asset.json";
+import logoDriver from "@/assets/logo-driver.png.asset.json";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 
 interface Props {

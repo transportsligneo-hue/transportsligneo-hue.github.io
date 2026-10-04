@@ -34,7 +34,7 @@ function LockIcon() {
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ driverBadge = false }: { driverBadge?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function Navbar() {
 
           <div className="tln-bar-inner">
             <Link to="/" className="tln-brand tln-brand--col" aria-label="Accueil · Transports Ligneo">
-              <LigneoLockup size="md" />
+              <LigneoLockup size="md" driverBadge={driverBadge} />
               <span className="or-under-word">
                 <OctobreRoseBadge />
               </span>
