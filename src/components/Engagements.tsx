@@ -38,15 +38,11 @@ export default function Engagements({ audience = "particuliers" }: { audience?: 
             })}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <MapLigneo size="small" />
-            <div style={{ marginTop: 20, textAlign: "center" }}>
-              <p className="engagements-location" style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, letterSpacing: "0.15em", fontSize: 16 }}>
-                Basé à Tours (37)
-              </p>
-              <p style={{ color: "var(--v4-text-muted)", fontSize: 12, marginTop: 4 }}>
-                Au cœur du réseau routier national
-              </p>
+          <div className="hx-map-card engag-map-card">
+            <MapLigneo size="big" />
+            <div className="hx-map-caption">
+              <p className="engagements-location">Basé à Tours (37)</p>
+              <span>Au cœur du réseau routier national</span>
             </div>
           </div>
 
