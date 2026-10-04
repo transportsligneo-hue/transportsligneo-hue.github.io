@@ -1,6 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import ThemeToggle from "@/components/ThemeToggle";
-import { LogOut, Menu, X, type LucideIcon } from "lucide-react";
+import { LifeBuoy, LogOut, Menu, X, type LucideIcon } from "lucide-react";
+import { REPLAY_HELP_EVENT } from "@/components/dashboard-pro/HelpTip";
+
+/** Rouvre les bulles d'aide « ? » de la page courante. */
+export function replayHelpTips() {
+  window.dispatchEvent(new Event(REPLAY_HELP_EVENT));
+}
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -125,6 +131,10 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
         </nav>
 
         <div className="lig-nav p-3 border-t border-pro-border">
+          <button onClick={replayHelpTips} className="lig-nav-logout mb-1" aria-label="Revoir les conseils d'utilisation">
+            <span className="lig-nav-ic"><LifeBuoy size={15} /></span>
+            Revoir les conseils
+          </button>
           <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
           <button onClick={() => logout()} className="lig-nav-logout">
             <span className="lig-nav-ic"><LogOut size={15} /></span>
@@ -194,6 +204,14 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
             </nav>
 
             <div className="lig-nav p-3 border-t border-pro-border">
+              <button
+                onClick={() => { setMobileOpen(false); replayHelpTips(); }}
+                className="lig-nav-logout mb-1"
+                aria-label="Revoir les conseils d'utilisation"
+              >
+                <span className="lig-nav-ic"><LifeBuoy size={15} /></span>
+                Revoir les conseils
+              </button>
               <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
               <button onClick={() => logout()} className="lig-nav-logout">
                 <span className="lig-nav-ic"><LogOut size={15} /></span>
