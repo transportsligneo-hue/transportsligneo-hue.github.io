@@ -11131,3 +11131,19 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .r4-page.services-engagements[data-audience="pro"] .ligneo-map-inner .hub-dot { fill: #a794ff; }
 .r4-page.services-engagements[data-audience="pro"] .ligneo-map-legend-dot { background: #a794ff; box-shadow: 0 0 8px rgba(167,148,255,0.9); }
 .r4-page.services-engagements[data-audience="pro"] .hx-map-card { border-color: rgba(167,148,255,0.28); }
+
+/* ===== Barre de progression de navigation ===== */
+.nav-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 100;
+  overflow: hidden; pointer-events: none;
+}
+.nav-progress::before {
+  content: ""; position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, #3b82f6 40%, #7dd3fc);
+  box-shadow: 0 0 12px rgba(59,130,246,0.8);
+  animation: navProgressSlide 1s ease-in-out infinite;
+}
+@keyframes navProgressSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
