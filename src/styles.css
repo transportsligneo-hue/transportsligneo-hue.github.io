@@ -8926,14 +8926,14 @@ html.theme-light .r4-page .v5-hero .v4-accent {
 .dvx-stat-k { font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#a3a4ac; }
 .dvx-stat-v { font-family:'Space Grotesk', ui-sans-serif, sans-serif; font-size:30px; font-weight:700; letter-spacing:-.02em; color:#14161c; margin-top:8px; line-height:1.05; }
 .dvx-stat-t { margin-top:8px; font-size:11.5px; font-weight:600; }
-.dvx-stat-t.up { color:#16a34a; } .dvx-stat-t.warn { color:#d97706; } .dvx-stat-t.dim { color:#a3a4ac; }
+.dvx-stat-t.up { color:#16a34a; } .dvx-stat-t.warn { color:#2450e0; } .dvx-stat-t.dim { color:#a3a4ac; }
 .dvx-stat-ic { position:absolute; top:16px; right:16px; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff;
   transition:transform .17s ease; }
 .dvx-stat:hover .dvx-stat-ic { transform:scale(1.06) rotate(-4deg); }
 .dvx-stat-ic.blue { background:linear-gradient(135deg,#4f8cff,#2f5fff); box-shadow:0 6px 14px rgba(47,95,255,.30); }
 .dvx-stat-ic.violet { background:linear-gradient(135deg,#a794ff,#7c5cff); box-shadow:0 6px 14px rgba(124,92,255,.30); }
 .dvx-stat-ic.green { background:linear-gradient(135deg,#4ad0a0,#189a72); box-shadow:0 6px 14px rgba(24,154,114,.30); }
-.dvx-stat-ic.orange { background:linear-gradient(135deg,#f0c26e,#c07d1f); box-shadow:0 6px 14px rgba(192,125,31,.28); }
+.dvx-stat-ic.orange { background:linear-gradient(135deg,#6f9bff,#1c3fc4); box-shadow:0 6px 14px rgba(28,63,196,.28); }
 
 /* --- Barre de filtres --- */
 .dvx-filters { display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:#fff; border:1px solid #eaeaee; border-radius:16px; padding:12px 14px; margin-bottom:18px;
@@ -8966,7 +8966,7 @@ html.theme-light .r4-page .v5-hero .v4-accent {
 .dvx-badge.grey { background:#f2f4f9; color:#5d5f6a; border-color:#e4e6ee; }
 .dvx-badge.blue { background:#eef2ff; color:#2f5fff; border-color:#dce6fd; }
 .dvx-badge.green { background:#e9f7ee; color:#15803d; border-color:#cbecd6; }
-.dvx-badge.orange { background:#fdf3e7; color:#b45309; border-color:#f6e0c0; }
+.dvx-badge.orange { background:#e8ecf8; color:#1c3fc4; border-color:#c3cff5; }
 .dvx-badge.red { background:#fdeef1; color:#be1b38; border-color:#f7d3da; }
 .dvx-badge.violet { background:#f2eeff; color:#6d4ce0; border-color:#e0d8fb; }
 .dvx-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -10334,3 +10334,29 @@ html.theme-dark .dashboard-shell-light[data-account-type="client"] { --cream: #e
 html.theme-dark .dashboard-shell-light :is(label, .text-cream, .text-cream\/70, .text-cream\/60, .text-cream\/50) { color: #b7c1e0; }
 html.theme-dark .dashboard-shell-light :is(h1, h2, h3, .font-heading) { color: #e8edfb; }
 html.theme-dark .dashboard-shell-light aside :is(.bg-white) { background-color: #17224a !important; }
+/* Admin v6 : ambre/doré remplacés par le bleu de la charte, et jetons sombres */
+.adm6, [class*="a6-"] { --a6-gold: #2f5fff; --a6-gold-soft: #eaf0ff; --a6-warn: #2450e0; --a6-warn-soft: #eaf0ff; }
+html.theme-dark .admin-shell, html.theme-dark .admin-shell .adm6 {
+  --a6-bg: #0b1026; --a6-surface: #111a3d; --a6-border: #24305c; --a6-border-soft: #1b2650;
+  --a6-text: #e8edfb; --a6-muted: #a9b4d6; --a6-dim: #7f8bb3;
+  --a6-blue: #7fa6ff; --a6-blue-soft: rgba(79,140,255,.14); --a6-gold: #7fa6ff; --a6-gold-soft: rgba(79,140,255,.14);
+  --a6-ok-soft: rgba(24,179,130,.14); --a6-warn: #9dbaff; --a6-warn-soft: rgba(79,140,255,.14);
+  --a6-red-soft: rgba(210,69,69,.16); --a6-violet-soft: rgba(124,92,255,.16);
+}
+html.theme-dark .admin-shell .a6-chip:not(.active) { background: #111a3d; color: #b7c1e0; border-color: #24305c; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) nav.fixed.bottom-0 { background: rgba(11,16,38,.96) !important; border-color: #24305c !important; }
+html.theme-dark :is(.admin-shell, .dashboard-shell-light) nav.fixed.bottom-0 :is(a, button) { color: #b7c1e0; }
+/* Admin factures/devis (dvx) en mode sombre */
+html.theme-dark .admin-shell :is(.dvx-card, .dvx-stat, .dvx-filters, .dvx-veh) { background: #111a3d !important; border-color: #24305c !important; }
+html.theme-dark .admin-shell .dvx-group, html.theme-dark .admin-shell .dvx-tag { background: #17224a !important; border-color: #24305c !important; color: #e8edfb; }
+html.theme-dark .admin-shell :is(.dvx-title, .dvx-price, .dvx-stat-v) { color: #e8edfb !important; }
+html.theme-dark .admin-shell :is(.dvx-sub, .dvx-date, .dvx-check, .dvx-group-t) { color: #a9b4d6 !important; }
+html.theme-dark .admin-shell .dvx-ref { color: #7fa6ff; }
+html.theme-dark .admin-shell .dvx-badge.grey { background: #17224a; color: #b7c1e0; border-color: #24305c; }
+html.theme-dark .admin-shell .dvx-badge.blue, html.theme-dark .admin-shell .dvx-badge.orange { background: rgba(79,140,255,.14); color: #9dbaff; border-color: rgba(79,140,255,.3); }
+html.theme-dark .admin-shell .dvx-badge.green { background: rgba(24,179,130,.14); color: #5ee6a8; border-color: rgba(24,179,130,.3); }
+html.theme-dark .admin-shell .dvx-badge.red { background: rgba(224,51,79,.16); color: #ff8a9a; border-color: rgba(224,51,79,.3); }
+html.theme-dark .admin-shell .dvx-badge.violet { background: rgba(124,92,255,.16); color: #b9a6ff; border-color: rgba(124,92,255,.3); }
+html.theme-dark .admin-shell :is(.bg-\[\#eef2ff\]) { background-color: rgba(79,140,255,.14) !important; }
+html.theme-dark .admin-shell :is(.text-\[\#1c3fc4\]) { color: #9dbaff !important; }
+html.theme-dark .admin-shell :is(.border-\[\#c3cff5\]) { border-color: rgba(79,140,255,.3) !important; }
