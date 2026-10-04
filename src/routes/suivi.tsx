@@ -38,6 +38,9 @@ const STATUT_LABEL: Record<string, { label: string; color: string }> = {
   annulee: { label: "Mission annulée", color: "#ef4444" },
 };
 const STATUT_FALLBACK = { label: "Mission suivie", color: "#4f8cff" };
+
+function SuiviPage() {
+  const [numero, setNumero] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
