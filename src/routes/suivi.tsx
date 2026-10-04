@@ -42,7 +42,11 @@ function SuiviPage() {
   const [numero, setNumero] = useState("");
   useEffect(() => {
     const n = new URLSearchParams(window.location.search).get("numero");
-    if (n) setNumero(n.slice(0, 40));
+    if (!n) return;
+    // Le lien de l'e-mail porte le numéro complet (MIS-TLG-2026-#116) : on ne
+    // pré-remplit que la fin, le préfixe est déjà affiché dans le champ.
+    const suffix = n.toUpperCase().replace(/^MIS-TLG-\d{4}-/i, "");
+    setNumero(suffix.slice(0, 40));
   }, []);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +55,10 @@ function SuiviPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const value = numero.trim();
+    // Le visiteur tape juste la fin du numéro (#116, 260) — le préfixe
+    // MIS-TLG-2026- est déjà affiché. S'il colle le numéro complet, on l'envoie tel quel.
+    const typed = numero.trim().toUpperCase();
+    const value = typed.includes("TLG") ? typed : typed.replace(/^#/, "");
     const codeValue = code.trim();
     if (value.length < 1 || codeValue.length < 4) {
       setError("Numéro ou code incorrect.");
