@@ -211,6 +211,13 @@
       "when": 1791149224698,
       "tag": "0029_pro_team_roles_invites_alerts",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1791150055709,
+      "tag": "0030_pro_demo_access",
+      "breakpoints": true
     }
   ]
 }
