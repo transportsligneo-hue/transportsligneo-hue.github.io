@@ -36,4 +36,4 @@
 - [x] Rôles Administrateur/Logistique/Comptabilité + invitations
 - [x] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide
 - [ ] Accès démo (attend choix utilisateur)
-- [ ] Titres accueil + FAQ : style « Ils nous confient leurs véhicules » (texte sombre avec voile bleu, dernier mot en bleu électrique) ; annuler le gris #3e4759 sur les deux titres de section accueil.
+- [x] Titres accueil + FAQ : voile bleu + dernier mot bleu électrique (gris #3e4759 retiré), vérifié à l0027écran en clair.
