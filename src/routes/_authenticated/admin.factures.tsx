@@ -654,7 +654,7 @@ function ReferenceInline({ row, onSave }: { row: FactureRow; onSave: (id: string
         onClick={() => { setVal(row.reference_client ?? ""); setEditing(true); }}
         className={`inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full border transition ${
           hasRef
-            ? "border-amber-400/60 bg-amber-50 text-amber-800 hover:bg-amber-100"
+            ? "border-[#c3cff5] bg-[#eef2ff] text-[#1c3fc4] hover:bg-[#e2e9ff]"
             : "border-dashed border-pro-border text-pro-muted hover:border-pro-accent hover:text-pro-accent"
         }`}
         title={hasRef ? "Modifier le numéro de commande (PO)" : "Ajouter un numéro de commande / Bon de commande (PO)"}

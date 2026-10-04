@@ -10357,3 +10357,6 @@ html.theme-dark .admin-shell .dvx-badge.blue, html.theme-dark .admin-shell .dvx-
 html.theme-dark .admin-shell .dvx-badge.green { background: rgba(24,179,130,.14); color: #5ee6a8; border-color: rgba(24,179,130,.3); }
 html.theme-dark .admin-shell .dvx-badge.red { background: rgba(224,51,79,.16); color: #ff8a9a; border-color: rgba(224,51,79,.3); }
 html.theme-dark .admin-shell .dvx-badge.violet { background: rgba(124,92,255,.16); color: #b9a6ff; border-color: rgba(124,92,255,.3); }
+html.theme-dark .admin-shell :is(.bg-\[\#eef2ff\]) { background-color: rgba(79,140,255,.14) !important; }
+html.theme-dark .admin-shell :is(.text-\[\#1c3fc4\]) { color: #9dbaff !important; }
+html.theme-dark .admin-shell :is(.border-\[\#c3cff5\]) { border-color: rgba(79,140,255,.3) !important; }
