@@ -7,8 +7,8 @@ import { Link } from "@tanstack/react-router";
 import { ClipboardList, ShieldCheck, MapPin, FileCheck2 } from "lucide-react";
 import demoParticulier from "@/assets/demo-ligneo-particuliers-2.mp4.asset.json";
 import demoParticulierPoster from "@/assets/demo-ligneo-particuliers-poster.jpg.asset.json";
-import demoProfessionnels from "@/assets/demo-ligneo-professionnels-son-faststart.mp4.asset.json";
-import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-son-poster.jpg.asset.json";
+import demoProfessionnels from "@/assets/demo-ligneo-professionnels-commande.mp4.asset.json";
+import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-commande-poster.jpg.asset.json";
 import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 
 const phases = [

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import filmParcoursPro from "@/assets/presentation-professionnels-voix-v2.mp4.asset.json";
-import demoProfessionnels from "@/assets/demo-ligneo-professionnels-son-faststart.mp4.asset.json";
-import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-son-poster.jpg.asset.json";
+import demoProfessionnels from "@/assets/demo-ligneo-professionnels-commande.mp4.asset.json";
+import demoProfessionnelsPoster from "@/assets/demo-ligneo-professionnels-commande-poster.jpg.asset.json";
 import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
 import proPoster from "@/assets/presentation-professionnels-poster-v2.jpg.asset.json";
