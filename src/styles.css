@@ -10998,12 +10998,3 @@ html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.te
 html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-pro-accent, .bg-\[\#2f5fff\], .bg-\[\#2F5FFF\], .bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-indigo-600, .bg-primary) { background-color:#8b3ff5 !important; }
 html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.border-pro-accent, .border-blue-200, .border-blue-300, .border-blue-400, .border-blue-500, .border-blue-600, .border-primary) { border-color:rgba(168,85,247,.55) !important; }
 html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-blue-50, .bg-blue-100, .bg-sky-50, .bg-indigo-50) { background-color:rgba(139,63,245,.14) !important; }
-
-/* ===== Espace professionnel · mode clair : bleu néon → violet électrique ===== */
-html.theme-light .dashboard-shell-light:not([data-account-type="client"]) {
-  --pro-accent:#7c5cff; --pro-accent-deep:#5334d6; --primary:oklch(0.55 0.24 295); --ring:oklch(0.55 0.24 295);
-}
-html.theme-light .dashboard-shell-light:not([data-account-type="client"]) :is(.text-pro-accent, .text-\[\#2f5fff\], .text-\[\#2F5FFF\], .text-blue-300, .text-blue-400, .text-blue-500, .text-blue-600, .text-blue-700, .text-sky-400, .text-sky-500, .text-indigo-400, .text-indigo-500, .text-indigo-600, .text-primary) { color:#7c3aed !important; }
-html.theme-light .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-pro-accent, .bg-\[\#2f5fff\], .bg-\[\#2F5FFF\], .bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-indigo-600, .bg-primary) { background-color:#7c5cff !important; }
-html.theme-light .dashboard-shell-light:not([data-account-type="client"]) :is(.border-pro-accent, .border-blue-200, .border-blue-300, .border-blue-400, .border-blue-500, .border-blue-600, .border-primary) { border-color:rgba(124,92,255,.5) !important; }
-html.theme-light .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-blue-50, .bg-blue-100, .bg-sky-50, .bg-indigo-50) { background-color:rgba(124,92,255,.10) !important; }

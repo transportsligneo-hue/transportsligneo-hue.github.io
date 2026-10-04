@@ -65,7 +65,7 @@ export default function ProSegment() {
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Pour qui ?
           </div>
-          <h2>Une solution pour <span className="v4-accent v">chaque professionnel</span></h2>
+          <h2>Une solution pour chaque professionnel</h2>
         </div>
         <div className="v4-audience-grid">
           {audiences.map(({ Icon, title, desc }) => (
@@ -85,7 +85,7 @@ export default function ProSegment() {
           <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
             <span className="dot" />Fonctionnalités
           </div>
-          <h2>Une plateforme <span className="v4-accent v">pensée pour les pros</span></h2>
+          <h2>Une plateforme pensée pour les pros</h2>
         </div>
         <div className="v4-feat-grid">
           {features.map(({ Icon, title, desc }) => (

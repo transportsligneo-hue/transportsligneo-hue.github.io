@@ -109,7 +109,7 @@ export default function ProTimeline() {
         <div className="v4-hero-eyebrow v" style={{ justifyContent: "center", width: "100%" }}>
           <span className="dot" />Comment ça marche
         </div>
-        <h2>Quatre étapes, <span className="v4-accent v">du devis à la livraison</span></h2>
+        <h2>Quatre étapes, du devis à la livraison</h2>
         <p>Un process industrialisé et traçable, conçu pour les volumes professionnels.</p>
       </div>
       <ol className="pro-tl">
