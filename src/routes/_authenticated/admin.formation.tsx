@@ -141,6 +141,8 @@ function SuiviTab({
   progress: ProgressRow[];
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [state, setState] = useState<"all" | "todo" | "started" | "done">("all");
   const byUser = useMemo(() => {
     const map: Record<string, ProgressRow[]> = {};
     for (const p of progress) (map[p.convoyeur_id] ??= []).push(p);
@@ -152,6 +154,18 @@ function SuiviTab({
     const done = drivers.filter((d) => d.has_completed_training).length;
     return { total: drivers.length, started, done };
   }, [drivers, byUser]);
+
+  const visibleDrivers = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return drivers.filter((d) => {
+      if (q && !`${d.prenom ?? ""} ${d.nom ?? ""} ${d.email ?? ""}`.toLowerCase().includes(q)) return false;
+      const started = (byUser[d.id] ?? []).length > 0;
+      if (state === "done") return d.has_completed_training;
+      if (state === "started") return started && !d.has_completed_training;
+      if (state === "todo") return !started && !d.has_completed_training;
+      return true;
+    });
+  }, [drivers, byUser, query, state]);
 
   return (
     <div className="space-y-4">
@@ -170,8 +184,30 @@ function SuiviTab({
         ))}
       </div>
 
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Rechercher un convoyeur (nom, email)…"
+          className="h-10 flex-1 rounded-lg border border-pro-border bg-white px-3 text-sm text-pro-text placeholder:text-pro-muted focus:outline-none focus:ring-2 focus:ring-pro-accent/30"
+        />
+        <select
+          value={state}
+          onChange={(e) => setState(e.target.value as typeof state)}
+          className="h-10 rounded-lg border border-pro-border bg-white px-3 text-sm text-pro-text"
+        >
+          <option value="all">Tous les états</option>
+          <option value="todo">Non démarrée</option>
+          <option value="started">En cours</option>
+          <option value="done">Validée</option>
+        </select>
+      </div>
+
       <div className="rounded-2xl border border-pro-border bg-white overflow-hidden">
-        {drivers.map((d) => {
+        {visibleDrivers.length === 0 && (
+          <p className="py-10 text-center text-sm text-pro-muted">Aucun convoyeur ne correspond.</p>
+        )}
+        {visibleDrivers.map((d) => {
           const rows = byUser[d.id] ?? [];
           const total = modules.length;
           const rawDone = rows.filter((r) => r.status === "completed").length;

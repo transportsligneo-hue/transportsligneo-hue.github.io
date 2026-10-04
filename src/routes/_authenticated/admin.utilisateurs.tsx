@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, Search, Users, Shield, IdCard, Building2, UserRound,
-  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare,
+  MoreHorizontal, KeyRound, Ban, CheckCircle2, Trash2, UserCog, FileText, Receipt, MessageSquare, Pencil, Save,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +76,7 @@ function AdminUtilisateurs() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | UserCategory>("all");
   const [selected, setSelected] = useState<UnifiedUser | null>(null);
 
   useEffect(() => { void loadUsers(); }, []);
@@ -137,18 +138,32 @@ function AdminUtilisateurs() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return users.filter((u) => {
-      if (roleFilter !== "all" && u.role !== roleFilter) return false;
-      if (statusFilter !== "all" && u.account_status !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        u.email?.toLowerCase().includes(q) ||
-        u.nom.toLowerCase().includes(q) ||
-        u.prenom.toLowerCase().includes(q) ||
-        (u.societe ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [users, search, roleFilter, statusFilter]);
+    return users
+      .filter((u) => {
+        if (categoryFilter !== "all" && categoryOf(u) !== categoryFilter) return false;
+        if (roleFilter !== "all" && u.role !== roleFilter) return false;
+        if (statusFilter !== "all" && u.account_status !== statusFilter) return false;
+        if (!q) return true;
+        return (
+          u.email?.toLowerCase().includes(q) ||
+          (u.nom ?? "").toLowerCase().includes(q) ||
+          (u.prenom ?? "").toLowerCase().includes(q) ||
+          (u.telephone ?? "").toLowerCase().includes(q) ||
+          (u.societe ?? "").toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const d = CATEGORY_ORDER.indexOf(categoryOf(a)) - CATEGORY_ORDER.indexOf(categoryOf(b));
+        if (d !== 0) return d;
+        return `${a.nom ?? ""} ${a.prenom ?? ""}`.localeCompare(`${b.nom ?? ""} ${b.prenom ?? ""}`, "fr");
+      });
+  }, [users, search, roleFilter, statusFilter, categoryFilter]);
+
+  const categoryCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    users.forEach((u) => { const k = categoryOf(u); c[k] = (c[k] ?? 0) + 1; });
+    return c;
+  }, [users]);
 
   const counts = useMemo(() => ({
     total: users.length,
@@ -157,6 +172,8 @@ function AdminUtilisateurs() {
     b2b: users.filter((u) => u.type_client === "b2b").length,
     particuliers: users.filter((u) => u.type_client === "particulier").length,
   }), [users]);
+
+  const hasFilters = categoryFilter !== "all" || roleFilter !== "all" || statusFilter !== "all" || search.trim() !== "";
 
   return (
     <div className="space-y-6">
@@ -177,10 +194,33 @@ function AdminUtilisateurs() {
         <KpiCard label="Particuliers" value={counts.particuliers} icon={UserRound} />
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {(["all", ...CATEGORY_ORDER] as const).map((k) => {
+          const active = categoryFilter === k;
+          const label = k === "all" ? "Tous" : CATEGORY_META[k].label;
+          const n = k === "all" ? users.length : categoryCounts[k] ?? 0;
+          return (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setCategoryFilter(k)}
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                active
+                  ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                  : "border-pro-border bg-white text-pro-text hover:border-blue-400 hover:text-blue-700"
+              }`}
+            >
+              {label}
+              <span className={`rounded-full px-1.5 text-[11px] ${active ? "bg-white/20" : "bg-slate-100 text-slate-600"}`}>{n}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" size={16} />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (email, nom, société)…" className="pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (email, nom, téléphone, société)…" className="pl-9" />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full md:w-48"><SelectValue placeholder="Rôle" /></SelectTrigger>
@@ -204,6 +244,11 @@ function AdminUtilisateurs() {
             <SelectItem value="archived">Archivé</SelectItem>
           </SelectContent>
         </Select>
+        {hasFilters && (
+          <Button variant="outline" onClick={() => { setSearch(""); setRoleFilter("all"); setStatusFilter("all"); setCategoryFilter("all"); }}>
+            Effacer
+          </Button>
+        )}
       </div>
 
       <div className="bg-white border border-pro-border rounded-xl overflow-hidden">
@@ -225,7 +270,31 @@ function AdminUtilisateurs() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((u) => {
+              {filtered.flatMap((u, i) => {
+                const cat = categoryOf(u);
+                const header = i === 0 || categoryOf(filtered[i - 1]) !== cat ? (
+                  <TableRow key={`h-${cat}`} className="bg-slate-50 hover:bg-slate-50">
+                    <TableCell colSpan={7} className="py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      {CATEGORY_META[cat].label} · {categoryCounts[cat] ?? 0}
+                    </TableCell>
+                  </TableRow>
+                ) : null;
+                return [header, renderRow(u)].filter(Boolean);
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      <UserDetailDrawer
+        user={selected}
+        onClose={() => setSelected(null)}
+        onChanged={() => { void loadUsers(); }}
+      />
+    </div>
+  );
+
+  function renderRow(u: UnifiedUser) {
                 const r = roleLabels[u.role] ?? roleLabels.client;
                 const Icon = r.icon;
                 return (
@@ -279,18 +348,105 @@ function AdminUtilisateurs() {
                     </TableCell>
                   </TableRow>
                 );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+  }
+}
 
-      <UserDetailDrawer
-        user={selected}
-        onClose={() => setSelected(null)}
-        onChanged={() => { void loadUsers(); }}
-      />
-    </div>
+type UserCategory = "equipe" | "convoyeur" | "flotte" | "pro" | "particulier";
+const CATEGORY_ORDER: UserCategory[] = ["equipe", "convoyeur", "flotte", "pro", "particulier"];
+const CATEGORY_META: Record<UserCategory, { label: string; tone: "blue" | "green" | "purple" | "amber" | "red" }> = {
+  equipe: { label: "Équipe Ligneo", tone: "amber" },
+  convoyeur: { label: "Convoyeurs", tone: "green" },
+  flotte: { label: "Clients flotte", tone: "purple" },
+  pro: { label: "Clients professionnels", tone: "purple" },
+  particulier: { label: "Clients particuliers", tone: "blue" },
+};
+function categoryOf(u: UnifiedUser): UserCategory {
+  if (["super_admin", "admin", "manager"].includes(u.role)) return "equipe";
+  if (u.role === "convoyeur" || u.role === "sous_traitant") return "convoyeur";
+  if (u.type_client === "flotte") return "flotte";
+  if (u.type_client === "b2b" || u.organization_id || u.societe) return "pro";
+  return "particulier";
+}
+
+function IdentityEditor({ user, onSaved }: { user: UnifiedUser; onSaved: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const init = () => ({
+    prenom: user.prenom ?? "", nom: user.nom ?? "", email: user.email ?? "",
+    telephone: user.telephone ?? "", adresse: user.adresse ?? "",
+    societe: user.societe ?? "", siret: user.siret ?? "",
+  });
+  const [form, setForm] = useState(init);
+  useEffect(() => { setForm(init()); setEditing(false); }, [user.user_id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isConvoyeur = user.role === "convoyeur" || user.role === "sous_traitant" || user.source === "convoyeur";
+
+  async function save() {
+    if (!form.nom.trim() && !form.prenom.trim()) { toast.error("Nom ou prénom requis"); return; }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { toast.error("Email invalide"); return; }
+    setSaving(true);
+    try {
+      const clean = (v: string) => v.trim().slice(0, 200) || null;
+      const errors: string[] = [];
+      if (user.source === "profile") {
+        const { error } = await supabase.from("profiles").update({
+          prenom: form.prenom.trim(), nom: form.nom.trim(), email: clean(form.email),
+          telephone: clean(form.telephone), adresse: clean(form.adresse),
+          societe: clean(form.societe), siret: clean(form.siret),
+        } as never).eq("user_id", user.user_id);
+        if (error) errors.push(error.message);
+      }
+      if (isConvoyeur) {
+        const { error } = await supabase.from("convoyeurs").update({
+          prenom: form.prenom.trim(), nom: form.nom.trim(), email: clean(form.email),
+          telephone: clean(form.telephone),
+          ...(user.source === "convoyeur" ? { ville: clean(form.adresse) } : {}),
+        } as never).eq("user_id", user.user_id);
+        if (error) errors.push(error.message);
+      }
+      if (errors.length) toast.error(errors[0]);
+      else { toast.success("Informations enregistrées"); setEditing(false); onSaved(); }
+    } finally { setSaving(false); }
+  }
+
+  if (!editing) {
+    return (
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50">
+          <Pencil size={14} className="mr-1" /> Modifier les informations
+        </Button>
+      </div>
+    );
+  }
+
+  const field = (key: keyof ReturnType<typeof init>, label: string, type = "text") => (
+    <label className="flex flex-col gap-1">
+      <span className="text-[10px] font-medium uppercase tracking-wider text-slate-600">{label}</span>
+      <Input type={type} value={form[key]} maxLength={200}
+        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        className="bg-white text-slate-900" />
+    </label>
+  );
+
+  return (
+    <DrawerSection title="Modifier l'identité" icon={<Pencil size={12} />}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {field("prenom", "Prénom")}
+        {field("nom", "Nom")}
+        {field("email", "Email", "email")}
+        {field("telephone", "Téléphone", "tel")}
+        <div className="sm:col-span-2">{field("adresse", user.source === "convoyeur" ? "Ville" : "Adresse")}</div>
+        {user.source === "profile" && !isConvoyeur && field("societe", "Société")}
+        {user.source === "profile" && !isConvoyeur && field("siret", "SIRET")}
+      </div>
+      <p className="mt-3 text-xs text-slate-500">L'email modifié ici est l'email de contact ; l'identifiant de connexion reste inchangé.</p>
+      <div className="mt-3 flex justify-end gap-2">
+        <Button size="sm" variant="outline" disabled={saving} onClick={() => { setForm(init()); setEditing(false); }} className="bg-white text-slate-700">Annuler</Button>
+        <Button size="sm" disabled={saving} onClick={save} className="bg-blue-600 hover:bg-blue-700 text-white">
+          {saving ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Save size={14} className="mr-1" />} Enregistrer
+        </Button>
+      </div>
+    </DrawerSection>
   );
 }
 
@@ -461,9 +617,9 @@ function UserDetailDrawer({
       subtitle={user.email ?? "—"}
       badge={
         <div className="flex flex-wrap gap-2">
+          <DrawerBadge tone={CATEGORY_META[categoryOf(user)].tone}>{CATEGORY_META[categoryOf(user)].label}</DrawerBadge>
           <DrawerBadge tone="blue">{roleMeta.label}</DrawerBadge>
           <DrawerBadge tone={suspended ? "red" : "green"}>{user.account_status}</DrawerBadge>
-          {user.type_client && <DrawerBadge tone="slate">{user.type_client}</DrawerBadge>}
         </div>
       }
       footer={
@@ -542,6 +698,7 @@ function UserDetailDrawer({
 
 
         <TabsContent value="profil" className="mt-4 space-y-4">
+          <IdentityEditor user={user} onSaved={onChanged} />
           <DrawerSection title="Identité" icon={<UserRound size={12} />}>
             <DrawerGrid>
               <DrawerField label="Prénom" value={user.prenom} />
