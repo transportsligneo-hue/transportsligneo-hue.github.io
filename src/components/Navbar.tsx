@@ -62,6 +62,8 @@ export default function Navbar() {
               <LigneoLockup size="md" />
             </Link>
 
+            <OctobreRoseBadge />
+
             <span className="tln-sep" aria-hidden="true" />
 
             <ul className="tln-links">

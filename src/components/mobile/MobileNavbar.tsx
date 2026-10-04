@@ -46,6 +46,7 @@ export default function MobileNavbar() {
               TRANSPORTS <span>LIGNEO</span>
             </span>
           </Link>
+          <OctobreRoseBadge compact />
           <div className="flex shrink-0 items-center gap-2">
             <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact md:hidden" aria-label="Appeler Transports Ligneo au 07 82 45 61 81">
               <span className="nav-phone-icon"><Phone size={13} strokeWidth={2.4} /></span>
