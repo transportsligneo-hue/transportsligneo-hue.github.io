@@ -452,11 +452,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
   // Message majoration hors horaires / week-end (n'efface jamais la saisie)
   const offHoursNotice = offHours ? (
-    <div className="flex items-start gap-3 rounded-xl border border-neon-blue/40 bg-neon-blue/10 px-4 py-3">
-      <Clock size={16} className="mt-0.5 shrink-0 text-neon-blue" />
-      <p className="text-[13px] leading-relaxed text-cream/90">
-        <strong className="font-semibold text-neon-blue">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
-        Une majoration de <strong className="font-semibold text-neon-blue">+30&nbsp;%</strong> s'applique à votre estimation — elle est déjà incluse dans le prix affiché.
+    <div className="flex items-start gap-3 rounded-xl border border-[#3b82f6]/60 bg-[#0c1a3f]/95 px-4 py-3 shadow-[0_10px_30px_-12px_rgba(59,130,246,0.55)]">
+      <Clock size={16} className="mt-0.5 shrink-0 text-[#60a5fa]" />
+      <p className="text-[13px] leading-relaxed text-[#dbe6ff]">
+        <strong className="font-semibold text-[#7db4ff]">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
+        Une majoration de <strong className="font-semibold text-[#7db4ff]">+30&nbsp;%</strong> s'applique à votre estimation — elle est déjà incluse dans le prix affiché.
       </p>
     </div>
   ) : null;
