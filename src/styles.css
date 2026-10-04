@@ -10360,3 +10360,14 @@ html.theme-dark .admin-shell .dvx-badge.violet { background: rgba(124,92,255,.16
 html.theme-dark .admin-shell :is(.bg-\[\#eef2ff\]) { background-color: rgba(79,140,255,.14) !important; }
 html.theme-dark .admin-shell :is(.text-\[\#1c3fc4\]) { color: #9dbaff !important; }
 html.theme-dark .admin-shell :is(.border-\[\#c3cff5\]) { border-color: rgba(79,140,255,.3) !important; }
+
+/* Pro dark-mode finishing: sidebar org card, tabs, KPI hints, pending pill */
+html.theme-dark .dashboard-shell-light :is(.v3-tab) { background: #17224a; color: #b7c1e0; border-color: #24305c; }
+html.theme-dark .dashboard-shell-light .v3-tab.active { background: #5334d6; color: #fff; border-color: #7c5cff; }
+html.theme-dark .dashboard-shell-light aside :is([class*="bg-slate-50"], [class*="bg-gray-50"], [class*="bg-pro-bg-soft"], [class*="bg-[#f"]) { background-color: #17224a !important; color: #e8edfb; }
+html.theme-dark .dashboard-shell-light :is(.bg-pro-bg-soft, .bg-slate-100, .bg-slate-200) { background-color: #17224a !important; }
+html.theme-dark .dashboard-shell-light :is(.text-pro-muted, .text-v3-dim, .text-slate-400, .text-slate-500, .text-gray-400, .text-gray-500) { color: #9aa6cc !important; }
+html.theme-dark .dashboard-shell-light { --v3-warn: #b9a6ff; --v3-warn-soft: rgba(124,92,255,.16); }
+html.theme-dark .dashboard-shell-light[data-account-type="client"] { --v3-warn: #9dbaff; --v3-warn-soft: rgba(79,140,255,.16); }
+.dashboard-shell-light { --v3-warn: #5334d6; --v3-warn-soft: #f2eeff; }
+.dashboard-shell-light[data-account-type="client"] { --v3-warn: #2f5fff; --v3-warn-soft: #eaf0ff; }
