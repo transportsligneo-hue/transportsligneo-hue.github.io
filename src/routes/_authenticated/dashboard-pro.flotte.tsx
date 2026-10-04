@@ -14,6 +14,7 @@ import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { lookupPlate } from "@/lib/plate.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { VehicleCsvImport } from "@/components/flotte/VehicleCsvImport";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
@@ -302,6 +303,7 @@ function FleetPage() {
               >
                 Coûts & TCO
               </Link>
+              {canManage && orgId ? <VehicleCsvImport orgId={orgId} /> : null}
               {canManage ? (
                 <FleetHeaderButton onClick={openCreate}>
                   <Plus size={14} /> Ajouter un véhicule

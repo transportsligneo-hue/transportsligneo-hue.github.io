@@ -10669,3 +10669,7 @@ html.theme-dark .pp-chip-clear{color:#f472b6}
 .edl-cmp-thumb--alert{border-color:rgba(239,68,68,.7);box-shadow:0 0 10px rgba(239,68,68,.3)}
 html.theme-dark .edl-cmp-alert{color:#fca5a5}
 html.theme-dark .edl-cmp-ok{color:#86efac}
+
+/* Bulle d'aide « ? » espace pro */
+.pp-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:4px;border-radius:999px;font-size:10px;font-weight:700;line-height:1;color:#a855f7;border:1px solid rgba(168,85,247,.55);background:rgba(168,85,247,.08);vertical-align:middle;transition:box-shadow .15s}
+.pp-help:hover,.pp-help:focus-visible{box-shadow:0 0 8px rgba(168,85,247,.55)}
