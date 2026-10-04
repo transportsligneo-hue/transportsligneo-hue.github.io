@@ -155,24 +155,31 @@ function SuiviPage() {
             <div className="rounded-2xl border border-[#7aa3ff]/20 bg-white/[0.03] p-6">
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <span
-                  className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                  style={{ background: `${statut.color}1f`, color: statut.color }}
+                  className="suivi-badge inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
+                  style={{
+                    background: `${statut.color}1f`,
+                    color: statut.color,
+                    border: `1px solid ${statut.color}44`,
+                    boxShadow: `0 0 18px -6px ${statut.color}`,
+                  }}
                 >
                   <PackageCheck size={14} /> {statut.label}
                 </span>
                 <span className="text-[12.5px] text-[#9aa6c9]">Mission {result.numero}</span>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex items-start gap-2.5 text-[13.5px] text-[#c7d0e8]">
-                  <MapPin size={16} className="mt-0.5 shrink-0 text-[#4f8cff]" />
-                  <span>
-                    {result.ville_depart || "Départ"} → {result.ville_arrivee || "Arrivée"}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex items-start gap-2.5 text-[13.5px]">
+                  <MapPin size={16} className="suivi-ico mt-0.5 shrink-0" />
+                  <span className="suivi-txt-depart">
+                    {result.ville_depart || "Départ"}
                   </span>
+                  <span className="shrink-0 text-[#8fa0c4]">→</span>
+                  <span className="suivi-txt-arrivee">{result.ville_arrivee || "Arrivée"}</span>
                 </div>
-                <div className="flex items-start gap-2.5 text-[13.5px] text-[#c7d0e8]">
-                  <Clock size={16} className="mt-0.5 shrink-0 text-[#d9b54a]" />
-                  <span>
+                <div className="flex items-start gap-2.5 text-[13.5px]">
+                  <Clock size={16} className="suivi-ico suivi-ico-horloge mt-0.5 shrink-0" />
+                  <span className="suivi-txt-horloge">
                     {result.date_prise_en_charge
                       ? `Prise en charge prévue le ${new Date(result.date_prise_en_charge).toLocaleDateString("fr-FR")}`
                       : "Date de prise en charge à confirmer"}
