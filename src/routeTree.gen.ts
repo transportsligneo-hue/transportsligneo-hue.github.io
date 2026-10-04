@@ -49,6 +49,7 @@ import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certi
 import { Route as SignerTokenRouteImport } from './routes/signer.$token'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
+import { Route as InvitationEquipeTokenRouteImport } from './routes/invitation-equipe.$token'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
 import { Route as DevisTokenRouteImport } from './routes/devis.$token'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -104,6 +105,7 @@ import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './
 import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/_authenticated/dashboard-pro.missions'
 import { Route as AuthenticatedDashboardProFlotteRouteImport } from './routes/_authenticated/dashboard-pro.flotte'
 import { Route as AuthenticatedDashboardProFideliteRouteImport } from './routes/_authenticated/dashboard-pro.fidelite'
+import { Route as AuthenticatedDashboardProEquipeRouteImport } from './routes/_authenticated/dashboard-pro.equipe'
 import { Route as AuthenticatedDashboardProDocumentsRouteImport } from './routes/_authenticated/dashboard-pro.documents'
 import { Route as AuthenticatedDashboardProDevisInstantaneRouteImport } from './routes/_authenticated/dashboard-pro.devis-instantane'
 import { Route as AuthenticatedDashboardProConducteursRouteImport } from './routes/_authenticated/dashboard-pro.conducteurs'
@@ -412,6 +414,11 @@ const PaiementConfirmationRoute = PaiementConfirmationRouteImport.update({
   path: '/paiement/confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvitationEquipeTokenRoute = InvitationEquipeTokenRouteImport.update({
+  id: '/invitation-equipe/$token',
+  path: '/invitation-equipe/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InvitationConvoyeurTokenRoute =
   InvitationConvoyeurTokenRouteImport.update({
     id: '/invitation-convoyeur/$token',
@@ -716,6 +723,12 @@ const AuthenticatedDashboardProFideliteRoute =
   AuthenticatedDashboardProFideliteRouteImport.update({
     id: '/fidelite',
     path: '/fidelite',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProEquipeRoute =
+  AuthenticatedDashboardProEquipeRouteImport.update({
+    id: '/equipe',
+    path: '/equipe',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProDocumentsRoute =
@@ -1402,6 +1415,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/signer/$token': typeof SignerTokenRoute
@@ -1470,6 +1484,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/equipe': typeof AuthenticatedDashboardProEquipeRoute
   '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
@@ -1600,6 +1615,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/signer/$token': typeof SignerTokenRoute
@@ -1667,6 +1683,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/dashboard-pro/equipe': typeof AuthenticatedDashboardProEquipeRoute
   '/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
@@ -1803,6 +1820,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
+  '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
   '/signer/$token': typeof SignerTokenRoute
@@ -1871,6 +1889,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/conducteurs': typeof AuthenticatedDashboardProConducteursRoute
   '/_authenticated/dashboard-pro/devis-instantane': typeof AuthenticatedDashboardProDevisInstantaneRoute
   '/_authenticated/dashboard-pro/documents': typeof AuthenticatedDashboardProDocumentsRoute
+  '/_authenticated/dashboard-pro/equipe': typeof AuthenticatedDashboardProEquipeRoute
   '/_authenticated/dashboard-pro/fidelite': typeof AuthenticatedDashboardProFideliteRoute
   '/_authenticated/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/_authenticated/dashboard-pro/missions': typeof AuthenticatedDashboardProMissionsRouteWithChildren
@@ -2009,6 +2028,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
+    | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/signer/$token'
@@ -2077,6 +2097,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/equipe'
     | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/missions'
@@ -2207,6 +2228,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
+    | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/signer/$token'
@@ -2274,6 +2296,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/conducteurs'
     | '/dashboard-pro/devis-instantane'
     | '/dashboard-pro/documents'
+    | '/dashboard-pro/equipe'
     | '/dashboard-pro/fidelite'
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
@@ -2409,6 +2432,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
+    | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
     | '/signer/$token'
@@ -2477,6 +2501,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/conducteurs'
     | '/_authenticated/dashboard-pro/devis-instantane'
     | '/_authenticated/dashboard-pro/documents'
+    | '/_authenticated/dashboard-pro/equipe'
     | '/_authenticated/dashboard-pro/fidelite'
     | '/_authenticated/dashboard-pro/flotte'
     | '/_authenticated/dashboard-pro/missions'
@@ -2605,6 +2630,7 @@ export interface RootRouteChildren {
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   DevisTokenRoute: typeof DevisTokenRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
+  InvitationEquipeTokenRoute: typeof InvitationEquipeTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
   SignerTokenRoute: typeof SignerTokenRoute
@@ -2939,6 +2965,13 @@ declare module '@tanstack/react-router' {
       path: '/paiement/confirmation'
       fullPath: '/paiement/confirmation'
       preLoaderRoute: typeof PaiementConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitation-equipe/$token': {
+      id: '/invitation-equipe/$token'
+      path: '/invitation-equipe/$token'
+      fullPath: '/invitation-equipe/$token'
+      preLoaderRoute: typeof InvitationEquipeTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invitation-convoyeur/$token': {
@@ -3324,6 +3357,13 @@ declare module '@tanstack/react-router' {
       path: '/fidelite'
       fullPath: '/dashboard-pro/fidelite'
       preLoaderRoute: typeof AuthenticatedDashboardProFideliteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/equipe': {
+      id: '/_authenticated/dashboard-pro/equipe'
+      path: '/equipe'
+      fullPath: '/dashboard-pro/equipe'
+      preLoaderRoute: typeof AuthenticatedDashboardProEquipeRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/documents': {
@@ -4393,6 +4433,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProConducteursRoute: typeof AuthenticatedDashboardProConducteursRoute
   AuthenticatedDashboardProDevisInstantaneRoute: typeof AuthenticatedDashboardProDevisInstantaneRoute
   AuthenticatedDashboardProDocumentsRoute: typeof AuthenticatedDashboardProDocumentsRoute
+  AuthenticatedDashboardProEquipeRoute: typeof AuthenticatedDashboardProEquipeRoute
   AuthenticatedDashboardProFideliteRoute: typeof AuthenticatedDashboardProFideliteRoute
   AuthenticatedDashboardProFlotteRoute: typeof AuthenticatedDashboardProFlotteRoute
   AuthenticatedDashboardProMissionsRoute: typeof AuthenticatedDashboardProMissionsRouteWithChildren
@@ -4418,6 +4459,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProDevisInstantaneRoute,
     AuthenticatedDashboardProDocumentsRoute:
       AuthenticatedDashboardProDocumentsRoute,
+    AuthenticatedDashboardProEquipeRoute: AuthenticatedDashboardProEquipeRoute,
     AuthenticatedDashboardProFideliteRoute:
       AuthenticatedDashboardProFideliteRoute,
     AuthenticatedDashboardProFlotteRoute: AuthenticatedDashboardProFlotteRoute,
@@ -4595,6 +4637,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   DevisTokenRoute: DevisTokenRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
+  InvitationEquipeTokenRoute: InvitationEquipeTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
   SignerTokenRoute: SignerTokenRoute,
