@@ -1,3 +1,4 @@
+import { PASS_SCORE } from "@/lib/formation/types";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Clock3, Download, Loader2, Target, Video, CheckCircle2 } from "lucide-react";

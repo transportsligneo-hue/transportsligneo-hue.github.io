@@ -37,7 +37,7 @@ function renderInline(text: string, key: string) {
   }
   if (last < text.length) parts.push(text.slice(last));
   // Gras : **texte**
-  return parts.flatMap((p, pi) =>
+  return parts.flatMap((p, pi): React.ReactNode[] =>
     typeof p !== "string"
       ? [p]
       : p.split(/\*\*(.+?)\*\*/g).map((s, si) =>
