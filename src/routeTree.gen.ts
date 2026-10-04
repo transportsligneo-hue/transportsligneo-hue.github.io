@@ -100,6 +100,7 @@ import { Route as AuthenticatedEntrepriseMembresRouteImport } from './routes/_au
 import { Route as AuthenticatedEntrepriseFacturesRouteImport } from './routes/_authenticated/entreprise.factures'
 import { Route as AuthenticatedDashboardProTcoRouteImport } from './routes/_authenticated/dashboard-pro.tco'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
+import { Route as AuthenticatedDashboardProSitesRouteImport } from './routes/_authenticated/dashboard-pro.sites'
 import { Route as AuthenticatedDashboardProRapportsRouteImport } from './routes/_authenticated/dashboard-pro.rapports'
 import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission'
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
@@ -694,6 +695,12 @@ const AuthenticatedDashboardProSocieteRoute =
   AuthenticatedDashboardProSocieteRouteImport.update({
     id: '/societe',
     path: '/societe',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProSitesRoute =
+  AuthenticatedDashboardProSitesRouteImport.update({
+    id: '/sites',
+    path: '/sites',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProRapportsRoute =
@@ -1506,6 +1513,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -1705,6 +1713,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -1915,6 +1924,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/_authenticated/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/_authenticated/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/_authenticated/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
   '/_authenticated/entreprise/factures': typeof AuthenticatedEntrepriseFacturesRoute
@@ -2125,6 +2135,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/rapports'
+    | '/dashboard-pro/sites'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
     | '/entreprise/factures'
@@ -2324,6 +2335,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/rapports'
+    | '/dashboard-pro/sites'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
     | '/entreprise/factures'
@@ -2533,6 +2545,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/nouvelle-mission'
     | '/_authenticated/dashboard-pro/rapports'
+    | '/_authenticated/dashboard-pro/sites'
     | '/_authenticated/dashboard-pro/societe'
     | '/_authenticated/dashboard-pro/tco'
     | '/_authenticated/entreprise/factures'
@@ -3348,6 +3361,13 @@ declare module '@tanstack/react-router' {
       path: '/societe'
       fullPath: '/dashboard-pro/societe'
       preLoaderRoute: typeof AuthenticatedDashboardProSocieteRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/sites': {
+      id: '/_authenticated/dashboard-pro/sites'
+      path: '/sites'
+      fullPath: '/dashboard-pro/sites'
+      preLoaderRoute: typeof AuthenticatedDashboardProSitesRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/rapports': {
@@ -4482,6 +4502,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
   AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   AuthenticatedDashboardProRapportsRoute: typeof AuthenticatedDashboardProRapportsRoute
+  AuthenticatedDashboardProSitesRoute: typeof AuthenticatedDashboardProSitesRoute
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProTcoRoute: typeof AuthenticatedDashboardProTcoRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
@@ -4513,6 +4534,7 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProNouvelleMissionRouteWithChildren,
     AuthenticatedDashboardProRapportsRoute:
       AuthenticatedDashboardProRapportsRoute,
+    AuthenticatedDashboardProSitesRoute: AuthenticatedDashboardProSitesRoute,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
     AuthenticatedDashboardProTcoRoute: AuthenticatedDashboardProTcoRoute,
