@@ -7195,6 +7195,24 @@ html.theme-light .dg-estimator span,
 html.theme-light .dg-estimator input,
 html.theme-light .dg-estimator select,
 html.theme-light .dg-estimator textarea { color: #0f1526 !important; }
+
+/* ---- Majoration hors horaires / week-end (+30 %) ---- */
+.dg-offhours {
+  background: #0c1a3f;
+  border: 1px solid rgba(59,130,246,0.6);
+  box-shadow: 0 10px 30px -12px rgba(59,130,246,0.55);
+}
+.dg-offhours-ic { color: #60a5fa; }
+.dg-offhours-txt { color: #dbe6ff !important; }
+.dg-offhours-strong { color: #7db4ff !important; }
+html.theme-light .dg-offhours {
+  background: #eaf2ff !important;
+  border-color: rgba(47,95,255,0.45) !important;
+  box-shadow: 0 10px 26px -14px rgba(47,95,255,0.45);
+}
+html.theme-light .dg-offhours-ic { color: #2f5fff !important; }
+html.theme-light .dg-offhours-txt { color: #1e2a4a !important; }
+html.theme-light .dg-offhours-strong { color: #2f5fff !important; }
 html.theme-light .dg-estimator [class*="text-white/6"],
 html.theme-light .dg-estimator [class*="text-white/7"],
 html.theme-light .dg-estimator [class*="text-white/5"],
