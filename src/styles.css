@@ -10336,7 +10336,7 @@ html.theme-dark .dashboard-shell-light :is(h1, h2, h3, .font-heading) { color: #
 html.theme-dark .dashboard-shell-light aside :is(.bg-white) { background-color: #17224a !important; }
 /* Admin v6 : ambre/doré remplacés par le bleu de la charte, et jetons sombres */
 .adm6, [class*="a6-"] { --a6-gold: #2f5fff; --a6-gold-soft: #eaf0ff; --a6-warn: #2450e0; --a6-warn-soft: #eaf0ff; }
-html.theme-dark .admin-shell {
+html.theme-dark .admin-shell, html.theme-dark .admin-shell .adm6 {
   --a6-bg: #0b1026; --a6-surface: #111a3d; --a6-border: #24305c; --a6-border-soft: #1b2650;
   --a6-text: #e8edfb; --a6-muted: #a9b4d6; --a6-dim: #7f8bb3;
   --a6-blue: #7fa6ff; --a6-blue-soft: rgba(79,140,255,.14); --a6-gold: #7fa6ff; --a6-gold-soft: rgba(79,140,255,.14);
