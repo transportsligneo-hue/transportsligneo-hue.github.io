@@ -10688,3 +10688,8 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
   .r4-page .hx-split-map .hx-map-card .ligneo-map { flex:1; justify-content:center; }
   .r4-page .hx-split-map .hx-map-card .ligneo-map-card { aspect-ratio:auto; flex:1; transform:scale(1.35); transform-origin:center; }
 }
+@media (min-width: 1081px) {
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-inner { overflow:hidden; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-svg { transform:scale(1.9) !important; transform-origin:52% 50%; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-card { transform:none !important; }
+}
