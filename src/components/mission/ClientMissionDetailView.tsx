@@ -1,3 +1,4 @@
+import { EdlComparison } from "@/components/mission/EdlComparison";
 import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -371,6 +372,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           hideLiveTracker
         />
       )}
+
+      {attributionId && <EdlComparison attributionId={attributionId} />}
 
       {attributionId && hasProofs && (
         <div className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
