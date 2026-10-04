@@ -420,10 +420,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType && date && heure);
+
+  // Majoration hors horaires / week-end : +30 % si livraison avant 8h, après 19h, samedi ou dimanche
+  const offHours = useMemo(() => {
+    let weekend = false;
+    if (date) {
+      const day = new Date(`${date}T12:00:00`).getDay();
+      weekend = day === 0 || day === 6;
+    }
+    let offHour = false;
+    if (heure) {
+      const h = parseInt(heure.split(":")[0] ?? "", 10);
+      if (!Number.isNaN(h)) offHour = h < 8 || h >= 19;
+    }
+    return weekend || offHour ? { weekend, offHour } : null;
+  }, [date, heure]);
+
   // priceTTC = source de vérité affichée. En micro-entreprise (franchise en base de TVA),
   // le prix affiché est le net à payer : aucune ventilation HT / TVA.
   const localTtc = pricing?.finalPrice ?? 0;
-  const priceTTC = serverTtc ?? localTtc;
+  const baseTtc = serverTtc ?? localTtc;
+  const priceTTC = offHours ? Math.round(baseTtc * 1.3) : baseTtc;
   const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
 
