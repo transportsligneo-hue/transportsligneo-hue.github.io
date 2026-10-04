@@ -10952,3 +10952,49 @@ html.theme-light .r4-page .v4-cta-box h2 {
   .or-ribbon .or-ribbon-label { display: none; }
   .or-ribbon { padding: 4px 7px; }
 }
+
+/* ===== Accueil · « Ils nous confient leurs véhicules » en violet néon ===== */
+.r4-page .v5-trust-label { color:#c4a6ff; text-shadow:0 0 26px rgba(168,85,247,.6), 0 0 56px rgba(168,85,247,.32); }
+.r4-page .v5-trust-label .hx-neon,
+html.theme-light .r4-page .v5-trust-label .hx-neon { color:#a855f7 !important; -webkit-text-fill-color:#a855f7;
+  text-shadow:0 0 18px rgba(168,85,247,.6), 0 0 36px rgba(139,63,245,.3) !important; }
+html.theme-light .r4-page .v5-trust-label { text-shadow:0 0 18px rgba(168,85,247,.35), 0 0 34px rgba(168,85,247,.18) !important; }
+.r4-page .v5-logo-item img { filter:drop-shadow(0 0 10px rgba(168,85,247,.55)) drop-shadow(0 0 22px rgba(217,70,239,.3)); }
+
+/* ===== Contact · bleu néon identique à l'accueil ===== */
+.r4-page .v4-c-ic { color:#6ea1ff; }
+.r4-page .v4-c-ic svg { filter:drop-shadow(0 0 6px rgba(79,139,255,.7)); }
+.r4-page .v4-contact-title span { color:#6ea1ff; text-shadow:0 0 18px rgba(79,139,255,.55), 0 0 36px rgba(47,95,255,.3); }
+html.theme-light .r4-page .v4-c-ic,
+html.theme-light .r4-page .v4-c-value,
+html.theme-light .r4-page .v4-c-arrow,
+html.theme-light .r4-page .v4-contact-title span { color:#2f5fff; }
+html.theme-light .r4-page .v4-contact-title span { text-shadow:0 0 14px rgba(47,95,255,.25); }
+html.theme-light .r4-page .v4-c-ic svg { filter:drop-shadow(0 0 5px rgba(47,95,255,.35)); }
+
+/* ===== Contact · profil Professionnel → violet électrique ===== */
+.r4-page.contact-pro .v4-hero .v4-accent,
+.r4-page.contact-pro .v4-contact-title span { color:#b07cff !important; -webkit-text-fill-color:#b07cff; text-shadow:0 0 18px rgba(168,85,247,.55), 0 0 36px rgba(139,63,245,.3); }
+.r4-page.contact-pro .v4-hero-eyebrow { color:#c4a6ff; border-color:rgba(168,85,247,.45); }
+.r4-page.contact-pro .v4-hero-eyebrow .dot { background:#a855f7; box-shadow:0 0 8px #a855f7; }
+.r4-page.contact-pro .v4-c-ic { color:#c084fc !important; background:linear-gradient(150deg, rgba(168,85,247,.3), rgba(168,85,247,.08)) !important; border-color:rgba(192,132,252,.45) !important; animation:none; box-shadow:0 0 16px rgba(168,85,247,.4); }
+.r4-page.contact-pro .v4-c-ic svg { filter:drop-shadow(0 0 6px rgba(168,85,247,.7)); }
+.r4-page.contact-pro .v4-c-value:hover, .r4-page.contact-pro .v4-contact-tile:hover .v4-c-value { color:#c084fc !important; text-shadow:0 0 14px rgba(168,85,247,.5); }
+.r4-page.contact-pro .v4-c-arrow { color:#c084fc !important; }
+.r4-page.contact-pro .v4-contact-tile:hover { border-color:rgba(192,132,252,.55) !important; background:rgba(168,85,247,.10) !important; box-shadow:0 12px 28px -10px rgba(168,85,247,.45) !important; }
+.r4-page.contact-pro .v4-call-btn { background:linear-gradient(120deg,#7c4dff,#8b3ff5 60%,#d946ef) !important; box-shadow:0 14px 30px rgba(139,63,245,.45) !important; }
+.r4-page.contact-pro .v4-call-btn:hover { box-shadow:0 20px 44px rgba(139,63,245,.6), 0 0 24px rgba(217,70,239,.45) !important; }
+html.theme-light .r4-page.contact-pro .v4-hero .v4-accent,
+html.theme-light .r4-page.contact-pro .v4-contact-title span,
+html.theme-light .r4-page.contact-pro .v4-c-value { color:#7c3aed !important; -webkit-text-fill-color:#7c3aed; }
+html.theme-light .r4-page.contact-pro .v4-c-ic { color:#7c3aed !important; background:linear-gradient(150deg, rgba(124,58,237,.16), rgba(124,58,237,.05)) !important; border-color:rgba(124,58,237,.3) !important; }
+html.theme-light .r4-page.contact-pro .v4-contact-tile { background:rgba(124,58,237,.05); border-color:rgba(124,58,237,.18); }
+
+/* ===== Espace professionnel · mode sombre : bleu néon → violet électrique ===== */
+html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) {
+  --pro-accent:#b07cff; --primary:oklch(0.62 0.24 300); --ring:oklch(0.62 0.24 300);
+}
+html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.text-pro-accent, .text-\[\#2f5fff\], .text-\[\#2F5FFF\], .text-blue-300, .text-blue-400, .text-blue-500, .text-blue-600, .text-blue-700, .text-sky-400, .text-sky-500, .text-indigo-400, .text-indigo-500, .text-indigo-600, .text-primary) { color:#c084fc !important; }
+html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-pro-accent, .bg-\[\#2f5fff\], .bg-\[\#2F5FFF\], .bg-blue-500, .bg-blue-600, .bg-blue-700, .bg-indigo-600, .bg-primary) { background-color:#8b3ff5 !important; }
+html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.border-pro-accent, .border-blue-200, .border-blue-300, .border-blue-400, .border-blue-500, .border-blue-600, .border-primary) { border-color:rgba(168,85,247,.55) !important; }
+html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg-blue-50, .bg-blue-100, .bg-sky-50, .bg-indigo-50) { background-color:rgba(139,63,245,.14) !important; }

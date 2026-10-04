@@ -104,7 +104,7 @@ ${form.message}`;
   };
 
   return (
-    <div className="r4-page">
+    <div className={`r4-page${profil === "pro" ? " contact-pro" : ""}`}>
       <div className="v4-hero">
         <div className="v4-hero-eyebrow"><span className="dot" />Contact</div>
         <h1 className="v4-h1">Contactez l'équipe <span className="v4-accent">Transports Ligneo</span></h1>
