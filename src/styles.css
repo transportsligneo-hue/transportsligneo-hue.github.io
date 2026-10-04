@@ -6124,8 +6124,10 @@ html.theme-light .r4-page .v4-contact-tile:hover, html.theme-light .r4-page .v4-
 html.theme-light .r4-page .v4-contact-tile:hover .v4-c-value, html.theme-light .r4-page .v4-contact-tile:focus-visible .v4-c-value { color:#2450e0; text-shadow:none; }
 html.theme-light .r4-page .v4-contact-tile:hover .v4-c-ic, html.theme-light .r4-page .v4-contact-tile:focus-visible .v4-c-ic { color:#2450e0; }
 html.theme-light .r4-page .v4-c-arrow { color:#2450e0; }
-html.theme-light .r4-page .v4-contact-title span { color:#2450e0; }
+html.theme-light .r4-page .v4-contact-title span { color:#2450e0; text-shadow:none; }
 html.theme-light .r4-page .v4-contact-title { color:#0f1526; }
+html.theme-light .r4-page .v4-c-ic { color:#2450e0; background:linear-gradient(150deg, rgba(63,123,255,0.16), rgba(63,123,255,0.06));
+  border:1px solid rgba(63,123,255,0.30); }
 html.theme-light .r4-page .v4-form-tabs .t.active { color:#0f1526; }
 html.theme-light .r4-page .v4-field input, .r4-page .v4-field textarea, .r4-page .v4-field select { color:#0f1526; }
 html.theme-light .r4-page .v4-field input:focus, .r4-page .v4-field textarea:focus, .r4-page .v4-field select:focus { border-color:rgba(15,21,38,0.10); }
