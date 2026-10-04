@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, User, Sparkles, Phone, MapPin } from "lucide-react";
+import { Menu, X, User, Sparkles, MapPin } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
@@ -102,17 +102,6 @@ export default function Navbar() {
               <Link to="/suivi" className="tln-track">
                 <MapPin size={13} /> Suivre mon véhicule
               </Link>
-              <Link
-                to="/contact"
-                className="nav-phone-block tln-phone"
-                aria-label="Contact · Transports Ligneo"
-              >
-                <span className="nav-phone-icon">
-                  <Phone size={13} strokeWidth={2.4} />
-                  <span className="nav-phone-pulse" aria-hidden="true" />
-                </span>
-                <span className="nav-phone-number">Contact</span>
-              </Link>
               <ThemePreference variant="compact" />
               <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
                 <User size={13} />
@@ -142,19 +131,6 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <Link
-                  to="/contact"
-                  className="nav-phone-block"
-                  aria-label="Contact · Transports Ligneo"
-                >
-                  <span className="nav-phone-icon">
-                    <Phone size={13} strokeWidth={2.4} />
-                    <span className="nav-phone-pulse" aria-hidden="true" />
-                  </span>
-                  <span className="nav-phone-number">Contact</span>
-                </Link>
-              </li>
               <li>
                 <ThemePreference variant="full" />
               </li>
