@@ -10690,6 +10690,6 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
 }
 @media (min-width: 1081px) {
   .r4-page .hx-split-map .hx-map-card .ligneo-map-inner { overflow:hidden; }
-  .r4-page .hx-split-map .hx-map-card .ligneo-map-svg { transform:scale(1.9) !important; transform-origin:52% 50%; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-svg { transform:scale(1.6) translateY(9%) !important; transform-origin:50% 50%; }
   .r4-page .hx-split-map .hx-map-card .ligneo-map-card { transform:none !important; }
 }
