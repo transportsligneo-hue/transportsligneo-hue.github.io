@@ -73,7 +73,7 @@ export default function HomeDesktopV5() {
         <div className="hx-split">
           <div className="hx-split-left">
             <div className="v4-section-head hx-split-head">
-              <h2>Un convoyage sans stress, du départ à l'arrivée</h2>
+              <h2>Un convoyage <span className="hx-neon">sans stress</span>, du départ à l'arrivée</h2>
             </div>
             <div className="hx-benefits">
               {[
@@ -93,7 +93,7 @@ export default function HomeDesktopV5() {
 
             <div className="v4-section-head hx-split-head">
               <div className="v4-hero-eyebrow"><span className="dot" />Vous êtes…</div>
-              <h2>Un parcours pensé pour votre métier</h2>
+              <h2>Un parcours <span className="hx-neon">pensé pour votre métier</span></h2>
             </div>
             <div className="hx-segments">
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-seg">
