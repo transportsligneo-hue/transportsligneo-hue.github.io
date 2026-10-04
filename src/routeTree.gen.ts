@@ -55,7 +55,6 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-confirmation'
-import { Route as ApiSeedFormationTmpRouteImport } from './routes/api/seed-formation-tmp'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
 import { Route as ACodeRouteImport } from './routes/a.$code'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
@@ -440,11 +439,6 @@ const B2bPartenariatFlotteRoute = B2bPartenariatFlotteRouteImport.update({
 const AuthEmailConfirmationRoute = AuthEmailConfirmationRouteImport.update({
   id: '/auth/email-confirmation',
   path: '/auth/email-confirmation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSeedFormationTmpRoute = ApiSeedFormationTmpRouteImport.update({
-  id: '/api/seed-formation-tmp',
-  path: '/api/seed-formation-tmp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ActualitesSlugRoute = ActualitesSlugRouteImport.update({
@@ -1388,7 +1382,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
-  '/api/seed-formation-tmp': typeof ApiSeedFormationTmpRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1585,7 +1578,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
-  '/api/seed-formation-tmp': typeof ApiSeedFormationTmpRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1787,7 +1779,6 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
-  '/api/seed-formation-tmp': typeof ApiSeedFormationTmpRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
@@ -1992,7 +1983,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/a/$code'
     | '/actualites/$slug'
-    | '/api/seed-formation-tmp'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -2189,7 +2179,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/a/$code'
     | '/actualites/$slug'
-    | '/api/seed-formation-tmp'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -2390,7 +2379,6 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/a/$code'
     | '/actualites/$slug'
-    | '/api/seed-formation-tmp'
     | '/auth/email-confirmation'
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
@@ -2588,7 +2576,6 @@ export interface RootRouteChildren {
   TestSmsRoute: typeof TestSmsRoute
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
-  ApiSeedFormationTmpRoute: typeof ApiSeedFormationTmpRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
   DevisTokenRoute: typeof DevisTokenRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
@@ -2968,13 +2955,6 @@ declare module '@tanstack/react-router' {
       path: '/auth/email-confirmation'
       fullPath: '/auth/email-confirmation'
       preLoaderRoute: typeof AuthEmailConfirmationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/seed-formation-tmp': {
-      id: '/api/seed-formation-tmp'
-      path: '/api/seed-formation-tmp'
-      fullPath: '/api/seed-formation-tmp'
-      preLoaderRoute: typeof ApiSeedFormationTmpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/actualites/$slug': {
@@ -4566,7 +4546,6 @@ const rootRouteChildren: RootRouteChildren = {
   TestSmsRoute: TestSmsRoute,
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
-  ApiSeedFormationTmpRoute: ApiSeedFormationTmpRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
   DevisTokenRoute: DevisTokenRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,

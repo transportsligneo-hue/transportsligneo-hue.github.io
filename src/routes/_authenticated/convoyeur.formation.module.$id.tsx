@@ -122,9 +122,9 @@ function ModulePage() {
         />
       )}
 
-      {module.case_study?.scenario && (
-        <CaseStudyBlock moduleId={module.id} caseStudy={module.case_study} initialAnswer={p?.case_study_answer ?? null} />
-      )}
+      {(module.case_studies?.length ? module.case_studies : module.case_study?.scenario ? [module.case_study] : []).map((cs, ci, all) => (
+        <CaseStudyBlock key={`${module.id}-${ci}`} moduleId={module.id} caseStudy={cs} caseIndex={ci} total={all.length} initialAnswer={null} />
+      ))}
 
       <QuizBlock
         moduleId={module.id}
