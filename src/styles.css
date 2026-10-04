@@ -10891,9 +10891,9 @@ html.theme-light .r4-page .v4-cta-box h2 {
 /* Hero action buttons v3 */
 .hb-wrap{max-width:560px;margin-bottom:12px}
 .hb-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.hb-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:11px 12px;border-radius:13px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(10px);text-decoration:none;transition:transform .18s ease,background .22s ease,box-shadow .22s ease}
+.hb-btn{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:11px 12px;border-radius:13px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,rgba(255,255,255,.03)),color-mix(in srgb,var(--c) 3%,transparent));border:1px solid color-mix(in srgb,var(--c) 26%,transparent);backdrop-filter:blur(10px);text-decoration:none;transition:transform .18s ease,background .22s ease,box-shadow .22s ease,border-color .22s ease}
 .hb-btn::after{content:'';position:absolute;inset:0;border-radius:13px;padding:1px;background:linear-gradient(135deg,var(--c),transparent 60%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .22s ease;pointer-events:none}
-.hb-btn:hover{transform:translateY(-2px);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));box-shadow:0 10px 20px rgba(0,0,0,.3)}
+.hb-btn:hover{transform:translateY(-2px);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.04)),color-mix(in srgb,var(--c) 6%,transparent));border-color:color-mix(in srgb,var(--c) 55%,transparent);box-shadow:0 10px 20px rgba(0,0,0,.3),0 0 18px -6px var(--glow)}
 .hb-btn:hover::after{opacity:1}
 .hb-ic{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(145deg,var(--c1),var(--c2));box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 3px 10px -2px var(--glow)}
 .hb-ic svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px rgba(255,255,255,.5))}
@@ -10901,20 +10901,20 @@ html.theme-light .r4-page .v4-cta-box h2 {
 .hb-btn .hb-label{font-size:11.5px;font-weight:600;color:#fff;line-height:1.25}
 .hb-chev{margin-left:auto;color:#6d78a8;font-size:12px;transition:transform .2s ease,color .2s}
 .hb-btn:hover .hb-chev{transform:translateX(3px);color:#fff}
-.hb-part{--c:#5b83ff;--c1:#5b83ff;--c2:#2f5fff;--glow:rgba(47,95,255,.55)}
-.hb-pro{--c:#b06cf0;--c1:#b06cf0;--c2:#8a3fe0;--glow:rgba(155,93,224,.55)}
-.hb-esp{--c:#5de0ff;--c1:#7ee9ff;--c2:#2fb8e0;--glow:rgba(93,224,255,.5)}
+.hb-part{--c:#4f8eff;--c1:#4f8eff;--c2:#2f6fff;--glow:rgba(79,142,255,.55)}
+.hb-pro{--c:#a794ff;--c1:#a794ff;--c2:#8a6cf0;--glow:rgba(167,148,255,.55)}
+.hb-esp{--c:#5de0ff;--c1:#5de0ff;--c2:#2fb8e0;--glow:rgba(93,224,255,.5)}
 .hb-divider{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hb-divider span{font-size:10px;color:#5c6690;letter-spacing:.6px;font-weight:600;text-transform:uppercase;white-space:nowrap}
 .hb-divider i{flex:1;height:1px;background:rgba(255,255,255,.08)}
 .hb-minis{display:flex;gap:8px}
-.hb-mini{flex:1;display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);text-decoration:none;transition:transform .18s ease,background .22s ease}
-.hb-mini:hover{transform:translateY(-1px);background:rgba(255,255,255,.07)}
+.hb-mini{flex:1;display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:999px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,rgba(255,255,255,.03)),color-mix(in srgb,var(--c) 3%,transparent));border:1px solid color-mix(in srgb,var(--c) 26%,transparent);text-decoration:none;transition:transform .18s ease,background .22s ease,border-color .22s ease}
+.hb-mini:hover{transform:translateY(-1px);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.04)),color-mix(in srgb,var(--c) 6%,transparent));border-color:color-mix(in srgb,var(--c) 55%,transparent)}
 .hb-mini .hb-ic{width:22px;height:22px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 2px 8px -2px var(--glow)}
 .hb-mini .hb-ic svg{width:11px;height:11px;stroke-width:2.4}
 .hb-mini .hb-label{font-size:11px;font-weight:600;color:#dfe3f7}
-.hb-conv{--c1:#3fe08f;--c2:#15a35e;--glow:rgba(31,184,94,.5)}
-.hb-suiv{--c1:#ffdd8a;--c2:#f0a93e;--glow:rgba(255,211,110,.5)}
+.hb-conv{--c:#2ee671;--c1:#2ee671;--c2:#15b25c;--glow:rgba(46,230,113,.5)}
+.hb-suiv{--c:#4f8eff;--c1:#4f8eff;--c2:#2f6fff;--glow:rgba(79,142,255,.5)}
 @media (max-width:520px){.hb-grid3{grid-template-columns:1fr}.hb-btn{flex-direction:row;align-items:center}}
 
 /* ===== Octobre rose — ruban près du logo (visible en octobre uniquement) ===== */

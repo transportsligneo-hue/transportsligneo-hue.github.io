@@ -42,26 +42,26 @@ export default function HomeDesktopV5() {
             <div className="hb-wrap">
               <div className="hb-grid3">
                 <Link to="/services" search={{ audience: "particuliers" }} className="hb-btn hb-part">
-                  <span className="hb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>
+                  <span className="hb-ic"><User size={14} strokeWidth={2.2} /></span>
                   <span className="hb-row"><span className="hb-label">Je suis un particulier</span><span className="hb-chev">→</span></span>
                 </Link>
                 <Link to="/services" search={{ audience: "pro" }} className="hb-btn hb-pro">
-                  <span className="hb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></span>
+                  <span className="hb-ic"><BriefcaseBusiness size={14} strokeWidth={2.2} /></span>
                   <span className="hb-row"><span className="hb-label">Je suis un professionnel</span><span className="hb-chev">→</span></span>
                 </Link>
                 <Link to={isAuthenticated ? homeRoute : "/login"} className="hb-btn hb-esp">
-                  <span className="hb-ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9"/></svg></span>
+                  <span className="hb-ic"><House size={14} strokeWidth={2.2} /></span>
                   <span className="hb-row"><span className="hb-label">Mon espace client</span><span className="hb-chev">→</span></span>
                 </Link>
               </div>
               <div className="hb-divider"><span>Autres accès</span><i /></div>
               <div className="hb-minis">
                 <Link to="/devenir-convoyeur" className="hb-mini hb-conv">
-                  <span className="hb-ic"><svg viewBox="0 0 24 24"><path d="M3 13l1.5-5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.4L21 13"/><rect x="2.5" y="13" width="19" height="5" rx="1.5"/><circle cx="7" cy="18.5" r="1.6" fill="#fff" stroke="none"/><circle cx="17" cy="18.5" r="1.6" fill="#fff" stroke="none"/></svg></span>
+                  <span className="hb-ic"><CarFront size={12} strokeWidth={2.2} /></span>
                   <span className="hb-label">Je suis convoyeur</span>
                 </Link>
                 <Link to="/suivi" className="hb-mini hb-suiv">
-                  <span className="hb-ic"><svg viewBox="0 0 24 24"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22Z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span>
+                  <span className="hb-ic"><MapPin size={12} strokeWidth={2.2} /></span>
                   <span className="hb-label">Suivre mon véhicule</span>
                 </Link>
               </div>
