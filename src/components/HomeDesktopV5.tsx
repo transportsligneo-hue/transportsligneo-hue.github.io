@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, BriefcaseBusiness, CarFront, House,
-  KeyRound, Truck, BarChart3, ArrowRight,
+  KeyRound, Truck, BarChart3, ArrowRight, Phone,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import DevisGenerator from "@/components/DevisGenerator";
