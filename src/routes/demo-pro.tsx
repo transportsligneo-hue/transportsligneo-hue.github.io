@@ -6,6 +6,7 @@ import { verifyDemoToken } from "@/lib/demo-access.functions";
 import { DemoRequestForm } from "@/components/marketing/DemoRequestButton";
 import { AlertTriangle, CalendarDays, Euro, Lock, Timer, Truck } from "lucide-react";
 import { computePilotage, euro, STATUS_META, type ProMission } from "@/hooks/useProMissions";
+import { DemoProModules } from "@/components/demo/DemoProModules";
 
 export const Route = createFileRoute("/demo-pro")({
   head: () => ({
@@ -156,6 +157,8 @@ function DemoProPage({ societe }: { societe?: string | null }) {
           })}
         </ul>
       </section>
+
+      <DemoProModules missions={DEMO_MISSIONS} now={now} />
 
       <div className="demo-pro-cta">
         <p>Envie de piloter vos propres véhicules comme ceci ?</p>
