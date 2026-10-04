@@ -4228,7 +4228,7 @@ html.theme-light .v5-section-transition {
 .r4-page .v5-logo-item::before { content:none; }
 .r4-page .v5-logo-item:hover { transform:none; border-color:transparent; box-shadow:none; }
 .r4-page .v5-logo-item img { height:140px; width:auto; display:block; object-fit:contain;
-  filter:brightness(1.1) drop-shadow(0 4px 18px rgba(63,123,255,0.4)); }
+  filter:none; }
 
 
 /* ---- FEAT GRID (Pourquoi nous choisir) ---- */
@@ -5931,7 +5931,7 @@ html.theme-light .r4-page .v5-hero h1,
 html.theme-light .r4-page .v5-hero h2,
 html.theme-light .r4-page .v5-hero p,
 html.theme-light .r4-page .v5-hero .v5-check-list > div { color: #ffffff; }
-html.theme-light .r4-page .v5-trust { background: #ffffff !important; }
+html.theme-light .r4-page .v5-trust { background: transparent !important; }
 html.theme-light .r4-page .v5-trust-label { color: #0f1526 !important; }
 html.theme-light .r4-page h1,
 html.theme-light .r4-page h2,
@@ -8453,7 +8453,7 @@ html.theme-light .r4-page .ligneo-map {
 }
 /* la bande "Ils nous font confiance" repart en blanc : fondu continu, sans filet */
 html.theme-light .r4-page .v5-trust {
-  background: #ffffff !important;
+  background: transparent !important;
   border-top: 0 !important;
   border-bottom: 0 !important;
 }
