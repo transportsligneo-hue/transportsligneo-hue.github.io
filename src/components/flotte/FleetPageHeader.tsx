@@ -85,10 +85,10 @@ export default function FleetPageHeader({
             <div key={s.label}>
               <div className="mb-1 text-[10.5px] text-[#a3a4ac]">{s.label}</div>
               <div
-                className="font-grotesk text-[17px] font-bold"
+                className="fleet-stat-value font-grotesk text-[17px] font-bold"
                 style={{
                   color:
-                    s.tone === "accent" ? "#2f5fff" : s.tone === "warn" ? "#d97706" : "#14161c",
+                    s.tone === "accent" ? "#2f5fff" : s.tone === "warn" ? "#7c5cff" : "#14161c",
                 }}
               >
                 {s.value}

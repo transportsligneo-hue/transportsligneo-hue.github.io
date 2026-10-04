@@ -10371,3 +10371,8 @@ html.theme-dark .dashboard-shell-light { --v3-warn: #b9a6ff; --v3-warn-soft: rgb
 html.theme-dark .dashboard-shell-light[data-account-type="client"] { --v3-warn: #9dbaff; --v3-warn-soft: rgba(79,140,255,.16); }
 .dashboard-shell-light { --v3-warn: #5334d6; --v3-warn-soft: #f2eeff; }
 .dashboard-shell-light[data-account-type="client"] { --v3-warn: #2f5fff; --v3-warn-soft: #eaf0ff; }
+html.theme-dark .dashboard-shell-light .fleet-stat-value:not([style*="#2f5fff"]) { color: #e8edfb !important; }
+html.theme-dark .dashboard-shell-light .v3-tabs { background: #111a3d; border-color: #24305c; }
+html.theme-dark .dashboard-shell-light .v3-kpi-trend { background: rgba(232,237,251,.08); color: #b7c1e0; }
+html.theme-dark .dashboard-shell-light aside [class*="from-violet-50"], html.theme-dark .dashboard-shell-light aside [class*="from-blue-50"] { background: #17224a !important; border-color: #3a2f7a !important; }
+html.theme-dark .dashboard-shell-light .v3-status.wait { color: #c9bbff; }
