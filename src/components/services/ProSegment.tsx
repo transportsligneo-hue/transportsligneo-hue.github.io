@@ -1,3 +1,4 @@
+import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 import { Link } from "@tanstack/react-router";
 import {
   Truck, Users, ArrowRight, CheckCircle2, Zap, FileText, BarChart3,
@@ -162,6 +163,7 @@ export default function ProSegment() {
                 Demander une étude flotte
                 <ArrowRight className="h-4 w-4" />
               </Link>
+              <DemoRequestButton className="mt-3" />
               <Link to="/b2b/partenariat-flotte" className="pf-more">
                 Voir le détail de l'offre <ArrowRight size={13} />
               </Link>

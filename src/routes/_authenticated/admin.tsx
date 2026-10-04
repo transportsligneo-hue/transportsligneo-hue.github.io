@@ -216,6 +216,7 @@ function AdminLayout() {
 
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
+    { to: "/admin/acces-demo", label: "Accès démo", icon: Send, group: "Activité" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
     { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Activité" },
 

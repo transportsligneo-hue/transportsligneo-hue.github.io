@@ -6378,6 +6378,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_demo_access: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          nom_contact: string | null
+          open_count: number
+          opened_at: string | null
+          sent_at: string | null
+          societe: string | null
+          statut: string
+          telephone: string | null
+          token: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          nom_contact?: string | null
+          open_count?: number
+          opened_at?: string | null
+          sent_at?: string | null
+          societe?: string | null
+          statut?: string
+          telephone?: string | null
+          token?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          nom_contact?: string | null
+          open_count?: number
+          opened_at?: string | null
+          sent_at?: string | null
+          societe?: string | null
+          statut?: string
+          telephone?: string | null
+          token?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string

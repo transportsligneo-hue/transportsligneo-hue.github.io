@@ -1,4 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { verifyDemoToken } from "@/lib/demo-access.functions";
+import { DemoRequestForm } from "@/components/marketing/DemoRequestButton";
 import { AlertTriangle, CalendarDays, Euro, Lock, Timer, Truck } from "lucide-react";
 import { computePilotage, euro, STATUS_META, type ProMission } from "@/hooks/useProMissions";
 
@@ -21,8 +26,33 @@ export const Route = createFileRoute("/demo-pro")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: DemoProPage,
+  validateSearch: (s) => z.object({ token: z.string().optional() }).parse(s),
+  component: DemoGate,
 });
+
+function DemoGate() {
+  const { token } = Route.useSearch();
+  const verify = useServerFn(verifyDemoToken);
+  const [state, setState] = useState<{ s: "load" | "ok" | "no"; societe?: string | null }>({ s: "load" });
+  useEffect(() => {
+    if (!token || !/^[a-f0-9]{48}$/.test(token)) { setState({ s: "no" }); return; }
+    verify({ data: { token } }).then((r) => setState(r.ok ? { s: "ok", societe: r.societe } : { s: "no" })).catch(() => setState({ s: "no" }));
+  }, [token, verify]);
+  if (state.s === "load") return <main className="demo-pro"><p className="demo-pro-sub">Vérification de votre accès…</p></main>;
+  if (state.s === "no")
+    return (
+      <main className="demo-pro demo-locked">
+        <div className="demo-pro-banner"><Lock size={14} aria-hidden /><span><strong>Accès réservé aux professionnels invités</strong> — lien absent ou expiré.</span></div>
+        <header className="demo-pro-head">
+          <p className="demo-pro-eyebrow">Espace professionnel</p>
+          <h1>Demandez votre démo privée</h1>
+          <p className="demo-pro-sub">Laissez vos coordonnées : un conseiller Ligneo vous envoie un lien personnel, valable 7 jours.</p>
+        </header>
+        <div className="demo-req-modal demo-req-inline"><DemoRequestForm /></div>
+      </main>
+    );
+  return <DemoProPage societe={state.societe} />;
+}
 
 const now = new Date();
 const iso = (offsetDays: number) => {
@@ -42,7 +72,7 @@ const DEMO_MISSIONS: ProMission[] = [
   { id: "d7", numero: "MIS-TLG-2026-265", ville_depart: "Tours", ville_arrivee: "Rennes", date_prise_en_charge: iso(-45), heure_prise_en_charge: "07:45", statut: "livree", prix_total: 260, created_at: ts(-47), updated_at: ts(-44), immatriculation: "BT-671-XW", marque: "Mercedes", modele: "Classe A", site_id: null },
 ];
 
-function DemoProPage() {
+function DemoProPage({ societe }: { societe?: string | null }) {
   const k = computePilotage(DEMO_MISSIONS, now);
   const delta = k.lastMonth > 0 ? Math.round(((k.thisMonth - k.lastMonth) / k.lastMonth) * 100) : null;
   const sorted = [...DEMO_MISSIONS].sort((a, b) => b.date_prise_en_charge.localeCompare(a.date_prise_en_charge));
@@ -59,7 +89,7 @@ function DemoProPage() {
 
       <header className="demo-pro-head">
         <p className="demo-pro-eyebrow">Espace professionnel</p>
-        <h1>Votre flotte, pilotée en un coup d'œil</h1>
+        <h1>{societe ? `Bienvenue ${societe}` : "Votre flotte, pilotée en un coup d'œil"}</h1>
         <p className="demo-pro-sub">
           Voici exactement ce que voient nos clients professionnels : indicateurs en temps réel, missions en cours et
           suivi des dépenses.

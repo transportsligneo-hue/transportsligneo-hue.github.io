@@ -167,6 +167,7 @@ import { Route as AuthenticatedAdminB2bDispatchRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminAttributionsRouteImport } from './routes/_authenticated/admin.attributions'
 import { Route as AuthenticatedAdminAssistantIaRouteImport } from './routes/_authenticated/admin.assistant-ia'
 import { Route as AuthenticatedAdminAlertesRouteImport } from './routes/_authenticated/admin.alertes'
+import { Route as AuthenticatedAdminAccesDemoRouteImport } from './routes/_authenticated/admin.acces-demo'
 import { Route as AuthenticatedAdminAcceptationsRouteImport } from './routes/_authenticated/admin.acceptations'
 import { Route as AuthenticatedDashboardProNouvelleMissionIndexRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.index'
 import { Route as AuthenticatedDashboardProMissionsIndexRouteImport } from './routes/_authenticated/dashboard-pro.missions.index'
@@ -1096,6 +1097,12 @@ const AuthenticatedAdminAlertesRoute =
     path: '/alertes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAccesDemoRoute =
+  AuthenticatedAdminAccesDemoRouteImport.update({
+    id: '/acces-demo',
+    path: '/acces-demo',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAcceptationsRoute =
   AuthenticatedAdminAcceptationsRouteImport.update({
     id: '/acceptations',
@@ -1431,6 +1438,7 @@ export interface FileRoutesByFullPath {
   '/scan/': typeof ScanIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/acces-demo': typeof AuthenticatedAdminAccesDemoRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1632,6 +1640,7 @@ export interface FileRoutesByTo {
   '/scan': typeof ScanIndexRoute
   '/signer': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/admin/acces-demo': typeof AuthenticatedAdminAccesDemoRoute
   '/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -1838,6 +1847,7 @@ export interface FileRoutesById {
   '/scan/': typeof ScanIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
+  '/_authenticated/admin/acces-demo': typeof AuthenticatedAdminAccesDemoRoute
   '/_authenticated/admin/alertes': typeof AuthenticatedAdminAlertesRoute
   '/_authenticated/admin/assistant-ia': typeof AuthenticatedAdminAssistantIaRoute
   '/_authenticated/admin/attributions': typeof AuthenticatedAdminAttributionsRoute
@@ -2047,6 +2057,7 @@ export interface FileRouteTypes {
     | '/scan/'
     | '/signer/'
     | '/admin/acceptations'
+    | '/admin/acces-demo'
     | '/admin/alertes'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -2248,6 +2259,7 @@ export interface FileRouteTypes {
     | '/scan'
     | '/signer'
     | '/admin/acceptations'
+    | '/admin/acces-demo'
     | '/admin/alertes'
     | '/admin/assistant-ia'
     | '/admin/attributions'
@@ -2453,6 +2465,7 @@ export interface FileRouteTypes {
     | '/scan/'
     | '/signer/'
     | '/_authenticated/admin/acceptations'
+    | '/_authenticated/admin/acces-demo'
     | '/_authenticated/admin/alertes'
     | '/_authenticated/admin/assistant-ia'
     | '/_authenticated/admin/attributions'
@@ -3806,6 +3819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAlertesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/acces-demo': {
+      id: '/_authenticated/admin/acces-demo'
+      path: '/acces-demo'
+      fullPath: '/admin/acces-demo'
+      preLoaderRoute: typeof AuthenticatedAdminAccesDemoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/acceptations': {
       id: '/_authenticated/admin/acceptations'
       path: '/acceptations'
@@ -4206,6 +4226,7 @@ const AuthenticatedAdminOrganisationsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAcceptationsRoute: typeof AuthenticatedAdminAcceptationsRoute
+  AuthenticatedAdminAccesDemoRoute: typeof AuthenticatedAdminAccesDemoRoute
   AuthenticatedAdminAlertesRoute: typeof AuthenticatedAdminAlertesRoute
   AuthenticatedAdminAssistantIaRoute: typeof AuthenticatedAdminAssistantIaRoute
   AuthenticatedAdminAttributionsRoute: typeof AuthenticatedAdminAttributionsRoute
@@ -4251,6 +4272,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAcceptationsRoute: AuthenticatedAdminAcceptationsRoute,
+  AuthenticatedAdminAccesDemoRoute: AuthenticatedAdminAccesDemoRoute,
   AuthenticatedAdminAlertesRoute: AuthenticatedAdminAlertesRoute,
   AuthenticatedAdminAssistantIaRoute: AuthenticatedAdminAssistantIaRoute,
   AuthenticatedAdminAttributionsRoute: AuthenticatedAdminAttributionsRoute,
