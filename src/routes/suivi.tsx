@@ -113,7 +113,7 @@ function SuiviPage() {
                 aria-hidden="true"
                 className="suivi-prefix shrink-0 select-none text-[15px]"
               >
-                MIS-TLG-2026-
+                MIS-TLG-2026<span className="suivi-prefix-dash">-</span>
               </span>
               <input
                 id="numero-mission"
