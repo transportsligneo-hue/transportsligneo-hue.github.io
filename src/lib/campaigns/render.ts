@@ -147,6 +147,7 @@ export function buildCampaignHtml({
     <tr>
       <td style="background:#f7f9fc; border-top:1px solid #e7ebf3; padding:22px 32px; text-align:center;">
         <p style="margin:0 0 6px; font-size:12px; color:#9aa2ba;">Transports Ligneo — convoyage de véhicules par la route</p>
+        <p style="margin:0 0 6px; font-size:12px; color:#2f5fff; font-weight:600; font-style:italic;">Votre logistique automobile sur toute la ligne</p>
         <p style="margin:0 0 10px; font-size:12px; color:#9aa2ba;">
           <a href="${LIGNEO_SITE_ORIGIN}" style="color:#2f5fff; text-decoration:none;">transportsligneo.fr</a>
           &nbsp;•&nbsp; contact@transportsligneo.fr
