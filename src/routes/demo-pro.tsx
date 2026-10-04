@@ -53,7 +53,7 @@ function DemoProPage() {
         <Lock size={14} aria-hidden />
         <span>
           <strong>Mode démonstration</strong> — données fictives, lecture seule.{" "}
-          <Link to="/auth">Créer mon compte professionnel</Link>
+          <Link to="/login">Créer mon compte professionnel</Link>
         </span>
       </div>
 
@@ -129,7 +129,7 @@ function DemoProPage() {
 
       <div className="demo-pro-cta">
         <p>Envie de piloter vos propres véhicules comme ceci ?</p>
-        <Link to="/auth" className="btn-onyx">
+        <Link to="/login" className="btn-onyx">
           Créer mon compte professionnel
         </Link>
       </div>
