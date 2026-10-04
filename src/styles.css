@@ -10567,3 +10567,43 @@ html.theme-light .driver-shell {
 html.theme-light .driver-shell .driver-brand-title { color: #0f1526; }
 html.theme-light .driver-shell .driver-brand-mail { color: #6b7590; }
 html.theme-light .driver-shell .text-\[\#34E68C\] { color: #0ea055 !important; }
+
+/* ===== Espace Pro — pilotage (KPI, calendrier, rapports) ===== */
+.pp-kpi{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:14px;background:var(--card);border:1px solid color-mix(in oklab,var(--border) 80%,transparent);box-shadow:0 6px 20px -14px rgba(15,21,38,.25);color:var(--foreground)}
+.pp-kpi-ico{color:#a855f7}
+.pp-kpi-val{font-size:1.5rem;font-weight:700;line-height:1.1}
+.pp-kpi-lbl{font-size:.78rem;color:var(--muted-foreground)}
+.pp-kpi-lbl em{font-style:normal;font-weight:600}
+.pp-up{color:#e4504a}.pp-down{color:#1fb85e}
+.pp-kpi-alert{border-color:rgba(228,80,74,.5);box-shadow:0 0 0 1px rgba(228,80,74,.25),0 8px 24px -14px rgba(228,80,74,.5)}
+.pp-kpi-alert .pp-kpi-ico,.pp-kpi-alert .pp-kpi-val{color:#e4504a}
+.pp-quick{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:.8rem;font-weight:600;background:var(--card);color:var(--foreground);border:1px solid rgba(168,85,247,.35);transition:all .2s}
+.pp-quick:hover{border-color:#a855f7;box-shadow:0 0 14px -4px rgba(168,85,247,.6);color:#a855f7}
+.pp-quick-primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border-color:transparent}
+.pp-quick-primary:hover{color:#fff}
+.pp-quick:disabled{opacity:.5;pointer-events:none}
+.pp-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground)}
+.pp-seg{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pp-seg button{padding:7px 12px;font-size:.8rem;font-weight:600;color:var(--muted-foreground);background:var(--card)}
+.pp-seg button.on{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+.pp-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.pp-cal-head{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-foreground);padding:4px 6px}
+.pp-cal-cell{min-height:104px;padding:6px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.pp-cal-cell.tall{min-height:320px}
+.pp-cal-cell.out{opacity:.45}
+.pp-cal-cell.today{border-color:#a855f7;box-shadow:0 0 0 1px rgba(168,85,247,.4)}
+.pp-cal-num{font-size:.75rem;font-weight:700;color:var(--foreground)}
+.pp-cal-load{font-size:.65rem;font-weight:700;color:#d98a2b}
+.pp-cal-ev{display:block;font-size:.68rem;font-weight:600;padding:2px 6px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid currentColor}
+.pp-st-wait{color:#2f5fff;background:rgba(47,95,255,.1)}
+.pp-st-run{color:#a855f7;background:rgba(168,85,247,.12)}
+.pp-st-done{color:#1fb85e;background:rgba(31,184,94,.12)}
+.pp-st-ko{color:#e4504a;background:rgba(228,80,74,.12)}
+.pp-field{display:flex;flex-direction:column;font-size:.7rem;font-weight:600;color:var(--muted-foreground);gap:2px}
+.pp-field input{padding:7px 10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--foreground);font-size:.8rem}
+.pp-panel{padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);color:var(--foreground)}
+.pp-panel h3{font-weight:600;margin-bottom:10px}
+.pp-table{width:100%;font-size:.82rem;border-collapse:collapse}
+.pp-table th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);padding:6px 4px;border-bottom:1px solid var(--border)}
+.pp-table td{padding:8px 4px;border-bottom:1px solid color-mix(in oklab,var(--border) 60%,transparent)}
+.pp-empty{text-align:center;color:var(--muted-foreground)}
