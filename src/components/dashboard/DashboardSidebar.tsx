@@ -121,7 +121,7 @@ export function DashboardSidebar({ title, subtitle, items, shellClass, children 
       </aside>
 
       {/* === MAIN === */}
-      <main className="dash-main-mobile dash-main-mobile--md flex-1 overflow-auto pt-14 md:pt-0 pb-bottom-nav md:pb-0 flex flex-col">
+      <main className="dash-main-mobile dash-main-mobile--md flex-1 min-w-0 max-w-full overflow-auto pt-14 md:pt-0 pb-bottom-nav md:pb-0 flex flex-col">
         <div className="hidden md:block">
           <DashboardHeader variant="dark" profileTo="/dashboard-client/profil" />
         </div>
