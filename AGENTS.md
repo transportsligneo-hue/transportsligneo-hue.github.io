@@ -10,3 +10,4 @@
 - Scope opaque Driver workspace surfaces and blue/green electric accents to the Driver shell, and violet/pink electric accents to the professional shell, so public marketing and unrelated workspaces keep their own design.
 - Keep the admin dashboard's operational map in a dedicated overview component, reusing the mission map engine and existing mission tables, so its collapsible mission lists do not alter other workspaces.
 - Keep the extended, locally retouched hero photo scoped to the desktop home presentation so mobile and other marketing pages retain their original framing.
+- Dark mode for admin, client and pro workspaces is a scoped CSS layer under `html.theme-dark` targeting `.admin-shell` / `.dashboard-shell-light`; light stays the default so existing workspace markup is untouched.
