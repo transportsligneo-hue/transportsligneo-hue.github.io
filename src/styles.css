@@ -10673,3 +10673,23 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
 /* Bulle d'aide « ? » espace pro */
 .pp-help{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:4px;border-radius:999px;font-size:10px;font-weight:700;line-height:1;color:#a855f7;border:1px solid rgba(168,85,247,.55);background:rgba(168,85,247,.08);vertical-align:middle;transition:box-shadow .15s}
 .pp-help:hover,.pp-help:focus-visible{box-shadow:0 0 8px rgba(168,85,247,.55)}
+
+/* Accueil : carte agrandie, même hauteur que les deux blocs de gauche (desktop) */
+@media (min-width: 1081px) {
+  .r4-page .hx-split { grid-template-columns:minmax(0,1fr) 440px; align-items:stretch; gap:32px; }
+  .r4-page .hx-split-map { position:static; display:flex; }
+  .r4-page .hx-split-map .hx-map-card { flex:1; display:flex; flex-direction:column; justify-content:center; padding:20px 20px 24px; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map,
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-card { width:100%; max-width:none; }
+  .r4-page .hx-split-map .hx-map-card svg,
+  .r4-page .hx-split-map .hx-map-card img { width:100%; height:auto; }
+}
+@media (min-width: 1081px) {
+  .r4-page .hx-split-map .hx-map-card .ligneo-map { flex:1; justify-content:center; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-card { aspect-ratio:auto; flex:1; transform:scale(1.35); transform-origin:center; }
+}
+@media (min-width: 1081px) {
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-inner { overflow:hidden; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-svg { transform:scale(1.6) translateY(20%) !important; transform-origin:50% 50%; }
+  .r4-page .hx-split-map .hx-map-card .ligneo-map-card { transform:none !important; }
+}
