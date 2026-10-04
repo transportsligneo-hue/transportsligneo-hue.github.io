@@ -1,6 +1,6 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
-import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck } from "lucide-react";
+import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck, CarFront, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
@@ -185,6 +185,25 @@ function SuiviPage() {
                       : "Date de prise en charge à confirmer"}
                   </span>
                 </div>
+                {(result.vehicule || result.immatriculation) && (
+                  <div className="flex items-start gap-2.5 text-[13.5px]">
+                    <CarFront size={16} className="suivi-ico mt-0.5 shrink-0" />
+                    <span className="suivi-txt-depart">
+                      {result.vehicule || "Véhicule"}
+                      {result.immatriculation && (
+                        <span className="ml-2 rounded-md border border-[#7aa3ff]/30 bg-[#4f8cff]/10 px-1.5 py-0.5 text-[11.5px] font-semibold tracking-wide text-[#8fbaff]">
+                          {result.immatriculation}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                )}
+                {result.destinataire && (
+                  <div className="flex items-start gap-2.5 text-[13.5px]">
+                    <User size={16} className="suivi-ico suivi-ico-horloge mt-0.5 shrink-0" />
+                    <span className="suivi-txt-horloge">Destinataire : {result.destinataire}</span>
+                  </div>
+                )}
               </div>
 
               {result.position && (
