@@ -14,12 +14,13 @@ const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; s
   { to: "/a-propos", label: "À propos" },
 ] as const;
 
-const proSubLinks: ReadonlyArray<{ to: string; label: string }> = [
+const proSubLinks: ReadonlyArray<{ to: string; label: string; demo?: boolean }> = [
   { to: "/concessionnaires", label: "Concessions" },
   { to: "/loueurs", label: "Loueurs" },
   { to: "/gestionnaires-flotte", label: "Gestionnaires de flotte" },
   { to: "/developpeurs", label: "API" },
   { to: "/login", label: "Espace Pro" },
+  { to: "/demo-pro", label: "Demander une démo", demo: true },
 ];
 
 function LockIcon() {
