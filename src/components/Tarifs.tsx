@@ -92,7 +92,7 @@ export default function Tarifs() {
             </h4>
             <div className="space-y-3 text-sm">
               {[
-                ["Livraison hors horaires / week-end", "+20 %"],
+                ["Livraison hors horaires (avant 8h, après 19h) / week-end", "+30 %"],
                 ["Lavage intérieur", "Sur devis"],
                 ["Lavage intérieur + extérieur", "Sur devis"],
               ].map(([label, price], i) => (

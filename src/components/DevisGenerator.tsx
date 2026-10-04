@@ -420,10 +420,27 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType && date && heure);
+
+  // Majoration hors horaires / week-end : +30 % si livraison avant 8h, après 19h, samedi ou dimanche
+  const offHours = useMemo(() => {
+    let weekend = false;
+    if (date) {
+      const day = new Date(`${date}T12:00:00`).getDay();
+      weekend = day === 0 || day === 6;
+    }
+    let offHour = false;
+    if (heure) {
+      const h = parseInt(heure.split(":")[0] ?? "", 10);
+      if (!Number.isNaN(h)) offHour = h < 8 || h >= 19;
+    }
+    return weekend || offHour ? { weekend, offHour } : null;
+  }, [date, heure]);
+
   // priceTTC = source de vérité affichée. En micro-entreprise (franchise en base de TVA),
   // le prix affiché est le net à payer : aucune ventilation HT / TVA.
   const localTtc = pricing?.finalPrice ?? 0;
-  const priceTTC = serverTtc ?? localTtc;
+  const baseTtc = serverTtc ?? localTtc;
+  const priceTTC = offHours ? Math.round(baseTtc * 1.3) : baseTtc;
   const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
 
@@ -432,6 +449,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   // inputBare retiré : la barre principale utilise des styles inline premium
   const inputCard = "dg-journey-input w-full rounded-md px-4 py-3 text-sm transition-all";
   const selectCard = inputCard + " appearance-none";
+
+  // Message majoration hors horaires / week-end (n'efface jamais la saisie)
+  const offHoursNotice = offHours ? (
+    <div className="dg-offhours flex items-start gap-3 rounded-xl px-4 py-3">
+      <Clock size={16} className="dg-offhours-ic mt-0.5 shrink-0" />
+      <p className="dg-offhours-txt text-[13px] leading-relaxed">
+        <strong className="dg-offhours-strong font-semibold">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
+        Une majoration de <strong className="dg-offhours-strong font-semibold">+30&nbsp;%</strong> s'applique à votre estimation — elle est déjà incluse dans le prix affiché.
+      </p>
+    </div>
+  ) : null;
 
   async function handleSubmit() {
     if (!pricing || distance == null) return;
@@ -513,7 +541,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         carburant: energy || null,
         prestation: null, option_trajet: option,
         date_souhaitee: date || null, heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice, prix_base: pricing.price,
+        prix_estime: priceTTC, prix_base: pricing.price,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
         message: comment || null,
@@ -532,7 +560,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         marque, modele,
         immatriculation: plaqueInconnue ? "" : immatriculation,
         carburant: energy,
-        prix_estime: pricing.finalPrice,
+        prix_estime: priceTTC,
         distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
@@ -543,7 +571,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           plaqueInconnue && "Plaque: à confirmer",
           isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
           isAR && retourImmat && `Plaque retour: ${retourImmat}`,
-          `Estimation: ${pricing.finalPrice}€`,
+          `Estimation: ${priceTTC}€`,
           `Distance: ${distance}km`,
           comment,
         ].filter(Boolean).join(" | "),
@@ -560,10 +588,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       await notifyAdmin({
         type: "estimation",
         titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
-        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        message: `${departure} → ${arrival} · ${distance} km · ${priceTTC} €`,
         link: "/admin/devis",
         entityType: "devis", entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
+        metadata: { email, telephone, prix: priceTTC, distance, option, account: !wantsAccount ? "none" : isExistingAccount ? "existing" : "created" },
       });
 
       const devisData: DevisData = {
@@ -574,7 +602,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         type_vehicule: vehicleType, marque, modele, carburant: energy,
         prestation: "", option_trajet: option,
         date_souhaitee: date || null, heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice, tarif_label: pricing.label,
+        prix_estime: priceTTC, tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel,
         message: comment, created_at: devisRow?.created_at,
       };
@@ -586,12 +614,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             templateName: "devis-client",
             recipientEmail: email,
             idempotencyKey: `devis-${devisRow?.id || devisData.numero}`,
-            templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: pricing.finalPrice, optionTrajet: option },
+            templateData: { prenom, nom, numero: devisData.numero, depart: departure, arrivee: arrival, distance, prix: priceTTC, optionTrajet: option },
           }),
           sendTransactionalEmail({
             templateName: "devis-cree-admin",
             idempotencyKey: `admin-devis-${devisRow?.id || devisData.numero}`,
-            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || " · ", prix: pricing.finalPrice },
+            templateData: { prenom, nom, email, telephone, numero: devisData.numero, depart: departure, arrivee: arrival, date: date || " · ", prix: priceTTC },
           }),
         ]);
         if (devisRow?.id) await supabase.from("devis").update({ email_envoye: true }).eq("id", devisRow.id);
@@ -680,11 +708,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <label htmlFor={`${inputId}-date`} className="dg-flat-label"><Calendar size={12} /> Date *</label>
                 <input id={`${inputId}-date`} type="date" value={date} onChange={e => setDate(e.target.value)} className="dg-flat-input" />
               </div>
-              <div className="dg-flat-field">
-                <label htmlFor={`${inputId}-heure`} className="dg-flat-label"><Clock size={12} /> Heure *</label>
-                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
-              </div>
-            </div>
+               <div className="dg-flat-field">
+                 <label htmlFor={`${inputId}-heure`} className="dg-flat-label"><Clock size={12} /> Heure *</label>
+                 <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)} className="dg-flat-input" />
+               </div>
+             </div>
+
+             {offHoursNotice && <div className="mt-4">{offHoursNotice}</div>}
 
             {/* Options de prestation · bascule */}
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -821,10 +851,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   onChange={e => setHeure(e.target.value)}
                   className="w-full bg-transparent text-white text-[15px] font-semibold focus:outline-none [color-scheme:dark]"
                 />
-              </div>
-            </div>
+               </div>
+             </div>
 
-            {/* CTA principal · pleine largeur, bleu électrique */}
+             {offHoursNotice && <div className="mt-3">{offHoursNotice}</div>}
+
+             {/* CTA principal · pleine largeur, bleu électrique */}
             <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
@@ -960,10 +992,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <label htmlFor={`${inputId}-heure`} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-cream/55 mb-1.5">
                   <Clock size={11} className="text-neon-blue" /> Heure de livraison *
                 </label>
-                <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
-                  className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
-              </div>
-              <Button variant="ghost"
+                 <input id={`${inputId}-heure`} type="time" value={heure} onChange={e => setHeure(e.target.value)}
+                   className="w-full bg-transparent text-cream text-sm focus:outline-none [color-scheme:dark]" />
+               </div>
+               {offHoursNotice && <div className="col-span-2 md:col-span-3">{offHoursNotice}</div>}
+               <Button variant="ghost"
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={!isComplete}
@@ -990,10 +1023,11 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <p className="text-xs uppercase tracking-[0.1em] text-cream/75">TVA</p>
                 <p className="font-heading text-base text-cream/85">{microRegime ? "Non applicable" : `${tva} €`}</p>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</p>
-                <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
-              </div>
+               <div>
+                 <p className="text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</p>
+                 <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
+               </div>
+               {offHoursNotice && <div className="w-full mt-3 md:col-span-full">{offHoursNotice}</div>}
 
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
@@ -1491,9 +1525,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <div className="pt-3 mt-3 border-t border-border grid grid-cols-3 gap-3">
                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Prix" : "Prix HT"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceHT} €</strong></div>
                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">TVA</em><strong className="block font-medium text-sm text-cream">{microRegime ? "Non applicable" : `${tva} €`}</strong></div>
-                        <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
-                      </div>
-                    )}
+                         <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
+                       </div>
+                     )}
+                     {offHoursNotice && <div className="mt-3">{offHoursNotice}</div>}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
                       <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><RouteIcon size={11} className="text-neon-blue" /> Péages inclus</strong>
                       <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><Fuel size={11} className="text-neon-blue" /> Carburant inclus</strong>

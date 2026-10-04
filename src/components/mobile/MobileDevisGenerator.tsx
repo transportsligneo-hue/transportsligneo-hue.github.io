@@ -198,6 +198,22 @@ export default function MobileDevisGenerator() {
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
 
+  // Majoration hors horaires / week-end : +30 % (avant 8h, après 19h, samedi/dimanche)
+  const offHours = useMemo(() => {
+    let weekend = false;
+    if (date) {
+      const day = new Date(`${date}T12:00:00`).getDay();
+      weekend = day === 0 || day === 6;
+    }
+    let offHour = false;
+    if (heure) {
+      const h = parseInt(heure.split(":")[0] ?? "", 10);
+      if (!Number.isNaN(h)) offHour = h < 8 || h >= 19;
+    }
+    return weekend || offHour ? { weekend, offHour } : null;
+  }, [date, heure]);
+  const displayPrice = pricing ? (offHours ? Math.round(pricing.finalPrice * 1.3) : pricing.finalPrice) : null;
+
   async function handleSivLookup() {
     setSivMsg(null);
     const plate = immatriculation.trim().toUpperCase();
@@ -287,7 +303,7 @@ export default function MobileDevisGenerator() {
         option_trajet: option,
         date_souhaitee: date || null,
         heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         prix_base: pricing.price,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel || null,
@@ -301,14 +317,14 @@ export default function MobileDevisGenerator() {
         heure_souhaitee: heure,
         marque, modele, immatriculation,
         carburant: energy,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         distance_km: distance,
         options: [
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           prestation && `Prestation: ${prestation}`,
           option && `Option: ${option}`,
-          `Estimation: ${pricing.finalPrice}€`,
+          `Estimation: ${displayPrice ?? 0}€`,
           `Distance: ${distance}km`,
           option === "aller-retour" && `Retour: ${sameRetourAddress ? `${arrival} → ${departure}` : `${departRetour || "?"} → ${arriveeRetour || "?"}`}${dateRetour ? ` le ${dateRetour}` : ""}${heureRetour ? ` à ${heureRetour}` : ""}`,
           option === "aller-retour" && !sameRetourVehicle && `Véhicule retour: ${[marqueRetour, modeleRetour].filter(Boolean).join(" ")}${immatRetour ? ` (${immatRetour})` : ""}${vinRetour ? ` VIN ${vinRetour}` : ""}`,
@@ -321,11 +337,11 @@ export default function MobileDevisGenerator() {
       await notifyAdmin({
         type: "estimation",
         titre: `Nouvelle estimation ${devisRow?.numero ?? ""} · ${prenom} ${nom}`,
-        message: `${departure} → ${arrival} · ${distance} km · ${pricing.finalPrice} €`,
+        message: `${departure} → ${arrival} · ${distance} km · ${displayPrice ?? 0} €`,
         link: "/admin/devis",
         entityType: "devis",
         entityId: devisRow?.id,
-        metadata: { email, telephone, prix: pricing.finalPrice, distance, option, source: "mobile" },
+        metadata: { email, telephone, prix: displayPrice ?? 0, distance, option, source: "mobile" },
       });
 
       const devisData: DevisData = {
@@ -339,7 +355,7 @@ export default function MobileDevisGenerator() {
         prestation, option_trajet: option,
         date_souhaitee: date || null,
         heure_souhaitee: heure || null,
-        prix_estime: pricing.finalPrice,
+        prix_estime: displayPrice ?? 0,
         tarif_label: pricing.label,
         multiplier_label: pricing.multiplierLabel,
         message: comment,
@@ -355,7 +371,7 @@ export default function MobileDevisGenerator() {
           templateData: {
             prenom, nom, numero: devisData.numero,
             depart: departure, arrivee: arrival,
-            distance, prix: pricing.finalPrice,
+            distance, prix: displayPrice ?? 0,
             optionTrajet: option,
           },
         });
@@ -557,7 +573,7 @@ export default function MobileDevisGenerator() {
                       className="text-white text-[20px] font-extrabold leading-none"
                       style={{ fontFamily: "'Space Grotesk',sans-serif" }}
                     >
-                      {pricing.finalPrice} €
+                      {displayPrice} €
                     </div>
                   ) : (
                     <div className="h-[9px] rounded mdev-shimmer" style={{ width: 88 }} />
@@ -578,10 +594,23 @@ export default function MobileDevisGenerator() {
                       ? "En attente"
                       : "Choisir un trajet"}
                   </span>
-                </div>
-              </div>
+                 </div>
+               </div>
 
-              {/* CTA "Voir mon tarif" */}
+               {offHours && (
+                 <div
+                   className="mt-3 flex items-start gap-2.5 rounded-[14px] px-3.5 py-3"
+                   style={{ background: "rgba(63,123,255,0.12)", border: "1px solid rgba(122,163,255,0.35)" }}
+                 >
+                   <Clock size={14} className="mt-0.5 shrink-0 text-[#4f8cff]" />
+                   <p className="text-[12px] leading-relaxed text-[#c7d2f2]">
+                     <strong className="text-[#4f8cff]">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
+                     Majoration de <strong className="text-[#4f8cff]">+30&nbsp;%</strong> déjà incluse dans le prix affiché.
+                   </p>
+                 </div>
+               )}
+
+               {/* CTA "Voir mon tarif" */}
               <button
                 type="button"
                 disabled={!pricing}
@@ -737,7 +766,7 @@ export default function MobileDevisGenerator() {
                     <p className="text-cream/45 text-[11px]">{distance} km · {estimateDuration(distance!)}</p>
                   </div>
                   <p className="font-heading gold-gradient-text text-2xl ml-3 shrink-0">
-                    {pricing.finalPrice}€
+                    {displayPrice ?? 0}€
                   </p>
                 </div>
               </div>
