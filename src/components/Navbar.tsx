@@ -105,19 +105,13 @@ export default function Navbar() {
               <Link
                 to="/contact"
                 className="nav-phone-block tln-phone"
-                aria-label="Contact · Transports Ligneo · 07 82 45 61 81"
+                aria-label="Contact · Transports Ligneo"
               >
                 <span className="nav-phone-icon">
-                  <Phone size={15} strokeWidth={2.25} />
+                  <Phone size={13} strokeWidth={2.4} />
                   <span className="nav-phone-pulse" aria-hidden="true" />
                 </span>
-                <span className="flex flex-col items-start">
-                  <span className="nav-phone-number">Besoin d'un conseil ?</span>
-                  <span className="nav-phone-sub">
-                    <span className="nav-phone-live" aria-hidden="true" />
-                    07 82 45 61 81 · 7j/7
-                  </span>
-                </span>
+                <span className="nav-phone-number">Contact</span>
               </Link>
               <ThemePreference variant="compact" />
               <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
@@ -152,19 +146,13 @@ export default function Navbar() {
                 <Link
                   to="/contact"
                   className="nav-phone-block"
-                  aria-label="Contact · Transports Ligneo · 07 82 45 61 81"
+                  aria-label="Contact · Transports Ligneo"
                 >
                   <span className="nav-phone-icon">
-                    <Phone size={15} strokeWidth={2.25} />
+                    <Phone size={13} strokeWidth={2.4} />
                     <span className="nav-phone-pulse" aria-hidden="true" />
                   </span>
-                  <span className="flex flex-col items-start">
-                    <span className="nav-phone-number">Besoin d'un conseil ?</span>
-                    <span className="nav-phone-sub">
-                      <span className="nav-phone-live" aria-hidden="true" />
-                      07 82 45 61 81 · 7j/7
-                    </span>
-                  </span>
+                  <span className="nav-phone-number">Contact</span>
                 </Link>
               </li>
               <li>

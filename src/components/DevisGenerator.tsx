@@ -1044,10 +1044,10 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           </p>
         )}
         <div className="dg-call-row">
-          <a href="tel:+33782456181" className="dg-call-btn" aria-label="Appeler Transports Ligneo au 07 82 45 61 81">
+          <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
             <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
-            Appeler
-          </a>
+            Contact
+          </Link>
         </div>
       </div>
 
