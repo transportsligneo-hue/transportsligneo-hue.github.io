@@ -18,6 +18,8 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Contactez Transports Ligneo pour toute demande de convoyage automobile. Devis rapide et réponse personnalisée." },
       { property: "og:title", content: "Contact · Transports Ligneo" },
       { property: "og:description", content: "Une question ? Notre équipe vous répond rapidement." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://transportsligneo.fr/contact" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/contact" }],

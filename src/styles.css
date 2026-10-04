@@ -11006,7 +11006,7 @@ html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg
 }
 .r4-page[data-audience="pro"] { --audience-accent: var(--v4-violet-glow); }
 .r4-page[data-audience="pro"] .v4-accent.v { color: var(--audience-accent); }
-.r4-page[data-audience="pro"] .v4-b2b-hero h1 { color: var(--audience-accent); text-shadow: 0 0 20px var(--audience-glow); }
+.r4-page[data-audience="pro"] .v4-b2b-hero h1 .v4-accent { color: var(--audience-accent); text-shadow: 0 0 20px var(--audience-glow); }
 .r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2) {
   text-shadow: 0 0 22px var(--audience-glow);
 }
@@ -11031,7 +11031,7 @@ html.theme-light .r4-page[data-audience="pro"] {
 }
 html.theme-light .r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2) .audience-accent,
 html.theme-light .r4-page[data-audience="pro"] .v4-faq-head h2 .audience-accent,
-html.theme-light .r4-page[data-audience="pro"] .v4-b2b-hero h1,
+html.theme-light .r4-page[data-audience="pro"] .v4-b2b-hero h1 .v4-accent,
 html.theme-light .r4-page[data-audience="pro"] .v4-faq-item.v4-open .v4-faq-q {
   color: var(--audience-accent) !important;
 }
