@@ -63,7 +63,7 @@ export default function AdminSectionHeader({
           ) : null}
         </div>
 
-        {actions ? <div className="flex flex-shrink-0 flex-wrap items-center gap-2.5">{actions}</div> : null}
+        {actions ? <div className="flex min-w-0 max-w-full shrink flex-wrap sm:flex-shrink-0 items-center gap-2.5">{actions}</div> : null}
       </div>
 
       {stats && stats.length > 0 ? (
