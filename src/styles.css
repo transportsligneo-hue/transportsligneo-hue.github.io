@@ -10659,3 +10659,13 @@ body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.na
 html.theme-dark .pp-filter-select{background:#151a33;border-color:#2a3157;color:#e5e7ff}
 html.theme-dark .pp-chip{color:#e9d5ff;background:rgba(168,85,247,.18)}
 html.theme-dark .pp-chip-clear{color:#f472b6}
+
+/* ===== Comparaison EDL départ / arrivée ===== */
+.edl-cmp-icon{color:#a855f7}
+.edl-cmp-alert{display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(239,68,68,.55);background:rgba(239,68,68,.08);color:#b91c1c;border-radius:12px;padding:12px 14px;box-shadow:0 0 14px rgba(239,68,68,.18)}
+.edl-cmp-ok{display:flex;gap:8px;align-items:center;border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08);color:#15803d;border-radius:12px;padding:10px 14px;font-size:13px}
+.edl-cmp-thumb{aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:1px solid rgba(148,163,184,.35);display:flex;align-items:center;justify-content:center;background:rgba(148,163,184,.08)}
+.edl-cmp-thumb img{width:100%;height:100%;object-fit:cover}
+.edl-cmp-thumb--alert{border-color:rgba(239,68,68,.7);box-shadow:0 0 10px rgba(239,68,68,.3)}
+html.theme-dark .edl-cmp-alert{color:#fca5a5}
+html.theme-dark .edl-cmp-ok{color:#86efac}

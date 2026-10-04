@@ -67,6 +67,9 @@ function FleetPage() {
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("tous");
   const [siteFilter, setSiteFilter] = useState<string>("tous");
+  const [energieFilter, setEnergieFilter] = useState<string>("");
+  const [marqueFilter, setMarqueFilter] = useState<string>("");
+  const [docFilter, setDocFilter] = useState<string>("");
   const [draft, setDraft] = useState<Partial<Vehicle> | null>(null);
   const [selected, setSelected] = useState<Vehicle | null>(null);
   const [panelTab, setPanelTab] = useState<"general" | "documents" | "entretien" | "historique">("general");
@@ -174,11 +177,32 @@ function FleetPage() {
       if (statutFilter !== "tous" && v.statut !== statutFilter) return false;
       if (statutFilter === "tous" && v.statut === "archive") return false;
       if (multiSite && siteFilter !== "tous" && v.site_id !== siteFilter) return false;
+      if (energieFilter && (v.energie ?? "").toLowerCase() !== energieFilter) return false;
+      if (marqueFilter && (v.marque ?? "").toUpperCase() !== marqueFilter) return false;
+      if (docFilter === "alerte" && !["warn", "expired"].includes(worstDocStatus(v))) return false;
+      if (docFilter === "ok" && worstDocStatus(v) !== "ok") return false;
       if (!q) return true;
       return [v.vin, v.immatriculation, v.marque, v.modele]
         .filter(Boolean).some((x) => String(x).toLowerCase().includes(q));
     });
-  }, [vehicles, search, statutFilter, siteFilter, multiSite]);
+  }, [vehicles, search, statutFilter, siteFilter, multiSite, energieFilter, marqueFilter, docFilter]);
+
+  const energieOptions = useMemo(
+    () => Array.from(new Set(vehicles.map((v) => (v.energie ?? "").toLowerCase()).filter(Boolean))).sort(),
+    [vehicles],
+  );
+  const marqueOptions = useMemo(
+    () => Array.from(new Set(vehicles.map((v) => (v.marque ?? "").toUpperCase()).filter(Boolean))).sort(),
+    [vehicles],
+  );
+  const parcChips = [
+    statutFilter !== "tous" && { key: "s", label: `Statut : ${FILTERS.find((f) => f.id === statutFilter)?.label}`, clear: () => setStatutFilter("tous") },
+    multiSite && siteFilter !== "tous" && { key: "site", label: `Site : ${sites[siteFilter] || "Site"}`, clear: () => setSiteFilter("tous") },
+    energieFilter && { key: "e", label: `Énergie : ${energieFilter}`, clear: () => setEnergieFilter("") },
+    marqueFilter && { key: "m", label: `Marque : ${marqueFilter}`, clear: () => setMarqueFilter("") },
+    docFilter && { key: "d", label: docFilter === "alerte" ? "Documents à renouveler" : "Documents à jour", clear: () => setDocFilter("") },
+    search.trim() && { key: "q", label: `« ${search.trim()} »`, clear: () => setSearch("") },
+  ].filter(Boolean) as { key: string; label: string; clear: () => void }[];
 
   const actifs = useMemo(() => vehicles.filter((v) => v.statut !== "archive"), [vehicles]);
 
@@ -378,6 +402,37 @@ function FleetPage() {
             {f.label}
           </button>
         ))}
+      </div>
+
+      <div className="pp-filterbar mb-4 -mt-1 flex flex-wrap items-center gap-2">
+        <select value={energieFilter} onChange={(e) => setEnergieFilter(e.target.value)} className="pp-filter-select" aria-label="Énergie">
+          <option value="">Toutes énergies</option>
+          {energieOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <select value={marqueFilter} onChange={(e) => setMarqueFilter(e.target.value)} className="pp-filter-select" aria-label="Marque">
+          <option value="">Toutes marques</option>
+          {marqueOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <select value={docFilter} onChange={(e) => setDocFilter(e.target.value)} className="pp-filter-select" aria-label="Documents">
+          <option value="">Tous les documents</option>
+          <option value="alerte">À renouveler / expirés</option>
+          <option value="ok">À jour</option>
+        </select>
+        <span className="pp-help" tabIndex={0} title="Combinez statut, énergie, marque et état des documents. Cliquez sur × d'une puce pour retirer ce filtre.">?</span>
+        {parcChips.length > 0 && (
+          <div className="flex w-full flex-wrap items-center gap-1.5">
+            {parcChips.map((c) => (
+              <button key={c.key} type="button" onClick={c.clear} className="pp-chip" aria-label={`Retirer le filtre ${c.label}`}>
+                {c.label} <span aria-hidden>×</span>
+              </button>
+            ))}
+            {parcChips.length > 1 && (
+              <button type="button" className="pp-chip-clear" onClick={() => { setStatutFilter("tous"); setSiteFilter("tous"); setEnergieFilter(""); setMarqueFilter(""); setDocFilter(""); setSearch(""); }}>
+                Tout effacer
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Grille véhicules */}

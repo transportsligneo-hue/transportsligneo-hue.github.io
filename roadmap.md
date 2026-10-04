@@ -29,9 +29,9 @@
 - [x] Indicateurs de pilotage + raccourcis sur la vue d'ensemble
 - [x] Calendrier mois/semaine
 - [x] Rapports + récap mensuel + export CSV
-- [ ] Comparaison EDL départ/arrivée avec alerte anomalie
+- [x] Comparaison EDL départ/arrivée avec alerte anomalie
 - [x] Reprise rapide (plaque → dernier trajet du véhicule)
 - [x] Filtres combinables avec puces (missions)
-- [ ] Filtres combinables sur le parc
+- [x] Filtres combinables sur le parc
 - [ ] Rôles Administrateur/Logistique/Comptabilité + invitations
 - [ ] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide, accès démo
