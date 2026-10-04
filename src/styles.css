@@ -9491,6 +9491,7 @@ html.theme-light .r4-page .hx-figure .l { color: #4a5578; }
 html.theme-light .r4-page .hx-benefit-ic,
 html.theme-light .r4-page .hx-seg-ic { color: #2f5fff; background: rgba(47, 95, 255, 0.08); border-color: rgba(47, 95, 255, 0.28); }
 html.theme-light .r4-page .hx-seg-more { color: #2f5fff; }
+html.theme-light .r4-page .hx-split-head h2 .hx-neon { color: #2f5fff; text-shadow: 0 0 14px rgba(47, 95, 255, 0.22); }
 html.theme-light .r4-page .hx-step-chip { color: #33406b; background: rgba(47, 95, 255, 0.07); border-color: rgba(47, 95, 255, 0.25); }
 html.theme-light .r4-page .hx-step-chip b { color: #2f5fff; }
 
