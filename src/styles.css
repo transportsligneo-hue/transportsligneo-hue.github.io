@@ -8499,6 +8499,14 @@ html.theme-light .r4-page .ligneo-map .ligneo-map-card {
   overflow: visible;
 }
 html.theme-light .r4-page .ligneo-map .ligneo-map-legend { display: flex; }
+/* la carte compacte de l'accueil reste une carte bleu nuit dans les deux thèmes */
+html.theme-light .r4-page .hx-map-card .ligneo-map {
+  padding: 0;
+  background: transparent;
+  margin: 0;
+}
+html.theme-light .r4-page .hx-map-card .hx-map-caption p { color: #6ea1ff; }
+html.theme-light .r4-page .hx-map-card .hx-map-caption span { color: #9aa6c9; }
 
 
 /* ============================================================
