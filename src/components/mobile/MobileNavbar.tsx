@@ -37,7 +37,7 @@ export default function MobileNavbar() {
   if (HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
 
   return (
-    <header className="2xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top">
+    <header className="xl:hidden fixed top-0 left-0 right-0 z-[55] safe-top">
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2.5 overflow-hidden" aria-label="Transports Ligneo · Accueil">
