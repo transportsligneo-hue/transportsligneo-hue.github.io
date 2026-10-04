@@ -10693,3 +10693,28 @@ html.theme-dark .edl-cmp-ok{color:#86efac}
   .r4-page .hx-split-map .hx-map-card .ligneo-map-svg { transform:scale(1.6) translateY(20%) !important; transform-origin:50% 50%; }
   .r4-page .hx-split-map .hx-map-card .ligneo-map-card { transform:none !important; }
 }
+
+/* ===== Page démonstration espace pro (/demo-pro) ===== */
+.demo-pro { max-width: 1080px; margin: 0 auto; padding: 96px 20px 64px; }
+.demo-pro-banner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(168, 85, 247, 0.45); background: rgba(168, 85, 247, 0.10); color: #e9d5ff; font-size: 0.85rem; margin-bottom: 28px; }
+.demo-pro-banner a { color: #c084fc; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.demo-pro-head { margin-bottom: 24px; }
+.demo-pro-eyebrow { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #a855f7; font-weight: 700; margin: 0 0 8px; }
+.demo-pro-head h1 { font-family: "Playfair Display", serif; font-size: clamp(1.6rem, 3.4vw, 2.4rem); margin: 0 0 10px; }
+.demo-pro-sub { color: rgba(219, 231, 255, 0.72); max-width: 640px; margin: 0; }
+.demo-pro-list h2 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin: 28px 0 12px; }
+.demo-pro-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.demo-pro-mission { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(148, 163, 255, 0.14); background: rgba(17, 26, 61, 0.55); }
+.demo-pro-mission-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.demo-pro-mission-main span { font-size: 0.8rem; color: rgba(219, 231, 255, 0.6); }
+.demo-pro-mission-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.demo-pro-mission-price { font-weight: 700; color: #67b6ff; }
+.demo-pro-cta { margin-top: 36px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+.demo-pro-cta p { margin: 0; color: rgba(219, 231, 255, 0.8); }
+html:not(.theme-dark) .demo-pro-banner { background: rgba(168, 85, 247, 0.08); color: #6b21a8; }
+html:not(.theme-dark) .demo-pro-banner a { color: #7c3aed; }
+html:not(.theme-dark) .demo-pro-sub { color: rgba(17, 26, 61, 0.66); }
+html:not(.theme-dark) .demo-pro-mission { background: #fdfcf8; border-color: rgba(17, 26, 61, 0.10); }
+html:not(.theme-dark) .demo-pro-mission-main span { color: rgba(17, 26, 61, 0.55); }
+html:not(.theme-dark) .demo-pro-mission-price { color: #2f5fff; }
+html:not(.theme-dark) .demo-pro-cta p { color: rgba(17, 26, 61, 0.75); }
