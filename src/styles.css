@@ -10901,9 +10901,9 @@ html.theme-light .r4-page .v4-cta-box h2 {
 .hb-btn .hb-label{font-size:11.5px;font-weight:600;color:#fff;line-height:1.25}
 .hb-chev{margin-left:auto;color:#6d78a8;font-size:12px;transition:transform .2s ease,color .2s}
 .hb-btn:hover .hb-chev{transform:translateX(3px);color:#fff}
-.hb-part{--c:#5b83ff;--c1:#5b83ff;--c2:#2f5fff;--glow:rgba(47,95,255,.55)}
-.hb-pro{--c:#b06cf0;--c1:#b06cf0;--c2:#8a3fe0;--glow:rgba(155,93,224,.55)}
-.hb-esp{--c:#5de0ff;--c1:#7ee9ff;--c2:#2fb8e0;--glow:rgba(93,224,255,.5)}
+.hb-part{--c:#4f8eff;--c1:#4f8eff;--c2:#2f6fff;--glow:rgba(79,142,255,.55)}
+.hb-pro{--c:#a794ff;--c1:#a794ff;--c2:#8a6cf0;--glow:rgba(167,148,255,.55)}
+.hb-esp{--c:#5de0ff;--c1:#5de0ff;--c2:#2fb8e0;--glow:rgba(93,224,255,.5)}
 .hb-divider{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hb-divider span{font-size:10px;color:#5c6690;letter-spacing:.6px;font-weight:600;text-transform:uppercase;white-space:nowrap}
 .hb-divider i{flex:1;height:1px;background:rgba(255,255,255,.08)}
