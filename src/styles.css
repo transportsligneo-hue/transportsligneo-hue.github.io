@@ -5932,9 +5932,6 @@ html.theme-light .r4-page .v5-hero h2,
 html.theme-light .r4-page .v5-hero p,
 html.theme-light .r4-page .v5-hero .v5-check-list > div { color: #ffffff; }
 html.theme-light .r4-page .v5-trust { background: #ffffff !important; }
-html.theme-light .r4-page .v5-logo-item { background: #ffffff !important; }
-html.theme-light .r4-page .v5-marquee-mask::before,
-html.theme-light .r4-page .v5-marquee-mask::after { background: linear-gradient(90deg, #ffffff, transparent) !important; }
 html.theme-light .r4-page .v5-trust-label { color: #0f1526 !important; }
 html.theme-light .r4-page h1,
 html.theme-light .r4-page h2,
