@@ -56,9 +56,12 @@ function SuiviPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Le visiteur tape juste la fin du numéro (#116, 260) — le préfixe
-    // MIS-TLG-2026- est déjà affiché. S'il colle le numéro complet, on l'envoie tel quel.
+    // MIS-TLG-2026- est déjà affiché. On envoie la séquence numérique : le
+    // serveur la recherche quelle que soit l'année, et les volets A/R partagent
+    // le même numéro de base.
     const typed = numero.trim().toUpperCase();
-    const value = typed.includes("TLG") ? typed : typed.replace(/^#/, "");
+    const m = typed.match(/(\d{1,5})(?:\.\d+)?(?:-[LRA])?$/);
+    const value = m ? m[1] : typed;
     const codeValue = code.trim();
     if (value.length < 1 || codeValue.length < 4) {
       setError("Numéro ou code incorrect.");
@@ -119,7 +122,6 @@ function SuiviPage() {
                 id="numero-mission"
                 value={numero}
                 maxLength={40}
-                inputMode="numeric"
                 onChange={(e) =>
                   setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-/i, "").slice(0, 40))
                 }
