@@ -10647,3 +10647,15 @@ body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.na
   box-shadow: 0 0 0 1px rgba(122,163,255,0.5), 0 0 20px rgba(79,140,255,0.45) !important;
 }
 body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.nav-accent-green):active { transform: scale(0.97) !important; }
+
+/* ===== Espace pro : filtres combinables + bulles d'aide ===== */
+.pp-filter-select{appearance:auto;border:1px solid hsl(var(--border, 220 13% 85%));background:var(--pro-bg-soft, #f5f3ff);color:inherit;border-radius:8px;padding:6px 10px;font-size:12.5px;outline:none}
+.pp-filter-select:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.18)}
+.pp-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(168,85,247,.55);background:rgba(168,85,247,.10);color:#7c3aed;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;transition:background .15s,box-shadow .15s}
+.pp-chip:hover{background:rgba(168,85,247,.18);box-shadow:0 0 10px rgba(168,85,247,.35)}
+.pp-chip span{font-size:14px;line-height:1}
+.pp-chip-clear{font-size:12px;color:#db2777;text-decoration:underline;padding:3px 6px}
+.pp-help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;border:1px solid rgba(168,85,247,.6);color:#a855f7;font-size:11px;font-weight:700;cursor:help}
+html.theme-dark .pp-filter-select{background:#151a33;border-color:#2a3157;color:#e5e7ff}
+html.theme-dark .pp-chip{color:#e9d5ff;background:rgba(168,85,247,.18)}
+html.theme-dark .pp-chip-clear{color:#f472b6}

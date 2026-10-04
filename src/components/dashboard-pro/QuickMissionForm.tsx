@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
   Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, KeyRound, Wrench,
+  Repeat,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -130,6 +131,7 @@ export default function QuickMissionForm({
   const [km, setKm] = useState("");
   const [vehNotes, setVehNotes] = useState("");
   const [plateBusy, setPlateBusy] = useState(false);
+  const [previousTrip, setPreviousTrip] = useState<{ numero: string; ville_depart: string; ville_arrivee: string; date_prise_en_charge: string; marque: string | null; modele: string | null; vin: string | null } | null>(null);
 
   // Restitution (Aller-retour) · 2e véhicule + adresses différentes
   const [sameRetourAddress, setSameRetourAddress] = useState(true);
@@ -234,6 +236,25 @@ export default function QuickMissionForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favorites]);
 
+
+  // Reprise rapide : retrouve la dernière mission du même véhicule (RLS = missions du client)
+  useEffect(() => {
+    const raw = immat.trim().toUpperCase();
+    const compact = raw.replace(/[^A-Z0-9]/g, "");
+    if (compact.length < 5) { setPreviousTrip(null); return; }
+    const dashed = compact.length === 7 ? `${compact.slice(0, 2)}-${compact.slice(2, 5)}-${compact.slice(5)}` : raw;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("missions")
+        .select("numero, ville_depart, ville_arrivee, date_prise_en_charge, marque, modele, vin")
+        .or(`immatriculation.ilike.${compact},immatriculation.ilike.${dashed}`)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (!cancelled) setPreviousTrip(data?.[0] ?? null);
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [immat]);
 
   // Resolve price whenever inputs change
   useEffect(() => {
@@ -840,6 +861,29 @@ export default function QuickMissionForm({
             <p className="text-[11px] text-pro-text-soft mt-1">
               Récupération automatique des infos véhicule (marque, modèle, énergie). Modifiez si nécessaire.
             </p>
+            {previousTrip && (
+              <div className="qm-repeat mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-pro-accent/40 bg-pro-bg-soft px-3 py-2 text-xs text-pro-text">
+                <Repeat size={13} className="text-pro-accent shrink-0" />
+                <span className="flex-1 min-w-0">
+                  Déjà convoyé : <strong>{previousTrip.ville_depart} → {previousTrip.ville_arrivee}</strong>
+                  {" "}({new Date(previousTrip.date_prise_en_charge).toLocaleDateString("fr-FR")})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDepart(previousTrip.ville_depart);
+                    if (tripType !== "recharge") setArrivee(previousTrip.ville_arrivee);
+                    if (previousTrip.marque && !marque) setMarque(previousTrip.marque);
+                    if (previousTrip.modele && !modele) setModele(previousTrip.modele);
+                    if (previousTrip.vin && !vin) setVin(previousTrip.vin);
+                    toast.success("Trajet repris : vérifiez les adresses exactes");
+                  }}
+                  className="rounded-md bg-pro-accent px-2.5 py-1 font-semibold text-white hover:bg-pro-accent-hover"
+                >
+                  Reprendre ce trajet
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <label className={lbl}>VIN / châssis</label>
