@@ -96,7 +96,7 @@ export default function ServicesContent({
         <>
           <div className="v4-hero">
             <div className="v4-hero-eyebrow"><span className="dot" />Nos services</div>
-<h1 className="v4-h1">Avec Ligneo, <span className="v4-accent">la tranquilité sur toute la ligne</span></h1>
+<h1 className="v4-h1">Avec Ligneo, <span className="v4-accent">la tranquilité sur toute la ligne.</span></h1>
             <p className="v4-hero-p">De la citadine au véhicule de collection, pour tous les moments de votre vie : un convoyeur professionnel prend en charge votre véhicule de l'enlèvement à la remise des clés, dans un service complet, transparent et assuré, pensé pour les particuliers.</p>
           </div>
 
