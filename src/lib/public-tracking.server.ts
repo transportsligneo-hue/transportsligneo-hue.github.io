@@ -15,6 +15,11 @@ export type PublicTracking = {
   ville_arrivee?: string | null;
   date_prise_en_charge?: string | null;
   etape?: string | null;
+  /** Véhicule convoyé (marque + modèle) */
+  vehicule?: string | null;
+  immatriculation?: string | null;
+  /** Nom du destinataire à la livraison (jamais de téléphone ni d'e-mail) */
+  destinataire?: string | null;
   /** Position approximative (arrondie ~1 km) */
   position?: { lat: number; lng: number } | null;
   updated_at?: string | null;
@@ -124,9 +129,15 @@ export async function trackMission(input: {
 
   const { data: trajets } = await supabaseAdmin
     .from("trajets")
-    .select("id")
+    .select("id, marque, modele, immatriculation, contact_arrivee_nom, contact_depart_nom")
     .eq("mission_id", mission!.id);
   const trajetIds = (trajets ?? []).map((t) => t.id);
+
+  // Infos véhicule + destinataire (jamais de téléphone ni d'e-mail ici).
+  const t0 = (trajets ?? [])[0];
+  const vehicule = t0 ? [t0.marque, t0.modele].filter(Boolean).join(" ") || null : null;
+  const immatriculation = t0?.immatriculation ?? null;
+  const destinataire = t0?.contact_arrivee_nom ?? t0?.contact_depart_nom ?? null;
 
   if (trajetIds.length > 0) {
     const { data: attribution } = await supabaseAdmin
@@ -166,6 +177,9 @@ export async function trackMission(input: {
     ville_arrivee: mission!.ville_arrivee,
     date_prise_en_charge: mission!.date_prise_en_charge,
     etape,
+    vehicule,
+    immatriculation,
+    destinataire,
     position,
     updated_at,
   };
