@@ -11,7 +11,7 @@ import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
-import heroBg from "@/assets/hero-ligneo-night.jpg";
+import heroBg from "@/assets/hero-ligneo-extended.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
 
