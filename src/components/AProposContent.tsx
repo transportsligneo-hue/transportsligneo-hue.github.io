@@ -99,7 +99,7 @@ export default function AProposContent() {
         <div className="v4-hero-eyebrow" style={{ justifyContent: "center", width: "100%" }}>
           <span className="dot" />Rejoignez l'aventure
         </div>
-        <h2>Envie de travailler <span className="audience-accent">avec nous</span> ?</h2>
+        <h2>Envie de travailler <span className="audience-accent">avec nous ?</span></h2>
         <p>Que vous soyez un particulier ou un professionnel, parlons de votre prochain convoyage.</p>
         <Link to="/contact" className="v4-btn-primary">Nous contacter</Link>
       </div>
