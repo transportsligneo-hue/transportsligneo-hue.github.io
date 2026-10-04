@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 import { dossierTypeLabel, isAllerRetour } from "@/lib/mission-type";
+import { PilotageStrip } from "@/components/dashboard-pro/PilotageStrip";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -291,6 +292,8 @@ function ProDashboard() {
       </div>
 
 
+
+      <PilotageStrip isFlotte={isFlotte} />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
