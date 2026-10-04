@@ -53,7 +53,7 @@ function SuiviPage() {
     e.preventDefault();
     const value = numero.trim();
     const codeValue = code.trim();
-    if (value.length < 3 || codeValue.length < 4) {
+    if (value.length < 1 || codeValue.length < 4) {
       setError("Numéro ou code incorrect.");
       return;
     }
@@ -92,8 +92,8 @@ function SuiviPage() {
             Où en est <span className="v4-accent">mon véhicule</span> ?
           </h1>
           <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
-            Saisissez votre numéro de mission et votre code confidentiel (tous deux indiqués sur votre
-            confirmation) pour connaître le statut de votre convoyage. Aucune information personnelle
+            Saisissez votre numéro de mission (juste le chiffre suffit, ex. 116) et votre code
+            confidentiel, tous deux indiqués dans l'e-mail de suivi. Aucune information personnelle
             n'est affichée sur cette page.
           </p>
 
@@ -106,7 +106,7 @@ function SuiviPage() {
               value={numero}
               maxLength={40}
               onChange={(e) => setNumero(e.target.value)}
-              placeholder="Ex. M-2026-0142"
+              placeholder="N° de mission, ex. 116"
               className="flex-1 rounded-xl border border-[#7aa3ff]/25 bg-white/[0.04] px-4 py-3.5 text-[15px] text-white placeholder:text-[#6f7ba0] focus:border-[#4f8cff] focus:outline-none"
             />
             <label htmlFor="code-confidentiel" className="sr-only">
