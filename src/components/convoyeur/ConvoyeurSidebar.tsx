@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import ThemeToggle from "@/components/ThemeToggle";
 import LigneoLockup from "@/components/brand/LigneoLockup";
+import driverBadge from "@/assets/ligneo-driver-badge.png.asset.json";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface ConvoyeurSidebarItem {
@@ -53,22 +54,22 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   const navItemClass = (active: boolean) =>
     `relative flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-all ${
       active
-        ? "bg-gradient-to-r from-[rgba(47,125,255,0.28)] via-[rgba(78,168,255,0.14)] to-transparent text-white font-semibold shadow-[0_0_24px_rgba(78,168,255,0.30)]"
+        ? "bg-gradient-to-r from-[rgba(24,201,110,0.28)] via-[rgba(52,230,140,0.14)] to-transparent text-white font-semibold shadow-[0_0_24px_rgba(52,230,140,0.30)]"
         : "text-[#D6E4FF] hover:bg-white/[0.06] hover:text-white"
     }`;
 
   return (
     <div className="driver-shell flex">
       {/* === Sidebar Desktop premium === */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 driver-nav-surface w-64 flex-col border-r border-[rgba(103,193,255,0.18)] bg-[rgba(4,27,82,0.72)] backdrop-blur-2xl">
-        <div className="px-5 py-5 border-b border-[rgba(103,193,255,0.16)]">
-          <DriverBrand />
-          {user?.email && (
-            <p className="text-[11px] text-[#A8C2FF]/80 truncate mt-2.5 pl-12 font-mono">{user.email}</p>
-          )}
-          <div className="mt-3 pl-11 text-[#D6E4FF]">
-            <NotificationBell />
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 driver-nav-surface w-64 flex-col border-r border-[rgba(52,230,140,0.18)] bg-[rgba(4,27,82,0.72)] backdrop-blur-2xl">
+        <div className="px-5 py-5 border-b border-[rgba(52,230,140,0.18)] flex items-center gap-3">
+          <img src={driverBadge.url} alt="Transports Ligneo Driver" className="h-12 w-12 rounded-xl object-cover shrink-0 shadow-[0_0_16px_rgba(52,230,140,0.35)]" />
+          <div className="min-w-0 flex-1">
+            <h2 className="driver-brand-title text-sm font-bold tracking-[0.12em] uppercase truncate">Transports Ligneo</h2>
+            <p className="text-[10px] font-bold tracking-[0.22em] text-[#34E68C] uppercase">Driver</p>
+            {user?.email && <p className="driver-brand-mail text-[11px] truncate mt-0.5">{user.email}</p>}
           </div>
+          <div className="shrink-0 text-[#34E68C]"><NotificationBell /></div>
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -77,9 +78,9 @@ export function ConvoyeurSidebar({ items, children }: Props) {
             return (
               <Link key={item.to} to={item.to} className={navItemClass(active)}>
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-gradient-to-b from-[#67C1FF] to-[#2F7DFF] rounded-r-full shadow-[0_0_12px_rgba(103,193,255,0.80)]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-gradient-to-b from-[#34E68C] to-[#18C96E] rounded-r-full shadow-[0_0_12px_rgba(52,230,140,0.80)]" />
                 )}
-                <item.icon size={18} className={active ? "text-[#67C1FF]" : "text-[#A8C2FF]"} />
+                <item.icon size={18} className={active ? "text-[#34E68C]" : "text-[#A8C2FF]"} />
                 <span className="flex-1">{item.label}</span>
                 {item.badge}
               </Link>
@@ -87,7 +88,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           })}
         </nav>
 
-        <div className="p-3 border-t border-[rgba(103,193,255,0.16)] space-y-1">
+        <div className="p-3 border-t border-[rgba(52,230,140,0.16)] space-y-1">
           <ThemeToggle variant="full" className="w-full justify-start" />
           <button
             onClick={() => logout()}
@@ -100,7 +101,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       </aside>
 
       {/* === Mobile Header premium glass === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 driver-nav-surface border-b border-[rgba(103,193,255,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 driver-nav-surface border-b border-[rgba(52,230,140,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
         <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[rgba(4,27,82,0.95)]" />
         <div className="h-11 px-3.5 flex items-center justify-between gap-3">
           <DriverBrand size="sm" />
@@ -108,7 +109,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
             <NotificationBell />
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="w-9 h-9 rounded-xl border border-[rgba(103,193,255,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
+              className="w-9 h-9 rounded-xl border border-[rgba(52,230,140,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
               aria-label="Menu"
             >
               <Menu size={16} />
@@ -121,12 +122,12 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       {mobileMenuOpen && (
         <>
           <div className="md:hidden fixed inset-0 z-50 bg-[#041B52]/70 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)} />
-          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] driver-nav-surface w-80 bg-[rgba(4,27,82,0.95)] backdrop-blur-2xl border-r border-[rgba(103,193,255,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
-            <div className="px-5 py-4 border-b border-[rgba(103,193,255,0.20)] flex items-center justify-between">
+          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] driver-nav-surface w-80 bg-[rgba(4,27,82,0.95)] backdrop-blur-2xl border-r border-[rgba(52,230,140,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
+            <div className="px-5 py-4 border-b border-[rgba(52,230,140,0.20)] flex items-center justify-between">
               <DriverBrand />
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-[rgba(103,193,255,0.28)] flex items-center justify-center text-white"
+                className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-[rgba(52,230,140,0.28)] flex items-center justify-center text-white"
               >
                 <X size={18} />
               </button>
@@ -141,18 +142,18 @@ export function ConvoyeurSidebar({ items, children }: Props) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all ${
                       active
-                        ? "bg-gradient-to-r from-[rgba(47,125,255,0.32)] via-[rgba(78,168,255,0.16)] to-transparent text-white font-semibold"
+                        ? "bg-gradient-to-r from-[rgba(24,201,110,0.32)] via-[rgba(52,230,140,0.16)] to-transparent text-white font-semibold"
                         : "text-[#D6E4FF] hover:bg-white/[0.06]"
                     }`}
                   >
-                    <item.icon size={18} className={active ? "text-[#67C1FF]" : "text-[#A8C2FF]"} />
+                    <item.icon size={18} className={active ? "text-[#34E68C]" : "text-[#A8C2FF]"} />
                     <span className="flex-1">{item.label}</span>
                     {item.badge}
                   </Link>
                 );
               })}
             </nav>
-            <div className="p-3 border-t border-[rgba(103,193,255,0.20)] space-y-1">
+            <div className="p-3 border-t border-[rgba(52,230,140,0.20)] space-y-1">
               <ThemeToggle variant="full" className="w-full justify-start" />
               <button
                 onClick={() => logout()}
@@ -180,5 +181,13 @@ export function ConvoyeurSidebar({ items, children }: Props) {
 
 /* Brand premium driver : lockup officiel TRANSPORTS LIGNEO + tag DRIVER */
 function DriverBrand({ size = "md" }: { size?: "sm" | "md" }) {
-  return <LigneoLockup size={size} tag="Driver" />;
+  return (
+    <span className="flex items-center gap-2.5 min-w-0">
+      <img src={driverBadge.url} alt="Transports Ligneo Driver" className={`${size === "sm" ? "h-8 w-8" : "h-10 w-10"} rounded-lg object-cover shrink-0`} />
+      <span className="min-w-0 leading-tight">
+        <span className="driver-brand-title block text-xs font-bold tracking-[0.12em] uppercase truncate">Transports Ligneo</span>
+        <span className="block text-[9px] font-bold tracking-[0.22em] text-[#34E68C] uppercase">Driver</span>
+      </span>
+    </span>
+  );
 }

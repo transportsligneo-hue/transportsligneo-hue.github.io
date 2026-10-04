@@ -10536,3 +10536,33 @@ html.theme-light .r4-page .suivi-txt-horloge { color: #3b6fe8; text-shadow: none
   .mnav-bar .theme-pref--compact .theme-pref-btn { padding: 3px 4px; }
   .mnav-bar .theme-pref--compact .theme-pref-btn svg { width: 12px; height: 12px; }
 }
+
+/* Driver : accents vert électrique (jamais bleu) dans les deux thèmes */
+.driver-shell {
+  --driver-border: rgba(52, 230, 140, 0.22);
+  --driver-border-strong: rgba(52, 230, 140, 0.50);
+  --driver-accent: #18C96E;
+  --driver-accent-2: #2EE08A;
+  --driver-accent-3: #34E68C;
+  --driver-gold: #34E68C;
+  --driver-accent-soft: rgba(24, 201, 110, 0.20);
+  --driver-glow: 0 0 24px rgba(52, 230, 140, 0.40);
+  --driver-training-blue: #34E68C;
+  --driver-training-button: #18C96E;
+}
+html.theme-light .driver-shell {
+  --driver-border-strong: rgba(14, 160, 85, 0.35);
+  --driver-gold: #0ea055;
+  --driver-accent: #0ea055;
+  --driver-accent-2: #12b562;
+  --driver-accent-3: #0ea055;
+  --driver-accent-soft: rgba(14, 160, 85, 0.10);
+  --driver-glow: 0 10px 30px -18px rgba(14, 160, 85, 0.45);
+  --driver-training-blue: #0b8a49;
+  --driver-training-button: #0ea055;
+}
+.driver-shell .driver-brand-title { color: #ffffff; }
+.driver-shell .driver-brand-mail { color: rgba(214, 255, 233, 0.7); }
+html.theme-light .driver-shell .driver-brand-title { color: #0f1526; }
+html.theme-light .driver-shell .driver-brand-mail { color: #6b7590; }
+html.theme-light .driver-shell .text-\[\#34E68C\] { color: #0ea055 !important; }
