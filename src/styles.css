@@ -10376,3 +10376,91 @@ html.theme-dark .dashboard-shell-light .v3-tabs { background: #111a3d; border-co
 html.theme-dark .dashboard-shell-light .v3-kpi-trend { background: rgba(232,237,251,.08); color: #b7c1e0; }
 html.theme-dark .dashboard-shell-light aside [class*="from-violet-50"], html.theme-dark .dashboard-shell-light aside [class*="from-blue-50"] { background: #17224a !important; border-color: #3a2f7a !important; }
 html.theme-dark .dashboard-shell-light .v3-status.wait { color: #c9bbff; }
+
+/* ===== Page /suivi — champs bleu néon électrique, statuts différenciés ===== */
+.r4-page .suivi-field {
+  border: 1px solid rgba(122,163,255,0.30);
+  background: rgba(255,255,255,0.045);
+  border-radius: 14px;
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.r4-page .suivi-field:focus-within,
+.r4-page input.suivi-field:focus {
+  border-color: rgba(79,140,255,0.80);
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.16), 0 0 22px rgba(79,140,255,0.28);
+  background: rgba(79,140,255,0.06);
+}
+.r4-page .suivi-prefix {
+  color: #4f8cff;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(79,140,255,0.55);
+}
+.r4-page .suivi-input {
+  color: #67b6ff;
+  font-weight: 600;
+  caret-color: #67b6ff;
+  text-shadow: 0 0 12px rgba(103,182,255,0.55);
+}
+.r4-page .suivi-input::placeholder {
+  color: #7b86a8;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-shadow: none;
+  opacity: 1;
+}
+.r4-page .suivi-badge {
+  text-shadow: 0 0 10px currentColor;
+}
+/* Adresses et prise en charge : bleu néon électrique avec variantes */
+.r4-page .suivi-ico {
+  color: #4f8cff;
+  filter: drop-shadow(0 0 6px rgba(79,140,255,0.75));
+}
+.r4-page .suivi-ico-horloge {
+  color: #67c1ff;
+  filter: drop-shadow(0 0 6px rgba(103,193,255,0.75));
+}
+.r4-page .suivi-txt-depart {
+  color: #4f8cff;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(79,140,255,0.40);
+}
+.r4-page .suivi-txt-arrivee {
+  color: #8fc0ff;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(143,192,255,0.40);
+}
+.r4-page .suivi-txt-horloge {
+  color: #67c1ff;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(103,193,255,0.40);
+}
+/* Mode clair : bleu électrique lisible, même esprit néon */
+html.theme-light .r4-page .suivi-field {
+  background: #ffffff;
+  border-color: rgba(47,95,255,0.30);
+  box-shadow: 0 1px 2px rgba(15,21,38,0.04), 0 10px 26px -18px rgba(15,21,38,0.35);
+}
+html.theme-light .r4-page .suivi-field:focus-within,
+html.theme-light .r4-page input.suivi-field:focus {
+  border-color: rgba(28,63,196,0.75);
+  box-shadow: 0 0 0 3px rgba(28,63,196,0.12);
+  background: #f4f7ff;
+}
+html.theme-light .r4-page .suivi-prefix,
+html.theme-light .r4-page .suivi-txt-depart {
+  color: #1c3fc4;
+  text-shadow: none;
+}
+html.theme-light .r4-page .suivi-input {
+  color: #2450e0;
+  text-shadow: none;
+  caret-color: #2450e0;
+}
+html.theme-light .r4-page .suivi-input::placeholder {
+  color: #8a93b4;
+}
+html.theme-light .r4-page .suivi-ico { color: #1c3fc4; filter: none; }
+html.theme-light .r4-page .suivi-ico-horloge { color: #0f6bd8; filter: none; }
+html.theme-light .r4-page .suivi-txt-arrivee { color: #0f6bd8; text-shadow: none; }
+html.theme-light .r4-page .suivi-txt-horloge { color: #3b6fe8; text-shadow: none; }
