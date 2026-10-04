@@ -129,7 +129,7 @@ function TarifsPage() {
           </div>
           <div className="v4-services-grid">
             {[
-              { t: "Péages & carburant", d: "Inclus dans chaque devis, quelle que soit la distance parcourue.", p: "M12 2v20M17 7c0-2.2-2.2-4-5-4S7 4.8 7 7s2.2 3.4 5 4 5 1.8 5 4-2.2 4-5 4-5-1.8-5-4" },
+              { t: "Péages & carburant", d: "Inclus dans chaque devis, quelle que soit la distance parcourue.", p: "M4 9h10 M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18 M4 22h12 M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5" },
               { t: "Assurance tous risques", d: "Chaque mission est couverte de bout en bout, sans supplément.", p: "M12 2l8 4v6c0 5-3.4 8.7-8 10-4.6-1.3-8-5-8-10V6z M9 12l2 2 4-4" },
               { t: "0 frais caché", d: "Le montant du devis est celui de la facture finale.", p: "M9 12l2 2 4-4 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z" },
               { t: "Devis instantané", d: "Un tarif clair et personnalisé en moins de 30 secondes.", p: "M13 2 3 14h7l-1 8 10-12h-7l1-8Z" },
