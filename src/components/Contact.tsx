@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Phone, Mail, Globe, Send, CheckCircle, AlertCircle, Loader2, ArrowUpRight } from "lucide-react";
 import emailjs from "@emailjs/browser";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -114,20 +114,23 @@ ${form.message}`;
       <div className="v4-split">
         <div className="v4-glass v4-contact-card">
           <span className="v4-status-badge"><span className="d" />Disponible 7j/7</span>
-          <h2>Nous joindre</h2>
+          <h2 className="v4-contact-title">Nous <span>joindre</span></h2>
           <p>Un interlocuteur dédié, joignable directement. Réponse rapide et personnalisée.</p>
 
-          <a href="tel:0782456181" className="v4-contact-row">
-            <div className="v4-c-ic"><Phone size={18} /></div>
-            <div><div className="v4-c-label">Téléphone</div><div className="v4-c-value">07 82 45 61 81</div></div>
+          <a href="tel:0782456181" className="v4-contact-tile">
+            <span className="v4-c-ic"><Phone size={20} /></span>
+            <span className="v4-c-txt"><span className="v4-c-label">Téléphone</span><span className="v4-c-value">07 82 45 61 81</span></span>
+            <ArrowUpRight size={17} className="v4-c-arrow" aria-hidden="true" />
           </a>
-          <a href="mailto:contact@transportsligneo.fr" className="v4-contact-row">
-            <div className="v4-c-ic"><Mail size={18} /></div>
-            <div><div className="v4-c-label">Email</div><div className="v4-c-value">contact@transportsligneo.fr</div></div>
+          <a href="mailto:contact@transportsligneo.fr" className="v4-contact-tile">
+            <span className="v4-c-ic"><Mail size={20} /></span>
+            <span className="v4-c-txt"><span className="v4-c-label">Email</span><span className="v4-c-value">contact@transportsligneo.fr</span></span>
+            <ArrowUpRight size={17} className="v4-c-arrow" aria-hidden="true" />
           </a>
-          <a href="https://www.transportsligneo.fr" target="_blank" rel="noopener noreferrer" className="v4-contact-row">
-            <div className="v4-c-ic"><Globe size={18} /></div>
-            <div><div className="v4-c-label">Site</div><div className="v4-c-value">www.transportsligneo.fr</div></div>
+          <a href="https://www.transportsligneo.fr" target="_blank" rel="noopener noreferrer" className="v4-contact-tile">
+            <span className="v4-c-ic"><Globe size={20} /></span>
+            <span className="v4-c-txt"><span className="v4-c-label">Site</span><span className="v4-c-value">www.transportsligneo.fr</span></span>
+            <ArrowUpRight size={17} className="v4-c-arrow" aria-hidden="true" />
           </a>
 
           <a href="tel:0782456181" className="v4-call-btn">Appeler maintenant</a>
