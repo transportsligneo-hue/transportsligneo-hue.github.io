@@ -1043,12 +1043,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             Renseignez votre trajet pour afficher votre tarif
           </p>
         )}
-        <div className="dg-call-row">
-          <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
-            <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
-            Contact
-          </Link>
-        </div>
+        {variant !== "flat-mini" && (
+          <div className="dg-call-row">
+            <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
+              <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
+              Contact
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* === MODAL MULTI-ÉTAPES === */}

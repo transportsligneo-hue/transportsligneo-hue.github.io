@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   MapPin, ShieldCheck, ScanLine, PenLine, FolderOpen, User, BriefcaseBusiness, CarFront, House,
-  KeyRound, Truck, BarChart3, ArrowRight,
+  KeyRound, Truck, BarChart3, ArrowRight, Phone,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import DevisGenerator from "@/components/DevisGenerator";
@@ -58,6 +58,13 @@ export default function HomeDesktopV5() {
                 <span className="hx-switch-icon"><House size={24} strokeWidth={2.1} aria-hidden="true" /></span>
                 <span className="hx-switch-label">Mon espace client</span>
                 <ArrowRight className="hx-switch-arrow" size={17} strokeWidth={1.8} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="hx-contact-row">
+              <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
+                <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
+                Contact
               </Link>
             </div>
           </div>
