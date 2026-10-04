@@ -10252,3 +10252,4 @@ html.theme-light .driver-shell [class*="bg-[#1"] .text-white,
 html.theme-light .driver-shell [class*="from-[#1"] .text-white,
 html.theme-light .driver-shell [class*="from-[#2"].text-white,
 html.theme-light .driver-shell .driver-cta-catalogue { color: #ffffff !important; }
+html.theme-light .driver-shell .driver-on-dark, html.theme-light .driver-shell span.driver-on-dark { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; }
