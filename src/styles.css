@@ -10631,3 +10631,22 @@ html.theme-light .driver-shell .text-\[\#34E68C\] { color: #0ea055 !important; }
 .pp-table th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);padding:6px 4px;border-bottom:1px solid var(--border)}
 .pp-table td{padding:8px 4px;border-bottom:1px solid color-mix(in oklab,var(--border) 60%,transparent)}
 .pp-empty{text-align:center;color:var(--muted-foreground)}
+
+/* Navbar : liens neutres en pilule néon fixe, calés à gauche */
+body .tln-links { justify-content: flex-start !important; gap: 10px !important; padding-left: 10px !important; }
+body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.nav-accent-green) {
+  border: 1px solid rgba(79,140,255,0.55) !important;
+  background: rgba(47,95,255,0.10) !important;
+  color: #dbe7ff !important;
+  box-shadow: 0 0 0 1px rgba(79,140,255,0.15), 0 0 12px rgba(79,140,255,0.25) !important;
+  animation: none !important;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.nav-accent-green)::after { display: none !important; }
+body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.nav-accent-green):hover {
+  transform: translateY(-1px) !important;
+  background: rgba(47,95,255,0.22) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 1px rgba(122,163,255,0.5), 0 0 20px rgba(79,140,255,0.45) !important;
+}
+body .tln-bar .r4-nav-link:not(.nav-accent-blue):not(.nav-accent-purple):not(.nav-accent-green):active { transform: scale(0.97) !important; }
