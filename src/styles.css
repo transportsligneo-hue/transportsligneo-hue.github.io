@@ -11006,10 +11006,11 @@ html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg
 }
 .r4-page[data-audience="pro"], .r4-page .plateforme-pro { --audience-accent: var(--v4-violet-glow); }
 .r4-page[data-audience="pro"] .v4-accent.v { color: var(--audience-accent); }
+.r4-page[data-audience="pro"] .v4-b2b-hero h1 { color: var(--audience-accent); text-shadow: 0 0 20px var(--audience-glow); }
 .r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2) {
   text-shadow: 0 0 22px var(--audience-glow);
 }
-.r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2) .audience-accent {
+.r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2, .v4-faq-head h2) .audience-accent {
   color: var(--audience-accent);
   text-shadow: 0 0 16px var(--audience-glow), 0 0 30px var(--audience-glow);
 }
@@ -11023,14 +11024,17 @@ html.theme-dark .dashboard-shell-light:not([data-account-type="client"]) :is(.bg
 }
 .r4-page[data-audience="pro"] .v4-faq-item.v4-open { border-color: color-mix(in srgb, var(--audience-accent) 42%, transparent); }
 .r4-page[data-audience="pro"] .plateforme-head h2 { text-shadow: 0 0 22px var(--audience-glow); }
+.r4-page[data-audience="pro"] .v4-faq-head h2 { text-shadow: 0 0 22px var(--audience-glow); }
 html.theme-light .r4-page[data-audience="pro"] {
   --audience-accent: oklch(0.49 0.24 297);
 }
 html.theme-light .r4-page[data-audience="pro"] :is(.v4-section-head h2, .v4-cta-box h2) .audience-accent,
+html.theme-light .r4-page[data-audience="pro"] .v4-faq-head h2 .audience-accent,
+html.theme-light .r4-page[data-audience="pro"] .v4-b2b-hero h1,
 html.theme-light .r4-page[data-audience="pro"] .v4-faq-item.v4-open .v4-faq-q {
   color: var(--audience-accent) !important;
 }
-.r4-page[data-audience="particuliers"] .v4-faq-item.v4-open .v4-faq-q { color: var(--audience-accent); }
+.r4-page[data-audience="particuliers"] :is(.v4-faq-item.v4-open .v4-faq-q, .v4-faq-head h2 .audience-accent) { color: var(--audience-accent); }
 .driver-shell { --audience-accent: var(--home-driver); }
 .driver-shell .audience-accent { color: var(--audience-accent); }
 
@@ -11043,9 +11047,9 @@ html.theme-dark .r4-page:has(.ccm-hero) {
   background: var(--v4-navy);
   color: var(--ccm-ink);
 }
-html.theme-dark .r4-page :is(.ccm-hero h1, .ccm-demo h3, .ccm-card h2, .ccm-actions li, .v4-section-head h2, .v5-feat-card h3, .v4-cta-box h2) { color: var(--ccm-ink); }
-html.theme-dark .r4-page :is(.ccm-hero p, .ccm-card p, .v4-section-head p, .v5-feat-card p, .v4-cta-box p, .v4-stat .l, .v5-trust-row) { color: var(--ccm-muted); }
-html.theme-dark .r4-page :is(.ccm-card, .v5-feat-card, .v4-cta-box) { background: var(--ccm-panel); border-color: var(--ccm-border); }
-html.theme-dark .r4-page .ccm-node { background: var(--ccm-panel); }
-html.theme-dark .r4-page .ccm-actions { border-color: var(--ccm-border); }
-html.theme-dark .r4-page .v4-btn-outline { color: var(--v4-blue-bright); }
+html.theme-dark .r4-page:has(.ccm-hero) :is(.ccm-hero h1, .ccm-demo h3, .ccm-card h2, .ccm-actions li, .v4-section-head h2, .v5-feat-card h3, .v4-cta-box h2) { color: var(--ccm-ink); }
+html.theme-dark .r4-page:has(.ccm-hero) :is(.ccm-hero p, .ccm-card p, .v4-section-head p, .v5-feat-card p, .v4-cta-box p, .v4-stat .l, .v5-trust-row) { color: var(--ccm-muted); }
+html.theme-dark .r4-page:has(.ccm-hero) :is(.ccm-card, .v5-feat-card, .v4-cta-box) { background: var(--ccm-panel); border-color: var(--ccm-border); }
+html.theme-dark .r4-page:has(.ccm-hero) .ccm-node { background: var(--ccm-panel); }
+html.theme-dark .r4-page:has(.ccm-hero) .ccm-actions { border-color: var(--ccm-border); }
+html.theme-dark .r4-page:has(.ccm-hero) .v4-btn-outline { color: var(--v4-blue-bright); }
