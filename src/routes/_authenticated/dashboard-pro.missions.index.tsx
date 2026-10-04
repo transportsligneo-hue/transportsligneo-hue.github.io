@@ -359,8 +359,8 @@ function ProMissionsIndex() {
 
       {!loading && filter === "tous" && pendingFiltered.length > 0 && (
         <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
-          <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2 bg-amber-50/40">
-            <Clock size={14} className="text-amber-600" />
+          <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2 bg-pro-bg-soft">
+            <Clock size={14} className="text-pro-accent" />
             <h2 className="text-sm font-semibold text-pro-text">En cours de validation</h2>
             <span className="ml-auto text-xs text-pro-text-soft">{pendingFiltered.length} demande{pendingFiltered.length > 1 ? "s" : ""}</span>
           </div>
@@ -375,7 +375,7 @@ function ProMissionsIndex() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-xs text-pro-text-soft">{displayNumero(p.numero)}</span>
-                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-amber-100 text-amber-700">
+                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-pro-bg-soft text-pro-accent">
                         {p.source === "devis" ? "Devis en attente" : "Demande reçue"}
                       </span>
                     </div>
