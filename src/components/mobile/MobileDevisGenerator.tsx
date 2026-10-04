@@ -198,6 +198,22 @@ export default function MobileDevisGenerator() {
     return calculatePrice(distance, departure, arrival, option);
   }, [distance, departure, arrival, option]);
 
+  // Majoration hors horaires / week-end : +30 % (avant 8h, après 19h, samedi/dimanche)
+  const offHours = useMemo(() => {
+    let weekend = false;
+    if (date) {
+      const day = new Date(`${date}T12:00:00`).getDay();
+      weekend = day === 0 || day === 6;
+    }
+    let offHour = false;
+    if (heure) {
+      const h = parseInt(heure.split(":")[0] ?? "", 10);
+      if (!Number.isNaN(h)) offHour = h < 8 || h >= 19;
+    }
+    return weekend || offHour ? { weekend, offHour } : null;
+  }, [date, heure]);
+  const displayPrice = pricing ? (offHours ? Math.round(pricing.finalPrice * 1.3) : pricing.finalPrice) : null;
+
   async function handleSivLookup() {
     setSivMsg(null);
     const plate = immatriculation.trim().toUpperCase();
@@ -557,7 +573,7 @@ export default function MobileDevisGenerator() {
                       className="text-white text-[20px] font-extrabold leading-none"
                       style={{ fontFamily: "'Space Grotesk',sans-serif" }}
                     >
-                      {pricing.finalPrice} €
+                      {displayPrice} €
                     </div>
                   ) : (
                     <div className="h-[9px] rounded mdev-shimmer" style={{ width: 88 }} />
