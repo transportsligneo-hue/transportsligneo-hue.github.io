@@ -4,7 +4,7 @@ import { Search, ChevronDown, LogOut, UserCog, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 
@@ -203,7 +203,7 @@ export function DashboardHeader({
   }, [user?.id]);
 
   // 1) photo perso  2) admin → logo Transports Ligneo  3) logo organisation  4) initiale
-  const avatarSrc = ownAvatar ?? (isAdminUser ? logoLigneo : orgInfo?.logoUrl ?? null);
+  const avatarSrc = ownAvatar ?? (isAdminUser ? logoLigneo() : orgInfo?.logoUrl ?? null);
   const avatarAlt = ownAvatar ? "Ma photo" : isAdminUser ? "Transports Ligneo" : orgName ?? "Logo";
   const avatarClass = ownAvatar ? "object-cover" : "object-contain";
 

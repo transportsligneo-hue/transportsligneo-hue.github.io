@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export const Route = createFileRoute("/auth/email-confirmation")({
   head: () => ({
@@ -17,7 +17,7 @@ function EmailConfirmationPage() {
     <div className="min-h-screen bg-[#0b1026] flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
         <div className="w-20 h-20 mx-auto rounded-2xl bg-[#111a3d] border border-primary/30 flex items-center justify-center mb-6 overflow-hidden">
-          <img src={logoLigneo} alt="Transports Ligneo" className="w-full h-full object-contain p-2" />
+          <img src={logoLigneo()} alt="Transports Ligneo" className="w-full h-full object-contain p-2" />
         </div>
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/40 mb-5">
           <CheckCircle2 className="text-emerald-400" size={30} />

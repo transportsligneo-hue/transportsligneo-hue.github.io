@@ -4,7 +4,7 @@ import { LogOut, X, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 
 export interface SidebarItem {
   to: string;
@@ -56,7 +56,7 @@ export function DashboardSidebar({ title, subtitle, items, shellClass, children 
       <header className="md:hidden fixed top-0 left-0 right-0 z-40 glass-bar border-b border-primary/15 safe-top">
         <div className="h-14 px-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 min-w-0" aria-label="Accueil">
-            <img src={logoLigneo} alt="Transports Ligneo" className="h-9 w-auto object-contain shrink-0" />
+            <img src={logoLigneo()} alt="Transports Ligneo" className="h-9 w-auto object-contain shrink-0" />
             <div className="min-w-0">
               <p className="font-heading text-primary text-sm tracking-[0.15em] uppercase truncate">
                 {title}
@@ -81,7 +81,7 @@ export function DashboardSidebar({ title, subtitle, items, shellClass, children 
         }`}
       >
         <div className="p-6 border-b border-primary/15 hidden md:flex items-center gap-3">
-          <img src={logoLigneo} alt="Transports Ligneo" className="h-12 w-auto object-contain shrink-0" />
+          <img src={logoLigneo()} alt="Transports Ligneo" className="h-12 w-auto object-contain shrink-0" />
           <div className="min-w-0">
             <h2 className="font-heading text-primary text-base tracking-[0.1em] uppercase truncate">{title}</h2>
             {subtitle && <p className="text-cream/40 text-xs mt-1 truncate">{subtitle}</p>}

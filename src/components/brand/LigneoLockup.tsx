@@ -1,4 +1,4 @@
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import logoDriver from "@/assets/ligneo-driver-badge.png.asset.json";
 import { useIsMobileAppShell } from "@/components/mobile/MobileAppGate";
 

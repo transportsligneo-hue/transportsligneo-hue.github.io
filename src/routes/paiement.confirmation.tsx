@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import { CheckCircle2, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/paiement/confirmation")({
@@ -109,7 +109,7 @@ function ConfirmationPage() {
         </div>
 
         <div className="pn-success-brand">
-          <img src={logoLigneo} alt="Transports Ligneo" />
+          <img src={logoLigneo()} alt="Transports Ligneo" />
           <span>TRANSPORTS LIGNEO · Convoyage automobile</span>
         </div>
       </section>

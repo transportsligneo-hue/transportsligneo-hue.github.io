@@ -1,4 +1,4 @@
-import ligneoMark from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as ligneoMark } from "@/lib/seasonal-logo";
 
 /** Nature du compte — pilote la couleur du logo Ligneo de repli. */
 export type ClientLogoKind = "convoyeur" | "particulier" | "b2b" | "flotte" | "admin" | "auto";
@@ -70,7 +70,7 @@ export function ClientLogo({
       title={name || undefined}
     >
       <img
-        src={ligneoMark}
+        src={ligneoMark()}
         alt=""
         loading="lazy"
         className="w-full h-full object-contain"

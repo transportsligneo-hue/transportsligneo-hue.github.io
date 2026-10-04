@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FactureNeonPayment, type FactureSummary } from "@/components/facture/FactureNeonPayment";
 import { NeonPayBackdrop } from "@/components/facture/NeonPayBackdrop";
-import logoLigneo from "@/assets/logo-transports-ligneo-officiel.png";
+import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import { ArrowLeft, ShieldCheck, Clock3, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/paiement/facture/$factureId")({
@@ -38,7 +38,7 @@ function PaiementFacturePage() {
       <header className="pn-topbar">
         <div className="pn-brand">
           <div className="pn-brand-mark">
-            <img src={logoLigneo} alt="Transports Ligneo" />
+            <img src={logoLigneo()} alt="Transports Ligneo" />
           </div>
           <div className="pn-brand-text">
             <span className="pn-brand-name">TRANSPORTS <span>LIGNEO</span></span>
