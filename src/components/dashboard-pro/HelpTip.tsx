@@ -43,7 +43,12 @@ export function HelpTip({ text }: { text: string }) {
       <PopoverTrigger asChild>
         <button type="button" aria-label="Aide" className="pp-help">?</button>
       </PopoverTrigger>
-      <PopoverContent side="bottom" className="w-[260px] p-3 text-xs leading-snug">
+      <PopoverContent
+        side="bottom"
+        className="w-[260px] p-3 text-xs leading-snug"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <p>{text}</p>
         <button type="button" onClick={() => change(false)} className="mt-2 text-[11px] font-semibold text-pro-accent">
           Compris
