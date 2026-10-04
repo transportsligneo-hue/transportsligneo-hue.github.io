@@ -450,6 +450,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const inputCard = "dg-journey-input w-full rounded-md px-4 py-3 text-sm transition-all";
   const selectCard = inputCard + " appearance-none";
 
+  // Message majoration hors horaires / week-end (n'efface jamais la saisie)
+  const offHoursNotice = offHours ? (
+    <div className="flex items-start gap-3 rounded-xl border border-neon-blue/40 bg-neon-blue/10 px-4 py-3">
+      <Clock size={16} className="mt-0.5 shrink-0 text-neon-blue" />
+      <p className="text-[13px] leading-relaxed text-cream/90">
+        <strong className="font-semibold text-neon-blue">Livraison {offHours.weekend && offHours.offHour ? "en week-end et hors horaires" : offHours.weekend ? "en week-end" : "hors horaires"} (avant 8h ou après 19h).</strong>{" "}
+        Une majoration de <strong className="font-semibold text-neon-blue">+30&nbsp;%</strong> s'applique à votre estimation — elle est déjà incluse dans le prix affiché.
+      </p>
+    </div>
+  ) : null;
+
   async function handleSubmit() {
     if (!pricing || distance == null) return;
     // Champs obligatoires : trajet + date/heure + coordonnées
