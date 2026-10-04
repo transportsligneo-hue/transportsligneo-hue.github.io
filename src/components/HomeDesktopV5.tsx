@@ -38,10 +38,6 @@ export default function HomeDesktopV5() {
               Convoyage automobile France &amp; Europe · Assurance incluse · Suivi GPS · État des lieux
             </p>
 
-            <button type="button" onClick={goDevis} className="hx-cta">
-              Obtenir mon devis en 30 secondes <ArrowRight size={20} />
-            </button>
-
             <div className="hx-switch">
               <Link to="/services" search={{ audience: "particuliers" }} className="hx-switch-btn">
                 <span className="hx-switch-icon"><User size={24} strokeWidth={2.1} aria-hidden="true" /></span>
