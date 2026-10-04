@@ -53,13 +53,22 @@ export function DemoRequestButton({ className = "" }: { className?: string }) {
       </button>
       {open && (
         <div className="demo-req-overlay" role="dialog" aria-modal="true" aria-label="Demander une démo" onClick={() => setOpen(false)}>
-          <div className="demo-req-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="demo-req-modal demo-req-modal--pro" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="demo-req-close" aria-label="Fermer" onClick={() => setOpen(false)}>
               <X size={18} />
             </button>
-            <p className="demo-pro-eyebrow">Espace professionnel</p>
-            <h3>Demandez votre démo privée</h3>
-            <p className="demo-req-sub">Recevez par e-mail un lien personnel pour découvrir l'espace pro Ligneo, valable 7 jours.</p>
+            <p className="demo-req-eyebrow"><MonitorPlay size={13} aria-hidden /> Espace professionnel</p>
+            <h3 className="demo-req-title">Demandez votre <span>démo privée</span></h3>
+            <p className="demo-req-sub">Recevez par e-mail un lien personnel pour découvrir l'espace pro Ligneo.</p>
+            <ul className="demo-req-features">
+              <li>Tableau de bord, indicateurs et missions en direct</li>
+              <li>Suivi GPS et comparaison des photos départ / arrivée</li>
+              <li>Calendrier, rapports et export pour la comptabilité</li>
+              <li>Gestion d'équipe : administrateur, logistique, comptabilité</li>
+            </ul>
+            <div className="demo-req-badges">
+              <span>Sans engagement</span><span>Lien valable 7 jours</span><span>Sans mot de passe</span>
+            </div>
             <DemoRequestForm />
           </div>
         </div>

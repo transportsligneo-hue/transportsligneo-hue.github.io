@@ -10737,3 +10737,33 @@ html:not(.theme-dark) .demo-req-btn { color:#6d28d9; background:rgba(168,85,247,
 .demo-req-submit:disabled { opacity:.6; }
 .demo-req-ok { color:#d8b4fe; line-height:1.5; }
 .demo-req-inline { margin:0 auto; }
+
+/* Demo request modal — refonte claire & pro */
+.demo-req-overlay { background:rgba(11,16,38,.55) !important; }
+.demo-req-modal.demo-req-modal--pro { max-width:480px; max-height:calc(100vh - 32px); overflow-y:auto; padding:30px 28px 26px; background:linear-gradient(180deg,#ffffff 0%,#fdfcf8 100%); color:#1a1f3d; border:1px solid rgba(168,85,247,.45); box-shadow:0 0 0 4px rgba(168,85,247,.08),0 24px 60px rgba(11,16,38,.35),0 0 36px rgba(168,85,247,.25); }
+.demo-req-modal--pro .demo-req-close { color:#6d28d9; }
+.demo-req-eyebrow { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:rgba(168,85,247,.10); border:1px solid rgba(168,85,247,.35); color:#7c3aed; font-size:.68rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; margin:0 0 12px; }
+.demo-req-modal--pro .demo-req-title { font-family:"Playfair Display",serif; font-size:1.65rem; line-height:1.2; color:#111a3d !important; margin:0 0 6px; }
+.demo-req-modal--pro .demo-req-title span { color:#8b3ff5; text-shadow:0 0 14px rgba(168,85,247,.35); }
+.demo-req-modal--pro .demo-req-sub { color:#3b4266; font-size:.92rem; margin:0 0 14px; }
+.demo-req-features { list-style:none; padding:0; margin:0 0 14px; display:grid; gap:7px; }
+.demo-req-features li { position:relative; padding-left:24px; font-size:.88rem; color:#1a1f3d; }
+.demo-req-features li::before { content:"✓"; position:absolute; left:0; top:0; width:17px; height:17px; border-radius:50%; display:grid; place-items:center; font-size:.68rem; font-weight:800; color:#fff; background:linear-gradient(135deg,#2f5fff,#8b3ff5); box-shadow:0 0 8px rgba(79,140,255,.5); }
+.demo-req-badges { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px; }
+.demo-req-badges span { font-size:.72rem; font-weight:600; padding:4px 10px; border-radius:999px; color:#1c3fc4; background:rgba(47,95,255,.08); border:1px solid rgba(47,95,255,.3); }
+.demo-req-modal--pro .demo-req-form input { background:#fff; color:#111a3d; border:1px solid rgba(124,58,237,.28); }
+.demo-req-modal--pro .demo-req-form input::placeholder { color:#7a809e; }
+.demo-req-modal--pro .demo-req-form input:focus { border-color:#a855f7; box-shadow:0 0 0 3px rgba(168,85,247,.2); }
+.demo-req-modal--pro .demo-req-submit { transition:transform .15s, box-shadow .2s; }
+.demo-req-modal--pro .demo-req-submit:hover { transform:translateY(-1px); box-shadow:0 0 28px rgba(217,70,239,.5); }
+.demo-req-modal--pro .demo-req-submit:active { transform:scale(.98); }
+.demo-req-modal--pro .demo-req-ok { color:#6d28d9; }
+html.theme-dark .demo-req-modal.demo-req-modal--pro { background:linear-gradient(180deg,#1a2350 0%,#141c42 100%); color:#eef2ff; }
+html.theme-dark .demo-req-modal--pro .demo-req-title { color:#fff !important; }
+html.theme-dark .demo-req-modal--pro .demo-req-title span { color:#c084fc; }
+html.theme-dark .demo-req-modal--pro .demo-req-sub, html.theme-dark .demo-req-features li { color:#dbe3ff; }
+html.theme-dark .demo-req-eyebrow { color:#d8b4fe; }
+html.theme-dark .demo-req-badges span { color:#9cc4ff; border-color:rgba(103,182,255,.4); background:rgba(103,182,255,.1); }
+html.theme-dark .demo-req-modal--pro .demo-req-form input { background:rgba(11,16,38,.6); color:#fff; border-color:rgba(168,85,247,.35); }
+html.theme-dark .demo-req-modal--pro .demo-req-form input::placeholder { color:rgba(219,231,255,.55); }
+html.theme-dark .demo-req-modal--pro .demo-req-close { color:#d8b4fe; }
