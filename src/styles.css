@@ -9733,7 +9733,13 @@ body .tln-sheen { display: none; }
 
 /* Four-phase mission timeline. */
 .r4-page:has(.ccm-hero) { background: #eef1fa; color: #0d1330; font-family: 'Poppins',sans-serif; }
-.r4-page .ccm-hero { text-align: center; padding: 90px 24px 20px; }
+.r4-page .ccm-hero { text-align: center; padding: 140px 24px 20px; }
+@media (min-width: 768px) and (max-width: 1279px) {
+  .r4-page .ccm-hero { padding-top: 150px; }
+}
+@media (max-width: 767px) {
+  .r4-page .ccm-hero { padding-top: 90px; }
+}
 .r4-page .ccm-hero .v4-hero-eyebrow { color: #2f5fff; }
 .r4-page .ccm-hero h1 { font-size: clamp(32px, 4vw, 46px); font-weight: 800; line-height: 1.2; }
 .r4-page .ccm-hero h1 span { color: #2f5fff; text-shadow: 0 0 28px #2f5fff55; }
