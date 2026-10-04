@@ -137,18 +137,32 @@ function AdminUtilisateurs() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return users.filter((u) => {
-      if (roleFilter !== "all" && u.role !== roleFilter) return false;
-      if (statusFilter !== "all" && u.account_status !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        u.email?.toLowerCase().includes(q) ||
-        u.nom.toLowerCase().includes(q) ||
-        u.prenom.toLowerCase().includes(q) ||
-        (u.societe ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [users, search, roleFilter, statusFilter]);
+    return users
+      .filter((u) => {
+        if (categoryFilter !== "all" && categoryOf(u) !== categoryFilter) return false;
+        if (roleFilter !== "all" && u.role !== roleFilter) return false;
+        if (statusFilter !== "all" && u.account_status !== statusFilter) return false;
+        if (!q) return true;
+        return (
+          u.email?.toLowerCase().includes(q) ||
+          (u.nom ?? "").toLowerCase().includes(q) ||
+          (u.prenom ?? "").toLowerCase().includes(q) ||
+          (u.telephone ?? "").toLowerCase().includes(q) ||
+          (u.societe ?? "").toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const d = CATEGORY_ORDER.indexOf(categoryOf(a)) - CATEGORY_ORDER.indexOf(categoryOf(b));
+        if (d !== 0) return d;
+        return `${a.nom ?? ""} ${a.prenom ?? ""}`.localeCompare(`${b.nom ?? ""} ${b.prenom ?? ""}`, "fr");
+      });
+  }, [users, search, roleFilter, statusFilter, categoryFilter]);
+
+  const categoryCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    users.forEach((u) => { const k = categoryOf(u); c[k] = (c[k] ?? 0) + 1; });
+    return c;
+  }, [users]);
 
   const counts = useMemo(() => ({
     total: users.length,
@@ -157,6 +171,8 @@ function AdminUtilisateurs() {
     b2b: users.filter((u) => u.type_client === "b2b").length,
     particuliers: users.filter((u) => u.type_client === "particulier").length,
   }), [users]);
+
+  const hasFilters = categoryFilter !== "all" || roleFilter !== "all" || statusFilter !== "all" || search.trim() !== "";
 
   return (
     <div className="space-y-6">
@@ -177,10 +193,33 @@ function AdminUtilisateurs() {
         <KpiCard label="Particuliers" value={counts.particuliers} icon={UserRound} />
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {(["all", ...CATEGORY_ORDER] as const).map((k) => {
+          const active = categoryFilter === k;
+          const label = k === "all" ? "Tous" : CATEGORY_META[k].label;
+          const n = k === "all" ? users.length : categoryCounts[k] ?? 0;
+          return (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setCategoryFilter(k)}
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                active
+                  ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                  : "border-pro-border bg-white text-pro-text hover:border-blue-400 hover:text-blue-700"
+              }`}
+            >
+              {label}
+              <span className={`rounded-full px-1.5 text-[11px] ${active ? "bg-white/20" : "bg-slate-100 text-slate-600"}`}>{n}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="bg-white border border-pro-border rounded-xl p-4 flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" size={16} />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (email, nom, société)…" className="pl-9" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher (email, nom, téléphone, société)…" className="pl-9" />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full md:w-48"><SelectValue placeholder="Rôle" /></SelectTrigger>
@@ -204,6 +243,11 @@ function AdminUtilisateurs() {
             <SelectItem value="archived">Archivé</SelectItem>
           </SelectContent>
         </Select>
+        {hasFilters && (
+          <Button variant="outline" onClick={() => { setSearch(""); setRoleFilter("all"); setStatusFilter("all"); setCategoryFilter("all"); }}>
+            Effacer
+          </Button>
+        )}
       </div>
 
       <div className="bg-white border border-pro-border rounded-xl overflow-hidden">
@@ -225,7 +269,32 @@ function AdminUtilisateurs() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((u) => {
+              {filtered.flatMap((u, i) => {
+                const cat = categoryOf(u);
+                const header = i === 0 || categoryOf(filtered[i - 1]) !== cat ? (
+                  <TableRow key={`h-${cat}`} className="bg-slate-50 hover:bg-slate-50">
+                    <TableCell colSpan={7} className="py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      {CATEGORY_META[cat].label} · {categoryCounts[cat] ?? 0}
+                    </TableCell>
+                  </TableRow>
+                ) : null;
+                return [header, renderRow(u)].filter(Boolean);
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      <UserDetailDrawer
+        user={selected}
+        onClose={() => setSelected(null)}
+        onChanged={() => { void loadUsers(); }}
+      />
+    </div>
+  );
+
+  function renderRow(u: UnifiedUser) {
+              {[u].map((u) => {
                 const r = roleLabels[u.role] ?? roleLabels.client;
                 const Icon = r.icon;
                 return (
@@ -461,9 +530,9 @@ function UserDetailDrawer({
       subtitle={user.email ?? "—"}
       badge={
         <div className="flex flex-wrap gap-2">
+          <DrawerBadge tone={CATEGORY_META[categoryOf(user)].tone}>{CATEGORY_META[categoryOf(user)].label}</DrawerBadge>
           <DrawerBadge tone="blue">{roleMeta.label}</DrawerBadge>
           <DrawerBadge tone={suspended ? "red" : "green"}>{user.account_status}</DrawerBadge>
-          {user.type_client && <DrawerBadge tone="slate">{user.type_client}</DrawerBadge>}
         </div>
       }
       footer={
@@ -542,6 +611,7 @@ function UserDetailDrawer({
 
 
         <TabsContent value="profil" className="mt-4 space-y-4">
+          <IdentityEditor user={user} onSaved={onChanged} />
           <DrawerSection title="Identité" icon={<UserRound size={12} />}>
             <DrawerGrid>
               <DrawerField label="Prénom" value={user.prenom} />
