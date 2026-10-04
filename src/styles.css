@@ -10908,13 +10908,13 @@ html.theme-light .r4-page .v4-cta-box h2 {
 .hb-divider span{font-size:10px;color:#5c6690;letter-spacing:.6px;font-weight:600;text-transform:uppercase;white-space:nowrap}
 .hb-divider i{flex:1;height:1px;background:rgba(255,255,255,.08)}
 .hb-minis{display:flex;gap:8px}
-.hb-mini{flex:1;display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);text-decoration:none;transition:transform .18s ease,background .22s ease}
-.hb-mini:hover{transform:translateY(-1px);background:rgba(255,255,255,.07)}
+.hb-mini{flex:1;display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:999px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,rgba(255,255,255,.03)),color-mix(in srgb,var(--c) 3%,transparent));border:1px solid color-mix(in srgb,var(--c) 26%,transparent);text-decoration:none;transition:transform .18s ease,background .22s ease,border-color .22s ease}
+.hb-mini:hover{transform:translateY(-1px);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.04)),color-mix(in srgb,var(--c) 6%,transparent));border-color:color-mix(in srgb,var(--c) 55%,transparent)}
 .hb-mini .hb-ic{width:22px;height:22px;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 2px 8px -2px var(--glow)}
 .hb-mini .hb-ic svg{width:11px;height:11px;stroke-width:2.4}
 .hb-mini .hb-label{font-size:11px;font-weight:600;color:#dfe3f7}
-.hb-conv{--c1:#3fe08f;--c2:#15a35e;--glow:rgba(31,184,94,.5)}
-.hb-suiv{--c1:#ffdd8a;--c2:#f0a93e;--glow:rgba(255,211,110,.5)}
+.hb-conv{--c:#2ee671;--c1:#2ee671;--c2:#15b25c;--glow:rgba(46,230,113,.5)}
+.hb-suiv{--c:#4f8eff;--c1:#4f8eff;--c2:#2f6fff;--glow:rgba(79,142,255,.5)}
 @media (max-width:520px){.hb-grid3{grid-template-columns:1fr}.hb-btn{flex-direction:row;align-items:center}}
 
 /* ===== Octobre rose — ruban près du logo (visible en octobre uniquement) ===== */
