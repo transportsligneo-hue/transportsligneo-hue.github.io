@@ -18,6 +18,7 @@
  *
  * Backend : aucune migration, réutilise inspection_photos + mission_signatures + mission_selfies.
  */
+import { PhotoAnnotationEditor } from "@/components/inspection/PhotoAnnotations";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -1597,6 +1598,8 @@ export function EdlPremiumFlow({
               onRetake={retake}
               onDelete={deleteCurrentPhoto}
               onRetryUpload={retryUpload}
+              inspectionId={inspectionId}
+              driverName={driverName}
             />
           )}
 
@@ -1788,7 +1791,9 @@ function StepIcon({ kind, state }: { kind: EdlStepDef["kind"]; state?: StepState
 
 function PhotoOrScanArea({
   step, state, onCapture, onSimpleCapture, onSkipScan, onMarkAbsent, onRetake, onDelete, onRetryUpload,
+  inspectionId, driverName,
 }: {
+  inspectionId?: string | null; driverName?: string;
   step: EdlStepDef; state?: StepState; onCapture: () => void;
   onSimpleCapture?: () => void; onSkipScan?: () => void;
   onMarkAbsent?: () => void;
@@ -1823,8 +1828,19 @@ function PhotoOrScanArea({
         </div>
       )}
 
+      {/* Photo annotable (étapes photo, après prise) */}
+      {step.kind === "photo" && state?.previewUrl && state.status !== "error" && (
+        <PhotoAnnotationEditor
+          key={state.captureId ?? state.storagePath ?? step.id}
+          src={state.previewUrl}
+          inspectionId={inspectionId ?? null}
+          vueType={step.id}
+          authorName={driverName}
+        />
+      )}
+
       {/* Aperçu après prise */}
-      {state?.previewUrl && (
+      {state?.previewUrl && !(step.kind === "photo" && state.status !== "error") && (
         <div className="edl-photo-frame relative">
           <img
             src={state.previewUrl}
