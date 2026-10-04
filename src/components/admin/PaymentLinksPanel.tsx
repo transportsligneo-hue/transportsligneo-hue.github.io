@@ -732,7 +732,7 @@ export function PaymentLinksPanel({
                     className="dvx-btn outline"
                     disabled={busyRow === r.id}
                     onClick={async () => {
-                      if (!window.confirm("Annuler ce lien de paiement ? Il ne sera plus payable.")) return;
+                      if (!(await confirmToast("Annuler ce lien de paiement ? Il ne sera plus payable."))) return;
                       setBusyRow(r.id);
                       setError(null);
                       try {
@@ -759,7 +759,7 @@ export function PaymentLinksPanel({
                     className="dvx-btn outline text-[#b3261e]"
                     disabled={busyRow === r.id}
                     onClick={async () => {
-                      if (!window.confirm("Supprimer définitivement ce lien de paiement ?")) return;
+                      if (!(await confirmToast("Supprimer définitivement ce lien de paiement ?"))) return;
                       setBusyRow(r.id);
                       setError(null);
                       try {

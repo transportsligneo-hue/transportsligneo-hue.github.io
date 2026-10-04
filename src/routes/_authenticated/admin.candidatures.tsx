@@ -129,7 +129,7 @@ function AdminCandidatures() {
   }), [offers]);
 
   const award = async (id: string) => {
-    if (!confirm("Attribuer la mission à ce convoyeur ?\nToutes les autres candidatures seront refusées.")) return;
+    if (!(await confirmToast("Attribuer la mission à ce convoyeur ?\nToutes les autres candidatures seront refusées."))) return;
     setBusy(id);
     const { error } = await supabase.rpc("admin_award_offer", { _offre_id: id });
     setBusy(null);

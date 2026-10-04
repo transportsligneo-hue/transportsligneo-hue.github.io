@@ -516,7 +516,7 @@ function AdminMissionsUnified() {
       return row ? row.status !== "terminee" && row.status !== "annulee" : true;
     });
     if (!openIds.length) return toast.error("Missions clôturées : attribution verrouillée");
-    if (!window.confirm(`Attribuer ${openIds.length} mission(s) à ${nom} ?`)) return;
+    if (!(await confirmToast(`Attribuer ${openIds.length} mission(s) à ${nom} ?`))) return;
     ids = openIds;
     setLotBusy(true);
     let ok = 0;

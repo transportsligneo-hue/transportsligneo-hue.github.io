@@ -604,7 +604,7 @@ function ReglagesTab({
   }
 
   async function deletePenalite(p: CatalogPenalite) {
-    if (!window.confirm(`Supprimer définitivement la pénalité « ${p.libelle} » ?`)) return;
+    if (!(await confirmToast(`Supprimer définitivement la pénalité « ${p.libelle} » ?`))) return;
     const { error } = await supabase.from("catalogue_penalites").delete().eq("id", p.id);
     if (error) return toast.error(error.message);
     toast.success("Pénalité supprimée");
