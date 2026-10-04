@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Remplacer la démo pro par le film sonore sur les profils et « Comment ça marche ? », remettre le logo Driver incliné, renforcer les néons par audience et renommer/colorer « Mon espace client » sur l'accueil.
 - [x] Accueil ordinateur : raffiner les quatre choix de profil et leurs états au survol, au clavier et au clic sans changer leurs destinations.
 - [x] Vidéos de démonstration : nouveau film particulier dans Services ; film loueurs à la place du film Driver sur les profils professionnels ; les deux parcours sur « Comment ça marche ? ».
 - [x] Navbar : « Professionnels » actif en violet néon (clair + sombre) ; bloc « Besoin d'un conseil ? » moins lumineux + lien vers /contact

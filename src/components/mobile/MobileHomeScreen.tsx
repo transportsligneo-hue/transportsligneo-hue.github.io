@@ -156,7 +156,7 @@ export default function MobileHomeScreen() {
         <Link to="/services" search={{ audience: "particuliers" }} className="mhome-path"><User size={17} /> Je suis un particulier</Link>
         <Link to="/services" search={{ audience: "pro" }} className="mhome-path mhome-path--pro"><Briefcase size={17} /> Je suis un professionnel</Link>
         <Link to="/devenir-convoyeur" className="mhome-path mhome-path--driver"><Car size={17} /> Je suis convoyeur</Link>
-        <Link to={isAuthenticated ? homeRoute : "/login"} className="mhome-path"><LogIn size={17} /> Je suis déjà un client</Link>
+        <Link to={isAuthenticated ? homeRoute : "/login"} className="mhome-path mhome-path--client"><LogIn size={17} /> Mon espace client</Link>
       </nav>
 
 
