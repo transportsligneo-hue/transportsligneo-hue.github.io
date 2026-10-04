@@ -9035,6 +9035,7 @@ export type Database = {
         Args: { _accept: boolean; _attribution_id: string; _reason?: string }
         Returns: undefined
       }
+      ensure_my_organization: { Args: never; Returns: string }
       expire_stale_proposals: { Args: never; Returns: undefined }
       find_or_create_company: {
         Args: {

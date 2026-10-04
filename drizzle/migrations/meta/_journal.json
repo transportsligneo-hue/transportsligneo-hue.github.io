@@ -225,6 +225,13 @@
       "when": 1791151847473,
       "tag": "0031_inspection_photo_annotations",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791155751679,
+      "tag": "0032_ensure_my_organization",
+      "breakpoints": true
     }
   ]
 }
