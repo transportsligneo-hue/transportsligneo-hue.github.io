@@ -853,10 +853,10 @@ body.is-driver-app .closed-link svg {
   .role-driver-soft   { background-color: rgba(5, 150, 105, 0.10); }
   .role-driver-border { border-color: rgba(5, 150, 105, 0.25); }
 
-  .role-client-bg     { background-color: #ea7c1c; }
-  .role-client-text   { color: #ea7c1c; }
-  .role-client-soft   { background-color: rgba(234, 124, 28, 0.10); }
-  .role-client-border { border-color: rgba(234, 124, 28, 0.25); }
+  .role-client-bg     { background-color: #2f5fff; }
+  .role-client-text   { color: #2f5fff; }
+  .role-client-soft   { background-color: rgba(47, 95, 255, 0.10); }
+  .role-client-border { border-color: rgba(47, 95, 255, 0.25); }
 
   .role-partner-bg     { background-color: #7c3aed; }
   .role-partner-text   { color: #7c3aed; }
