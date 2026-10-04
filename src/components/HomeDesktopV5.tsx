@@ -154,6 +154,8 @@ export default function HomeDesktopV5() {
         </div>
       </section>
 
+      <AvisSection />
+
       {/* ============ ESPACE LIGNEO ============ */}
       <section className="v4-section">
         <div className="v4-section-head">
@@ -170,7 +172,6 @@ export default function HomeDesktopV5() {
         </div>
       </section>
 
-      <AvisSection />
       <DerniersArticles />
       <FaqDynamique />
 
