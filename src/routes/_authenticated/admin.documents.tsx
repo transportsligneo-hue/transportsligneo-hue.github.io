@@ -60,6 +60,7 @@ function AdminDocuments() {
   const [docsByConvoyeur, setDocsByConvoyeur] = useState<Record<string, Document[]>>({});
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "incomplets" | "valides">("all");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -106,7 +107,9 @@ function AdminDocuments() {
     return issues;
   };
 
+  const q = query.trim().toLowerCase();
   const filtered = convoyeurs.filter((c) => {
+    if (q && !`${c.prenom ?? ""} ${c.nom ?? ""} ${c.email ?? ""}`.toLowerCase().includes(q)) return false;
     const blocking = getBlockingIssues(c);
     if (filter === "incomplets") return blocking.length > 0;
     if (filter === "valides") return blocking.length === 0;
@@ -161,6 +164,12 @@ function AdminDocuments() {
         subtitle={`${filtered.length} convoyeur${filtered.length > 1 ? "s" : ""}`}
         actions={
           <>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher (nom, email)…"
+              className="h-9 w-56 rounded-lg border border-pro-border bg-white px-3 text-sm text-pro-text placeholder:text-pro-muted focus:outline-none focus:ring-2 focus:ring-pro-accent/30"
+            />
             <Select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
               <option value="all">Tous</option>
               <option value="incomplets">Documents manquants</option>
