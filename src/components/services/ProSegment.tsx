@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import ProTimeline, { ProFilm } from "@/components/services/ProTimeline";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
+import ProfessionalBrochures from "@/components/marketing/ProfessionalBrochures";
 
 const audiences = [
   { Icon: Building2, title: "Concessions", desc: "Transferts inter-sites, livraisons clients, restitutions : gagnez du temps sur vos flux quotidiens." },
@@ -78,6 +79,8 @@ export default function ProSegment() {
         </div>
       </div>
 
+
+      <ProfessionalBrochures />
 
       {/* Fonctionnalités */}
       <div className="v4-section">
