@@ -199,7 +199,7 @@ export default function HomeDesktopV5() {
 
       {/* ============ CTA FINAL ============ */}
       <div className="v4-cta-box">
-        <h2>Votre véhicule doit être <span className="hx-neon">déplacé</span> ?</h2>
+        <h2>Votre véhicule doit être <span className="hx-neon">déplacé ?</span></h2>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
           <button type="button" onClick={goDevis} className="v4-btn-primary">Obtenir mon devis</button>
           <Link to="/suivi" className="v4-btn-outline">Suivre mon véhicule</Link>
