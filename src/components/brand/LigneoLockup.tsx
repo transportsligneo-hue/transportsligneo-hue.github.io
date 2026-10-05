@@ -16,7 +16,7 @@ interface Props {
 
 const SIZES = {
   sm: { badge: 30, icon: 17, word: 12.5, tag: 8 },
-  md: { badge: 34, icon: 19, word: 14.5, tag: 9 },
+  md: { badge: 48, icon: 27, word: 17.5, tag: 10 },
   lg: { badge: 48, icon: 27, word: 20, tag: 11 },
 } as const;
 

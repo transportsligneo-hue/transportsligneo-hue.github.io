@@ -3675,8 +3675,8 @@ body.is-driver-app .closed-link svg {
   /* Ruban octobre rose centré sous le mot « TRANSPORTS LIGNEO » (pas sous le badge) */
   .tln-brand--col .or-under-word {
     display: flex; justify-content: center;
-    margin-left: calc(34px + 10px);            /* badge md + gap du lockup */
-    width: calc(100% - 34px - 10px);
+    margin-left: calc(48px + 10px);            /* badge md + gap du lockup */
+    width: calc(100% - 48px - 10px);
   }
   .tln-brand--col .or-ribbon { padding: 3px 9px; font-size: 9px; letter-spacing: .14em; }
   .tln-shell.is-scrolled .tln-brand--col { gap: 2px; }
