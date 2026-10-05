@@ -4,6 +4,7 @@ import demoParticulierPoster from "@/assets/demo-ligneo-particuliers-poster.jpg.
 import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
+import { ParticulierBrochure } from "@/components/marketing/ProfessionalBrochures";
 
 const services = [
   {
@@ -141,6 +142,8 @@ export default function ServicesContent({
               ))}
             </div>
           </div>
+
+          <ParticulierBrochure />
 
           <ServicesPlateforme />
         </>

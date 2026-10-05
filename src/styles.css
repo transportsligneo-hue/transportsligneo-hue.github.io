@@ -11174,3 +11174,9 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
   0% { transform: translateX(-100%); }
   100% { transform: translateX(350%); }
 }
+
+/* Particuliers : dropdown + brochure en bleu électrique */
+.tln-dd-menu--part .tln-dd-brochures { border-top-color: color-mix(in srgb, #2f5fff 35%, transparent); }
+.tln-dd-menu--part .tln-dd-brochures-label, .tln-dd-menu--part .tln-dd-brochures a svg { color: #4d7bff; }
+.r4-page .part-brochure { --audience-accent: #2f5fff; }
+.r4-page .part-brochure .pro-brochures-grid { grid-template-columns: minmax(0, 420px); justify-content: center; }
