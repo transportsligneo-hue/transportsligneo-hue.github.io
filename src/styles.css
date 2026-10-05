@@ -11095,6 +11095,11 @@ html.theme-light .r4-page[data-audience="pro"] .plateforme-head h2 .v4-accent { 
 .r4-page .pro-brochure-download:focus-visible, .tln-dd-brochures a:focus-visible { outline: 2px solid var(--audience-accent, var(--v4-violet-glow)); outline-offset: 3px; }
 html.theme-light .r4-page .pro-brochure { background: #fdfcf8; color: var(--foreground); }
 html.theme-light .r4-page .pro-brochure-download:hover { color: var(--foreground); }
+@media (max-width: 767px) {
+  html.theme-light .r4-page .pro-brochure { background: var(--public-mobile-surface); color: var(--public-mobile-text); }
+  html.theme-light .r4-page .pro-brochure p, html.theme-light .r4-page .pro-brochure-index { color: var(--public-mobile-muted); }
+  html.theme-light .r4-page .pro-brochure-download:hover { color: var(--public-mobile-text); }
+}
 @media (max-width: 960px) { .r4-page .pro-brochures-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .r4-page .pro-brochures-grid { grid-template-columns: minmax(0, 1fr); } .r4-page .pro-brochure { min-height: 220px; } }
 .tln-dd-brochures { margin-top: 7px; padding-top: 9px; border-top: 1px solid color-mix(in srgb, var(--v4-violet-glow) 35%, transparent); }
