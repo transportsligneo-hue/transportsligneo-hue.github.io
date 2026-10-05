@@ -8,6 +8,7 @@ export const Route = createFileRoute("/loueurs")({
   component: () => (
     <ProfilMetierPage
       eyebrow="Loueurs"
+      brochures={["loueurs"]}
       title="Automatisez les rotations de véhicules"
       accent="entre agences."
       subtitle="Automatisez les rotations de véhicules entre agences : repositionnement, fins de contrat, pics saisonniers, et API partenaires."

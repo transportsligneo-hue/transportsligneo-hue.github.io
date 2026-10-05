@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
 import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
+import { Download } from "lucide-react";
+import { professionalBrochures } from "@/components/marketing/ProfessionalBrochures";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
@@ -93,6 +95,14 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
                             <Link key={s.to} to={s.to}>{s.label}</Link>
                           )
                         )}
+                        <div className="tln-dd-brochures" aria-label="Brochures professionnelles à télécharger">
+                          <span className="tln-dd-brochures-label">Brochures PDF</span>
+                          {professionalBrochures.map((item) => (
+                            <a key={item.id} href={item.file.url} download={item.filename} type="application/pdf" aria-label={`Télécharger la brochure ${item.audience}`}>
+                              <Download size={13} aria-hidden="true" />{item.audience}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </li>

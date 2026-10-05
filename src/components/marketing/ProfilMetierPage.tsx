@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import R4Hero from "@/components/marketing/R4Hero";
 import { ProPresentations } from "@/components/services/ProTimeline";
+import ProfessionalBrochures, { type BrochureId } from "@/components/marketing/ProfessionalBrochures";
 
 interface Props {
   eyebrow: string;
@@ -11,14 +12,15 @@ interface Props {
   accent: string;
   subtitle: string;
   benefits: Array<{ t: string; d: string }>;
+  brochures: readonly BrochureId[];
   highlight?: { t: string; d: string; to: string; label: string };
 }
 
-export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, benefits, highlight }: Props) {
+export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, benefits, brochures, highlight }: Props) {
   return (
     <>
       <Navbar />
-      <main className="r4-page">
+      <main className="r4-page" data-audience="pro">
         <R4Hero eyebrow={eyebrow} title={<>{title} <span className="v4-accent">{accent}</span></>} subtitle={subtitle}>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/tarifs" hash="devis" className="v4-btn-primary">Obtenir mon devis</Link>
@@ -26,6 +28,7 @@ export default function ProfilMetierPage({ eyebrow, title, accent, subtitle, ben
           </div>
         </R4Hero>
         <ProPresentations />
+        <ProfessionalBrochures ids={brochures} />
         <section className="v4-section">
           <div className="hx-benefits hx-benefits--3">
             {benefits.map((b) => (

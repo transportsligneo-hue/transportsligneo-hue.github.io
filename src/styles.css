@@ -11080,6 +11080,33 @@ html.theme-light .r4-page[data-audience="pro"] .v4-faq-item.v4-open .v4-faq-q {
 }
 html.theme-light .r4-page[data-audience="pro"] .plateforme-head h2 .v4-accent { color: var(--audience-accent); }
 .r4-page[data-audience="particuliers"] :is(.v4-faq-item.v4-open .v4-faq-q, .v4-faq-head h2 .audience-accent) { color: var(--audience-accent); }
+/* Professional presentation library: compact document covers, scoped to public pages. */
+.r4-page .pro-brochures { padding-top: 28px; }
+.r4-page .pro-brochures .v4-section-head { margin-bottom: 25px; }
+.r4-page .pro-brochures-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.r4-page .pro-brochure { display: flex; flex-direction: column; min-width: 0; min-height: 250px; padding: 22px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--audience-accent) 35%, transparent); background: var(--v4-navy); color: var(--foreground); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--audience-accent) 18%, transparent); }
+.r4-page .pro-brochure-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 22px; }
+.r4-page .pro-brochure-icon { display: inline-grid; place-items: center; width: 42px; height: 42px; border: 1px solid color-mix(in srgb, var(--audience-accent) 45%, transparent); border-radius: 6px; color: var(--audience-accent); background: color-mix(in srgb, var(--audience-accent) 14%, transparent); }
+.r4-page .pro-brochure-index { font-size: 11px; font-weight: 700; color: var(--v4-text-muted); }
+.r4-page .pro-brochure h3 { margin: 0 0 10px; color: inherit; font-size: 17px; font-weight: 750; line-height: 1.25; }
+.r4-page .pro-brochure p { margin: 0 0 20px; color: var(--v4-text-muted); font-size: 12px; line-height: 1.5; }
+.r4-page .pro-brochure-download { display: inline-flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; margin-top: auto; padding: 12px 0 0; border-top: 1px solid color-mix(in srgb, var(--audience-accent) 32%, transparent); color: var(--audience-accent); font-size: 13px; font-weight: 750; text-decoration: none; transition: color .2s ease, gap .2s ease; }
+.r4-page .pro-brochure-download:hover { color: var(--foreground); gap: 20px; }
+.r4-page .pro-brochure-download:focus-visible, .tln-dd-brochures a:focus-visible { outline: 2px solid var(--audience-accent, var(--v4-violet-glow)); outline-offset: 3px; }
+html.theme-light .r4-page .pro-brochure { background: #fdfcf8; color: var(--foreground); }
+html.theme-light .r4-page .pro-brochure-download:hover { color: var(--foreground); }
+@media (max-width: 767px) {
+  html.theme-light .r4-page .pro-brochure { background: var(--public-mobile-surface); color: var(--public-mobile-text); }
+  html.theme-light .r4-page .pro-brochure h3 { color: var(--public-mobile-text); }
+  html.theme-light .r4-page .pro-brochure p, html.theme-light .r4-page .pro-brochure-index { color: var(--public-mobile-muted); }
+  html.theme-light .r4-page .pro-brochure-download:hover { color: var(--public-mobile-text); }
+}
+@media (max-width: 960px) { .r4-page .pro-brochures-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .r4-page .pro-brochures-grid { grid-template-columns: minmax(0, 1fr); } .r4-page .pro-brochure { min-height: 220px; } }
+.tln-dd-brochures { margin-top: 7px; padding-top: 9px; border-top: 1px solid color-mix(in srgb, var(--v4-violet-glow) 35%, transparent); }
+.tln-dd-brochures-label { display: block; padding: 3px 12px 7px; color: var(--v4-violet-glow, #a794ff); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.tln-dd-menu .tln-dd-brochures a { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+.tln-dd-menu .tln-dd-brochures a svg { flex: none; color: var(--v4-violet-glow, #a794ff); }
 .driver-shell { --audience-accent: var(--home-driver); }
 .driver-shell .audience-accent { color: var(--audience-accent); }
 

@@ -8,6 +8,7 @@ export const Route = createFileRoute("/concessionnaires")({
   component: () => (
     <ProfilMetierPage
       eyebrow="Concessionnaires"
+      brochures={["concessions"]}
       title="Déplacez vos véhicules entre concessions, ateliers"
       accent="et clients."
       subtitle={D}
