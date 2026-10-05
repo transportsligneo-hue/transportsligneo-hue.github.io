@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useServerFn } from "@tanstack/react-start";
 import { MonitorPlay, X } from "lucide-react";
 import { toast } from "sonner";
@@ -46,12 +47,20 @@ export function DemoRequestForm({ onDone }: { onDone?: () => void }) {
 
 export function DemoRequestButton({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
   return (
     <>
       <button type="button" className={`demo-req-btn ${className}`} onClick={() => setOpen(true)}>
         <MonitorPlay size={15} aria-hidden /> Demander une démo
       </button>
-      {open && (
+      {open && createPortal(
         <div className="demo-req-overlay" role="dialog" aria-modal="true" aria-label="Demander une démo" onClick={() => setOpen(false)}>
           <div className="demo-req-modal demo-req-modal--pro" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="demo-req-close" aria-label="Fermer" onClick={() => setOpen(false)}>
@@ -71,7 +80,8 @@ export function DemoRequestButton({ className = "" }: { className?: string }) {
             </div>
             <DemoRequestForm />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
