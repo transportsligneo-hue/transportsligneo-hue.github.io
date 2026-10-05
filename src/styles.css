@@ -11097,6 +11097,7 @@ html.theme-light .r4-page .pro-brochure { background: #fdfcf8; color: var(--fore
 html.theme-light .r4-page .pro-brochure-download:hover { color: var(--foreground); }
 @media (max-width: 767px) {
   html.theme-light .r4-page .pro-brochure { background: var(--public-mobile-surface); color: var(--public-mobile-text); }
+  html.theme-light .r4-page .pro-brochure h3 { color: var(--public-mobile-text); }
   html.theme-light .r4-page .pro-brochure p, html.theme-light .r4-page .pro-brochure-index { color: var(--public-mobile-muted); }
   html.theme-light .r4-page .pro-brochure-download:hover { color: var(--public-mobile-text); }
 }
