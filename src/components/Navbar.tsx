@@ -7,7 +7,7 @@ import ThemePreference from "@/components/ThemePreference";
 import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Download } from "lucide-react";
-import { professionalBrochures } from "@/components/marketing/ProfessionalBrochures";
+import { professionalBrochures, particulierBrochure } from "@/components/marketing/ProfessionalBrochures";
 
 type NavAccent = "purple" | "green" | "blue" | undefined;
 const navLinks: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: Record<string, unknown> }> = [
@@ -74,8 +74,9 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
               {navLinks.map((l) => {
                 const accentClass = l.accent === "purple" ? " nav-accent-purple" : l.accent === "green" ? " nav-accent-green" : l.accent === "blue" ? " nav-accent-blue" : "";
                 const isPro = l.label === "Professionnels";
+                const isPart = l.label === "Particuliers";
                 return (
-                  <li key={`${l.to}-${l.search?.audience ?? ""}`} className={isPro ? "tln-dd" : undefined}>
+                  <li key={`${l.to}-${l.search?.audience ?? ""}`} className={isPro || isPart ? "tln-dd" : undefined}>
                     <Link
                       to={l.to}
                       search={l.search}
@@ -102,6 +103,19 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
                               <Download size={13} aria-hidden="true" />{item.audience}
                             </a>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                    {isPart && (
+                      <div className="tln-dd-menu tln-dd-menu--part">
+                        <Link to="/services" search={{ audience: "particuliers" }}>Nos services</Link>
+                        <Link to="/tarifs">Tarifs & estimation</Link>
+                        <Link to="/suivi">Suivre mon véhicule</Link>
+                        <div className="tln-dd-brochures" aria-label="Brochure particuliers à télécharger">
+                          <span className="tln-dd-brochures-label">Brochure PDF</span>
+                          <a href={particulierBrochure.file.url} download={particulierBrochure.filename} type="application/pdf" aria-label="Télécharger la brochure Particuliers">
+                            <Download size={13} aria-hidden="true" />Particuliers
+                          </a>
                         </div>
                       </div>
                     )}

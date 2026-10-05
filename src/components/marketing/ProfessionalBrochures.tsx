@@ -3,6 +3,34 @@ import concessions from "@/assets/Ligneo-Concessionnaires.pdf.asset.json";
 import loueurs from "@/assets/Ligneo-Loueurs-de-vehicules.pdf.asset.json";
 import gestionnaires from "@/assets/Ligneo-Gestionnaires-de-flotte.pdf.asset.json";
 import entreprises from "@/assets/Ligneo-Entreprises-parc-vehicules.pdf.asset.json";
+import particuliers from "@/assets/Ligneo-Particuliers.pdf.asset.json";
+
+export const particulierBrochure = { audience: "Particuliers", detail: "Achat à distance, déménagement, restitution LOA/LLD et plus", file: particuliers, filename: "Ligneo-Particuliers.pdf" } as const;
+
+export function ParticulierBrochure() {
+  const item = particulierBrochure;
+  return (
+    <section className="v4-section pro-brochures part-brochure" aria-labelledby="part-brochure-title">
+      <div className="v4-section-head">
+        <div className="v4-hero-eyebrow"><span className="dot" />Document à télécharger</div>
+        <h2 id="part-brochure-title">Notre brochure <span className="audience-accent">particuliers</span></h2>
+      </div>
+      <div className="pro-brochures-grid">
+        <article className="pro-brochure">
+          <div className="pro-brochure-top">
+            <span className="pro-brochure-icon"><FileText size={23} strokeWidth={1.7} /></span>
+            <span className="pro-brochure-index">PDF</span>
+          </div>
+          <h3>{item.audience}</h3>
+          <p>{item.detail}</p>
+          <a className="pro-brochure-download" href={item.file.url} download={item.filename} type="application/pdf" aria-label="Télécharger la brochure PDF Particuliers">
+            Télécharger le PDF <Download size={17} strokeWidth={2} />
+          </a>
+        </article>
+      </div>
+    </section>
+  );
+}
 
 export const professionalBrochures = [
   { id: "concessions", audience: "Concessionnaires automobiles", detail: "Livraison client, reprises et transferts entre concessions", file: concessions, filename: "Ligneo-Concessionnaires.pdf" },
