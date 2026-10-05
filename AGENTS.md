@@ -14,3 +14,4 @@
 - EDL photo anomaly annotations live in inspection_photos.annotations (fractional x/y, category, author, time) and render via the shared PhotoAnnotations component in every workspace, so markers stay identical across screens; only the driver EDL edits them.
 - Scope public profile accent styles to explicit audience markers on each marketing section, so professional violet and particular blue remain independent in both themes.
 - Render the public demo-request dialog at the document root, not inside the navigation dropdown, so fixed positioning stays viewport-centered and never clips behind the header.
+- Keep professional PDF brochures in a shared public marketing catalogue used by the professional menu and métier pages, so download labels and files stay consistent without entering signed-in workspaces.
