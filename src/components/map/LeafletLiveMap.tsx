@@ -416,7 +416,7 @@ export function LeafletLiveMap({
     }
     carRef.current.setIcon(carIcon(headingRef.current));
     carRef.current.getElement()?.classList.toggle("is-stale", signalLost);
-    const from = posRef.current ?? target;
+    const from = carRef.current.getLatLng() ?? posRef.current ?? target;
     posRef.current = target;
     if (animRef.current) cancelAnimationFrame(animRef.current);
     // Glide over the real gap between GPS points so the car never stops between updates.
@@ -431,6 +431,7 @@ export function LeafletLiveMap({
         from.lng + (target.lng - from.lng) * e,
       ]);
       if (t < 1) animRef.current = requestAnimationFrame(step);
+      else if (!map.getBounds().contains(target)) map.panTo(target, { animate: true, duration: 0.8 });
     };
     animRef.current = requestAnimationFrame(step);
   }, [last, points, route.length, signalLost]);
