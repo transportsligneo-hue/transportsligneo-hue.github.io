@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureLocationPermission, isNativeApp } from "@/lib/native/bridge";
 import { toast } from "sonner";
+import { haversineKm } from "@/lib/geo/haversine";
 import { CapacitorHttp, registerPlugin } from "@capacitor/core";
 import type { BackgroundGeolocationPlugin } from "@capacitor-community/background-geolocation";
 
@@ -62,6 +63,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 4000 }: Use
   const lastSentRef = useRef(0);
   const sendingRef = useRef(false);
   const lastErrorRef = useRef(0);
+  const lastPosRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const sendPosition = useCallback(async (position: GpsPosition) => {
     if (!attributionId) return;
@@ -69,12 +71,18 @@ export function useGpsTracking({ attributionId, active, intervalMs = 4000 }: Use
     // Do not report a cached lock from an earlier journey as a current position.
     if (!Number.isFinite(position.timestamp) || Math.abs(Date.now() - position.timestamp) > 120_000) return;
     const now = Date.now();
-    if (sendingRef.current || now - lastSentRef.current < intervalMs) return;
+    // Stationary vehicle: slow uploads to ~30 s to save battery.
+    const lp = lastPosRef.current;
+    const movedM = lp ? haversineKm(lp, { lat: position.coords.latitude, lng: position.coords.longitude }) * 1000 : Infinity;
+    const stopped = movedM < 10 && (position.coords.speed ?? 0) < 1;
+    const minGap = stopped ? Math.max(intervalMs, 30_000) : intervalMs;
+    if (sendingRef.current || now - lastSentRef.current < minGap) return;
     sendingRef.current = true;
 
     try {
       await uploadPosition(position, attributionId, isNativeApp());
       lastSentRef.current = Date.now();
+      lastPosRef.current = { lat: position.coords.latitude, lng: position.coords.longitude };
     } catch (error) {
       console.warn("GPS insert error:", error);
       if (Date.now() - lastErrorRef.current > 60_000) {

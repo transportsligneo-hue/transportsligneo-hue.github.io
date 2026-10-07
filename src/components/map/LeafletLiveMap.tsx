@@ -417,6 +417,8 @@ export function LeafletLiveMap({
     carRef.current.setIcon(carIcon(headingRef.current));
     carRef.current.getElement()?.classList.toggle("is-stale", signalLost);
     const from = carRef.current.getLatLng() ?? posRef.current ?? target;
+    // Ignore GPS jitter (< 8 m) so the car never twitches backwards.
+    if (haversineKm({ lat: from.lat, lng: from.lng }, { lat: target.lat, lng: target.lng }) < 0.008) return;
     posRef.current = target;
     if (animRef.current) cancelAnimationFrame(animRef.current);
     // Glide over the real gap between GPS points so the car never stops between updates.
