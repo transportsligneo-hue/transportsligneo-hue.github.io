@@ -57,7 +57,7 @@ interface UseGpsTrackingOptions {
   intervalMs?: number;
 }
 
-export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: UseGpsTrackingOptions) {
+export function useGpsTracking({ attributionId, active, intervalMs = 4000 }: UseGpsTrackingOptions) {
   const watchIdRef = useRef<number | null>(null);
   const lastSentRef = useRef(0);
   const sendingRef = useRef(false);
@@ -121,7 +121,7 @@ export function useGpsTracking({ attributionId, active, intervalMs = 12000 }: Us
       void BackgroundGeolocation.addWatcher({
         backgroundTitle: "Suivi de la mission Ligneo",
         backgroundMessage: "Votre trajet avec le véhicule est en cours.",
-        distanceFilter: 15,
+        distanceFilter: 5,
         stale: false,
         requestPermissions: true,
       }, (position, error) => {

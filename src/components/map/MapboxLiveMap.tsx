@@ -562,17 +562,24 @@ export function MapboxLiveMap({
 
     carRef.current.getElement().classList.toggle("is-stale", signalLost && !completed);
     carRef.current.getElement().title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
-    if (carInnerRef.current) carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
-    const from = posRef.current ?? target;
+    if (carInnerRef.current) {
+      carInnerRef.current.style.transition = "transform 800ms ease-out";
+      carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
+    }
+    const cur = carRef.current.getLngLat();
+    const from = cur ? { lat: cur.lat, lng: cur.lng } : (posRef.current ?? target);
     posRef.current = target;
     if (animRef.current) cancelAnimationFrame(animRef.current);
+    // Glide over the real gap between GPS points so the car never stops between updates.
+    const gapMs = prev ? new Date(last.recorded_at).getTime() - new Date(prev.recorded_at).getTime() : 0;
+    const dur = Number.isFinite(gapMs) && gapMs > 0 ? Math.min(Math.max(gapMs, 1000), 10_000) : 1200;
     const t0 = performance.now();
-    const dur = 900;
     const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / dur);
-      const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      const e = Math.min(1, (now - t0) / dur);
+      const t = e;
       carRef.current?.setLngLat([from.lng + (target.lng - from.lng) * e, from.lat + (target.lat - from.lat) * e]);
       if (t < 1) animRef.current = requestAnimationFrame(step);
+      else if (!map.getBounds()?.contains([target.lng, target.lat])) map.easeTo({ center: [target.lng, target.lat], duration: 800 });
     };
     animRef.current = requestAnimationFrame(step);
   }, [last, points, route.length, ready, signalLost]);
