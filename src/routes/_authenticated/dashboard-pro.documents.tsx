@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useMemo, useState } from "react";
@@ -225,7 +226,7 @@ function ProDocuments() {
       const [dRes, fRes] = await Promise.all([
         supabase
           .from("devis")
-          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, heure_souhaitee, date_retour, heure_retour, option_trajet, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour")
+          .select("id, numero, depart, arrivee, prix_estime, statut, pdf_url, created_at, paid_at, accepted_at, locked_at, mission_id, converted_at, refused_at, date_souhaitee, heure_souhaitee, date_retour, heure_retour, option_trajet, marque, modele, immatriculation, depart_retour, arrivee_retour, immatriculation_retour, marque_retour, modele_retour, prix_retour, vehicules")
           .order("created_at", { ascending: false }),
         supabase
           .from("factures")
@@ -539,6 +540,11 @@ function ProDocuments() {
                         <td className="px-5 py-3 text-pro-text-soft font-mono text-xs">
                           <div className="flex flex-col gap-1.5">
                             <span>{d.numero}</span>
+                            {Array.isArray((d as { vehicules?: unknown }).vehicules) && ((d as { vehicules?: unknown[] }).vehicules?.length ?? 0) > 1 && (
+                              <Link to="/dashboard-pro/devis-groupe/$devisId" params={{ devisId: d.id }} className="text-pro-accent underline text-[11px] font-sans">
+                                Valider par lots
+                              </Link>
+                            )}
                             <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
                               {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
                               {typeInfo.label}
