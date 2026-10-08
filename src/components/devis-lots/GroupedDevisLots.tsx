@@ -85,20 +85,28 @@ export function GroupedDevisLots({ devisId, readOnly = false }: { devisId: strin
     let { data: ls } = await db.from("devis_lignes").select("*").eq("devis_id", devisId).order("position");
     // Premier affichage : les lignes sont créées depuis les véhicules du devis groupé.
     if (!readOnly && (!ls || ls.length === 0) && Array.isArray(d.vehicules) && d.vehicules.length > 0) {
-      const seed = (d.vehicules as Record<string, unknown>[]).map((v, i) => {
+      const seed = [];
+      for (const [i, v] of (d.vehicules as Record<string, unknown>[]).entries()) {
         const type = parseLigneType(v.type_trajet);
         const prix = Number(v.prix ?? 0);
-        return {
+        // Partage aller/retour existant pour un prix livraison + restitution déjà devisé.
+        let split = { aller: prix, retour: 0 };
+        if (type === "livraison_restitution" && prix > 0) {
+          const { data: sp } = await db.rpc("split_ar_prices", { _total: prix });
+          const row = Array.isArray(sp) ? sp[0] : sp;
+          if (row) split = { aller: Number(row.aller), retour: Number(row.retour) };
+        }
+        seed.push({
           devis_id: devisId, position: i + 1, type_ligne: type,
           depart: d.depart, arrivee: (v.arrivee as string) ?? d.arrivee,
           date_enlevement: d.date_souhaitee, heure_enlevement: d.heure_souhaitee,
           adresse_retour: type === "livraison_restitution" ? d.depart : null,
           immatriculation: (v.immatriculation as string) ?? null, vin: (v.vin as string) ?? null,
           marque: (v.marque as string) ?? null, modele: (v.modele as string) ?? null,
-          prix_aller: type === "livraison_restitution" ? Math.round(prix * 50) / 100 : prix,
-          prix_retour: type === "livraison_restitution" ? prix - Math.round(prix * 50) / 100 : 0,
-        };
-      });
+          prix_aller: split.aller,
+          prix_retour: split.retour,
+        });
+      }
       await db.from("devis_lignes").insert(seed);
       ({ data: ls } = await db.from("devis_lignes").select("*").eq("devis_id", devisId).order("position"));
     }
