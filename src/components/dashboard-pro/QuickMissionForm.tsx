@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
   Loader2, Send, CheckCircle, Info, Sparkles, Star, Search, Zap, Fuel, Sparkle, KeyRound, Wrench,
-  Repeat,
+  Repeat, Save,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,7 @@ import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
+import { guessElectricFromModel } from "@/lib/vehicule-electrique";
 
 type TripOption = "aller-simple" | "aller-retour" | "express" | "recharge";
 type DisplayMode = "ttc" | "ht" | "exempt";
