@@ -3,6 +3,16 @@ import { ArrowLeft } from "lucide-react";
 import QuickMissionForm from "@/components/dashboard-pro/QuickMissionForm";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-demande")({
+  head: () => ({
+    meta: [
+      { title: "Mission simple | Transports Ligneo" },
+      { name: "description", content: "Créer une mission simple de convoyage dans votre espace Transports Ligneo." },
+      { property: "og:title", content: "Mission simple | Transports Ligneo" },
+      { property: "og:description", content: "Créer une mission simple de convoyage dans votre espace Transports Ligneo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ProNouvelleDemande,
 });
 

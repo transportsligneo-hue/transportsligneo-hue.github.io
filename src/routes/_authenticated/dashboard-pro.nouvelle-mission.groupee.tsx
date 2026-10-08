@@ -26,6 +26,16 @@ import {
 } from "@/lib/grouped-mission-type";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
+  head: () => ({
+    meta: [
+      { title: "Mission groupée | Transports Ligneo" },
+      { name: "description", content: "Créer une mission groupée avec plusieurs types de trajet dans votre espace Transports Ligneo." },
+      { property: "og:title", content: "Mission groupée | Transports Ligneo" },
+      { property: "og:description", content: "Créer une mission groupée avec plusieurs types de trajet dans votre espace Transports Ligneo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: GroupedMissionForm,
 });
 
