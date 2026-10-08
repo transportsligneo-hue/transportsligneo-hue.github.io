@@ -11,7 +11,7 @@ export const Route = createFileRoute("/concessionnaires")({
       brochures={["concessions"]}
       title="Déplacez vos véhicules entre concessions, ateliers"
       accent="et clients."
-      subtitle={D}
+      subtitle={"Transferts inter-sites, livraisons clients, véhicules d'essai et restitutions : déplacez vos véhicules entre concessions, ateliers et clients."}
       benefits={[
         { t: "Transferts inter-sites", d: "Vos véhicules passent d'une concession à l'autre sans mobiliser vos équipes." },
         { t: "Livraisons clients", d: "Remise en main propre, clés et documents, avec signature électronique." },
