@@ -750,27 +750,34 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   supplements.forEach((s) => lignes.push({ title: s.label, amount: toHt(Number(s.montant)) }));
 
-  lignes.push(
-    rechargeSeule
-      ? {
-          title: "Contrôle photo avant / après recharge",
-          sub: "Photos horodatées du niveau de charge, compte rendu d'intervention et notifications client.",
-          amount: null,
-        }
-      : {
-          title: "État des lieux numérique et suivi de mission",
-          sub: "Photos horodatées et signature électronique au départ et à l'arrivée, suivi GPS et notifications client.",
-          amount: null,
-        },
-  );
-  if (pvDigital) lignes.push({ title: `PV de livraison digitalisé : ${pvDigital}`, amount: null });
-  optionsList.forEach((o) => lignes.push({ title: `Option : ${o}`, amount: null }));
-  if (d.destinataire_nom) {
+  const inclusTitle = rechargeSeule
+    ? "Contrôle photo avant / après recharge"
+    : "État des lieux numérique et suivi de mission";
+  const inclusSub = rechargeSeule
+    ? "Photos horodatées du niveau de charge, compte rendu d'intervention et notifications client."
+    : "Photos horodatées et signature électronique au départ et à l'arrivée, suivi GPS et notifications client.";
+  const destTxt = d.destinataire_nom
+    ? [d.destinataire_nom, d.destinataire_tel, d.destinataire_note].filter(Boolean).join(" · ")
+    : null;
+
+  if (isGroupe) {
+    // Devis groupé : une seule ligne récapitulative pour tout ce qui est inclus.
     lignes.push({
-      title: "Destinataire",
-      sub: [d.destinataire_nom, d.destinataire_tel, d.destinataire_note].filter(Boolean).join(" · "),
+      title: "Inclus pour chaque véhicule",
+      sub: [
+        rechargeSeule ? null : `${d.depart} → ${d.arrivee}. Carburant, péages et assurance tous risques inclus.`,
+        `${inclusTitle} : ${inclusSub}`,
+        pvDigital ? `PV de livraison digitalisé : ${pvDigital}.` : null,
+        optionsList.length ? `Options : ${optionsList.join(", ")}.` : null,
+        destTxt ? `Destinataire : ${destTxt}` : null,
+      ].filter(Boolean).join(" "),
       amount: null,
     });
+  } else {
+    lignes.push({ title: inclusTitle, sub: inclusSub, amount: null });
+    if (pvDigital) lignes.push({ title: `PV de livraison digitalisé : ${pvDigital}`, amount: null });
+    optionsList.forEach((o) => lignes.push({ title: `Option : ${o}`, amount: null }));
+    if (destTxt) lignes.push({ title: "Destinataire", sub: destTxt, amount: null });
   }
 
   sectionLabel(doc, M, y, "Prestation");
@@ -786,20 +793,39 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   y += 5.5;
 
   const descW = innerW - 34;
-  // Compression automatique : le devis doit tenir sur une seule page.
+  // Compression automatique : le devis doit tenir sur une seule page,
+  // au-dessus des totaux (~24 mm), des conditions (min ~14 mm) et des signatures.
   const measure = (subFs: number, gap: number, keepSub: boolean) =>
     lignes.reduce((acc, l) => {
-      const s = l.sub && keepSub ? (doc.setFontSize(subFs), (doc.splitTextToSize(l.sub, descW) as string[]).length) : 0;
-      return acc + 4.2 + s * (subFs * 0.5) + 2 + gap;
+      doc.setFontSize(subFs);
+      const s = l.sub && keepSub ? (doc.splitTextToSize(l.sub, descW) as string[]).length : 0;
+      return acc + (l.plates ? 3.2 : 4.2) + s * (subFs * 0.52) + 1.8 + gap;
     }, 0);
   const sigBlockH = 24;
-  const availableForLines = pageH - 24 - sigBlockH - 6 - 46 - y; // conditions ~46mm réservés
+  const availableForLines = pageH - 24 - sigBlockH - 6 - 24 - 14 - y;
   doc.setFont("helvetica", "normal");
   let subFs = 7.1;
   let gap = 4.2;
   let keepSub = true;
-  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6.4; gap = 3.4; }
-  if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2.8; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { subFs = 6.4; gap = 3; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { gap = 2; }
+  if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2; }
+
+  const drawPlates = (plates: Plaque[], x0: number, yy: number) => {
+    let x = x0;
+    plates.forEach((p) => {
+      const isR = p.tag === "R";
+      x += badge(doc, x, yy - 3.3, isR ? "RESTITUTION" : "LIVRAISON", isR ? AMBER_SOFT : BLUE_SOFT, isR ? AMBER_INK : BLUE, 5.4) + 1.6;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.6);
+      doc.setTextColor(...INK);
+      const id = (doc.splitTextToSize(p.ident, 30) as string[])[0];
+      doc.text(id, x, yy);
+      x += doc.getTextWidth(id) + 1.8;
+      if (p.plate) x += plateBadge(doc, x, yy - 4.4, p.plate, 7.2) + 4;
+      else x += 4;
+    });
+  };
 
   lignes.forEach((l) => {
     const sub = l.sub && keepSub
@@ -807,11 +833,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [];
     const lh = subFs * 0.52;
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(l.plates ? 8.2 : 8.9);
+    doc.setTextColor(...INK);
+    if (l.plates) {
+      const t = `Véhicule ${l.title.match(/\d+/)?.[0] ?? ""}`;
+      doc.text(t, M, y);
+      drawPlates(l.plates, M + doc.getTextWidth(t) + 4, y);
+    } else {
+      doc.text((doc.splitTextToSize(l.title, descW) as string[])[0], M, y);
+    }
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(8.9);
     doc.setTextColor(...INK);
-    doc.text((doc.splitTextToSize(l.title, descW) as string[])[0], M, y);
     doc.text(l.amount === null ? "Inclus" : eur(l.amount), right, y, { align: "right" });
-    let sy = y + 4;
+    let sy = y + (l.plates ? 3 : 4);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(subFs);
     doc.setTextColor(...MUTED);
