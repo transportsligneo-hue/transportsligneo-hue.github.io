@@ -457,6 +457,74 @@ function ResetOperationalCard() {
   );
 }
 
+function DeliveryRechargeSurchargeCard() {
+  const [amount, setAmount] = useState("25");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void supabase
+      .from("pricing_settings")
+      .select("recharge_delivery_surcharge")
+      .eq("id", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        const value = Number(data?.recharge_delivery_surcharge ?? 25);
+        setAmount(String(Number.isFinite(value) ? value : 25));
+        setLoading(false);
+      });
+  }, []);
+
+  const saveSurcharge = async () => {
+    const value = Number(amount.replace(",", "."));
+    if (!Number.isFinite(value) || value < 0) {
+      toast.error("Saisissez un supplément valide");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("pricing_settings")
+      .update({ recharge_delivery_surcharge: Math.round(value * 100) / 100 })
+      .eq("id", true);
+    setSaving(false);
+    if (error) toast.error("Échec de l'enregistrement", { description: error.message });
+    else toast.success("Supplément de recharge pour livraison enregistré");
+  };
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-pro-bg-soft text-pro-accent flex items-center justify-center shrink-0">
+          <Receipt size={18} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-pro-text">Recharge électrique pour livraison</h3>
+          <p className="text-xs text-pro-muted mt-1">
+            Supplément appliqué à cette option dans les missions simples et groupées.
+          </p>
+        </div>
+      </div>
+      <div className="max-w-xs">
+        <FormField label="Supplément (€)">
+          <TextInput
+            type="number"
+            min="0"
+            step="0.01"
+            value={amount}
+            disabled={loading}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </FormField>
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Button icon={<Save size={14} />} onClick={saveSurcharge} disabled={loading || saving}>
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 function FactureMentionCard() {
   const [text, setText] = useState("");
   const [active, setActive] = useState(false);

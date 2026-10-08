@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Missions flotte simples et groupées : distinguer recharge trajet et recharge livraison (+25 € configurable par l'admin), sans modifier les autres tarifs.
+- [x] Missions flotte simples et groupées : distinguer recharge trajet et recharge livraison (+25 € configurable par l'admin), sans modifier les autres tarifs.
 - [ ] Harmoniser « Suivre ma mission » avec le GPS partagé en direct et la voiture Ligneo bleu électrique.
 
 - [x] Brochures PDF professionnelles : téléchargements dans le menu professionnel, sur chaque page métier concernée et sur la page professionnelle complète.

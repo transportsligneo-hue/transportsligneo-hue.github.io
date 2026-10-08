@@ -545,7 +545,7 @@ function GroupedMissionForm() {
                               r.options[o.key] ? "border-[#2f5fff] bg-[#eef2ff] text-[#2f5fff]" : "border-slate-200 bg-white text-slate-600"
                             }`}
                           >
-                            {o.label}
+                            {o.label}{o.key === "recharge_electrique_livraison" ? ` (+${deliveryRechargeSurcharge} €)` : ""}
                           </button>
                         ))}
                       </div>
