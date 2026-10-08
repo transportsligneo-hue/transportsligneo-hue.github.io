@@ -73,7 +73,7 @@ export function AdminMfaGate({ children }: { children: ReactNode }) {
         <div className="amfa-shield">
           <ShieldCheck className="h-5 w-5" aria-hidden />
         </div>
-        <Input
+        <input
           inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
           value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
           className="amfa-input" autoFocus
