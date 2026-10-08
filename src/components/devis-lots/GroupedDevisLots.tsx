@@ -309,7 +309,7 @@ export function GroupedDevisLots({ devisId, readOnly = false }: { devisId: strin
                 </div>
                 <div className="dl-actions">
                   <button className="dl-btn-ghost" onClick={() => void lotPdf(lot)}><FileDown size={15} /> Bon de commande PDF</button>
-                  {readOnly && <Link className="dl-btn-ghost" to="/admin/missions" search={{ lot: lot.id } as never}>Missions du lot</Link>}
+                  {readOnly && <Link className="dl-btn-ghost" to="/admin/missions">Missions (filtre Lot)</Link>}
                   {!readOnly && lot.statut === "valide" && <button className="dl-btn-ghost" onClick={() => void cancelLot(lot)}><X size={15} /> Annuler le lot</button>}
                 </div>
               </div>
