@@ -174,10 +174,13 @@ type VehLine = {
   vin: string;
   arrivee: string;
   type: "aller-simple" | "aller-retour" | "recharge";
+  immatRetour?: string;
   prix: string;
   busy: boolean;
   msg: string | null;
 };
+
+const ADMIN_DRAFT_KEY = "ligneo:admin-devis-groupe-brouillon";
 
 const VEH_TYPES: { v: VehLine["type"]; l: string }[] = [
   { v: "aller-simple", l: "Livraison simple" },
@@ -529,6 +532,7 @@ function AdminNouveauDevisPage() {
     vin: normalizeVin(v.vin) || null,
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
     type_trajet: v.type,
+    immatriculation_retour: v.type === "aller-retour" ? (v.immatRetour ?? "").trim().toUpperCase() || null : null,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
@@ -541,7 +545,7 @@ function AdminNouveauDevisPage() {
           (v, i) =>
             `Véhicule ${i + 1} : ${[v.marque, v.modele].filter(Boolean).join(" ") || "—"}${
               v.immatriculation ? ` (${v.immatriculation})` : ""
-            }${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
+            }${v.immatriculation_retour ? ` · Plaque retour ${v.immatriculation_retour}` : ""}${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
         )
       : []),
     !isGroupe && immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
@@ -1313,6 +1317,53 @@ function AdminNouveauDevisPage() {
                 {vlines.length} ligne{vlines.length > 1 ? "s" : ""}
               </span>
             </div>
+            <div className="mb-4 flex flex-wrap gap-2 rounded-lg border border-pro-border bg-white p-3">
+              <span className="w-full text-[12px] font-bold uppercase tracking-wide text-pro-muted">Brouillon</span>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.setItem(
+                    ADMIN_DRAFT_KEY,
+                    JSON.stringify({ vlines: vlines.map((x) => ({ ...x, busy: false, msg: null })), depart, arrivee, typeTrajet, options, savedAt: new Date().toISOString() }),
+                  );
+                  toast.success("Brouillon enregistré");
+                }}
+                className="rounded-lg bg-pro-accent px-3 py-2 text-[12.5px] font-semibold text-white"
+              >
+                Enregistrer le brouillon
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const raw = localStorage.getItem(ADMIN_DRAFT_KEY);
+                  if (!raw) return toast.error("Aucun brouillon enregistré");
+                  try {
+                    const d = JSON.parse(raw);
+                    if (Array.isArray(d.vlines) && d.vlines.length) setVlines(d.vlines);
+                    if (typeof d.depart === "string") setDepart(d.depart);
+                    if (typeof d.arrivee === "string") setArrivee(d.arrivee);
+                    if (typeof d.typeTrajet === "string") setTypeTrajet(d.typeTrajet);
+                    if (Array.isArray(d.options)) setOptions(d.options);
+                    toast.success("Brouillon repris");
+                  } catch {
+                    toast.error("Brouillon illisible");
+                  }
+                }}
+                className="rounded-lg border border-pro-border px-3 py-2 text-[12.5px] font-semibold text-pro-text"
+              >
+                Reprendre le brouillon
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem(ADMIN_DRAFT_KEY);
+                  toast.success("Brouillon supprimé");
+                }}
+                className="rounded-lg px-3 py-2 text-[12.5px] font-semibold text-red-600"
+              >
+                Supprimer
+              </button>
+            </div>
             <div className="space-y-3">
               {vlines.map((v, i) => (
                 <div key={v.key} className="rounded-xl border border-pro-border bg-pro-bg-soft p-4">
@@ -1365,6 +1416,14 @@ function AdminNouveauDevisPage() {
                         </button>
                       ))}
                     </div>
+                    {v.type === "aller-retour" && (
+                      <Field
+                        label="Plaque retour (restitution)"
+                        value={v.immatRetour ?? ""}
+                        onChange={(x) => patchVeh(v.key, { immatRetour: x.toUpperCase() })}
+                        placeholder="AB-123-CD"
+                      />
+                    )}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
