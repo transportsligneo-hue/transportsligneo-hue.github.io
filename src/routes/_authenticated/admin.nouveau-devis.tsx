@@ -173,10 +173,17 @@ type VehLine = {
   modele: string;
   vin: string;
   arrivee: string;
+  type: "aller-simple" | "aller-retour" | "recharge";
   prix: string;
   busy: boolean;
   msg: string | null;
 };
+
+const VEH_TYPES: { v: VehLine["type"]; l: string }[] = [
+  { v: "aller-simple", l: "Livraison simple" },
+  { v: "aller-retour", l: "Livraison + restitution" },
+  { v: "recharge", l: "Recharge uniquement" },
+];
 
 const newVeh = (): VehLine => ({
   key: crypto.randomUUID(),
@@ -185,6 +192,7 @@ const newVeh = (): VehLine => ({
   modele: "",
   vin: "",
   arrivee: "",
+  type: "aller-simple",
   prix: "",
   busy: false,
   msg: null,
@@ -520,6 +528,7 @@ function AdminNouveauDevisPage() {
     modele: v.modele.trim() || null,
     vin: normalizeVin(v.vin) || null,
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
+    type_trajet: v.type,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
