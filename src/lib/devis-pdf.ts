@@ -716,18 +716,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const toHt = (v: number) => (micro ? v : +(v / (1 + vatRate / 100)).toFixed(2));
   const baseHt = toHt(baseTtc);
 
-  type Ligne = { title: string; sub?: string; amount: number | null };
+  type Plaque = { tag: "L" | "R"; ident: string; plate: string | null };
+  type Ligne = { title: string; sub?: string; amount: number | null; plates?: Plaque[] };
   const lignes: Ligne[] = isGroupe
     ? multiVehicules.map((v, i) => {
         const htLigne = toHt(Number(v.prix ?? 0));
         const ident = [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
-        const plaque = v.immatriculation ? ` — ${v.immatriculation}` : "";
+        const hasRetour = !!(v.immatriculation_retour || v.marque_retour || v.type === "aller-retour");
+        const identR = [v.marque_retour, v.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser";
+        const plates: Plaque[] = [{ tag: "L", ident, plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
+        if (hasRetour) plates.push({ tag: "R", ident: identR, plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
         return {
-          title: `Véhicule ${i + 1} : ${ident}${plaque}`,
-          sub: rechargeSeule
-            ? `Recharge électrique sur place (sans livraison), ${d.depart}. Branchement, surveillance et contrôle photo.`
-            : `${d.depart} → ${v.arrivee || d.arrivee}${plateau ? ", véhicule non roulant transporté sur plateau porte-voiture (non conduit)." : ". Carburant, péages et assurance tous risques inclus."}`,
+          title: `Véhicule ${i + 1}${hasRetour ? " · Livraison + restitution" : ""}`,
           amount: htLigne,
+          plates,
         };
       })
     : [
