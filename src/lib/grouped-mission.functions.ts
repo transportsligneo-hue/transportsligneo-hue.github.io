@@ -13,6 +13,7 @@ const vehicleSchema = z.object({
   km: z.number().int().min(0).max(3000000).nullable().optional(),
   notes: z.string().max(1000).nullable().optional(),
   arrivee: z.string().min(2).max(400),
+  tripType: z.enum(["aller-simple", "aller-retour", "recharge"]).default("aller-simple"),
   prixTtc: z.number().min(0).max(100000),
   optionsMeta: z.record(z.string(), z.boolean()).optional().default({}),
 });
@@ -94,7 +95,11 @@ export const createGroupedMission = createServerFn({ method: "POST" })
         immatriculation: firstVehicle?.immatriculation ?? null,
         vin: firstVehicle?.vin ?? null,
         carburant: firstVehicle?.energie ?? null,
-        option_trajet: "aller_simple",
+        option_trajet: data.vehicles.some((vehicle) => vehicle.tripType === "aller-retour")
+          ? "aller_retour"
+          : data.vehicles.every((vehicle) => vehicle.tripType === "recharge")
+            ? "recharge_seule"
+            : "aller_simple",
         prestation: `Mission groupée ${groupReference} · ${data.vehicles.length} véhicule${data.vehicles.length > 1 ? "s" : ""}`,
         prix_estime: totalTtc,
         statut: "envoye",
@@ -106,6 +111,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
           modele: v.modele ?? null,
           vin: v.vin ?? null,
           arrivee: v.arrivee,
+          type_trajet: v.tripType,
           prix: v.prixTtc,
         })),
         message: [
@@ -142,8 +148,11 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       ]
         .filter(Boolean)
         .join("\n"),
-      options: "aller-simple",
-      options_meta: v.optionsMeta ?? {},
+      options: v.tripType,
+      options_meta: {
+        ...(v.optionsMeta ?? {}),
+        ...(v.tripType === "recharge" ? { recharge_seule: true } : {}),
+      },
       statut: "nouvelle",
       prix_estime: v.prixTtc,
       pricing_display_mode: profile?.pricing_display_mode ?? "ttc",
