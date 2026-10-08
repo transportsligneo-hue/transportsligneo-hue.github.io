@@ -4,7 +4,7 @@ import { Phone } from "lucide-react";
 const faqs = [
   { q: "Quels types de véhicules pouvez-vous convoyer ?", a: "Nous convoyons tous types de véhicules : citadines, berlines, SUV, utilitaires, véhicules de collection et même poids lourds légers. Contactez-nous pour toute demande spécifique." },
   { q: "Les péages et le carburant sont-ils inclus dans le prix ?", a: "Oui, nos tarifs incluent systématiquement les péages et le carburant nécessaires au transport de votre véhicule. Aucun frais caché." },
-  { q: "Quel est le délai de prise en charge ?", a: "Selon la distance et la disponibilité, nous pouvons prendre en charge votre véhicule en moins de 24 heures. Pour les missions express, un supplément de 20% s'applique." },
+  { q: "Quel est le délai de prise en charge ?", a: "Selon la distance et la disponibilité, nous pouvons prendre en charge votre véhicule en moins de 24 heures. Une majoration de 30 % s'applique pour les missions express et les interventions hors horaires." },
   { q: "Vos convoyeurs sont-ils assurés ?", a: "Absolument. Tous nos convoyeurs sont couverts par une assurance circulation complète pendant toute la durée du transport." },
   { q: "Livrez-vous dans toute la France ?", a: "Oui, nous intervenons sur l'ensemble du territoire français et également en Europe. Notre base est à Tours (37), au cœur du réseau routier national." },
   { q: "Comment suivre la livraison de mon véhicule ?", a: "De la prise en charge à la restitution, nous vous tenons informé par SMS ou appel à chaque étape clé : départ, en route et arrivée." },
