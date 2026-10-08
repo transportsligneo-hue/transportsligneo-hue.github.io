@@ -582,6 +582,18 @@ function AdminDevisPage() {
                     const vehAller = [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—";
                     const vehRetour = [dx.marque_retour, dx.modele_retour].filter(Boolean).join(" ");
                     const hasRetourVeh = !!(dx.immatriculation_retour || vehRetour);
+                    if (vehicules.length > 1) {
+                      return (
+                        <div className="min-w-0">
+                          <p className="dvx-col-k">Véhicules</p>
+                          <span className="dvx-tag">
+                            <Layers size={13} className="text-[#2f5fff]" />
+                            Véhicules multiples ({vehicules.length})
+                          </span>
+                          <p className="mt-1 text-[11px] text-[#a3a4ac]">Plaques détaillées ci-dessous</p>
+                        </div>
+                      );
+                    }
                     return (
                       <div className="min-w-0">
                         <p className="dvx-col-k">{hasRetourVeh ? "Véhicules (L + R)" : "Véhicule"}</p>
@@ -637,10 +649,21 @@ function AdminDevisPage() {
                       <Layers size={13} /> Devis groupé · {vehicules.length} véhicules
                     </p>
                     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                      {vehicules.map((v, i) => (
+                      {vehicules.map((v, i) => {
+                        const vr = v as typeof v & {
+                          immatriculation_retour?: string | null;
+                          marque_retour?: string | null;
+                          modele_retour?: string | null;
+                          vin_retour?: string | null;
+                          type?: string | null;
+                          type_trajet?: string | null;
+                        };
+                        const hasR = !!(vr.immatriculation_retour || vr.marque_retour || vr.type === "aller-retour" || vr.type_trajet === "aller-retour");
+                        return (
                         <div key={i} className="dvx-veh">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
+                              {hasR && <div className="mb-1"><span className="dvx-leg l"><ArrowRight size={10} /> Livraison</span></div>}
                               <p className="text-[12.5px] font-bold text-[#14161c] truncate">
                                 {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
                               </p>
@@ -650,6 +673,20 @@ function AdminDevisPage() {
                                 </div>
                               )}
                               {v.vin && <p className="dvx-vin mt-0.5">VIN {v.vin}</p>}
+                              {hasR && (
+                                <div className="mt-2 border-t border-[#eaeaee] pt-2">
+                                  <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Restitution</span></div>
+                                  <p className="text-[12.5px] font-bold text-[#14161c] truncate">
+                                    {[vr.marque_retour, vr.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser"}
+                                  </p>
+                                  {vr.immatriculation_retour && (
+                                    <div className="mt-1">
+                                      <span className="plate-tag plate-tag--sm">{vr.immatriculation_retour}</span>
+                                    </div>
+                                  )}
+                                  {vr.vin_retour && <p className="dvx-vin mt-0.5">VIN {vr.vin_retour}</p>}
+                                </div>
+                              )}
                               {v.arrivee && (
                                 <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-[#70727d]">
                                   <MapPin size={11} className="shrink-0 text-[#e0334f]" />{v.arrivee}
@@ -661,14 +698,14 @@ function AdminDevisPage() {
                             )}
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
-                    {(d.options?.length || d.message) && (
+                    {d.options?.length ? (
                       <p className="mt-2.5 border-t border-[#eaeaee] pt-2.5 text-[11.5px] text-[#70727d]">
-                        {d.options?.length ? `Options : ${d.options.join(", ")}. ` : ""}
-                        {d.message ? `Notes : ${d.message}` : ""}
+                        Options : {d.options.join(", ")}.
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 )}
 
