@@ -17,6 +17,7 @@ import {
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { drawPlateTag } from "@/lib/pdf-plate";
+import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
 
 
 export interface DevisData {
@@ -86,6 +87,8 @@ export interface DevisData {
 
   date_souhaitee?: string | null;
   heure_souhaitee?: string | null;
+  date_livraison?: string | null;
+  heure_livraison?: string | null;
   prix_estime: number;
   tarif_label?: string | null;
   multiplier_label?: string | null;
@@ -212,6 +215,8 @@ export function devisRowToPdfData(
     option_trajet: g<string | null>("option_trajet"),
     date_souhaitee: g<string | null>("date_souhaitee"),
     heure_souhaitee: g<string | null>("heure_souhaitee"),
+    date_livraison: g<string | null>("date_livraison"),
+    heure_livraison: g<string | null>("heure_livraison"),
     destinataire_nom: g<string | null>("contact_arrivee_nom"),
     destinataire_tel: g<string | null>("contact_arrivee_tel"),
     destinataire_note: g<string | null>("contact_arrivee_note"),
@@ -561,6 +566,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const dateLine = d.date_souhaitee
     ? `${fmtDate(d.date_souhaitee)}${d.heure_souhaitee ? ` à ${d.heure_souhaitee}` : ""}`
     : "Date et heure à déterminer";
+  const delivery = resolveDevisDeliverySchedule(d);
+  const deliveryDateLine = delivery.date
+    ? `${fmtDate(delivery.date)}${delivery.time ? ` à ${delivery.time}` : ""}`
+    : "Date et heure à déterminer";
   sectionLabel(doc, M, y, "Trajet");
   y += 3.4;
   const trajetH = groupedLayout ? 26 : 27;
@@ -603,7 +612,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.setFontSize(6.9);
     doc.setTextColor(...MUTED);
     doc.text(
-      d.duree_estimee ? `Durée estimée : ${d.duree_estimee}` : `Livraison souhaitée : ${dateLine}`,
+      delivery.date ? `Livraison souhaitée : ${deliveryDateLine}` : d.duree_estimee ? `Durée estimée : ${d.duree_estimee}` : `Livraison souhaitée : ${deliveryDateLine}`,
       ax,
       y + 23.4,
     );

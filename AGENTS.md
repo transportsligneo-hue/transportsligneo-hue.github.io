@@ -22,3 +22,4 @@
 
 - Persist normalized plate-lookup energy separately for delivered and returned quote vehicles and use the shared electric-vehicle resolver for PDF and admin badges, so electric vans do not depend on model guessing.
 - Render grouped quote PDFs with fixed delivery, return and amount tracks, so plates and totals align independently of vehicle name length.
+- Keep quote PDF pickup and delivery schedules separate through the shared row mapper; delivery must never reuse the pickup date.
