@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useId, useMemo, useState } from "react";
 import type { FavoriteAddressRow } from "@/components/dashboard-pro/FavoriteAddressesManager";
+import { isElectricEnergie } from "@/lib/vehicule-electrique";
 import { lookupPlate } from "@/lib/plate.functions";
 import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
 import { fetchDeliveryRechargeSurcharge } from "@/lib/client-pricing";
@@ -200,6 +201,8 @@ type VehLine = {
   marque: string;
   modele: string;
   vin: string;
+  carburant?: string | null;
+  carburantRetour?: string | null;
   arrivee: string;
   type: "aller-simple" | "aller-retour" | "recharge";
   immatRetour?: string;
@@ -401,11 +404,11 @@ function AdminNouveauDevisPage() {
           if (d.modele) setModeleRetour(d.modele);
           if (d.vin) setVinRetour(d.vin.toUpperCase());
         }
-        const carb = (d.carburant ?? "").toLowerCase();
-        const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
+        const carb = d.energie || d.carburant || "";
+        const isElec = isElectricEnergie(carb);
         setMsg({
           type: "ok",
-          text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}${
+          text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}${
             d.carburant ? ` · ${d.carburant}` : ""
           }${d.categorie ? ` · ${d.categorie}` : ""}`,
         });
@@ -498,7 +501,8 @@ function AdminNouveauDevisPage() {
           marque: d.marque || line.marque,
           modele: d.modele || line.modele,
           vin: d.vin ? normalizeVin(d.vin) : line.vin,
-          msg: `Trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+          carburant: d.energie || d.carburant || null,
+          msg: `Trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}`,
         });
       }
     } catch {
@@ -525,7 +529,8 @@ function AdminNouveauDevisPage() {
           marqueRetour: d.marque || line.marqueRetour,
           modeleRetour: d.modele || line.modeleRetour,
           vinRetour: d.vin ? normalizeVin(d.vin) : line.vinRetour,
-          msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+          carburantRetour: d.energie || d.carburant || null,
+          msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}`,
         });
       }
     } catch {
@@ -607,6 +612,8 @@ function AdminNouveauDevisPage() {
     marque: v.marque.trim() || null,
     modele: v.modele.trim() || null,
     vin: normalizeVin(v.vin) || null,
+    carburant: v.carburant || null,
+    carburant_retour: v.type === "aller-retour" ? v.carburantRetour || null : null,
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
     type_trajet: v.type,
     immatriculation_retour: v.type === "aller-retour" ? (v.immatRetour ?? "").trim().toUpperCase() || null : null,
@@ -1468,7 +1475,7 @@ function AdminNouveauDevisPage() {
                     <div className="flex gap-2">
                       <input
                         value={v.immat}
-                        onChange={(e) => patchVeh(v.key, { immat: e.target.value.toUpperCase() })}
+                        onChange={(e) => patchVeh(v.key, { immat: e.target.value.toUpperCase(), carburant: null })}
                         placeholder="AB-123-CD"
                         className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
                       />
@@ -1506,7 +1513,7 @@ function AdminNouveauDevisPage() {
                         <div className="flex gap-2">
                           <input
                             value={v.immatRetour ?? ""}
-                            onChange={(e) => patchVeh(v.key, { immatRetour: e.target.value.toUpperCase() })}
+                            onChange={(e) => patchVeh(v.key, { immatRetour: e.target.value.toUpperCase(), carburantRetour: null })}
                             placeholder="AB-123-CD"
                             className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
                           />

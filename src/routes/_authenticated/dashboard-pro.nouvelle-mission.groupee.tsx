@@ -196,7 +196,8 @@ function GroupedMissionForm() {
       if (d.marque) patch.marque = d.marque;
       if (d.modele) patch.modele = d.modele;
       if (d.vin) patch.vin = normalizeVin(d.vin);
-      if (d.carburant) {
+      patch.energie = d.energie || "";
+      if (!d.energie && d.carburant) {
         const c = d.carburant.toLowerCase();
         if (c.includes("élec") || c.includes("elec") || c.includes("ev")) patch.energie = "electrique";
         else if (c.includes("hyb") && c.includes("rech")) patch.energie = "hybride_rechargeable";

@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Aligner les colonnes et les totaux du PDF groupé ; conserver la motorisation issue de la recherche de chaque plaque (livraison et restitution). PDF de contrôle 11 véhicules vérifié sur une page ; tests électriques réussis.
+- [ ] Vérifier la recherche réelle de plaque depuis un compte connecté : bloqué sans session de prévisualisation disponible.
 - [x] Admin devis : retirer le type global en groupé, garder les trois types par véhicule et proposer les adresses favorites du client en simple/groupé.
 - [x] Corriger l’affichage des deux options Recharge dans les missions simples et ajouter le choix par véhicule (livraison simple, livraison + restitution, recharge uniquement) dans les missions groupées.
 - [x] Missions flotte simples et groupées : distinguer recharge trajet et recharge livraison (+25 € configurable par l'admin), sans modifier les autres tarifs.

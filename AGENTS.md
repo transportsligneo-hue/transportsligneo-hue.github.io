@@ -19,3 +19,6 @@
 - Read the delivery-recharge surcharge from the shared pricing settings and keep trip recharge as its existing independent option, so simple and grouped fleet missions calculate both consistently.
 - Store the trip type on each grouped-mission vehicle and derive its pricing and saved request from that value, so one group can mix simple deliveries, returns, and recharge-only jobs.
 - Load selected-client favorite addresses through the existing RLS browser client and expose them on admin quote address fields, so no privileged service or separate address catalogue is required.
+
+- Persist normalized plate-lookup energy separately for delivered and returned quote vehicles and use the shared electric-vehicle resolver for PDF and admin badges, so electric vans do not depend on model guessing.
+- Render grouped quote PDFs with fixed delivery, return and amount tracks, so plates and totals align independently of vehicle name length.

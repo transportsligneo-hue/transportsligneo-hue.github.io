@@ -9,7 +9,7 @@ export type MotorisationChoice = "oui" | "non" | "hybride";
 /** Électrique pur OU hybride rechargeable (les deux ont des câbles de recharge). */
 export function isElectricEnergie(value?: string | null): boolean {
   if (!value) return false;
-  return /electr|électr|\bev\b|phev|plug.?in|hybride?\s*rechargeable/i.test(value);
+  return /^\s*(EL|EE)\s*$|electr|électr|\bev\b|phev|plug.?in|hybride?\s*rechargeable/i.test(value);
 }
 
 /** Hybride non rechargeable (pas de câble). */
@@ -33,6 +33,7 @@ const EV_MODEL_PATTERNS = [
   /\brenault\s+(renault\s+)?5\b/i,
   /\br5\s*e[-\s]?tech\b/i,
   /\btwingo\s*e[-\s]?tech\b/i,
+  /\b(?:master|trafic)\s*e[-\s]?tech\b/i,
   /\bmegane\s*e[-\s]?tech\b/i,
   /\bscenic\s*e[-\s]?tech\b/i,
   /\bid\.?\s?[3457]\b/i,
@@ -81,4 +82,13 @@ export function motorisationToCarburant(
   if (choice === "oui") return "electrique";
   if (choice === "hybride") return "hybride_rechargeable";
   return fallback && !isElectricEnergie(fallback) ? fallback : null;
+}
+
+/** Explicit lookup energy takes precedence over model-only fallback. */
+export function isElectricVehicle(v: {
+  carburant?: string | null; energie?: string | null;
+  marque?: string | null; modele?: string | null;
+}): boolean {
+  const energy = resolveEnergie(v.energie, v.carburant);
+  return energy ? isElectricEnergie(energy) : guessElectricFromModel(v.marque, v.modele);
 }

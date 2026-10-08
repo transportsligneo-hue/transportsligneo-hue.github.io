@@ -1,4 +1,4 @@
-import { guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { groupedVehicleType, groupedPrestationLabel } from "@/lib/devis-groupe-types";
 import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
@@ -56,6 +56,10 @@ export interface DevisData {
     marque?: string | null;
     modele?: string | null;
     vin?: string | null;
+    carburant?: string | null;
+    energie?: string | null;
+    carburant_retour?: string | null;
+    energie_retour?: string | null;
     arrivee?: string | null;
     prix?: number | null;
     type?: string | null;
@@ -494,7 +498,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   // ===== Émetteur / Destinataire =====
   let y = 41;
   const colW = (innerW - 6) / 2;
-  const boxH = 33;
+  const groupedLayout = (d.vehicules?.length ?? 0) > 1;
+  const boxH = groupedLayout ? 30 : 33;
   card(doc, M, y, colW, boxH, "Émetteur");
   card(doc, M + colW + 6, y, colW, boxH, "Destinataire");
 
@@ -545,7 +550,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     dy += 3.6;
   });
 
-  y += boxH + 5;
+  y += boxH + (groupedLayout ? 3 : 5);
 
 
   // ===== Trajet =====
@@ -556,7 +561,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     : "Date et heure à déterminer";
   sectionLabel(doc, M, y, "Trajet");
   y += 3.4;
-  const trajetH = 27;
+  const trajetH = groupedLayout ? 26 : 27;
   card(doc, M, y, innerW, trajetH);
   const halfCol = innerW / 2 - 22;
   const addrLines = (txt: string, w: number) =>
@@ -601,7 +606,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       y + 23.4,
     );
   }
-  y += trajetH + 5;
+  y += trajetH + (groupedLayout ? 3 : 5);
 
 
   // ===== Véhicule / Type de prestation =====
@@ -646,7 +651,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
   const lineH = 11.6;
-  const vehH = Math.max(21, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
+  const vehH = Math.max(isGroupe ? 19 : 21, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
 
@@ -700,7 +705,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     .slice(0, 2)
 
     .forEach((l, i) => doc.text(l, M + colW + 11, y + 12 + i * 4.4));
-  y += vehH + 6;
+  y += vehH + (isGroupe ? 4 : 6);
 
 
   // ===== Lignes de prestation =====
@@ -728,8 +733,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         const ident = [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
         const hasRetour = groupedVehicleType(v, i, d.message) === "aller-retour";
         const identR = [v.marque_retour, v.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser";
-        const plates: Plaque[] = [{ tag: "L", ident, elec: guessElectricFromModel(v.marque, v.modele), plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
-        if (hasRetour) plates.push({ tag: "R", ident: identR, elec: guessElectricFromModel(v.marque_retour, v.modele_retour), plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
+        const plates: Plaque[] = [{ tag: "L", ident, elec: isElectricVehicle(v), plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
+        if (hasRetour) plates.push({ tag: "R", ident: identR, elec: isElectricVehicle({ marque: v.marque_retour, modele: v.modele_retour, carburant: v.carburant_retour, energie: v.energie_retour }), plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
         return {
           title: `Véhicule ${i + 1}${hasRetour ? " · Livraison + restitution" : ""}`,
           amount: htLigne,
@@ -815,28 +820,41 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   if (measure(subFs, gap, keepSub) > availableForLines) { gap = 2; }
   if (measure(subFs, gap, keepSub) > availableForLines) { keepSub = false; gap = 2; }
 
-  const drawPlates = (plates: Plaque[], x0: number, yy: number) => {
-    let x = x0;
+  // Fixed tracks: number, delivery, return and right-aligned amount.
+  const legWidth = (innerW - 18 - 25) / 2;
+  const deliveryX = M + 18;
+  const returnX = deliveryX + legWidth;
+  const plateFs = 6.6;
+  const drawPlates = (plates: Plaque[], _x0: number, yy: number) => {
     plates.forEach((p) => {
-      const isR = p.tag === "R";
-      x += badge(doc, x, yy - 3.3, isR ? "RESTITUTION" : "LIVRAISON", isR ? AMBER_SOFT : BLUE_SOFT, isR ? AMBER_INK : BLUE, 5.4) + 1.6;
+      const x = p.tag === "R" ? returnX : deliveryX;
+      const plateX = x + legWidth - 25;
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.6);
+      doc.setFontSize(7.1);
       doc.setTextColor(...INK);
-      const id = (doc.splitTextToSize(p.ident, 30) as string[])[0];
+      // API names sometimes repeat the make (RENAULT RENAULT 5).
+      const words = p.ident.split(/\s+/);
+      const ident = words[0]?.toUpperCase() === words[1]?.toUpperCase() ? words.slice(1).join(" ") : p.ident;
+      const id = (doc.splitTextToSize(ident, plateX - x - 5) as string[])[0];
       doc.text(id, x, yy);
-      x += doc.getTextWidth(id) + 1.8;
       if (p.elec) {
-        // Petit éclair bleu électrique : véhicule électrique.
+        const ex = plateX - 3.8;
         doc.setFillColor(...BLUE);
-        doc.triangle(x + 1.6, yy - 3.4, x + 0.2, yy - 1.0, x + 1.4, yy - 1.0, "F");
-        doc.triangle(x + 1.0, yy - 1.3, x + 2.4, yy - 1.3, x + 0.6, yy + 1.0, "F");
-        x += 3.6;
+        doc.triangle(ex + 1.6, yy - 3.1, ex + 0.2, yy - 1, ex + 1.4, yy - 1, "F");
+        doc.triangle(ex + 1, yy - 1.3, ex + 2.4, yy - 1.3, ex + 0.6, yy + 0.8, "F");
       }
-      if (p.plate) x += plateBadge(doc, x, yy - 4.4, p.plate, 7.2) + 4;
-      else x += 4;
+      if (p.plate) plateBadge(doc, plateX, yy - 4.2, p.plate, plateFs);
     });
   };
+  if (isGroupe) {
+    sectionLabel(doc, deliveryX, y - 11.5, "Livraison");
+    sectionLabel(doc, returnX, y - 11.5, "Restitution");
+    keepSub = false;
+    // Reserve the actual totals height and a clear gap above the signatures.
+    const rowCount = lignes.filter((l) => l.plates).length;
+    const rowPitch = Math.min(7, (pageH - 24 - 24 - 6 - 23 - y - 7) / Math.max(1, rowCount));
+    gap = Math.max(0.6, rowPitch - 4.8);
+  }
 
   lignes.forEach((l) => {
     const sub = l.sub && keepSub
@@ -844,7 +862,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [];
     const lh = subFs * 0.52;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(l.plates ? 8.2 : 8.9);
+    doc.setFontSize(l.plates ? 7.6 : 8.9);
     doc.setTextColor(...INK);
     if (l.plates) {
       const t = `Véhicule ${l.title.match(/\d+/)?.[0] ?? ""}`;
@@ -871,6 +889,21 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
 
   // ===== Totaux =====
+  y += 3;
+  if (isGroupe) {
+    // Shared inclusions stay readable beside totals rather than disappearing.
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.2);
+    doc.setTextColor(...MUTED);
+    const summary = [
+      "Carburant, péages et assurance tous risques inclus. État des lieux photo, signatures et suivi GPS.",
+      optionsList.length ? `Options : ${optionsList.join(", ")}.` : null,
+      pvDigital ? `PV digitalisé : ${pvDigital}.` : null,
+      `Validité : ${validite} jours. Conditions : transportsligneo.fr/cgv.`,
+    ].filter(Boolean).join(" ");
+    const wrapped = doc.splitTextToSize(summary, innerW / 2 - 10) as string[];
+    doc.text(wrapped.slice(0, 7), M, y, { lineHeightFactor: 1.35 });
+  }
   const totX = pageW / 2 + 10;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.7);
@@ -942,7 +975,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     condWrapped = wrapConds(condFs);
     condH = condHeight(condWrapped, condLh);
   }
-  if (condBudget() >= 13 && condH <= condBudget()) {
+  if (!isGroupe && condBudget() >= 13 && condH <= condBudget()) {
     card(doc, M, y, innerW, condH, "Conditions et précisions");
     let cy2 = y + 11;
     condWrapped.forEach((w, i) => {
