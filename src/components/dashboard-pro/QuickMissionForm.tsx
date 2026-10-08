@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import PlacesInput from "@/components/PlacesInput";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { sendTransactionalEmail } from "@/lib/email/send";
-import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
+import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurcharge, DEFAULT_DELIVERY_RECHARGE_SURCHARGE, type OptionKey } from "@/lib/client-pricing";
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { lookupPlate } from "@/lib/plate.functions";
@@ -74,7 +74,8 @@ const ENERGIES = [
 ];
 
 const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Zap }[] = [
-  { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
+  { key: "recharge_electrique", label: "Recharge électrique pour trajet", desc: "Brancher pour le trajet", Icon: Zap },
+  { key: "recharge_electrique_livraison", label: "Recharge électrique pour livraison", desc: "Recharge avant la remise du véhicule", Icon: Zap },
   { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
   { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
@@ -234,7 +235,12 @@ export default function QuickMissionForm({
     baseLabel: string;
     supplements: Partial<Record<OptionKey, number>>;
   } | null>(null);
+  const [deliveryRechargeSurcharge, setDeliveryRechargeSurcharge] = useState(DEFAULT_DELIVERY_RECHARGE_SURCHARGE);
   const [resolving, setResolving] = useState(false);
+
+  useEffect(() => {
+    void fetchDeliveryRechargeSurcharge().then(setDeliveryRechargeSurcharge);
+  }, []);
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -390,12 +396,15 @@ export default function QuickMissionForm({
   const priceView = useMemo(() => {
     if (!pricing) return null;
     const mode: DisplayMode = profile?.pricing_display_mode ?? "ttc";
-    const sup = computeOptionSupplements(pricing.supplements, options);
+    const sup = computeOptionSupplements({
+      ...pricing.supplements,
+      recharge_electrique_livraison: deliveryRechargeSurcharge,
+    }, options);
     const ttc = Math.round((pricing.base + sup.total) * 100) / 100;
     const ht = Math.round((ttc / (1 + VAT_RATE)) * 100) / 100;
     const tva = Math.round((ttc - ht) * 100) / 100;
     return { base: pricing.base, baseLabel: pricing.baseLabel, supLines: sup.lines, ttc, ht, tva, mode };
-  }, [pricing, options, profile]);
+  }, [pricing, options, profile, deliveryRechargeSurcharge]);
 
   // Plate lookup
   const handlePlateLookup = async () => {
@@ -1172,7 +1181,9 @@ export default function QuickMissionForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
           {OPTIONS_DEF.map(({ key, label, desc, Icon }) => {
             const checked = !!options[key];
-            const sup = pricing?.supplements?.[key];
+            const sup = key === "recharge_electrique_livraison"
+              ? deliveryRechargeSurcharge
+              : pricing?.supplements?.[key];
             return (
               <label
                 key={key}

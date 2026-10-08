@@ -186,6 +186,7 @@ function AdminParametres() {
         {/* === FACTURATION === */}
         <TabsContent value="facturation" className="mt-0 space-y-4">
           <RegimeFacturationCard />
+          <DeliveryRechargeSurchargeCard />
 
           <Card>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
