@@ -1,5 +1,5 @@
 import { groupedVehicleType, groupedVehicleTypes } from "@/lib/devis-groupe-types";
-import { guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { Zap as ZapIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -36,6 +36,14 @@ import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/devis")({
+  head: () => ({ meta: [
+    { title: "Devis clients | Transports Ligneo" },
+    { name: "description", content: "Gestion des devis simples et groupés Transports Ligneo." },
+    { property: "og:title", content: "Devis clients | Transports Ligneo" },
+    { property: "og:description", content: "Gestion des devis simples et groupés Transports Ligneo." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminDevisPage,
 });
 
@@ -675,8 +683,9 @@ function AdminDevisPage() {
                           type_trajet?: string | null;
                         };
                         const hasR = groupedVehicleType(vr, i, d.message) === "aller-retour";
-                        const elec = guessElectricFromModel(v.marque, v.modele);
-                        const elecR = guessElectricFromModel(vr.marque_retour, vr.modele_retour);
+                        const elec = isElectricVehicle(v as typeof v & { carburant?: string | null; energie?: string | null });
+                        const energyR = vr as typeof vr & { carburant_retour?: string | null; energie_retour?: string | null };
+                         const elecR = isElectricVehicle({ marque: vr.marque_retour, modele: vr.modele_retour, carburant: energyR.carburant_retour, energie: energyR.energie_retour });
                         return (
                         <div key={i} className="dvx-veh">
                           <div className="flex items-start justify-between gap-2">

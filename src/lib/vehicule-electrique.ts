@@ -82,3 +82,12 @@ export function motorisationToCarburant(
   if (choice === "hybride") return "hybride_rechargeable";
   return fallback && !isElectricEnergie(fallback) ? fallback : null;
 }
+
+/** Explicit lookup energy takes precedence over model-only fallback. */
+export function isElectricVehicle(v: {
+  carburant?: string | null; energie?: string | null;
+  marque?: string | null; modele?: string | null;
+}): boolean {
+  const energy = resolveEnergie(v.carburant, v.energie);
+  return energy ? isElectricEnergie(energy) : guessElectricFromModel(v.marque, v.modele);
+}
