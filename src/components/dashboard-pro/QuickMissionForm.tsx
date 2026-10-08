@@ -156,7 +156,76 @@ export default function QuickMissionForm({
   // Planning
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
+  const [dateLivraison, setDateLivraison] = useState("");
+  const [heureLivraison, setHeureLivraison] = useState("");
   const [message, setMessage] = useState("");
+
+  // Brouillons (numéro de devis réservé à la création du brouillon)
+  type Draft = { id: string; numero: string; form: Record<string, unknown> };
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [draftNumero, setDraftNumero] = useState<string | null>(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    void supabase.from("devis_brouillons" as never).select("id, numero, form")
+      .is("consumed_at", null).order("created_at", { ascending: false })
+      .then(({ data }) => setDrafts(((data ?? []) as unknown) as Draft[]));
+  }, [user]);
+
+  const snapshot = () => ({
+    tripType, depart, arrivee, contactDepartNom, contactDepartTel, contactDepartNote,
+    contactArriveeNom, contactArriveeTel, contactArriveeNote, vehicleType, immat, vin, marque, modele,
+    energie, couleur, km, vehNotes, sameRetourAddress, departRetour, arriveeRetour, sameRetourVehicle,
+    immatRetour, marqueRetour, modeleRetour, vinRetour, dateRetour, heureRetour, options, jokeage,
+    jokeageServices, autreNote, pvDigitalise, date, heure, dateLivraison, heureLivraison, message,
+  });
+
+  function loadDraft(d: Draft) {
+    const f = d.form as Record<string, any>;
+    const s = (v: unknown) => (typeof v === "string" ? v : "");
+    setTripType((f.tripType as TripOption) ?? "aller-simple");
+    setDepart(s(f.depart)); setArrivee(s(f.arrivee));
+    setContactDepartNom(s(f.contactDepartNom)); setContactDepartTel(s(f.contactDepartTel)); setContactDepartNote(s(f.contactDepartNote));
+    setContactArriveeNom(s(f.contactArriveeNom)); setContactArriveeTel(s(f.contactArriveeTel)); setContactArriveeNote(s(f.contactArriveeNote));
+    setVehicleType(s(f.vehicleType) || "berline"); setImmat(s(f.immat)); setVin(s(f.vin)); setMarque(s(f.marque)); setModele(s(f.modele));
+    setEnergie(s(f.energie)); setCouleur(s(f.couleur)); setKm(s(f.km)); setVehNotes(s(f.vehNotes));
+    setSameRetourAddress(f.sameRetourAddress !== false); setDepartRetour(s(f.departRetour)); setArriveeRetour(s(f.arriveeRetour));
+    setSameRetourVehicle(!!f.sameRetourVehicle); setImmatRetour(s(f.immatRetour)); setMarqueRetour(s(f.marqueRetour));
+    setModeleRetour(s(f.modeleRetour)); setVinRetour(s(f.vinRetour)); setDateRetour(s(f.dateRetour)); setHeureRetour(s(f.heureRetour));
+    setOptions(f.options ?? {}); setJokeage(!!f.jokeage); setJokeageServices(f.jokeageServices ?? {}); setAutreNote(s(f.autreNote));
+    if (f.pvDigitalise) setPvDigitalise(f.pvDigitalise as PvChoice);
+    setDate(s(f.date)); setHeure(s(f.heure)); setDateLivraison(s(f.dateLivraison)); setHeureLivraison(s(f.heureLivraison)); setMessage(s(f.message));
+    setDraftId(d.id); setDraftNumero(d.numero);
+    toast.success(`Brouillon ${d.numero} repris`);
+  }
+
+  async function saveDraft() {
+    if (!user) return;
+    setSavingDraft(true);
+    try {
+      const form = snapshot();
+      if (draftId) {
+        const { error } = await supabase.from("devis_brouillons" as never)
+          .update({ form, updated_at: new Date().toISOString() } as never).eq("id", draftId);
+        if (error) throw error;
+        setDrafts((ds) => ds.map((d) => (d.id === draftId ? { ...d, form } : d)));
+        toast.success(`Brouillon ${draftNumero} mis à jour`);
+      } else {
+        const { data, error } = await supabase.rpc("create_devis_brouillon" as never, { _form: form } as never);
+        if (error) throw error;
+        const row = data as unknown as Draft;
+        setDraftId(row.id); setDraftNumero(row.numero);
+        setDrafts((ds) => [row, ...ds]);
+        toast.success(`Brouillon enregistré · numéro ${row.numero} réservé`);
+      }
+    } catch {
+      toast.error("Impossible d'enregistrer le brouillon");
+    } finally {
+      setSavingDraft(false);
+    }
+  }
 
   // Pricing
   const [pricing, setPricing] = useState<{
@@ -344,22 +413,26 @@ export default function QuickMissionForm({
       if (d.marque && !marque) setMarque(d.marque);
       if (d.modele && !modele) setModele(d.modele);
       if (d.vin && !vin) setVin(d.vin);
+      let found = energie;
       if (!energie) {
-        if (d.energie) setEnergie(d.energie === "hydrogene" || d.energie === "gnv" ? "autre" : d.energie);
+        if (d.energie) found = d.energie === "hydrogene" || d.energie === "gnv" ? "autre" : d.energie;
         else if (d.carburant) {
           const c = d.carburant.toLowerCase();
-          if (c.includes("élec") || c.includes("elec") || c.includes("ev")) setEnergie("electrique");
-          else if (c.includes("hyb") && c.includes("rech")) setEnergie("hybride_rechargeable");
-          else if (c.includes("hyb")) setEnergie("hybride");
-          else if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergie("diesel");
-          else if (c.includes("gpl")) setEnergie("gpl");
-          else if (c.includes("ess")) setEnergie("essence");
+          if (c.includes("élec") || c.includes("elec") || c.includes("ev")) found = "electrique";
+          else if (c.includes("hyb") && c.includes("rech")) found = "hybride_rechargeable";
+          else if (c.includes("hyb")) found = "hybride";
+          else if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) found = "diesel";
+          else if (c.includes("gpl")) found = "gpl";
+          else if (c.includes("ess")) found = "essence";
         }
+        if (!found && guessElectricFromModel(d.marque ?? marque, d.modele ?? modele)) found = "electrique";
+        if (found) setEnergie(found);
       }
       if (d.categorie) {
         setVehicleType(VEHICLE_TYPES.some((v) => v.value === d.categorie) ? d.categorie : "autre");
       }
-      toast.success("Informations véhicule récupérées");
+      const label = ENERGIES.find((x) => x.value === found)?.label;
+      toast.success(label ? `Véhicule récupéré · ${label}` : "Véhicule récupéré · précisez l'énergie");
 
     } catch {
       toast.error("Service indisponible · vous pouvez remplir manuellement");
@@ -437,6 +510,7 @@ export default function QuickMissionForm({
           .from("devis")
           .insert({
             user_id: user.id,
+            ...(draftNumero ? { numero: draftNumero } : {}),
             nom: profile.nom || "Client",
             prenom: profile.prenom || "",
             email: profile.email,
@@ -445,6 +519,8 @@ export default function QuickMissionForm({
             arrivee,
             date_souhaitee: date || null,
             heure_souhaitee: heure || null,
+            date_livraison: tripType !== "recharge" && dateLivraison ? dateLivraison : null,
+            heure_livraison: tripType !== "recharge" && heureLivraison ? heureLivraison : null,
             marque: marque || null,
             modele: modele || null,
             vin: vin || null,
@@ -475,6 +551,8 @@ export default function QuickMissionForm({
         arrivee,
         date_souhaitee: date,
         heure_souhaitee: heure || "",
+        date_livraison: tripType !== "recharge" && dateLivraison ? dateLivraison : null,
+        heure_livraison: tripType !== "recharge" && heureLivraison ? heureLivraison : null,
         message: [
           message,
           profile.societe ? `Société : ${profile.societe}` : "",
@@ -605,6 +683,7 @@ export default function QuickMissionForm({
       }).catch(() => {});
 
 
+      if (draftId && !devisId) void supabase.from("devis_brouillons" as never).delete().eq("id", draftId);
       setSuccess(true);
       setSubmitting(false);
       if (devisId) {
@@ -673,6 +752,22 @@ export default function QuickMissionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {(drafts.length > 0 || draftNumero) && (
+        <section className="qm-card p-4">
+          <h2 className="qm-section-title mb-2"><Save size={14} className="text-pro-accent" /> Brouillons</h2>
+          {draftNumero && (
+            <p className="text-xs text-pro-text mb-2">Brouillon en cours : <strong className="text-pro-accent">{draftNumero}</strong> — ce numéro sera conservé à la validation.</p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {drafts.filter((d) => d.id !== draftId).map((d) => (
+              <button key={d.id} type="button" onClick={() => loadDraft(d)}
+                className="rounded-full border border-pro-border px-3 py-1.5 text-xs font-medium text-pro-text hover:border-pro-accent">
+                {d.numero} · {String((d.form as Record<string, unknown>).depart ?? "").slice(0, 24) || "sans adresse"}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       {/* Type de prestation */}
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
@@ -861,6 +956,12 @@ export default function QuickMissionForm({
             <p className="text-[11px] text-pro-text-soft mt-1">
               Récupération automatique des infos véhicule (marque, modèle, énergie). Modifiez si nécessaire.
             </p>
+            {(immat || energie) && (
+              <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-pro-accent/40 px-2 py-1 text-xs font-semibold text-pro-text">
+                <Fuel size={12} className="text-pro-accent" />
+                Énergie : {energie ? (ENERGIES.find((x) => x.value === energie)?.label ?? energie) : "à préciser"}
+              </p>
+            )}
             {previousTrip && (
               <div className="qm-repeat mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-pro-accent/40 bg-pro-bg-soft px-3 py-2 text-xs text-pro-text">
                 <Repeat size={13} className="text-pro-accent shrink-0" />
@@ -1180,14 +1281,27 @@ export default function QuickMissionForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date souhaitée *</label>
+            <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date d'enlèvement *</label>
             <input type="date" className={inp} value={date} onChange={(e) => setDate(e.target.value)} required min={new Date().toISOString().slice(0, 10)} />
           </div>
           <div>
-            <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure souhaitée *</label>
+            <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure d'enlèvement *</label>
             <input type="time" className={inp} value={heure} onChange={(e) => setHeure(e.target.value)} required />
           </div>
         </div>
+
+        {tripType !== "recharge" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div>
+              <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date de livraison</label>
+              <input type="date" className={inp} value={dateLivraison} onChange={(e) => setDateLivraison(e.target.value)} min={date || new Date().toISOString().slice(0, 10)} />
+            </div>
+            <div>
+              <label className={lbl}><Clock size={11} className="inline mr-1" /> Heure de livraison</label>
+              <input type="time" className={inp} value={heureLivraison} onChange={(e) => setHeureLivraison(e.target.value)} />
+            </div>
+          </div>
+        )}
 
         <div className="mt-3">
           <label className={lbl}>Informations complémentaires</label>
@@ -1235,14 +1349,25 @@ export default function QuickMissionForm({
         <p className="text-xs text-pro-text-soft flex items-center gap-1.5">
           <Info size={12} /> Votre demande sera traitée sous 24h par notre équipe.
         </p>
+        <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={saveDraft}
+          disabled={savingDraft || submitting}
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-md border border-pro-accent text-pro-accent bg-transparent text-sm font-medium hover:bg-pro-accent/10 disabled:opacity-50"
+        >
+          {savingDraft ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          {draftNumero ? `Mettre à jour le brouillon ${draftNumero}` : "Enregistrer en brouillon"}
+        </button>
         <button
           type="submit"
           disabled={submitting || !depart || !arrivee || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-          Créer la demande de mission
+          {draftNumero ? `Valider le devis ${draftNumero}` : "Créer la demande de mission"}
         </button>
+        </div>
       </div>
     </form>
   );
