@@ -175,6 +175,8 @@ type VehLine = {
   arrivee: string;
   type: "aller-simple" | "aller-retour" | "recharge";
   immatRetour?: string;
+  busyRetour?: boolean;
+  msgRetour?: string | null;
   prix: string;
   busy: boolean;
   msg: string | null;
@@ -455,6 +457,33 @@ function AdminNouveauDevisPage() {
       patchVeh(line.key, { msg: "Erreur réseau" });
     } finally {
       patchVeh(line.key, { busy: false });
+    }
+  };
+
+  const lookupVehRetourPlate = async (line: VehLine) => {
+    const plate = (line.immatRetour ?? "").trim().toUpperCase();
+    if (plate.length < 4) {
+      patchVeh(line.key, { msgRetour: "Saisis une plaque valide" });
+      return;
+    }
+    patchVeh(line.key, { busyRetour: true, msgRetour: null });
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        patchVeh(line.key, { msgRetour: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        patchVeh(line.key, {
+          marque: d.marque || line.marque,
+          modele: d.modele || line.modele,
+          vin: d.vin ? normalizeVin(d.vin) : line.vin,
+          msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+        });
+      }
+    } catch {
+      patchVeh(line.key, { msgRetour: "Erreur réseau" });
+    } finally {
+      patchVeh(line.key, { busyRetour: false });
     }
   };
 
