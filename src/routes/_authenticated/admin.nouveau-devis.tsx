@@ -173,10 +173,17 @@ type VehLine = {
   modele: string;
   vin: string;
   arrivee: string;
+  type: "aller-simple" | "aller-retour" | "recharge";
   prix: string;
   busy: boolean;
   msg: string | null;
 };
+
+const VEH_TYPES: { v: VehLine["type"]; l: string }[] = [
+  { v: "aller-simple", l: "Livraison simple" },
+  { v: "aller-retour", l: "Livraison + restitution" },
+  { v: "recharge", l: "Recharge uniquement" },
+];
 
 const newVeh = (): VehLine => ({
   key: crypto.randomUUID(),
@@ -185,6 +192,7 @@ const newVeh = (): VehLine => ({
   modele: "",
   vin: "",
   arrivee: "",
+  type: "aller-simple",
   prix: "",
   busy: false,
   msg: null,
@@ -520,6 +528,7 @@ function AdminNouveauDevisPage() {
     modele: v.modele.trim() || null,
     vin: normalizeVin(v.vin) || null,
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
+    type_trajet: v.type,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
@@ -1340,6 +1349,22 @@ function AdminNouveauDevisPage() {
                       </button>
                     </div>
                     {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
+                    <div className="flex flex-wrap gap-2">
+                      {VEH_TYPES.map((t) => (
+                        <button
+                          key={t.v}
+                          type="button"
+                          onClick={() => patchVeh(v.key, { type: t.v })}
+                          className={`rounded-lg border px-3 py-2 text-[12.5px] font-semibold transition ${
+                            v.type === t.v
+                              ? "border-pro-accent bg-pro-accent text-white"
+                              : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                          }`}
+                        >
+                          {t.l}
+                        </button>
+                      ))}
+                    </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
@@ -1534,7 +1559,21 @@ function AdminNouveauDevisPage() {
                     onChange={() => toggleOption(o.label)}
                     className="h-4 w-4 accent-pro-accent"
                   />
-                  {o.label}{o.id === "recharge_elec_livraison" ? ` (+${rechargeLivSurcharge} €)` : ""}
+                  {o.label}
+                  {o.id === "recharge_elec_livraison" && checked && (
+                    <span className="ml-auto flex items-center gap-1" onClick={(e) => e.preventDefault()}>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={rechargeLivSurcharge}
+                        onChange={(e) => setRechargeLivSurcharge(Math.max(0, Number(e.target.value) || 0))}
+                        className="w-20 rounded-lg border border-pro-border bg-white px-2 py-1 text-right text-[13px] text-pro-text focus:border-pro-accent focus:outline-none"
+                        aria-label="Prix libre recharge à la livraison"
+                      />
+                      €
+                    </span>
+                  )}
                 </label>
               );
             })}
