@@ -1534,7 +1534,7 @@ function AdminNouveauDevisPage() {
                     onChange={() => toggleOption(o.label)}
                     className="h-4 w-4 accent-pro-accent"
                   />
-                  {o.label}
+                  {o.label}{o.id === "recharge_elec_livraison" ? ` (+${rechargeLivSurcharge} €)` : ""}
                 </label>
               );
             })}
