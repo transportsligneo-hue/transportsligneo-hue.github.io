@@ -545,7 +545,7 @@ function AdminNouveauDevisPage() {
           (v, i) =>
             `Véhicule ${i + 1} : ${[v.marque, v.modele].filter(Boolean).join(" ") || "—"}${
               v.immatriculation ? ` (${v.immatriculation})` : ""
-            }${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
+            }${v.immatriculation_retour ? ` · Plaque retour ${v.immatriculation_retour}` : ""}${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
         )
       : []),
     !isGroupe && immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
