@@ -651,7 +651,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
   const lineH = 11.6;
-  const vehH = Math.max(isGroupe ? 19 : 21, 8 + vehLines.length * lineH + (plateau ? 6 : 0));
+  const prestationLabel =
+    (isGroupe ? groupedPrestationLabel(multiVehicules, d.message, d.options ?? []) : null) ||
+    d.prestation?.trim() ||
+    [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(isGroupe ? 8.3 : 9.6);
+  const prestationLines = doc.splitTextToSize(prestationLabel || "Livraison simple", colW - 10) as string[];
+  const vehH = Math.max(isGroupe ? 19 : 21, 8 + vehLines.length * lineH + (plateau ? 6 : 0), 12 + prestationLines.length * 4.4);
   card(doc, M, y, colW, vehH, "Véhicule");
   card(doc, M + colW + 6, y, colW, vehH, "Type de prestation");
 
@@ -694,16 +701,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     badge(doc, bx, Math.min(vy - 3, y + vehH - 6), "Plateau", BLUE_SOFT, BLUE, 6);
   }
 
-  const prestationLabel =
-    (isGroupe ? groupedPrestationLabel(multiVehicules, d.message) : null) ||
-    d.prestation?.trim() ||
-    [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.6);
+  doc.setFontSize(isGroupe ? 8.3 : 9.6);
   doc.setTextColor(...INK);
-  (doc.splitTextToSize(prestationLabel || "Livraison simple", colW - 10) as string[])
-    .slice(0, 2)
-
+  prestationLines
     .forEach((l, i) => doc.text(l, M + colW + 11, y + 12 + i * 4.4));
   y += vehH + (isGroupe ? 4 : 6);
 
