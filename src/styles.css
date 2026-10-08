@@ -11254,3 +11254,79 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .dl-modal-card { background:#fff; color: var(--dl-navy); border-radius:18px; border:1px solid var(--dl-b2); width:100%; max-width:620px; max-height:92vh; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
 .dl-recap { display:flex; flex-direction:column; gap:6px; } .dl-recap li { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:14px; } .dl-recap strong { margin-left:auto; }
 @media (max-width: 640px) { .dl-bar { left:6px; right:6px; bottom:6px; } .dl-bar-btns { width:100%; } .dl-bar-btns button { flex:1; } .dl-price { margin-left:0; } }
+
+/* ====== Écran de verrouillage admin (code SMS) ====== */
+.amfa-screen {
+  position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: #061238; overflow: hidden;
+}
+.amfa-screen::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 18% -12%, rgba(47,95,255,.24), transparent 62%),
+    radial-gradient(720px 420px at 88% 112%, rgba(93,224,255,.13), transparent 60%);
+}
+.amfa-card {
+  position: relative; width: 100%; max-width: 400px; text-align: center;
+  background: rgba(9, 22, 64, .72); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(91, 131, 255, .28); border-radius: 22px;
+  padding: 34px 28px 26px;
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,.7);
+}
+.amfa-logo {
+  width: 64px; height: 64px; margin: 0 auto 14px; display: block; object-fit: contain;
+  border-radius: 16px; padding: 8px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 0 0 1px rgba(91,131,255,.35), 0 0 26px rgba(47,95,255,.35);
+}
+.amfa-eyebrow {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(110,161,255,.85); margin: 0 0 6px;
+}
+.amfa-title {
+  font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700;
+  color: #f4f7ff; margin: 0 0 10px;
+}
+.amfa-sub { font-size: 14px; line-height: 1.55; color: rgba(203,214,244,.8); margin: 0 0 22px; }
+.amfa-sub strong { color: #cfe0ff; font-weight: 600; }
+.amfa-input {
+  width: 100%; text-align: center; letter-spacing: .55em; font-size: 26px; font-weight: 600;
+  font-family: 'IBM Plex Mono', 'Inter', monospace; color: #eaf1ff;
+  background: rgba(6,18,56,.6); border: 1px solid rgba(91,131,255,.35); border-radius: 14px;
+  padding: 14px 12px 14px calc(12px + .55em); outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.amfa-input::placeholder { color: rgba(141,163,214,.4); letter-spacing: .55em; }
+.amfa-input:focus { border-color: #5b8fff; box-shadow: 0 0 0 3px rgba(47,95,255,.22); }
+.amfa-btn {
+  width: 100%; margin-top: 16px; border: none; cursor: pointer; border-radius: 14px;
+  padding: 13px 18px; font-size: 15px; font-weight: 600; color: #fff;
+  background: linear-gradient(90deg, #2f5fff, #4f8cff);
+  box-shadow: 0 0 22px rgba(47,95,255,.4);
+  transition: filter .2s, transform .1s;
+}
+.amfa-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.amfa-btn:active:not(:disabled) { transform: translateY(1px); }
+.amfa-btn:disabled { opacity: .45; cursor: not-allowed; }
+.amfa-links { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; font-size: 13.5px; }
+.amfa-resend {
+  background: none; border: none; padding: 0; cursor: pointer; color: #6ea1ff;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.amfa-resend:disabled { opacity: .5; cursor: not-allowed; }
+.amfa-logout {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: none; padding: 0; cursor: pointer; color: rgba(203,214,244,.65);
+}
+.amfa-logout:hover { color: #cfe0ff; }
+.amfa-error {
+  margin-top: 12px; font-size: 13.5px; line-height: 1.5; color: #ff8a8a;
+  background: rgba(255,90,90,.1); border: 1px solid rgba(255,90,90,.28);
+  border-radius: 10px; padding: 9px 12px; text-align: left;
+}
+.amfa-shield {
+  margin: 0 auto 18px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: #5de0ff;
+  background: rgba(93,224,255,.08); border: 1px solid rgba(93,224,255,.3);
+  box-shadow: 0 0 18px rgba(93,224,255,.18);
+}
+.amfa-loading { position: relative; color: rgba(203,214,244,.8); }

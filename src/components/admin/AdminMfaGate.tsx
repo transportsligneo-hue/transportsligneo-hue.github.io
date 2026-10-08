@@ -4,8 +4,7 @@ import { ShieldCheck, LogOut } from "lucide-react";
 import { getAdminMfaStatus, requestAdminMfaCode, verifyAdminMfaCode } from "@/lib/admin-mfa.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { LogoLoader } from "@/components/brand/LogoLoader";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { LIGNEO_BRAND_LOGO } from "@/lib/brand-assets";
 
 /** Verrou de l'administration : code SMS demandé à chaque nouvelle connexion. */
 export function AdminMfaGate({ children }: { children: ReactNode }) {
@@ -52,29 +51,39 @@ export function AdminMfaGate({ children }: { children: ReactNode }) {
 
   if (state === "ok") return <>{children}</>;
   if (state === "loading") {
-    return <div className="min-h-screen flex items-center justify-center bg-pro-bg"><LogoLoader label="Vérification de sécurité…" /></div>;
+    return (
+      <div className="amfa-screen">
+        <div className="amfa-loading flex flex-col items-center gap-4">
+          <LogoLoader label="Vérification de sécurité…" />
+        </div>
+      </div>
+    );
   }
   return (
-    <div className="min-h-screen flex items-center justify-center bg-pro-bg px-4">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border border-pro-border bg-card p-6 shadow-lg space-y-4">
-        <div className="flex items-center gap-3">
-          <ShieldCheck className="h-7 w-7 text-primary" />
-          <h1 className="text-lg font-semibold text-foreground">Code de sécurité</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {sent && masked ? `Un code à 6 chiffres a été envoyé par SMS au ${masked}.` : "Un code va vous être envoyé par SMS."}
+    <div className="amfa-screen">
+      <form onSubmit={submit} className="amfa-card">
+        <img src={LIGNEO_BRAND_LOGO} alt="Transports Ligneo" className="amfa-logo" />
+        <p className="amfa-eyebrow">Espace administration</p>
+        <h1 className="amfa-title">Code de sécurité</h1>
+        <p className="amfa-sub">
+          {sent && masked
+            ? <>Un code à 6 chiffres a été envoyé par SMS au <strong>{masked}</strong>.</>
+            : "Un code va vous être envoyé par SMS."}
         </p>
+        <div className="amfa-shield">
+          <ShieldCheck className="h-5 w-5" aria-hidden />
+        </div>
         <Input
           inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
           value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          className="text-center text-2xl tracking-[0.5em]" autoFocus
+          className="amfa-input" autoFocus
         />
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy || code.length !== 6}>Valider</Button>
-        <div className="flex items-center justify-between text-sm">
-          <button type="button" className="text-primary underline disabled:opacity-50" onClick={send} disabled={busy}>Renvoyer le code</button>
-          <button type="button" className="flex items-center gap-1 text-muted-foreground" onClick={() => logout()}>
-            <LogOut className="h-4 w-4" /> Déconnexion
+        {error && <p className="amfa-error">{error}</p>}
+        <button type="submit" className="amfa-btn" disabled={busy || code.length !== 6}>Valider</button>
+        <div className="amfa-links">
+          <button type="button" className="amfa-resend" onClick={send} disabled={busy}>Renvoyer le code</button>
+          <button type="button" className="amfa-logout" onClick={() => logout()}>
+            <LogOut className="h-4 w-4" aria-hidden /> Déconnexion
           </button>
         </div>
       </form>
