@@ -23,6 +23,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { PoLinkCard } from "@/components/admin/PoLinkCard";
 import { checkPaymentLink, sanitizePaymentUrl } from "@/lib/payment-link";
 import { EditDevisDialog } from "@/components/admin/EditDevisDialog";
+import { GroupedDevisLots } from "@/components/devis-lots/GroupedDevisLots";
 
 const CLIENT_TYPE_LABELS: Record<string, string> = {
   particulier: "Particulier",
@@ -366,6 +367,12 @@ function AdminDevisDetailPage() {
       <div className="mb-5">
         <PoLinkCard devisId={devis.id} />
       </div>
+
+      {Array.isArray(devis.vehicules) && devis.vehicules.length > 1 && (
+        <div className="mb-5">
+          <GroupedDevisLots devisId={devis.id} readOnly />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: details */}

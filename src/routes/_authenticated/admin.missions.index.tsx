@@ -184,6 +184,27 @@ function AdminMissionsUnified() {
   const [convFilter, setConvFilter] = useState("all");
   const [payFilter, setPayFilter] = useState("all");
   const [energyFilter, setEnergyFilter] = useState("all");
+  // Filtre par devis groupé / lot : mission_id -> lot validé.
+  const [lotFilter, setLotFilter] = useState("all");
+  const [lotByMission, setLotByMission] = useState<Map<string, string>>(new Map());
+  const [lotOptions, setLotOptions] = useState<{ v: string; l: string }[]>([]);
+  const [lotDevis, setLotDevis] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    void (async () => {
+      const sb = supabase as unknown as { from: (t: string) => any };
+      const { data: lots } = await sb.from("devis_lots").select("id, numero, nom, devis_id, devis:devis_id(numero)").eq("statut", "valide").order("created_at", { ascending: false });
+      const { data: ms } = await sb.from("missions").select("id, devis_lot_id").not("devis_lot_id", "is", null);
+      const ld = new Map<string, string>(((lots ?? []) as any[]).map((l) => [l.id, l.devis_id]));
+      setLotByMission(new Map(((ms ?? []) as any[]).map((m) => [m.id, m.devis_lot_id])));
+      const devisSeen = new Map<string, string>();
+      ((lots ?? []) as any[]).forEach((l) => devisSeen.set(l.devis_id, l.devis?.numero ?? "Devis groupé"));
+      setLotOptions([
+        ...Array.from(devisSeen.entries()).map(([id, num]) => ({ v: `devis:${id}`, l: `${num} (tous les lots)` })),
+        ...((lots ?? []) as any[]).map((l) => ({ v: `lot:${l.id}`, l: `${l.devis?.numero ?? ""} · Lot ${l.numero}${l.nom ? ` ${l.nom}` : ""}` })),
+      ]);
+      setLotDevis(ld);
+    })();
+  }, []);
   const [sortBy, setSortBy] = useState("recent");
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
@@ -556,6 +577,14 @@ function AdminMissionsUnified() {
         const elec = isElectric(m?.energie, r.marque, r.modele);
         if (energyFilter === "electrique" ? !elec : elec) return false;
       }
+      if (lotFilter !== "all") {
+        const lotId = m?.missionId ? lotByMission.get(m.missionId) : undefined;
+        if (!lotId) return false;
+        if (lotFilter.startsWith("lot:") && lotFilter.slice(4) !== lotId) return false;
+        if (lotFilter.startsWith("devis:")) {
+          if (lotDevis.get(lotId) !== lotFilter.slice(6)) return false;
+        }
+      }
       if (!q) return true;
       return [r.ref, r.depart, r.arrivee, r.clientNom, r.immatriculation, r.marque, r.modele, m?.vin, m?.convoyeurNom]
         .filter(Boolean)
@@ -568,7 +597,7 @@ function AdminMissionsUnified() {
     else if (sortBy === "date") sorted.sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime());
     else if (sortBy === "client") sorted.sort((a, b) => (a.clientNom ?? "").localeCompare(b.clientNom ?? ""));
     return sorted;
-  }, [scopedRows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy]);
+  }, [scopedRows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy, lotFilter, lotByMission, lotDevis]);
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
@@ -767,6 +796,10 @@ function AdminMissionsUnified() {
             value: energyFilter, set: setEnergyFilter, label: "Énergie",
             options: [{ v: "all", l: "Toutes énergies" }, { v: "electrique", l: "Électrique" }, { v: "thermique", l: "Thermique" }],
           },
+          ...(lotOptions.length ? [{
+            value: lotFilter, set: setLotFilter, label: "Lot",
+            options: [{ v: "all", l: "Tous devis groupés et lots" }, ...lotOptions],
+          }] : []),
           {
             value: sortBy, set: setSortBy, label: "Tri",
             options: [

@@ -1114,3 +1114,73 @@ export async function downloadBlob(blob: Blob, filename: string): Promise<void> 
 
 /** Couleurs réexportées pour les consommateurs. */
 export { DOC_WHITE };
+
+/* ------------------------------------------------------------------ */
+/* BON DE COMMANDE / RÉCAPITULATIF D'UN LOT DE DEVIS GROUPÉ            */
+/* ------------------------------------------------------------------ */
+
+export interface LotRecapData {
+  devisNumero: string;
+  lotNumero: number;
+  lotNom?: string | null;
+  client?: string | null;
+  signedAt?: string | null;
+  signerName?: string | null;
+  signature?: string | null;
+  totalTtc: number;
+  totalHt: number;
+  lignes: {
+    reference: string;
+    type: string;
+    plaque: string;
+    vehicule: string;
+    trajet: string;
+    date: string;
+    prix: number;
+  }[];
+}
+
+export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo | null): Promise<Blob> {
+  const { doc, pageW, company: c } = await newDoc(
+    "Bon de commande",
+    `${d.devisNumero} · Lot ${d.lotNumero}`,
+    d.lotNom ? d.lotNom : `Devis groupé d'origine ${d.devisNumero}`,
+    company,
+  );
+  const w = pageW - 28;
+  const eur = (n: number) => `${n.toFixed(2).replace(".", ",")} €`;
+  let y = 52;
+  y = drawSectionTitle(doc, pageW, y, "Informations du lot");
+  y = drawKeyValueRow(doc, 14, y, w, "Devis groupé d'origine", d.devisNumero);
+  y = drawKeyValueRow(doc, 14, y, w, "Client", d.client ?? "");
+  y = drawKeyValueRow(doc, 14, y, w, "Validé le", d.signedAt ? dateFmt(d.signedAt) : "");
+  y += 3;
+  y = drawSectionTitle(doc, pageW, y, `Lignes du lot (${d.lignes.length})`);
+  doc.setFontSize(7.5);
+  for (const l of d.lignes) {
+    y = docEnsureSpace(doc, y, 12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DOC_NAVY);
+    doc.text(`${l.reference}  ${l.type}`, 14, y + 4);
+    doc.text(eur(l.prix), pageW - 14, y + 4, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...DOC_TEXT);
+    doc.text(doc.splitTextToSize(`${l.plaque} · ${l.vehicule} · ${l.date} · ${l.trajet}`, w).slice(0, 2), 14, y + 8);
+    doc.setDrawColor(...DOC_LINE);
+    doc.line(14, y + 11.5, pageW - 14, y + 11.5);
+    y += 13;
+  }
+  y = docEnsureSpace(doc, y, 16) + 2;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...DOC_NAVY);
+  doc.text(`Total HT : ${eur(d.totalHt)}`, pageW - 14, y + 4, { align: "right" });
+  doc.setTextColor(...DOC_GOLD);
+  doc.text(`Total TTC : ${eur(d.totalTtc)}`, pageW - 14, y + 10, { align: "right" });
+  y += 16;
+  signatureBlocks(doc, pageW, y, `Bon pour accord ${d.signerName ?? ""}`.trim(), "Transports Ligneo", 24, {
+    left: d.signature ?? null,
+  });
+  finalizeDoc(doc, c);
+  return doc.output("blob");
+}
