@@ -1,3 +1,6 @@
+import { groupedVehicleType, groupedVehicleTypes } from "@/lib/devis-groupe-types";
+import { guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { Zap as ZapIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -143,7 +146,20 @@ function statutBadgeTone(s: string): string {
   }
 }
 
-function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation">) {
+function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation" | "vehicules" | "message">) {
+  const veh = (d.vehicules ?? []).filter(Boolean);
+  if (veh.length > 1) {
+    const types = groupedVehicleTypes(veh as never[], d.message);
+    const labels = [
+      types.simple ? "Livraison simple" : null,
+      types.retour ? "Livraison + restitution" : null,
+      types.recharge ? "Recharge uniquement" : null,
+    ].filter(Boolean) as string[];
+    if (labels.length > 1) return { label: `Mixte : ${labels.join(" · ")}`, tone: "violet" };
+    if (types.retour) return { label: "Livraison + restitution", tone: "violet" };
+    if (types.recharge) return { label: "Recharge uniquement", tone: "green" };
+    return { label: "Livraison simple", tone: "blue" };
+  }
   const value = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
   if (value.includes("recharge")) return { label: "Recharge uniquement", tone: "green" };
   if (/aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(value)) {
@@ -658,14 +674,16 @@ function AdminDevisPage() {
                           type?: string | null;
                           type_trajet?: string | null;
                         };
-                        const hasR = !!(vr.immatriculation_retour || vr.marque_retour || vr.type === "aller-retour" || vr.type_trajet === "aller-retour");
+                        const hasR = groupedVehicleType(vr, i, d.message) === "aller-retour";
+                        const elec = guessElectricFromModel(v.marque, v.modele);
+                        const elecR = guessElectricFromModel(vr.marque_retour, vr.modele_retour);
                         return (
                         <div key={i} className="dvx-veh">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               {hasR && <div className="mb-1"><span className="dvx-leg l"><ArrowRight size={10} /> Livraison</span></div>}
                               <p className="text-[12.5px] font-bold text-[#14161c] truncate">
-                                {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
+                                {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}{elec && <ZapIcon size={13} className="ml-1 inline-block align-[-2px] text-[#2f5fff]" fill="#2f5fff" aria-label="Véhicule électrique" />}
                               </p>
                               {v.immatriculation && (
                                 <div className="mt-1">
@@ -677,7 +695,7 @@ function AdminDevisPage() {
                                 <div className="mt-2 border-t border-[#eaeaee] pt-2">
                                   <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Restitution</span></div>
                                   <p className="text-[12.5px] font-bold text-[#14161c] truncate">
-                                    {[vr.marque_retour, vr.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser"}
+                                    {[vr.marque_retour, vr.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser"}{elecR && <ZapIcon size={13} className="ml-1 inline-block align-[-2px] text-[#2f5fff]" fill="#2f5fff" aria-label="Véhicule électrique" />}
                                   </p>
                                   {vr.immatriculation_retour && (
                                     <div className="mt-1">

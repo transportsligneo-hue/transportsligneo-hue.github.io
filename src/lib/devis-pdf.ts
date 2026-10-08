@@ -1,3 +1,5 @@
+import { guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { groupedVehicleType, groupedPrestationLabel } from "@/lib/devis-groupe-types";
 import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
@@ -688,6 +690,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   }
 
   const prestationLabel =
+    (isGroupe ? groupedPrestationLabel(multiVehicules, d.message) : null) ||
     d.prestation?.trim() ||
     [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
   doc.setFont("helvetica", "bold");
@@ -717,16 +720,16 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const toHt = (v: number) => (micro ? v : +(v / (1 + vatRate / 100)).toFixed(2));
   const baseHt = toHt(baseTtc);
 
-  type Plaque = { tag: "L" | "R"; ident: string; plate: string | null };
+  type Plaque = { tag: "L" | "R"; ident: string; plate: string | null; elec?: boolean };
   type Ligne = { title: string; sub?: string; amount: number | null; plates?: Plaque[] };
   const lignes: Ligne[] = isGroupe
     ? multiVehicules.map((v, i) => {
         const htLigne = toHt(Number(v.prix ?? 0));
         const ident = [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
-        const hasRetour = !!(v.immatriculation_retour || v.marque_retour || v.type === "aller-retour" || v.type_trajet === "aller-retour");
+        const hasRetour = groupedVehicleType(v, i, d.message) === "aller-retour";
         const identR = [v.marque_retour, v.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser";
-        const plates: Plaque[] = [{ tag: "L", ident, plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
-        if (hasRetour) plates.push({ tag: "R", ident: identR, plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
+        const plates: Plaque[] = [{ tag: "L", ident, elec: guessElectricFromModel(v.marque, v.modele), plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
+        if (hasRetour) plates.push({ tag: "R", ident: identR, elec: guessElectricFromModel(v.marque_retour, v.modele_retour), plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
         return {
           title: `Véhicule ${i + 1}${hasRetour ? " · Livraison + restitution" : ""}`,
           amount: htLigne,
@@ -823,6 +826,13 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       const id = (doc.splitTextToSize(p.ident, 30) as string[])[0];
       doc.text(id, x, yy);
       x += doc.getTextWidth(id) + 1.8;
+      if (p.elec) {
+        // Petit éclair bleu électrique : véhicule électrique.
+        doc.setFillColor(...BLUE);
+        doc.triangle(x + 1.6, yy - 3.4, x + 0.2, yy - 1.0, x + 1.4, yy - 1.0, "F");
+        doc.triangle(x + 1.0, yy - 1.3, x + 2.4, yy - 1.3, x + 0.6, yy + 1.0, "F");
+        x += 3.6;
+      }
       if (p.plate) x += plateBadge(doc, x, yy - 4.4, p.plate, 7.2) + 4;
       else x += 4;
     });

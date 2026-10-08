@@ -30,6 +30,9 @@ export function resolveEnergie(...values: (string | null | undefined)[]): string
 const EV_MODEL_PATTERNS = [
   /\btesla\b/i,
   /\bzoe\b/i,
+  /\brenault\s+(renault\s+)?5\b/i,
+  /\br5\s*e[-\s]?tech\b/i,
+  /\btwingo\s*e[-\s]?tech\b/i,
   /\bmegane\s*e[-\s]?tech\b/i,
   /\bscenic\s*e[-\s]?tech\b/i,
   /\bid\.?\s?[3457]\b/i,
