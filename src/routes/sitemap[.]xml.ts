@@ -17,6 +17,7 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/a-propos", changefreq: "monthly", priority: "0.7" },
   { path: "/contact", changefreq: "monthly", priority: "0.7" },
   { path: "/pro", changefreq: "monthly", priority: "0.8" },
+  { path: "/demo", changefreq: "monthly", priority: "0.7" },
   { path: "/b2b", changefreq: "monthly", priority: "0.8" },
   { path: "/b2b/partenariat-flotte", changefreq: "monthly", priority: "0.7" },
   { path: "/b2b/transport-ponctuel", changefreq: "monthly", priority: "0.7" },
