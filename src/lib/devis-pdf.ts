@@ -890,6 +890,20 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   // ===== Totaux =====
   y += 3;
+  if (isGroupe) {
+    // Shared inclusions stay readable beside totals rather than disappearing.
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.2);
+    doc.setTextColor(...MUTED);
+    const summary = [
+      "Carburant, péages et assurance tous risques inclus. État des lieux photo, signatures et suivi GPS.",
+      optionsList.length ? `Options : ${optionsList.join(", ")}.` : null,
+      pvDigital ? `PV digitalisé : ${pvDigital}.` : null,
+      `Validité : ${validite} jours. Conditions : transportsligneo.fr/cgv.`,
+    ].filter(Boolean).join(" ");
+    const wrapped = doc.splitTextToSize(summary, innerW / 2 - 10) as string[];
+    doc.text(wrapped.slice(0, 7), M, y, { lineHeightFactor: 1.35 });
+  }
   const totX = pageW / 2 + 10;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.7);
