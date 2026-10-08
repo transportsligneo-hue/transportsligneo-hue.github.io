@@ -13,12 +13,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+const ALLOWED_ORIGIN_RE = /^https:\/\/([a-z0-9-]+\.)*(transportsligneo\.fr|lovable\.app)$/i;
+const ALLOWED_EXACT = new Set(["capacitor://localhost", "https://localhost", "http://localhost"]);
+function originAllowed(origin: string | null): boolean {
+  if (!origin) return true;
+  return ALLOWED_EXACT.has(origin) || ALLOWED_ORIGIN_RE.test(origin);
+}
+
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://www.transportsligneo.fr",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Vary": "Origin",
 };
 
 serve(async (req) => {
+  const reqOrigin = req.headers.get("Origin");
+  if (!originAllowed(reqOrigin)) {
+    return new Response(JSON.stringify({ error: "Origine non autorisée" }), { status: 403, headers: { "Content-Type": "application/json" } });
+  }
+  if (reqOrigin) corsHeaders["Access-Control-Allow-Origin"] = reqOrigin;
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
