@@ -57,6 +57,7 @@ export interface DevisData {
     arrivee?: string | null;
     prix?: number | null;
     type?: string | null;
+    type_trajet?: string | null;
     immatriculation_retour?: string | null;
     marque_retour?: string | null;
     modele_retour?: string | null;
@@ -722,7 +723,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ? multiVehicules.map((v, i) => {
         const htLigne = toHt(Number(v.prix ?? 0));
         const ident = [v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule";
-        const hasRetour = !!(v.immatriculation_retour || v.marque_retour || v.type === "aller-retour");
+        const hasRetour = !!(v.immatriculation_retour || v.marque_retour || v.type === "aller-retour" || v.type_trajet === "aller-retour");
         const identR = [v.marque_retour, v.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser";
         const plates: Plaque[] = [{ tag: "L", ident, plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
         if (hasRetour) plates.push({ tag: "R", ident: identR, plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });

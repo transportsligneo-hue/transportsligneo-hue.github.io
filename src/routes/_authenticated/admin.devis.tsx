@@ -656,8 +656,9 @@ function AdminDevisPage() {
                           modele_retour?: string | null;
                           vin_retour?: string | null;
                           type?: string | null;
+                          type_trajet?: string | null;
                         };
-                        const hasR = !!(vr.immatriculation_retour || vr.marque_retour || vr.type === "aller-retour");
+                        const hasR = !!(vr.immatriculation_retour || vr.marque_retour || vr.type === "aller-retour" || vr.type_trajet === "aller-retour");
                         return (
                         <div key={i} className="dvx-veh">
                           <div className="flex items-start justify-between gap-2">
