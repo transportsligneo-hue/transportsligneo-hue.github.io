@@ -38,6 +38,7 @@ export function groupedVehicleTypes(vehicules: Veh[], message?: string | null) {
 export function groupedPrestationLabel(vehicules: Veh[], message?: string | null, options: string[] = []): string {
   const t = groupedVehicleTypes(vehicules, message);
   const selected = options.length ? options : (message?.match(/^Options?\s*:\s*(.+)$/im)?.[1]?.split(",") ?? []);
+  const glissant = message?.match(/livraison sur 2 jours glissants[^\n]*/i)?.[0]?.trim();
   return [
     t.simple ? `Livraison simple (${t.simple})` : null,
     t.retour ? `Livraison + restitution (${t.retour})` : null,
