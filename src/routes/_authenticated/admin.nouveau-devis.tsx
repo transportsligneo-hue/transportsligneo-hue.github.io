@@ -175,6 +175,8 @@ type VehLine = {
   arrivee: string;
   type: "aller-simple" | "aller-retour" | "recharge";
   immatRetour?: string;
+  busyRetour?: boolean;
+  msgRetour?: string | null;
   prix: string;
   busy: boolean;
   msg: string | null;
@@ -455,6 +457,33 @@ function AdminNouveauDevisPage() {
       patchVeh(line.key, { msg: "Erreur réseau" });
     } finally {
       patchVeh(line.key, { busy: false });
+    }
+  };
+
+  const lookupVehRetourPlate = async (line: VehLine) => {
+    const plate = (line.immatRetour ?? "").trim().toUpperCase();
+    if (plate.length < 4) {
+      patchVeh(line.key, { msgRetour: "Saisis une plaque valide" });
+      return;
+    }
+    patchVeh(line.key, { busyRetour: true, msgRetour: null });
+    try {
+      const r = await lookupPlateFn({ data: { plate } });
+      if (!r.ok || !r.data) {
+        patchVeh(line.key, { msgRetour: r.error || "Recherche impossible" });
+      } else {
+        const d = r.data;
+        patchVeh(line.key, {
+          marque: d.marque || line.marque,
+          modele: d.modele || line.modele,
+          vin: d.vin ? normalizeVin(d.vin) : line.vin,
+          msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
+        });
+      }
+    } catch {
+      patchVeh(line.key, { msgRetour: "Erreur réseau" });
+    } finally {
+      patchVeh(line.key, { busyRetour: false });
     }
   };
 
@@ -1324,7 +1353,7 @@ function AdminNouveauDevisPage() {
                 onClick={() => {
                   localStorage.setItem(
                     ADMIN_DRAFT_KEY,
-                    JSON.stringify({ vlines: vlines.map((x) => ({ ...x, busy: false, msg: null })), depart, arrivee, typeTrajet, options, savedAt: new Date().toISOString() }),
+                    JSON.stringify({ vlines: vlines.map((x) => ({ ...x, busy: false, msg: null, busyRetour: false, msgRetour: null })), depart, arrivee, typeTrajet, options, savedAt: new Date().toISOString() }),
                   );
                   toast.success("Brouillon enregistré");
                 }}
@@ -1417,12 +1446,27 @@ function AdminNouveauDevisPage() {
                       ))}
                     </div>
                     {v.type === "aller-retour" && (
-                      <Field
-                        label="Plaque retour (restitution)"
-                        value={v.immatRetour ?? ""}
-                        onChange={(x) => patchVeh(v.key, { immatRetour: x.toUpperCase() })}
-                        placeholder="AB-123-CD"
-                      />
+                      <div>
+                        <label className="mb-1 block text-[12px] font-semibold text-pro-muted">Plaque retour (restitution)</label>
+                        <div className="flex gap-2">
+                          <input
+                            value={v.immatRetour ?? ""}
+                            onChange={(e) => patchVeh(v.key, { immatRetour: e.target.value.toUpperCase() })}
+                            placeholder="AB-123-CD"
+                            className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => lookupVehRetourPlate(v)}
+                            disabled={v.busyRetour}
+                            className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                          >
+                            {v.busyRetour ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                            Rechercher
+                          </button>
+                        </div>
+                        {v.msgRetour && <p className="mt-1 text-[12px] font-medium text-pro-muted">{v.msgRetour}</p>}
+                      </div>
                     )}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
