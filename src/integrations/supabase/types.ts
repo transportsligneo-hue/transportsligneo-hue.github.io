@@ -2321,6 +2321,7 @@ export type Database = {
           contact_depart_note: string | null
           contact_depart_tel: string | null
           created_at: string
+          date_livraison: string | null
           date_retour: string | null
           date_souhaitee: string | null
           default_address_id: string | null
@@ -2331,6 +2332,7 @@ export type Database = {
           distance_km: number | null
           email: string
           group_reference: string | null
+          heure_livraison: string | null
           heure_retour: string | null
           heure_souhaitee: string | null
           id: string
@@ -2385,6 +2387,7 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_livraison?: string | null
           date_retour?: string | null
           date_souhaitee?: string | null
           default_address_id?: string | null
@@ -2395,6 +2398,7 @@ export type Database = {
           distance_km?: number | null
           email: string
           group_reference?: string | null
+          heure_livraison?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -2449,6 +2453,7 @@ export type Database = {
           contact_depart_note?: string | null
           contact_depart_tel?: string | null
           created_at?: string
+          date_livraison?: string | null
           date_retour?: string | null
           date_souhaitee?: string | null
           default_address_id?: string | null
@@ -2459,6 +2464,7 @@ export type Database = {
           distance_km?: number | null
           email?: string
           group_reference?: string | null
+          heure_livraison?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -2532,6 +2538,7 @@ export type Database = {
           converted_at: string | null
           converted_by: string | null
           created_at: string
+          date_livraison: string | null
           date_retour: string | null
           date_souhaitee: string | null
           demande_id: string | null
@@ -2542,6 +2549,7 @@ export type Database = {
           email: string
           email_envoye: boolean
           expires_at: string | null
+          heure_livraison: string | null
           heure_retour: string | null
           heure_souhaitee: string | null
           id: string
@@ -2618,6 +2626,7 @@ export type Database = {
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
+          date_livraison?: string | null
           date_retour?: string | null
           date_souhaitee?: string | null
           demande_id?: string | null
@@ -2628,6 +2637,7 @@ export type Database = {
           email: string
           email_envoye?: boolean
           expires_at?: string | null
+          heure_livraison?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -2704,6 +2714,7 @@ export type Database = {
           converted_at?: string | null
           converted_by?: string | null
           created_at?: string
+          date_livraison?: string | null
           date_retour?: string | null
           date_souhaitee?: string | null
           demande_id?: string | null
@@ -2714,6 +2725,7 @@ export type Database = {
           email?: string
           email_envoye?: boolean
           expires_at?: string | null
+          heure_livraison?: string | null
           heure_retour?: string | null
           heure_souhaitee?: string | null
           id?: string
@@ -2848,6 +2860,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      devis_brouillons: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          form: Json
+          id: string
+          numero: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          form?: Json
+          id?: string
+          numero: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          form?: Json
+          id?: string
+          numero?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       devis_otp_challenges: {
         Row: {
@@ -8995,6 +9037,24 @@ export type Database = {
           id: string
           numero: string
         }[]
+      }
+      create_devis_brouillon: {
+        Args: { _form: Json }
+        Returns: {
+          consumed_at: string | null
+          created_at: string
+          form: Json
+          id: string
+          numero: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "devis_brouillons"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_scan_handoff_session: {
         Args: { _context?: string }
