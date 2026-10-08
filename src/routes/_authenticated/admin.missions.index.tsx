@@ -188,12 +188,13 @@ function AdminMissionsUnified() {
   const [lotFilter, setLotFilter] = useState("all");
   const [lotByMission, setLotByMission] = useState<Map<string, string>>(new Map());
   const [lotOptions, setLotOptions] = useState<{ v: string; l: string }[]>([]);
+  const [lotDevis, setLotDevis] = useState<Map<string, string>>(new Map());
   useEffect(() => {
     void (async () => {
       const sb = supabase as unknown as { from: (t: string) => any };
       const { data: lots } = await sb.from("devis_lots").select("id, numero, nom, devis_id, devis:devis_id(numero)").eq("statut", "valide").order("created_at", { ascending: false });
       const { data: ms } = await sb.from("missions").select("id, devis_lot_id").not("devis_lot_id", "is", null);
-      const lotDevis = new Map<string, string>(((lots ?? []) as any[]).map((l) => [l.id, l.devis_id]));
+      const ld = new Map<string, string>(((lots ?? []) as any[]).map((l) => [l.id, l.devis_id]));
       setLotByMission(new Map(((ms ?? []) as any[]).map((m) => [m.id, m.devis_lot_id])));
       const devisSeen = new Map<string, string>();
       ((lots ?? []) as any[]).forEach((l) => devisSeen.set(l.devis_id, l.devis?.numero ?? "Devis groupé"));
@@ -201,7 +202,7 @@ function AdminMissionsUnified() {
         ...Array.from(devisSeen.entries()).map(([id, num]) => ({ v: `devis:${id}`, l: `${num} (tous les lots)` })),
         ...((lots ?? []) as any[]).map((l) => ({ v: `lot:${l.id}`, l: `${l.devis?.numero ?? ""} · Lot ${l.numero}${l.nom ? ` ${l.nom}` : ""}` })),
       ]);
-      (window as unknown as { __lotDevis?: Map<string, string> }).__lotDevis = lotDevis;
+      setLotDevis(ld);
     })();
   }, []);
   const [sortBy, setSortBy] = useState("recent");
@@ -581,8 +582,7 @@ function AdminMissionsUnified() {
         if (!lotId) return false;
         if (lotFilter.startsWith("lot:") && lotFilter.slice(4) !== lotId) return false;
         if (lotFilter.startsWith("devis:")) {
-          const ld = (window as unknown as { __lotDevis?: Map<string, string> }).__lotDevis;
-          if (ld?.get(lotId) !== lotFilter.slice(6)) return false;
+          if (lotDevis.get(lotId) !== lotFilter.slice(6)) return false;
         }
       }
       if (!q) return true;
@@ -597,7 +597,7 @@ function AdminMissionsUnified() {
     else if (sortBy === "date") sorted.sort((a, b) => new Date(b.date ?? b.createdAt).getTime() - new Date(a.date ?? a.createdAt).getTime());
     else if (sortBy === "client") sorted.sort((a, b) => (a.clientNom ?? "").localeCompare(b.clientNom ?? ""));
     return sorted;
-  }, [scopedRows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy, lotFilter, lotByMission]);
+  }, [scopedRows, filter, search, meta, convFilter, payFilter, energyFilter, sortBy, lotFilter, lotByMission, lotDevis]);
 
   /* ---------------- Regroupement duo L/R ---------------- */
   type ListRow =
