@@ -1,5 +1,5 @@
 import { groupedVehicleType, groupedVehicleTypes } from "@/lib/devis-groupe-types";
-import { guessElectricFromModel, isElectricEnergie } from "@/lib/vehicule-electrique";
+import { guessElectricFromModel } from "@/lib/vehicule-electrique";
 import { Zap as ZapIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -675,7 +675,7 @@ function AdminDevisPage() {
                           type_trajet?: string | null;
                         };
                         const hasR = groupedVehicleType(vr, i, d.message) === "aller-retour";
-                        const elec = isElectricEnergie(d.carburant) || guessElectricFromModel(v.marque, v.modele);
+                        const elec = guessElectricFromModel(v.marque, v.modele);
                         const elecR = guessElectricFromModel(vr.marque_retour, vr.modele_retour);
                         return (
                         <div key={i} className="dvx-veh">
@@ -683,7 +683,7 @@ function AdminDevisPage() {
                             <div className="min-w-0">
                               {hasR && <div className="mb-1"><span className="dvx-leg l"><ArrowRight size={10} /> Livraison</span></div>}
                               <p className="text-[12.5px] font-bold text-[#14161c] truncate">
-                                {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}
+                                {[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}{elec && <ZapIcon size={13} className="ml-1 inline-block align-[-2px] text-[#2f5fff]" fill="#2f5fff" aria-label="Véhicule électrique" />}
                               </p>
                               {v.immatriculation && (
                                 <div className="mt-1">
@@ -695,7 +695,7 @@ function AdminDevisPage() {
                                 <div className="mt-2 border-t border-[#eaeaee] pt-2">
                                   <div className="mb-1"><span className="dvx-leg r"><ArrowLeft size={10} /> Restitution</span></div>
                                   <p className="text-[12.5px] font-bold text-[#14161c] truncate">
-                                    {[vr.marque_retour, vr.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser"}
+                                    {[vr.marque_retour, vr.modele_retour].filter(Boolean).join(" ") || "Modèle à préciser"}{elecR && <ZapIcon size={13} className="ml-1 inline-block align-[-2px] text-[#2f5fff]" fill="#2f5fff" aria-label="Véhicule électrique" />}
                                   </p>
                                   {vr.immatriculation_retour && (
                                     <div className="mt-1">
