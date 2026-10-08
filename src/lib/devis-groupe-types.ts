@@ -38,11 +38,13 @@ export function groupedVehicleTypes(vehicules: Veh[], message?: string | null) {
 export function groupedPrestationLabel(vehicules: Veh[], message?: string | null, options: string[] = []): string {
   const t = groupedVehicleTypes(vehicules, message);
   const selected = options.length ? options : (message?.match(/^Options?\s*:\s*(.+)$/im)?.[1]?.split(",") ?? []);
+  const glissant = message?.match(/livraison sur 2 jours glissants[^\n]*/i)?.[0]?.trim();
   return [
     t.simple ? `Livraison simple (${t.simple})` : null,
     t.retour ? `Livraison + restitution (${t.retour})` : null,
     t.recharge ? `Recharge uniquement (${t.recharge})` : null,
     selected.some((o) => /recharge[_\s]+(?:électrique|electrique|elec)/i.test(o)) ? "Recharge électrique" : null,
     selected.some((o) => /mise[_\s]+en[_\s]+main/i.test(o)) ? "Mise en main" : null,
+    glissant ? glissant.charAt(0).toUpperCase() + glissant.slice(1) : null,
   ].filter(Boolean).join(" · ");
 }
