@@ -73,6 +73,7 @@ type VehicleRow = {
   notes: string;
   arrivee: string;
   tripType: GroupedTripType;
+  immatRetour: string;
   open: boolean;
   busy: boolean;
   options: Partial<Record<OptionKey, boolean>>;
@@ -82,7 +83,7 @@ type VehicleRow = {
 const newRow = (): VehicleRow => ({
   key: crypto.randomUUID(),
   immat: "", marque: "", modele: "", energie: "", type: "", vin: "", km: "", notes: "",
-  arrivee: "", tripType: "aller-simple", open: false, busy: false, options: {}, optionsOverride: false,
+  arrivee: "", tripType: "aller-simple", immatRetour: "", open: false, busy: false, options: {}, optionsOverride: false,
 });
 
 const fieldCls = "qm-input";
@@ -316,6 +317,7 @@ function GroupedMissionForm() {
             notes: r.notes || null,
             arrivee: destFor(r),
             tripType: r.tripType,
+            immatriculationRetour: r.tripType === "aller-retour" && r.immatRetour.trim() ? r.immatRetour.trim().toUpperCase() : null,
             prixTtc: prices[r.key] ?? 0,
             optionsMeta: Object.fromEntries(
               Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
@@ -540,6 +542,24 @@ function GroupedMissionForm() {
                       </button>
                     ))}
                   </div>
+                  {r.tripType === "aller-retour" && (
+                    <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <span className={labelCls}>Plaque livraison</span>
+                        <input className={`${fieldCls} uppercase tracking-widest`} value={r.immat} readOnly placeholder="Plaque ci-dessus" />
+                      </div>
+                      <div>
+                        <span className={labelCls}>Plaque retour (restitution)</span>
+                        <input
+                          className={`${fieldCls} uppercase tracking-widest`}
+                          value={r.immatRetour}
+                          onChange={(e) => patchRow(r.key, { immatRetour: e.target.value.toUpperCase() })}
+                          placeholder="AB-123-CD"
+                          maxLength={32}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button
