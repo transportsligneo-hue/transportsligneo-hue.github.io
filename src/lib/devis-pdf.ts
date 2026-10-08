@@ -56,6 +56,11 @@ export interface DevisData {
     vin?: string | null;
     arrivee?: string | null;
     prix?: number | null;
+    type?: string | null;
+    immatriculation_retour?: string | null;
+    marque_retour?: string | null;
+    modele_retour?: string | null;
+    vin_retour?: string | null;
   }> | null;
 
   /** Options additionnelles cochees (recharge, lavage, mise en main...) */
