@@ -14,6 +14,7 @@ const vehicleSchema = z.object({
   notes: z.string().max(1000).nullable().optional(),
   arrivee: z.string().min(2).max(400),
   tripType: z.enum(["aller-simple", "aller-retour", "recharge"]).default("aller-simple"),
+  immatriculationRetour: z.string().max(32).nullable().optional(),
   prixTtc: z.number().min(0).max(100000),
   optionsMeta: z.record(z.string(), z.boolean()).optional().default({}),
 });
@@ -112,6 +113,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
           vin: v.vin ?? null,
           arrivee: v.arrivee,
           type_trajet: v.tripType,
+          immatriculation_retour: v.immatriculationRetour ?? null,
           prix: v.prixTtc,
         })),
         message: [
@@ -144,6 +146,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
         `[Mission groupée ${groupReference}]`,
         data.message,
         v.notes ? `Notes véhicule : ${v.notes}` : "",
+        v.tripType === "aller-retour" && v.immatriculationRetour ? `Plaque retour : ${v.immatriculationRetour}` : "",
         profile?.societe ? `Société : ${profile.societe}` : "",
       ]
         .filter(Boolean)
