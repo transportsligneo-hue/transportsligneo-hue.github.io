@@ -1088,7 +1088,7 @@ function AdminNouveauDevisPage() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {TRAJET_TYPES.map((t) => (
-                    <button
+                    <Button
                       key={t}
                       type="button"
                       onClick={() => {
@@ -1098,6 +1098,7 @@ function AdminNouveauDevisPage() {
                           setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
                         }
                       }}
+                      variant="secondary"
                       className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                         typeTrajet === t
                           ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
@@ -1105,7 +1106,7 @@ function AdminNouveauDevisPage() {
                       }`}
                     >
                       {t}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 {isRechargeSeule && (
@@ -1478,18 +1479,19 @@ function AdminNouveauDevisPage() {
                     {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
                     <div className="flex flex-wrap gap-2">
                       {VEH_TYPES.map((t) => (
-                        <button
+                        <Button
                           key={t.v}
                           type="button"
+                          variant="secondary"
                           onClick={() => patchVeh(v.key, { type: t.v })}
                           className={`rounded-lg border px-3 py-2 text-[12.5px] font-semibold transition ${
                             v.type === t.v
-                              ? "border-pro-accent bg-pro-accent text-white"
-                              : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                              ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                              : "border-pro-border bg-pro-surface text-pro-text hover:border-pro-accent/50"
                           }`}
                         >
                           {t.l}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     {v.type === "aller-retour" && (
@@ -1645,12 +1647,14 @@ function AdminNouveauDevisPage() {
                 </div>
                 <Field label={vinRequis ? "VIN retour *" : "VIN retour"} value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, vinRequis).error} />
                 <AddressField
+                  favorites={favorites}
                   label="Adresse de départ (retour)"
                   value={departRetour}
                   onChange={setDepartRetour}
                   placeholder={arrivee || "Par défaut : adresse d'arrivée de l'aller"}
                 />
                 <AddressField
+                  favorites={favorites}
                   label="Adresse d'arrivée (retour)"
                   value={arriveeRetour}
                   onChange={setArriveeRetour}
