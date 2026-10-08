@@ -40,6 +40,7 @@ import { AdminSidebar, type AdminSidebarItem } from "@/components/admin/AdminSid
 import { supabase } from "@/integrations/supabase/client";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { verifyAdminAccess } from "@/lib/admin-guard.functions";
+import { AdminMfaGate } from "@/components/admin/AdminMfaGate";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
@@ -259,8 +260,10 @@ function AdminLayout() {
   }
 
   return (
-    <AdminSidebar items={navItems}>
-      <Outlet />
-    </AdminSidebar>
+    <AdminMfaGate>
+      <AdminSidebar items={navItems}>
+        <Outlet />
+      </AdminSidebar>
+    </AdminMfaGate>
   );
 }
