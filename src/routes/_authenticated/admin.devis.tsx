@@ -143,7 +143,20 @@ function statutBadgeTone(s: string): string {
   }
 }
 
-function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation">) {
+function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation" | "vehicules" | "message">) {
+  const veh = (d.vehicules ?? []).filter(Boolean);
+  if (veh.length > 1) {
+    const types = groupedVehicleTypes(veh, d.message);
+    const labels = [
+      types.simple ? "Livraison simple" : null,
+      types.retour ? "Livraison + restitution" : null,
+      types.recharge ? "Recharge uniquement" : null,
+    ].filter(Boolean) as string[];
+    if (labels.length > 1) return { label: `Mixte : ${labels.join(" · ")}`, tone: "violet" };
+    if (types.retour) return { label: "Livraison + restitution", tone: "violet" };
+    if (types.recharge) return { label: "Recharge uniquement", tone: "green" };
+    return { label: "Livraison simple", tone: "blue" };
+  }
   const value = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
   if (value.includes("recharge")) return { label: "Recharge uniquement", tone: "green" };
   if (/aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(value)) {
