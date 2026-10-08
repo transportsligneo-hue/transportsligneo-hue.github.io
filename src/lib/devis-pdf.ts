@@ -1024,7 +1024,8 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     } catch { /* optionnel */ }
   }
   if (signatureData) {
-    try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 7, 32, 11); } catch { /* optionnel */ }
+    // Signature manuscrite posée sur le tampon, tout à droite, au niveau des écritures.
+    try { doc.addImage(signatureData, "PNG", M + 2 * sigW + 6 - 5 - 30, y + sigH - 12.5, 30, 10); } catch { /* optionnel */ }
   }
 
   doc.setFont("helvetica", "normal");
