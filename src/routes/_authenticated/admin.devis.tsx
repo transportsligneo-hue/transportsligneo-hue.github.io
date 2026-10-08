@@ -1,3 +1,6 @@
+import { groupedVehicleType, groupedVehicleTypes } from "@/lib/devis-groupe-types";
+import { guessElectricFromModel, isElectricEnergie } from "@/lib/vehicule-electrique";
+import { Zap as ZapIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -671,7 +674,9 @@ function AdminDevisPage() {
                           type?: string | null;
                           type_trajet?: string | null;
                         };
-                        const hasR = !!(vr.immatriculation_retour || vr.marque_retour || vr.type === "aller-retour" || vr.type_trajet === "aller-retour");
+                        const hasR = groupedVehicleType(vr, i, d.message) === "aller-retour";
+                        const elec = isElectricEnergie(d.carburant) || guessElectricFromModel(v.marque, v.modele);
+                        const elecR = guessElectricFromModel(vr.marque_retour, vr.modele_retour);
                         return (
                         <div key={i} className="dvx-veh">
                           <div className="flex items-start justify-between gap-2">
