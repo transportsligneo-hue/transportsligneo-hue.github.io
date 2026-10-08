@@ -582,6 +582,18 @@ function AdminDevisPage() {
                     const vehAller = [d.marque, d.modele].filter(Boolean).join(" ") || d.type_vehicule || "—";
                     const vehRetour = [dx.marque_retour, dx.modele_retour].filter(Boolean).join(" ");
                     const hasRetourVeh = !!(dx.immatriculation_retour || vehRetour);
+                    if (vehicules.length > 1) {
+                      return (
+                        <div className="min-w-0">
+                          <p className="dvx-col-k">Véhicules</p>
+                          <span className="dvx-tag">
+                            <Layers size={13} className="text-[#2f5fff]" />
+                            Véhicules multiples ({vehicules.length})
+                          </span>
+                          <p className="mt-1 text-[11px] text-[#a3a4ac]">Plaques détaillées ci-dessous</p>
+                        </div>
+                      );
+                    }
                     return (
                       <div className="min-w-0">
                         <p className="dvx-col-k">{hasRetourVeh ? "Véhicules (L + R)" : "Véhicule"}</p>
