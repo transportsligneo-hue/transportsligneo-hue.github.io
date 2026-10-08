@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useId, useMemo, useState } from "react";
 import type { FavoriteAddressRow } from "@/components/dashboard-pro/FavoriteAddressesManager";
+import { isElectricEnergie } from "@/lib/vehicule-electrique";
 import { lookupPlate } from "@/lib/plate.functions";
 import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
 import { fetchDeliveryRechargeSurcharge } from "@/lib/client-pricing";
@@ -403,8 +404,8 @@ function AdminNouveauDevisPage() {
           if (d.modele) setModeleRetour(d.modele);
           if (d.vin) setVinRetour(d.vin.toUpperCase());
         }
-        const carb = (d.carburant ?? "").toLowerCase();
-        const isElec = carb.includes("élec") || carb.includes("elec") || carb.includes("ev");
+        const carb = d.energie || d.carburant || "";
+        const isElec = isElectricEnergie(carb);
         setMsg({
           type: "ok",
           text: `Véhicule trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}${
@@ -500,7 +501,7 @@ function AdminNouveauDevisPage() {
           marque: d.marque || line.marque,
           modele: d.modele || line.modele,
           vin: d.vin ? normalizeVin(d.vin) : line.vin,
-          carburant: d.carburant || null,
+          carburant: d.energie || d.carburant || null,
           msg: `Trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}`,
         });
       }
@@ -528,7 +529,7 @@ function AdminNouveauDevisPage() {
           marqueRetour: d.marque || line.marqueRetour,
           modeleRetour: d.modele || line.modeleRetour,
           vinRetour: d.vin ? normalizeVin(d.vin) : line.vinRetour,
-          carburantRetour: d.carburant || null,
+          carburantRetour: d.energie || d.carburant || null,
           msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee, d.carburant].filter(Boolean).join(" ")}`,
         });
       }
