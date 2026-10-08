@@ -16,8 +16,26 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
+import {
+  GROUPED_TRIP_CHOICES,
+  groupedDestination,
+  groupedResolverTrip,
+  groupedStandardTrip,
+  groupedTripLabel,
+  type GroupedTripType,
+} from "@/lib/grouped-mission-type";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/groupee")({
+  head: () => ({
+    meta: [
+      { title: "Mission groupée | Transports Ligneo" },
+      { name: "description", content: "Créer une mission groupée avec plusieurs types de trajet dans votre espace Transports Ligneo." },
+      { property: "og:title", content: "Mission groupée | Transports Ligneo" },
+      { property: "og:description", content: "Créer une mission groupée avec plusieurs types de trajet dans votre espace Transports Ligneo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: GroupedMissionForm,
 });
 
@@ -54,6 +72,7 @@ type VehicleRow = {
   km: string;
   notes: string;
   arrivee: string;
+  tripType: GroupedTripType;
   open: boolean;
   busy: boolean;
   options: Partial<Record<OptionKey, boolean>>;
@@ -63,7 +82,7 @@ type VehicleRow = {
 const newRow = (): VehicleRow => ({
   key: crypto.randomUUID(),
   immat: "", marque: "", modele: "", energie: "", type: "", vin: "", km: "", notes: "",
-  arrivee: "", open: false, busy: false, options: {}, optionsOverride: false,
+  arrivee: "", tripType: "aller-simple", open: false, busy: false, options: {}, optionsOverride: false,
 });
 
 const fieldCls = "qm-input";
@@ -194,9 +213,14 @@ function GroupedMissionForm() {
     }
   };
 
-  const destFor = useCallback(
+  const enteredDestFor = useCallback(
     (r: VehicleRow) => (sameDest ? commonArrivee : r.arrivee),
     [sameDest, commonArrivee],
+  );
+
+  const destFor = useCallback(
+    (r: VehicleRow) => groupedDestination(r.tripType, depart, enteredDestFor(r)),
+    [depart, enteredDestFor],
   );
 
   const filledRows = useMemo(
@@ -205,7 +229,7 @@ function GroupedMissionForm() {
   );
 
   // Estimation par véhicule — même moteur tarifaire que Mission simple
-  const rowsSignature = filledRows.map((r) => `${r.key}|${destFor(r)}|${JSON.stringify(r.optionsOverride ? r.options : options)}`).join(";");
+  const rowsSignature = filledRows.map((r) => `${r.key}|${r.tripType}|${destFor(r)}|${JSON.stringify(r.optionsOverride ? r.options : options)}`).join(";");
   useEffect(() => {
     if (!profile || !depart) { setPrices({}); return; }
     if (filledRows.length === 0) { setPrices({}); return; }
@@ -222,7 +246,7 @@ function GroupedMissionForm() {
             email: profile.email,
             depart,
             arrivee: arr,
-            tripType: "aller",
+            tripType: groupedResolverTrip(r.tripType),
           });
           if (custom) {
             const sup = computeOptionSupplements({
@@ -233,10 +257,10 @@ function GroupedMissionForm() {
             continue;
           }
         } catch { /* fallback standard */ }
-        let std = calculateBasePrice(depart, arr, "aller_simple");
+        let std = calculateBasePrice(depart, arr, groupedStandardTrip(r.tripType));
         if (std.base <= 0) {
           const km = await resolveDistanceKm(depart, arr);
-          std = calculateBasePrice(depart, arr, "aller_simple", km);
+          std = calculateBasePrice(depart, arr, groupedStandardTrip(r.tripType), km);
         }
         if (std.base > 0) {
           const sup = computeOptionSupplements({
@@ -291,6 +315,7 @@ function GroupedMissionForm() {
             km: r.km ? parseInt(r.km, 10) : null,
             notes: r.notes || null,
             arrivee: destFor(r),
+            tripType: r.tripType,
             prixTtc: prices[r.key] ?? 0,
             optionsMeta: Object.fromEntries(
               Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
@@ -497,6 +522,26 @@ function GroupedMissionForm() {
                   </div>
                 )}
 
+                <div className="mt-3">
+                  <span className={labelCls}>Type de trajet</span>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {GROUPED_TRIP_CHOICES.map((choice) => (
+                      <button
+                        key={choice.value}
+                        type="button"
+                        onClick={() => patchRow(r.key, { tripType: choice.value })}
+                        className={`rounded-[9px] border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                          r.tripType === choice.value
+                            ? "border-[#2f5fff] bg-[#eef2ff] text-[#2f5fff]"
+                            : "border-slate-200 bg-white text-slate-600"
+                        }`}
+                      >
+                        {choice.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => patchRow(r.key, { open: !r.open })}
@@ -636,6 +681,7 @@ function GroupedMissionForm() {
                   <span className="text-[11px] text-slate-400">{r.immat}</span>
                 </td>
                 <td className="border-b border-slate-200 px-2.5 py-3 text-slate-600">
+                  <span className="block font-semibold text-slate-900">{groupedTripLabel(r.tripType)}</span>
                   {depart || "—"} → {destFor(r) || "—"}
                 </td>
                 <td className="border-b border-slate-200 px-2.5 py-3 text-right font-semibold text-slate-900">
