@@ -15,7 +15,7 @@ export interface LivePointLite {
 }
 
 /** Au-delà de ce délai sans position, le signal est considéré comme perdu (envoi ~4 s en route, ~30 s à l'arrêt). */
-export const SIGNAL_STALE_MIN = 2;
+export const SIGNAL_STALE_MIN = 15;
 
 /** Seuil de déplacement (km) entre deux points pour considérer le véhicule en mouvement. */
 const MOVE_KM = 0.25;
