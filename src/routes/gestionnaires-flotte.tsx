@@ -11,7 +11,7 @@ export const Route = createFileRoute("/gestionnaires-flotte")({
       brochures={["gestionnaires", "entreprises"]}
       title="Une vision centralisée de tous vos"
       accent="mouvements de véhicules."
-      subtitle={D}
+      subtitle="Une vision centralisée de tous vos mouvements de véhicules : tableau de bord, coûts, historique, TCO, alertes, reporting et multi-sites."
       benefits={[
         { t: "Pilotez 50, 100 ou 500 véhicules depuis un seul espace", d: "Tableau de bord de flotte centralisé." },
         { t: "Maîtrisez vos coûts", d: "Coûts par site, par véhicule et TCO." },
