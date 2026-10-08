@@ -1020,7 +1020,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     try {
       const tw = 40;
       const th = tw * (442 / 1200);
-      doc.addImage(tamponData, "PNG", M + sigW + sigW - tw - 4, y + 4.2, tw, th, "tampon-ligneo", "FAST", 3);
+      doc.addImage(tamponData, "PNG", M + sigW + 30, y + 4.6, tw, th, "tampon-ligneo", "FAST", 3);
     } catch { /* optionnel */ }
   }
   if (signatureData) {
