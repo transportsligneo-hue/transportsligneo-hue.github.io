@@ -107,6 +107,14 @@ export function ConvoyeurSidebar({ items, children }: Props) {
           <div className="flex items-center gap-2 shrink-0">
             <NotificationBell />
             <button
+              onClick={() => logout()}
+              className="w-9 h-9 rounded-xl border border-[rgba(52,230,140,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
+              aria-label="Déconnexion"
+              title="Déconnexion"
+            >
+              <LogOut size={16} />
+            </button>
+            <button
               onClick={() => setMobileMenuOpen(true)}
               className="w-9 h-9 rounded-xl border border-[rgba(52,230,140,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
               aria-label="Menu"
