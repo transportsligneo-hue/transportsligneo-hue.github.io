@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Harmoniser « Suivre ma mission » avec le GPS partagé en direct et la voiture Ligneo bleu électrique.
 
 - [x] Brochures PDF professionnelles : téléchargements dans le menu professionnel, sur chaque page métier concernée et sur la page professionnelle complète.
 
