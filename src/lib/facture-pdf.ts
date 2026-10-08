@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
 import signatureGo from "@/assets/signature-go.png";
+import tamponLigneo from "@/assets/tampon-ligneo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { parseDevisOptions, parseDevisSupplements } from "@/lib/devis-pdf";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
@@ -154,6 +155,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const innerW = pageW - M * 2;
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  const tamponData = await loadImageAsDataUrl(tamponLigneo);
   // Logo du client (comme sur le devis) — affiché dans le bloc « Facturé à ».
   const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
@@ -548,6 +550,25 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     my += lines.length * mentionLeading + mentionGap;
   }
   y += mentionsH;
+
+  // ---------- Cachet officiel + signature ----------
+  // Posé à la main au-dessus du pied de page, à droite, comme sur les devis.
+  const stampSpace = pageH - 21 - y;
+  if (stampSpace >= 18) {
+    const th = 40 * (442 / 1200);
+    const sx = R - 40 - 2;
+    const sy = pageH - 21 - th - 1.5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.3);
+    doc.setTextColor(...INK);
+    doc.text("Olivier Gourlaouen — Fondateur", L, sy + th - 2);
+    if (tamponData) {
+      try { doc.addImage(tamponData, "PNG", sx, sy, 40, th, "tampon-ligneo-net", "NONE", 3); } catch { /* optionnel */ }
+    }
+    if (signatureData) {
+      try { doc.addImage(signatureData, "PNG", sx + 16, sy + 3.6, 30, 12); } catch { /* optionnel */ }
+    }
+  }
 
   // ---------- Pied de page ----------
   const siren = toSiren(co?.siret);
