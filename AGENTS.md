@@ -16,3 +16,4 @@
 - Scope public profile accent styles to explicit audience markers on each marketing section, so professional violet and particular blue remain independent in both themes.
 - Render the public demo-request dialog at the document root, not inside the navigation dropdown, so fixed positioning stays viewport-centered and never clips behind the header.
 - Keep professional PDF brochures in a shared public marketing catalogue used by the professional menu and métier pages, so download labels and files stay consistent without entering signed-in workspaces.
+- Read the delivery-recharge surcharge from the shared pricing settings and keep trip recharge as its existing independent option, so simple and grouped fleet missions calculate both consistently.

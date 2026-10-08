@@ -239,6 +239,13 @@
       "when": 1791459639948,
       "tag": "0033_brouillons_devis_et_livraison",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1791460286206,
+      "tag": "0034_add_recharge_delivery_surcharge",
+      "breakpoints": true
     }
   ]
 }

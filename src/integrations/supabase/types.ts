@@ -6399,6 +6399,7 @@ export type Database = {
           currency: string
           default_vat_rate: number
           id: boolean
+          recharge_delivery_surcharge: number
           regime: string
           updated_at: string
           updated_by: string | null
@@ -6408,6 +6409,7 @@ export type Database = {
           currency?: string
           default_vat_rate?: number
           id?: boolean
+          recharge_delivery_surcharge?: number
           regime?: string
           updated_at?: string
           updated_by?: string | null
@@ -6417,6 +6419,7 @@ export type Database = {
           currency?: string
           default_vat_rate?: number
           id?: boolean
+          recharge_delivery_surcharge?: number
           regime?: string
           updated_at?: string
           updated_by?: string | null

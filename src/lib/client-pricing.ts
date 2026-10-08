@@ -10,6 +10,7 @@ export type ResolverTripType = "aller" | "aller_retour" | "express";
 
 export type OptionKey =
   | "recharge_electrique"
+  | "recharge_electrique_livraison"
   | "plein_essence"
   | "nettoyage"
   | "mise_en_main"
@@ -23,6 +24,25 @@ export interface ResolvedClientPrice {
   ville_depart: string | null;
   ville_arrivee: string | null;
   supplements: Partial<Record<OptionKey, number>>;
+}
+
+export const DEFAULT_DELIVERY_RECHARGE_SURCHARGE = 25;
+
+export function normalizeDeliveryRechargeSurcharge(value: unknown): number {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount >= 0
+    ? Math.round(amount * 100) / 100
+    : DEFAULT_DELIVERY_RECHARGE_SURCHARGE;
+}
+
+export async function fetchDeliveryRechargeSurcharge(): Promise<number> {
+  const { data, error } = await supabase
+    .from("pricing_settings")
+    .select("recharge_delivery_surcharge")
+    .eq("id", true)
+    .maybeSingle();
+  if (error) return DEFAULT_DELIVERY_RECHARGE_SURCHARGE;
+  return normalizeDeliveryRechargeSurcharge(data?.recharge_delivery_surcharge);
 }
 
 interface RuleRow {
@@ -172,7 +192,8 @@ export function computeOptionSupplements(
   optionsChecked: Partial<Record<OptionKey, boolean>>,
 ): { total: number; lines: { key: OptionKey; label: string; amount: number }[] } {
   const labels: Record<OptionKey, string> = {
-    recharge_electrique: "Recharge électrique",
+    recharge_electrique: "Recharge électrique pour trajet",
+    recharge_electrique_livraison: "Recharge électrique pour livraison",
     plein_essence: "Appoint carburant",
     nettoyage: "Nettoyage véhicule",
     mise_en_main: "Mise en main du véhicule",

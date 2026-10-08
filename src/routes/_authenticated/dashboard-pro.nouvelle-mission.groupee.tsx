@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
-import { resolveClientPrice, computeOptionSupplements, type OptionKey } from "@/lib/client-pricing";
+import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurcharge, DEFAULT_DELIVERY_RECHARGE_SURCHARGE, type OptionKey } from "@/lib/client-pricing";
 import { isValidVinFormat, normalizeVin } from "@/lib/vin";
 import { lookupPlate } from "@/lib/plate.functions";
 import PlacesInput from "@/components/PlacesInput";
@@ -24,7 +24,8 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mis
 const VAT_RATE = 0.2;
 
 const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Zap }[] = [
-  { key: "recharge_electrique", label: "Recharge électrique", desc: "Brancher pour le trajet", Icon: Zap },
+  { key: "recharge_electrique", label: "Recharge électrique pour trajet", desc: "Brancher pour le trajet", Icon: Zap },
+  { key: "recharge_electrique_livraison", label: "Recharge électrique pour livraison", desc: "Recharge avant la remise du véhicule", Icon: Zap },
   { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
   { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
@@ -100,8 +101,13 @@ function GroupedMissionForm() {
 
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [pricing, setPricing] = useState(false);
+  const [deliveryRechargeSurcharge, setDeliveryRechargeSurcharge] = useState(DEFAULT_DELIVERY_RECHARGE_SURCHARGE);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ ref: string; count: number; devisId: string | null } | null>(null);
+
+  useEffect(() => {
+    void fetchDeliveryRechargeSurcharge().then(setDeliveryRechargeSurcharge);
+  }, []);
 
   // Chargement profil + adresses favorites
   useEffect(() => {
@@ -219,7 +225,10 @@ function GroupedMissionForm() {
             tripType: "aller",
           });
           if (custom) {
-            const sup = computeOptionSupplements(custom.supplements, opts);
+            const sup = computeOptionSupplements({
+              ...custom.supplements,
+              recharge_electrique_livraison: deliveryRechargeSurcharge,
+            }, opts);
             out[r.key] = Math.round((custom.prix_ttc + sup.total) * 100) / 100;
             continue;
           }
@@ -229,13 +238,18 @@ function GroupedMissionForm() {
           const km = await resolveDistanceKm(depart, arr);
           std = calculateBasePrice(depart, arr, "aller_simple", km);
         }
-        if (std.base > 0) out[r.key] = std.base;
+        if (std.base > 0) {
+          const sup = computeOptionSupplements({
+            recharge_electrique_livraison: deliveryRechargeSurcharge,
+          }, opts);
+          out[r.key] = Math.round((std.base + sup.total) * 100) / 100;
+        }
       }
       if (!cancelled) { setPrices(out); setPricing(false); }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [depart, rowsSignature, profile, user]);
+  }, [depart, rowsSignature, profile, user, deliveryRechargeSurcharge]);
 
   const total = useMemo(
     () => filledRows.reduce((s, r) => s + (prices[r.key] ?? 0), 0),
@@ -531,7 +545,7 @@ function GroupedMissionForm() {
                               r.options[o.key] ? "border-[#2f5fff] bg-[#eef2ff] text-[#2f5fff]" : "border-slate-200 bg-white text-slate-600"
                             }`}
                           >
-                            {o.label}
+                            {o.label}{o.key === "recharge_electrique_livraison" ? ` (+${deliveryRechargeSurcharge} €)` : ""}
                           </button>
                         ))}
                       </div>
@@ -572,7 +586,9 @@ function GroupedMissionForm() {
                   {checked && <Check className="h-3 w-3" />}
                 </span>
                 <span>
-                  <b className="block text-[12.5px] text-slate-900">{o.label}</b>
+                  <b className="block text-[12.5px] text-slate-900">
+                    {o.label}{o.key === "recharge_electrique_livraison" ? ` (+${deliveryRechargeSurcharge} €)` : ""}
+                  </b>
                   <span className="text-[11px] text-slate-400">{o.desc}</span>
                 </span>
               </button>

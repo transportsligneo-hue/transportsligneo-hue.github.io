@@ -180,7 +180,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     const entries = Object.entries(sup).filter(([, v]) => Number(v) > 0);
     if (entries.length === 0) return null;
     const labels: Record<string, string> = {
-      recharge_electrique: "Recharge",
+      recharge_electrique: "Recharge pour trajet",
       plein_essence: "Plein",
       nettoyage: "Nettoyage",
       mise_en_main: "Mise en main",
