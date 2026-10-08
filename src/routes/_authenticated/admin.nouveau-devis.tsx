@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+import type { FavoriteAddressRow } from "@/components/dashboard-pro/FavoriteAddressesManager";
 import { lookupPlate } from "@/lib/plate.functions";
 import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
 import { fetchDeliveryRechargeSurcharge } from "@/lib/client-pricing";
@@ -107,18 +108,40 @@ function AddressField({
   value,
   onChange,
   placeholder,
+  favorites = [],
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  favorites?: FavoriteAddressRow[];
 }) {
+  const inputId = useId();
   return (
     <div>
-      <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+      <label htmlFor={inputId} className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
         {label}
       </label>
+      {favorites.length > 0 && (
+        <select
+          aria-label={`Adresses favorites : ${label}`}
+          value=""
+          onChange={(event) => {
+            const favorite = favorites.find((item) => item.id === event.target.value);
+            if (favorite) onChange(formatFavoriteAddress(favorite));
+          }}
+          className="mb-2 w-full rounded-lg border border-pro-border bg-pro-bg-soft px-3 py-2 text-sm text-pro-text focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+        >
+          <option value="">Choisir une adresse favorite du client</option>
+          {favorites.map((favorite) => (
+            <option key={favorite.id} value={favorite.id}>
+              {favorite.label} · {formatFavoriteAddress(favorite)}
+            </option>
+          ))}
+        </select>
+      )}
       <PlacesInput
+        inputId={inputId}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
@@ -127,6 +150,11 @@ function AddressField({
       />
     </div>
   );
+}
+
+function formatFavoriteAddress(favorite: FavoriteAddressRow): string {
+  return [favorite.address, [favorite.code_postal, favorite.ville].filter(Boolean).join(" ")]
+    .filter(Boolean).join(", ");
 }
 
 const RECHARGE_LIVRAISON_LABEL = "Recharge électrique pour livraison";
@@ -152,7 +180,7 @@ const SUPPLEMENTS_LIST = [
   { id: "treuillage", label: "Treuillage véhicule non roulant", defaut: 90 },
 ] as const;
 
-const RECHARGE_SEULE = "Recharge uniquement (sans livraison)";
+const RECHARGE_SEULE = "Recharge électrique uniquement";
 
 
 const TRAJET_TYPES = [
@@ -187,7 +215,7 @@ const ADMIN_DRAFT_KEY = "ligneo:admin-devis-groupe-brouillon";
 const VEH_TYPES: { v: VehLine["type"]; l: string }[] = [
   { v: "aller-simple", l: "Livraison simple" },
   { v: "aller-retour", l: "Livraison + restitution" },
-  { v: "recharge", l: "Recharge uniquement" },
+  { v: "recharge", l: "Recharge électrique uniquement" },
 ];
 
 const newVeh = (): VehLine => ({
@@ -213,6 +241,7 @@ function AdminNouveauDevisPage() {
   const [results, setResults] = useState<ClientRow[]>([]);
   const [searching, setSearching] = useState(false);
   const [client, setClient] = useState<ClientRow | null>(null);
+  const [favorites, setFavorites] = useState<FavoriteAddressRow[]>([]);
   const [autofillNote, setAutofillNote] = useState<string | null>(null);
 
   const [mode, setMode] = useState<"simple" | "groupe">("simple");
@@ -398,35 +427,51 @@ function AdminNouveauDevisPage() {
 
 
 
-  const selectClient = async (c: ClientRow) => {
+  const selectClient = (c: ClientRow) => {
     setClient(c);
     setResults([]);
     setSearch("");
     setEmailTo(c.email ?? "");
     setAutofillNote(null);
-
-    const { data } = await supabase
-      .from("client_default_addresses")
-      .select("address, ville, code_postal, is_default, address_type, active")
-      .eq("client_email", c.email ?? "")
-      .eq("active", true)
-      .order("is_default", { ascending: false })
-      .limit(10);
-
-    const fav = (data ?? []).find(
-      (a) => a.address_type === "depart" || a.address_type === "both",
-    );
-    if (fav) {
-      const full = [fav.address, [fav.code_postal, fav.ville].filter(Boolean).join(" ")]
-        .filter(Boolean)
-        .join(", ");
-      setDepart(full);
-      setAutofillNote(`Adresse favorite préremplie automatiquement : ${full}`);
-    } else if (c.adresse) {
+    setFavorites([]);
+    if (c.adresse) {
       setDepart(c.adresse);
       setAutofillNote(`Adresse du profil préremplie : ${c.adresse}`);
     }
   };
+
+  useEffect(() => {
+    setFavorites([]);
+    if (!client?.user_id && !client?.email) return;
+    let cancelled = false;
+    const loadFavorites = async () => {
+      let query = supabase.from("client_default_addresses").select("*").eq("active", true);
+      const email = client.email?.trim().toLowerCase();
+      if (client.user_id && email) {
+        query = query.or(`client_user_id.eq.${client.user_id},client_email.eq.${JSON.stringify(email)}`);
+      } else if (client.user_id) {
+        query = query.eq("client_user_id", client.user_id);
+      } else if (email) {
+        query = query.eq("client_email", email);
+      } else return;
+      const { data, error } = await query.order("is_default", { ascending: false });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Impossible de charger les adresses favorites du client");
+        return;
+      }
+      const addresses = (data ?? []) as FavoriteAddressRow[];
+      setFavorites(addresses);
+      const favorite = addresses.find((item) => item.address_type === "depart" || item.address_type === "both");
+      if (favorite) {
+        const full = formatFavoriteAddress(favorite);
+        setDepart(full);
+        setAutofillNote(`Adresse favorite préremplie automatiquement : ${full}`);
+      }
+    };
+    void loadFavorites();
+    return () => { cancelled = true; };
+  }, [client?.user_id, client?.email]);
 
   const isGroupe = mode === "groupe";
 
@@ -534,7 +579,7 @@ function AdminNouveauDevisPage() {
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
   const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
-  const isRechargeSeule = typeTrajet === RECHARGE_SEULE;
+  const isRechargeSeule = !isGroupe && typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
     ? isGroupe
       ? "Recharge véhicule uniquement (sans livraison) — devis groupé multi-véhicules"
@@ -543,7 +588,7 @@ function AdminNouveauDevisPage() {
       ? "Convoyage automobile (devis groupé multi-véhicules)"
       : "Convoyage automobile";
   const optionTrajetLabel = isGroupe
-    ? `${typeTrajet} — devis groupé (${groupLines.length} véhicule${groupLines.length > 1 ? "s" : ""})`
+    ? `Devis groupé (${groupLines.length} véhicule${groupLines.length > 1 ? "s" : ""})`
     : typeTrajet;
 
   /** VIN exigé uniquement si la fiche client a l'option « VIN obligatoire ». */
@@ -567,7 +612,7 @@ function AdminNouveauDevisPage() {
 
   const recapMessage = [
     isGroupe
-      ? `Devis groupé : ${groupLines.length} véhicules — Type de prestation : ${typeTrajet}`
+      ? `Devis groupé : ${groupLines.length} véhicules`
       : `Type de trajet : ${typeTrajet}`,
     ...(isGroupe
       ? groupPayload.map(
@@ -1021,6 +1066,7 @@ function AdminNouveauDevisPage() {
           </div>
           <div className="space-y-4">
             <AddressField
+              favorites={favorites}
               label={isRechargeSeule ? "Adresse d'intervention" : "Adresse de départ"}
               value={depart}
               onChange={setDepart}
@@ -1028,20 +1074,21 @@ function AdminNouveauDevisPage() {
             />
             {!isRechargeSeule && (
               <AddressField
+                favorites={favorites}
                 label={isGroupe ? "Adresse d'arrivée commune" : "Adresse d'arrivée"}
                 value={arrivee}
                 onChange={setArrivee}
                 placeholder="Ex : 5 avenue de la République, Le Mans"
               />
             )}
-            {(
+            {!isGroupe && (
               <div>
                 <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-                  {isGroupe ? "Type de prestation (appliqué à tous les véhicules)" : "Type de trajet"}
+                  Type de trajet
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {TRAJET_TYPES.map((t) => (
-                    <button
+                    <Button
                       key={t}
                       type="button"
                       onClick={() => {
@@ -1051,6 +1098,7 @@ function AdminNouveauDevisPage() {
                           setOptions((prev) => (prev.includes(elecLabel) ? prev : [...prev, elecLabel]));
                         }
                       }}
+                      variant="secondary"
                       className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-semibold transition ${
                         typeTrajet === t
                           ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
@@ -1058,7 +1106,7 @@ function AdminNouveauDevisPage() {
                       }`}
                     >
                       {t}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 {isRechargeSeule && (
@@ -1431,18 +1479,19 @@ function AdminNouveauDevisPage() {
                     {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
                     <div className="flex flex-wrap gap-2">
                       {VEH_TYPES.map((t) => (
-                        <button
+                        <Button
                           key={t.v}
                           type="button"
+                          variant="secondary"
                           onClick={() => patchVeh(v.key, { type: t.v })}
                           className={`rounded-lg border px-3 py-2 text-[12.5px] font-semibold transition ${
                             v.type === t.v
-                              ? "border-pro-accent bg-pro-accent text-white"
-                              : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
+                              ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
+                              : "border-pro-border bg-pro-surface text-pro-text hover:border-pro-accent/50"
                           }`}
                         >
                           {t.l}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     {v.type === "aller-retour" && (
@@ -1476,8 +1525,9 @@ function AdminNouveauDevisPage() {
                       <Field label={vinRequis ? "VIN *" : "VIN"} value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
-                    {!isRechargeSeule && (
+                    {v.type !== "recharge" && (
                       <AddressField
+                        favorites={favorites}
                         label="Adresse de livraison (si différente)"
                         value={v.arrivee}
                         onChange={(x) => patchVeh(v.key, { arrivee: x })}
@@ -1597,12 +1647,14 @@ function AdminNouveauDevisPage() {
                 </div>
                 <Field label={vinRequis ? "VIN retour *" : "VIN retour"} value={vinRetour} onChange={(v) => setVinRetour(normalizeVin(v))} placeholder="VF1XXXXXXXXXXXXXX" error={validateVin(vinRetour, vinRequis).error} />
                 <AddressField
+                  favorites={favorites}
                   label="Adresse de départ (retour)"
                   value={departRetour}
                   onChange={setDepartRetour}
                   placeholder={arrivee || "Par défaut : adresse d'arrivée de l'aller"}
                 />
                 <AddressField
+                  favorites={favorites}
                   label="Adresse d'arrivée (retour)"
                   value={arriveeRetour}
                   onChange={setArriveeRetour}
