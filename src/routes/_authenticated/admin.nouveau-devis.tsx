@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { lookupPlate } from "@/lib/plate.functions";
 import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
+import { fetchDeliveryRechargeSurcharge } from "@/lib/client-pricing";
 
 import { supabase } from "@/integrations/supabase/client";
 import PlacesInput from "@/components/PlacesInput";
@@ -128,9 +129,12 @@ function AddressField({
   );
 }
 
+const RECHARGE_LIVRAISON_LABEL = "Recharge électrique pour livraison";
+
 const OPTIONS_LIST = [
-  { id: "recharge_elec", label: "Recharge électrique (véhicule électrique)" },
+  { id: "recharge_elec", label: "Recharge électrique pour trajet" },
   { id: "carburant_thermique", label: "Plein de carburant (véhicule thermique)" },
+  { id: "recharge_elec_livraison", label: RECHARGE_LIVRAISON_LABEL },
   { id: "mise_en_main", label: "Mise en main du véhicule" },
   { id: "lavage_ext", label: "Lavage extérieur" },
   { id: "lavage_int", label: "Lavage intérieur" },
@@ -220,6 +224,12 @@ function AdminNouveauDevisPage() {
   const [heureSouhaitee, setHeureSouhaitee] = useState("");
   const [dateRetourInput, setDateRetourInput] = useState("");
   const [heureRetourInput, setHeureRetourInput] = useState("");
+  const [dateLivraison, setDateLivraison] = useState("");
+  const [heureLivraison, setHeureLivraison] = useState("");
+  const [rechargeLivSurcharge, setRechargeLivSurcharge] = useState(25);
+  useEffect(() => {
+    fetchDeliveryRechargeSurcharge().then(setRechargeLivSurcharge).catch(() => {});
+  }, []);
   /** « Date à déterminer » : le planning sera fixé plus tard avec le client. */
   const [dateADeterminer, setDateADeterminer] = useState(false);
   const [dateRetourADeterminer, setDateRetourADeterminer] = useState(false);
@@ -454,8 +464,11 @@ function AdminNouveauDevisPage() {
         .filter((s) => s.montant > 0),
       // Majoration « véhicule de plus de 1,1 t » (plateau uniquement)
       ...(plateau && lourd ? [{ label: HEAVY_LABEL, montant: HEAVY_SURCHARGE }] : []),
+      ...(options.includes(RECHARGE_LIVRAISON_LABEL) && rechargeLivSurcharge > 0
+        ? [{ label: RECHARGE_LIVRAISON_LABEL, montant: rechargeLivSurcharge }]
+        : []),
     ],
-    [supp, plateau, lourd],
+    [supp, plateau, lourd, options, rechargeLivSurcharge],
   );
 
   const totalSupplements = useMemo(
@@ -537,6 +550,9 @@ function AdminNouveauDevisPage() {
     plateau ? `Véhicule de plus de 1,1 t : ${lourd ? "oui" : "non"}` : null,
 
     dateADeterminer ? "Date d'enlèvement : à déterminer avec le client" : null,
+    !dateADeterminer && !isRechargeSeule && (dateLivraison || heureLivraison)
+      ? `Livraison prévue : ${[dateLivraison ? new Date(dateLivraison).toLocaleDateString("fr-FR") : null, heureLivraison].filter(Boolean).join(" à ")}`
+      : null,
     isAllerRetour && dateRetourADeterminer ? "Date de restitution : à déterminer avec le client" : null,
     ...supplements.map((s) => `Supplément : ${s.label} = ${s.montant.toFixed(2)} €`),
     pvLabel ? `PV de livraison digitalisé : ${pvLabel}` : null,
@@ -643,6 +659,8 @@ function AdminNouveauDevisPage() {
 
           date_souhaitee: dateADeterminer ? null : dateSouhaitee || null,
           heure_souhaitee: dateADeterminer ? null : heureSouhaitee || null,
+          date_livraison: dateADeterminer || isRechargeSeule ? null : dateLivraison || null,
+          heure_livraison: dateADeterminer || isRechargeSeule ? null : heureLivraison || null,
           date_retour:
             isAllerRetour && !dateRetourADeterminer
               ? dateRetourInput || (dateADeterminer ? null : dateSouhaitee) || null
@@ -805,12 +823,7 @@ function AdminNouveauDevisPage() {
             <button
               key={m.key}
               type="button"
-              onClick={() => {
-                setMode(m.key);
-                if (m.key === "groupe" && typeTrajet === "Livraison + restitution") {
-                  setTypeTrajet("Livraison simple");
-                }
-              }}
+              onClick={() => setMode(m.key)}
               className={`rounded-xl border px-4 py-3 text-left transition ${
                 mode === m.key
                   ? "border-pro-accent bg-pro-accent/10"
@@ -985,7 +998,7 @@ function AdminNouveauDevisPage() {
                   {isGroupe ? "Type de prestation (appliqué à tous les véhicules)" : "Type de trajet"}
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {TRAJET_TYPES.filter((t) => !isGroupe || t !== "Livraison + restitution").map((t) => (
+                  {TRAJET_TYPES.map((t) => (
                     <button
                       key={t}
                       type="button"
@@ -1204,6 +1217,34 @@ function AdminNouveauDevisPage() {
                   />
                 </div>
               </div>
+              {!isRechargeSeule && (
+                <div className={`mt-4 grid gap-4 sm:grid-cols-2 ${dateADeterminer ? "opacity-40" : ""}`}>
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Date de livraison
+                    </label>
+                    <input
+                      type="date"
+                      disabled={dateADeterminer}
+                      value={dateLivraison}
+                      onChange={(e) => setDateLivraison(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
+                      Heure de livraison
+                    </label>
+                    <input
+                      type="time"
+                      disabled={dateADeterminer}
+                      value={heureLivraison}
+                      onChange={(e) => setHeureLivraison(e.target.value)}
+                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
+                    />
+                  </div>
+                </div>
+              )}
               {isAllerRetour && (
                 <>
                 <label className="mt-4 flex cursor-pointer items-center gap-2 text-[12px] font-semibold text-pro-text">
