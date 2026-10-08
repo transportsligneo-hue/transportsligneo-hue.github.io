@@ -151,6 +151,14 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
           <div className="flex items-center gap-2 text-pro-text-soft">
             <NotificationBell />
             <button
+              onClick={() => logout()}
+              className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
+              aria-label="Déconnexion"
+              title="Déconnexion"
+            >
+              <LogOut size={16} />
+            </button>
+            <button
               onClick={() => setMobileOpen(true)}
               className="w-9 h-9 rounded-md border border-pro-border flex items-center justify-center text-pro-text-soft"
               aria-label="Menu"
