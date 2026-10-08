@@ -2891,6 +2891,182 @@ export type Database = {
         }
         Relationships: []
       }
+      devis_lignes: {
+        Row: {
+          adresse_retour: string | null
+          arrivee: string | null
+          contact_nom: string | null
+          contact_tel: string | null
+          created_at: string
+          date_enlevement: string | null
+          date_livraison: string | null
+          date_restitution: string | null
+          depart: string | null
+          devis_id: string
+          energie: string | null
+          heure_enlevement: string | null
+          heure_livraison: string | null
+          heure_restitution: string | null
+          id: string
+          immatriculation: string | null
+          lot_id: string | null
+          marque: string | null
+          mission_ids: string[]
+          mission_numero: string | null
+          modele: string | null
+          position: number
+          prix_aller: number
+          prix_retour: number
+          statut: string
+          type_ligne: string
+          updated_at: string
+          vin: string | null
+        }
+        Insert: {
+          adresse_retour?: string | null
+          arrivee?: string | null
+          contact_nom?: string | null
+          contact_tel?: string | null
+          created_at?: string
+          date_enlevement?: string | null
+          date_livraison?: string | null
+          date_restitution?: string | null
+          depart?: string | null
+          devis_id: string
+          energie?: string | null
+          heure_enlevement?: string | null
+          heure_livraison?: string | null
+          heure_restitution?: string | null
+          id?: string
+          immatriculation?: string | null
+          lot_id?: string | null
+          marque?: string | null
+          mission_ids?: string[]
+          mission_numero?: string | null
+          modele?: string | null
+          position?: number
+          prix_aller?: number
+          prix_retour?: number
+          statut?: string
+          type_ligne?: string
+          updated_at?: string
+          vin?: string | null
+        }
+        Update: {
+          adresse_retour?: string | null
+          arrivee?: string | null
+          contact_nom?: string | null
+          contact_tel?: string | null
+          created_at?: string
+          date_enlevement?: string | null
+          date_livraison?: string | null
+          date_restitution?: string | null
+          depart?: string | null
+          devis_id?: string
+          energie?: string | null
+          heure_enlevement?: string | null
+          heure_livraison?: string | null
+          heure_restitution?: string | null
+          id?: string
+          immatriculation?: string | null
+          lot_id?: string | null
+          marque?: string | null
+          mission_ids?: string[]
+          mission_numero?: string | null
+          modele?: string | null
+          position?: number
+          prix_aller?: number
+          prix_retour?: number
+          statut?: string
+          type_ligne?: string
+          updated_at?: string
+          vin?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_lignes_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devis_lignes_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "devis_lots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_lots: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          devis_id: string
+          facture_id: string | null
+          id: string
+          nb_lignes: number
+          nb_missions: number
+          nom: string | null
+          numero: number
+          paiement_statut: string
+          signature_data: string | null
+          signed_at: string | null
+          signer_name: string | null
+          statut: string
+          total_ht: number
+          total_ttc: number
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          devis_id: string
+          facture_id?: string | null
+          id?: string
+          nb_lignes?: number
+          nb_missions?: number
+          nom?: string | null
+          numero: number
+          paiement_statut?: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          statut?: string
+          total_ht?: number
+          total_ttc?: number
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          devis_id?: string
+          facture_id?: string | null
+          id?: string
+          nb_lignes?: number
+          nb_missions?: number
+          nom?: string | null
+          numero?: number
+          paiement_statut?: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          statut?: string
+          total_ht?: number
+          total_ttc?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_lots_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       devis_otp_challenges: {
         Row: {
           attempts: number
@@ -5207,6 +5383,7 @@ export type Database = {
           created_at: string
           date_prise_en_charge: string
           devis_id: string | null
+          devis_lot_id: string | null
           email: string
           fleet_organization_id: string | null
           group_reference: string | null
@@ -5252,6 +5429,7 @@ export type Database = {
           created_at?: string
           date_prise_en_charge: string
           devis_id?: string | null
+          devis_lot_id?: string | null
           email: string
           fleet_organization_id?: string | null
           group_reference?: string | null
@@ -5297,6 +5475,7 @@ export type Database = {
           created_at?: string
           date_prise_en_charge?: string
           devis_id?: string | null
+          devis_lot_id?: string | null
           email?: string
           fleet_organization_id?: string | null
           group_reference?: string | null
@@ -8986,6 +9165,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_order_devis: {
+        Args: { _devis_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_read_devis_lots: {
+        Args: { _devis_id: string; _user_id: string }
+        Returns: boolean
+      }
+      cancel_devis_lot: { Args: { _lot_id: string }; Returns: undefined }
       canonical_group_numero: { Args: { p_group_id: string }; Returns: string }
       convoyeur_documents_signes: {
         Args: { _user_id: string }
@@ -9518,6 +9706,16 @@ export type Database = {
         Returns: undefined
       }
       user_site_ids: { Args: { _user_id: string }; Returns: string[] }
+      validate_devis_lot: {
+        Args: {
+          _devis_id: string
+          _ligne_ids: string[]
+          _nom: string
+          _signature: string
+          _signer_name: string
+        }
+        Returns: string
+      }
       verify_certificate: {
         Args: { _token: string }
         Returns: {

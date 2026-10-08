@@ -246,6 +246,13 @@
       "when": 1791460286206,
       "tag": "0034_add_recharge_delivery_surcharge",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1791469737100,
+      "tag": "0035_devis_groupes_lots",
+      "breakpoints": true
     }
   ]
 }
