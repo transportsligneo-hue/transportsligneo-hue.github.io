@@ -203,6 +203,9 @@ type VehLine = {
   arrivee: string;
   type: "aller-simple" | "aller-retour" | "recharge";
   immatRetour?: string;
+  marqueRetour?: string;
+  modeleRetour?: string;
+  vinRetour?: string;
   busyRetour?: boolean;
   msgRetour?: string | null;
   prix: string;
@@ -519,9 +522,9 @@ function AdminNouveauDevisPage() {
       } else {
         const d = r.data;
         patchVeh(line.key, {
-          marque: d.marque || line.marque,
-          modele: d.modele || line.modele,
-          vin: d.vin ? normalizeVin(d.vin) : line.vin,
+          marqueRetour: d.marque || line.marqueRetour,
+          modeleRetour: d.modele || line.modeleRetour,
+          vinRetour: d.vin ? normalizeVin(d.vin) : line.vinRetour,
           msgRetour: `Véhicule retour trouvé : ${[d.marque, d.modele, d.annee].filter(Boolean).join(" ")}`,
         });
       }
@@ -607,6 +610,9 @@ function AdminNouveauDevisPage() {
     arrivee: (v.arrivee.trim() || arrivee.trim()) || null,
     type_trajet: v.type,
     immatriculation_retour: v.type === "aller-retour" ? (v.immatRetour ?? "").trim().toUpperCase() || null : null,
+    marque_retour: v.type === "aller-retour" ? (v.marqueRetour ?? "").trim() || null : null,
+    modele_retour: v.type === "aller-retour" ? (v.modeleRetour ?? "").trim() || null : null,
+    vin_retour: v.type === "aller-retour" ? normalizeVin(v.vinRetour ?? "") || null : null,
     prix: Math.round(parseEur(v.prix) * 100) / 100,
   }));
 
@@ -619,7 +625,7 @@ function AdminNouveauDevisPage() {
           (v, i) =>
             `Véhicule ${i + 1} : ${[v.marque, v.modele].filter(Boolean).join(" ") || "—"}${
               v.immatriculation ? ` (${v.immatriculation})` : ""
-            }${v.immatriculation_retour ? ` · Plaque retour ${v.immatriculation_retour}` : ""}${v.vin ? ` · VIN ${v.vin}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
+            }${v.vin ? ` · VIN ${v.vin}` : ""}${v.immatriculation_retour || v.marque_retour ? ` · Retour : ${[v.marque_retour, v.modele_retour].filter(Boolean).join(" ") || "—"}${v.immatriculation_retour ? ` (${v.immatriculation_retour})` : ""}${v.vin_retour ? ` · VIN ${v.vin_retour}` : ""}` : ""} → ${v.arrivee ?? "—"} · ${v.prix.toFixed(2)} €`,
         )
       : []),
     !isGroupe && immat ? `Immatriculation${isAllerRetour ? " aller" : ""} : ${immat}` : null,
@@ -1517,6 +1523,9 @@ function AdminNouveauDevisPage() {
                         {v.msgRetour && <p className="mt-1 text-[12px] font-medium text-pro-muted">{v.msgRetour}</p>}
                       </div>
                     )}
+                    {v.type === "aller-retour" && (
+                      <p className="text-[12px] font-bold uppercase tracking-wider text-pro-accent">Véhicule livré</p>
+                    )}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <Field label="Marque" value={v.marque} onChange={(x) => patchVeh(v.key, { marque: x })} placeholder="Ex : Peugeot" />
                       <Field label="Modèle" value={v.modele} onChange={(x) => patchVeh(v.key, { modele: x })} placeholder="Ex : 208 GT" />
@@ -1525,6 +1534,16 @@ function AdminNouveauDevisPage() {
                       <Field label={vinRequis ? "VIN *" : "VIN"} value={v.vin} onChange={(x) => patchVeh(v.key, { vin: normalizeVin(x) })} placeholder="VF3XXXXXXXXXXXXXX" error={v.vin.length > 0 && !isValidVinFormat(v.vin) ? "VIN invalide" : undefined} />
                       <Field label="Montant TTC (€)" value={v.prix} onChange={(x) => patchVeh(v.key, { prix: x })} placeholder="120,00" />
                     </div>
+                    {v.type === "aller-retour" && (
+                      <>
+                        <p className="text-[12px] font-bold uppercase tracking-wider text-pro-accent">Véhicule restitué {v.immatRetour ? `(${v.immatRetour})` : ""}</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Field label="Marque retour" value={v.marqueRetour ?? ""} onChange={(x) => patchVeh(v.key, { marqueRetour: x })} placeholder="Ex : Renault" />
+                          <Field label="Modèle retour" value={v.modeleRetour ?? ""} onChange={(x) => patchVeh(v.key, { modeleRetour: x })} placeholder="Ex : Zoe" />
+                        </div>
+                        <Field label="VIN retour" value={v.vinRetour ?? ""} onChange={(x) => patchVeh(v.key, { vinRetour: normalizeVin(x) })} placeholder="VF1XXXXXXXXXXXXXX" error={(v.vinRetour ?? "").length > 0 && !isValidVinFormat(v.vinRetour ?? "") ? "VIN invalide" : undefined} />
+                      </>
+                    )}
                     {v.type !== "recharge" && (
                       <AddressField
                         favorites={favorites}
