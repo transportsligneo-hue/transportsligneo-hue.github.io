@@ -253,6 +253,13 @@
       "when": 1791469737100,
       "tag": "0035_devis_groupes_lots",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1791485258269,
+      "tag": "0036_close_anon_security_definer_functions",
+      "breakpoints": true
     }
   ]
 }
