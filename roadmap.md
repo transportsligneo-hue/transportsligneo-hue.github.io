@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Corriger l’affichage des deux options Recharge dans les missions simples et ajouter le choix par véhicule (livraison simple, livraison + restitution, recharge uniquement) dans les missions groupées.
 - [x] Missions flotte simples et groupées : distinguer recharge trajet et recharge livraison (+25 € configurable par l'admin), sans modifier les autres tarifs.
 - [ ] Harmoniser « Suivre ma mission » avec le GPS partagé en direct et la voiture Ligneo bleu électrique.
 
