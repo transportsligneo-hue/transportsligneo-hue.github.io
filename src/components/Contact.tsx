@@ -43,6 +43,9 @@ export default function Contact({ onProfilChange }: { onProfilChange?: (profil: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Champ piège invisible : seuls les robots le remplissent
+    const trap = (e.currentTarget as HTMLFormElement).elements.namedItem("site_web") as HTMLInputElement | null;
+    if (trap?.value) { setStatus("success"); return; }
     setStatus("sending");
 
     const messageEnrichi =
@@ -140,6 +143,7 @@ ${form.message}`;
         </div>
 
         <form onSubmit={handleSubmit} className="v4-glass v4-form-card">
+          <input type="text" name="site_web" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} />
           <div className="v4-form-tabs">
              <button type="button" className={`t ${profil === "particulier" ? "active" : ""}`} onClick={() => { setProfil("particulier"); onProfilChange?.("particulier"); }}>Particulier</button>
              <button type="button" className={`t t-pro ${profil === "pro" ? "active" : ""}`} onClick={() => { setProfil("pro"); onProfilChange?.("pro"); }}>Professionnel</button>
