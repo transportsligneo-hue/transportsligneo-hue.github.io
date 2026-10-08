@@ -149,7 +149,7 @@ function statutBadgeTone(s: string): string {
 function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation" | "vehicules" | "message">) {
   const veh = (d.vehicules ?? []).filter(Boolean);
   if (veh.length > 1) {
-    const types = groupedVehicleTypes(veh, d.message);
+    const types = groupedVehicleTypes(veh as never[], d.message);
     const labels = [
       types.simple ? "Livraison simple" : null,
       types.retour ? "Livraison + restitution" : null,
