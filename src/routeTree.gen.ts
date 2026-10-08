@@ -197,6 +197,7 @@ import { Route as ApiPublicB2bLeadCreatedRouteImport } from './routes/api/public
 import { Route as AuthenticatedFlotteMissionsMissionIdRouteImport } from './routes/_authenticated/flotte.missions.$missionId'
 import { Route as AuthenticatedDashboardProNouvelleMissionGroupeeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission.groupee'
 import { Route as AuthenticatedDashboardProMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-pro.missions.$missionId'
+import { Route as AuthenticatedDashboardProDevisGroupeDevisIdRouteImport } from './routes/_authenticated/dashboard-pro.devis-groupe.$devisId'
 import { Route as AuthenticatedDashboardClientMissionsMissionIdRouteImport } from './routes/_authenticated/dashboard-client.missions.$missionId'
 import { Route as AuthenticatedConvoyeurFormationFaqRouteImport } from './routes/_authenticated/convoyeur.formation.faq'
 import { Route as AuthenticatedConvoyeurFormationDocumentsRouteImport } from './routes/_authenticated/convoyeur.formation.documents'
@@ -1267,6 +1268,12 @@ const AuthenticatedDashboardProMissionsMissionIdRoute =
     path: '/$missionId',
     getParentRoute: () => AuthenticatedDashboardProMissionsRoute,
   } as any)
+const AuthenticatedDashboardProDevisGroupeDevisIdRoute =
+  AuthenticatedDashboardProDevisGroupeDevisIdRouteImport.update({
+    id: '/devis-groupe/$devisId',
+    path: '/devis-groupe/$devisId',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
 const AuthenticatedDashboardClientMissionsMissionIdRoute =
   AuthenticatedDashboardClientMissionsMissionIdRouteImport.update({
     id: '/missions/$missionId',
@@ -1558,6 +1565,7 @@ export interface FileRoutesByFullPath {
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/dashboard-pro/devis-groupe/$devisId': typeof AuthenticatedDashboardProDevisGroupeDevisIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
@@ -1758,6 +1766,7 @@ export interface FileRoutesByTo {
   '/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/dashboard-pro/devis-groupe/$devisId': typeof AuthenticatedDashboardProDevisGroupeDevisIdRoute
   '/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
@@ -1969,6 +1978,7 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/formation/documents': typeof AuthenticatedConvoyeurFormationDocumentsRoute
   '/_authenticated/convoyeur/formation/faq': typeof AuthenticatedConvoyeurFormationFaqRoute
   '/_authenticated/dashboard-client/missions/$missionId': typeof AuthenticatedDashboardClientMissionsMissionIdRoute
+  '/_authenticated/dashboard-pro/devis-groupe/$devisId': typeof AuthenticatedDashboardProDevisGroupeDevisIdRoute
   '/_authenticated/dashboard-pro/missions/$missionId': typeof AuthenticatedDashboardProMissionsMissionIdRoute
   '/_authenticated/dashboard-pro/nouvelle-mission/groupee': typeof AuthenticatedDashboardProNouvelleMissionGroupeeRoute
   '/_authenticated/flotte/missions/$missionId': typeof AuthenticatedFlotteMissionsMissionIdRoute
@@ -2180,6 +2190,7 @@ export interface FileRouteTypes {
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
+    | '/dashboard-pro/devis-groupe/$devisId'
     | '/dashboard-pro/missions/$missionId'
     | '/dashboard-pro/nouvelle-mission/groupee'
     | '/flotte/missions/$missionId'
@@ -2380,6 +2391,7 @@ export interface FileRouteTypes {
     | '/convoyeur/formation/documents'
     | '/convoyeur/formation/faq'
     | '/dashboard-client/missions/$missionId'
+    | '/dashboard-pro/devis-groupe/$devisId'
     | '/dashboard-pro/missions/$missionId'
     | '/dashboard-pro/nouvelle-mission/groupee'
     | '/flotte/missions/$missionId'
@@ -2590,6 +2602,7 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/formation/documents'
     | '/_authenticated/convoyeur/formation/faq'
     | '/_authenticated/dashboard-client/missions/$missionId'
+    | '/_authenticated/dashboard-pro/devis-groupe/$devisId'
     | '/_authenticated/dashboard-pro/missions/$missionId'
     | '/_authenticated/dashboard-pro/nouvelle-mission/groupee'
     | '/_authenticated/flotte/missions/$missionId'
@@ -4042,6 +4055,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProMissionsMissionIdRouteImport
       parentRoute: typeof AuthenticatedDashboardProMissionsRoute
     }
+    '/_authenticated/dashboard-pro/devis-groupe/$devisId': {
+      id: '/_authenticated/dashboard-pro/devis-groupe/$devisId'
+      path: '/devis-groupe/$devisId'
+      fullPath: '/dashboard-pro/devis-groupe/$devisId'
+      preLoaderRoute: typeof AuthenticatedDashboardProDevisGroupeDevisIdRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
     '/_authenticated/dashboard-client/missions/$missionId': {
       id: '/_authenticated/dashboard-client/missions/$missionId'
       path: '/missions/$missionId'
@@ -4506,6 +4526,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProTcoRoute: typeof AuthenticatedDashboardProTcoRoute
   AuthenticatedDashboardProIndexRoute: typeof AuthenticatedDashboardProIndexRoute
+  AuthenticatedDashboardProDevisGroupeDevisIdRoute: typeof AuthenticatedDashboardProDevisGroupeDevisIdRoute
 }
 
 const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChildren =
@@ -4539,6 +4560,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProSocieteRoute,
     AuthenticatedDashboardProTcoRoute: AuthenticatedDashboardProTcoRoute,
     AuthenticatedDashboardProIndexRoute: AuthenticatedDashboardProIndexRoute,
+    AuthenticatedDashboardProDevisGroupeDevisIdRoute:
+      AuthenticatedDashboardProDevisGroupeDevisIdRoute,
   }
 
 const AuthenticatedDashboardProRouteWithChildren =
