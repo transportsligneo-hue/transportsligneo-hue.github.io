@@ -1020,12 +1020,12 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     try {
       const tw = 40;
       const th = tw * (442 / 1200);
-      doc.addImage(tamponData, "PNG", M + sigW + 30, y + 4.6, tw, th, "tampon-ligneo", "FAST", 3);
+      doc.addImage(tamponData, "PNG", M + sigW + 30, y + 4.6, tw, th, "tampon-ligneo-net", "NONE", 3);
     } catch { /* optionnel */ }
   }
   if (signatureData) {
     // Signature manuscrite posée sur le tampon, tout à droite, au niveau des écritures.
-    try { doc.addImage(signatureData, "PNG", M + 2 * sigW + 6 - 5 - 30, y + sigH - 12.5, 30, 10); } catch { /* optionnel */ }
+    try { doc.addImage(signatureData, "PNG", M + sigW + 44, y + 8, 28, 9.5); } catch { /* optionnel */ }
   }
 
   doc.setFont("helvetica", "normal");
