@@ -45,5 +45,6 @@ export function groupedPrestationLabel(vehicules: Veh[], message?: string | null
     t.recharge ? `Recharge uniquement (${t.recharge})` : null,
     selected.some((o) => /recharge[_\s]+(?:électrique|electrique|elec)/i.test(o)) ? "Recharge électrique" : null,
     selected.some((o) => /mise[_\s]+en[_\s]+main/i.test(o)) ? "Mise en main" : null,
+    glissant ? glissant.charAt(0).toUpperCase() + glissant.slice(1) : null,
   ].filter(Boolean).join(" · ");
 }
