@@ -20,8 +20,9 @@ export type PublicTracking = {
   immatriculation?: string | null;
   /** Nom du destinataire à la livraison (jamais de téléphone ni d'e-mail) */
   destinataire?: string | null;
-  /** Position approximative (arrondie ~1 km) */
+  /** Dernière position GPS, accessible uniquement après vérification du code. */
   position?: { lat: number; lng: number } | null;
+  points?: Array<{ latitude: number; longitude: number; recorded_at: string; accuracy: number | null }>;
   updated_at?: string | null;
 };
 
@@ -95,9 +96,7 @@ export async function trackMission(input: {
     (m) => (m.tracking_code ?? "").toUpperCase() === code && code.length > 0,
   );
 
-  const ok = !!mission;
-
-  if (!ok) {
+  if (!mission) {
     const windowExpired =
       !attempt || new Date(attempt.window_started_at).getTime() + WINDOW_MIN * 60_000 < now.getTime();
     const failed = windowExpired ? 1 : (attempt?.failed_count ?? 0) + 1;
@@ -106,7 +105,7 @@ export async function trackMission(input: {
       {
         fingerprint: fp,
         failed_count: blocked ? 0 : failed,
-        window_started_at: windowExpired || blocked ? now.toISOString() : attempt!.window_started_at,
+        window_started_at: windowExpired || blocked ? now.toISOString() : (attempt?.window_started_at ?? now.toISOString()),
         blocked_until: blocked ? new Date(now.getTime() + BLOCK_MIN * 60_000).toISOString() : null,
         updated_at: now.toISOString(),
       },
@@ -125,12 +124,13 @@ export async function trackMission(input: {
 
   let etape: string | null = null;
   let position: { lat: number; lng: number } | null = null;
-  let updated_at: string | null = mission!.updated_at ?? null;
+  let updated_at: string | null = mission.updated_at ?? null;
+  let points: NonNullable<PublicTracking["points"]> = [];
 
   const { data: trajets } = await supabaseAdmin
     .from("trajets")
     .select("id, marque, modele, immatriculation, contact_arrivee_nom, contact_depart_nom")
-    .eq("mission_id", mission!.id);
+    .eq("mission_id", mission.id);
   const trajetIds = (trajets ?? []).map((t) => t.id);
 
   // Infos véhicule + destinataire (jamais de téléphone ni d'e-mail ici).
@@ -150,18 +150,20 @@ export async function trackMission(input: {
 
     if (attribution) {
       etape = attribution.etape_courante ?? attribution.statut ?? null;
-      if (mapStatut(mission!.statut) === "en_cours") {
-        const { data: loc } = await supabaseAdmin
+      if (["en_cours", "livree"].includes(mapStatut(mission.statut) ?? "")) {
+        const { data: locations, error } = await supabaseAdmin
           .from("mission_locations")
-          .select("latitude, longitude, recorded_at")
+          .select("latitude, longitude, recorded_at, accuracy")
           .eq("attribution_id", attribution.id)
           .order("recorded_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
+          .limit(2000);
+        if (error) throw new Error("Suivi GPS momentanément indisponible");
+        points = (locations ?? []).reverse();
+        const loc = points.at(-1);
         if (loc) {
           position = {
-            lat: Math.round(loc.latitude * 100) / 100,
-            lng: Math.round(loc.longitude * 100) / 100,
+            lat: loc.latitude,
+            lng: loc.longitude,
           };
           updated_at = loc.recorded_at;
         }
@@ -171,16 +173,17 @@ export async function trackMission(input: {
 
   return {
     found: true,
-    numero: mission!.numero,
-    statut: mapStatut(mission!.statut),
-    ville_depart: mission!.ville_depart,
-    ville_arrivee: mission!.ville_arrivee,
-    date_prise_en_charge: mission!.date_prise_en_charge,
+    numero: mission.numero,
+    statut: mapStatut(mission.statut),
+    ville_depart: mission.ville_depart,
+    ville_arrivee: mission.ville_arrivee,
+    date_prise_en_charge: mission.date_prise_en_charge,
     etape,
     vehicule,
     immatriculation,
     destinataire,
     position,
+    points,
     updated_at,
   };
 }

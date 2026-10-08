@@ -1,5 +1,6 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck, CarFront, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/suivi")({
       {
         name: "description",
         content:
-          "Suivez l'avancement de votre convoyage automobile avec votre numéro de mission : statut, position approximative et date de prise en charge.",
+           "Suivez votre convoyage automobile en direct : carte GPS, véhicule et prise en charge, avec votre numéro de mission et votre code confidentiel.",
       },
       { property: "og:title", content: "Suivre ma mission · Transports Ligneo" },
       {
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/suivi")({
         content: "Statut en temps réel de votre convoyage, sans connexion, avec votre numéro de mission.",
       },
       { property: "og:url", content: "https://transportsligneo.fr/suivi" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://transportsligneo.fr/suivi" }],
   }),
@@ -45,6 +48,36 @@ function SuiviPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const track = useServerFn(trackMissionPublic);
+  const [access, setAccess] = useState<{ numero: string; code: string } | null>(null);
+  const requestVersion = useRef(0);
+
+  useEffect(() => {
+    if (!access || !result?.found || result.statut === "livree" || result.statut === "annulee") return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const refresh = async () => {
+      if (document.visibilityState !== "hidden") {
+        try {
+          const next = await track({ data: access });
+          if (cancelled) return;
+          if (!next.found) {
+            setAccess(null);
+            setResult(null);
+            setError("Accès au suivi indisponible. Vérifiez votre numéro et votre code.");
+            return;
+          }
+          setResult(next);
+          if (next.statut === "livree" || next.statut === "annulee") return;
+        } catch {
+          // Conserver la dernière vraie position ; la carte indique l'âge du signal.
+        }
+      }
+      if (!cancelled) timer = setTimeout(refresh, 4000);
+    };
+    timer = setTimeout(refresh, 4000);
+    return () => { cancelled = true; if (timer) clearTimeout(timer); };
+  }, [access, result?.found, result?.statut, track]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +96,13 @@ function SuiviPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setAccess(null);
+    const version = ++requestVersion.current;
     try {
-      const res = await trackMissionPublic({ data: { numero: value, code: codeValue } });
+      const res = await track({ data: { numero: value, code: codeValue } });
+      if (version !== requestVersion.current) return;
       setResult(res);
+      if (res.found) setAccess({ numero: value, code: codeValue });
       // On efface les champs après la recherche : rien ne doit sembler
       // pré-rempli, le champ repart avec son aide de saisie (#XXX).
       setNumero("");
@@ -209,20 +246,18 @@ function SuiviPage() {
               {result.position && (
                 <div className="mt-6">
                   <p className="mb-2 text-[12px] uppercase tracking-[0.1em] text-[#9aa6c9]">
-                    Position approximative
+                    Suivi GPS
                   </p>
                   <ClientOnly fallback={<div className="h-[280px] rounded-xl bg-white/[0.04]" />}>
                     <Suspense fallback={<div className="h-[280px] rounded-xl bg-white/[0.04]" />}>
                       <LiveMissionMap
                         className="h-[280px] w-full overflow-hidden rounded-xl"
-                        points={[
-                          {
-                            latitude: result.position.lat,
-                            longitude: result.position.lng,
-                            recorded_at: result.updated_at ?? new Date().toISOString(),
-                            accuracy: null,
-                          },
-                        ]}
+                        points={result.points ?? []}
+                        origin={result.ville_depart}
+                        destination={result.ville_arrivee}
+                        role="client"
+                        completed={result.statut === "livree"}
+                        completedPlaque={result.immatriculation}
                       />
                     </Suspense>
                   </ClientOnly>

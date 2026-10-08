@@ -1,4 +1,5 @@
 - Keep the public mobile navigation and color treatment scoped below 768px in MobileNavbar and the public mobile CSS; desktop marketing and signed-in workspaces remain independent so mobile presentation changes cannot alter their workflows.
+- Reuse LiveMissionMap for code-protected public tracking, refreshing only through the code-verified server function and returning GPS-only projections, so map behavior matches workspaces without exposing private records.
 - Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
 - Reuse public presentation assets in marketing pages only, with shared video markup for the three professional profiles, to keep their films consistent without affecting signed-in workspaces.
 - Share the public mission-order demo player across Services, professional profile pages and How It Works so each audience sees a consistent film without changing signed-in mission flows.
