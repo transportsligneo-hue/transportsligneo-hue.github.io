@@ -3,7 +3,8 @@ import { groupedVehicleType, groupedPrestationLabel } from "@/lib/devis-groupe-t
 import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
-import signatureGo from "@/assets/signature-go.png";
+import signatureGo from "@/assets/signature-go-transparente.png";
+import tamponLigneo from "@/assets/tampon-ligneo.png";
 import {
   fetchCompanyInfo,
   companyLegalLine1,
@@ -485,6 +486,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   const logoData = await loadImageAsDataUrl(logoLigneo);
   const signatureData = await loadImageAsDataUrl(signatureGo);
+  const tamponData = await loadImageAsDataUrl(tamponLigneo);
   const clientLogoData = d.logo_url ? await loadImageAsDataUrl(d.logo_url) : null;
 
   const validite = d.validite_jours ?? 15;
@@ -1012,6 +1014,14 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
 
   if (d.clientSignatureDataUrl) {
     try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
+  }
+  // Cachet officiel posé à la main (légèrement de travers), signature par-dessus.
+  if (tamponData) {
+    try {
+      const tw = 40;
+      const th = tw * (442 / 1200);
+      doc.addImage(tamponData, "PNG", M + sigW + 30, y + 4.6, tw, th, "tampon-ligneo", "FAST", 3);
+    } catch { /* optionnel */ }
   }
   if (signatureData) {
     try { doc.addImage(signatureData, "PNG", M + sigW + 11, y + 7, 32, 11); } catch { /* optionnel */ }
