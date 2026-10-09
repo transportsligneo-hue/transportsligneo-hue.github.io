@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, FileText, X } from "lucide-react";
 import { euro, STATUS_META, type ProMission } from "@/hooks/useProMissions";
 import { DemoLiveMap } from "./DemoLiveMap";
+import { downloadDemoPdf } from "./demo-pdf";
 
 const STEPS = ["Commande validée", "Convoyeur assigné", "État des lieux départ", "En route", "État des lieux arrivée", "Livré et signé"];
 
@@ -30,7 +31,7 @@ export function DemoMissionDetail({ m, onClose }: { m: ProMission; onClose: () =
       </ol>
       <div className="demo-docs">
         {["Bon de commande", "PV de livraison", "Facture"].map((d, i) => (
-          <button key={d} type="button" disabled={i > 0 && m.statut !== "livree"} title="Document d'exemple">
+          <button key={d} type="button" disabled={i > 0 && m.statut !== "livree"} title="Document d'exemple" onClick={() => downloadDemoPdf(d, m)}>
             <FileText size={14} /> {d}
           </button>
         ))}
