@@ -11277,10 +11277,10 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
   box-shadow: 0 30px 80px -30px rgba(0,0,0,.7);
 }
 .amfa-logo {
-  width: 64px; height: 64px; margin: 0 auto 14px; display: block; object-fit: contain;
-  border-radius: 16px; padding: 8px;
-  background: rgba(255,255,255,.95);
-  box-shadow: 0 0 0 1px rgba(91,131,255,.35), 0 0 26px rgba(47,95,255,.35);
+  width: 92px; height: 92px; margin: 0 auto 16px; display: block; object-fit: contain;
+  border-radius: 18px;
+  background: transparent;
+  filter: drop-shadow(0 0 18px rgba(47,95,255,.45));
 }
 .amfa-eyebrow {
   font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
@@ -11292,14 +11292,23 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 }
 .amfa-sub { font-size: 14px; line-height: 1.55; color: rgba(203,214,244,.8); margin: 0 0 22px; }
 .amfa-sub strong { color: #cfe0ff; font-weight: 600; }
-.amfa-input {
+.amfa-input,
+.amfa-input:where(*) {
   width: 100%; text-align: center; letter-spacing: .55em; font-size: 26px; font-weight: 600;
-  font-family: 'IBM Plex Mono', 'Inter', monospace; color: #eaf1ff;
+  font-family: 'IBM Plex Mono', 'Inter', monospace;
+  color: #5de0ff !important; caret-color: #5de0ff;
   background: rgba(6,18,56,.6); border: 1px solid rgba(91,131,255,.35); border-radius: 14px;
   padding: 14px 12px 14px calc(12px + .55em); outline: none; transition: border-color .2s, box-shadow .2s;
 }
-.amfa-input::placeholder { color: rgba(141,163,214,.4); letter-spacing: .55em; }
-.amfa-input:focus { border-color: #5b8fff; box-shadow: 0 0 0 3px rgba(47,95,255,.22); }
+.amfa-input:-webkit-autofill,
+.amfa-input:-webkit-autofill:hover,
+.amfa-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #5de0ff;
+  -webkit-box-shadow: 0 0 0 100px rgba(6,18,56,.9) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+.amfa-input::placeholder { color: rgba(93,224,255,.3) !important; letter-spacing: .55em; }
+.amfa-input:focus { border-color: #5de0ff; box-shadow: 0 0 0 3px rgba(93,224,255,.18), 0 0 18px rgba(47,95,255,.25); }
 .amfa-btn {
   width: 100%; margin-top: 16px; border: none; cursor: pointer; border-radius: 14px;
   padding: 13px 18px; font-size: 15px; font-weight: 600; color: #fff;
