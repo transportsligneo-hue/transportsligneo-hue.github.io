@@ -10780,6 +10780,9 @@ html:not(.theme-dark) .demo-req-btn { color:#6d28d9; background:rgba(168,85,247,
 .demo-req-submit:disabled { opacity:.6; }
 .demo-req-ok { color:#d8b4fe; line-height:1.5; }
 .demo-req-inline { margin:0 auto; }
+.demo-req-inline .demo-req-form input { color:#ffffff !important; -webkit-text-fill-color:#ffffff; caret-color:#c084fc; }
+.demo-req-inline .demo-req-form input::placeholder { color:rgba(219,231,255,.55); -webkit-text-fill-color:rgba(219,231,255,.55); }
+.demo-req-inline .demo-req-form input:-webkit-autofill { -webkit-text-fill-color:#ffffff; -webkit-box-shadow:0 0 0 1000px #111a3d inset; caret-color:#c084fc; }
 
 /* Demo request modal — refonte claire & pro */
 .demo-req-overlay { background:rgba(11,16,38,.55) !important; }
