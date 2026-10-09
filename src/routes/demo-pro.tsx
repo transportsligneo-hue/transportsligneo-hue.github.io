@@ -7,6 +7,7 @@ import { DemoRequestForm } from "@/components/marketing/DemoRequestButton";
 import { AlertTriangle, CalendarDays, Euro, Lock, Timer, Truck } from "lucide-react";
 import { computePilotage, euro, STATUS_META, type ProMission } from "@/hooks/useProMissions";
 import { DemoProModules } from "@/components/demo/DemoProModules";
+import { DemoMissionDetail } from "@/components/demo/DemoMissionDetail";
 
 export const Route = createFileRoute("/demo-pro")({
   head: () => ({
@@ -77,6 +78,8 @@ function DemoProPage({ societe }: { societe?: string | null }) {
   const k = computePilotage(DEMO_MISSIONS, now);
   const delta = k.lastMonth > 0 ? Math.round(((k.thisMonth - k.lastMonth) / k.lastMonth) * 100) : null;
   const sorted = [...DEMO_MISSIONS].sort((a, b) => b.date_prise_en_charge.localeCompare(a.date_prise_en_charge));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = DEMO_MISSIONS.find((m) => m.id === selectedId) ?? null;
 
   return (
     <main className="demo-pro">
@@ -135,23 +138,22 @@ function DemoProPage({ societe }: { societe?: string | null }) {
         <h2>
           <CalendarDays size={16} aria-hidden /> Missions récentes
         </h2>
+        {selected && <DemoMissionDetail m={selected} onClose={() => setSelectedId(null)} />}
         <ul>
           {sorted.map((m) => {
             const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait" };
             return (
-              <li key={m.id} className="demo-pro-mission">
-                <div className="demo-pro-mission-main">
-                  <strong>
-                    {m.ville_depart} → {m.ville_arrivee}
-                  </strong>
-                  <span>
-                    {m.marque} {m.modele} · {m.immatriculation}
-                  </span>
-                </div>
-                <div className="demo-pro-mission-meta">
-                  <span className={`pp-st ${st.cls}`}>{st.label}</span>
-                  <span className="demo-pro-mission-price">{euro(m.prix_total)}</span>
-                </div>
+              <li key={m.id}>
+                <button type="button" className={`demo-pro-mission demo-pro-mission-btn ${selectedId === m.id ? "is-on" : ""}`} onClick={() => setSelectedId(m.id)}>
+                  <div className="demo-pro-mission-main">
+                    <strong>{m.ville_depart} → {m.ville_arrivee}</strong>
+                    <span>{m.marque} {m.modele} · {m.immatriculation}</span>
+                  </div>
+                  <div className="demo-pro-mission-meta">
+                    <span className={`pp-st ${st.cls}`}>{st.label}</span>
+                    <span className="demo-pro-mission-price">{euro(m.prix_total)}</span>
+                  </div>
+                </button>
               </li>
             );
           })}

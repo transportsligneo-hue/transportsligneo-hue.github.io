@@ -11342,3 +11342,18 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
   box-shadow: 0 0 18px rgba(93,224,255,.18);
 }
 .amfa-loading { position: relative; color: rgba(203,214,244,.8); }
+
+/* Démo pro : missions cliquables + fiche mission */
+.demo-pro-mission-btn { width: 100%; text-align: left; color: inherit; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.demo-pro-mission-btn:hover, .demo-pro-mission-btn.is-on { border-color: rgba(167, 139, 250, 0.6); box-shadow: 0 0 18px rgba(167, 139, 250, 0.25); }
+.demo-detail { margin-bottom: 14px; display: flex; flex-direction: column; gap: 14px; }
+.demo-detail-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.demo-detail-sub { font-size: .8rem; color: rgba(219, 231, 255, .65); }
+.demo-detail-actions { display: flex; gap: 8px; align-items: center; }
+.demo-detail-close { padding: 6px; border-radius: 8px; border: 1px solid rgba(148,163,255,.2); color: inherit; }
+.demo-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; font-size: .82rem; }
+.demo-steps li { display: flex; gap: 6px; align-items: center; color: rgba(219,231,255,.45); }
+.demo-steps li.is-done { color: #c4b5fd; }
+.demo-docs { display: flex; flex-wrap: wrap; gap: 8px; }
+.demo-docs button { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 10px; border: 1px solid rgba(167,139,250,.35); font-size: .8rem; color: inherit; }
+.demo-docs button:disabled { opacity: .4; }
