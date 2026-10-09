@@ -41,6 +41,7 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"tous" | "actifs" | "suspendus">("tous");
   const [selected, setSelected] = useState<ClientRow | null>(null);
   const [pricingClient, setPricingClient] = useState<ClientRow | null>(null);
   const [missions, setMissions] = useState<any[]>([]);
@@ -170,6 +171,8 @@ function AdminClients() {
   };
 
   const filtered = clients.filter((c) => {
+    if (statusFilter === "actifs" && !c.actif) return false;
+    if (statusFilter === "suspendus" && c.actif) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -240,6 +243,23 @@ function AdminClients() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher un client, un email, un téléphone…"
           />
+        </div>
+        <div className="flex items-center gap-2">
+          {([
+            { key: "tous", label: "Tous" },
+            { key: "actifs", label: "Actifs" },
+            { key: "suspendus", label: `Suspendus${suspendusCount > 0 ? ` (${suspendusCount})` : ""}` },
+          ] as const).map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              className={`dvx-btn ${statusFilter === f.key ? "solid" : ""} ${f.key === "suspendus" && suspendusCount > 0 && statusFilter !== "suspendus" ? "!border-red-300 !text-red-600" : ""}`}
+              onClick={() => setStatusFilter(f.key)}
+            >
+              {f.key === "suspendus" && <Ban size={13} />}
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 
