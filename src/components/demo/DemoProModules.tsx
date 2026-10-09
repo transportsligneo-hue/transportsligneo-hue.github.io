@@ -4,6 +4,8 @@ import {
   MapPin, Navigation, Shield, Users, CalendarDays, BarChart3,
 } from "lucide-react";
 import { euro, type ProMission } from "@/hooks/useProMissions";
+import { DemoLiveMap } from "./DemoLiveMap";
+import type { LiveMetricsSnapshot } from "@/components/map/types";
 
 type Tab = "gps" | "cal" | "team";
 
@@ -24,6 +26,7 @@ const TEAM = [
 
 export function DemoProModules({ missions, now }: { missions: ProMission[]; now: Date }) {
   const [tab, setTab] = useState<Tab>("gps");
+  const [metrics, setMetrics] = useState<LiveMetricsSnapshot | null>(null);
   const live = missions.find((m) => m.statut === "en_cours") ?? missions[0];
 
   const y = now.getFullYear(), mo = now.getMonth();
@@ -66,20 +69,12 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
       {tab === "gps" && (
         <div className="dpm-grid">
           <div className="dpm-card">
-            <h3><MapPin size={15} /> Suivi en direct — {live.ville_depart} → {live.ville_arrivee}</h3>
-            <div className="dpm-map" aria-hidden>
-              <svg viewBox="0 0 400 200" preserveAspectRatio="none">
-                <path d="M30 160 C 110 150, 140 70, 220 90 S 330 40, 370 30" className="dpm-route" />
-                <path d="M30 160 C 110 150, 140 70, 220 90" className="dpm-done" />
-                <circle cx="30" cy="160" r="6" className="dpm-pt" />
-                <circle cx="370" cy="30" r="6" className="dpm-pt" />
-                <circle cx="220" cy="90" r="9" className="dpm-car" />
-              </svg>
-            </div>
+            <h3><MapPin size={15} /> Suivi GPS en direct — Tours → Bordeaux</h3>
+            <DemoLiveMap onMetrics={setMetrics} />
             <ul className="dpm-facts">
               <li><span>Véhicule</span><strong>{live.marque} {live.modele} · {live.immatriculation}</strong></li>
-              <li><span>Progression</span><strong>58 %</strong></li>
-              <li><span>Arrivée estimée</span><strong>16 h 40</strong></li>
+              <li><span>Progression</span><strong>{metrics ? `${Math.round(metrics.progress)} %` : "…"}</strong></li>
+              <li><span>Arrivée estimée</span><strong>{metrics ? metrics.etaAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "…"}</strong></li>
             </ul>
           </div>
           <div className="dpm-card">
