@@ -41,6 +41,7 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"tous" | "actifs" | "suspendus">("tous");
   const [selected, setSelected] = useState<ClientRow | null>(null);
   const [pricingClient, setPricingClient] = useState<ClientRow | null>(null);
   const [missions, setMissions] = useState<any[]>([]);
@@ -170,6 +171,8 @@ function AdminClients() {
   };
 
   const filtered = clients.filter((c) => {
+    if (statusFilter === "actifs" && !c.actif) return false;
+    if (statusFilter === "suspendus" && c.actif) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
