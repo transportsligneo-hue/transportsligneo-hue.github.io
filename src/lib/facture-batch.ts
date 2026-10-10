@@ -59,7 +59,7 @@ const numberRoot = (numero: string | null | undefined) => {
 };
 
 /**
- * Missions terminées facturables (une seule entrée par duo Livraison + Restitution).
+ * Missions terminées facturables (une seule entrée par duo restitution et livraison).
  * Inclut celles déjà facturées : l'admin voit le n° de facture et le PO existants.
  */
 export async function listFactureCandidates(): Promise<FactureCandidate[]> {
@@ -453,7 +453,7 @@ export async function ensureFacture(
       date_echeance: echeance.toISOString().slice(0, 10),
       mode_paiement: "Virement bancaire",
       designation: basis.isGroup
-        ? "Prestation de convoyage automobile — livraison + restitution"
+        ? "Prestation de convoyage automobile — restitution et livraison"
         : "Prestation de convoyage automobile",
       depart: basis.depart ?? trajet.depart,
       arrivee: basis.arrivee ?? trajet.arrivee,

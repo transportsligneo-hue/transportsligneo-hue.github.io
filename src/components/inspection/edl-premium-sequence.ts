@@ -143,7 +143,7 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
 
   // ─── Documents · scan auto OCR ───
   { num: 18, id: "pv_livraison", kind: "scan", section: "documents", phase: "depart",
-    label: "PV livraison / restitution", hint: "Cadrez le document, contours détectés automatiquement",
+    label: "PV restitution et livraison", hint: "Cadrez le document, contours détectés automatiquement",
     example: pv_livraison },
 
   { num: 19, id: "carte_grise", kind: "scan", section: "documents", phase: "depart",

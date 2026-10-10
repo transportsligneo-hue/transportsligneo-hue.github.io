@@ -4,7 +4,7 @@
  *
  * Règle métier :
  *  - "Recharge uniquement" : toutes les jambes sont des recharges sur place.
- *  - "Livraison + Restitution" : le dossier contient une jambe aller ET une
+ *  - "restitution et livraison" : le dossier contient une jambe aller ET une
  *    jambe retour (aller/retour réel). Deux missions simplement groupées
  *    (deux véhicules distincts) ne sont PAS un aller-retour.
  *  - "Mission groupée · N véhicules" : plusieurs jambes sans aller/retour.
@@ -32,9 +32,9 @@ export function dossierTypeLabel(legs: MissionLegLike[]): string {
   if (legs.every((l) => l.recharge)) {
     return legs.length > 1 ? `Recharge uniquement · ${legs.length} véhicules` : "Recharge uniquement";
   }
-  if (isAllerRetour(legs)) return "Livraison + Restitution";
+  if (isAllerRetour(legs)) return "restitution et livraison";
   if (legs.length > 1) return `Mission groupée · ${legs.length} véhicules`;
-  if (legs[0]?.typeTrajet === "aller_retour") return "Livraison + Restitution";
+  if (legs[0]?.typeTrajet === "aller_retour") return "restitution et livraison";
   return "Livraison simple";
 }
 
@@ -42,7 +42,7 @@ export function dossierTypeLabel(legs: MissionLegLike[]): string {
 export function missionTypeLabel(leg: MissionLegLike): string {
   if (leg.recharge) return "Recharge uniquement";
   if (leg.legType === "aller" || leg.legType === "retour" || leg.typeTrajet === "aller_retour") {
-    return "Livraison + Restitution";
+    return "restitution et livraison";
   }
   return "Livraison simple";
 }

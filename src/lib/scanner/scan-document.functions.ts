@@ -3,7 +3,7 @@
  *
  * Server function : extraction OCR + classification pour tout document auto
  * français scanné dans TRANSPORTS LIGNEO (carte grise, CPI, bon de commande,
- * bon de livraison, PV livraison/restitution, mandat, facture, devis,
+ * bon de livraison, PV restitution et livraison, mandat, facture, devis,
  * document constructeur).
  *
  * Utilise Lovable AI Gateway (Gemini 2.5 Flash Vision) avec tool-calling

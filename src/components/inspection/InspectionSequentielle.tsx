@@ -113,7 +113,7 @@ const ALL_STEPS: StepDef[] = [
   { num: 13, id: "siege_avant",                label: "Sièges avant",           hint: "Sièges conducteur + passager",             variant: "siege_avant" },
   { num: 14, id: "compteur",                   label: "Compteur",               hint: "Kilométrage + niveau carburant",           variant: "compteur" },
   { num: 15, id: "kit_securite",               label: "Kit de sécurité",        hint: "Gilet jaune + triangle",                   variant: "kit_securite" },
-  { num: 16, id: "pv_livraison",               label: "PV livraison / restitution", hint: "Photo du PV signé / bon de mission",   variant: "documents" },
+  { num: 16, id: "pv_livraison",               label: "PV restitution et livraison", hint: "Photo du PV signé / bon de mission",   variant: "documents" },
   { num: 17, id: "carte_grise",                label: "Carte grise",            hint: "Photo de la carte grise du véhicule",      variant: "documents" },
   { num: 18, id: "signature",                  label: "Signature client",       hint: "Le client signe directement à l'écran",    variant: "signature", singlePhoto: true, kind: "signature" },
 ];

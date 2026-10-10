@@ -38,7 +38,7 @@ const commonSuivi: AideCategory = {
     },
     {
       q: "Que signifient les types de mission (Livraison, Restitution, Recharge uniquement) ?",
-      a: "« Livraison simple » : le véhicule vous est remis une seule fois. « Livraison + Restitution » : deux trajets liés dans le même dossier, la livraison (L) puis la restitution (R). « Recharge uniquement » : le véhicule est conduit à une borne de recharge puis restitué, sans autre déplacement.",
+      a: "« Livraison simple » : le véhicule vous est remis une seule fois. « restitution et livraison » : deux trajets liés dans le même dossier, la livraison (L) puis la restitution (R). « Recharge uniquement » : le véhicule est conduit à une borne de recharge puis restitué, sans autre déplacement.",
     },
     {
       q: "Comment lire les dossiers liés (L / R) ?",

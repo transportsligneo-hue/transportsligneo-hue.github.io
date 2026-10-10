@@ -257,7 +257,7 @@ function estimerDevis(args: {
     depart,
     arrivee,
     type_livraison:
-      type === "aller_retour" ? "Livraison + restitution" : type === "express" ? "Express" : "Livraison simple",
+      type === "aller_retour" ? "restitution et livraison" : type === "express" ? "Express" : "Livraison simple",
     distance_km: quote.distanceKm,
     prix_ttc: quote.priceTtc,
     prix_ht: quote.priceHt,

@@ -186,7 +186,7 @@ const RECHARGE_SEULE = "Recharge électrique uniquement";
 
 const TRAJET_TYPES = [
   "Livraison simple",
-  "Livraison + restitution",
+  "restitution et livraison",
   RECHARGE_SEULE,
 ] as const;
 
@@ -220,7 +220,7 @@ const ADMIN_DRAFT_KEY = "ligneo:admin-devis-groupe-brouillon";
 
 const VEH_TYPES: { v: VehLine["type"]; l: string }[] = [
   { v: "aller-simple", l: "Livraison simple" },
-  { v: "aller-retour", l: "Livraison + restitution" },
+  { v: "aller-retour", l: "restitution et livraison" },
   { v: "recharge", l: "Recharge électrique uniquement" },
 ];
 
@@ -586,7 +586,7 @@ function AdminNouveauDevisPage() {
 
 
   const pvLabel = pvDigital === "aucun" ? null : (pvDef(pvDigital)?.label ?? null);
-  const isAllerRetour = !isGroupe && typeTrajet === "Livraison + restitution";
+  const isAllerRetour = !isGroupe && /restitution|aller[-_ ]?retour/i.test(typeTrajet);
   const isRechargeSeule = !isGroupe && typeTrajet === RECHARGE_SEULE;
   const prestationLabel = isRechargeSeule
     ? isGroupe
@@ -1589,7 +1589,7 @@ function AdminNouveauDevisPage() {
 
           {isAllerRetour && (
             <p className="mb-4 rounded-lg border border-pro-border bg-pro-accent/5 px-3 py-2 text-[12px] font-medium text-pro-muted">
-              Trajet Livraison + restitution : deux véhicules distincts (deux états des lieux).
+              Trajet restitution et livraison : deux véhicules distincts (deux états des lieux).
             </p>
           )}
           <div className="space-y-4">
@@ -1803,7 +1803,7 @@ function AdminNouveauDevisPage() {
           </Button>
           {planningIncomplet && (
             <p className="mt-3 text-[12px] font-medium text-red-600">
-              Renseignez la date et l'heure{isAllerRetour ? " (livraison et restitution)" : ""}, ou cochez « À déterminer », pour générer le devis.
+              Renseignez la date et l'heure{isAllerRetour ? " (restitution et livraison)" : ""}, ou cochez « À déterminer », pour générer le devis.
             </p>
           )}
         </Card>

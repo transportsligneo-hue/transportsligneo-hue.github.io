@@ -436,7 +436,7 @@ function ClientMissions() {
                             {flags[m.id]?.recharge
                               ? "Recharge uniquement"
                               : m.leg_type === "aller" || m.leg_type === "retour"
-                                ? "Livraison + Restitution"
+                                ? "restitution et livraison"
                                 : "Livraison simple"}
                           </span>
                         </div>

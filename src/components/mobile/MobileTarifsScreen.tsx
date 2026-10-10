@@ -58,7 +58,7 @@ export default function MobileTarifsScreen() {
             title="Tours intra"
             lines={[
               { l: "Livraison simple", p: "70 €" },
-              { l: "Livraison + Restitution", p: "120 €" },
+              { l: "restitution et livraison", p: "120 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />
@@ -66,7 +66,7 @@ export default function MobileTarifsScreen() {
             title="Hors agglomération (37)"
             lines={[
               { l: "Livraison simple", p: "90 €" },
-              { l: "Livraison + Restitution", p: "130 €" },
+              { l: "restitution et livraison", p: "130 €" },
             ]}
             footnote="Assurance, péage & carburant inclus · TTC"
           />

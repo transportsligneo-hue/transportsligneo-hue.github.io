@@ -171,7 +171,7 @@ export function MissionDetailSheet({
                   color: "#cddcff",
                 }}
               >
-                → {isAR ? "Livraison + Restitution" : "Livraison simple"}
+                → {isAR ? "restitution et livraison" : "Livraison simple"}
               </span>
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider"

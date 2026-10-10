@@ -6,7 +6,7 @@ import { Card, Button, FormField, TextInput } from "@/components/admin/AdminUI";
 
 /**
  * Édition du prix d'une mission (admin) — disponible sur TOUTES les missions
- * (simple, livraison, restitution, livraison + restitution).
+ * (simple, livraison, restitution, restitution et livraison).
  *
  * - Prix client : écrit sur le trajet (prix / prix_client) et figé sur la mission
  *   côté client via l'RPC admin_set_mission_prix (prix par client, mission par mission).

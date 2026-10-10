@@ -696,7 +696,7 @@ function AdminMissionsUnified() {
         statutLabel: UNIFIED_STATUS[m.status]?.label ?? m.status,
         plaque: m.immatriculation ?? null,
         meta: [m.marque, m.modele].filter(Boolean).join(" ") || m.clientNom || undefined,
-        typeLabel: m.rechargeSeule ? "Recharge uniquement" : m.isRoundTrip ? "Livraison + Restitution" : "Livraison simple",
+        typeLabel: m.rechargeSeule ? "Recharge uniquement" : m.isRoundTrip ? "restitution et livraison" : "Livraison simple",
         groupKey: m.isRoundTrip && m.groupId ? m.groupId : `solo-${m.id}`,
         legLabel: m.legType === "retour" ? "R" : m.legType === "aller" ? "L" : null,
         purchaseOrder: m.commandeRef,
@@ -961,7 +961,7 @@ function AdminMissionsUnified() {
                       >
                         <span className="inline-flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4f46e5] px-2.5 py-0.5 text-[10.5px] font-semibold text-white">
-                            <ArrowLeftRight size={11} /> Duo Livraison–Restitution
+                            <ArrowLeftRight size={11} /> Duo restitution et livraison
                           </span>
                           <span className="text-[11px] font-medium text-[#3730a3]">
                             Livraison {r.refs[0] ?? "—"} + Restitution {r.refs[1] ?? "—"} — un seul dossier
@@ -1025,7 +1025,7 @@ function AdminMissionsUnified() {
                           {r.m.isTest && <span className="dvx-badge red">Test</span>}
                         </div>
                         {!r.inGroup && hasLegSuffix(r.m.ref) && (
-                          <p className="mt-1 text-[10.5px] text-[#4f46e5]">Ancien duo Livraison–Restitution</p>
+                          <p className="mt-1 text-[10.5px] text-[#4f46e5]">Ancien duo restitution et livraison</p>
                         )}
                       </td>
 

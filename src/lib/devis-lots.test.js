@@ -4,7 +4,7 @@ import { devisGlobalStatut, lignePrix, parseLigneType, totalLignes } from "./dev
 const L = (type_ligne, prix_aller, prix_retour = 0, statut = "a_valider") => ({ type_ligne, prix_aller, prix_retour, statut });
 
 describe("devis groupés par lots", () => {
-  it("additionne aller et retour uniquement pour livraison et restitution", () => {
+  it("additionne aller et retour uniquement pour restitution et livraison", () => {
     expect(lignePrix(L("livraison_restitution", 70, 50))).toBe(120);
     expect(lignePrix(L("aller_simple", 70, 50))).toBe(70);
   });
@@ -22,7 +22,7 @@ describe("devis groupés par lots", () => {
   });
 
   it("reconnaît le type importé et met Aller simple par défaut", () => {
-    expect(parseLigneType("Livraison et restitution")).toBe("livraison_restitution");
+    expect(parseLigneType("restitution et livraison")).toBe("livraison_restitution");
     expect(parseLigneType("aller-retour")).toBe("livraison_restitution");
     expect(parseLigneType("livraison simple")).toBe("livraison_simple");
     expect(parseLigneType("")).toBe("aller_simple");

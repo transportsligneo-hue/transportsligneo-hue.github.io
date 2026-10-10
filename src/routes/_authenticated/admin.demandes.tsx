@@ -201,7 +201,7 @@ function AdminDemandes() {
       const isAR = rows.length > 1;
       toast.success(
         isAR
-          ? `Livraison + Restitution éclatée : ${rows.map((r) => `${r.leg === "aller" ? "Livraison" : "Restitution"} ${r.numero}`).join(" · ")}`
+          ? `restitution et livraison éclatée : ${rows.map((r) => `${r.leg === "aller" ? "Livraison" : "Restitution"} ${r.numero}`).join(" · ")}`
           : rows[0]
               ? `Mission ${rows[0].numero} créée`
               : "Demande convertie",
@@ -345,7 +345,7 @@ function AdminDemandes() {
                       {isNew && <span className="dvx-badge blue">Nouveau</span>}
                       <span className={`dvx-badge ${statutTone}`}>{statutLabels[d.statut] ?? d.statut}</span>
                       {isAR && (
-                        <span className="dvx-badge violet" title="Livraison + Restitution">
+                        <span className="dvx-badge violet" title="restitution et livraison">
                           <ArrowRight size={11} /> Duo L + R
                         </span>
                       )}
@@ -654,7 +654,7 @@ function DemandeDrawer({
       </DrawerSection>
 
       {(demande.options === "aller_retour" || demande.options === "aller-retour" || demande.depart_retour || demande.immatriculation_retour) && (
-        <DrawerSection title="Restitution (Livraison + Restitution)" icon={<MapPin size={12} />}>
+        <DrawerSection title="Restitution (restitution et livraison)" icon={<MapPin size={12} />}>
           <DrawerGrid>
             <DrawerField
               label="Récupération retour"

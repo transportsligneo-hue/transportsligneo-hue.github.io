@@ -160,18 +160,18 @@ function devisMissionType(d: Pick<DevisRow, "option_trajet" | "prestation" | "ve
     const types = groupedVehicleTypes(veh as never[], d.message);
     const labels = [
       types.simple ? "Livraison simple" : null,
-      types.retour ? "Livraison + restitution" : null,
+      types.retour ? "restitution et livraison" : null,
       types.recharge ? "Recharge uniquement" : null,
     ].filter(Boolean) as string[];
     if (labels.length > 1) return { label: `Mixte : ${labels.join(" · ")}`, tone: "violet" };
-    if (types.retour) return { label: "Livraison + restitution", tone: "violet" };
+    if (types.retour) return { label: "restitution et livraison", tone: "violet" };
     if (types.recharge) return { label: "Recharge uniquement", tone: "green" };
     return { label: "Livraison simple", tone: "blue" };
   }
   const value = `${d.option_trajet ?? ""} ${d.prestation ?? ""}`.toLowerCase();
   if (value.includes("recharge")) return { label: "Recharge uniquement", tone: "green" };
   if (/aller[-_ ]?retour|livraison\s*\+\s*restitution/.test(value)) {
-    return { label: "Livraison + restitution", tone: "violet" };
+    return { label: "restitution et livraison", tone: "violet" };
   }
   return { label: "Livraison simple", tone: "blue" };
 }

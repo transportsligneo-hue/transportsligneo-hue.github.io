@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface GroupInvoiceBasis {
-  /** true si le trajet appartient à un groupe (livraison + restitution / mission groupée) */
+  /** true si le trajet appartient à un groupe (restitution et livraison / mission groupée) */
   isGroup: boolean;
   /** ids de tous les trajets couverts par la facture */
   trajetIds: string[];
@@ -41,7 +41,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Détermine la base de facturation d'un trajet.
- * Pour une mission livraison + restitution (ou groupée), la facture doit être unique
+ * Pour une mission restitution et livraison (ou groupée), la facture doit être unique
  * et porter le tarif de base global du devis — pas la moitié coupée par segment.
  */
 export async function resolveGroupInvoiceBasis(
@@ -176,7 +176,7 @@ export async function resolveGroupInvoiceBasis(
 
     itineraire,
     designation: isGroup
-      ? "Convoyage véhicule — livraison + restitution"
+      ? "Convoyage véhicule — restitution et livraison"
       : "Convoyage véhicule",
     existing,
   };

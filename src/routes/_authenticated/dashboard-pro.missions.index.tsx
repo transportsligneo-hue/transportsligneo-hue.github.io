@@ -229,7 +229,7 @@ function ProMissionsIndex() {
     search.trim() && { key: "q", label: `« ${search.trim()} »`, clear: () => setSearch("") },
   ].filter(Boolean) as { key: string; label: string; clear: () => void }[];
 
-  /** Regroupe les jambes Livraison + Restitution d'un même dossier. */
+  /** Regroupe les jambes restitution et livraison d'un même dossier. */
   const dossiers = useMemo(() => {
     const map = new Map<string, MissionRow[]>();
     for (const m of filtered) {
@@ -503,8 +503,8 @@ function ProMissionsIndex() {
                         <Zap size={10} /> {typeLabel}
                       </span>
                     ) : duoAR ? (
-                      <span className="fleet-chip-duo" title="Dossier avec livraison + restitution">
-                        <Repeat size={10} /> Livraison + Restitution
+                      <span className="fleet-chip-duo" title="Dossier avec restitution et livraison">
+                        <Repeat size={10} /> restitution et livraison
                       </span>
                     ) : (
                       <span className="fleet-chip-simple">{typeLabel}</span>

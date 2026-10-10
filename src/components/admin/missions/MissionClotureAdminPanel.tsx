@@ -173,7 +173,7 @@ export const CLOTURE_FACTURABLE_CATEGORIES: ClotureCategorie[] = [
 type Props = {
   attributionId: string;
   statut: string;
-  /** Duo Livraison–Restitution : l'annulation s'applique aux deux volets. */
+  /** Duo restitution et livraison : l'annulation s'applique aux deux volets. */
   isGroup?: boolean;
   /** Pré-remplissage déclenché depuis un incident. */
   prefill?: { categorie: string; motif: string } | null;
@@ -315,7 +315,7 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
     const cat = CLOTURE_CATEGORIES.find((c) => c.key === categorie);
     const ok = await confirmToast(`Annuler la mission — ${cat?.label} ?`, {
       description: isGroup && applyGroup
-        ? "Les deux volets (Livraison + Restitution) passent en statut Annulé. Action tracée dans l'historique."
+        ? "Les deux volets (restitution et livraison) passent en statut Annulé. Action tracée dans l'historique."
         : "La mission passe en statut Annulé et le trajet est mis à jour. Action tracée dans l'historique.",
       confirmLabel: "Confirmer l'annulation",
       variant: "danger",
@@ -582,7 +582,7 @@ export function MissionClotureAdminPanel({ attributionId, statut, isGroup, prefi
             {isGroup && (
               <label className="flex items-center gap-2 text-sm font-semibold text-pro-text sm:col-span-2 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2">
                 <input type="checkbox" checked={applyGroup} onChange={(e) => setApplyGroup(e.target.checked)} />
-                Appliquer aux deux volets (Livraison + Restitution)
+                Appliquer aux deux volets (restitution et livraison)
               </label>
             )}
 

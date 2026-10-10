@@ -30,7 +30,7 @@ interface IncidentRow {
 
 interface Props {
   attributionId: string;
-  /** La mission fait partie d'un Duo Livraison–Restitution. */
+  /** La mission fait partie d'un Duo restitution et livraison. */
   isGroup?: boolean;
   /** Ouvre le formulaire "passage à vide" pré-rempli avec ce motif. */
   onPassageAVide?: (motif: string) => void;
@@ -227,7 +227,7 @@ export function MissionIncidentsPanel({ attributionId, isGroup, onPassageAVide, 
                   >
                     <Ban size={14} />
                     {isGroup
-                      ? "Annuler la mission (Livraison + Restitution)"
+                      ? "Annuler la mission (restitution et livraison)"
                       : "Annuler la mission suite à cet incident"}
                   </button>
                 )}

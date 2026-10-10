@@ -69,12 +69,12 @@ const vueLabels: Record<string, string> = {
   trois_quart_avant_gauche: "3/4 avant gauche", jante_avant_gauche: "Jante avant gauche",
   siege_avant: "Sièges avant", siege_arriere: "Sièges arrière", cables: "Câbles",
   roue_secours: "Roue de secours / kit", compteur: "Compteur", photos_cles: "Clés du véhicule", kit_securite: "Kit sécurité",
-  pv_livraison: "PV livraison / restitution", carte_grise: "Carte grise",
+  pv_livraison: "PV restitution et livraison", carte_grise: "Carte grise",
   avant: "Avant", avant_droit: "Avant droit 3/4", arriere: "Arrière",
 };
 
 const docTypeLabels: Record<string, string> = {
-  pv_livraison: "PV de livraison / restitution", pv_signature: "Signature PV",
+  pv_livraison: "PV de restitution et livraison", pv_signature: "Signature PV",
   carte_grise: "Carte grise", contrat: "Contrat", autre: "Autre",
 };
 

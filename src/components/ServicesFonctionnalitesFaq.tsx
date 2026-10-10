@@ -30,7 +30,7 @@ const CATS: Cat[] = [
       },
       {
         label: "Livraison simple / + restitution",
-        q: "Livraison simple ou livraison + restitution : quelle différence ?",
+        q: "Livraison simple ou restitution et livraison : quelle différence ?",
         a: "La livraison simple déplace votre véhicule une fois. Avec la restitution, les deux trajets sont liés dans le même dossier : la livraison (L) s'affiche en premier, la restitution (R) ensuite, avec le montant total combiné.",
       },
       {

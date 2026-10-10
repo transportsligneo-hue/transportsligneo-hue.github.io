@@ -4,7 +4,7 @@ import { generateEdlFinalPdf, type EdlFinalPdfData, type EdlFinalPdfDocument } f
 /**
  * Construction du « dossier complet » d'une mission.
  *
- * - Sur un duo Livraison + Restitution, les deux volets sont compilés dans un
+ * - Sur un duo restitution et livraison, les deux volets sont compilés dans un
  *   seul PDF (aller puis retour).
  * - L'admin peut joindre des pièces supplémentaires (PV, PDF, photos) qui sont
  *   ajoutées à la fin du dossier.

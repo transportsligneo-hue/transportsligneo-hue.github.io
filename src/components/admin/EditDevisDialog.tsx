@@ -36,7 +36,7 @@ interface Props {
 /** Libellés proposés — la valeur d'origine du devis est toujours conservée. */
 const OPTIONS = [
   'Livraison simple',
-  'Livraison + restitution',
+  'restitution et livraison',
   'Recharge uniquement (sans livraison)',
   'Aller simple',
   'Aller-retour',

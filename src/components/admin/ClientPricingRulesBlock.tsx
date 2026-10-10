@@ -192,7 +192,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
   return (
     <AdminSection
       title="Tarifs personnalisés"
-      description="Prix par trajet (livraison simple / livraison + restitution / express) + suppléments options. Appliqués automatiquement dans le formulaire « Nouvelle mission » du client."
+      description="Prix par trajet (livraison simple / restitution et livraison / express) + suppléments options. Appliqués automatiquement dans le formulaire « Nouvelle mission » du client."
     >
       <div className="space-y-3">
         {loading ? (
@@ -277,7 +277,7 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
               <AdminField label="Prix livraison simple (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_simple} onChange={(e) => setForm({ ...form, prix_aller_simple: e.target.value })} placeholder="70" />
               </AdminField>
-              <AdminField label="Prix livraison + restitution (€)">
+              <AdminField label="Prix restitution et livraison (€)">
                 <input type="number" step="0.01" className={inp} value={form.prix_aller_retour} onChange={(e) => setForm({ ...form, prix_aller_retour: e.target.value })} placeholder="120" />
               </AdminField>
               <AdminField label="Prix express (€)">

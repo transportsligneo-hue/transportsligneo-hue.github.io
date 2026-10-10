@@ -39,7 +39,7 @@ export function DemoSimulator() {
             {ROUTES.map((x, k) => <option key={x.label} value={k}>{x.label}</option>)}
           </select>
         </label>
-        <label className="demo-sim-check"><input type="checkbox" checked={retour} onChange={(e) => setRetour(e.target.checked)} /> Livraison + restitution</label>
+        <label className="demo-sim-check"><input type="checkbox" checked={retour} onChange={(e) => setRetour(e.target.checked)} /> restitution et livraison</label>
         <label className="demo-sim-check"><input type="checkbox" checked={elec} onChange={(e) => setElec(e.target.checked)} /> <Zap size={13} /> Recharge électrique à la livraison</label>
       </div>
       <ul className="dpm-facts">

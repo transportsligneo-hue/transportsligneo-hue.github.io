@@ -230,7 +230,7 @@ const vueLabels: Record<string, string> = {
   compteur: "14. Compteur (km + carburant)",
   photos_cles: "15. Clés du véhicule",
   kit_securite: "16. Kit sécurité",
-  pv_livraison: "16. PV livraison / restitution",
+  pv_livraison: "16. PV restitution et livraison",
   carte_grise: "17. Carte grise",
   signature: "18. Signature client",
 };
@@ -332,7 +332,7 @@ function AdminMissionDetail() {
         setPoHistoryKey((k) => k + 1);
         if (!silent) {
           toast.success("N° de PO enregistré", {
-            description: trajet?.mission_group_id ? "Appliqué aux deux volets (Livraison + Restitution)." : undefined,
+            description: trajet?.mission_group_id ? "Appliqué aux deux volets (restitution et livraison)." : undefined,
           });
         }
       } catch (e) {
@@ -533,7 +533,7 @@ function AdminMissionDetail() {
       })));
     }
 
-    // Facture existante — recherchée au niveau du DUO (une seule facture pour Livraison + Restitution)
+    // Facture existante — recherchée au niveau du DUO (une seule facture pour restitution et livraison)
     const factBasis = await resolveGroupInvoiceBasis(attr.trajet_id);
     setIsSecondaryLeg(factBasis.isGroup && factBasis.primaryAttributionId !== attr.id);
     setLinkedFactureId(factBasis.existing?.id ?? null);
@@ -647,7 +647,7 @@ function AdminMissionDetail() {
 
   /**
    * Compile le dossier complet de la mission en un seul PDF.
-   * Sur un duo Livraison + Restitution, les DEUX volets sont inclus.
+   * Sur un duo restitution et livraison, les DEUX volets sont inclus.
    * Les pièces jointes fournies par l'admin sont ajoutées à la fin.
    */
   const buildDossierBlob = async (attachments: File[] = []): Promise<Blob> => {
@@ -879,13 +879,13 @@ function AdminMissionDetail() {
     await savePo(po, true);
     setGeneratingFacture(true);
     try {
-      // Livraison + restitution = UNE seule facture au tarif de base global
+      // restitution et livraison = UNE seule facture au tarif de base global
       const basis = await resolveGroupInvoiceBasis(trajet.id);
       if (basis.existing) {
         setLinkedFactureId(basis.existing.id);
         setLinkedFactureNumero(basis.existing.numero);
         toast.info(
-          basis.isGroup ? "Facture unique déjà émise pour ce duo Livraison–Restitution" : "Facture déjà émise pour cette mission",
+          basis.isGroup ? "Facture unique déjà émise pour ce duo restitution et livraison" : "Facture déjà émise pour cette mission",
           { description: basis.existing.numero },
         );
         return;
@@ -943,7 +943,7 @@ function AdminMissionDetail() {
       if (error) throw error;
       setLinkedFactureId(inserted.id);
       setLinkedFactureNumero(inserted.numero as string);
-      toast.success("Facture créée", { description: `Numéro ${numero}${basis.isGroup ? " — facture unique Livraison + Restitution" : ""}` });
+      toast.success("Facture créée", { description: `Numéro ${numero}${basis.isGroup ? " — facture unique restitution et livraison" : ""}` });
 
     } catch (e) {
 
@@ -1081,7 +1081,7 @@ function AdminMissionDetail() {
         </IconButton>
       </div>
 
-      {/* === Switch Livraison / Restitution (aller-retour) === */}
+      {/* === Switch restitution et livraison (aller-retour) === */}
       {legTabs.length > 1 && (
         <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-xl border border-pro-border bg-pro-surface p-1">
           {legTabs.map((leg) => {
@@ -1451,7 +1451,7 @@ function AdminMissionDetail() {
               />
               <p className="mt-1.5 text-[11px] text-pro-muted">
                 Le PO est reporté sur la facture existante, puis le PDF est régénéré.
-                {trajet.mission_group_id ? " Facture unique pour le duo Livraison + Restitution (montant global)." : ""}
+                {trajet.mission_group_id ? " Facture unique pour le duo restitution et livraison (montant global)." : ""}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1489,7 +1489,7 @@ function AdminMissionDetail() {
               <p className="mt-1.5 text-[11px] text-pro-muted">
                 {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
                 {trajet.mission_group_id
-                  ? " Un seul PO et UNE seule facture pour le duo Livraison + Restitution (montant global)."
+                  ? " Un seul PO et UNE seule facture pour le duo restitution et livraison (montant global)."
                   : ""}
                 {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
               </p>
@@ -1782,7 +1782,7 @@ function AdminMissionDetail() {
 
             {isDuo && (
               <p className="mt-3 text-[11px] text-pro-text-soft border-t border-pro-border pt-3">
-                Duo Livraison + Restitution : chaque volet a son propre véhicule et sa propre plaque.
+                Duo restitution et livraison : chaque volet a son propre véhicule et sa propre plaque.
                 Ouvrez l'autre volet pour vérifier ses informations.
               </p>
             )}
@@ -1948,7 +1948,7 @@ function AdminMissionDetail() {
             />
           </div>
 
-          {/* Transformer un aller simple en Livraison + Restitution */}
+          {/* Transformer un aller simple en restitution et livraison */}
           <MissionConvertDuoPanel
             trajetId={trajet.id}
             isDuo={isDuo}

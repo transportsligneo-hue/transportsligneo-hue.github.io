@@ -749,7 +749,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         const plates: Plaque[] = [{ tag: "L", ident, elec: isElectricVehicle(v), plate: v.immatriculation ? formatPlate(v.immatriculation) : null }];
         if (hasRetour) plates.push({ tag: "R", ident: identR, elec: isElectricVehicle({ marque: v.marque_retour, modele: v.modele_retour, carburant: v.carburant_retour, energie: v.energie_retour }), plate: v.immatriculation_retour ? formatPlate(v.immatriculation_retour) : null });
         return {
-          title: `Véhicule ${i + 1}${hasRetour ? " · Livraison + restitution" : ""}`,
+          title: `Véhicule ${i + 1}${hasRetour ? " · restitution et livraison" : ""}`,
           amount: htLigne,
           plates,
         };

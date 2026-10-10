@@ -85,7 +85,7 @@ const ALL_STEPS: StepDef[] = [
   { id: "kit_securite",                section: "securite",  label: "Kit sécurité",             hint: "Prenez une photo du kit sécurité (gilet, triangle, etc.)" },
 
   // ───── DOCUMENTS ─────
-  { id: "pv_livraison",                section: "documents", label: "PV livraison / restitution", hint: "Prenez une photo du PV de livraison" },
+  { id: "pv_livraison",                section: "documents", label: "PV restitution et livraison", hint: "Prenez une photo du PV de livraison" },
   { id: "carte_grise",                 section: "documents", label: "Carte grise",             hint: "Prenez une photo de la carte grise du véhicule" },
   // ───── DOUBLE SIGNATURE OBLIGATOIRE (départ ET arrivée) ─────
   { id: "signature_convoyeur",         section: "signature", label: "Signature convoyeur",      hint: "Signez pour attester de l'état du véhicule à cette étape" },

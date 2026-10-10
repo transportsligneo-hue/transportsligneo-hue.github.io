@@ -54,19 +54,19 @@ interface DevisRow {
   option_trajet: string | null;
 }
 
-/** Pastilles néon électriques : recharge = vert, livraison simple = bleu, livraison + restitution = violet. */
+/** Pastilles néon électriques : recharge = vert, livraison simple = bleu, restitution et livraison = violet. */
 const NEON_RECHARGE = "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.35)]";
 const NEON_SIMPLE = "bg-sky-100 text-sky-700 border-sky-300 shadow-[0_0_10px_rgba(14,165,233,0.35)]";
 const NEON_DUO = "bg-violet-100 text-violet-700 border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.35)]";
 
-/** Type de prestation lisible : recharge / livraison + restitution / livraison simple. */
+/** Type de prestation lisible : recharge / restitution et livraison / livraison simple. */
 function devisTypeInfo(d: DevisRow, isDuo: boolean): { label: string; cls: string } {
   const opt = (d.option_trajet ?? "").toLowerCase();
   if (opt.includes("recharge")) {
     return { label: "Recharge uniquement", cls: NEON_RECHARGE };
   }
   if (isDuo || opt.includes("retour") || opt.includes("restitution")) {
-    return { label: "Livraison + Restitution", cls: NEON_DUO };
+    return { label: "restitution et livraison", cls: NEON_DUO };
   }
   return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
@@ -85,17 +85,17 @@ function factureTypeInfo(
     const opt = (dv.option_trajet ?? "").toLowerCase();
     if (opt.includes("recharge")) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
     if (dv.date_retour || opt.includes("retour") || opt.includes("restitution")) {
-      return { label: "Livraison + Restitution", cls: NEON_DUO };
+      return { label: "restitution et livraison", cls: NEON_DUO };
     }
     return { label: "Livraison simple", cls: NEON_SIMPLE };
   }
   if (f.leg_type === "aller" || f.leg_type === "retour") {
-    return { label: "Livraison + Restitution", cls: NEON_DUO };
+    return { label: "restitution et livraison", cls: NEON_DUO };
   }
 
   const txt = `${f.designation ?? ""} ${f.depart ?? ""} ${f.arrivee ?? ""}`.toLowerCase();
   if (/recharge/.test(txt)) return { label: "Recharge uniquement", cls: NEON_RECHARGE };
-  if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "Livraison + Restitution", cls: NEON_DUO };
+  if (/restitution|aller[- ]?retour|retour/.test(txt)) return { label: "restitution et livraison", cls: NEON_DUO };
   return { label: "Livraison simple", cls: NEON_SIMPLE };
 }
 
@@ -309,7 +309,7 @@ function ProDocuments() {
     return map;
   }, [devis]);
 
-  /** Dossiers (livraison + restitution) comptant plusieurs factures. */
+  /** Dossiers (restitution et livraison) comptant plusieurs factures. */
   const dossierCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const f of factures) {
@@ -546,7 +546,7 @@ function ProDocuments() {
                               </Link>
                             )}
                             <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
-                              {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                              {typeInfo.label === "restitution et livraison" && <Repeat size={10} />}
                               {typeInfo.label}
                             </span>
                           </div>
@@ -755,7 +755,7 @@ function ProDocuments() {
                               <span>{f.numero}</span>
                               <div className="flex flex-wrap items-center gap-1.5">
                                 <span className={`inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${typeInfo.cls}`}>
-                                  {typeInfo.label === "Livraison + Restitution" && <Repeat size={10} />}
+                                  {typeInfo.label === "restitution et livraison" && <Repeat size={10} />}
                                   {typeInfo.label}
                                 </span>
                                 <MissionLegBadge leg={(f.leg_type as "aller" | "retour" | "simple" | null)} size="xs" />

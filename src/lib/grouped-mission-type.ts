@@ -5,7 +5,7 @@ export type GroupedTripType = "aller-simple" | "aller-retour" | "recharge";
 
 export const GROUPED_TRIP_CHOICES: { value: GroupedTripType; label: string }[] = [
   { value: "aller-simple", label: "Livraison simple" },
-  { value: "aller-retour", label: "Livraison + restitution" },
+  { value: "aller-retour", label: "restitution et livraison" },
   { value: "recharge", label: "Recharge uniquement" },
 ];
 

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/concessionnaires")({
         { t: "Transferts inter-sites", d: "Vos véhicules passent d'une concession à l'autre sans mobiliser vos équipes." },
         { t: "Livraisons clients", d: "Remise en main propre, clés et documents, avec signature électronique." },
         { t: "Véhicules d'essai", d: "Acheminement et retour de vos véhicules de démonstration." },
-        { t: "Restitutions", d: "Livraison + restitution liées dans une seule mission." },
+        { t: "Restitutions", d: "restitution et livraison liées dans une seule mission." },
         { t: "Suivi des mouvements", d: "Chaque déplacement tracé : GPS, états des lieux, historique." },
         { t: "Une seule facture pour l'ensemble de vos sites", d: "Facturation consolidée par site ou par mission." },
       ]}
