@@ -706,7 +706,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);
-      doc.setTextColor(...MUTED);
+      doc.setTextColor(...BLUE);
       doc.text(`VIN ${v.vin.toUpperCase()}`, M + 5, vy + 4.6);
     }
     vy += lineH;
@@ -891,7 +891,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.9);
-    doc.setTextColor(...INK);
+    doc.setTextColor(...(l.amount === null ? INK : BLUE));
     doc.text(l.amount === null ? "Inclus" : eur(l.amount), right, y, { align: "right" });
     let sy = y + (l.plates ? 3 : 4);
     doc.setFont("helvetica", "normal");
@@ -927,7 +927,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.setFontSize(8.7);
   doc.setTextColor(...MUTED);
   doc.text(micro ? "Total" : "Total HT", totX, y);
-  doc.setTextColor(...INK);
+  doc.setTextColor(...BLUE);
   doc.text(eur(ht), right, y, { align: "right" });
   y += 5;
   doc.setTextColor(...MUTED);
@@ -937,7 +937,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     doc.text("Non applicable", right, y, { align: "right" });
   } else {
     doc.text(`TVA (${String(vatRate).replace(".", ",")} %)`, totX, y);
-    doc.setTextColor(...INK);
+    doc.setTextColor(...BLUE);
     doc.text(eur(tva), right, y, { align: "right" });
   }
   y += 3.6;
