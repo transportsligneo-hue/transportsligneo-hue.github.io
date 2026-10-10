@@ -39,5 +39,7 @@ export async function downloadDemoPdf(kind: string, m: ProMission) {
   doc.setFontSize(9);
   doc.setTextColor(140, 140, 140);
   doc.text("Données fictives — aucune valeur contractuelle.", 15, 285);
-  await downloadBlob(doc.output("blob"), `demo-${kind.toLowerCase().replace(/\s+/g, "-")}-${m.numero}.pdf`);
+  // Téléchargement direct (pas de partage natif) pour la démo publique.
+  void downloadBlob;
+  doc.save(`demo-${kind.toLowerCase().replace(/\s+/g, "-")}-${m.numero}.pdf`);
 }
