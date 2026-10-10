@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
+import { GuidedTour, CLIENT_DASHBOARD_TOUR } from "@/components/onboarding/GuidedTour";
 import { isApercuMode } from "@/lib/apercu-mode";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/")({
@@ -231,6 +232,7 @@ function ClientDashboard() {
         actions={
           <Link
             to="/dashboard-client/nouvelle-reservation"
+            data-tour="new-mission"
             className="client-btn-blue inline-flex items-center gap-2 rounded-[9px] px-4 py-2.5 text-[12.5px] font-semibold"
           >
             <PlusCircle size={14} /> Réserver un convoyage
@@ -241,7 +243,7 @@ function ClientDashboard() {
       <div className="h-6" />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div data-tour="dash-kpis" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <KpiCard
           tone="warn" label="Demandes en attente" value={stats.demandes} trendLabel="à traiter"
           icon={<Inbox size={18} />}
@@ -262,10 +264,12 @@ function ClientDashboard() {
 
       {/* Suivi + CTA */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 mb-8">
-        <ActiveMissionsMap
+        <GuidedTour id="client-dashboard" steps={CLIENT_DASHBOARD_TOUR} delay={1200} />
+        <div data-tour="dash-map"><ActiveMissionsMap
           title="Suivi de vos convoyages"
           emptyMessage="Aucun convoyage en cours actuellement."
-        />
+        /></div>
+
         <div className="v3-cta-gold p-6 flex flex-col justify-center text-center">
           <h3 className="font-v3-display text-[17px] font-semibold text-v3 m-0">
             Un véhicule à faire convoyer ?

@@ -133,3 +133,27 @@ export const MISSION_DETAIL_TOUR: TourStep[] = [
   { target: '[data-tour="mission-invoice"]', title: "Votre facture", body: "La facture est générée automatiquement en fin de mission. Téléchargez son PDF en un clic." },
   { target: '[data-tour="mission-vehicle"]', title: "Véhicule", body: "Modèle, plaque et VIN du véhicule transporté, toujours à portée de main." },
 ];
+
+export const PRO_DASHBOARD_TOUR: TourStep[] = [
+  { target: '[data-tour="side-nav"]', title: "Votre menu", body: "Sur le côté, retrouvez tout votre espace : tableau de bord, missions, documents, adresses favorites et votre parc." },
+  { target: '[data-tour="new-simple"]', title: "Demande de mission simple", body: "Un seul véhicule, un trajet : livraison simple, restitution et livraison, ou recharge électrique." },
+  { target: '[data-tour="new-grouped"]', title: "Demande de mission groupée", body: "Plusieurs véhicules en une seule demande. Mixez librement livraisons simples, restitution et livraison, et recharges électriques, véhicule par véhicule." },
+  { target: '[data-tour="dash-kpis"]', title: "Vos chiffres clés", body: "Véhicules en mission, disponibles ou immobilisés, mis à jour en temps réel." },
+  { target: '[data-tour="dash-map"]', title: "Suivi GPS en direct", body: "Suivez sur la carte chaque véhicule en cours de convoyage." },
+  { target: '[data-tour="side-missions"]', title: "Vos missions", body: "Ouvrez une mission pour voir les photos, le GPS, les PV et télécharger la facture." },
+  { target: '[data-tour="help-round"]', title: "Revoir les conseils", body: "Ce petit bouton rond relance la visite à tout moment." },
+];
+
+export const MISSION_CHOICE_TOUR: TourStep[] = [
+  { target: '[data-tour="choice-simple"]', title: "Mission simple", body: "Un véhicule, un trajet de A à B. Vous choisissez livraison simple, restitution et livraison, ou recharge." },
+  { target: '[data-tour="choice-grouped"]', title: "Mission groupée", body: "Un lot de véhicules : un enlèvement commun, puis une prestation différente par véhicule si besoin. Les documents de chaque mission sont créés automatiquement." },
+];
+
+export const CLIENT_DASHBOARD_TOUR: TourStep[] = [
+  { target: '[data-tour="side-nav"]', title: "Votre menu", body: "Sur le côté : réservations, missions, factures et devis, adresses favorites et documents." },
+  { target: '[data-tour="new-mission"]', title: "Réserver un convoyage", body: "Faites votre demande en quelques étapes simples : adresses, véhicule, date." },
+  { target: '[data-tour="dash-kpis"]', title: "Vos convoyages", body: "Demandes en attente, planifiées, en cours et terminées d'un coup d'œil." },
+  { target: '[data-tour="dash-map"]', title: "Suivi GPS en direct", body: "Suivez votre véhicule en temps réel pendant le convoyage." },
+  { target: '[data-tour="side-missions"]', title: "Vos missions", body: "Ouvrez une mission pour voir les photos, les PV et télécharger la facture." },
+  { target: '[data-tour="help-round"]', title: "Revoir les conseils", body: "Ce petit bouton rond relance la visite à tout moment." },
+];

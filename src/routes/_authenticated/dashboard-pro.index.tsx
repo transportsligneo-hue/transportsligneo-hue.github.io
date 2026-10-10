@@ -12,6 +12,7 @@ import { ActiveMissionsMap } from "@/components/map/ActiveMissionsMap";
 import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 import { dossierTypeLabel, isAllerRetour } from "@/lib/mission-type";
 import { PilotageStrip } from "@/components/dashboard-pro/PilotageStrip";
+import { GuidedTour, PRO_DASHBOARD_TOUR } from "@/components/onboarding/GuidedTour";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -259,6 +260,7 @@ function ProDashboard() {
                   <TooltipTrigger asChild>
                     <Link
                       to="/dashboard-pro/nouvelle-demande"
+                      data-tour="new-simple"
                       className="group flex items-center gap-1.5 rounded-[9px] bg-[#2f5fff] px-4 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_2px_8px_-2px_rgba(47,95,255,0.35)] transition-colors hover:bg-[#1e4af0]"
                     >
                       <PlusCircle size={14} />
@@ -275,6 +277,7 @@ function ProDashboard() {
                 <TooltipTrigger asChild>
                   <Link
                     to={isFlotte ? "/dashboard-pro/nouvelle-mission/groupee" : "/dashboard-pro/nouvelle-mission"}
+                    data-tour="new-grouped"
                     className="group flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
                   >
                     <PlusCircle size={14} />
@@ -296,7 +299,7 @@ function ProDashboard() {
       <PilotageStrip isFlotte={isFlotte} />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div data-tour="dash-kpis" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {isFlotte ? (
           <>
             <KpiCard tone="blue" trend="flat" trendLabel="stable" label="Véhicules en mission" value={vehicleStats.enMission}
@@ -367,7 +370,8 @@ function ProDashboard() {
       </div>
 
       {/* Carte trajets en cours */}
-      <div className="mb-8">
+      <div data-tour="dash-map" className="mb-8">
+        <GuidedTour id="pro-dashboard" steps={PRO_DASHBOARD_TOUR} delay={1200} />
         <ActiveMissionsMap
           scope="all"
           title={isFlotte ? "Flotte en mouvement" : "Vos trajets en cours"}
