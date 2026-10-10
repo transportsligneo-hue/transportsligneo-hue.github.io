@@ -365,7 +365,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const arriveeLines = (doc.splitTextToSize(f.arrivee || "—", halfW) as string[]).slice(0, 3);
   const addrRows = Math.max(departLines.length, arriveeLines.length);
   const addrBlockH = 11 + addrRows * 4.4;
-  const mH = addrBlockH + (hasVeh ? 20 : 3);
+  const mH = addrBlockH + (hasVeh ? 23 : 3);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
@@ -409,7 +409,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 16);
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 20);
     void vx;
   }
 
@@ -538,9 +538,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (legalMention) mentions.push(legalMention);
 
   doc.setFont("helvetica", "normal");
-  const mentionFontSize = compactDetails ? 5.8 : 8;
-  const mentionLeading = compactDetails ? 2.6 : 3.8;
-  const mentionGap = compactDetails ? 0.4 : 2;
+  const mentionFontSize = compactDetails ? 5.8 : 7.1;
+  const mentionLeading = compactDetails ? 2.6 : 3.2;
+  const mentionGap = compactDetails ? 0.4 : 1.2;
   doc.setFontSize(mentionFontSize);
   const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
   const mentionsH = (compactDetails ? 8 : 9.5)
