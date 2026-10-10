@@ -4,7 +4,7 @@ import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
 import signatureGo from "@/assets/signature-go-transparente.png";
 import tamponLigneo from "@/assets/tampon-ligneo.png";
 import { supabase } from "@/integrations/supabase/client";
-import { parseDevisOptions, parseDevisSupplements } from "@/lib/devis-pdf";
+import { parseDevisSupplements } from "@/lib/devis-pdf";
 import { resolveInvoiceMention } from "@/lib/invoice-settings";
 
 import {
@@ -20,6 +20,7 @@ import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
+import { invoiceSelectedOptions, invoiceVehicles } from "@/lib/invoice-document-details";
 
 
 
@@ -184,22 +185,54 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---- Détail repris du devis d'origine (mêmes libellés, mêmes prix) ----
   let devisMessage = f.devis_message ?? null;
-  if (!context?.demo && !devisMessage && f.reference_client && /^DEV-/i.test(f.reference_client)) {
+  let selectedOptions = f.options;
+  let vehicles = invoiceVehicles(f as unknown as Record<string, unknown>);
+  if (!context?.demo) {
     try {
-      const { data } = await supabase
-        .from("devis")
-        .select("message")
-        .eq("numero", f.reference_client)
-        .maybeSingle();
-      devisMessage = (data as { message?: string | null } | null)?.message ?? null;
+      // Read-only recovery for old invoices and callers omitting vehicle metadata.
+      const { data: invoice } = await supabase.from("factures")
+        .select("metadata, attribution_id, mission_id, reference_client")
+        .eq("numero", f.numero).maybeSingle();
+      const metadata = invoice?.metadata && typeof invoice.metadata === "object" && !Array.isArray(invoice.metadata)
+        ? invoice.metadata as Record<string, unknown> : {};
+      if (!vehicles.some((v) => v.immatriculation) && metadata.vehicle && typeof metadata.vehicle === "object") {
+        vehicles = invoiceVehicles(metadata.vehicle as Record<string, unknown>);
+      }
+      let devisId: string | null = null;
+      let trajet: Record<string, unknown> | null = null;
+      if (invoice?.attribution_id) {
+        const { data: attribution } = await supabase.from("attributions")
+          .select("trajets(*)").eq("id", invoice.attribution_id).maybeSingle();
+        trajet = attribution?.trajets as Record<string, unknown> | null;
+      }
+      if (!trajet && invoice?.mission_id) {
+        const { data } = await supabase.from("trajets").select("*")
+          .eq("mission_id", invoice.mission_id).limit(1).maybeSingle();
+        trajet = data as Record<string, unknown> | null;
+      }
+      if (trajet) {
+        devisId = typeof trajet.devis_id === "string" ? trajet.devis_id : null;
+        if (!vehicles.some((v) => v.immatriculation)) vehicles = invoiceVehicles(trajet);
+      }
+      const ref = invoice?.reference_client || f.reference_client;
+      if (devisId || (ref && /^DEV-/i.test(ref))) {
+        const query = supabase.from("devis").select("*");
+        const { data: quote } = await (devisId ? query.eq("id", devisId) : query.eq("numero", ref ?? "")).maybeSingle();
+        if (quote) {
+          devisMessage = quote.message ?? devisMessage;
+          const rawOptions = (quote as Record<string, unknown>).options;
+          if (Array.isArray(rawOptions)) selectedOptions = rawOptions.filter((v): v is string => typeof v === "string");
+          const quoteVehicles = invoiceVehicles(quote as Record<string, unknown>);
+          if (quoteVehicles.some((v) => v.immatriculation) && !vehicles.some((v) => v.immatriculation)) vehicles = quoteVehicles;
+        }
+      }
     } catch { /* détail optionnel */ }
   }
   const parsedSupp = parseDevisSupplements(devisMessage);
-  const parsedOpts = parseDevisOptions(devisMessage);
   const supplements = (f.supplements?.length ? f.supplements : parsedSupp.supplements).filter(
     (s) => s && Number(s.montant) > 0,
   );
-  const optionsList = (f.options?.length ? f.options : parsedOpts.options).filter(Boolean);
+  const optionsList = invoiceSelectedOptions(selectedOptions, devisMessage);
   const toHt = (v: number) => (tvaExempt ? v : +(v / (1 + tvaTaux / 100)).toFixed(2));
   const supplementsTtc = supplements.reduce((s, x) => s + Number(x.montant), 0);
   const baseHt = Math.max(0, +(ht - toHt(supplementsTtc)).toFixed(2));
@@ -353,9 +386,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.text(text, x + 2.6, y + 3.2);
   };
 
-  const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
-  const plaque = f.vehicule_immatriculation?.trim() || "";
-  const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
+  const hasVeh = Boolean(vehicles.length || f.distance_km || f.km_depart);
+  const groupedVehicles = vehicles.length > 2;
+  const extraVehicleHeight = Math.max(0, (groupedVehicles ? Math.ceil(vehicles.length / 2) : vehicles.length) - 1) * (groupedVehicles ? 7 : 10);
   smallLabel("MISSION FACTURÉE", L, 88.5);
   const mTop = 91.5;
   // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
@@ -365,7 +398,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const arriveeLines = (doc.splitTextToSize(f.arrivee || "—", halfW) as string[]).slice(0, 3);
   const addrRows = Math.max(departLines.length, arriveeLines.length);
   const addrBlockH = 11 + addrRows * 4.4;
-  const mH = addrBlockH + (hasVeh ? 23 : 3);
+  const mH = addrBlockH + (hasVeh ? 23 + extraVehicleHeight : 3);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
@@ -394,12 +427,17 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
-    let vx = L + 6;
-    if (vehLabel) {
-      doc.text(vehLabel, vx, vTop + 11.5);
-      vx += doc.getTextWidth(vehLabel) + 3.5;
-    }
-    if (plaque) vx += drawTemplatePlate(doc, vx, vTop + 6.3, plaque, 11) + 4;
+    vehicles.forEach((vehicle, index) => {
+      const rowY = vTop + 11.5 + (groupedVehicles ? Math.floor(index / 2) * 7 : index * 10);
+      const rowX = L + 6 + (groupedVehicles ? (index % 2) * (innerW / 2) : 0);
+      const width = groupedVehicles ? innerW / 2 - 6 : innerW - 12;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(groupedVehicles ? 7 : 9.5);
+      doc.setTextColor(...INK);
+      const label = [vehicle.marque, vehicle.modele].filter(Boolean).join(" ");
+      doc.text((doc.splitTextToSize(label, width - (groupedVehicles ? 29 : 49)) as string[])[0] || "Véhicule", rowX, rowY);
+      if (vehicle.immatriculation) drawTemplatePlate(doc, rowX + width - (groupedVehicles ? 26 : 43), rowY - (groupedVehicles ? 4 : 5.8), vehicle.immatriculation, groupedVehicles ? 7 : 11);
+    });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -409,8 +447,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 20);
-    void vx;
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 20 + extraVehicleHeight);
   }
 
 
