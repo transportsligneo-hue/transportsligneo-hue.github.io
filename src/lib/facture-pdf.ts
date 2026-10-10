@@ -19,6 +19,7 @@ import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { drawPlateTag } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
 
 
 
@@ -85,7 +86,7 @@ export interface FactureData {
 
 
 const NAVY: [number, number, number] = [14, 26, 53];
-const GOLD: [number, number, number] = [176, 134, 42];
+const GOLD = DOCUMENT_TEMPLATE.blue;
 const GOLD_SOFT: [number, number, number] = [212, 175, 55];
 const TEXT: [number, number, number] = [32, 38, 52];
 const MUTED: [number, number, number] = [122, 130, 145];
@@ -128,7 +129,7 @@ const fmtDateTime = (d?: string | null) => {
   } catch { return d; }
 };
 
-const M = 18; // marge gauche/droite
+const M = 13; // margins of the supplied blue-neon invoice
 
 export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
@@ -209,36 +210,36 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   // =====================================================================
   //  Modèle officiel « facture-modele-transports-ligneo » (fond clair)
   // =====================================================================
-  const INK: [number, number, number] = [11, 16, 32];
-  const BLUE: [number, number, number] = [47, 95, 255];
-  const GREY: [number, number, number] = [122, 130, 145];
-  const BOX: [number, number, number] = [244, 246, 250];
-  const RULE: [number, number, number] = [226, 231, 240];
-  const BLUEBOX: [number, number, number] = [238, 243, 255];
+  const INK = DOCUMENT_TEMPLATE.ink;
+  const BLUE = DOCUMENT_TEMPLATE.blue;
+  const GREY = DOCUMENT_TEMPLATE.textSoft;
+  const BOX = DOCUMENT_TEMPLATE.panel;
+  const RULE = DOCUMENT_TEMPLATE.line;
+  const BLUEBOX = DOCUMENT_TEMPLATE.payment;
 
   const L = M;
   const R = pageW - M;
 
   // ---------- En-tête ----------
   if (logoData) {
-    try { doc.addImage(logoData, "PNG", L, 21, 11, 11); } catch { /* logo optionnel */ }
+    try { doc.addImage(logoData, "PNG", L, 14, 14, 14); } catch { /* logo optionnel */ }
   }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(...INK);
   const brand = (co?.raison_sociale || "Transports Ligneo").toUpperCase();
   const brandWords = brand.split(" ");
-  const lastWord = brandWords.length > 1 ? brandWords.pop()! : "";
+  const lastWord = brandWords.length > 1 ? brandWords.pop() ?? "" : "";
   const firstPart = brandWords.join(" ") + (lastWord ? " " : "");
-  doc.text(firstPart, L + 14, 27);
+  doc.text(firstPart, L + 17, 20.5);
   if (lastWord) {
     doc.setTextColor(...BLUE);
-    doc.text(lastWord, L + 14 + doc.getTextWidth(firstPart), 27);
+    doc.text(lastWord, L + 17 + doc.getTextWidth(firstPart), 20.5);
   }
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(...GREY);
-  doc.text(`Convoyage automobile${isB2B ? " B2B" : ""} · Tours (37)`, L + 14, 32);
+  doc.text(`Convoyage automobile${isB2B ? " B2B" : ""} · Tours (37)`, L + 17, 25.4);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
@@ -332,9 +333,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ---------- Mission facturée ----------
-  const AMBER: [number, number, number] = [176, 106, 12];
-  const AMBER_SOFT: [number, number, number] = [255, 243, 224];
-  const BLUE_SOFT: [number, number, number] = [232, 240, 255];
+  const AMBER = DOCUMENT_TEMPLATE.cyan;
+  const AMBER_SOFT = DOCUMENT_TEMPLATE.cyanSoft;
+  const BLUE_SOFT = DOCUMENT_TEMPLATE.blueSoft;
   const pill = (
     x: number,
     y: number,
@@ -428,8 +429,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.line(L, y, R, y);
   y += compactDetails ? 5 : 8;
 
-  const mainTitle = f.designation?.trim()
-    || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
+  const mainTitle = (f.designation?.trim()
+    || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile"))
+    .replace(/livraison\s*(?:\+|et|–|\/)\s*restitution/gi, "restitution et livraison");
   const mainSub = isPlateau
     ? `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""} — véhicule non roulant transporté sur plateau porte-voiture (non conduit).`
     : `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""}. Carburant, péages et assurance tous risques inclus.`;

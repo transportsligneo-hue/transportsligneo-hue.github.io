@@ -232,16 +232,16 @@ export function devisRowToPdfData(
 }
 
 /* ===== Palette du gabarit "devis clair" (identique à la maquette) ===== */
-const INK: [number, number, number] = [15, 23, 42]; // titres quasi noirs
-const BLUE: [number, number, number] = [47, 95, 255]; // bleu électrique
-const MUTED: [number, number, number] = [113, 122, 140];
-const FAINT: [number, number, number] = [148, 157, 173];
-const LINE: [number, number, number] = [228, 231, 238];
-const CARD: [number, number, number] = [244, 245, 249];
+const INK = DOCUMENT_TEMPLATE.ink;
+const BLUE = DOCUMENT_TEMPLATE.blue;
+const MUTED = DOCUMENT_TEMPLATE.textSoft;
+const FAINT = DOCUMENT_TEMPLATE.muted;
+const LINE = DOCUMENT_TEMPLATE.line;
+const CARD = DOCUMENT_TEMPLATE.panel;
 const WHITE: [number, number, number] = [255, 255, 255];
-const BLUE_SOFT: [number, number, number] = [232, 238, 255];
-const AMBER_SOFT: [number, number, number] = [255, 243, 219];
-const AMBER_INK: [number, number, number] = [161, 108, 12];
+const BLUE_SOFT = DOCUMENT_TEMPLATE.blueSoft;
+const AMBER_SOFT = DOCUMENT_TEMPLATE.cyanSoft;
+const AMBER_INK = DOCUMENT_TEMPLATE.cyan;
 const PINK_SOFT: [number, number, number] = [255, 233, 240];
 const PINK_INK: [number, number, number] = [200, 42, 90];
 const GREEN_SOFT: [number, number, number] = [225, 247, 235];
