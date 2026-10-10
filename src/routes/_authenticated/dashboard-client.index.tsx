@@ -268,7 +268,8 @@ function ClientDashboard() {
         <div data-tour="dash-map"><ActiveMissionsMap
           title="Suivi de vos convoyages"
           emptyMessage="Aucun convoyage en cours actuellement."
-        />
+        /></div>
+
         <div className="v3-cta-gold p-6 flex flex-col justify-center text-center">
           <h3 className="font-v3-display text-[17px] font-semibold text-v3 m-0">
             Un véhicule à faire convoyer ?
