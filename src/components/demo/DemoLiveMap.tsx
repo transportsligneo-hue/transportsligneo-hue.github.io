@@ -66,7 +66,8 @@ export function DemoLiveMap({ onMetrics }: { onMetrics?: (m: LiveMetricsSnapshot
             role="client"
             title="Mission démo"
             onMetrics={onMetrics}
-          />
+            />
+          </div>
         )}
       </Suspense>
     </ClientOnly>
