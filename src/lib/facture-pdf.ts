@@ -79,6 +79,8 @@ export interface FactureData {
   devis_message?: string | null;
   /** Options facturées (reprises du devis). */
   options?: string[] | null;
+  /** Vehicles explicitly included on this invoice, including returned vehicles. */
+  vehicules?: Array<{ marque?: string | null; modele?: string | null; immatriculation?: string | null; vin?: string | null; immatriculation_retour?: string | null; marque_retour?: string | null; modele_retour?: string | null; vin_retour?: string | null }> | null;
   /** Suppléments chiffrés repris du devis (montants TTC). */
   supplements?: Array<{ label: string; montant: number }> | null;
 }
@@ -195,6 +197,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
         .eq("numero", f.numero).maybeSingle();
       const metadata = invoice?.metadata && typeof invoice.metadata === "object" && !Array.isArray(invoice.metadata)
         ? invoice.metadata as Record<string, unknown> : {};
+      if (selectedOptions == null && Array.isArray(metadata.options)) selectedOptions = metadata.options.filter((v): v is string => typeof v === "string");
+      if (!devisMessage && typeof metadata.devis_message === "string") devisMessage = metadata.devis_message;
+      if (!vehicles.some((v) => v.immatriculation) && Array.isArray(metadata.vehicules)) vehicles = invoiceVehicles(metadata);
       if (!vehicles.some((v) => v.immatriculation) && metadata.vehicle && typeof metadata.vehicle === "object") {
         vehicles = invoiceVehicles(metadata.vehicle as Record<string, unknown>);
       }
@@ -223,7 +228,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
           const rawOptions = (quote as Record<string, unknown>).options;
           if (Array.isArray(rawOptions)) selectedOptions = rawOptions.filter((v): v is string => typeof v === "string");
           const quoteVehicles = invoiceVehicles(quote as Record<string, unknown>);
-          if (quoteVehicles.some((v) => v.immatriculation) && !vehicles.some((v) => v.immatriculation)) vehicles = quoteVehicles;
+          // A whole-quote invoice includes both legs; a mission/lot keeps its own vehicle scope.
+          if (quoteVehicles.some((v) => v.immatriculation) && (!vehicles.some((v) => v.immatriculation) || (!devisId && ref === quote.numero))) vehicles = quoteVehicles;
         }
       }
     } catch { /* détail optionnel */ }
