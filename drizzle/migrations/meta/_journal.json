@@ -281,6 +281,13 @@
       "when": 1791494477031,
       "tag": "0039_admin_mfa_sms",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791664281145,
+      "tag": "0040_user_mfa_sms",
+      "breakpoints": true
     }
   ]
 }
