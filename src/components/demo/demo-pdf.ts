@@ -6,8 +6,15 @@ export async function downloadDemoPdf(kind: string, m: ProMission) {
   const [{ fetchCompanyInfo }, { fetchActiveRegime }] = await Promise.all([
     import("@/lib/doc-branding"), import("@/lib/pricing/fetch"),
   ]);
-  const [company, regime] = await Promise.all([fetchCompanyInfo(), fetchActiveRegime()]);
-  if (!company) throw new Error("Les informations publiques Ligneo sont momentanément indisponibles.");
+  const [publicCompany, regime] = await Promise.all([fetchCompanyInfo(), fetchActiveRegime()]);
+  // No private settings fallback: keep brand and omit unavailable legal fields.
+  const company = publicCompany ?? {
+    raison_sociale: "Transports Ligneo", forme_juridique: null, capital_social: null,
+    rcs: null, siret: null, tva_intra: null, adresse_ligne1: null, adresse_cp: null,
+    adresse_ville: "Tours", adresse_pays: null, email_contact: null, telephone: null,
+    site_web: "www.transportsligneo.fr", signataire_nom: "Olivier Gourlaouen",
+    signataire_fonction: "Fondateur", assurance_mention: null,
+  };
   const amounts = demoAmounts(m.prix_total ?? 0, regime.vatRate);
   const data = demoDocumentData(m);
   const context = { demo: true };
