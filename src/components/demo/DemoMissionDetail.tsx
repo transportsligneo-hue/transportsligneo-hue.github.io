@@ -2,10 +2,21 @@ import { CheckCircle2, Circle, FileText, X } from "lucide-react";
 import { euro, STATUS_META, type ProMission } from "@/hooks/useProMissions";
 import { DemoLiveMap } from "./DemoLiveMap";
 import { downloadDemoPdf } from "./demo-pdf";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const STEPS = ["Commande validée", "Convoyeur assigné", "État des lieux départ", "En route", "État des lieux arrivée", "Livré et signé"];
 
 export function DemoMissionDetail({ m, onClose }: { m: ProMission; onClose: () => void }) {
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  async function download(kind: string) {
+    setDownloading(kind);
+    setError(null);
+    try { await downloadDemoPdf(kind, m); }
+    catch { setError("Le document n'a pas pu être téléchargé. Réessayez dans un instant."); }
+    finally { setDownloading(null); }
+  }
   const done = m.statut === "livree" ? 6 : m.statut === "en_cours" ? 4 : 1;
   const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait" };
   return (
@@ -30,12 +41,13 @@ export function DemoMissionDetail({ m, onClose }: { m: ProMission; onClose: () =
         ))}
       </ol>
       <div className="demo-docs">
-        {["Bon de commande", "PV de livraison", "Facture"].map((d, i) => (
-          <button key={d} type="button" disabled={i > 0 && m.statut !== "livree"} title="Document d'exemple" onClick={() => downloadDemoPdf(d, m)}>
-            <FileText size={14} /> {d}
-          </button>
+        {["Devis", "Bon de commande", "PV de livraison", "Facture"].map((d, i) => (
+          <Button variant="outline" key={d} type="button" disabled={downloading !== null || (i > 1 && m.statut !== "livree")} title="Télécharger le PDF" onClick={() => download(d)}>
+            <FileText size={14} /> {downloading === d ? "Téléchargement…" : d}
+          </Button>
         ))}
       </div>
+      {error && <p role="alert">{error}</p>}
     </section>
   );
 }

@@ -17,6 +17,8 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { drawPlateTag } from "@/lib/pdf-plate";
+import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
+import { fetchActiveRegime } from "@/lib/pricing/fetch";
 
 
 
@@ -128,11 +130,11 @@ const fmtDateTime = (d?: string | null) => {
 
 const M = 18; // marge gauche/droite
 
-export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null): Promise<Blob> {
+export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
 
   // Facturation au nom de l'organisation (rétroactif) : la société prime sur le contact.
-  const billing = await resolveClientBillingIdentity({
+  const billing = context?.demo ? null : await resolveClientBillingIdentity({
     userId: fInput.client_user_id ?? null,
     email: fInput.client_email ?? null,
   });
@@ -159,7 +161,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   // Logo du client (comme sur le devis) — affiché dans le bloc « Facturé à ».
   const clientLogoData = f.client_logo_url ? await loadImageAsDataUrl(f.client_logo_url) : null;
 
-  const resolved = await resolveInvoiceMention({ userId: f.client_user_id ?? null });
+  const publicRegime = context?.demo ? await fetchActiveRegime() : null;
+  const resolved = publicRegime ? {
+    pricingDisplayMode: publicRegime.regime === "societe" ? "ttc" : "exempt",
+    tvaExemptionNote: publicRegime.exemptionNote,
+    active: false,
+    mention: null,
+  } : await resolveInvoiceMention({ userId: f.client_user_id ?? null });
   const tvaExempt = f.tva_exempt ?? resolved.pricingDisplayMode === "exempt";
   const exemptionNote = f.tva_exemption_note ?? resolved.tvaExemptionNote ?? "TVA non applicable, art. 293 B du CGI";
   const legalMention = (f.legal_mention ?? (resolved.active ? resolved.mention : null))?.trim() || null;
@@ -175,7 +183,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---- Détail repris du devis d'origine (mêmes libellés, mêmes prix) ----
   let devisMessage = f.devis_message ?? null;
-  if (!devisMessage && f.reference_client && /^DEV-/i.test(f.reference_client)) {
+  if (!context?.demo && !devisMessage && f.reference_client && /^DEV-/i.test(f.reference_client)) {
     try {
       const { data } = await supabase
         .from("devis")
@@ -599,6 +607,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   void signatureData;
+  markDemoPdf(doc, context);
   return doc.output("blob");
 }
 

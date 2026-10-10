@@ -20,6 +20,7 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
+import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -1140,7 +1141,7 @@ export interface LotRecapData {
   }[];
 }
 
-export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo | null): Promise<Blob> {
+export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
   const { doc, pageW, company: c } = await newDoc(
     "Bon de commande",
     `${d.devisNumero} · Lot ${d.lotNumero}`,
@@ -1182,5 +1183,6 @@ export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo
     left: d.signature ?? null,
   });
   finalizeDoc(doc, c);
+  markDemoPdf(doc, context);
   return doc.output("blob");
 }

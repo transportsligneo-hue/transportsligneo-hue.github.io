@@ -34,6 +34,7 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { formatVin, normalizeVin } from "@/lib/vin";
+import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 
 export type PvVariant = "livraison" | "restitution";
 
@@ -198,6 +199,7 @@ export async function generatePvMissionPdf(
   variant: PvVariant,
   d: PvMissionData,
   company?: CompanyInfo | null,
+  context?: PdfRenderContext,
 ): Promise<Blob> {
   const isLiv = variant === "livraison";
   const plateau = !!d.plateau;
@@ -621,5 +623,6 @@ export async function generatePvMissionPdf(
   doc.setTextColor(...MUTED);
   doc.text(c?.email_contact || "contact@transportsligneo.fr", right - siteW - 4, footY + 4.5, { align: "right" });
 
+  markDemoPdf(doc, context);
   return doc.output("blob");
 }
