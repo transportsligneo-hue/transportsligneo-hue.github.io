@@ -57,6 +57,16 @@ function LoginPage() {
 
   useEffect(() => {
     if (isInitializing || isLoading || !isAuthenticated) return;
+    // Compte sans rôle actif : homeRoute = /login → on informe immédiatement
+    // au lieu d'attendre le garde-fou de 15 s.
+    if (homeRoute === "/login") {
+      if (justLoggedInRef.current) {
+        justLoggedInRef.current = false;
+        setSubmitting(false);
+        setError("Votre compte n'est pas encore activé ou a été désactivé. Contactez Transports Ligneo pour le réactiver.");
+      }
+      return;
+    }
     if (!justLoggedInRef.current) { navigate({ to: homeRoute }); return; }
     justLoggedInRef.current = false;
     // Le rôle et l'organisation font foi. L'onglet choisi ne doit jamais
