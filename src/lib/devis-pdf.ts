@@ -16,7 +16,7 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
-import { drawPlateTag, drawTemplatePlate } from "@/lib/pdf-plate";
+import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
@@ -345,7 +345,7 @@ function badge(
  * `.plate-tag` utilisé dans Missions / Attributions.
  */
 function plateBadge(doc: jsPDF, x: number, y: number, text: string, fs = 8.4): number {
-  return drawPlateTag(doc, x, y, text, fs);
+  return drawTemplatePlate(doc, x, y, text, fs);
 }
 
 
