@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Harmoniser les plaques des documents et afficher sur les factures uniquement les options Recharge électrique et Mise en main sélectionnées dans le devis.
 - [x] Devis, bons de commande et factures : présentation des trois modèles fournis reprise dans les générateurs partagés, auto-remplissage conservé, mentions démo uniquement en démonstration ; versions réelles et démo contrôlées, taxes et signatures préservées. Chevauchement plaque/description facture et espacement légal corrigés. Test depuis les écrans connectés toujours bloqué par le code SMS.
 - [x] PV livraison/restitution : deux modèles vectoriels fournis raccordés au remplissage automatique dans tous les espaces, mentions démo uniquement en démonstration ; libellé « restitution et livraison » harmonisé. Quatre PDF contrôlés ; villes résiduelles et position du bandeau démo corrigées.
 - [ ] Vérifier le téléchargement des nouveaux PV depuis une vraie mission dans l’admin : la session de test est arrêtée par la vérification SMS, impossible de poursuivre sans validation utilisateur.
