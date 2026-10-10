@@ -964,7 +964,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ["CGV", "prestation soumise aux conditions générales de vente (www.transportsligneo.fr/cgv)."],
   ];
 
-  const sigH = 24;
+  const sigH = 28;
   const sigTop = pageH - 24 - sigH;
   const condW = innerW - 14;
   let condFs = 6.9;
@@ -1028,7 +1028,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   if (d.clientSignatureDataUrl) {
     try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
   }
-  drawCompanySignature(doc, companySignature, M + sigW + 30, y + 4.6);
+  drawCompanySignature(doc, companySignature, M + sigW + 30, y + 8);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.3);
