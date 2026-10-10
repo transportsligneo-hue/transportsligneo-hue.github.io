@@ -25,5 +25,5 @@
 - Keep quote PDF pickup and delivery schedules separate through the shared row mapper; delivery must never reuse the pickup date.
 
 - Admin access requires an SMS code per login session via AdminMfaGate and admin-mfa.functions; phones live only in admin_mfa_phones (service-role only) so a stolen password cannot re-enroll a phone.
-- PDFs share document-template-theme and pdf-plate; preserve totals/signatures. Invoice details recover plates and quote selections read-only via RLS; demo skips private reads.
+- PDFs share document-template-theme, pdf-plate and pdf-company-signature to keep templates and company overlays identical. Preserve personal signatures; invoice enrichment is read-only via RLS, skipped in demo.
 - PV downloads use sanitized vector templates via pv-mission-pdf; preserve signed originals and make client controls download-only.
