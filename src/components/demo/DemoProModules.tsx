@@ -55,7 +55,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
 
   const tabs: { id: Tab; label: string; Icon: typeof LayoutDashboard }[] = [
     { id: "gps", label: "Suivi GPS & photos", Icon: Navigation },
-    { id: "cal", label: "Calendrier, rapports & export", Icon: CalendarDays },
+    { id: "cal", label: "Calendrier, prix & export", Icon: CalendarDays },
     { id: "team", label: "Gestion d'équipe", Icon: Users },
   ];
 
@@ -133,6 +133,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
               <FileSpreadsheet size={15} /> Exporter pour la comptabilité (Excel) <Download size={14} />
             </button>
           </div>
+          <DemoSimulator />
         </div>
       )}
 

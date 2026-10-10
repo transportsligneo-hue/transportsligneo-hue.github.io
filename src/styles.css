@@ -11357,3 +11357,16 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .demo-docs { display: flex; flex-wrap: wrap; gap: 8px; }
 .demo-docs button { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 10px; border: 1px solid rgba(167,139,250,.35); font-size: .8rem; color: inherit; }
 .demo-docs button:disabled { opacity: .4; }
+
+/* Démo pro : photos EDL et simulateur */
+.demo-edl-photos{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.75rem 0}
+.demo-edl-photos figure{position:relative;margin:0;border-radius:10px;overflow:hidden;border:1px solid rgba(93,224,255,.25)}
+.demo-edl-photos figure.is-alert{border-color:rgba(255,99,99,.6)}
+.demo-edl-photos img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.demo-edl-photos figcaption{position:absolute;left:0;right:0;bottom:0;padding:.35rem .5rem;font-size:.75rem;color:#fff;background:linear-gradient(transparent,rgba(5,10,30,.85))}
+.demo-edl-mark{position:absolute;left:34%;top:40%;width:22%;height:12%;border:2px solid #ff5a5a;border-radius:999px;box-shadow:0 0 12px rgba(255,90,90,.7)}
+.demo-sim{display:grid;gap:.6rem;margin:.5rem 0 .75rem}
+.demo-sim label{display:grid;gap:.3rem;font-size:.8rem;color:rgba(255,255,255,.75)}
+.demo-sim select{background:#0b1026;color:#fff;border:1px solid rgba(93,224,255,.35);border-radius:8px;padding:.5rem}
+.demo-sim .demo-sim-check{display:flex;align-items:center;gap:.4rem}
+.demo-sim-price{color:#5de0ff;font-size:1.1rem}
