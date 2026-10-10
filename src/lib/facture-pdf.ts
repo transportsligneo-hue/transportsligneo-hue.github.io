@@ -393,7 +393,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const hasVeh = Boolean(vehicles.length || f.distance_km || f.km_depart);
   const groupedVehicles = vehicles.length > 2;
-  const extraVehicleHeight = Math.max(0, (groupedVehicles ? Math.ceil(vehicles.length / 2) : vehicles.length) - 1) * (groupedVehicles ? 7 : 10);
+  const hasVin = vehicles.some((v) => v.vin);
+  const vehicleRowH = (groupedVehicles ? 7 : 10) + (hasVin ? (groupedVehicles ? 3.2 : 3.8) : 0);
+  const extraVehicleHeight = Math.max(0, (groupedVehicles ? Math.ceil(vehicles.length / 2) : vehicles.length) - 1) * vehicleRowH + (hasVin ? (groupedVehicles ? 3.2 : 3.8) : 0);
   smallLabel("MISSION FACTURÉE", L, 88.5);
   const mTop = 91.5;
   // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
