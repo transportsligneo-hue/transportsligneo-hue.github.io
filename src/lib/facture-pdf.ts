@@ -447,7 +447,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       if (vehicle.vin) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(groupedVehicles ? 5.8 : 7);
-        doc.setTextColor(...GREY);
+        doc.setTextColor(...BLUE);
         doc.text(`VIN ${vehicle.vin}`, rowX, rowY + (groupedVehicles ? 2.8 : 3.4));
       }
     });
@@ -492,6 +492,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setTextColor(...INK);
     doc.text((doc.splitTextToSize(title, innerW - 45) as string[])[0], L, y);
     doc.setFont("helvetica", "bold");
+    doc.setTextColor(...(amount === "Inclus" ? INK : BLUE));
     doc.text(amount, R, y, { align: "right" });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(compactDetails ? 7 : 8.5);
@@ -527,12 +528,12 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(compactDetails ? 8.5 : 10);
   doc.setTextColor(...GREY);
   doc.text(tvaExempt ? "Total" : "Total HT", totLabelX, y);
-  doc.setTextColor(...INK);
+  doc.setTextColor(...BLUE);
   doc.text(eur(ht), R, y, { align: "right" });
   y += compactDetails ? 4.5 : 6;
   doc.setTextColor(...GREY);
   doc.text("TVA", totLabelX, y);
-  doc.setTextColor(...INK);
+  doc.setTextColor(...(tvaExempt ? INK : BLUE));
   doc.text(tvaExempt ? "Non applicable" : `${eur(tva)} (${tvaTaux} %)`, R, y, { align: "right" });
   y += compactDetails ? 3 : 4;
   doc.setDrawColor(...INK);
@@ -544,7 +545,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(compactDetails ? 11 : 13);
   doc.setTextColor(...INK);
   doc.text("Net à payer", totLabelX, y);
-  doc.setTextColor(...(isPaid ? GREEN : INK));
+  doc.setTextColor(...BLUE);
   doc.setFontSize(compactDetails ? 12 : 14);
   doc.text(eur(ttc), R, y, { align: "right" });
   y += compactDetails ? 5.5 : 8;
