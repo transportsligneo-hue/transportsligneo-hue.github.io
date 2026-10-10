@@ -10,6 +10,14 @@ export interface InvoiceVehicle {
 const text = (v: unknown) => typeof v === "string" && v.trim() ? v.trim() : null;
 const record = (v: unknown): DocumentSource => v && typeof v === "object" && !Array.isArray(v) ? v as DocumentSource : {};
 
+export function invoiceSourceOptions(source: DocumentSource): string[] | null {
+  if (Array.isArray(source.options)) return source.options.filter((v): v is string => typeof v === "string");
+  if (source.options_meta && typeof source.options_meta === "object") {
+    return Object.entries(record(source.options_meta)).filter(([, value]) => value === true).map(([key]) => key);
+  }
+  return null;
+}
+
 /** Explicit selection, including an empty array, always overrides legacy text. */
 export function invoiceSelectedOptions(options?: string[] | null, message?: string | null): string[] {
   const selected = options ?? (message?.match(/^Options?\s*:\s*(.*)$/im)?.[1]?.split(",") ?? []);

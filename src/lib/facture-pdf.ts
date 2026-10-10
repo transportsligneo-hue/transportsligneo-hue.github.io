@@ -20,7 +20,7 @@ import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
-import { invoiceSelectedOptions, invoiceVehicles } from "@/lib/invoice-document-details";
+import { invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "@/lib/invoice-document-details";
 
 
 
@@ -225,8 +225,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
         const { data: quote } = await (devisId ? query.eq("id", devisId) : query.eq("numero", ref ?? "")).maybeSingle();
         if (quote) {
           devisMessage = quote.message ?? devisMessage;
-          const rawOptions = (quote as Record<string, unknown>).options;
-          if (Array.isArray(rawOptions)) selectedOptions = rawOptions.filter((v): v is string => typeof v === "string");
+          selectedOptions = invoiceSourceOptions(quote as Record<string, unknown>) ?? selectedOptions;
           const quoteVehicles = invoiceVehicles(quote as Record<string, unknown>);
           // A whole-quote invoice includes both legs; a mission/lot keeps its own vehicle scope.
           if (quoteVehicles.some((v) => v.immatriculation) && (!vehicles.some((v) => v.immatriculation) || (!devisId && ref === quote.numero))) vehicles = quoteVehicles;
