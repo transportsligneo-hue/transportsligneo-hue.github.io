@@ -16,6 +16,7 @@ import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 import { legRef } from "@/lib/mission-number";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
+import { GuidedTour, MISSION_DETAIL_TOUR } from "@/components/onboarding/GuidedTour";
 
 interface Mission {
   id: string;
@@ -319,6 +320,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <GuidedTour id="mission-detail" steps={MISSION_DETAIL_TOUR} delay={1800} />
       <Link to={backTo} className="inline-flex items-center gap-2 mission-text-muted text-xs uppercase tracking-wider hover:mission-accent transition-colors">
         <ArrowLeft size={14} /> {backLabel}
       </Link>
@@ -359,7 +361,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           <SendTrackingCodeButton missionId={mission.id} />
         </div>
         {attributionId && (
-          <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border mission-divider sm:h-[430px] sm:min-h-[430px]">
+          <div data-tour="mission-gps" className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border mission-divider sm:h-[430px] sm:min-h-[430px]">
             <MissionLiveTracker attributionId={attributionId} mapOnly />
           </div>
         )}
@@ -375,12 +377,12 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         />
       )}
 
-      {attributionId && <EdlComparison attributionId={attributionId} />}
+      {attributionId && <div data-tour="mission-photos"><EdlComparison attributionId={attributionId} /></div>}
 
       <MissionHistory missionId={missionId} createdAt={mission?.created_at} />
 
       {attributionId && hasProofs && (
-        <div className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
+        <div data-tour="mission-report" className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="font-heading text-sm mission-text tracking-wider">Rapport de mission (PDF unique)</p>
             <p className="mission-text-soft text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
@@ -395,7 +397,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         </div>
       )}
 
-      <div className="mission-surface p-5">
+      <div data-tour="mission-vehicle" className="mission-surface p-5">
         <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
           <Car size={16} /> Véhicule
         </h2>
@@ -531,14 +533,14 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       )}
 
       {attributionId && hasProofs && (
-        <div className="mission-surface p-5">
+        <div data-tour="mission-pv" className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent uppercase mb-4">Procès-verbaux</h2>
           <MissionDocsOfficielsPanel attributionId={attributionId} pvOnly />
         </div>
       )}
 
       {facture && (
-        <div className="mission-surface p-5">
+        <div data-tour="mission-invoice" className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <Receipt size={16} /> Facture
           </h2>

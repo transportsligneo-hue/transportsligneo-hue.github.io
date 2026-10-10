@@ -11370,3 +11370,31 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .demo-sim select{background:#0b1026;color:#fff;border:1px solid rgba(93,224,255,.35);border-radius:8px;padding:.5rem}
 .demo-sim .demo-sim-check{display:flex;align-items:center;gap:.4rem}
 .demo-sim-price{color:#5de0ff;font-size:1.1rem}
+
+/* ===== Visite guidée (GuidedTour) ===== */
+.gt-root { position: fixed; inset: 0; z-index: 100; pointer-events: none; }
+.gt-backdrop { position: absolute; inset: 0; pointer-events: auto; background: transparent; }
+.gt-spot { position: fixed; border-radius: 14px; pointer-events: none;
+  box-shadow: 0 0 0 2px #2f5fff, 0 0 24px 4px rgba(47,95,255,.55), 0 0 0 9999px rgba(6,18,56,.62);
+  transition: all .4s cubic-bezier(.4,0,.2,1); }
+.gt-pulse { position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; border-radius: 9999px; background: #5de0ff;
+  box-shadow: 0 0 10px #5de0ff; animation: gt-pulse 1.4s ease-in-out infinite; }
+@keyframes gt-pulse { 0%,100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.6); opacity: .5 } }
+.gt-bubble { position: fixed; pointer-events: auto; background: #fff; color: #0b1a4a; border: 1px solid #c9d6ff; border-radius: 16px;
+  padding: 18px 18px 14px; box-shadow: 0 20px 50px -12px rgba(6,18,56,.45); font-family: Inter, system-ui, sans-serif;
+  animation: gt-in .3s ease-out; transition: top .4s, left .4s; }
+@keyframes gt-in { from { opacity: 0; transform: translateY(6px) } }
+.gt-progress { display: flex; gap: 4px; margin-bottom: 10px; }
+.gt-progress span { flex: 1; height: 3px; border-radius: 3px; background: #e2e8ff; }
+.gt-progress span.on { background: linear-gradient(90deg,#2f5fff,#5b83ff); }
+.gt-step { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .12em; color: #2f5fff; font-weight: 600; }
+.gt-title { font-family: Poppins, Inter, sans-serif; font-size: 18px; font-weight: 700; margin-top: 4px; }
+.gt-body { font-size: 15px; line-height: 1.5; color: #334155; margin-top: 6px; }
+.gt-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.gt-skip { font-size: 13px; color: #64748b; padding: 8px 10px; border-radius: 10px; }
+.gt-skip:hover { color: #0b1a4a; }
+.gt-next { font-size: 14px; font-weight: 600; color: #fff; padding: 10px 18px; border-radius: 12px;
+  background: linear-gradient(135deg,#2f5fff,#5b83ff); box-shadow: 0 6px 18px -4px rgba(47,95,255,.6); }
+.lig-help-round { width: 34px; height: 34px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--pro-border, #e2e8f0); color: inherit; opacity: .75; transition: all .2s; }
+.lig-help-round:hover { opacity: 1; border-color: #2f5fff; box-shadow: 0 0 12px -2px rgba(47,95,255,.5); }

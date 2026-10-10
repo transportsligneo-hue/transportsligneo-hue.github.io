@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
+import { GuidedTour, MISSIONS_LIST_TOUR } from "@/components/onboarding/GuidedTour";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -338,7 +339,8 @@ function ProMissionsIndex() {
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" data-tour="missions-list">
+      {!loading && <GuidedTour id="missions-list" steps={MISSIONS_LIST_TOUR} />}
       <FleetPageHeader
         breadcrumb="Missions"
         eyebrow="Suivi d'activité"
@@ -348,6 +350,7 @@ function ProMissionsIndex() {
         actions={
           <Link
             to="/dashboard-pro/nouvelle-demande"
+            data-tour="new-mission"
             className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
           >
             <PlusCircle size={14} /> Nouvelle mission

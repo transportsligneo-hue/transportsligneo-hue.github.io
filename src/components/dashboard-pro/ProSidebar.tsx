@@ -131,11 +131,12 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
         </nav>
 
         <div className="lig-nav p-3 border-t border-pro-border">
-          <button onClick={replayHelpTips} className="lig-nav-logout mb-1" aria-label="Revoir les conseils d'utilisation">
-            <span className="lig-nav-ic"><LifeBuoy size={15} /></span>
-            Revoir les conseils
-          </button>
-          <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
+          <div className="mb-2 flex items-center gap-2">
+            <ThemeToggle variant="full" className="flex-1 justify-start" />
+            <button onClick={replayHelpTips} className="lig-help-round shrink-0" aria-label="Revoir les conseils" title="Revoir les conseils">
+              <LifeBuoy size={15} />
+            </button>
+          </div>
           <button onClick={() => logout()} className="lig-nav-logout">
             <span className="lig-nav-ic"><LogOut size={15} /></span>
             Déconnexion
@@ -212,15 +213,17 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
             </nav>
 
             <div className="lig-nav p-3 border-t border-pro-border">
-              <button
-                onClick={() => { setMobileOpen(false); replayHelpTips(); }}
-                className="lig-nav-logout mb-1"
-                aria-label="Revoir les conseils d'utilisation"
-              >
-                <span className="lig-nav-ic"><LifeBuoy size={15} /></span>
-                Revoir les conseils
-              </button>
-              <ThemeToggle variant="full" className="mb-2 w-full justify-start" />
+              <div className="mb-2 flex items-center gap-2">
+                <ThemeToggle variant="full" className="flex-1 justify-start" />
+                <button
+                  onClick={() => { setMobileOpen(false); replayHelpTips(); }}
+                  className="lig-help-round shrink-0"
+                  aria-label="Revoir les conseils"
+                  title="Revoir les conseils"
+                >
+                  <LifeBuoy size={15} />
+                </button>
+              </div>
               <button onClick={() => logout()} className="lig-nav-logout">
                 <span className="lig-nav-ic"><LogOut size={15} /></span>
                 Déconnexion
