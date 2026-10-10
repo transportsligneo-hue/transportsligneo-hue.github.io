@@ -435,7 +435,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
     vehicles.forEach((vehicle, index) => {
-      const rowY = vTop + 11.5 + (groupedVehicles ? Math.floor(index / 2) * 7 : index * 10);
+      const rowY = vTop + 11.5 + (groupedVehicles ? Math.floor(index / 2) * vehicleRowH : index * vehicleRowH);
       const rowX = L + 6 + (groupedVehicles ? (index % 2) * (innerW / 2) : 0);
       const width = groupedVehicles ? innerW / 2 - 6 : innerW - 12;
       doc.setFont("helvetica", "bold");
@@ -444,6 +444,12 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       const label = [vehicle.marque, vehicle.modele].filter(Boolean).join(" ");
       doc.text((doc.splitTextToSize(label, width - (groupedVehicles ? 29 : 49)) as string[])[0] || "Véhicule", rowX, rowY);
       if (vehicle.immatriculation) drawTemplatePlate(doc, rowX + width - (groupedVehicles ? 26 : 43), rowY - (groupedVehicles ? 4 : 5.8), vehicle.immatriculation, groupedVehicles ? 7 : 11);
+      if (vehicle.vin) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(groupedVehicles ? 5.8 : 7);
+        doc.setTextColor(...GREY);
+        doc.text(`VIN ${vehicle.vin}`, rowX, rowY + (groupedVehicles ? 2.8 : 3.4));
+      }
     });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
