@@ -23,6 +23,7 @@ import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
 import { drawTemplatePlate } from "@/lib/pdf-plate";
+import { drawCompanySignature, loadCompanySignature } from "@/lib/pdf-company-signature";
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -43,7 +44,9 @@ function signatureBlocks(
   right: string,
   height = 24,
   images?: { left?: string | null; right?: string | null },
+  companySignature?: Awaited<ReturnType<typeof loadCompanySignature>>,
 ): number {
+  if (companySignature) height = Math.max(height, 27);
   y = docEnsureSpace(doc, y, height + 6);
   const boxW = (pageW - 32) / 2;
   doc.setDrawColor(...DOC_LINE);
@@ -69,6 +72,7 @@ function signatureBlocks(
   };
   place(images?.left, 18);
   place(images?.right, pageW / 2 + 6);
+  if (companySignature) drawCompanySignature(doc, companySignature, pageW - 66, y + 8);
   return y;
 }
 
@@ -294,7 +298,7 @@ export async function generatePassageAVidePdf(d: PassageAVideData, company?: Com
   y += 4;
   signatureBlocks(doc, pageW, y, "Signature du convoyeur", `Pour ${c?.raison_sociale || "Transports Ligneo"}`, 22, {
     left: d.signatures?.convoyeur ?? null,
-  });
+  }, await loadCompanySignature());
 
 
   finalizeDoc(doc, c);
@@ -885,6 +889,7 @@ export async function generateContratConvoyeurPdf(
   doc.setTextColor(...DOC_TEXT);
   doc.setFontSize(7.5);
   doc.text(`${c?.signataire_nom || "—"} — ${c?.signataire_fonction || "—"}`, 18, y + 12);
+  drawCompanySignature(doc, await loadCompanySignature(), 40, y + 15);
   doc.text(d.nom_complet, pageW / 2 + 4, y + 12);
 
   if (d.signed_at) {
@@ -1080,7 +1085,7 @@ export async function generateCharteDiscretionPdf(
   doc.text(d.nom_complet, pageW / 2 + 4, y + 12);
   doc.setTextColor(...DOC_MUTED);
   doc.setFontSize(7);
-  doc.text("Signature précédée de la mention « Lu et approuvé »", 18, y + 24);
+  drawCompanySignature(doc, await loadCompanySignature(), 40, y + 15);
   doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
 
   finalizeDoc(doc, c);
@@ -1229,10 +1234,9 @@ export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo
   row("Montant HT", eur(d.totalHt));
   row("TVA", eur(Math.round((d.totalTtc - d.totalHt) * 100) / 100));
   row("Montant TTC", eur(d.totalTtc), false, true);
-  if (d.signature || (!context?.demo && d.signerName)) {
-    if (y + 32 > pageH - 27) { doc.addPage(); header(); y = 38.5; }
-    signatureBlocks(doc, pageW, y + 4, `Bon pour accord ${d.signerName ?? ""}`.trim(), "Transports Ligneo", 24, { left: d.signature ?? null });
-  }
+  if (y + 37 > pageH - 27) { doc.addPage(); header(); y = 38.5; }
+  signatureBlocks(doc, pageW, y + 4, `Bon pour accord ${d.signerName ?? ""}`.trim(), "Transports Ligneo", 27,
+    { left: d.signature ?? null }, await loadCompanySignature());
   const pages = doc.getNumberOfPages();
   for (let page = 1; page <= pages; page++) {
     doc.setPage(page);
