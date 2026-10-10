@@ -15,6 +15,7 @@ import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 import { MissionTwinLink } from "@/components/mission/MissionTwinLink";
 import { legRef } from "@/lib/mission-number";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
+import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 
 interface Mission {
   id: string;
@@ -461,7 +462,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
 
       <Section title="Détails du convoyage" icon={<FileText size={16} />}>
-        <Field label="Type de trajet" value={mission.type_trajet?.replace(/_/g, " ")} />
+        <Field label="Type de trajet" value={/restitution|aller[-_ ]?retour/i.test(mission.type_trajet ?? "") ? "restitution et livraison" : mission.type_trajet?.replace(/_/g, " ")} />
         {options.length > 0 && (
           <div className="sm:col-span-2">
             <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-2">Options</p>
@@ -526,6 +527,13 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {attributionId && hasProofs && (
+        <div className="mission-surface p-5">
+          <h2 className="font-heading text-sm mission-accent uppercase mb-4">Procès-verbaux</h2>
+          <MissionDocsOfficielsPanel attributionId={attributionId} pvOnly />
         </div>
       )}
 

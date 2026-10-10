@@ -13,6 +13,7 @@ import { fetchCompanyInfo, isCompanyComplete, resolveClientBillingIdentity, type
 import { generateMandatRecuperationPdf, mandatNumero } from "@/lib/mandat-recuperation-pdf";
 import { UniversalSignatureDialog } from "@/components/signature/UniversalSignatureDialog";
 import { SIGNATURE_DOCS, signatureKind, slotLabel, type SignatureDocType } from "@/lib/signature-slots";
+import { Button } from "@/components/ui/button";
 
 /** Libellés des vues EDL, pour situer les dommages repris sur le PV. */
 const EDL_VUE_LABELS: Record<string, string> = {
@@ -37,6 +38,8 @@ type Variant = "light" | "dark";
 
 interface Props {
   attributionId: string;
+  /** Client-facing downloads only, without signature editing. */
+  pvOnly?: boolean;
   userId?: string | null;
   variant?: Variant;
   /** Motif pré-rempli du passage à vide (ex. déclenché depuis un incident). */
@@ -105,7 +108,7 @@ const SOURCE_LABELS: Record<string, string> = {
   otp: "code de validation client",
 };
 
-export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0 }: Props) {
+export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0, pvOnly = false }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurLite | null>(null);
@@ -366,8 +369,8 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         carburant: trajet.vehicule_energie,
         lieu_prise_en_charge: trajet.depart,
         lieu_livraison: trajet.arrivee,
-        date_prise_en_charge: trajet.date_trajet,
-        date_livraison: null,
+        date_prise_en_charge: [trajet.date_trajet, trajet.heure_trajet].filter(Boolean).join(" ") || null,
+        date_livraison: signatureRows.find((r) => r.kind === signatureKind(`pv_${v}` as SignatureDocType, v === "livraison" ? "destinataire" : "proprietaire"))?.signed_at ?? null,
         dommages,
         signatures: {
           convoyeur: signatures[signatureKind(`pv_${v}` as SignatureDocType, "convoyeur")] ?? null,
@@ -495,6 +498,17 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     return <div className="flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={20} /></div>;
   }
 
+  if (pvOnly) return (
+    <div className="flex flex-wrap gap-2">
+      {(["livraison", "restitution"] as const).map((v) => (
+        <Button key={v} variant="outline" disabled={busy !== null} onClick={() => void downloadPv(v)}>
+          {busy === `pv-${v}` ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+          PV de {v}
+        </Button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-1.5">
@@ -529,11 +543,16 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         const signe = pvSigne(v);
         const label = v === "livraison" ? "PV de livraison" : "PV de restitution";
         return signe ? (
+          <div key={v} className="flex flex-col gap-1.5">
           <button key={v} type="button" className={btn} onClick={() => void openStored(signe.url_fichier)}>
             <FileCheck2 size={18} />
             <span className="flex-1">Voir le {label.toLowerCase()} signé</span>
             <Eye size={16} className="opacity-60" />
           </button>
+          <Button variant="outline" disabled={busy !== null} onClick={() => void downloadPv(v)}>
+            <Download size={16} /> Télécharger le {label.toLowerCase()} auto-rempli
+          </Button>
+          </div>
         ) : (
           <div key={v} className="flex flex-col gap-1.5">
             <button type="button" className={btn} onClick={() => void downloadPv(v)} disabled={busy === `pv-${v}`}>

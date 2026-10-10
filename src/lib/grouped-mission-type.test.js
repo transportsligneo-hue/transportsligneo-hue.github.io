@@ -13,7 +13,7 @@ describe("grouped mission vehicle types", () => {
   });
 
   it("prices delivery plus restitution as a round trip", () => {
-    expect(groupedTripLabel("aller-retour")).toBe("Livraison + restitution");
+    expect(groupedTripLabel("aller-retour")).toBe("restitution et livraison");
     expect(groupedResolverTrip("aller-retour")).toBe("aller_retour");
     expect(groupedStandardTrip("aller-retour")).toBe("aller_retour");
   });

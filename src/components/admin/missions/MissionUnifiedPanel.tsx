@@ -203,7 +203,7 @@ export function MissionUnifiedPanel({
               </h2>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <span className={`a6-badge ${meta.cls}`}>{meta.label}</span>
-                {mission.isRoundTrip && <span className="a6-badge attribuee">Livraison + Restitution</span>}
+                {mission.isRoundTrip && <span className="a6-badge attribuee">restitution et livraison</span>}
                 {mission.isTest && <span className="a6-badge annulee">Test</span>}
               </div>
             </div>

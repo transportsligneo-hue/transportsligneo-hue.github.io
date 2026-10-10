@@ -44,7 +44,7 @@ export function EditableNumero({ table, id, column = "numero", value, onSaved, c
         return;
       }
       toast.success("Numéro mis à jour partout", {
-        description: "Volets Livraison/Restitution, fiche mission, facture et devis liés.",
+        description: "Volets restitution et livraison, fiche mission, facture et devis liés.",
       });
 
       onSaved(next);

@@ -204,7 +204,7 @@ export function estimateDraft(draft: VroomyOrderDraft): LiveEstimate | null {
 }
 
 export function tripTypeLabel(t: TripType) {
-  return t === "aller_retour" ? "Livraison + restitution" : t === "express" ? "Express" : "Livraison simple";
+  return t === "aller_retour" ? "restitution et livraison" : t === "express" ? "Express" : "Livraison simple";
 }
 
 function optionTrajet(t: TripType) {

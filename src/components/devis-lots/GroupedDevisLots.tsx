@@ -89,7 +89,7 @@ export function GroupedDevisLots({ devisId, readOnly = false }: { devisId: strin
       for (const [i, v] of (d.vehicules as Record<string, unknown>[]).entries()) {
         const type = parseLigneType(v.type_trajet);
         const prix = Number(v.prix ?? 0);
-        // Partage aller/retour existant pour un prix livraison + restitution déjà devisé.
+        // Partage aller/retour existant pour un prix restitution et livraison déjà devisé.
         let split = { aller: prix, retour: 0 };
         if (type === "livraison_restitution" && prix > 0) {
           const { data: sp } = await db.rpc("split_ar_prices", { _total: prix });

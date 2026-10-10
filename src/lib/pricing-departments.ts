@@ -493,7 +493,7 @@ export function resolveLocalDeptTariff(
     : `Forfait département ${zDep.dept} — hors agglomération`;
 
   if (option === "aller-retour") {
-    return { price: simple, label, finalPrice: retour, multiplierLabel: "Livraison + Restitution", hasExtra: true };
+    return { price: simple, label, finalPrice: retour, multiplierLabel: "restitution et livraison", hasExtra: true };
   }
   if (option === "express") {
     return { price: simple, label, finalPrice: Math.round(simple * 1.2), multiplierLabel: "+20% express", hasExtra: true };
@@ -526,7 +526,7 @@ export function resolveCrossDeptTariff(departure: string, arrival: string, optio
   const t = CROSS_DEPT_TARIFFS.find((x) => (x.a === d1 && x.b === d2) || (x.a === d2 && x.b === d1));
   if (!t) return null;
   if (option === "aller-retour") {
-    return { price: t.simple, label: t.label, finalPrice: t.retour, multiplierLabel: "Livraison + Restitution", hasExtra: true };
+    return { price: t.simple, label: t.label, finalPrice: t.retour, multiplierLabel: "restitution et livraison", hasExtra: true };
   }
   if (option === "express") {
     return { price: t.simple, label: t.label, finalPrice: Math.round(t.simple * 1.2), multiplierLabel: "+20% express", hasExtra: true };

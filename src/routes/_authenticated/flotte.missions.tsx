@@ -63,7 +63,7 @@ function FlotteMissions() {
         heure: r.heure_prise_en_charge ?? null,
         statut: r.statut,
         plaque: r.immatriculation ?? null,
-        typeLabel: r.leg_type === "aller" || r.leg_type === "retour" ? "Livraison + Restitution" : "Livraison simple",
+        typeLabel: r.leg_type === "aller" || r.leg_type === "retour" ? "restitution et livraison" : "Livraison simple",
         groupKey: r.mission_group_id ?? `solo-${r.id}`,
         legLabel: r.leg_type === "retour" ? "R" : r.leg_type === "aller" ? "L" : null,
         amount: `${Number(r.prix_total).toFixed(2)} €`,

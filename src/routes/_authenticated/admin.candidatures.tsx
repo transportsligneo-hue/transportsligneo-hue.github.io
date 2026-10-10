@@ -235,7 +235,7 @@ function AdminCandidatures() {
                     <span className="text-pro-muted">→</span>
                     <span className="font-semibold text-pro-text">{t?.arrivee}</span>
                     
-                    {isAr && <span className="text-xs font-bold text-amber-700">· Livraison + Restitution</span>}
+                    {isAr && <span className="text-xs font-bold text-amber-700">· restitution et livraison</span>}
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-pro-muted">Tarif base :</span>

@@ -40,7 +40,7 @@ export function legSuffix(legType?: string | null, legIndex?: number | null): "L
 
 /**
  * Référence d'un trajet, suffixée -L (livraison) / -R (restitution)
- * pour les missions livraison + restitution. Les deux volets partagent
+ * pour les missions restitution et livraison. Les deux volets partagent
  * le même numéro de base (dérivé du mission_group_id).
  */
 export function formatTrajetRef(opts: {

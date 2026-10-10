@@ -125,7 +125,7 @@ export function AdminMissionARBanner({
   };
 
   const doUnlink = async () => {
-    const ok = await confirmToast("Dissocier ce groupe livraison + restitution ?", {
+    const ok = await confirmToast("Dissocier ce groupe restitution et livraison ?", {
       description: "Les deux missions deviennent totalement indépendantes. Elles conservent leur numéro et leurs données.",
       confirmLabel: "Dissocier",
     });
@@ -190,7 +190,7 @@ export function AdminMissionARBanner({
         <MissionLegBadge leg={legType as "aller" | "retour"} />
         <div className="text-sm text-pro-text">
           <span className="font-semibold">Mission {legType === "aller" ? "Livraison" : "Restitution"}</span>
-          <span className="text-pro-text-soft"> · duo Livraison–Restitution — L = Livraison, R = Restitution</span>
+          <span className="text-pro-text-soft"> · duo restitution et livraison — L = Livraison, R = Restitution</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
           {loading ? (

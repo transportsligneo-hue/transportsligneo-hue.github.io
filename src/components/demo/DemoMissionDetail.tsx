@@ -41,7 +41,7 @@ export function DemoMissionDetail({ m, onClose }: { m: ProMission; onClose: () =
         ))}
       </ol>
       <div className="demo-docs">
-        {["Devis", "Bon de commande", "PV de livraison", "Facture"].map((d, i) => (
+        {["Devis", "Bon de commande", "PV de livraison", "PV de restitution", "Facture"].map((d, i) => (
           <Button variant="outline" key={d} type="button" disabled={downloading !== null || (i > 1 && m.statut !== "livree")} title="Télécharger le PDF" onClick={() => download(d)}>
             <FileText size={14} /> {downloading === d ? "Téléchargement…" : d}
           </Button>

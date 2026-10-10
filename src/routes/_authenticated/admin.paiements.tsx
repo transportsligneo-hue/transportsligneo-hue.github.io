@@ -387,7 +387,7 @@ function AdminPaiements() {
             {filterFact.map(f => {
               const meta = factMeta.get(f.id);
               const type = meta?.missionType ?? "simple";
-              const typeLabel = type === "recharge" ? "Recharge uniquement" : type === "roundTrip" ? "Livraison + restitution" : "Livraison simple";
+              const typeLabel = type === "recharge" ? "Recharge uniquement" : type === "roundTrip" ? "restitution et livraison" : "Livraison simple";
               const typeTone = type === "recharge" ? "green" : type === "roundTrip" ? "violet" : "blue";
               return (
               <div key={f.id} className="dvx-card">

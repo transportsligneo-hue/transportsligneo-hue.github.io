@@ -144,7 +144,7 @@ const vueLabels: Record<string, string> = {
   compteur:                   "14. Compteur (km + carburant)",
   photos_cles:                "15. Clés du véhicule",
   kit_securite:               "16. Kit de sécurité",
-  pv_livraison:               "16. PV livraison / restitution",
+  pv_livraison:               "16. PV restitution et livraison",
   carte_grise:                "17. Carte grise",
   signature:                  "18. Signature client",
   // Legacy (anciennes inspections — conservés pour rétrocompatibilité)
@@ -304,7 +304,7 @@ function AdminAttributions() {
           date_echeance: echeance.toISOString().slice(0, 10),
           mode_paiement: "Virement bancaire",
           designation: basis.isGroup
-            ? "Prestation de convoyage automobile — livraison + restitution"
+            ? "Prestation de convoyage automobile — restitution et livraison"
             : "Prestation de convoyage automobile",
           depart: basis.depart ?? trajet.depart,
           arrivee: basis.arrivee ?? trajet.arrivee,
@@ -1025,7 +1025,7 @@ function AdminAttributions() {
               <div key={item.gid} className="rounded-2xl border-2 border-indigo-200 bg-indigo-50/50 p-3">
                 <div className="mb-2.5 flex flex-wrap items-center gap-2 px-1">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white">
-                    <ArrowLeftRight size={12} /> Duo Livraison–Restitution
+                    <ArrowLeftRight size={12} /> Duo restitution et livraison
                   </span>
                   <span className="text-[11px] text-pro-text-soft">
                     Livraison {item.items[0] ? attributionRef(item.items[0], arBaseByGroup) : "—"} + Restitution{" "}

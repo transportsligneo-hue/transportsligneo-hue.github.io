@@ -71,7 +71,7 @@ function TarifsPage() {
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>70 €</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison + Restitution</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>restitution et livraison</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>120 €</span>
               </div>
               <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>
@@ -84,7 +84,7 @@ function TarifsPage() {
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>90 €</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0" }}>
-                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison + Restitution</span>
+                <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>restitution et livraison</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>130 €</span>
               </div>
               <p style={{ marginTop: 10, fontSize: 11.5 }}>Assurance, péage &amp; carburant inclus · TTC</p>

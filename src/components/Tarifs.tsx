@@ -60,7 +60,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">79 €</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-cream/80 text-sm">Livraison + Restitution</span>
+                <span className="text-cream/80 text-sm">restitution et livraison</span>
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>
@@ -77,7 +77,7 @@ export default function Tarifs() {
                 <span className="font-heading text-primary text-lg">99 €</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-cream/80 text-sm">Livraison + Restitution</span>
+                <span className="text-cream/80 text-sm">restitution et livraison</span>
                 <span className="font-heading text-primary text-lg">129 €</span>
               </div>
             </div>

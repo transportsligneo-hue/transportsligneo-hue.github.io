@@ -9,7 +9,7 @@ export type LigneStatut = "a_valider" | "validee";
 export const LIGNE_TYPES: { value: LigneType; label: string }[] = [
   { value: "aller_simple", label: "Aller simple" },
   { value: "livraison_simple", label: "Livraison simple" },
-  { value: "livraison_restitution", label: "Livraison et restitution" },
+  { value: "livraison_restitution", label: "restitution et livraison" },
 ];
 
 export function ligneTypeLabel(t: LigneType): string {
@@ -45,7 +45,7 @@ export interface DevisLigne {
   mission_numero: string | null;
 }
 
-/** Prix d'une ligne : le retour ne compte que pour « Livraison et restitution ». */
+/** Prix d'une ligne : le retour ne compte que pour « restitution et livraison ». */
 export function lignePrix(l: Pick<DevisLigne, "type_ligne" | "prix_aller" | "prix_retour">): number {
   const r = l.type_ligne === "livraison_restitution" ? Number(l.prix_retour || 0) : 0;
   return Math.round((Number(l.prix_aller || 0) + r) * 100) / 100;
@@ -94,7 +94,7 @@ export function parseLigneType(raw: unknown): LigneType {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z]/g, "");
-  if (["allerretour", "livraisonetrestitution", "livraisonrestitution", "livraisonplusrestitution", "livraisonrestitutions"].includes(s)) return "livraison_restitution";
+  if (["restitutionetlivraison", "allerretour", "livraisonetrestitution", "livraisonrestitution", "livraisonplusrestitution", "livraisonrestitutions"].includes(s)) return "livraison_restitution";
   if (s.startsWith("livraisonsimple") || s === "livraison") return "livraison_simple";
   return "aller_simple";
 }
@@ -115,7 +115,7 @@ async function stdPrice(from: string, to: string, ar: boolean): Promise<number> 
 
 /**
  * Prix d'une ligne avec le calcul existant (tarifs client personnalisés, sinon barème standard).
- * Livraison et restitution : retour à l'adresse de départ = tarif aller-retour existant,
+ * restitution et livraison : retour à l'adresse de départ = tarif aller-retour existant,
  * détaillé aller/retour ; autre adresse de retour = somme de deux trajets simples.
  */
 export async function computeLignePrix(

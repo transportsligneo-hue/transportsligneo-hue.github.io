@@ -164,7 +164,7 @@ function ClientDashboard() {
         trajetType: /recharge/.test((d.option_trajet || "").toLowerCase())
           ? "Recharge uniquement"
           : /retour|restitution/.test((d.option_trajet || "").toLowerCase())
-            ? "Livraison + Restitution"
+            ? "restitution et livraison"
             : "Livraison simple",
         distance_km: d.distance_km,
         prix: d.prix_estime != null ? Number(d.prix_estime) : null,

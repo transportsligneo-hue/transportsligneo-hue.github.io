@@ -26,7 +26,7 @@ export interface MissionViewItem {
   plaque?: string | null;
   amount?: string;
   badge?: ReactNode;
-  /** "Livraison + Restitution", "Livraison simple", "Recharge uniquement"… */
+  /** "restitution et livraison", "Livraison simple", "Recharge uniquement"… */
   typeLabel?: string;
   /** Motif affiché en petit sous une mission annulée. */
   cancelReason?: string | null;

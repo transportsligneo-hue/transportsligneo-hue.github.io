@@ -73,7 +73,7 @@ export function calculateBasePrice(
   const baseKm = Math.round(dist * rate);
   let base = baseKm;
   let label = `${dist} km × ${rateLabel}`;
-  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (livraison + restitution)`; }
+  if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (restitution et livraison)`; }
   else if (type === "express") { base = Math.round(baseKm * 1.20); label = `${dist} km × ${rateLabel} (+20% express)`; }
   return { base, label, distance: dist };
 }

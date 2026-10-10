@@ -6,7 +6,7 @@ import { ArrowLeftRight, Loader2, Info } from "lucide-react";
 
 interface Props {
   trajetId: string;
-  /** true si la mission fait déjà partie d'un duo Livraison + Restitution */
+  /** true si la mission fait déjà partie d'un duo restitution et livraison */
   isDuo: boolean;
   depart: string | null;
   arrivee: string | null;
@@ -24,7 +24,7 @@ const inputCls =
 const labelCls = "block text-[11px] font-semibold uppercase tracking-wider text-pro-muted mb-1";
 
 /**
- * Transforme une mission "aller simple" en duo Livraison + Restitution :
+ * Transforme une mission "aller simple" en duo restitution et livraison :
  * crée le volet retour (adresses inversées par défaut), répartit le prix
  * et remet le devis d'origine en aller-retour.
  */
@@ -82,7 +82,7 @@ export function MissionConvertDuoPanel({
       toast.error("Conversion impossible", { description: error.message });
       return;
     }
-    toast.success("Mission transformée en Livraison + Restitution", {
+    toast.success("Mission transformée en restitution et livraison", {
       description: "Le volet retour est créé, le devis et la facturation sont mis à jour.",
     });
     setOpen(false);

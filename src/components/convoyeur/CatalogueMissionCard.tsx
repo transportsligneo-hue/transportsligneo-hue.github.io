@@ -152,7 +152,7 @@ export function CatalogueMissionCard({
       <div className="cat2-badges">
         <span className={`cat2-badge ${isAR ? "linked" : "simple"}`}>
           {isAR ? <IcoLink /> : <IcoArrow />}
-          {isAR ? "Livraison + Restitution" : "Livraison simple"}
+          {isAR ? "restitution et livraison" : "Livraison simple"}
         </span>
         {isAR && (
           <span className="cat2-badge doc"><IcoDoc />2 états des lieux</span>

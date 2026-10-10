@@ -786,7 +786,7 @@ export default function QuickMissionForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
             { v: "aller-simple", label: "Livraison simple", desc: "Aller à destination" },
-            { v: "aller-retour", label: "Livraison + restitution", desc: "Aller-retour" },
+            { v: "aller-retour", label: "restitution et livraison", desc: "Aller-retour" },
             { v: "recharge", label: "Recharge uniquement", desc: "Recharge du véhicule, sans livraison" },
           ].map((opt) => {
             const active = tripType === (opt.v as TripOption);

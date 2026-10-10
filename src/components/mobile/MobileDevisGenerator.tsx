@@ -552,7 +552,7 @@ export default function MobileDevisGenerator() {
                     option === "aller-retour" ? "text-white" : "text-[#9aa6c9]"
                   }`}
                 >
-                  Livraison + Restitution
+                  restitution et livraison
                 </button>
               </div>
 

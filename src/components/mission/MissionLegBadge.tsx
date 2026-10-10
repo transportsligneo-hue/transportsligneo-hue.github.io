@@ -18,7 +18,7 @@ export function MissionLegBadge({ leg, size = "sm" }: { leg: Leg; size?: "xs" | 
   return (
     <span
       className={`inline-flex items-center rounded-full border font-medium ${styles[leg]} ${cls}`}
-      title={leg === "aller" ? "Mission Livraison d'un groupe livraison + restitution" : "Mission Restitution d'un groupe livraison + restitution"}
+      title={leg === "aller" ? "Mission Livraison d'un groupe restitution et livraison" : "Mission Restitution d'un groupe restitution et livraison"}
     >
       <Icon size={size === "xs" ? 10 : 11} />
       {label}

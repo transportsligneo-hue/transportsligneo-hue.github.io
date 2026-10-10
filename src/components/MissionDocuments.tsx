@@ -9,7 +9,7 @@ import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 
 const DOC_TYPES = [
-  { value: "pv_livraison", label: "PV de livraison / restitution", short: "PV", icon: FileCheck2 },
+  { value: "pv_livraison", label: "PV de restitution et livraison", short: "PV", icon: FileCheck2 },
   { value: "contrat", label: "Contrat", short: "Contrat", icon: FilePenLine },
   { value: "carte_grise", label: "Carte grise (CG)", short: "CG", icon: CarFront },
   { value: "autre", label: "Autre", short: "Autre", icon: MoreHorizontal },

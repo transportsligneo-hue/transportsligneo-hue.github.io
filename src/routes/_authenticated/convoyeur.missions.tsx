@@ -39,7 +39,7 @@ interface Mission extends MissionCardData {
   trajet_id: string;
   numero_mission?: string | null;
   options_completion?: Record<string, { done: boolean; at?: string; photo_url?: string | null }> | null;
-  /** Duo Livraison + Restitution : identifiant du groupe et rôle du volet. */
+  /** Duo restitution et livraison : identifiant du groupe et rôle du volet. */
   mission_group_id?: string | null;
   leg_type?: string | null;
   /** Véhicule non roulant : parcours EDL plateau + devis signé obligatoire. */
@@ -541,7 +541,7 @@ function ConvoyeurMissions() {
         statut: m.statut,
         plaque: m.trajet?.immatriculation ?? null,
         typeLabel:
-          m.leg_type === "aller" || m.leg_type === "retour" ? "Livraison + Restitution" : "Livraison simple",
+          m.leg_type === "aller" || m.leg_type === "retour" ? "restitution et livraison" : "Livraison simple",
         legLabel: m.leg_type === "retour" ? "R" : m.leg_type === "aller" ? "L" : null,
         meta: [m.trajet?.marque, m.trajet?.modele].filter(Boolean).join(" ") || m.trajet?.immatriculation || undefined,
         wrap: (children) => (
@@ -840,7 +840,7 @@ function ConvoyeurMissions() {
       />
     ) : null;
 
-    // === Duo Livraison + Restitution : enchaînement direct sans repasser par la liste
+    // === Duo restitution et livraison : enchaînement direct sans repasser par la liste
     const twinMission = openMission.mission_group_id
       ? missions.find(
           (m) => m.id !== openMission.id && m.mission_group_id === openMission.mission_group_id,

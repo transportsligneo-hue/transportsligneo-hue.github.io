@@ -60,7 +60,7 @@ function factureDesignationFromDevis(devis: FactureRow): string {
     (() => {
       const opt = String(devis["option_trajet"] ?? "").toLowerCase();
       if (/recharge/.test(opt)) return "Recharge uniquement";
-      return /aller[-_ ]?retour|restitution/.test(opt) ? "Livraison + restitution" : "Livraison simple";
+      return /aller[-_ ]?retour|restitution/.test(opt) ? "restitution et livraison" : "Livraison simple";
     })(),
   ]
     .filter(Boolean)

@@ -382,7 +382,7 @@ export default function TunnelReservation({ onClose }: Props) {
 }
 
 function tripTypeLabel(t: TripType): string {
-  return t === "aller_simple" ? "Livraison simple" : t === "aller_retour" ? "Livraison + restitution" : "Express (+20%)";
+  return t === "aller_simple" ? "Livraison simple" : t === "aller_retour" ? "restitution et livraison" : "Express (+20%)";
 }
 
 // ----- Steps -----
@@ -445,7 +445,7 @@ function Step2({
 }) {
   const types: { value: TripType; label: string; desc: string }[] = [
     { value: "aller_simple", label: "Livraison simple", desc: "Convoyage A → B" },
-    { value: "aller_retour", label: "Livraison + restitution", desc: "Aller + retour véhicule" },
+    { value: "aller_retour", label: "restitution et livraison", desc: "Aller + retour véhicule" },
     { value: "express", label: "Express", desc: "+20% prioritaire" },
   ];
   return (

@@ -149,7 +149,7 @@ export function CatalogueFilters({
         {[
           { key: "all" as const, label: "Toutes" },
           { key: "simple" as const, label: "Livraison simple" },
-          { key: "ar" as const, label: "Livraison + Restitution" },
+          { key: "ar" as const, label: "restitution et livraison" },
         ].map((o) => {
           const active = value.leg === o.key;
           return (

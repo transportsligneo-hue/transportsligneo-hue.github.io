@@ -566,7 +566,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           devisRow?.numero && `Devis: ${devisRow.numero}`,
           vehicleType && `Type: ${vehicleType}`,
           societe && `Société: ${societe}`,
-          `Prestation: ${option === "aller-retour" ? "Livraison + restitution" : option === "express" ? "Express" : "Livraison simple"}`,
+          `Prestation: ${option === "aller-retour" ? "restitution et livraison" : option === "express" ? "Express" : "Livraison simple"}`,
           `Roulant: ${running}`,
           plaqueInconnue && "Plaque: à confirmer",
           isAR && `Restitution: ${retourDepart} → ${retourArrivee}`,
@@ -720,7 +720,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { v: "aller-simple", l: "Livraison simple" },
-                { v: "aller-retour", l: "Livraison + restitution" },
+                { v: "aller-retour", l: "restitution et livraison" },
               ].map((o) => (
                 <Button variant="ghost"
                   key={o.v}
@@ -870,7 +870,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
               {[
                 { v: "aller-simple", l: "Livraison simple" },
-                { v: "aller-retour", l: "Livraison + restitution" },
+                { v: "aller-retour", l: "restitution et livraison" },
               ].map((o) => (
                 <Button variant="ghost"
                   key={o.v}
@@ -899,7 +899,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { v: "aller-simple", l: "Livraison simple", s: "Aller simple" },
-                  { v: "aller-retour", l: "Livraison + restitution", s: "Aller-retour" },
+                  { v: "aller-retour", l: "restitution et livraison", s: "Aller-retour" },
                 ].map((o) => (
                   <Button variant="ghost"
                     key={o.v}
@@ -1220,7 +1220,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         </div>
                       </div>
                       <p className="text-[10px] text-cream/45">
-                        Les deux véhicules (livraison et restitution) peuvent être différents · vous saisirez la seconde plaque à l'étape suivante.
+                        Les deux véhicules (restitution et livraison) peuvent être différents · vous saisirez la seconde plaque à l'étape suivante.
                       </p>
                     </div>
                   )}
