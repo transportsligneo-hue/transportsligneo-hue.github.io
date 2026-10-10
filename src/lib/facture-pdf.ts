@@ -393,7 +393,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   const hasVeh = Boolean(vehicles.length || f.distance_km || f.km_depart);
   const groupedVehicles = vehicles.length > 2;
-  const extraVehicleHeight = Math.max(0, (groupedVehicles ? Math.ceil(vehicles.length / 2) : vehicles.length) - 1) * (groupedVehicles ? 7 : 10);
+  const hasVin = vehicles.some((v) => v.vin);
+  const vehicleRowH = (groupedVehicles ? 7 : 10) + (hasVin ? (groupedVehicles ? 3.2 : 3.8) : 0);
+  const extraVehicleHeight = Math.max(0, (groupedVehicles ? Math.ceil(vehicles.length / 2) : vehicles.length) - 1) * vehicleRowH + (hasVin ? (groupedVehicles ? 3.2 : 3.8) : 0);
   smallLabel("MISSION FACTURÉE", L, 88.5);
   const mTop = 91.5;
   // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
@@ -433,7 +435,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFontSize(9.5);
     doc.setTextColor(...INK);
     vehicles.forEach((vehicle, index) => {
-      const rowY = vTop + 11.5 + (groupedVehicles ? Math.floor(index / 2) * 7 : index * 10);
+      const rowY = vTop + 11.5 + (groupedVehicles ? Math.floor(index / 2) * vehicleRowH : index * vehicleRowH);
       const rowX = L + 6 + (groupedVehicles ? (index % 2) * (innerW / 2) : 0);
       const width = groupedVehicles ? innerW / 2 - 6 : innerW - 12;
       doc.setFont("helvetica", "bold");
@@ -442,12 +444,18 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       const label = [vehicle.marque, vehicle.modele].filter(Boolean).join(" ");
       doc.text((doc.splitTextToSize(label, width - (groupedVehicles ? 29 : 49)) as string[])[0] || "Véhicule", rowX, rowY);
       if (vehicle.immatriculation) drawTemplatePlate(doc, rowX + width - (groupedVehicles ? 26 : 43), rowY - (groupedVehicles ? 4 : 5.8), vehicle.immatriculation, groupedVehicles ? 7 : 11);
+      if (vehicle.vin) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(groupedVehicles ? 5.8 : 7);
+        doc.setTextColor(...GREY);
+        doc.text(`VIN ${vehicle.vin}`, rowX, rowY + (groupedVehicles ? 2.8 : 3.4));
+      }
     });
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
     const extras: string[] = [];
-    if (f.vehicule_vin) extras.push(`VIN ${f.vehicule_vin}`);
+    if (f.vehicule_vin && !vehicles.some((v) => v.vin)) extras.push(`VIN ${f.vehicule_vin}`);
     if (f.km_depart != null) extras.push(`Km départ ${f.km_depart.toLocaleString("fr-FR")}`);
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
