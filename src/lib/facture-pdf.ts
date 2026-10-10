@@ -133,7 +133,7 @@ const fmtDateTime = (d?: string | null) => {
 
 const M = 13; // margins of the supplied blue-neon invoice
 
-export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
+export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null, context?: PdfRenderContext, forceCompact = false): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
 
   // Facturation au nom de l'organisation (rétroactif) : la société prime sur le contact.
@@ -465,7 +465,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   // ---------- Prestation ----------
   let y = mTop + mH + 8;
   // Les factures détaillées (comme la 109) doivent rester sur une seule page A4.
-  const compactDetails = supplements.length + optionsList.length >= 4;
+  const compactDetails = forceCompact || supplements.length + optionsList.length >= 4;
 
   smallLabel("PRESTATION", L, y);
   doc.setFont("helvetica", "bold");
@@ -612,7 +612,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---------- Cachet officiel + signature ----------
   // Posé à la main au-dessus du pied de page, à droite, comme sur les devis.
-  if (pageH - 21 - y < 18) doc.addPage();
+  // Tout doit tenir sur une seule page : si le contenu touche la zone cachet, on recompose en mode compact.
+  if (y > pageH - 21 - 40 * (442 / 1200) - 3 && !compactDetails) {
+    return generateFacturePdf(fInput, co, context, true);
+  }
   {
     const th = 40 * (442 / 1200);
     const sx = R - 40 - 2;
