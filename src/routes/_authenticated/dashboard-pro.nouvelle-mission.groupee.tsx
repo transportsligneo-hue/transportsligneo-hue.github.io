@@ -399,6 +399,15 @@ function GroupedMissionForm() {
       <h1 className="mt-1.5 flex items-center gap-2 text-[24px] font-extrabold tracking-[-0.02em] text-slate-900">
         <Layers className="h-6 w-6 text-[#7c5cff]" /> Mission groupée
       </h1>
+      <div className="mt-4 rounded-xl border border-[#7c5cff]/25 bg-[#7c5cff]/[0.05] p-4">
+        <p className="text-[13.5px] font-semibold text-slate-900">Une seule demande, des prestations mixées</p>
+        <ul className="mt-2 grid gap-1.5 text-[13px] text-slate-600 sm:grid-cols-2">
+          <li><b className="text-slate-900">1. Enlèvement commun</b> : un départ pour tous vos véhicules.</li>
+          <li><b className="text-slate-900">2. Prestation par véhicule</b> : livraison simple, restitution et livraison, ou recharge électrique.</li>
+          <li><b className="text-slate-900">3. Destinations</b> : même adresse pour tous ou une adresse par véhicule, depuis vos adresses favorites.</li>
+          <li><b className="text-slate-900">4. Documents automatiques</b> : devis, bon de commande, PV et factures générés en PDF.</li>
+        </ul>
+      </div>
       <p className="mt-1 text-[13.5px] text-slate-500">
         Convoyez plusieurs véhicules de votre parc en une seule demande.
       </p>

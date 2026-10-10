@@ -1,3 +1,4 @@
+import { GuidedTour, MISSIONS_LIST_TOUR } from "@/components/onboarding/GuidedTour";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useMemo, useState } from "react";
@@ -210,7 +211,8 @@ function ClientMissions() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="missions-list">
+      {!loading && <GuidedTour id="client-missions-list" steps={MISSIONS_LIST_TOUR} />}
       <ClientPageHeader
         breadcrumb="Mes missions"
         eyebrow="Suivi des convoyages"
