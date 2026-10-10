@@ -3,8 +3,7 @@ import { groupedVehicleType, groupedPrestationLabel } from "@/lib/devis-groupe-t
 import jsPDF from "jspdf";
 // Logo officiel carré 1:1 — évite l'écrasement subi par logo-ligneo.png (ratio 2.65)
 import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
-import signatureGo from "@/assets/signature-go-transparente.png";
-import tamponLigneo from "@/assets/tampon-ligneo.png";
+import { drawCompanySignature, loadCompanySignature } from "@/lib/pdf-company-signature";
 import {
   fetchCompanyInfo,
   companyLegalLine1,
@@ -492,8 +491,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const right = pageW - M;
 
   const logoData = await loadImageAsDataUrl(logoLigneo);
-  const signatureData = await loadImageAsDataUrl(signatureGo);
-  const tamponData = await loadImageAsDataUrl(tamponLigneo);
+  const companySignature = await loadCompanySignature();
   const clientLogoData = d.logo_url ? await loadImageAsDataUrl(d.logo_url) : null;
 
   const validite = d.validite_jours ?? 15;
@@ -966,7 +964,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     ["CGV", "prestation soumise aux conditions générales de vente (www.transportsligneo.fr/cgv)."],
   ];
 
-  const sigH = 24;
+  const sigH = 28;
   const sigTop = pageH - 24 - sigH;
   const condW = innerW - 14;
   let condFs = 6.9;
@@ -1030,19 +1028,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   if (d.clientSignatureDataUrl) {
     try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
   }
-  // Cachet officiel posé à la main (légèrement de travers), signature par-dessus.
-  if (tamponData) {
-    try {
-      const tw = 40;
-      const th = tw * (442 / 1200);
-      doc.addImage(tamponData, "PNG", M + sigW + 30, y + 4.6, tw, th, "tampon-ligneo-net", "NONE", 3);
-    } catch { /* optionnel */ }
-  }
-  if (signatureData) {
-    // Signature manuscrite posée sur le tampon, tout à droite, au niveau des écritures,
-    // légèrement plus grande pour déborder un peu sous le tampon (effet naturel).
-    try { doc.addImage(signatureData, "PNG", M + sigW + 46, y + 8.2, 30, 12); } catch { /* optionnel */ }
-  }
+  drawCompanySignature(doc, companySignature, M + sigW + 30, y + 8);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.3);

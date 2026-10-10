@@ -17,6 +17,7 @@ import {
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { formatVin, normalizeVin } from "@/lib/vin";
 import { SIGNATURE_PRINT_H, SIGNATURE_PRINT_W } from "@/lib/signature-slots";
+import { drawCompanySignature, loadCompanySignature } from "@/lib/pdf-company-signature";
 
 const INK: [number, number, number] = [17, 22, 38];
 const BLUE: [number, number, number] = [37, 91, 235];
@@ -213,11 +214,7 @@ export async function generateMandatRecuperationPdf(
       doc.addImage(d.signatures.mandant, "PNG", M + 5, y + 8, SIGNATURE_PRINT_W, SIGNATURE_PRINT_H);
     } catch { /* signature optionnelle */ }
   }
-  if (d.signatures?.mandataire) {
-    try {
-      doc.addImage(d.signatures.mandataire, "PNG", M + sigW + 11, y + 8, SIGNATURE_PRINT_W, SIGNATURE_PRINT_H);
-    } catch { /* signature optionnelle */ }
-  }
+  drawCompanySignature(doc, await loadCompanySignature(), M + sigW + 30, y + 8);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
