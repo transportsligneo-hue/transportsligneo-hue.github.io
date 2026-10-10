@@ -37,10 +37,12 @@ export async function downloadDemoPdf(kind: string, m: ProMission) {
       }, company, context);
       break;
     }
-    case "PV de livraison": {
+    case "PV de livraison":
+    case "PV de restitution": {
       const { generatePvMissionPdf, pvNumero } = await import("@/lib/pv-mission-pdf");
-      blob = await generatePvMissionPdf("livraison", {
-        numero_mission: m.numero, numero_pv: `DEMO-${pvNumero("livraison", m.numero)}`,
+      const variant = kind === "PV de restitution" ? "restitution" : "livraison";
+      blob = await generatePvMissionPdf(variant, {
+        numero_mission: m.numero, numero_pv: `DEMO-${pvNumero(variant, m.numero)}`,
         donneur_ordre: DEMO_BILLING.societe, destinataire: "Claire Martin (fictif)",
         marque_modele: `${m.marque ?? ""} ${m.modele ?? ""}`, immatriculation: m.immatriculation,
         lieu_prise_en_charge: data.depart, lieu_livraison: data.arrivee,
