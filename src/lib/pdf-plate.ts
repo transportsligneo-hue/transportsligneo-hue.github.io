@@ -66,3 +66,38 @@ export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs 
   doc.setFontSize(prevSize);
   return w;
 }
+
+/** Administrative plate from the supplied document templates. */
+export function drawTemplatePlate(doc: jsPDF, x: number, y: number, text: string, fs = 12): number {
+  const label = (text || "").toUpperCase();
+  if (!label) return 0;
+  const previous = doc.getFont();
+  const previousSize = doc.getFontSize();
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(fs);
+  const band = 5;
+  const width = Math.max(37, doc.getTextWidth(label) + band + 6);
+  const height = 9;
+  doc.setFillColor(232, 234, 239);
+  doc.roundedRect(x + 0.4, y + 0.5, width, height, 1, 1, "F");
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(15, 23, 42);
+  doc.setLineWidth(0.45);
+  doc.roundedRect(x, y, width, height, 1, 1, "FD");
+  doc.setFillColor(9, 63, 195);
+  doc.rect(x + 0.4, y + 0.4, band, height - 0.8, "F");
+  doc.setDrawColor(255, 255, 255);
+  for (let i = 0; i < 12; i++) {
+    const angle = i * Math.PI / 6;
+    doc.circle(x + 2.9 + Math.cos(angle) * 1.25, y + 2.8 + Math.sin(angle) * 1.25, 0.12, "S");
+  }
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(5.5);
+  doc.text("F", x + 2.9, y + 7.6, { align: "center" });
+  doc.setFontSize(fs);
+  doc.setTextColor(15, 23, 42);
+  doc.text(label, x + band + 3.2, y + 6.3);
+  doc.setFont(previous.fontName, previous.fontStyle);
+  doc.setFontSize(previousSize);
+  return width;
+}

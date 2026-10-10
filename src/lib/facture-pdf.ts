@@ -16,7 +16,7 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
-import { drawPlateTag } from "@/lib/pdf-plate";
+import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
@@ -274,8 +274,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---------- Émetteur / Client ----------
   const colW = (innerW - 6) / 2;
-  const boxTop = 51.5;
-  const boxH2 = 35.5;
+  const boxTop = 49.5;
+  const boxH2 = 33.5;
   doc.setFillColor(...BOX);
   doc.roundedRect(L, boxTop, colW, boxH2, 2.5, 2.5, "F");
   doc.roundedRect(L + colW + 6, boxTop, colW, boxH2, 2.5, 2.5, "F");
@@ -356,8 +356,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   const plaque = f.vehicule_immatriculation?.trim() || "";
   const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
-  smallLabel("MISSION FACTURÉE", L, 93.5);
-  const mTop = 96.5;
+  smallLabel("MISSION FACTURÉE", L, 88.5);
+  const mTop = 91.5;
   // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
   const halfW = innerW * 0.42;
   const departLines = (doc.setFont("helvetica", "bold"), doc.setFontSize(9),
@@ -399,7 +399,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       doc.text(vehLabel, vx, vTop + 11.5);
       vx += doc.getTextWidth(vehLabel) + 3.5;
     }
-    if (plaque) vx += drawPlateTag(doc, vx, vTop + 6.3, plaque, 8) + 4;
+    if (plaque) vx += drawTemplatePlate(doc, vx, vTop + 6.3, plaque, 11) + 4;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -452,10 +452,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (subLines.length) doc.text(subLines, L, y + subOffset);
     y += compactDetails
       ? (subLines.length ? subOffset + subLines.length * subLeading + 1 : 2)
-      : (subLines.length ? subOffset + subLines.length * subLeading : 2) + 3;
+      : (subLines.length ? subOffset + subLines.length * subLeading : 2) + 1;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
-    y += compactDetails ? 2.8 : 7;
+    y += compactDetails ? 2.8 : 4;
 
   };
 
@@ -507,7 +507,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8.5);
   const rightW = doc.getTextWidth(rightTxt);
   doc.setFillColor(...BLUEBOX);
-  const paymentBoxH = compactDetails ? 9 : 11;
+  const paymentBoxH = compactDetails ? 13 : 14;
   const paymentTextY = y + (compactDetails ? 5.8 : 7);
   doc.roundedRect(L, y, innerW, paymentBoxH, 2.5, 2.5, "F");
   doc.setFontSize(compactDetails ? 7.5 : 9);
@@ -526,8 +526,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
-    doc.text(`IBAN : ${f.iban || co?.iban || "—"}  ·  BIC : ${f.bic || co?.bic || "—"}`, L, y);
-    y += 8;
+    doc.text(`IBAN : ${f.iban || co?.iban || "—"}  ·  BIC : ${f.bic || co?.bic || "—"}`, L + 6, y - 4);
+    y += 2;
   }
 
   // ---------- Mentions légales ----------

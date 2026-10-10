@@ -16,7 +16,7 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
-import { drawPlateTag } from "@/lib/pdf-plate";
+import { drawPlateTag, drawTemplatePlate } from "@/lib/pdf-plate";
 import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
@@ -699,7 +699,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
     doc.text(label, vx, vy);
     vx += doc.getTextWidth(label) + 2.6;
-    if (v.plate) plateBadge(doc, vx, vy - 5.1, v.plate, 8.4);
+    if (v.plate) {
+      if (isGroupe || isAr) plateBadge(doc, vx, vy - 5.1, v.plate, 8.4);
+      else drawTemplatePlate(doc, vx, vy - 6.1, v.plate, 11);
+    }
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);

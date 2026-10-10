@@ -22,7 +22,7 @@ import {
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
-import { drawPlateTag } from "@/lib/pdf-plate";
+import { drawTemplatePlate } from "@/lib/pdf-plate";
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -1190,7 +1190,7 @@ export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo
     doc.rect(left, y, w, height, "F");
     doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.ink : DOCUMENT_TEMPLATE.textSoft));
     doc.text(label, left + 6, y + 8);
-    if (plate) drawPlateTag(doc, left + 78, y + 4, value, 9);
+    if (plate) drawTemplatePlate(doc, left + 78, y + 4, value, 12);
     else {
       doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.blue : DOCUMENT_TEMPLATE.ink));
       doc.text(lines, left + 78, y + 8);
