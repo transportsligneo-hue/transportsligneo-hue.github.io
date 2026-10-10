@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] PV livraison/restitution : reprendre exactement les deux modèles fournis avec remplissage automatique, sans mentions démo en production ; harmoniser « restitution et livraison ».
 - [x] Démo pro : modèles officiels devis, bon de commande, PV et facture reliés aux téléchargements avec données fictives ; quatre PDF téléchargés et leurs quatre pages contrôlées, tests de confidentialité réussis. Accès par invitation non vérifié sans lien valide.
 - [x] Afficher Recharge électrique et Mise en main dans le type de prestation du PDF groupé lorsque sélectionnées ; PDF vérifié sur une page sans chevauchement.
 - [x] Aligner les colonnes et les totaux du PDF groupé ; conserver la motorisation issue de la recherche de chaque plaque (livraison et restitution). PDF de contrôle 11 véhicules vérifié sur une page ; tests électriques réussis.
