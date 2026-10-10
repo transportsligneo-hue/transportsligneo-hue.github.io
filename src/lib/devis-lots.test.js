@@ -23,6 +23,8 @@ describe("devis groupés par lots", () => {
 
   it("reconnaît le type importé et met Aller simple par défaut", () => {
     expect(parseLigneType("restitution et livraison")).toBe("livraison_restitution");
+    expect(parseLigneType("Livraison et restitution")).toBe("livraison_restitution");
+    expect(parseLigneType("Livraison + restitution")).toBe("livraison_restitution");
     expect(parseLigneType("aller-retour")).toBe("livraison_restitution");
     expect(parseLigneType("livraison simple")).toBe("livraison_simple");
     expect(parseLigneType("")).toBe("aller_simple");

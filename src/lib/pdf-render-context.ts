@@ -11,6 +11,7 @@ export function markDemoPdf(doc: jsPDF, context?: PdfRenderContext) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(...DOC_GOLD);
-    doc.text("DÉMONSTRATION — DONNÉES FICTIVES — AUCUNE VALEUR CONTRACTUELLE", doc.internal.pageSize.getWidth() / 2, 6, { align: "center" });
+    const top = (6 * 72 / 25.4) / doc.internal.scaleFactor;
+    doc.text("DÉMONSTRATION — DONNÉES FICTIVES — AUCUNE VALEUR CONTRACTUELLE", doc.internal.pageSize.getWidth() / 2, top, { align: "center" });
   }
 }

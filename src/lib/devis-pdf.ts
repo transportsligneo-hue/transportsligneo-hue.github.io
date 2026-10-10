@@ -663,10 +663,11 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       : [{ label: identAller, plate: formatPlate(d.immatriculation), vin: d.vin }];
 
   const lineH = 11.6;
-  const prestationLabel =
+  const prestationLabel = (
     (isGroupe ? groupedPrestationLabel(multiVehicules, d.message, d.options ?? []) : null) ||
     d.prestation?.trim() ||
-    [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ");
+    [d.option_trajet, rechargeSeule ? "Recharge uniquement" : "Livraison simple"].filter(Boolean).join(" · ")
+  ).replace(/livraison\s*(?:\+|et|–|\/)\s*restitution/gi, "restitution et livraison");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(isGroupe ? 8.3 : 9.6);
   const prestationLines = doc.splitTextToSize(prestationLabel || "Livraison simple", colW - 10) as string[];
