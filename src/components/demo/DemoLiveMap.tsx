@@ -55,15 +55,19 @@ export function DemoLiveMap({ onMetrics }: { onMetrics?: (m: LiveMetricsSnapshot
     <ClientOnly fallback={fallback}>
       <Suspense fallback={fallback}>
         {points.length > 0 && (
-          <LiveMissionMap
-            className="h-[300px] w-full overflow-hidden rounded-xl"
+          // Conteneur à hauteur fixe : .ligneo-mbx force height:100%, il faut
+          // un parent dimensionné sinon la carte s'étire et pousse la suite hors du cadre.
+          <div className="h-[300px] w-full">
+            <LiveMissionMap
+              className="h-full w-full overflow-hidden rounded-xl"
             points={points}
             origin={{ lat: WAYPOINTS[0][0], lng: WAYPOINTS[0][1], label: "Tours" }}
             destination={{ lat: 44.8378, lng: -0.5792, label: "Bordeaux" }}
             role="client"
             title="Mission démo"
             onMetrics={onMetrics}
-          />
+            />
+          </div>
         )}
       </Suspense>
     </ClientOnly>
