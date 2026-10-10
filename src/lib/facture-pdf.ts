@@ -455,7 +455,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
     const extras: string[] = [];
-    if (f.vehicule_vin) extras.push(`VIN ${f.vehicule_vin}`);
+    if (f.vehicule_vin && !vehicles.some((v) => v.vin)) extras.push(`VIN ${f.vehicule_vin}`);
     if (f.km_depart != null) extras.push(`Km départ ${f.km_depart.toLocaleString("fr-FR")}`);
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
