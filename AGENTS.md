@@ -25,5 +25,5 @@
 - Keep quote PDF pickup and delivery schedules separate through the shared row mapper; delivery must never reuse the pickup date.
 
 - Admin access requires an SMS code per login session via AdminMfaGate and admin-mfa.functions; phones live only in admin_mfa_phones (service-role only) so a stolen password cannot re-enroll a phone.
-- Demo PDFs reuse the official generators with an explicit demo render context that skips private client/billing lookups; fictional inputs and a per-page demo mark keep sandbox exports separate from production documents.
+- Quote, invoice and order PDFs share document-template-theme; retain variable data, totals and signatures. Explicit demo context skips private lookups and marks sandbox exports only.
 - PV downloads use sanitized vector templates via pv-mission-pdf; preserve signed originals and make client controls download-only.

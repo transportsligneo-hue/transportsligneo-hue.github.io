@@ -16,9 +16,10 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
-import { drawPlateTag } from "@/lib/pdf-plate";
+import { drawPlateTag, drawTemplatePlate } from "@/lib/pdf-plate";
 import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
+import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
 
 
 export interface DevisData {
@@ -232,16 +233,16 @@ export function devisRowToPdfData(
 }
 
 /* ===== Palette du gabarit "devis clair" (identique à la maquette) ===== */
-const INK: [number, number, number] = [15, 23, 42]; // titres quasi noirs
-const BLUE: [number, number, number] = [47, 95, 255]; // bleu électrique
-const MUTED: [number, number, number] = [113, 122, 140];
-const FAINT: [number, number, number] = [148, 157, 173];
-const LINE: [number, number, number] = [228, 231, 238];
-const CARD: [number, number, number] = [244, 245, 249];
+const INK = DOCUMENT_TEMPLATE.ink;
+const BLUE = DOCUMENT_TEMPLATE.blue;
+const MUTED = DOCUMENT_TEMPLATE.textSoft;
+const FAINT = DOCUMENT_TEMPLATE.muted;
+const LINE = DOCUMENT_TEMPLATE.line;
+const CARD = DOCUMENT_TEMPLATE.panel;
 const WHITE: [number, number, number] = [255, 255, 255];
-const BLUE_SOFT: [number, number, number] = [232, 238, 255];
-const AMBER_SOFT: [number, number, number] = [255, 243, 219];
-const AMBER_INK: [number, number, number] = [161, 108, 12];
+const BLUE_SOFT = DOCUMENT_TEMPLATE.blueSoft;
+const AMBER_SOFT = DOCUMENT_TEMPLATE.cyanSoft;
+const AMBER_INK = DOCUMENT_TEMPLATE.cyan;
 const PINK_SOFT: [number, number, number] = [255, 233, 240];
 const PINK_INK: [number, number, number] = [200, 42, 90];
 const GREEN_SOFT: [number, number, number] = [225, 247, 235];
@@ -698,7 +699,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     const label = (doc.splitTextToSize(v.label, Math.max(12, colW - (vx - M) - 30)) as string[])[0];
     doc.text(label, vx, vy);
     vx += doc.getTextWidth(label) + 2.6;
-    if (v.plate) plateBadge(doc, vx, vy - 5.1, v.plate, 8.4);
+    if (v.plate) {
+      if (isGroupe || isAllerRetour) plateBadge(doc, vx, vy - 5.1, v.plate, 8.4);
+      else drawTemplatePlate(doc, vx, vy - 6.1, v.plate, 11);
+    }
     if (v.vin) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(6.4);

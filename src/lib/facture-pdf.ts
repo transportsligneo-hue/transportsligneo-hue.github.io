@@ -16,9 +16,10 @@ import {
   type CompanyInfo,
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
-import { drawPlateTag } from "@/lib/pdf-plate";
+import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
 
 
 
@@ -85,7 +86,7 @@ export interface FactureData {
 
 
 const NAVY: [number, number, number] = [14, 26, 53];
-const GOLD: [number, number, number] = [176, 134, 42];
+const GOLD = DOCUMENT_TEMPLATE.blue;
 const GOLD_SOFT: [number, number, number] = [212, 175, 55];
 const TEXT: [number, number, number] = [32, 38, 52];
 const MUTED: [number, number, number] = [122, 130, 145];
@@ -128,7 +129,7 @@ const fmtDateTime = (d?: string | null) => {
   } catch { return d; }
 };
 
-const M = 18; // marge gauche/droite
+const M = 13; // margins of the supplied blue-neon invoice
 
 export async function generateFacturePdf(fInput: FactureData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
@@ -209,36 +210,36 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   // =====================================================================
   //  Modèle officiel « facture-modele-transports-ligneo » (fond clair)
   // =====================================================================
-  const INK: [number, number, number] = [11, 16, 32];
-  const BLUE: [number, number, number] = [47, 95, 255];
-  const GREY: [number, number, number] = [122, 130, 145];
-  const BOX: [number, number, number] = [244, 246, 250];
-  const RULE: [number, number, number] = [226, 231, 240];
-  const BLUEBOX: [number, number, number] = [238, 243, 255];
+  const INK = DOCUMENT_TEMPLATE.ink;
+  const BLUE = DOCUMENT_TEMPLATE.blue;
+  const GREY = DOCUMENT_TEMPLATE.textSoft;
+  const BOX = DOCUMENT_TEMPLATE.panel;
+  const RULE = DOCUMENT_TEMPLATE.line;
+  const BLUEBOX = DOCUMENT_TEMPLATE.payment;
 
   const L = M;
   const R = pageW - M;
 
   // ---------- En-tête ----------
   if (logoData) {
-    try { doc.addImage(logoData, "PNG", L, 21, 11, 11); } catch { /* logo optionnel */ }
+    try { doc.addImage(logoData, "PNG", L, 14, 14, 14); } catch { /* logo optionnel */ }
   }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(...INK);
   const brand = (co?.raison_sociale || "Transports Ligneo").toUpperCase();
   const brandWords = brand.split(" ");
-  const lastWord = brandWords.length > 1 ? brandWords.pop()! : "";
+  const lastWord = brandWords.length > 1 ? brandWords.pop() ?? "" : "";
   const firstPart = brandWords.join(" ") + (lastWord ? " " : "");
-  doc.text(firstPart, L + 14, 27);
+  doc.text(firstPart, L + 17, 20.5);
   if (lastWord) {
     doc.setTextColor(...BLUE);
-    doc.text(lastWord, L + 14 + doc.getTextWidth(firstPart), 27);
+    doc.text(lastWord, L + 17 + doc.getTextWidth(firstPart), 20.5);
   }
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(...GREY);
-  doc.text(`Convoyage automobile${isB2B ? " B2B" : ""} · Tours (37)`, L + 14, 32);
+  doc.text(`Convoyage automobile${isB2B ? " B2B" : ""} · Tours (37)`, L + 17, 25.4);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
@@ -273,8 +274,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
 
   // ---------- Émetteur / Client ----------
   const colW = (innerW - 6) / 2;
-  const boxTop = 51.5;
-  const boxH2 = 35.5;
+  const boxTop = 49.5;
+  const boxH2 = 33.5;
   doc.setFillColor(...BOX);
   doc.roundedRect(L, boxTop, colW, boxH2, 2.5, 2.5, "F");
   doc.roundedRect(L + colW + 6, boxTop, colW, boxH2, 2.5, 2.5, "F");
@@ -332,9 +333,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   // ---------- Mission facturée ----------
-  const AMBER: [number, number, number] = [176, 106, 12];
-  const AMBER_SOFT: [number, number, number] = [255, 243, 224];
-  const BLUE_SOFT: [number, number, number] = [232, 240, 255];
+  const AMBER = DOCUMENT_TEMPLATE.cyan;
+  const AMBER_SOFT = DOCUMENT_TEMPLATE.cyanSoft;
+  const BLUE_SOFT = DOCUMENT_TEMPLATE.blueSoft;
   const pill = (
     x: number,
     y: number,
@@ -355,8 +356,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const vehLabel = [f.vehicule_marque, f.vehicule_modele].filter(Boolean).join(" ");
   const plaque = f.vehicule_immatriculation?.trim() || "";
   const hasVeh = Boolean(vehLabel || plaque || f.vehicule_vin || f.distance_km || f.km_depart);
-  smallLabel("MISSION FACTURÉE", L, 93.5);
-  const mTop = 96.5;
+  smallLabel("MISSION FACTURÉE", L, 88.5);
+  const mTop = 91.5;
   // Adresses complètes (jusqu'à 3 lignes chacune) — plus de troncature.
   const halfW = innerW * 0.42;
   const departLines = (doc.setFont("helvetica", "bold"), doc.setFontSize(9),
@@ -364,7 +365,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   const arriveeLines = (doc.splitTextToSize(f.arrivee || "—", halfW) as string[]).slice(0, 3);
   const addrRows = Math.max(departLines.length, arriveeLines.length);
   const addrBlockH = 11 + addrRows * 4.4;
-  const mH = addrBlockH + (hasVeh ? 20 : 3);
+  const mH = addrBlockH + (hasVeh ? 23 : 3);
   doc.setFillColor(...BOX);
   doc.roundedRect(L, mTop, innerW, mH, 2.5, 2.5, "F");
 
@@ -398,7 +399,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       doc.text(vehLabel, vx, vTop + 11.5);
       vx += doc.getTextWidth(vehLabel) + 3.5;
     }
-    if (plaque) vx += drawPlateTag(doc, vx, vTop + 6.3, plaque, 8) + 4;
+    if (plaque) vx += drawTemplatePlate(doc, vx, vTop + 6.3, plaque, 11) + 4;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
@@ -408,7 +409,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (f.km_arrivee != null) extras.push(`Km arrivée ${f.km_arrivee.toLocaleString("fr-FR")}`);
     if (f.distance_km) extras.push(`Distance ${Math.round(f.distance_km)} km`);
     extras.push(isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage par la route");
-    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 16);
+    doc.text((doc.splitTextToSize(extras.join("  ·  "), innerW - 12) as string[])[0], L + 6, vTop + 20);
     void vx;
   }
 
@@ -428,8 +429,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.line(L, y, R, y);
   y += compactDetails ? 5 : 8;
 
-  const mainTitle = f.designation?.trim()
-    || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile");
+  const mainTitle = (f.designation?.trim()
+    || (isPlateau ? "Transport sur plateau porte-voiture" : "Convoyage automobile"))
+    .replace(/livraison\s*(?:\+|et|–|\/)\s*restitution/gi, "restitution et livraison");
   const mainSub = isPlateau
     ? `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""} — véhicule non roulant transporté sur plateau porte-voiture (non conduit).`
     : `${f.depart ?? ""} → ${f.arrivee ?? ""}${f.distance_km ? `, environ ${Math.round(f.distance_km)} km` : ""}. Carburant, péages et assurance tous risques inclus.`;
@@ -450,10 +452,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     if (subLines.length) doc.text(subLines, L, y + subOffset);
     y += compactDetails
       ? (subLines.length ? subOffset + subLines.length * subLeading + 1 : 2)
-      : (subLines.length ? subOffset + subLines.length * subLeading : 2) + 3;
+      : (subLines.length ? subOffset + subLines.length * subLeading : 2) + 1;
     doc.setDrawColor(...RULE);
     doc.line(L, y, R, y);
-    y += compactDetails ? 2.8 : 7;
+    y += compactDetails ? 2.8 : 4;
 
   };
 
@@ -505,7 +507,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setFontSize(8.5);
   const rightW = doc.getTextWidth(rightTxt);
   doc.setFillColor(...BLUEBOX);
-  const paymentBoxH = compactDetails ? 9 : 11;
+  const paymentBoxH = compactDetails ? 13 : 14;
   const paymentTextY = y + (compactDetails ? 5.8 : 7);
   doc.roundedRect(L, y, innerW, paymentBoxH, 2.5, 2.5, "F");
   doc.setFontSize(compactDetails ? 7.5 : 9);
@@ -524,8 +526,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...GREY);
-    doc.text(`IBAN : ${f.iban || co?.iban || "—"}  ·  BIC : ${f.bic || co?.bic || "—"}`, L, y);
-    y += 8;
+    doc.text(`IBAN : ${f.iban || co?.iban || "—"}  ·  BIC : ${f.bic || co?.bic || "—"}`, L + 6, y - 4);
+    y += 2;
   }
 
   // ---------- Mentions légales ----------
@@ -536,9 +538,9 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (legalMention) mentions.push(legalMention);
 
   doc.setFont("helvetica", "normal");
-  const mentionFontSize = compactDetails ? 5.8 : 8;
-  const mentionLeading = compactDetails ? 2.6 : 3.8;
-  const mentionGap = compactDetails ? 0.4 : 2;
+  const mentionFontSize = compactDetails ? 5.8 : 7.1;
+  const mentionLeading = compactDetails ? 2.6 : 3.2;
+  const mentionGap = compactDetails ? 0.4 : 1.2;
   doc.setFontSize(mentionFontSize);
   const mentionWrapped = mentions.map((m) => doc.splitTextToSize(m, innerW - 12) as string[]);
   const mentionsH = (compactDetails ? 8 : 9.5)
