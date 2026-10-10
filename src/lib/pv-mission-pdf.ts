@@ -623,5 +623,6 @@ export async function generatePvMissionPdf(
   doc.setTextColor(...MUTED);
   doc.text(c?.email_contact || "contact@transportsligneo.fr", right - siteW - 4, footY + 4.5, { align: "right" });
 
+  markDemoPdf(doc, context);
   return doc.output("blob");
 }
