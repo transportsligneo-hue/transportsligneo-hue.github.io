@@ -16,7 +16,7 @@ export function invoiceSelectedOptions(options?: string[] | null, message?: stri
   return [...new Set(selected.map((value) => {
     const normalized = value.trim().replace(/_/g, " ");
     if (/^recharge\s+(?:électrique|electrique|elec|livraison)(?:\s|$)/i.test(normalized)) return "Recharge électrique";
-    if (/^mise\s+en\s+main$/i.test(normalized)) return "Mise en main";
+    if (/^mise\s+en\s+main(?:\s+du\s+v[ée]hicule)?$/i.test(normalized)) return "Mise en main";
     return normalized;
   }).filter(Boolean))];
 }

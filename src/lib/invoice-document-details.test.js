@@ -8,6 +8,7 @@ describe("invoice selections and plates", () => {
   });
   it("includes selected handover", () => {
     expect(invoiceSelectedOptions(["mise_en_main"])).toEqual(["Mise en main"]);
+    expect(invoiceSelectedOptions(null, "Options : Mise en main du véhicule")).toEqual(["Mise en main"]);
   });
   it("never adds either option when not selected", () => {
     expect(invoiceSelectedOptions([], "Options : Recharge électrique, Mise en main")).toEqual([]);
