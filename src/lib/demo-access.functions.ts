@@ -47,19 +47,17 @@ export const requestDemo = createServerFn({ method: 'POST' })
       .single()
     if (error || !row) throw new Error("La demande n'a pas pu être enregistrée.")
 
-    try {
-      await supabaseAdmin.rpc('create_admin_notification', {
-        _type: 'demo_request',
-        _titre: 'Nouvelle demande de démo',
-        _message: `${data.nom} — ${data.societe} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
-        _link: '/admin/acces-demo',
-        _entity_type: 'pro_demo_access',
-        _entity_id: row.id,
-        _metadata: {},
-      })
-    } catch (e) {
-      console.error('demo admin bell failed', e)
-    }
+    // Insertion directe : la RPC exige une session et refuse ce type (visiteur public).
+    const { error: notifErr } = await supabaseAdmin.from('admin_notifications').insert({
+      type: 'demo_request',
+      titre: 'Nouvelle demande de démo',
+      message: `${data.nom} — ${data.societe} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
+      link: '/admin/acces-demo',
+      entity_type: 'pro_demo_access',
+      entity_id: row.id,
+      metadata: {},
+    })
+    if (notifErr) console.error('demo admin bell failed', notifErr)
 
     try {
       const { sendTransactionalEmailServer } = await import('@/server/email-send')

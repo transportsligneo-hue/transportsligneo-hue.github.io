@@ -6,6 +6,9 @@ import {
 import { euro, type ProMission } from "@/hooks/useProMissions";
 import { DemoLiveMap } from "./DemoLiveMap";
 import type { LiveMetricsSnapshot } from "@/components/map/types";
+import edlDepart from "@/assets/demo-edl-depart.jpg";
+import edlArrivee from "@/assets/demo-edl-arrivee.jpg";
+import { DemoSimulator } from "./DemoSimulator";
 
 type Tab = "gps" | "cal" | "team";
 
@@ -52,7 +55,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
 
   const tabs: { id: Tab; label: string; Icon: typeof LayoutDashboard }[] = [
     { id: "gps", label: "Suivi GPS & photos", Icon: Navigation },
-    { id: "cal", label: "Calendrier, rapports & export", Icon: CalendarDays },
+    { id: "cal", label: "Calendrier, prix & export", Icon: CalendarDays },
     { id: "team", label: "Gestion d'équipe", Icon: Users },
   ];
 
@@ -80,6 +83,10 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
           <div className="dpm-card">
             <h3><Camera size={15} /> Comparaison photos départ / arrivée</h3>
             <div className="dpm-alert"><AlertTriangle size={15} /> 1 nouveau dégât détecté à l'arrivée</div>
+            <div className="demo-edl-photos">
+              <figure><img src={edlDepart} alt="État des lieux départ — porte arrière droite" loading="lazy" width={1024} height={768} /><figcaption>Départ · RAS</figcaption></figure>
+              <figure className="is-alert"><img src={edlArrivee} alt="État des lieux arrivée — rayure porte arrière droite" loading="lazy" width={1024} height={768} /><i className="demo-edl-mark" aria-hidden /><figcaption>Arrivée · Rayure 4 cm</figcaption></figure>
+            </div>
             <table className="dpm-table">
               <thead><tr><th>Zone</th><th>Départ</th><th>Arrivée</th></tr></thead>
               <tbody>
@@ -126,6 +133,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
               <FileSpreadsheet size={15} /> Exporter pour la comptabilité (Excel) <Download size={14} />
             </button>
           </div>
+          <DemoSimulator />
         </div>
       )}
 
