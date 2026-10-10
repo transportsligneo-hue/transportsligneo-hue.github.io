@@ -1184,16 +1184,24 @@ export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo
     doc.setFont("helvetica", total ? "bold" : "normal");
     doc.setFontSize(total ? 11 : 9);
     const lines = doc.splitTextToSize(value || "—", w - 85) as string[];
-    const height = Math.max(plate ? 16.5 : 11.5, lines.length * 4.2 + 6);
+    const grouped = d.lignes.length > 1;
+    const height = Math.max(plate ? (grouped ? 13 : 16.5) : grouped ? 8 : 11.5, lines.length * 4.2 + (grouped ? 3 : 6));
     if (y + height > pageH - 27) { doc.addPage(); header(); y = 38.5; }
     doc.setFillColor(...DOCUMENT_TEMPLATE.panel);
-    doc.rect(left, y, w, height, "F");
+    if (y === 38.5) {
+      doc.roundedRect(left, y, w, height, 2.5, 2.5, "F");
+      doc.rect(left, y + height / 2, w, height / 2, "F");
+    } else if (total) {
+      doc.roundedRect(left, y, w, height, 2.5, 2.5, "F");
+      doc.rect(left, y, w, height / 2, "F");
+    } else doc.rect(left, y, w, height, "F");
     doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.ink : DOCUMENT_TEMPLATE.textSoft));
-    doc.text(label, left + 6, y + 8);
-    if (plate) drawTemplatePlate(doc, left + 78, y + 4, value, 12);
+    const baseline = grouped ? 5.6 : 8;
+    doc.text(label, left + 6, y + baseline);
+    if (plate) drawTemplatePlate(doc, left + 78, y + (grouped ? 2 : 4), value, 12);
     else {
       doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.blue : DOCUMENT_TEMPLATE.ink));
-      doc.text(lines, left + 78, y + 8);
+      doc.text(lines, left + 78, y + baseline);
     }
     doc.setDrawColor(...DOCUMENT_TEMPLATE.line);
     doc.line(left + 6, y + height, right - 6, y + height);
