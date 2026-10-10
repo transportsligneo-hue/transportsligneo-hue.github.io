@@ -30,6 +30,7 @@ import { Route as GestionnairesFlotteRouteImport } from './routes/gestionnaires-
 import { Route as DevenirConvoyeurRouteImport } from './routes/devenir-convoyeur'
 import { Route as DeveloppeursRouteImport } from './routes/developpeurs'
 import { Route as DesinscriptionRouteImport } from './routes/desinscription'
+import { Route as DemoTestRouteImport } from './routes/demo-test'
 import { Route as DemoProRouteImport } from './routes/demo-pro'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -323,6 +324,11 @@ const DeveloppeursRoute = DeveloppeursRouteImport.update({
 const DesinscriptionRoute = DesinscriptionRouteImport.update({
   id: '/desinscription',
   path: '/desinscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoTestRoute = DemoTestRouteImport.update({
+  id: '/demo-test',
+  path: '/demo-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoProRoute = DemoProRouteImport.update({
@@ -1414,6 +1420,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-pro': typeof DemoProRoute
+  '/demo-test': typeof DemoTestRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
@@ -1625,6 +1632,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-pro': typeof DemoProRoute
+  '/demo-test': typeof DemoTestRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
@@ -1829,6 +1837,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/demo-pro': typeof DemoProRoute
+  '/demo-test': typeof DemoTestRoute
   '/desinscription': typeof DesinscriptionRoute
   '/developpeurs': typeof DeveloppeursRoute
   '/devenir-convoyeur': typeof DevenirConvoyeurRoute
@@ -2042,6 +2051,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/demo'
     | '/demo-pro'
+    | '/demo-test'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
@@ -2253,6 +2263,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/demo'
     | '/demo-pro'
+    | '/demo-test'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
@@ -2456,6 +2467,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/demo'
     | '/demo-pro'
+    | '/demo-test'
     | '/desinscription'
     | '/developpeurs'
     | '/devenir-convoyeur'
@@ -2669,6 +2681,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DemoRoute: typeof DemoRoute
   DemoProRoute: typeof DemoProRoute
+  DemoTestRoute: typeof DemoTestRoute
   DesinscriptionRoute: typeof DesinscriptionRoute
   DeveloppeursRoute: typeof DeveloppeursRoute
   DevenirConvoyeurRoute: typeof DevenirConvoyeurRoute
@@ -2897,6 +2910,13 @@ declare module '@tanstack/react-router' {
       path: '/desinscription'
       fullPath: '/desinscription'
       preLoaderRoute: typeof DesinscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-test': {
+      id: '/demo-test'
+      path: '/demo-test'
+      fullPath: '/demo-test'
+      preLoaderRoute: typeof DemoTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo-pro': {
@@ -4720,6 +4740,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DemoRoute: DemoRoute,
   DemoProRoute: DemoProRoute,
+  DemoTestRoute: DemoTestRoute,
   DesinscriptionRoute: DesinscriptionRoute,
   DeveloppeursRoute: DeveloppeursRoute,
   DevenirConvoyeurRoute: DevenirConvoyeurRoute,
