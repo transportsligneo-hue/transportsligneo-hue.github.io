@@ -18,6 +18,7 @@ import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { drawPlateTag } from "@/lib/pdf-plate";
 import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
+import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 
 
 export interface DevisData {
@@ -457,7 +458,7 @@ function sectionLabel(doc: jsPDF, x: number, y: number, text: string) {
 }
 
 
-export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null): Promise<Blob> {
+export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
   const co = company ?? (await fetchCompanyInfo().catch(() => null));
 
   // Régime de facturation : micro-entreprise (franchise en base) = prix saisi = net à payer.
@@ -465,7 +466,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   const micro = regime !== "societe";
 
   // Devis au nom de l'organisation (rétroactif) : la société prime sur le contact.
-  const billing = await resolveClientBillingIdentity({
+  const billing = context?.demo ? null : await resolveClientBillingIdentity({
     userId: (dInput as unknown as { client_user_id?: string | null; user_id?: string | null }).client_user_id
       ?? (dInput as unknown as { user_id?: string | null }).user_id
       ?? null,
@@ -1119,6 +1120,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
     drawFooter(doc, pageW, pageH, co, validite);
   }
 
+  markDemoPdf(doc, context);
   return doc.output("blob");
 }
 
