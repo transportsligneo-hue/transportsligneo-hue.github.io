@@ -19,6 +19,7 @@ import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { drawPlateTag } from "@/lib/pdf-plate";
 import { resolveDevisDeliverySchedule } from "@/lib/devis-delivery-date";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
+import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
 
 
 export interface DevisData {

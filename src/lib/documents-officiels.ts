@@ -21,6 +21,8 @@ import {
 } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
+import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
+import { drawPlateTag } from "@/lib/pdf-plate";
 
 async function newDoc(title: string, numero?: string, subtitle?: string, company?: CompanyInfo | null) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -1142,47 +1144,99 @@ export interface LotRecapData {
 }
 
 export async function generateLotRecapPdf(d: LotRecapData, company?: CompanyInfo | null, context?: PdfRenderContext): Promise<Blob> {
-  const { doc, pageW, company: c } = await newDoc(
-    "Bon de commande",
-    `${d.devisNumero} · Lot ${d.lotNumero}`,
-    d.lotNom ? d.lotNom : `Devis groupé d'origine ${d.devisNumero}`,
-    company,
-  );
-  const w = pageW - 28;
-  const eur = (n: number) => `${n.toFixed(2).replace(".", ",")} €`;
-  let y = 52;
-  y = drawSectionTitle(doc, pageW, y, "Informations du lot");
-  y = drawKeyValueRow(doc, 14, y, w, "Devis groupé d'origine", d.devisNumero);
-  y = drawKeyValueRow(doc, 14, y, w, "Client", d.client ?? "");
-  y = drawKeyValueRow(doc, 14, y, w, "Validé le", d.signedAt ? dateFmt(d.signedAt) : "");
-  y += 3;
-  y = drawSectionTitle(doc, pageW, y, `Lignes du lot (${d.lignes.length})`);
-  doc.setFontSize(7.5);
-  for (const l of d.lignes) {
-    y = docEnsureSpace(doc, y, 12);
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  applyLigneoFonts(doc);
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const c = company ?? await fetchCompanyInfo();
+  const logo = await loadImageAsDataUrl(logoLigneo);
+  const left = 13;
+  const right = pageW - left;
+  const w = right - left;
+  const header = () => {
+    if (logo) doc.addImage(logo, "PNG", left, 14, 14, 14);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(...DOC_NAVY);
-    doc.text(`${l.reference}  ${l.type}`, 14, y + 4);
-    doc.text(eur(l.prix), pageW - 14, y + 4, { align: "right" });
+    doc.setFontSize(14);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.ink);
+    doc.text("TRANSPORTS ", 30, 20.5);
+    const brandWidth = doc.getTextWidth("TRANSPORTS ");
+    doc.setTextColor(...DOCUMENT_TEMPLATE.blue);
+    doc.text("LIGNEO", 30 + brandWidth, 20.5);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...DOC_TEXT);
-    doc.text(doc.splitTextToSize(`${l.plaque} · ${l.vehicule} · ${l.date} · ${l.trajet}`, w).slice(0, 2), 14, y + 8);
-    doc.setDrawColor(...DOC_LINE);
-    doc.line(14, y + 11.5, pageW - 14, y + 11.5);
-    y += 13;
+    doc.setFontSize(7.9);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.textSoft);
+    doc.text(`Convoyage automobile B2B · ${c?.adresse_ville || "Tours"} (${c?.adresse_cp?.slice(0, 2) || "37"})`, 30, 25.4);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(19);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.ink);
+    doc.text("BON DE COMMANDE", right, 20.5, { align: "right" });
+    doc.setFontSize(9.6);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.blue);
+    doc.text(d.lignes.length === 1 ? d.lignes[0]?.reference || d.devisNumero : `${d.devisNumero} · Lot ${d.lotNumero}`, right, 26.8, { align: "right" });
+    doc.setDrawColor(...DOCUMENT_TEMPLATE.line);
+    doc.setLineWidth(0.3);
+    doc.line(left, 32.5, right, 32.5);
+  };
+  header();
+  const eur = (n: number) => `${n.toFixed(2).replace(".", ",")} €`;
+  let y = 38.5;
+  const row = (label: string, value: string, plate = false, total = false) => {
+    doc.setFont("helvetica", total ? "bold" : "normal");
+    doc.setFontSize(total ? 11 : 9);
+    const lines = doc.splitTextToSize(value || "—", w - 85) as string[];
+    const height = Math.max(plate ? 16.5 : 11.5, lines.length * 4.2 + 6);
+    if (y + height > pageH - 27) { doc.addPage(); header(); y = 38.5; }
+    doc.setFillColor(...DOCUMENT_TEMPLATE.panel);
+    doc.rect(left, y, w, height, "F");
+    doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.ink : DOCUMENT_TEMPLATE.textSoft));
+    doc.text(label, left + 6, y + 8);
+    if (plate) drawPlateTag(doc, left + 78, y + 4, value, 9);
+    else {
+      doc.setTextColor(...(total ? DOCUMENT_TEMPLATE.blue : DOCUMENT_TEMPLATE.ink));
+      doc.text(lines, left + 78, y + 8);
+    }
+    doc.setDrawColor(...DOCUMENT_TEMPLATE.line);
+    doc.line(left + 6, y + height, right - 6, y + height);
+    y += height;
+  };
+  if (d.lignes.length > 1 || !context?.demo) {
+    row("Devis d'origine", d.devisNumero);
+    row("Client", d.client ?? "");
+    row("Lot", d.lotNom || String(d.lotNumero));
+    if (d.signedAt) row("Validé le", dateFmt(d.signedAt));
   }
-  y = docEnsureSpace(doc, y, 16) + 2;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text(`Total HT : ${eur(d.totalHt)}`, pageW - 14, y + 4, { align: "right" });
-  doc.setTextColor(...DOC_GOLD);
-  doc.text(`Total TTC : ${eur(d.totalTtc)}`, pageW - 14, y + 10, { align: "right" });
-  y += 16;
-  signatureBlocks(doc, pageW, y, `Bon pour accord ${d.signerName ?? ""}`.trim(), "Transports Ligneo", 24, {
-    left: d.signature ?? null,
-  });
-  finalizeDoc(doc, c);
+  for (const l of d.lignes) {
+    const [depart, ...arrivee] = l.trajet.split("→");
+    row("Mission", l.reference);
+    row("Date de prise en charge", l.date);
+    row("Départ", depart?.trim() || l.trajet);
+    row("Arrivée", arrivee.join("→").trim());
+    row("Véhicule", l.vehicule);
+    row("Immatriculation", l.plaque, true);
+    if (d.lignes.length > 1) {
+      row("Prestation", l.type);
+      row("Montant TTC", eur(l.prix));
+    }
+  }
+  row("Montant HT", eur(d.totalHt));
+  row("TVA", eur(Math.round((d.totalTtc - d.totalHt) * 100) / 100));
+  row("Montant TTC", eur(d.totalTtc), false, true);
+  if (d.signature || (!context?.demo && d.signerName)) {
+    if (y + 32 > pageH - 27) { doc.addPage(); header(); y = 38.5; }
+    signatureBlocks(doc, pageW, y + 4, `Bon pour accord ${d.signerName ?? ""}`.trim(), "Transports Ligneo", 24, { left: d.signature ?? null });
+  }
+  const pages = doc.getNumberOfPages();
+  for (let page = 1; page <= pages; page++) {
+    doc.setPage(page);
+    doc.setDrawColor(...DOCUMENT_TEMPLATE.line);
+    doc.line(left, pageH - 11, right, pageH - 11);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.textSoft);
+    doc.text(context?.demo ? "Données fictives — aucune valeur contractuelle." : c?.raison_sociale || "Transports Ligneo", left, pageH - 7);
+    doc.setTextColor(...DOCUMENT_TEMPLATE.blue);
+    doc.text(c?.site_web || "www.transportsligneo.fr", right, pageH - 7, { align: "right" });
+  }
   markDemoPdf(doc, context);
   return doc.output("blob");
 }
