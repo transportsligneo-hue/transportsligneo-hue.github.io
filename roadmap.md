@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] PV livraison/restitution : reprendre exactement les deux modèles fournis avec remplissage automatique, sans mentions démo en production ; harmoniser « restitution et livraison ».
+- [x] PV livraison/restitution : deux modèles vectoriels fournis raccordés au remplissage automatique dans tous les espaces, mentions démo uniquement en démonstration ; libellé « restitution et livraison » harmonisé. Quatre PDF contrôlés ; villes résiduelles et position du bandeau démo corrigées.
+- [ ] Vérifier le téléchargement des nouveaux PV depuis une vraie mission dans l’admin : la session de test est arrêtée par la vérification SMS, impossible de poursuivre sans validation utilisateur.
 - [x] Démo pro : modèles officiels devis, bon de commande, PV et facture reliés aux téléchargements avec données fictives ; quatre PDF téléchargés et leurs quatre pages contrôlées, tests de confidentialité réussis. Accès par invitation non vérifié sans lien valide.
 - [x] Afficher Recharge électrique et Mise en main dans le type de prestation du PDF groupé lorsque sélectionnées ; PDF vérifié sur une page sans chevauchement.
 - [x] Aligner les colonnes et les totaux du PDF groupé ; conserver la motorisation issue de la recherche de chaque plaque (livraison et restitution). PDF de contrôle 11 véhicules vérifié sur une page ; tests électriques réussis.

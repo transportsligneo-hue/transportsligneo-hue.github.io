@@ -94,7 +94,7 @@ export function parseLigneType(raw: unknown): LigneType {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z]/g, "");
-  if (["restitutionetlivraison", "allerretour", "restitution et livraison", "livraisonrestitution", "livraisonplusrestitution", "livraisonrestitutions"].includes(s)) return "livraison_restitution";
+  if (["restitutionetlivraison", "allerretour", "livraisonetrestitution", "livraisonrestitution", "livraisonplusrestitution", "livraisonrestitutions"].includes(s)) return "livraison_restitution";
   if (s.startsWith("livraisonsimple") || s === "livraison") return "livraison_simple";
   return "aller_simple";
 }
