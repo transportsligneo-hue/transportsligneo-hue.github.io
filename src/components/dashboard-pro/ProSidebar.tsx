@@ -113,13 +113,14 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
           {headerBlock}
         </div>
 
-        <nav className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav data-tour="side-nav" className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
           {items.map((item) => {
             const active = isActive(item);
             return (
               <Link
                 key={item.to}
                 to={item.to}
+                data-tour={item.to.endsWith("/missions") ? "side-missions" : undefined}
                 className={`lig-nav-item${active ? " is-active" : ""}`}
               >
                 <span className="lig-nav-ic"><item.icon size={15} /></span>
@@ -133,7 +134,7 @@ export function ProSidebar({ societe, items, children, audience = "pro" }: Props
         <div className="lig-nav p-3 border-t border-pro-border">
           <div className="mb-2 flex items-center gap-2">
             <ThemeToggle variant="full" className="flex-1 justify-start" />
-            <button onClick={replayHelpTips} className="lig-help-round shrink-0" aria-label="Revoir les conseils" title="Revoir les conseils">
+            <button data-tour="help-round" onClick={replayHelpTips} className="lig-help-round shrink-0" aria-label="Revoir les conseils" title="Revoir les conseils">
               <LifeBuoy size={15} />
             </button>
           </div>

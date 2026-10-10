@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Car, Layers, ArrowRight } from "lucide-react";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
+import { GuidedTour, MISSION_CHOICE_TOUR } from "@/components/onboarding/GuidedTour";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mission/")({
   component: NouvelleMissionChoice,
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-mis
 function NouvelleMissionChoice() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      <GuidedTour id="mission-choice" steps={MISSION_CHOICE_TOUR} />
       <FleetPageHeader
         breadcrumb="Nouvelle mission"
         eyebrow="Créer une demande"
@@ -21,6 +23,7 @@ function NouvelleMissionChoice() {
       <div className="grid gap-5 sm:grid-cols-2">
         <Link
           to="/dashboard-pro/nouvelle-demande"
+          data-tour="choice-simple"
           className="group relative overflow-hidden qm-card p-6 transition hover:-translate-y-0.5 hover:border-[#2f5fff]/40 hover:shadow-[0_20px_40px_-24px_rgba(47,95,255,0.35)]"
         >
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf0ff] text-[#2f5fff]">
@@ -38,6 +41,7 @@ function NouvelleMissionChoice() {
 
         <Link
           to="/dashboard-pro/nouvelle-mission/groupee"
+          data-tour="choice-grouped"
           className="group relative overflow-hidden qm-card p-6 transition hover:-translate-y-0.5 hover:border-[#7c5cff]/40 hover:shadow-[0_20px_40px_-24px_rgba(124,92,255,0.35)]"
         >
           <span className="absolute right-4 top-4 rounded-full bg-[#f0ecff] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#5334d6]">
