@@ -89,14 +89,14 @@ const OPTION_LABELS: Record<string, string> = {
 function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): string[] {
   if (!meta) return [];
   const labels = Object.entries(meta)
-    .filter(([, v]) => v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0))
+    .filter(([k, v]) => !k.startsWith("jockey_") && (v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0)))
     .map(([k, v]) => OPTION_LABELS[k] ?? `${k}: ${String(v)}`);
   const jokeageServices = Array.isArray(meta.jokeage_prestations)
     ? meta.jokeage_prestations
         .filter((value): value is string => typeof value === "string")
         .map((value) => JOKEAGE_LABELS[value] ?? value)
-    : [];
-  if (jokeageServices.length > 0) labels.push(`Jockeyage : ${jokeageServices.join(", ")}`);
+    : Object.entries(meta).filter(([k, v]) => k.startsWith("jockey_") && v === true).map(([k]) => JOKEAGE_LABELS[k.slice(7)] ?? k.slice(7));
+  if (jokeageServices.length > 0) labels.push(`Service de jockeyage : ${jokeageServices.join(", ")}`);
   return labels;
 }
 
