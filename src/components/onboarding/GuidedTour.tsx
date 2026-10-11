@@ -123,24 +123,42 @@ export function GuidedTour({ id, steps, delay = 900 }: { id: string; steps: Tour
 
 export const MISSIONS_LIST_TOUR: TourStep[] = [
   {
+    target: '[data-tour="missions-views"]',
+    title: "Quatre façons de voir vos missions",
+    body: "Liste, Cartes, Kanban ou Planning : choisissez l'affichage qui vous convient. Le planning regroupe vos missions par jour, le kanban par étape d'avancement. Votre choix est mémorisé.",
+  },
+  {
+    target: '[data-tour="missions-filters"]',
+    title: "Filtrer par statut",
+    body: "Toutes, En attente, Planifiées, En cours ou Archives : un clic suffit pour ne voir que les missions qui vous intéressent. Les missions livrées, terminées ou annulées se retrouvent dans Archives.",
+  },
+  {
     target: '[data-tour="missions-list"] a[href*="/missions/"]',
     title: "Ouvrir une mission",
-    body: "Cliquez sur une mission pour accéder à son suivi complet : carte GPS, photos, documents et facture.",
+    body: "Cliquez sur une mission pour accéder à son suivi complet : carte GPS en direct, photos de l'état des lieux, procès-verbaux, facture et historique. Le badge coloré indique son statut, la pastille L ou R signale une livraison ou une restitution.",
+  },
+  {
+    target: '[data-tour="missions-pending"]',
+    title: "Demandes en cours de validation",
+    body: "Vos demandes récentes apparaissent ici le temps que notre équipe les valide. Dès qu'elles sont acceptées, elles deviennent des missions et remontent dans la liste ci-dessus.",
   },
   {
     target: '[data-tour="new-mission"]',
     title: "Nouvelle demande",
-    body: "Créez une mission simple ou groupée. En groupé, mixez livraisons simples, restitution et livraison, et recharges électriques.",
+    body: "Créez une mission simple ou groupée. En groupé, mixez librement livraisons simples, restitution et livraison, recharges électriques et services de jockeyage, véhicule par véhicule.",
   },
 ];
 
 export const MISSION_DETAIL_TOUR: TourStep[] = [
-  { target: '[data-tour="mission-gps"]', title: "Suivi GPS en direct", body: "Suivez le convoyeur en temps réel sur la carte, du départ jusqu'à la remise des clés." },
-  { target: '[data-tour="mission-photos"]', title: "Photos et état des lieux", body: "Comparez les photos prises au départ et à l'arrivée, avec les anomalies signalées." },
-  { target: '[data-tour="mission-report"]', title: "Rapport de mission", body: "Téléchargez en un PDF toutes les preuves : photos, signatures et état des lieux." },
-  { target: '[data-tour="mission-pv"]', title: "PV de livraison et de restitution", body: "Vos procès-verbaux officiels, remplis automatiquement et prêts à télécharger." },
-  { target: '[data-tour="mission-invoice"]', title: "Votre facture", body: "La facture est générée automatiquement en fin de mission. Téléchargez son PDF en un clic." },
-  { target: '[data-tour="mission-vehicle"]', title: "Véhicule", body: "Modèle, plaque et VIN du véhicule transporté, toujours à portée de main." },
+  { target: '[data-tour="mission-status"]', title: "L'essentiel de la mission", body: "Trajet, date de prise en charge, statut en temps réel et montant. Le statut se met à jour automatiquement dès que le convoyeur avance, sans recharger la page." },
+  { target: '[data-tour="mission-tracking-code"]', title: "Code de suivi à partager", body: "Envoyez le code de suivi à un proche ou à un collaborateur : il pourra suivre la mission en direct, sans créer de compte et sans voir vos informations personnelles." },
+  { target: '[data-tour="mission-gps"]', title: "Suivi GPS en direct", body: "Suivez le convoyeur en temps réel sur la carte, du départ jusqu'à la remise des clés. La position s'actualise pendant tout le trajet." },
+  { target: '[data-tour="mission-photos"]', title: "Photos et état des lieux", body: "Comparez les photos prises au départ et à l'arrivée, avec les anomalies signalées. Chaque photo est horodatée et sert de preuve en cas de litige." },
+  { target: '[data-tour="mission-report"]', title: "Rapport de mission", body: "Téléchargez en un PDF unique toutes les preuves : photos, signatures et état des lieux. Idéal pour vos archives ou votre assurance." },
+  { target: '[data-tour="mission-pv"]', title: "PV de livraison et de restitution", body: "Vos procès-verbaux officiels, remplis automatiquement à partir de la mission et prêts à télécharger. Ils font foi en cas de contrôle ou de litige." },
+  { target: '[data-tour="mission-invoice"]', title: "Votre facture", body: "La facture est générée automatiquement en fin de mission, avec le détail des prestations et des options choisies. Téléchargez son PDF en un clic." },
+  { target: '[data-tour="mission-vehicle"]', title: "Véhicule", body: "Modèle, plaque, VIN et énergie du véhicule transporté, toujours à portée de main. La carte grise est consultable ici si elle a été fournie." },
+  { target: '[data-tour="mission-history"]', title: "Historique de la mission", body: "Chaque étape est consignée : demande, validation, attribution du convoyeur, départ, arrivée. Vous savez toujours ce qui s'est passé et quand." },
 ];
 
 export const PRO_DASHBOARD_TOUR: TourStep[] = [
