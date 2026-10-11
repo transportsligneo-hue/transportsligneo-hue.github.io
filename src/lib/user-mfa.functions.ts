@@ -104,7 +104,8 @@ export const getUserMfaStatus = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const ctx = context as Ctx;
     const db = await admin();
-    const { data: s } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+  const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+  if (error) throw new Error("Lecture des réglages de sécurité impossible");
     const enabled = !!s?.enabled && !!s?.phone;
     let verified = !enabled;
     if (enabled) {
