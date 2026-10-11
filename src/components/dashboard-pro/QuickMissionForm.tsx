@@ -1,4 +1,5 @@
 import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
+import { HelpTip } from "@/components/ui/HelpTip";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -778,6 +779,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Type de prestation
+          <HelpTip tone="violet" title="Quel trajet choisir ?" text="Livraison simple : le véhicule est conduit de A à B. Restitution et livraison : aller-retour, le véhicule revient à son point de départ. Recharge uniquement : le véhicule est rechargé puis restitué sur place, sans livraison. Pour un contrôle technique, une révision ou un dépôt au garage, choisissez un service de jockeyage plus bas." />
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -805,6 +807,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <MapPin size={14} className="text-pro-accent" /> Lieu d'enlèvement
+          <HelpTip tone="violet" title="Où récupérer le véhicule ?" text="Indiquez l'adresse exacte de prise en charge. Ajoutez un contact sur place avec son téléphone : le convoyeur l'appellera en arrivant. Le commentaire sert pour les détails pratiques (clés, horaires, parking, digicode). Vos adresses favorites remplissent tout en un clic." />
         </h2>
 
         {!isParticulier && favorites.length > 0 && (
@@ -876,6 +879,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <MapPinned size={14} className="text-pro-accent" /> Lieu de livraison
+          <HelpTip tone="violet" title="Où déposer le véhicule ?" text="L'adresse où le véhicule doit être remis. Comme au départ, précisez un contact et un téléphone pour que la remise des clés se fasse sans attente. En restitution et livraison, c'est l'adresse de l'aller : le retour se fait automatiquement au point de départ." />
         </h2>
         <div className="space-y-3">
           <div>
