@@ -302,6 +302,13 @@
       "when": 1791749476470,
       "tag": "0042_vehicle_immobilisation_and_automation_log",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1791749740219,
+      "tag": "0043_vehicle_km_after_mission",
+      "breakpoints": true
     }
   ]
 }

@@ -8425,6 +8425,53 @@ export type Database = {
           },
         ]
       }
+      vehicle_km_history: {
+        Row: {
+          attribution_id: string | null
+          auteur: string | null
+          created_at: string
+          id: string
+          inspection_id: string | null
+          kilometrage: number
+          organization_id: string
+          source: string
+          statut: string
+          vehicle_id: string
+        }
+        Insert: {
+          attribution_id?: string | null
+          auteur?: string | null
+          created_at?: string
+          id?: string
+          inspection_id?: string | null
+          kilometrage: number
+          organization_id: string
+          source?: string
+          statut?: string
+          vehicle_id: string
+        }
+        Update: {
+          attribution_id?: string | null
+          auteur?: string | null
+          created_at?: string
+          id?: string
+          inspection_id?: string | null
+          kilometrage?: number
+          organization_id?: string
+          source?: string
+          statut?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_km_history_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_maintenances: {
         Row: {
           cout: number | null
@@ -9563,6 +9610,10 @@ export type Database = {
       fleet_member_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: string
+      }
+      flotte_resolve_km: {
+        Args: { _history_id: string; _km?: number }
+        Returns: undefined
       }
       gen_tracking_code: { Args: never; Returns: string }
       generate_group_reference: { Args: never; Returns: string }
