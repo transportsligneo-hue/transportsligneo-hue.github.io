@@ -44,6 +44,9 @@ const EMPTY_FORM = {
   sup_recharge: "",
   sup_plein: "",
   sup_nettoyage: "",
+  sup_lavage_ext: "",
+  sup_lavage_int: "",
+  sup_lavage_full: "",
   sup_mise_en_main: "",
   sup_express: "",
   notes: "",
@@ -97,6 +100,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
       sup_recharge: r.supplements?.recharge_electrique != null ? String(r.supplements.recharge_electrique) : "",
       sup_plein: r.supplements?.plein_essence != null ? String(r.supplements.plein_essence) : "",
       sup_nettoyage: r.supplements?.nettoyage != null ? String(r.supplements.nettoyage) : "",
+      sup_lavage_ext: r.supplements?.lavage_ext != null ? String(r.supplements.lavage_ext) : "",
+      sup_lavage_int: r.supplements?.lavage_int != null ? String(r.supplements.lavage_int) : "",
+      sup_lavage_full: r.supplements?.lavage_full != null ? String(r.supplements.lavage_full) : "",
       sup_mise_en_main: r.supplements?.mise_en_main != null ? String(r.supplements.mise_en_main) : "",
       sup_express: r.supplements?.express != null ? String(r.supplements.express) : "",
       notes: r.notes ?? "",
@@ -117,6 +123,9 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
     const sr = parseNum(form.sup_recharge); if (sr != null && sr > 0) supplements.recharge_electrique = sr;
     const sp = parseNum(form.sup_plein); if (sp != null && sp > 0) supplements.plein_essence = sp;
     const sn = parseNum(form.sup_nettoyage); if (sn != null && sn > 0) supplements.nettoyage = sn;
+    const ext = parseNum(form.sup_lavage_ext); if (ext != null && ext > 0) supplements.lavage_ext = ext;
+    const int = parseNum(form.sup_lavage_int); if (int != null && int > 0) supplements.lavage_int = int;
+    const full = parseNum(form.sup_lavage_full); if (full != null && full > 0) supplements.lavage_full = full;
     const sm = parseNum(form.sup_mise_en_main); if (sm != null && sm > 0) supplements.mise_en_main = sm;
     const se = parseNum(form.sup_express); if (se != null && se > 0) supplements.express = se;
 
@@ -296,6 +305,15 @@ export function ClientPricingRulesBlock({ clientUserId, clientEmail }: Props) {
                 </AdminField>
                 <AdminField label="Nettoyage">
                   <input type="number" step="0.01" className={inp} value={form.sup_nettoyage} onChange={(e) => setForm({ ...form, sup_nettoyage: e.target.value })} placeholder="25" />
+                </AdminField>
+                <AdminField label="Lavage extérieur">
+                  <input type="number" min="0" step="0.01" className={inp} value={form.sup_lavage_ext} onChange={(e) => setForm({ ...form, sup_lavage_ext: e.target.value })} placeholder="optionnel" />
+                </AdminField>
+                <AdminField label="Lavage intérieur">
+                  <input type="number" min="0" step="0.01" className={inp} value={form.sup_lavage_int} onChange={(e) => setForm({ ...form, sup_lavage_int: e.target.value })} placeholder="optionnel" />
+                </AdminField>
+                <AdminField label="Lavage extérieur + intérieur">
+                  <input type="number" min="0" step="0.01" className={inp} value={form.sup_lavage_full} onChange={(e) => setForm({ ...form, sup_lavage_full: e.target.value })} placeholder="optionnel" />
                 </AdminField>
                 <AdminField label="Mise en main">
                   <input type="number" step="0.01" className={inp} value={form.sup_mise_en_main} onChange={(e) => setForm({ ...form, sup_mise_en_main: e.target.value })} placeholder="15" />

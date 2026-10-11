@@ -6,6 +6,10 @@ import {
 } from "./client-pricing";
 
 describe("delivery electric recharge surcharge", () => {
+  it("uses only the admin-configured wash amount", () => {
+    expect(computeOptionSupplements({ lavage_ext: 12, lavage_int: 16, lavage_full: 24 }, { lavage_int: true }).total).toBe(16);
+    expect(computeOptionSupplements({}, { lavage_full: true }).total).toBe(0);
+  });
   it("uses the requested 25 euro default", () => {
     expect(DEFAULT_DELIVERY_RECHARGE_SURCHARGE).toBe(25);
     expect(normalizeDeliveryRechargeSurcharge(undefined)).toBe(25);
