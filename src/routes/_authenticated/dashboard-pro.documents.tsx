@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -564,10 +565,10 @@ function ProDocuments() {
                               </span>
                             )}
                             <span className="flex flex-wrap items-center gap-2 text-[11px] text-pro-text-soft">
-                              {d.immatriculation && <span className="plate-tag plate-tag--sm">{d.immatriculation}</span>}
+                              {d.immatriculation && <PlateBadge plate={d.immatriculation} size="sm" />}
                               {vehicule && <span>{vehicule}</span>}
                               {d.immatriculation_retour && d.immatriculation_retour !== d.immatriculation && (
-                                <span className="plate-tag plate-tag--sm">{d.immatriculation_retour}</span>
+                                <PlateBadge plate={d.immatriculation_retour} size="sm" />
                               )}
                               {vehiculeRetour && vehiculeRetour !== vehicule && <span>{vehiculeRetour}</span>}
                             </span>

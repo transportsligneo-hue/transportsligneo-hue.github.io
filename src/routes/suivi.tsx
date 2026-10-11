@@ -3,6 +3,7 @@ import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck, CarFront, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import Footer from "@/components/Footer";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
 
@@ -228,8 +229,8 @@ function SuiviPage() {
                     <span className="suivi-txt-depart">
                       {result.vehicule || "Véhicule"}
                       {result.immatriculation && (
-                        <span className="ml-2 rounded-md border border-[#7aa3ff]/30 bg-[#4f8cff]/10 px-1.5 py-0.5 text-[11.5px] font-semibold tracking-wide text-[#8fbaff]">
-                          {result.immatriculation}
+                        <span className="ml-2 inline-flex align-middle">
+                          <PlateBadge plate={result.immatriculation} size="sm" />
                         </span>
                       )}
                     </span>

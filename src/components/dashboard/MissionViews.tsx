@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LayoutList, LayoutGrid, Kanban, CalendarDays, Calendar, MapPin, ArrowRight } from "lucide-react";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export type MissionViewMode = "list" | "cards" | "kanban" | "planning";
 
@@ -232,7 +233,7 @@ export function MissionViewsBody({
               </p>
               <div className={`flex items-center gap-3 text-[11px] flex-wrap pt-2 mt-auto border-t ${theme === "dark" ? "border-primary/10" : "border-pro-border"} ${muted}`}>
                 <span className="flex items-center gap-1"><Calendar size={11} />{fmtDate(i.date)}</span>
-                {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+                {i.plaque && <PlateBadge plate={i.plaque} size="sm" />}
                 {i.meta && <span className="truncate">{i.meta}</span>}
                 {i.amount && <span className={`ml-auto font-semibold ${strong}`}>{i.amount}</span>}
               </div>
@@ -283,7 +284,7 @@ export function MissionViewsBody({
                       </p>
                       <div className={`flex items-center gap-1 text-[10px] mt-2 ${muted}`}>
                         <Calendar size={10} />{fmtDate(i.date)}
-                        {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+                        {i.plaque && <PlateBadge plate={i.plaque} size="sm" />}
                         {i.amount && <span className={`ml-auto font-semibold ${strong}`}>{i.amount}</span>}
                       </div>
                     </div>
@@ -315,7 +316,7 @@ export function MissionViewsBody({
             )}
             <span className={`text-[10px] uppercase tracking-wider font-mono ${muted}`}>{i.numero}</span>
             {i.badge ?? <StatusBadge kind={missionStatusKind(i.statut)}>{i.statutLabel ?? missionStatusLabel(i.statut)}</StatusBadge>}
-            {i.plaque && <span className="plate-tag plate-tag--sm">{i.plaque}</span>}
+            {i.plaque && <PlateBadge plate={i.plaque} size="sm" />}
             {!inDuo && i.typeLabel && (
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${missionTypeBadgeClass(i.typeLabel)}`}>{i.typeLabel}</span>
             )}

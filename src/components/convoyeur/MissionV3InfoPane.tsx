@@ -77,6 +77,7 @@ function CopyBtn({ value }: { value: string }) {
     </button>
   );
 }
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export function MissionV3InfoPane({
   vehicule, client, depart, arrivee, instructions,
@@ -229,7 +230,7 @@ export function MissionV3InfoPane({
           <div style={{ minWidth: 0 }}>
             <div className="v3-field-lbl">Plaque d'immatriculation</div>
             <div className="v3-field-val" style={{ opacity: vehicule.immatriculation ? 1 : 0.45 }}>
-              {vehicule.immatriculation || "Non renseignée"}
+              {vehicule.immatriculation ? <PlateBadge plate={vehicule.immatriculation} size="sm" /> : "Non renseignée"}
             </div>
           </div>
           {vehicule.immatriculation && <CopyBtn value={vehicule.immatriculation} />}

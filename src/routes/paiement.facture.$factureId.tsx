@@ -19,6 +19,7 @@ export const Route = createFileRoute("/paiement/facture/$factureId")({
     ],
   }),
 });
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 function PaiementFacturePage() {
   const { factureId } = Route.useParams();
@@ -84,7 +85,7 @@ function PaiementFacturePage() {
           {summary?.immatriculation && (
             <div className="pn-row">
               <span className="pn-label">Plaque</span>
-              <span className="pn-val pn-plate">{summary.immatriculation}</span>
+              <PlateBadge plate={summary.immatriculation} size="sm" />
             </div>
           )}
           {summary?.dateMission && (

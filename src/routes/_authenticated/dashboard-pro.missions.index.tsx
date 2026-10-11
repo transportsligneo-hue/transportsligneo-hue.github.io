@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { GuidedTour, MISSIONS_LIST_TOUR } from "@/components/onboarding/GuidedTour";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -513,7 +514,7 @@ function ProMissionsIndex() {
                       <span className="fleet-chip-simple">{typeLabel}</span>
                     )}
                     {plates.map((p) => (
-                      <span key={p} className="plate-tag">{p}</span>
+                      <PlateBadge key={p} plate={p} size="sm" />
                     ))}
                     {elec && <span className="fleet-chip-elec"><Zap size={10} /> Électrique</span>}
                   </div>
@@ -565,7 +566,7 @@ function ProMissionsIndex() {
                         <div className="fleet-leg-meta">
                           <span><Calendar size={10} className="inline mr-1" />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
                           {(m.immatriculation ?? flags[m.id]?.plaque) && (
-                            <span className="plate-tag plate-tag--sm">{m.immatriculation ?? flags[m.id]?.plaque}</span>
+                            <PlateBadge plate={m.immatriculation ?? flags[m.id]?.plaque} size="sm" />
                           )}
                           <span className="font-semibold text-pro-text">{Number(m.prix_total).toFixed(2)} €</span>
                           <span className="fleet-leg-cta">Suivi <ArrowRight size={11} /></span>

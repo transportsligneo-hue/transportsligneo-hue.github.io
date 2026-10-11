@@ -16,6 +16,7 @@ import PlacesInput from "@/components/PlacesInput";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { lookupPlate } from "@/lib/plate.functions";
+import { PlateInput } from "@/components/plate/PlateInput";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // === Mêmes données que la version desktop ===
@@ -805,33 +806,19 @@ export default function MobileDevisGenerator() {
 
               {/* 1. Plaque + recherche */}
               <div>
-                <label className={labelCls}>Plaque d'immatriculation</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={immatriculation}
-                    onChange={e => { setImmatriculation(e.target.value.toUpperCase()); setSivMsg(null); }}
-                    placeholder="AA-123-AA"
-                    className={`${inputCls} uppercase tracking-widest flex-1`}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSivLookup}
-                    disabled={sivLoading || !immatriculation}
-                    className="px-4 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
-                  >
-                    {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                    {sivLoading ? "..." : "Rechercher"}
-                  </button>
-                </div>
-                {sivMsg && (
-                  <p className={`mt-2 text-[11px] ${sivMsg.type === "ok" ? "text-emerald-500" : "text-red-500"}`}>
-                    {sivMsg.text}
-                  </p>
+                <PlateInput
+                  value={immatriculation}
+                  onChange={(v) => { setImmatriculation(v); setSivMsg(null); }}
+                  onSearch={handleSivLookup}
+                  searching={sivLoading}
+                  label="Plaque d'immatriculation"
+                  help="Pré-remplit le véhicule automatiquement (marque, modèle, VIN, énergie)."
+                  tone="blue"
+                  found={sivMsg?.type === "ok"}
+                />
+                {sivMsg && sivMsg.type === "err" && (
+                  <p className="mt-2 text-[11px] text-red-500">{sivMsg.text}</p>
                 )}
-                <p className="mt-1.5 text-[10px] text-primary/50">
-                  Pré-remplit le véhicule automatiquement.
-                </p>
               </div>
 
               {/* 2. VIN optionnel */}
@@ -997,29 +984,18 @@ export default function MobileDevisGenerator() {
                 {!sameRetourVehicle && (
                   <div className="space-y-3">
                     <div>
-                      <label className={labelCls}>Plaque retour</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={immatRetour}
-                          onChange={e => { setImmatRetour(e.target.value.toUpperCase()); setSivRetourMsg(null); }}
-                          placeholder="AA-123-AA"
-                          className={`${inputCls} uppercase tracking-widest flex-1`}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSivRetourLookup}
-                          disabled={sivRetourLoading || !immatRetour}
-                          className="px-4 rounded-xl border border-[#e7c76a]/60 bg-gradient-to-b from-[#e7c76a]/25 to-[#d4af37]/15 text-[#e7c76a] text-xs font-semibold uppercase tracking-wider disabled:opacity-40 flex items-center gap-1.5 whitespace-nowrap"
-                        >
-                          {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                          {sivRetourLoading ? "..." : "Rechercher"}
-                        </button>
-                      </div>
-                      {sivRetourMsg && (
-                        <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-500" : "text-red-500"}`}>
-                          {sivRetourMsg.text}
-                        </p>
+                      <PlateInput
+                        value={immatRetour}
+                        onChange={(v) => { setImmatRetour(v); setSivRetourMsg(null); }}
+                        onSearch={handleSivRetourLookup}
+                        searching={sivRetourLoading}
+                        label="Plaque retour"
+                        help="Plaque du véhicule restitué, si différent du véhicule livré."
+                        tone="blue"
+                        found={sivRetourMsg?.type === "ok"}
+                      />
+                      {sivRetourMsg && sivRetourMsg.type === "err" && (
+                        <p className="mt-2 text-[11px] text-red-500">{sivRetourMsg.text}</p>
                       )}
                     </div>
                     <div>

@@ -5,6 +5,7 @@ import { Car, Banknote, Layers } from "lucide-react";
 import { Card, Button } from "@/components/admin/AdminUI";
 import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
 import { stripLegSuffix } from "@/lib/mission-number";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 type Sibling = {
   trajetId: string;
@@ -120,7 +121,7 @@ export function MissionLotPlaquesPanel({
                   </p>
                   <p className="text-xs text-pro-muted truncate">
                     {r.vehicule || "Véhicule —"}
-                    {r.plaque !== "—" && <span className="plate-tag plate-tag--sm ml-2">{r.plaque}</span>}
+                    {r.plaque !== "—" && <span className="ml-2 inline-flex"><PlateBadge plate={r.plaque} size="sm" /></span>}
                   </p>
                 </div>
               </div>

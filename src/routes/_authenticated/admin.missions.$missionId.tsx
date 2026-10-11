@@ -87,6 +87,7 @@ import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
 
 
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -1215,7 +1216,7 @@ function AdminMissionDetail() {
                     ? `${trajet.marque ?? ""} ${trajet.modele ?? ""}`.trim()
                     : "Véhicule —"}
                   {trajet.immatriculation && (
-                    <span className="plate-tag plate-tag--sm">{trajet.immatriculation}</span>
+                    <PlateBadge plate={trajet.immatriculation} size="sm" />
                   )}
                 </span>
 
@@ -1276,7 +1277,7 @@ function AdminMissionDetail() {
               <div className="mt-3 pt-3 border-t border-pro-border grid grid-cols-2 gap-3">
                 <div className="col-span-2 flex items-center gap-2 flex-wrap">
                   {trajet.immatriculation ? (
-                    <span className="plate-tag">{trajet.immatriculation}</span>
+                    <PlateBadge plate={trajet.immatriculation} size="md" />
                   ) : (
                     <span className="text-sm text-pro-muted">Plaque —</span>
                   )}

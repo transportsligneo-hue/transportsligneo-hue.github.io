@@ -50,6 +50,7 @@ type Lot = {
   statut: string;
   created_at: string;
 };
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 type Filter = "tous" | LigneType | "a_valider" | "validee";
 const FILTERS: { v: Filter; l: string }[] = [
@@ -374,7 +375,7 @@ function LigneCard({ l, checked, error, lot, readOnly, readOnlyAdmin, onToggle, 
             {LIGNE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         )}
-        {l.immatriculation && <span className="dl-mono dl-plate">{l.immatriculation}</span>}
+        {l.immatriculation && <PlateBadge plate={l.immatriculation} size="sm" />}
         <span className="dl-muted">{[l.marque, l.modele].filter(Boolean).join(" ")}</span>
         <span className={`dl-pill ${l.statut === "validee" ? "dl-pill--complet" : "dl-pill--a_valider"}`}>{l.statut === "validee" ? "Validée" : "À valider"}</span>
         <strong className="dl-price">{eur(lignePrix(l))}</strong>

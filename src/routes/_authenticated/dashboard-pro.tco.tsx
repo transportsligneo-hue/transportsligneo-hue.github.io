@@ -50,6 +50,7 @@ const SEV_CLS: Record<string, string> = {
   haute: "border-l-[#d97706] bg-[#fef3e2]",
   moyenne: "border-l-[#2f5fff] bg-[#eef2ff]",
 };
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 function FleetTcoPage() {
   const { data: orgInfo, isLoading: orgLoading } = useCurrentOrgAccountType();
@@ -298,7 +299,7 @@ function FleetTcoPage() {
                       <tr key={v.id} className="border-t border-[#eaeaee]">
                         <td className="py-2.5">
                           <b className="font-semibold">{[v.marque, v.modele].filter(Boolean).join(" ") || "Véhicule"}</b>
-                          <span className="ml-2 font-mono text-[11px] text-[#a3a4ac]">{v.immatriculation || "—"}</span>
+                          <span className="ml-2 inline-flex">{v.immatriculation ? <PlateBadge plate={v.immatriculation} size="sm" /> : "—"}</span>
                         </td>
                         <td className="py-2.5 text-[#70727d]">{Number(v.kilometrage || 0).toLocaleString("fr-FR")} km</td>
                         <td className="py-2.5 font-semibold">{fmtEur(v.total)}</td>

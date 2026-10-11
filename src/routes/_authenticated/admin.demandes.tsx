@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { Eye, RefreshCw, ArrowRightCircle, FileText, Search, ArrowRight, Mail, Phone, MapPin, Car, Calendar, Trash2, User, Inbox, Clock, CheckCircle2, Euro, XCircle } from "lucide-react";
 import {
   AdminPageHeader,
@@ -432,14 +433,14 @@ function AdminDemandes() {
                       </span>
                       {plaque && (
                         <div className="mt-1.5">
-                          <span className="plate-tag plate-tag--sm">{plaque}</span>
+                          <PlateBadge plate={plaque} size="sm" />
                         </div>
                       )}
                       {d.vehicule_vin && <p className="dvx-vin mt-1">VIN {d.vehicule_vin}</p>}
                       {isAR && d.immatriculation_retour && (
                         <div className="mt-2.5 border-t border-[#eaeaee] pt-2">
                           <p className="text-[11px] text-[#a3a4ac] mb-1">Restitution</p>
-                          <span className="plate-tag plate-tag--sm">{d.immatriculation_retour}</span>
+                          <PlateBadge plate={d.immatriculation_retour} size="sm" />
                         </div>
                       )}
                     </div>

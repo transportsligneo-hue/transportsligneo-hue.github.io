@@ -14,6 +14,7 @@ import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurc
 import { calculateBasePrice, type TripType } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { lookupPlate } from "@/lib/plate.functions";
+import { PlateInput } from "@/components/plate/PlateInput";
 import { ScanToPrefill } from "@/components/scanner/ScanToPrefill";
 import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
@@ -946,28 +947,15 @@ export default function QuickMissionForm({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div className="md:col-span-2">
-            <label className={lbl}>Immatriculation</label>
-            <div className="flex gap-2">
-              <input
-                className={`${inp} uppercase`}
-                value={immat}
-                onChange={(e) => setImmat(e.target.value.toUpperCase())}
-                placeholder="AA-123-BB"
-                maxLength={15}
-              />
-              <button
-                type="button"
-                onClick={handlePlateLookup}
-                disabled={plateBusy || !immat}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-pro-accent text-white text-xs font-medium hover:bg-pro-accent-hover disabled:opacity-50 whitespace-nowrap"
-              >
-                {plateBusy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                Récupérer
-              </button>
-            </div>
-            <p className="text-[11px] text-pro-text-soft mt-1">
-              Récupération automatique des infos véhicule (marque, modèle, énergie). Modifiez si nécessaire.
-            </p>
+            <PlateInput
+              value={immat}
+              onChange={setImmat}
+              onSearch={handlePlateLookup}
+              searching={plateBusy}
+              label="Immatriculation"
+              help="Récupération automatique des infos véhicule (marque, modèle, énergie). Modifiez si nécessaire."
+              tone="violet"
+            />
             {(immat || energie) && (
               <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-md border border-pro-accent/40 px-2 py-1 text-xs font-semibold text-pro-text">
                 <Fuel size={12} className="text-pro-accent" />
@@ -1118,26 +1106,15 @@ export default function QuickMissionForm({
               <div className="pl-6 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2">
-                     <label className={lbl}>Plaque restitution *</label>
-                    <div className="flex gap-2">
-                      <input
-                        className={`${inp} uppercase`}
-                        value={immatRetour}
-                        onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
-                        placeholder="AA-123-BB"
-                        maxLength={15}
-                        required={!sameRetourVehicle}
-                      />
-                      <button
-                        type="button"
-                        onClick={handlePlateRetourLookup}
-                        disabled={plateRetourBusy || !immatRetour}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-pro-accent text-white text-xs font-medium hover:bg-pro-accent-hover disabled:opacity-50 whitespace-nowrap"
-                      >
-                        {plateRetourBusy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                        Récupérer
-                      </button>
-                    </div>
+                     <PlateInput
+                      value={immatRetour}
+                      onChange={setImmatRetour}
+                      onSearch={handlePlateRetourLookup}
+                      searching={plateRetourBusy}
+                      label="Plaque restitution *"
+                      help="Plaque du véhicule restitué, si différent du véhicule livré."
+                      tone="violet"
+                    />
                   </div>
                   <div>
                     <label className={lbl}>VIN retour</label>

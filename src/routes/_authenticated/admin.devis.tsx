@@ -46,6 +46,7 @@ export const Route = createFileRoute("/_authenticated/admin/devis")({
   ] }),
   component: AdminDevisPage,
 });
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 interface DevisRow {
   id: string;
@@ -628,7 +629,7 @@ function AdminDevisPage() {
                         </span>
                         {dx.immatriculation && (
                           <div className="mt-1.5">
-                            <span className="plate-tag plate-tag--sm">{dx.immatriculation}</span>
+                            <PlateBadge plate={dx.immatriculation} size="sm" />
                           </div>
                         )}
                         {hasRetourVeh && (() => {
@@ -654,7 +655,7 @@ function AdminDevisPage() {
                               )}
                               {dx.immatriculation_retour && (
                                 <div className="mt-1.5">
-                                  <span className="plate-tag plate-tag--sm">{dx.immatriculation_retour}</span>
+                                  <PlateBadge plate={dx.immatriculation_retour} size="sm" />
                                 </div>
                               )}
                             </div>
@@ -696,7 +697,7 @@ function AdminDevisPage() {
                               </p>
                               {v.immatriculation && (
                                 <div className="mt-1">
-                                  <span className="plate-tag plate-tag--sm">{v.immatriculation}</span>
+                                  <PlateBadge plate={v.immatriculation} size="sm" />
                                 </div>
                               )}
                               {v.vin && <p className="dvx-vin mt-0.5">VIN {v.vin}</p>}
@@ -708,7 +709,7 @@ function AdminDevisPage() {
                                   </p>
                                   {vr.immatriculation_retour && (
                                     <div className="mt-1">
-                                      <span className="plate-tag plate-tag--sm">{vr.immatriculation_retour}</span>
+                                      <PlateBadge plate={vr.immatriculation_retour} size="sm" />
                                     </div>
                                   )}
                                   {vr.vin_retour && <p className="dvx-vin mt-0.5">VIN {vr.vin_retour}</p>}

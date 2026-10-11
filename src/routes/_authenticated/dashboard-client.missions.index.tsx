@@ -1,6 +1,7 @@
 import { GuidedTour, MISSIONS_LIST_TOUR } from "@/components/onboarding/GuidedTour";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -432,7 +433,7 @@ function ClientMissions() {
                           <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
                           <StatusBadge kind={missionStatusKind(m.statut)}>{friendlyStatusLabel(m.statut)}</StatusBadge>
                           {(m.immatriculation ?? flags[m.id]?.plaque) && (
-                            <span className="plate-tag plate-tag--sm">{m.immatriculation ?? flags[m.id]?.plaque}</span>
+                            <PlateBadge plate={m.immatriculation ?? flags[m.id]?.plaque} size="sm" />
                           )}
                           <span className="text-cream/40 text-[10px] px-1.5 py-0.5 rounded bg-navy/60">
                             {flags[m.id]?.recharge
