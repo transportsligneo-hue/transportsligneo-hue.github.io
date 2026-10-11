@@ -32,7 +32,7 @@ const AUTO_DEFAULT: Auto = {
   assurance: { on: true, days: [30, 7] },
   revision: { on: true, opts: ["2000km", "30j"] },
   convoyage: { on: false, cible: "garage" },
-  kmAuto: { on: false },
+  kmAuto: { on: true },
   immobiliser: { on: false },
   calendrier: { on: true },
   canaux: ["email", "notification"],
@@ -431,7 +431,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
                   <Chips multi items={[["2000km", "2 000 km avant"], ["1000km", "1 000 km avant"], ["30j", "30 jours avant"]]} value={auto.revision.opts} onChange={(v) => setAuto((a) => ({ ...a, revision: { ...a.revision, opts: v } }))} />
                 </AutoCard>
                 <AutoCard soon title="Proposer un convoyage vers le garage" help="Un brouillon de mission est préparé quand une échéance approche. Rien n’est commandé ni facturé tant que vous ne l’avez pas validé." on={auto.convoyage.on} onToggle={(v) => setAuto((a) => ({ ...a, convoyage: { ...a.convoyage, on: v } }))} />
-                <AutoCard soon title="Kilométrage mis à jour après chaque mission" help="Le relevé du convoyeur à l’arrivée met à jour le compteur et recalcule la prochaine révision." on={auto.kmAuto.on} onToggle={(v) => setAuto((a) => ({ ...a, kmAuto: { on: v } }))} />
+                <AutoCard title="Kilométrage mis à jour après chaque mission" help="À la fin de l’état des lieux d’arrivée, le relevé du convoyeur met à jour le compteur et la prochaine révision. Un relevé plus faible ou anormalement élevé n’est jamais appliqué seul : vous recevez une alerte pour confirmer ou corriger." on={auto.kmAuto.on} onToggle={(v) => setAuto((a) => ({ ...a, kmAuto: { on: v } }))} />
                 <AutoCard title="Immobiliser si un document est expiré" help="Chaque matin et à chaque changement de date, si le contrôle technique ou l’assurance est dépassé, le véhicule passe en Immobilisé. Il reprend son statut précédent dès que la date est mise à jour. Les missions déjà planifiées ne sont jamais annulées. N’empêche jamais un convoyage vers un garage ou un centre de contrôle." on={auto.immobiliser.on} onToggle={(v) => setAuto((a) => ({ ...a, immobiliser: { on: v } }))} />
                 <AutoCard title="Ajouter les échéances au calendrier de la flotte" help="Contrôle technique, assurance, révision estimée et fin de contrat apparaissent dans le calendrier de la flotte et se déplacent tout seuls quand la date change." on={auto.calendrier.on} onToggle={(v) => setAuto((a) => ({ ...a, calendrier: { on: v } }))} />
                 <div className="avd-auto on">

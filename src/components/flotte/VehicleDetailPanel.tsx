@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
 import VehicleCostsTab from "@/components/flotte/VehicleCostsTab";
+import { VehicleAutomationHistory } from "@/components/flotte/VehicleAutomationHistory";
 
 
 
@@ -362,6 +363,7 @@ export default function VehicleDetailPanel({
                     value={vehicle.kilometrage != null ? `${vehicle.kilometrage.toLocaleString("fr-FR")} km` : "—"}
                   />
                   <Field label="Couleur" value={vehicle.couleur || "—"} />
+                  <VehicleAutomationHistory vehicleId={vehicle.id} canManage={canManage} />
                   {vehicle.notes && (
                     <div className="col-span-2">
                       <Field label="Notes" value={vehicle.notes} />
