@@ -5,6 +5,7 @@ import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
 
 import { MapPin, RefreshCw, Eye, Clock, Image, FileText, Plus, Send, Receipt, Loader2, User, Truck, Car, CheckCircle2, XCircle, RotateCcw, Edit2, ExternalLink, Shield } from "lucide-react";
 import { LiveMissionMap } from "@/components/map/LiveMissionMap";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { MissionReport } from "@/components/MissionReport";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import {
@@ -759,7 +760,7 @@ function AdminAttributions() {
                           return (
                             <div key={`${v.immatriculation ?? i}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                               {v.immatriculation ? (
-                                <span className="plate-tag plate-tag--sm">{v.immatriculation}</span>
+                                <PlateBadge plate={v.immatriculation} size="sm" />
                               ) : (
                                 <span className="rounded-md border border-dashed border-amber-400/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
                                   Plaque à renseigner

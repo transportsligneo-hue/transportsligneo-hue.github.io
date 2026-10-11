@@ -8,6 +8,7 @@ import { calculateBasePrice } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurcharge, DEFAULT_DELIVERY_RECHARGE_SURCHARGE, type OptionKey } from "@/lib/client-pricing";
 import { isValidVinFormat, normalizeVin } from "@/lib/vin";
+import { PlateInput } from "@/components/plate/PlateInput";
 import { lookupPlate } from "@/lib/plate.functions";
 import PlacesInput from "@/components/PlacesInput";
 import {
@@ -525,24 +526,17 @@ function GroupedMissionForm() {
             return (
               <div key={r.key} className="grouped-vehicle-panel p-4">
                 <div className="flex flex-wrap items-end gap-2.5">
-                  <div className="w-[170px]">
-                    <span className={labelCls}>Plaque livraison</span>
-                    <input
-                      className={`${fieldCls} font-mono font-bold tracking-[0.05em] uppercase`}
+                  <div className="w-[300px]">
+                    <PlateInput
                       value={r.immat}
-                      onChange={(e) => patchRow(r.key, { immat: e.target.value.toUpperCase() })}
-                      placeholder="AA-000-AA"
+                      onChange={(v) => patchRow(r.key, { immat: v })}
+                      onSearch={() => fetchPlate(r)}
+                      searching={r.busy}
+                      label="Plaque livraison"
+                      tone="violet"
+                      found={!!info}
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => fetchPlate(r)}
-                    disabled={r.busy}
-                    className="flex items-center gap-1.5 rounded-[9px] bg-[#7c5cff] px-3.5 py-2.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
-                  >
-                    {r.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
-                    Récupérer
-                  </button>
                   <div className={`flex flex-1 min-w-[160px] items-center gap-2 px-1 py-2.5 text-[13px] ${info ? "font-semibold text-slate-900" : "text-slate-400"}`}>
                     {info ? <Check className="h-3.5 w-3.5 text-[#16a34a]" /> : null}
                     {info || "En attente de la plaque…"}
@@ -592,15 +586,15 @@ function GroupedMissionForm() {
                   {r.tripType === "aller-retour" && (
                     <div className="mt-2.5">
                       <div>
-                        <span className={labelCls}>Plaque retour (restitution)</span>
-                        <input
-                          className={`${fieldCls} uppercase tracking-widest`}
+                        <PlateInput
                           value={r.immatRetour}
-                          onChange={(e) => patchRow(r.key, { immatRetour: e.target.value.toUpperCase() })}
-                          placeholder="AB-123-CD"
-                          maxLength={32}
+                          onChange={(v) => patchRow(r.key, { immatRetour: v })}
+                          onSearch={() => fetchPlate(r, true)}
+                          searching={r.busyRetour}
+                          label="Plaque retour (restitution)"
+                          tone="violet"
+                          found={!!(r.marqueRetour || r.modeleRetour)}
                         />
-                        {r.busyRetour && <Loader2 className="mt-2 h-4 w-4 animate-spin text-pro-accent" />}
                         {(r.marqueRetour || r.modeleRetour) && <p className="mt-2 text-sm font-semibold text-pro-text">{[r.marqueRetour, r.modeleRetour].filter(Boolean).join(" ")}</p>}
                         <input aria-label="VIN du véhicule restitué" className={`${fieldCls} mt-2 font-mono`} value={r.vinRetour} maxLength={17} onChange={(e) => patchRow(r.key, { vinRetour: normalizeVin(e.target.value) })} placeholder="VIN du véhicule restitué" />
                       </div>

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
   Truck, Clock, CheckCircle, PlusCircle, Loader2, ArrowUpRight, FileText,
@@ -439,7 +440,7 @@ function ProDashboard() {
                     <div className="text-[13.5px] text-v3 font-medium truncate">{m.ville_depart} → {m.ville_arrivee}</div>
                     <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                       {(m.immatriculation ?? plates[m.id]) && (
-                        <span className="plate-tag plate-tag--sm">{m.immatriculation ?? plates[m.id]}</span>
+                        <PlateBadge plate={m.immatriculation ?? plates[m.id]} size="sm" />
                       )}
                       {recharges[m.id] && (
                         <span className="fleet-chip-recharge" title="Recharge du véhicule sur place, sans livraison">

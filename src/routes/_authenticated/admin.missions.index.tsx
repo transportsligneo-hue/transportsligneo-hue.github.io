@@ -47,6 +47,7 @@ import { ElectricBadge, resolveMotorisationKind } from "@/components/mission/Ele
 export const Route = createFileRoute("/_authenticated/admin/missions/")({
   component: AdminMissionsUnified,
 });
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 interface TrajetRow {
   id: string; depart: string; arrivee: string; date_trajet: string | null; heure_trajet: string | null;
@@ -907,7 +908,7 @@ function AdminMissionsUnified() {
                             <Layers size={11} /> Lot {r.lotRef} · {r.ids.length} véhicules
                           </span>
                           {r.plaques.map((pl) => (
-                            <span key={pl} className="plate-tag plate-tag--sm">{pl}</span>
+                            <PlateBadge key={pl} plate={pl} size="sm" />
                           ))}
                           <span className="rounded-full bg-white/80 px-2 py-0.5">
                             <ClientBrand
@@ -1045,9 +1046,7 @@ function AdminMissionsUnified() {
                       {show("plaque") && (
                         <td>
                           {r.m.immatriculation ? (
-                            <span className="plate-tag plate-tag--sm">
-                              {r.m.immatriculation}
-                            </span>
+                            <PlateBadge plate={r.m.immatriculation} size="sm" />
                           ) : (
                             <span className="text-[11px] text-[var(--a6-dim)]">—</span>
                           )}

@@ -75,6 +75,7 @@ type HistoryRow = {
   to_address: string | null;
   mission: { numero: string; ville_depart: string; ville_arrivee: string; prix_total: number; statut: string } | null;
 };
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export type DocStatus = "ok" | "warn" | "expired" | "unknown";
 
@@ -311,7 +312,9 @@ export default function VehicleDetailPanel({
                     {[vehicle.marque, vehicle.modele].filter(Boolean).join(" ") || "Véhicule"}
                   </h2>
                   <div className="flex items-center gap-2.5">
-                    <span className="font-mono text-[11px] text-[#a3a4ac]">{vehicle.immatriculation || "—"}</span>
+                    {vehicle.immatriculation
+                      ? <PlateBadge plate={vehicle.immatriculation} size="sm" />
+                      : <span className="font-mono text-[11px] text-[#a3a4ac]">—</span>}
                     <StatusPill statut={vehicle.statut} />
                   </div>
                 </div>

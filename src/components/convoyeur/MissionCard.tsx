@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import { displayNumero } from "@/lib/mission-number";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 
 export interface MissionCardData {
@@ -154,12 +155,7 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
               {mission.lot.ref ? ` · ${mission.lot.ref}` : ""}
             </span>
             {mission.lot.plaques.map((pl) => (
-              <span
-                key={pl}
-                className="rounded-md border border-white/15 bg-white/[0.06] px-1.5 py-0.5 text-[10.5px] font-semibold tabular-nums text-white"
-              >
-                {pl}
-              </span>
+              <PlateBadge key={pl} plate={pl} size="sm" />
             ))}
           </div>
         </div>
@@ -172,7 +168,8 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
             {(t?.marque || t?.immatriculation) && (
               <>
                 <Car size={13} className="text-[var(--driver-muted)] shrink-0" />
-                <span className="truncate tabular-nums">{[t?.marque, t?.modele, t?.immatriculation].filter(Boolean).join(" · ")}</span>
+                <span className="truncate tabular-nums">{[t?.marque, t?.modele].filter(Boolean).join(" · ")}</span>
+                <PlateBadge plate={t?.immatriculation} size="sm" />
               </>
             )}
           </div>

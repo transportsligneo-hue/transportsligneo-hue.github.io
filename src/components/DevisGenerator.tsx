@@ -18,6 +18,7 @@ import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
+import { PlateInput } from "@/components/plate/PlateInput";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
@@ -1270,33 +1271,21 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   <div className="grid sm:grid-cols-2 gap-4">
                     {/* 1. Plaque d'immatriculation · en premier */}
                     <div className="sm:col-span-2">
-                      <label className="dg-journey-label block mb-1.5">Plaque d'immatriculation</label>
-                      <div className="flex gap-2">
-                        <input
+                      {!plaqueInconnue && (
+                        <PlateInput
                           value={immatriculation}
-                          onChange={e => { setImmatriculation(e.target.value.toUpperCase()); setSivMsg(null); }}
-                          placeholder="AA-123-AA"
-                          disabled={plaqueInconnue}
-                          className={inputCard + " uppercase tracking-widest disabled:opacity-50 flex-1"}
+                          onChange={(v) => { setImmatriculation(v); setSivMsg(null); }}
+                          onSearch={handleSivLookup}
+                          searching={sivLoading}
+                          label="Plaque d'immatriculation"
+                          help="La recherche pré-remplit automatiquement le véhicule (VIN, marque, modèle, carburant, année)."
+                          tone="blue"
+                          found={sivMsg?.type === "ok"}
                         />
-                        <Button variant="ghost"
-                          type="button"
-                          onClick={handleSivLookup}
-                          disabled={plaqueInconnue || sivLoading || !immatriculation}
-                          className="h-auto px-5 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 hover:to-neon-blue-strong/25 hover:border-neon-blue disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap shadow-[0_0_0_1px_rgba(91,143,255,0.15)]"
-                        >
-                          {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                          {sivLoading ? "Recherche..." : "Rechercher"}
-                        </Button>
-                      </div>
-                      {sivMsg && (
-                        <p className={`mt-2 text-[11px] ${sivMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>
-                          {sivMsg.text}
-                        </p>
                       )}
-                      <p className="mt-2 text-[10px] text-cream/45">
-                        La recherche pré-remplit automatiquement le véhicule (VIN, marque, modèle, carburant, année).
-                      </p>
+                      {sivMsg && sivMsg.type === "err" && (
+                        <p className="mt-2 text-[11px] text-red-400">{sivMsg.text}</p>
+                      )}
                       <label className="mt-2 inline-flex items-center gap-2 text-[11px] text-cream/65 cursor-pointer">
                         <input type="checkbox" checked={plaqueInconnue} onChange={e => setPlaqueInconnue(e.target.checked)}
                           className="accent-[#5fb6ff]" />
@@ -1387,26 +1376,18 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <p className="font-heading text-xs tracking-[0.2em] uppercase text-neon-blue">Véhicule de restitution</p>
                       <p className="text-[10px] text-cream/50 -mt-1">Laissez vide si c'est le même véhicule que la livraison.</p>
                       <div>
-                        <label className="dg-journey-label block mb-1.5">Plaque restitution</label>
-                        <div className="flex gap-2">
-                          <input
-                            value={immatRetour}
-                            onChange={e => { setImmatRetour(e.target.value.toUpperCase()); setSivRetourMsg(null); }}
-                            placeholder="AA-123-AA"
-                            className={inputCard + " uppercase tracking-widest flex-1"}
-                          />
-                          <Button variant="ghost"
-                            type="button"
-                            onClick={handleSivRetourLookup}
-                            disabled={sivRetourLoading || !immatRetour}
-                            className="h-auto px-4 py-3 rounded-xl border border-neon-blue/60 bg-gradient-to-b from-neon-blue/25 to-neon-blue-strong/15 text-neon-blue text-xs font-semibold uppercase tracking-wider hover:from-neon-blue/35 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2 whitespace-nowrap"
-                          >
-                            {sivRetourLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                            {sivRetourLoading ? "..." : "Rechercher"}
-                          </Button>
-                        </div>
-                        {sivRetourMsg && (
-                          <p className={`mt-2 text-[11px] ${sivRetourMsg.type === "ok" ? "text-emerald-400" : "text-red-400"}`}>{sivRetourMsg.text}</p>
+                        <PlateInput
+                          value={immatRetour}
+                          onChange={(v) => { setImmatRetour(v); setSivRetourMsg(null); }}
+                          onSearch={handleSivRetourLookup}
+                          searching={sivRetourLoading}
+                          label="Plaque restitution"
+                          help="Plaque du véhicule restitué, si différent du véhicule livré."
+                          tone="blue"
+                          found={sivRetourMsg?.type === "ok"}
+                        />
+                        {sivRetourMsg && sivRetourMsg.type === "err" && (
+                          <p className="mt-2 text-[11px] text-red-400">{sivRetourMsg.text}</p>
                         )}
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">

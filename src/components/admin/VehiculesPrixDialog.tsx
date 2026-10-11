@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Banknote, Loader2, Save, X } from "lucide-react";
 import { Button } from "@/components/admin/AdminUI";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 type Row = {
   id: string;
@@ -175,7 +176,7 @@ export function VehiculesPrixDialog({
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="plate-tag plate-tag--sm">{r.plaque}</span>
+                    <PlateBadge plate={r.plaque} size="sm" />
                     <span className="truncate text-[12.5px] font-semibold text-pro-text">{r.vehicule}</span>
                   </div>
                   <p className="truncate text-[11px] text-pro-muted">{r.trajet}</p>

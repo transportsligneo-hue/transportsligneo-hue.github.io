@@ -14,6 +14,7 @@ import { Card, Button, TextInput, Select } from "@/components/admin/AdminUI";
 import { Pencil, Loader2, Save, RotateCcw, CalendarClock, Car, MapPin, Users } from "lucide-react";
 import { notifyDriver } from "@/lib/push/driver-notify";
 import { toast } from "sonner";
+import { PlateInput } from "@/components/plate/PlateInput";
 
 type FieldDef = {
   key: string;
@@ -343,6 +344,20 @@ export function MissionEditInfosPanel({ trajetId, openKey = 0, onChanged }: Prop
   const renderField = (f: FieldDef) => {
     const changed = (form[f.key] ?? "") !== (initial[f.key] ?? "");
     const set = (v: string) => setForm((p) => ({ ...p, [f.key]: v }));
+    if (f.key === "immatriculation") {
+      return (
+        <div key={f.key} className="sm:col-span-2">
+          <PlateInput
+            value={form[f.key] ?? ""}
+            onChange={set}
+            label={f.label}
+            help={f.hint}
+            tone="blue"
+          />
+          {changed && <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-pro-accent" aria-label="modifié" />}
+        </div>
+      );
+    }
     return (
       <div key={f.key} className={f.span ? "sm:col-span-2" : undefined}>
         <label className="mb-1 flex items-center gap-1 text-[11px] font-medium text-pro-text-soft">

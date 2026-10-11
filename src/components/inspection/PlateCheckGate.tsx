@@ -18,6 +18,7 @@ import { compressImage } from "@/lib/image-compression";
 import { useServerFn } from "@tanstack/react-start";
 import { verifyMissionPlate, recordPlateOverride, type PlateCheckResult } from "@/lib/plate-check.functions";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
+import { PlateInput } from "@/components/plate/PlateInput";
 
 interface Props {
   attributionId: string;
@@ -235,14 +236,11 @@ export function PlateCheckGate({
                 <Keyboard size={16} className="text-[var(--edl-cyan)]" />
                 Plaque illisible ? Saisie manuelle en secours
               </p>
-              <input
+              <PlateInput
                 value={manual}
-                onChange={(e) => setManual(e.target.value.toUpperCase())}
-                placeholder="AA-123-BB"
-                inputMode="text"
-                autoCapitalize="characters"
-                className="w-full h-12 rounded-xl px-3 text-white text-lg font-bold tracking-[0.12em] outline-none"
-                style={{ background: "rgba(20,32,72,0.7)", border: "1px solid rgba(120,180,255,0.3)" }}
+                onChange={setManual}
+                label="Plaque du véhicule"
+                tone="blue"
               />
               <button
                 type="button" onClick={runManual} disabled={busy || !manual.trim()}

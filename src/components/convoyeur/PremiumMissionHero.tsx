@@ -4,6 +4,7 @@ import {
   ClipboardList, ShieldCheck, Loader2,
 } from "lucide-react";
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export interface PremiumMissionHeroData {
   numeroMission: string | null;
@@ -275,8 +276,8 @@ function InfoCard({
       <h4 className="mt-2.5 font-bold text-[#0b1026] text-[15px] leading-tight truncate tracking-tight">{title}</h4>
       {line1 && <p className="mt-1 text-[#1f2540] text-xs truncate font-medium">{line1}</p>}
       {badge && (
-        <span className="inline-flex items-center mt-2 px-2 py-0.5 rounded-md bg-[#0b1026] text-white text-[11px] font-mono tracking-wider">
-          {badge}
+        <span className="inline-flex mt-2">
+          <PlateBadge plate={badge} size="sm" />
         </span>
       )}
       {footer && (
