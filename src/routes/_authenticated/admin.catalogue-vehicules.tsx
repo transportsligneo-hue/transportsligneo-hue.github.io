@@ -10,13 +10,13 @@ export const Route = createFileRoute("/_authenticated/admin/catalogue-vehicules"
   component: CataloguePage,
 });
 
-const SUGGESTIONS: [string, string, string][] = [
-  ["Renault", "Clio", "essence"], ["Renault", "Captur", "hybride"], ["Renault", "Mégane E-Tech", "electrique"], ["Renault", "R5 E-Tech", "electrique"], ["Renault", "Austral", "hybride"], ["Renault", "Kangoo", "diesel"], ["Renault", "Trafic", "diesel"],
-  ["Peugeot", "208", "essence"], ["Peugeot", "2008", "essence"], ["Peugeot", "308", "hybride"], ["Peugeot", "3008", "hybride"], ["Peugeot", "e-208", "electrique"], ["Peugeot", "Partner", "diesel"], ["Peugeot", "Expert", "diesel"],
-  ["Citroën", "C3", "essence"], ["Citroën", "ë-C4", "electrique"], ["Citroën", "Berlingo", "diesel"], ["Dacia", "Sandero", "essence"], ["Dacia", "Duster", "essence"], ["Dacia", "Spring", "electrique"],
-  ["Tesla", "Model 3", "electrique"], ["Tesla", "Model Y", "electrique"], ["Volkswagen", "Golf", "essence"], ["Volkswagen", "Polo", "essence"], ["Volkswagen", "ID.3", "electrique"], ["Volkswagen", "ID.4", "electrique"],
-  ["Toyota", "Yaris", "hybride"], ["Toyota", "C-HR", "hybride"], ["Fiat", "500e", "electrique"], ["Kia", "EV6", "electrique"], ["Kia", "Niro", "hybride"], ["Hyundai", "Kona", "electrique"],
-  ["BMW", "Série 1", "essence"], ["BMW", "iX1", "electrique"], ["Mercedes-Benz", "Classe A", "essence"], ["Audi", "A3", "essence"], ["MG", "MG4", "electrique"], ["Skoda", "Octavia", "diesel"],
+const SUGGESTIONS: [string, string][] = [
+  ["Renault", "Clio"], ["Renault", "Captur"], ["Renault", "Mégane E-Tech"], ["Renault", "R5 E-Tech"], ["Renault", "Austral"], ["Renault", "Kangoo"], ["Renault", "Trafic"],
+  ["Peugeot", "208"], ["Peugeot", "2008"], ["Peugeot", "308"], ["Peugeot", "3008"], ["Peugeot", "e-208"], ["Peugeot", "Partner"], ["Peugeot", "Expert"],
+  ["Citroën", "C3"], ["Citroën", "ë-C4"], ["Citroën", "Berlingo"], ["Dacia", "Sandero"], ["Dacia", "Duster"], ["Dacia", "Spring"],
+  ["Tesla", "Model 3"], ["Tesla", "Model Y"], ["Volkswagen", "Golf"], ["Volkswagen", "Polo"], ["Volkswagen", "ID.3"], ["Volkswagen", "ID.4"],
+  ["Toyota", "Yaris"], ["Toyota", "C-HR"], ["Fiat", "500e"], ["Kia", "EV6"], ["Kia", "Niro"], ["Hyundai", "Kona"],
+  ["BMW", "Série 1"], ["BMW", "iX1"], ["Mercedes-Benz", "Classe A"], ["Audi", "A3"], ["MG", "MG4"], ["Skoda", "Octavia"],
 ];
 
 function Thumb({ path }: { path: string | null }) {
@@ -27,20 +27,20 @@ function Thumb({ path }: { path: string | null }) {
 
 function CataloguePage() {
   const [rows, setRows] = useState<CatalogEntry[]>([]);
-  const [f, setF] = useState({ marque: "", modele: "", energie: "" });
+  const [f, setF] = useState({ marque: "", modele: "" });
   const [q, setQ] = useState("");
   const reload = () => void loadCatalog().then(setRows);
   useEffect(reload, []);
 
-  const add = async (marque: string, modele: string, energie: string) => {
+  const add = async (marque: string, modele: string) => {
     if (!marque.trim() || !modele.trim()) return toast.error("Marque et modèle obligatoires");
-    const { error } = await supabase.from("vehicle_catalog").insert({ marque: marque.trim(), modele: modele.trim(), energie: energie || null });
+    const { error } = await supabase.from("vehicle_catalog").insert({ marque: marque.trim(), modele: modele.trim() });
     if (error) return toast.error(error.code === "23505" ? "Ce modèle existe déjà" : error.message);
-    setF({ marque: "", modele: "", energie: "" }); reload();
+    setF({ marque: "", modele: "" }); reload();
   };
   const addAll = async () => {
     const have = new Set(rows.map((r) => `${r.marque}|${r.modele}`.toLowerCase()));
-    const list = SUGGESTIONS.filter(([m, mo]) => !have.has(`${m}|${mo}`.toLowerCase())).map(([marque, modele, energie]) => ({ marque, modele, energie }));
+    const list = SUGGESTIONS.filter(([m, mo]) => !have.has(`${m}|${mo}`.toLowerCase())).map(([marque, modele]) => ({ marque, modele }));
     if (!list.length) return toast.info("Tous les modèles courants sont déjà présents");
     const { error } = await supabase.from("vehicle_catalog").insert(list);
     if (error) return toast.error(error.message);
@@ -73,10 +73,7 @@ function CataloguePage() {
       <div className="flex flex-wrap gap-2 rounded-xl border p-4">
         <input className="h-10 rounded-md border bg-background px-3" placeholder="Marque" value={f.marque} onChange={(e) => setF({ ...f, marque: e.target.value })} />
         <input className="h-10 rounded-md border bg-background px-3" placeholder="Modèle" value={f.modele} onChange={(e) => setF({ ...f, modele: e.target.value })} />
-        <select className="h-10 rounded-md border bg-background px-3" value={f.energie} onChange={(e) => setF({ ...f, energie: e.target.value })}>
-          <option value="">Énergie</option><option value="essence">Essence</option><option value="diesel">Diesel</option><option value="hybride">Hybride</option><option value="electrique">Électrique</option>
-        </select>
-        <button onClick={() => void add(f.marque, f.modele, f.energie)} className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-primary-foreground"><Plus className="h-4 w-4" />Ajouter</button>
+        <button onClick={() => void add(f.marque, f.modele)} className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-primary-foreground"><Plus className="h-4 w-4" />Ajouter</button>
         <input className="ml-auto h-10 rounded-md border bg-background px-3" placeholder="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -85,7 +82,7 @@ function CataloguePage() {
             <div className="flex h-36 items-center justify-center bg-muted/40 p-2"><Thumb path={r.photo_path} /></div>
             <div className="space-y-2 p-3">
               <div className="flex items-start justify-between gap-2">
-                <div><p className="font-semibold">{r.marque} {r.modele}</p><p className="text-xs text-muted-foreground">{r.energie ?? "Énergie non précisée"}</p></div>
+                <div><p className="font-semibold">{r.marque} {r.modele}</p><p className="text-xs text-muted-foreground">{r.photo_path ? "Photo en ligne" : "Photo à ajouter"}</p></div>
                 <button onClick={() => void del(r)} aria-label="Supprimer" className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
               </div>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed py-2 text-sm hover:bg-muted">
