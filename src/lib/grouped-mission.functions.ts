@@ -117,7 +117,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
           vin: v.vin ?? null,
           arrivee: v.arrivee,
           type_trajet: v.tripType,
-          immatriculation_retour: v.immatriculationRetour ?? null,
+          immatriculation_retour: v.tripType === "aller-retour" ? v.immatriculationRetour ?? null : null,
           marque_retour: v.tripType === "aller-retour" ? v.marqueRetour ?? null : null,
           modele_retour: v.tripType === "aller-retour" ? v.modeleRetour ?? null : null,
           vin_retour: v.tripType === "aller-retour" ? v.vinRetour ?? null : null,
