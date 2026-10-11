@@ -31,3 +31,6 @@
 <!-- LOVABLE:BEGIN -->
 - Optional SMS uses shared user MFA functions; fail closed and reject grants predating reactivation to prevent stale-session approval.
 <!-- LOVABLE:END -->
+
+- Plates are entered and shown via shared PlateInput/PlateBadge (src/components/plate) with plate-format helpers, so every screen stores and displays one normalized format.
+- Optional user SMS MFA is enforced in the database by restrictive RLS policies calling public.user_mfa_satisfied(), so bypassing the UI gate cannot read protected rows.
