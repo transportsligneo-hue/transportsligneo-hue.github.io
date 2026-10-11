@@ -13,6 +13,7 @@ import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionView
 import { dossierTypeLabel, missionTypeLabel, isAllerRetour } from "@/lib/mission-type";
 import { StatusBadge, missionStatusKind, missionStatusLabel } from "@/components/dashboard/StatusBadge";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
+import { HelpTip } from "@/components/ui/HelpTip";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/missions/")({
   component: ProMissionsIndex,
