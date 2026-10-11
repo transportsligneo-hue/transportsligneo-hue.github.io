@@ -161,6 +161,7 @@ import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminContenuRouteImport } from './routes/_authenticated/admin.contenu'
 import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
+import { Route as AuthenticatedAdminCatalogueVehiculesRouteImport } from './routes/_authenticated/admin.catalogue-vehicules'
 import { Route as AuthenticatedAdminCandidaturesRouteImport } from './routes/_authenticated/admin.candidatures'
 import { Route as AuthenticatedAdminCampagnesRouteImport } from './routes/_authenticated/admin.campagnes'
 import { Route as AuthenticatedAdminBonsCommandeRouteImport } from './routes/_authenticated/admin.bons-commande'
@@ -1063,6 +1064,12 @@ const AuthenticatedAdminClientsRoute =
     path: '/clients',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCatalogueVehiculesRoute =
+  AuthenticatedAdminCatalogueVehiculesRouteImport.update({
+    id: '/catalogue-vehicules',
+    path: '/catalogue-vehicules',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCandidaturesRoute =
   AuthenticatedAdminCandidaturesRouteImport.update({
     id: '/candidatures',
@@ -1468,6 +1475,7 @@ export interface FileRoutesByFullPath {
   '/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
+  '/admin/catalogue-vehicules': typeof AuthenticatedAdminCatalogueVehiculesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/contenu': typeof AuthenticatedAdminContenuRoute
@@ -1673,6 +1681,7 @@ export interface FileRoutesByTo {
   '/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
+  '/admin/catalogue-vehicules': typeof AuthenticatedAdminCatalogueVehiculesRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/contenu': typeof AuthenticatedAdminContenuRoute
@@ -1883,6 +1892,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/bons-commande': typeof AuthenticatedAdminBonsCommandeRoute
   '/_authenticated/admin/campagnes': typeof AuthenticatedAdminCampagnesRoute
   '/_authenticated/admin/candidatures': typeof AuthenticatedAdminCandidaturesRoute
+  '/_authenticated/admin/catalogue-vehicules': typeof AuthenticatedAdminCatalogueVehiculesRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/_authenticated/admin/contenu': typeof AuthenticatedAdminContenuRoute
@@ -2096,6 +2106,7 @@ export interface FileRouteTypes {
     | '/admin/bons-commande'
     | '/admin/campagnes'
     | '/admin/candidatures'
+    | '/admin/catalogue-vehicules'
     | '/admin/clients'
     | '/admin/communication'
     | '/admin/contenu'
@@ -2301,6 +2312,7 @@ export interface FileRouteTypes {
     | '/admin/bons-commande'
     | '/admin/campagnes'
     | '/admin/candidatures'
+    | '/admin/catalogue-vehicules'
     | '/admin/clients'
     | '/admin/communication'
     | '/admin/contenu'
@@ -2510,6 +2522,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/bons-commande'
     | '/_authenticated/admin/campagnes'
     | '/_authenticated/admin/candidatures'
+    | '/_authenticated/admin/catalogue-vehicules'
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/communication'
     | '/_authenticated/admin/contenu'
@@ -3816,6 +3829,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/catalogue-vehicules': {
+      id: '/_authenticated/admin/catalogue-vehicules'
+      path: '/catalogue-vehicules'
+      fullPath: '/admin/catalogue-vehicules'
+      preLoaderRoute: typeof AuthenticatedAdminCatalogueVehiculesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/candidatures': {
       id: '/_authenticated/admin/candidatures'
       path: '/candidatures'
@@ -4295,6 +4315,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBonsCommandeRoute: typeof AuthenticatedAdminBonsCommandeRoute
   AuthenticatedAdminCampagnesRoute: typeof AuthenticatedAdminCampagnesRoute
   AuthenticatedAdminCandidaturesRoute: typeof AuthenticatedAdminCandidaturesRoute
+  AuthenticatedAdminCatalogueVehiculesRoute: typeof AuthenticatedAdminCatalogueVehiculesRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
   AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
   AuthenticatedAdminContenuRoute: typeof AuthenticatedAdminContenuRoute
@@ -4341,6 +4362,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBonsCommandeRoute: AuthenticatedAdminBonsCommandeRoute,
   AuthenticatedAdminCampagnesRoute: AuthenticatedAdminCampagnesRoute,
   AuthenticatedAdminCandidaturesRoute: AuthenticatedAdminCandidaturesRoute,
+  AuthenticatedAdminCatalogueVehiculesRoute:
+    AuthenticatedAdminCatalogueVehiculesRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
   AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,
   AuthenticatedAdminContenuRoute: AuthenticatedAdminContenuRoute,
