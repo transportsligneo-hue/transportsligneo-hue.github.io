@@ -144,7 +144,9 @@ function VisitorConseiller({ summary }: { summary?: string }) {
   }
 
   return (
-    <div className="lgc-thread lgc-accent-blue" style={{ height: 380 }}>
+    <>
+    <p className="lgc-waiting">Un conseiller va bientôt vous répondre.</p>
+    <div className="lgc-thread lgc-accent-blue" style={{ height: 340 }}>
       <div className="lgc-body" ref={bodyRef} role="log" aria-live="polite">
         {msgs.map((m) => (
           <div key={m.id} className={`lgc-row${m.sender_type === "visiteur" ? " lgc-mine" : ""}`}>

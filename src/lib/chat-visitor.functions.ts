@@ -51,11 +51,15 @@ export const startVisitorChat = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error || !conv) throw new Error("Impossible d'ouvrir la conversation.");
+    const firstId = crypto.randomUUID();
     await supabaseAdmin.from("chat_messages").insert({
+      id: firstId,
       conversation_id: conv.id,
       sender_type: "visiteur",
       body: data.message,
     });
+    const { notifyChatMessageById } = await import("./chat-notify.server");
+    await notifyChatMessageById(firstId);
     return { token };
   });
 
@@ -101,10 +105,14 @@ export const sendVisitorMessage = createServerFn({ method: "POST" })
       .eq("sender_type", "visiteur")
       .gte("created_at", since);
     if ((count ?? 0) >= 40) throw new Error("Trop de messages, patientez un instant.");
+    const msgId = crypto.randomUUID();
     await supabaseAdmin.from("chat_messages").insert({
+      id: msgId,
       conversation_id: conv.id,
       sender_type: "visiteur",
       body: data.body,
     });
+    const { notifyChatMessageById } = await import("./chat-notify.server");
+    await notifyChatMessageById(msgId);
     return { ok: true };
   });
