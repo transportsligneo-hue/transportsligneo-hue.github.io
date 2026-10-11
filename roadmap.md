@@ -76,3 +76,4 @@
 - [x] Brouillon convoyage garage (proposition sur fiche véhicule)
 - [x] Démo : onglet Parc & automatismes
 - [x] Bulles d'aide TCO et fiche véhicule
+- [x] Images de catégories (citadine, berline, SUV, utilitaire, fourgon) et visites guidées : mission simple, groupée, ajout véhicule
