@@ -376,6 +376,7 @@ export function MapboxLiveMap({
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: STYLE_URL,
+      ...(worldOverview ? { projection: { name: "globe" as const } } : {}),
        center: worldOverview ? [8, 22] : [2.3, 46.8],
        zoom: worldOverview ? 1.5 : 4.6,
       attributionControl: true,
