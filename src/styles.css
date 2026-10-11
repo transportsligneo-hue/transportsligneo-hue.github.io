@@ -11555,3 +11555,22 @@ html.theme-dark .pp-ech{color:#5de0ff}
 html.theme-dark .pp-ech-soon{color:#b9a2ff}
 html.theme-dark .pp-ech-urgent{color:#f9a8d4}
 html.theme-dark .pp-ech-late{color:#fca5a5}
+
+/* Ajouter un véhicule : contraste et étapes */
+.avd-steps section{display:none}
+.avd-steps[data-active="0"] section[data-avd-sec="0"],.avd-steps[data-active="1"] section[data-avd-sec="1"],.avd-steps[data-active="2"] section[data-avd-sec="2"],.avd-steps[data-active="3"] section[data-avd-sec="3"],.avd-steps[data-active="4"] section[data-avd-sec="4"],.avd-steps[data-active="5"] section[data-avd-sec="5"],.avd-steps[data-active="6"] section[data-avd-sec="6"]{display:block;animation:avdIn .25s ease-out}
+@keyframes avdIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.avd-steps h2{padding-bottom:12px;border-bottom:1px solid var(--line);color:#fff}
+.avd-modal{color:#fff}
+.avd-modal .avd-input{color:#fff;color-scheme:dark;-webkit-text-fill-color:#fff}
+.avd-modal .avd-input[type=date]::-webkit-datetime-edit,.avd-modal .avd-input[type=date]::-webkit-datetime-edit-fields-wrapper{color:#fff}
+.avd-modal .avd-input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.85;cursor:pointer}
+.avd-modal .avd-input::placeholder{color:#a5bdf7;-webkit-text-fill-color:#a5bdf7;opacity:1}
+.avd-modal .avd-input option{background:#0b1a4a;color:#fff}
+.avd-modal .avd-lbl{color:#dbe4ff}
+.avd-card-top{position:static;align-self:flex-end;margin-bottom:-4px}
+.avd-ring{background:radial-gradient(closest-side,#0b1a4a 76%,transparent 78%),conic-gradient(#8b5cff 0deg,#5de0ff var(--p),rgba(255,255,255,.1) var(--p))}
+.avd-ring span{max-width:80px;text-align:center;line-height:1.2;color:#dbe4ff}
+.avd-timeline span{color:#c3d0f5}
+.avd-photo{width:100%;height:110px;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+.avd-foot>span{color:#c3d0f5}
