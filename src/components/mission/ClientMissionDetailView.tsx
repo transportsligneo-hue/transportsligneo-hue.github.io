@@ -325,7 +325,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <ArrowLeft size={14} /> {backLabel}
       </Link>
 
-      <div className="mission-surface p-6">
+      <div className="mission-surface p-6" data-tour="mission-status">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -357,7 +357,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </span>
           <span className="font-heading mission-text text-2xl font-semibold">{Number(mission.prix_total).toFixed(2)} €</span>
         </div>
-        <div className="mt-4">
+        <div className="mt-4" data-tour="mission-tracking-code">
           <SendTrackingCodeButton missionId={mission.id} />
         </div>
         {attributionId && (
@@ -379,7 +379,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
       {attributionId && <div data-tour="mission-photos"><EdlComparison attributionId={attributionId} /></div>}
 
-      <MissionHistory missionId={missionId} createdAt={mission?.created_at} />
+      <div data-tour="mission-history"><MissionHistory missionId={missionId} createdAt={mission?.created_at} /></div>
 
       {attributionId && hasProofs && (
         <div data-tour="mission-report" className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
