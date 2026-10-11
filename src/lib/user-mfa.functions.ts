@@ -122,7 +122,8 @@ export const requestLoginMfaCode = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const ctx = context as Ctx;
     const db = await admin();
-    const { data: s } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+    const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+     if (error) throw new Error("Lecture des réglages de sécurité impossible");
     if (!s?.enabled || !s.phone) throw new Error("Double authentification non activée");
     return sendCode(ctx, s.phone, "login");
   });
@@ -138,7 +139,14 @@ export const verifyLoginMfaCode = createServerFn({ method: "POST" })
 export const requestMfaEnrollment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { phone: string }) => ({ phone: cleanPhone(input?.phone) }))
-  .handler(async ({ data, context }) => sendCode(context as Ctx, data.phone, "enroll"));
+  .handler(async ({ data, context }) => {
+    const ctx = context as Ctx;
+    const db = await admin();
+    const { data: settings, error } = await db.from("user_mfa_settings").select("enabled").eq("user_id", ctx.userId).maybeSingle();
+    if (error) throw new Error("Lecture des réglages de sécurité impossible");
+    if (settings?.enabled) throw new Error("Désactivez d’abord la protection depuis votre session vérifiée pour changer de numéro.");
+    return sendCode(ctx, data.phone, "enroll");
+  });
 
 export const confirmMfaEnrollment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -165,6 +173,7 @@ export const disableUserMfa = createServerFn({ method: "POST" })
         .eq("user_id", ctx.userId).eq("session_id", sessionOf(ctx)).maybeSingle();
       if (!sess || new Date(sess.expires_at).getTime() < Date.now()) throw new Error("Session non vérifiée");
     }
-    await db.from("user_mfa_settings").upsert({ user_id: ctx.userId, enabled: false, updated_at: new Date().toISOString() });
+    const { error } = await db.from("user_mfa_settings").upsert({ user_id: ctx.userId, enabled: false, updated_at: new Date().toISOString() });
+    if (error) throw new Error("Désactivation impossible");
     return { enabled: false };
   });
