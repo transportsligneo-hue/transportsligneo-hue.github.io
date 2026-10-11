@@ -362,7 +362,8 @@ function ProMissionsIndex() {
             className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
           >
             <PlusCircle size={14} /> Nouvelle mission
-          </Link>
+            </Link>
+          </>
         }
       />
 
