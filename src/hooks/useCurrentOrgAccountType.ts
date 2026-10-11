@@ -21,7 +21,8 @@ export function useCurrentOrgAccountType() {
   return useQuery({
     queryKey: ["current-org-account-type", user?.id],
     enabled: !!user?.id && isAuthenticated,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<{
       orgId: string | null;
       accountType: OrgAccountType;

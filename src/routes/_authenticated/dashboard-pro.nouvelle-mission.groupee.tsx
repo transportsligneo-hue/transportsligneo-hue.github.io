@@ -441,7 +441,7 @@ function GroupedMissionForm() {
         <p className="text-[13.5px] font-semibold text-slate-900">Une seule demande, des prestations mixées</p>
         <ul className="mt-2 grid gap-1.5 text-[13px] text-slate-600 sm:grid-cols-2">
           <li><b className="text-slate-900">1. Enlèvement commun</b> : un départ pour tous vos véhicules.</li>
-          <li><b className="text-slate-900">2. Prestation par véhicule</b> : livraison simple, restitution et livraison, ou recharge électrique.</li>
+          <li><b className="text-slate-900">2. Prestation par véhicule</b> : livraison simple, restitution et livraison, recharge électrique ou service de jockeyage.</li>
           <li><b className="text-slate-900">3. Destinations</b> : même adresse pour tous ou une adresse par véhicule, depuis vos adresses favorites.</li>
           <li><b className="text-slate-900">4. Documents automatiques</b> : devis, bon de commande, PV et factures générés en PDF.</li>
         </ul>
