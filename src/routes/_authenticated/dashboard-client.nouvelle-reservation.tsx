@@ -3,6 +3,14 @@ import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import QuickMissionForm from "@/components/dashboard-pro/QuickMissionForm";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/nouvelle-reservation")({
+  head: () => ({ meta: [
+    { title: "Demande de convoyage particulier | Transports Ligneo" },
+    { name: "description", content: "Préparez votre demande de convoyage : adresses, véhicule, documents et planning." },
+    { property: "og:title", content: "Demande de convoyage particulier | Transports Ligneo" },
+    { property: "og:description", content: "Préparez votre demande de convoyage : adresses, véhicule, documents et planning." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: NouvelleReservation,
 });
 

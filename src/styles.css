@@ -11442,7 +11442,7 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .helptip-btn{width:24px;height:24px;flex:none;border-radius:999px;display:inline-grid;place-items:center;border:1px solid rgba(91,131,255,.45);background:rgba(47,95,255,.16);color:#5b83ff;position:relative}
 .helptip-btn::after{content:"";position:absolute;inset:-8px}
 .helptip-violet.helptip-btn{border-color:rgba(139,92,255,.5);background:rgba(139,92,255,.18);color:#b79bff}
-.helptip-bubble{z-index:1000;max-width:min(320px,92vw);padding:14px 16px;border-radius:14px;background:#0b1a4a;border:1px solid #2f5fff;box-shadow:0 18px 50px rgba(0,0,0,.45);color:#fff;animation:helptip-in .16s ease-out}
+.helptip-bubble{z-index:1000;max-width:min(360px,92vw);max-height:min(560px,var(--radix-popover-content-available-height,80dvh));overflow-y:auto;overscroll-behavior:contain;padding:14px 16px;border-radius:14px;background:#0b1a4a;border:1px solid #2f5fff;box-shadow:0 18px 50px rgba(0,0,0,.45);color:#fff;animation:helptip-in .16s ease-out}
 .helptip-bubble.helptip-violet{border-color:#8b5cff}
 .helptip-bubble strong{display:block;font:600 15px Poppins,sans-serif;margin-bottom:4px}
 .helptip-bubble p{margin:0;font:400 15px/1.5 Inter,sans-serif;color:#c3d0f5}

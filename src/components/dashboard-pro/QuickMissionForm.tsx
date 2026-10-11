@@ -1,5 +1,6 @@
 import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
 import { HelpTip } from "@/components/ui/HelpTip";
+import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -759,6 +760,7 @@ export default function QuickMissionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center gap-2 text-sm font-semibold text-pro-text">Votre demande, étape par étape <MissionRequestHelp topic="request" /></div>
       {(drafts.length > 0 || draftNumero) && (
         <section className="qm-card p-4">
           <h2 className="qm-section-title mb-2"><Save size={14} className="text-pro-accent" /> Brouillons</h2>
@@ -779,7 +781,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Type de prestation
-          <HelpTip tone="violet" title="Quel trajet choisir ?" text="Livraison simple : le véhicule est conduit de A à B. Restitution et livraison : aller-retour, le véhicule revient à son point de départ. Recharge uniquement : le véhicule est rechargé puis restitué sur place, sans livraison. Pour un contrôle technique, une révision ou un dépôt au garage, choisissez un service de jockeyage plus bas." />
+          <MissionRequestHelp topic="trip" />
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -879,7 +881,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <MapPinned size={14} className="text-pro-accent" /> Lieu de livraison
-          <HelpTip tone="violet" title="Où déposer le véhicule ?" text="L'adresse où le véhicule doit être remis. Comme au départ, précisez un contact et un téléphone pour que la remise des clés se fasse sans attente. En restitution et livraison, c'est l'adresse de l'aller : le retour se fait automatiquement au point de départ." />
+          <HelpTip tone="violet" title="Où déposer le véhicule ?" text="Indiquez l'adresse exacte de remise, le contact, son téléphone et les consignes d'accès. En restitution et livraison, vérifiez aussi les adresses du retour dans le bloc Véhicule restitution : elles peuvent être différentes." />
         </h2>
         <div className="space-y-3">
           <div>
@@ -916,6 +918,7 @@ export default function QuickMissionForm({
         <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
           <h2 className="qm-section-title">
             <Car size={14} className="text-pro-accent" /> {tripType === "aller-retour" ? "Véhicule livraison" : "Véhicule"}
+            <MissionRequestHelp topic="vehicle" />
           </h2>
           {(() => {
             const applyExtracted = (f: ExtractedFields) => {
@@ -937,6 +940,7 @@ export default function QuickMissionForm({
               <div className="flex flex-wrap gap-2">
                 <ScanToPrefill label="Scanner" multiPage variant="blue" onExtracted={applyExtracted} />
                 <QrHandoffButton context="pro_demande" variant="blue" onExtracted={applyExtracted} />
+                <MissionRequestHelp topic="phone" />
               </div>
             );
           })()}
@@ -944,6 +948,7 @@ export default function QuickMissionForm({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <div className="md:col-span-2">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-pro-text">Plaque et recherche <MissionRequestHelp topic="plate" /></div>
             <PlateInput
               value={immat}
               onChange={setImmat}
@@ -1036,6 +1041,7 @@ export default function QuickMissionForm({
           <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
             <h2 className="qm-section-title qm-section-title-purple">
               <Car size={14} /> Véhicule restitution
+              <MissionRequestHelp topic="return" />
             </h2>
             {(() => {
               const applyExtractedRetour = (f: ExtractedFields) => {
@@ -1152,6 +1158,7 @@ export default function QuickMissionForm({
       <section className="qm-card p-5 md:p-6">
         <h2 className="qm-section-title mb-4">
           <Sparkles size={14} className="text-pro-accent" /> Options & planning
+          <MissionRequestHelp topic="options" />
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
@@ -1185,6 +1192,7 @@ export default function QuickMissionForm({
 
         {!isParticulier && (
           <div className="mb-4 rounded-lg border border-pro-border bg-white p-3">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-pro-text">Choisir le jockeyage <MissionRequestHelp topic="jockeyage" /></div>
             <label className="flex cursor-pointer items-start gap-3">
               <input
                 type="checkbox"
@@ -1222,7 +1230,7 @@ export default function QuickMissionForm({
         {/* PV de livraison digitalisé (comptes professionnels) */}
         {!isParticulier && (
         <div className="mb-4">
-          <label className={lbl}>PV de livraison digitalisé</label>
+          <div className="mb-2 flex items-center gap-2"><span className={lbl}>PV de livraison digitalisé</span><MissionRequestHelp topic="pv" /></div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {([{ key: "aucun" as const, label: "Aucun" }, ...PV_PLATEFORMES.map((p) => ({ key: p.key, label: p.label }))]).map(({ key, label }) => {
               const def = pvDef(key);
@@ -1262,6 +1270,7 @@ export default function QuickMissionForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className={lbl}><Calendar size={11} className="inline mr-1" /> Date d'enlèvement *</label>
+            <div className="mb-2"><MissionRequestHelp topic="planning" /></div>
             <input type="date" className={inp} value={date} onChange={(e) => setDate(e.target.value)} required min={new Date().toISOString().slice(0, 10)} />
           </div>
           <div>
@@ -1292,7 +1301,7 @@ export default function QuickMissionForm({
       {/* Récap prix */}
       <section className="bg-gradient-to-br from-slate-50 to-white rounded-xl border border-pro-border p-5 md:p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h2 className="text-sm font-semibold text-pro-text">Récapitulatif & estimation</h2>
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-pro-text">Récapitulatif & estimation <MissionRequestHelp topic="recap" /></h2>
           {priceView && (
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
               priceView.mode === "exempt"
@@ -1327,7 +1336,7 @@ export default function QuickMissionForm({
       {/* CTA sticky mobile */}
       <div className="sticky bottom-0 -mx-3 sm:mx-0 sm:static z-10 bg-white/95 sm:bg-transparent backdrop-blur sm:backdrop-blur-0 border-t border-pro-border sm:border-0 px-3 sm:px-0 py-3 sm:py-0 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <p className="text-xs text-pro-text-soft flex items-center gap-1.5">
-          <Info size={12} /> Votre demande sera traitée sous 24h par notre équipe.
+          <Info size={12} /> Votre demande sera traitée sous 24h par notre équipe. <MissionRequestHelp topic="send" />
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
         <button

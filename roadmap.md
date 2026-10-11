@@ -68,6 +68,8 @@
 - [ ] Automatismes « Bientôt disponible » : brouillon convoyage garage, km auto, immobilisation, calendrier
 
 ## Jockeyage, nom du parc, Compte Kilomètres
+- [x] Compléter les bulles des demandes simples et groupées : plaques, restitution et livraison, jockeyage, dates, options, récapitulatif et envoi ; aide du scanner partagé détaillée. Ouverture et fermeture vérifiées en contrôle isolé.
+- [ ] Vérifier les bulles dans les demandes d'un compte connecté : aucune session autorisée disponible ; connexion dans l'aperçu nécessaire.
 - [x] Services de jockeyage dans demandes simple et groupée (recharge électrique conservée)
 - [x] Nom du parc synchronisé avec le nom de société
 - [x] Interrupteur admin Compte Kilomètres

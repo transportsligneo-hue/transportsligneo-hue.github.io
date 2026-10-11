@@ -1,3 +1,4 @@
+import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
 import { JOKEAGE_SERVICES } from "@/lib/jokeage-services";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
@@ -442,6 +443,7 @@ function GroupedMissionForm() {
       </div>
       <h1 className="mt-1.5 flex items-center gap-2 text-[24px] font-extrabold tracking-[-0.02em] text-slate-900">
         <Layers className="h-6 w-6 text-[#7c5cff]" /> Mission groupée
+        <MissionRequestHelp topic="grouped" />
       </h1>
       <div className="mt-4 rounded-xl border border-[#7c5cff]/25 bg-[#7c5cff]/[0.05] p-4">
         <p className="text-[13.5px] font-semibold text-slate-900">Une seule demande, des prestations mixées</p>
@@ -460,7 +462,7 @@ function GroupedMissionForm() {
       </span>
 
       {/* 1 — Trajet commun */}
-      <Card num="1" title="Trajet commun">
+      <Card num="1" title="Trajet commun" helpTopic="addresses">
         <span className={labelCls}>Lieu d'enlèvement</span>
         {favorites.filter((f) => f.address_type !== "arrivee").length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -524,6 +526,7 @@ function GroupedMissionForm() {
       <Card
         num="2"
         title="Véhicules à convoyer"
+        helpTopic="vehicle"
         badge={`${rows.length} véhicule${rows.length > 1 ? "s" : ""}`}
       >
         <div className="flex flex-col gap-2.5">
@@ -532,7 +535,8 @@ function GroupedMissionForm() {
             return (
               <div key={r.key} className="grouped-vehicle-panel p-4">
                 <div className="flex flex-wrap items-end gap-2.5">
-                  <div className="w-[300px]">
+                  <div className="w-[300px] max-w-full">
+                    <div className="mb-2"><MissionRequestHelp topic="plate" /></div>
                     <PlateInput
                       value={r.immat}
                       onChange={(v) => patchRow(r.key, { immat: v })}
@@ -572,7 +576,7 @@ function GroupedMissionForm() {
                 )}
 
                 <div className="mt-3">
-                  <span className={labelCls}>Type de trajet</span>
+                  <div className="mb-2 flex items-center gap-2"><span className={labelCls}>Type de trajet</span><MissionRequestHelp topic="trip" /></div>
                   <div className="grid gap-2 sm:grid-cols-3">
                     {GROUPED_TRIP_CHOICES.map((choice) => (
                       <button
@@ -592,6 +596,7 @@ function GroupedMissionForm() {
                   {r.tripType === "aller-retour" && (
                     <div className="mt-2.5">
                       <div>
+                        <div className="mb-2"><MissionRequestHelp topic="groupedReturn" /></div>
                         <PlateInput
                           value={r.immatRetour}
                           onChange={(v) => patchRow(r.key, { immatRetour: v })}
@@ -678,7 +683,7 @@ function GroupedMissionForm() {
       </Card>
 
       {/* 3 — Options communes */}
-      <Card num="3" title="Options communes">
+      <Card num="3" title="Options communes" helpTopic="commonOptions">
         <div className="grid gap-2.5 sm:grid-cols-3">
           {OPTIONS_DEF.map((o) => {
             const checked = !!options[o.key];
@@ -707,7 +712,7 @@ function GroupedMissionForm() {
           })}
         </div>
         <div className="mt-4 rounded-[11px] border border-slate-200 p-3">
-          <b className="block text-[12.5px] text-slate-900">Service de jockeyage</b>
+          <div className="flex items-center gap-2"><b className="block text-[12.5px] text-slate-900">Service de jockeyage</b><MissionRequestHelp topic="jockeyage" /></div>
           <span className="text-[11px] text-slate-400">Nous emmenons les véhicules à leur rendez-vous et les ramenons.</span>
           <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
             {JOKEAGE_SERVICES.map((sv) => (
@@ -725,7 +730,7 @@ function GroupedMissionForm() {
       </Card>
 
       {/* 4 — Planning */}
-      <Card num="4" title="Planning">
+      <Card num="4" title="Planning" helpTopic="planning">
         <div className="grid gap-3.5 sm:grid-cols-2">
           <div>
             <span className={labelCls}>Date souhaitée *</span>
@@ -743,7 +748,7 @@ function GroupedMissionForm() {
       </Card>
 
       {/* Récapitulatif */}
-      <Card title="Récapitulatif">
+      <Card title="Récapitulatif" helpTopic="recap">
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
@@ -808,8 +813,8 @@ function GroupedMissionForm() {
 }
 
 function Card({
-  num, title, badge, children,
-}: { num?: string; title: string; badge?: string; children: React.ReactNode }) {
+  num, title, badge, children, helpTopic,
+}: { num?: string; title: string; badge?: string; children: React.ReactNode; helpTopic?: React.ComponentProps<typeof MissionRequestHelp>["topic"] }) {
   return (
     <section className="qm-card mb-4 p-5 md:px-6 md:py-[22px]">
       <header className="mb-4 flex items-center gap-2.5">
@@ -819,6 +824,7 @@ function Card({
           </span>
         )}
         <h3 className="qm-section-title">{title}</h3>
+        {helpTopic && <MissionRequestHelp topic={helpTopic} />}
         {badge && (
           <span className="ml-auto rounded-full bg-[#eef2ff] px-3 py-1 text-[11.5px] font-bold text-[#2f5fff]">
             {badge}
