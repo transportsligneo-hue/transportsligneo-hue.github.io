@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   AlertTriangle, Camera, CheckCircle2, Download, FileSpreadsheet, LayoutDashboard,
-  MapPin, Navigation, Shield, Users, CalendarDays, BarChart3,
+  MapPin, Navigation, Shield, Users, CalendarDays, BarChart3, Wrench, Gauge,
 } from "lucide-react";
 import { euro, type ProMission } from "@/hooks/useProMissions";
 import { DemoLiveMap } from "./DemoLiveMap";
@@ -9,8 +9,9 @@ import type { LiveMetricsSnapshot } from "@/components/map/types";
 import edlDepart from "@/assets/demo-edl-depart.jpg";
 import edlArrivee from "@/assets/demo-edl-arrivee.jpg";
 import { DemoSimulator } from "./DemoSimulator";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 
-type Tab = "gps" | "cal" | "team";
+type Tab = "gps" | "cal" | "team" | "parc";
 
 const PHOTOS = [
   { zone: "Avant", dep: "RAS", arr: "RAS", alert: false },
@@ -57,6 +58,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
     { id: "gps", label: "Suivi GPS & photos", Icon: Navigation },
     { id: "cal", label: "Calendrier, prix & export", Icon: CalendarDays },
     { id: "team", label: "Gestion d'équipe", Icon: Users },
+    { id: "parc", label: "Parc & automatismes", Icon: Wrench },
   ];
 
   return (
@@ -152,6 +154,27 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
             <Users size={15} /> Inviter un membre par e-mail
           </button>
           <p className="dpm-note">En démonstration, les invitations sont désactivées.</p>
+        </div>
+      )}
+      {tab === "parc" && (
+        <div className="dpm-card">
+          <h3><Gauge size={15} /> Fiche véhicule automatisée</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", margin: "8px 0 14px" }}>
+            <PlateBadge plate="FG-482-KL" size="md" />
+            <strong>Renault Mégane E-Tech</strong>
+          </div>
+          <ul className="dpm-team">
+            <li><div><strong>Kilométrage</strong><span>Mis à jour après la mission du 08/10</span></div><div className="dpm-team-r"><em className="dpm-role">48 230 km</em><span>Relevé convoyeur</span></div></li>
+            <li><div><strong>Contrôle technique</strong><span>À faire avant le 30/11</span></div><div className="dpm-team-r"><em className="dpm-role">Dans 20 jours</em><span>Rappel envoyé</span></div></li>
+            <li><div><strong>Immobilisation automatique</strong><span>Si le contrôle technique ou l'assurance expire</span></div><div className="dpm-team-r"><em className="dpm-role">Active</em><span>Remise en service automatique</span></div></li>
+          </ul>
+          <h3 style={{ marginTop: 16 }}><Wrench size={15} /> Convoyage vers le contrôle technique proposé</h3>
+          <p className="dpm-note">Brouillon préparé automatiquement. Rien n'est commandé tant que vous ne validez pas. Choisissez aussi un service de jockeyage : révision, pneus, carrosserie, pare-brise.</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" className="dpm-btn" disabled title="Désactivé en démonstration">Valider</button>
+            <button type="button" className="dpm-btn" disabled title="Désactivé en démonstration">Reporter</button>
+            <button type="button" className="dpm-btn" disabled title="Désactivé en démonstration">Ignorer</button>
+          </div>
         </div>
       )}
     </section>

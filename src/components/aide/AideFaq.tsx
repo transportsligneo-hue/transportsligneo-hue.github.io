@@ -1,3 +1,4 @@
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Phone, Mail, MessageCircleQuestion, Sparkles } from "lucide-react";
@@ -24,9 +25,10 @@ export default function AideFaq({ audience = "pro" }: { audience?: AideAudience 
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string | null>(null);
 
-  const categories = useMemo(() => getAideCategories(audience), [audience]);
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
+  const categories = useMemo(() => getAideCategories(audience).filter((c) => loyaltyOn || c.id !== "loyalty"), [audience, loyaltyOn]);
   const hero = aideHero[audience];
-  const tools = audience === "pro" ? aideToolsPro : aideToolsClient;
+  const tools = (audience === "pro" ? aideToolsPro : aideToolsClient).filter((t) => loyaltyOn || t.label !== "Compte Kilomètres");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

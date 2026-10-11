@@ -1,3 +1,4 @@
+import { JOKEAGE_SERVICES } from "@/lib/jokeage-services";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,6 +125,7 @@ function GroupedMissionForm() {
 
   // Bloc 3 — options communes
   const [options, setOptions] = useState<Partial<Record<OptionKey, boolean>>>({});
+  const [jokeage, setJokeage] = useState<Record<string, boolean>>({});
 
   // Bloc 4 — planning
   const [date, setDate] = useState("");
@@ -359,7 +361,11 @@ function GroupedMissionForm() {
             energieRetour: r.tripType === "aller-retour" ? r.energieRetour || null : null,
             prixTtc: prices[r.key] ?? 0,
             optionsMeta: Object.fromEntries(
-              Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
+              [
+                ...Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
+                ...Object.entries(jokeage).filter(([, v]) => v).map(([k]) => [`jockey_${k}`, true] as const),
+                ...(Object.values(jokeage).some(Boolean) ? [["jokeage", true] as const] : []),
+              ],
             ) as Record<string, boolean>,
           })),
         },
@@ -441,7 +447,7 @@ function GroupedMissionForm() {
         <p className="text-[13.5px] font-semibold text-slate-900">Une seule demande, des prestations mixées</p>
         <ul className="mt-2 grid gap-1.5 text-[13px] text-slate-600 sm:grid-cols-2">
           <li><b className="text-slate-900">1. Enlèvement commun</b> : un départ pour tous vos véhicules.</li>
-          <li><b className="text-slate-900">2. Prestation par véhicule</b> : livraison simple, restitution et livraison, ou recharge électrique.</li>
+          <li><b className="text-slate-900">2. Prestation par véhicule</b> : livraison simple, restitution et livraison, recharge électrique ou service de jockeyage.</li>
           <li><b className="text-slate-900">3. Destinations</b> : même adresse pour tous ou une adresse par véhicule, depuis vos adresses favorites.</li>
           <li><b className="text-slate-900">4. Documents automatiques</b> : devis, bon de commande, PV et factures générés en PDF.</li>
         </ul>
@@ -699,6 +705,19 @@ function GroupedMissionForm() {
               </button>
             );
           })}
+        </div>
+        <div className="mt-4 rounded-[11px] border border-slate-200 p-3">
+          <b className="block text-[12.5px] text-slate-900">Service de jockeyage</b>
+          <span className="text-[11px] text-slate-400">Nous emmenons les véhicules à leur rendez-vous et les ramenons.</span>
+          <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+            {JOKEAGE_SERVICES.map((sv) => (
+              <label key={sv.key} className="flex cursor-pointer items-center gap-2 text-[12.5px] text-slate-700">
+                <input type="checkbox" className="h-4 w-4 accent-[#2f5fff]" checked={!!jokeage[sv.key]}
+                  onChange={(e) => setJokeage((p) => ({ ...p, [sv.key]: e.target.checked }))} />
+                {sv.label}
+              </label>
+            ))}
+          </div>
         </div>
         <p className="mt-2.5 text-[11.5px] text-slate-400">
           Ces options s'appliquent aux {rows.length} véhicules de la demande. Ajustez-les individuellement dans « Détails » si besoin.

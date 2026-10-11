@@ -1,3 +1,4 @@
+import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -84,14 +85,6 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
 ];
 
-const JOKEAGE_SERVICES = [
-  { key: "controle_technique", label: "Contrôle technique" },
-  { key: "revision", label: "Révision / entretien" },
-  { key: "lavage", label: "Lavage" },
-  { key: "garage", label: "Dépôt ou récupération au garage" },
-] as const;
-
-type JokeageService = (typeof JOKEAGE_SERVICES)[number]["key"];
 
 const VAT_RATE = 0.20;
 
@@ -1197,10 +1190,10 @@ export default function QuickMissionForm({
               />
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5 text-sm font-medium text-pro-text">
-                  <Wrench size={13} className="text-pro-accent" /> Jockeyage
+                  <Wrench size={13} className="text-pro-accent" /> Service de jockeyage
                 </span>
                 <span className="mt-0.5 block text-xs text-pro-text-soft">
-                  Déplacement du véhicule vers un prestataire pour une intervention.
+                  Nous emmenons le véhicule à son rendez-vous (contrôle technique, révision, pneus, carrosserie...) et le ramenons.
                 </span>
               </span>
             </label>

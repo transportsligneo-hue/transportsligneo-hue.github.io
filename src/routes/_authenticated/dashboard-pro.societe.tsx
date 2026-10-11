@@ -2,6 +2,7 @@ import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
 import { createFileRoute } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Save, Loader2, CheckCircle } from "lucide-react";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro/societe")({
 });
 
 function ProSociete() {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,6 +78,7 @@ function ProSociete() {
       } as never)
       .eq("user_id", user.id);
     setSaving(false);
+    void queryClient.invalidateQueries({ queryKey: ["current-org-account-type"] });
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };

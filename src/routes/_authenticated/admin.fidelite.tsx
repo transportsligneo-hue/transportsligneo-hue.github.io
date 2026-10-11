@@ -1,3 +1,4 @@
+import { LoyaltyToggleCard } from "@/components/admin/LoyaltyToggleCard";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -108,6 +109,8 @@ function AdminFidelite() {
           </Button>
         }
       />
+
+      <LoyaltyToggleCard />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard label="Comptes actifs" value={totals.comptes} icon={Users} tone="info" />

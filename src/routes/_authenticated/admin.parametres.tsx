@@ -24,6 +24,7 @@ import { confirmToast } from "@/lib/confirm-toast";
 import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 import { AvisGoogleHistoryCard } from "@/components/admin/AvisGoogleHistoryCard";
 import { RegistrationGateCard } from "@/components/admin/RegistrationGateCard";
+import { LoyaltyToggleCard } from "@/components/admin/LoyaltyToggleCard";
 
 const EMAIL_TEMPLATES = Object.entries(TEMPLATES_MAP).map(([name, t]) => ({
   name,
@@ -300,6 +301,7 @@ function AdminParametres() {
         {/* === INSCRIPTIONS === */}
         <TabsContent value="inscriptions" className="mt-0 space-y-4">
           <RegistrationGateCard />
+          <LoyaltyToggleCard />
         </TabsContent>
 
         <TabsContent value="roles" className="mt-0 space-y-6">

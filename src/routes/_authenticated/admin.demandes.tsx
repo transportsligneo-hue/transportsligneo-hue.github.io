@@ -1,3 +1,4 @@
+import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -79,29 +80,23 @@ const OPTION_LABELS: Record<string, string> = {
   plein_essence: "⛽ Appoint carburant",
   mise_en_main: "🔑 Mise en main du véhicule",
   lavage: "🧽 Lavage",
-  jokeage: "🔧 Jockeyage",
+  jokeage: "Service de jockeyage",
   express: "⚡ Express",
   aller_retour: "↔ Aller-retour",
 };
 
-const JOKEAGE_LABELS: Record<string, string> = {
-  controle_technique: "Contrôle technique",
-  revision: "Révision / entretien",
-  lavage: "Lavage",
-  garage: "Dépôt ou récupération au garage",
-};
 
 function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): string[] {
   if (!meta) return [];
   const labels = Object.entries(meta)
-    .filter(([, v]) => v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0))
+    .filter(([k, v]) => !k.startsWith("jockey_") && (v === true || (typeof v === "string" && v.length > 0) || (typeof v === "number" && v > 0)))
     .map(([k, v]) => OPTION_LABELS[k] ?? `${k}: ${String(v)}`);
   const jokeageServices = Array.isArray(meta.jokeage_prestations)
     ? meta.jokeage_prestations
         .filter((value): value is string => typeof value === "string")
         .map((value) => JOKEAGE_LABELS[value] ?? value)
-    : [];
-  if (jokeageServices.length > 0) labels.push(`Jockeyage : ${jokeageServices.join(", ")}`);
+    : Object.entries(meta).filter(([k, v]) => k.startsWith("jockey_") && v === true).map(([k]) => JOKEAGE_LABELS[k.slice(7)] ?? k.slice(7));
+  if (jokeageServices.length > 0) labels.push(`Service de jockeyage : ${jokeageServices.join(", ")}`);
   return labels;
 }
 

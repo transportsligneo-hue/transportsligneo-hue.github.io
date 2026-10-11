@@ -1,3 +1,4 @@
+import { useFeatureFlag, isLoyaltyPath } from "@/hooks/useFeatureFlag";
 import { Link, useLocation } from "@tanstack/react-router";
 import ThemeToggle from "@/components/ThemeToggle";
 import { ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
@@ -25,7 +26,9 @@ interface Props {
  * Sidebar admin SaaS clair (cohérent avec ProSidebar).
  * Regroupement par "group" + sticky sur desktop, drawer sur mobile.
  */
-export function AdminSidebar({ items, children }: Props) {
+export function AdminSidebar({ items: allItems, children }: Props) {
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
+  const items = loyaltyOn ? allItems : allItems.filter((i) => !isLoyaltyPath(i.to));
   const location = useLocation();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);

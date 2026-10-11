@@ -8,6 +8,8 @@ import {
 import { DocScanButton } from "@/components/scanner/DocScanButton";
 import VehicleCostsTab from "@/components/flotte/VehicleCostsTab";
 import { VehicleAutomationHistory } from "@/components/flotte/VehicleAutomationHistory";
+import { GarageConvoyProposal } from "@/components/flotte/GarageConvoyProposal";
+import { HelpTip } from "@/components/ui/HelpTip";
 
 
 
@@ -363,6 +365,11 @@ export default function VehicleDetailPanel({
                     value={vehicle.kilometrage != null ? `${vehicle.kilometrage.toLocaleString("fr-FR")} km` : "—"}
                   />
                   <Field label="Couleur" value={vehicle.couleur || "—"} />
+                  <GarageConvoyProposal vehicleId={vehicle.id} />
+                  <div className="col-span-2 flex items-center gap-2 pt-2 text-sm font-semibold">
+                    Suivi automatique
+                    <HelpTip title="Fiche du véhicule" text="Le kilométrage se met à jour après chaque mission. Un relevé suspect vous est soumis avant d'être appliqué. Le journal liste chaque action automatique : immobilisation, remise en service, propositions de convoyage." />
+                  </div>
                   <VehicleAutomationHistory vehicleId={vehicle.id} canManage={canManage} />
                   {vehicle.notes && (
                     <div className="col-span-2">

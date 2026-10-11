@@ -1,3 +1,4 @@
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -20,6 +21,7 @@ interface Props {
  * Affiché uniquement dans l'espace client authentifié (programme non public).
  */
 export default function AvoirRedemption({ devisId, prixTtc, dejaApplique = 0, onApplied }: Props) {
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
   const qc = useQueryClient();
   const fetchLoyalty = useServerFn(getMyLoyalty);
   const apply = useServerFn(applyAvoirToDevis);
@@ -41,6 +43,7 @@ export default function AvoirRedemption({ devisId, prixTtc, dejaApplique = 0, on
     onError: (e: any) => toast.error(e?.message || "Impossible d'appliquer l'avoir"),
   });
 
+  if (!loyaltyOn) return null;
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-cream/60 text-sm py-3">

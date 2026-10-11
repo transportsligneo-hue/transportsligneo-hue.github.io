@@ -14,6 +14,7 @@ import { LigneoBrand } from "@/components/brand/LigneoBrand";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { OrgLogo } from "@/components/OrgLogo";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import { useFeatureFlag, isLoyaltyPath } from "@/hooks/useFeatureFlag";
 
 export interface ProSidebarItem {
   to: string;
@@ -79,7 +80,9 @@ function OrgHeaderBlock({ fallbackName }: { fallbackName?: string }) {
  * Layout SaaS clair pour l'espace B2B (/dashboard-pro/*).
  * Indépendant de DashboardSidebar (espace particulier) · design clair, dense, business.
  */
-export function ProSidebar({ societe, items, children, audience = "pro" }: Props) {
+export function ProSidebar({ societe, items: allItems, children, audience = "pro" }: Props) {
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
+  const items = loyaltyOn ? allItems : allItems.filter((i) => !isLoyaltyPath(i.to));
   const location = useLocation();
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
