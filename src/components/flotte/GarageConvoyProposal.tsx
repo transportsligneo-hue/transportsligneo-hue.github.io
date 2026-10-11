@@ -15,6 +15,7 @@ type Row = {
   derniere_revision_km: number | null;
   kilometrage: number | null;
   intervalle_revision_mois: number | null;
+  intervalle_revision_km: number | null;
   km_moyen_mois: number | null;
 };
 
@@ -38,7 +39,7 @@ export function GarageConvoyProposal({ vehicleId }: { vehicleId: string }) {
   useEffect(() => {
     void supabase
       .from("vehicles")
-      .select("automatismes, controle_technique_expire_le, immatriculation, derniere_revision_le, derniere_revision_km, kilometrage, intervalle_revision_mois, km_moyen_mois")
+      .select("automatismes, controle_technique_expire_le, immatriculation, derniere_revision_le, derniere_revision_km, kilometrage, intervalle_revision_mois, intervalle_revision_km, km_moyen_mois")
       .eq("id", vehicleId)
       .maybeSingle()
       .then(({ data }) => setRow((data as Row | null) ?? null));
@@ -58,7 +59,7 @@ export function GarageConvoyProposal({ vehicleId }: { vehicleId: string }) {
       lastDate: row.derniere_revision_le,
       lastKm: row.derniere_revision_km,
       currentKm: row.kilometrage,
-      intervalKm: DEFAULT_INTERVAL_KM,
+      intervalKm: row.intervalle_revision_km ?? DEFAULT_INTERVAL_KM,
       intervalMonths: row.intervalle_revision_mois ?? DEFAULT_INTERVAL_MONTHS,
       kmPerMonth: row.km_moyen_mois ?? DEFAULT_KM_PER_MONTH,
     });
