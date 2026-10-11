@@ -1,3 +1,4 @@
+import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
 import { createFileRoute } from "@tanstack/react-router";
 import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import { useEffect, useState } from "react";
@@ -7,6 +8,7 @@ import { Building2, Save, Loader2, CheckCircle } from "lucide-react";
 import { LogoUploader } from "@/components/LogoUploader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/societe")({
+  head: () => ({ meta: [{ title: "Ma société et sécurité | Transports Ligneo" }, { name: "description", content: "Informations de société et sécurité SMS de votre espace professionnel et flotte." }, { property: "og:title", content: "Ma société et sécurité | Transports Ligneo" }, { property: "og:description", content: "Informations de société et sécurité SMS de votre espace professionnel et flotte." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ProSociete,
 });
 
@@ -160,6 +162,7 @@ function ProSociete() {
           )}
         </div>
       </form>
+      <UserMfaSettingsCard defaultPhone={form.telephone} />
     </div>
   );
 }

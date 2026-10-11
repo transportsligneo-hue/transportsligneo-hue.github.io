@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck, Loader2 } from "lucide-react";
@@ -17,10 +18,11 @@ export function UserMfaSettingsCard({ defaultPhone = "" }: { defaultPhone?: stri
   const [phone, setPhone] = useState(defaultPhone);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => { setPhone((p) => p || defaultPhone); }, [defaultPhone]);
   useEffect(() => {
-    status().then((s) => { setEnabled(s.enabled); setMasked(s.maskedPhone); }).catch(() => {}).finally(() => setLoading(false));
+    status().then((s) => { setEnabled(s.enabled); setMasked(s.maskedPhone); }).catch(() => { setLoadError(true); toast.error("Impossible de lire vos réglages de sécurité. Rechargez la page."); }).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -49,40 +51,40 @@ export function UserMfaSettingsCard({ defaultPhone = "" }: { defaultPhone?: stri
         )}
       </div>
 
-      {loading ? <Loader2 className="h-5 w-5 animate-spin text-pro-accent" /> : enabled ? (
+      {loadError ? <p role="alert" className="text-sm text-destructive">Réglages indisponibles. Rechargez la page pour réessayer.</p> : loading ? <Loader2 className="h-5 w-5 animate-spin text-pro-accent" /> : enabled ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-pro-text">Protection SMS active sur le <strong>{masked}</strong></p>
-          <button type="button" disabled={busy} className="rounded-lg border border-pro-border px-4 py-2 text-sm font-medium text-pro-text hover:border-pro-accent"
+          <Button type="button" disabled={busy} className="rounded-lg border border-pro-border px-4 py-2 text-sm font-medium text-pro-text hover:border-pro-accent"
             onClick={() => run(async () => { await disable(); setEnabled(false); setStep("idle"); toast.success("Double authentification désactivée"); })}>
             Désactiver
-          </button>
+          </Button>
         </div>
       ) : step === "idle" ? (
-        <button type="button" className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-white" onClick={() => setStep("phone")}>
+        <Button type="button" className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => setStep("phone")}>
           Activer la protection SMS
-        </button>
+        </Button>
       ) : step === "phone" ? (
         <div className="flex flex-wrap gap-2">
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="06 12 34 56 78"
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} aria-label="Numéro de téléphone pour la protection SMS" placeholder="06 12 34 56 78"
             className="flex-1 min-w-[200px] rounded-lg border border-pro-border bg-transparent px-3 py-2 text-pro-text" />
-          <button type="button" disabled={busy || !phone} className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-white"
+          <Button type="button" disabled={busy || !phone} className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-primary-foreground"
             onClick={() => run(async () => { const r = await enroll({ data: { phone } }); setMasked(r.maskedPhone); setStep("code"); toast.success(`Code envoyé au ${r.maskedPhone}`); })}>
             Recevoir un code
-          </button>
-          <button type="button" className="px-3 py-2 text-sm text-pro-text-soft" onClick={() => setStep("idle")}>Annuler</button>
+          </Button>
+          <Button type="button" className="px-3 py-2 text-sm text-pro-text-soft" onClick={() => setStep("idle")}>Annuler</Button>
         </div>
       ) : (
         <div className="space-y-2">
           <p className="text-sm text-pro-text-soft">Saisissez le code reçu au {masked} pour confirmer votre numéro.</p>
           <div className="flex flex-wrap gap-2">
-            <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" value={code}
+            <input aria-label="Code SMS d’activation" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               className="w-40 rounded-lg border border-pro-border bg-transparent px-3 py-2 font-mono tracking-[0.3em] text-pro-text" />
-            <button type="button" disabled={busy || code.length !== 6} className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-white"
+            <Button type="button" disabled={busy || code.length !== 6} className="rounded-lg bg-pro-accent px-4 py-2 text-sm font-semibold text-primary-foreground"
               onClick={() => run(async () => { const r = await confirm({ data: { code } }); setEnabled(true); setMasked(r.maskedPhone); setCode(""); setStep("idle"); toast.success("Double authentification activée"); })}>
               Activer
-            </button>
-            <button type="button" className="px-3 py-2 text-sm text-pro-text-soft" onClick={() => setStep("phone")}>Changer de numéro</button>
+            </Button>
+            <Button type="button" className="px-3 py-2 text-sm text-pro-text-soft" onClick={() => setStep("phone")}>Changer de numéro</Button>
           </div>
         </div>
       )}

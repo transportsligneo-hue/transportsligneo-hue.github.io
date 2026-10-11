@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck, LogOut } from "lucide-react";
@@ -33,7 +34,7 @@ export function UserMfaGate({ children, label = "Votre espace" }: { children: Re
       setMasked(s.maskedPhone);
       setState(s.verified ? "ok" : "locked");
       if (!s.verified) void send();
-    }).catch(() => { if (alive) setState("ok"); }); // hors ligne : on ne bloque pas un utilisateur sans MFA
+    }).catch(() => { if (alive) { setState("locked"); setError("Vérification de sécurité indisponible. Rechargez la page pour réessayer."); } });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -60,13 +61,13 @@ export function UserMfaGate({ children, label = "Votre espace" }: { children: Re
           {sent && masked ? <>Un code à 6 chiffres a été envoyé par SMS au <strong>{masked}</strong>.</> : "Un code va vous être envoyé par SMS."}
         </p>
         <div className="amfa-shield"><ShieldCheck className="h-5 w-5" aria-hidden /></div>
-        <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
+        <input aria-label="Code de sécurité SMS" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
           value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="amfa-input" autoFocus />
         {error && <p className="amfa-error">{error}</p>}
-        <button type="submit" className="amfa-btn" disabled={busy || code.length !== 6}>Valider</button>
+        <Button type="submit" className="amfa-btn" disabled={busy || code.length !== 6}>Valider</Button>
         <div className="amfa-links">
-          <button type="button" className="amfa-resend" onClick={send} disabled={busy}>Renvoyer le code</button>
-          <button type="button" className="amfa-logout" onClick={() => logout()}><LogOut className="h-4 w-4" aria-hidden /> Déconnexion</button>
+          <Button type="button" className="amfa-resend" onClick={send} disabled={busy}>Renvoyer le code</Button>
+          <Button type="button" className="amfa-logout" onClick={() => logout()}><LogOut className="h-4 w-4" aria-hidden /> Déconnexion</Button>
         </div>
       </form>
     </div>

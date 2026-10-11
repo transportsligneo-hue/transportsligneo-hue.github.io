@@ -1,3 +1,4 @@
+import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -92,6 +93,7 @@ function ConvoyeurLayout() {
 
   return (
     <ConvoyeurSidebar items={navItems}>
+      <UserMfaGate label="Espace Driver">
       <DriverGpsTracker />
       <OfflineOutboxBadge />
       <ScreenCaptureGuard />
@@ -107,6 +109,7 @@ function ConvoyeurLayout() {
         </div>
       )}
       <Outlet />
+      </UserMfaGate>
     </ConvoyeurSidebar>
   );
 }
