@@ -174,6 +174,7 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
 export default function AssistantIaWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [chatTab, setChatTab] = useState<"vroomy" | "conseiller">("vroomy");
   const [notif, setNotif] = useState(true);
   const [messages, setMessages] = useState<ChatMsg[]>([{ role: "assistant", content: WELCOME }]);
   const [input, setInput] = useState("");
