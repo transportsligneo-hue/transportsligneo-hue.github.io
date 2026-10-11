@@ -41,6 +41,7 @@ export default function AvoirRedemption({ devisId, prixTtc, dejaApplique = 0, on
     onError: (e: any) => toast.error(e?.message || "Impossible d'appliquer l'avoir"),
   });
 
+  if (!loyaltyOn) return null;
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-cream/60 text-sm py-3">
