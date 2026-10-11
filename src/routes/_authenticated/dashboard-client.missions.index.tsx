@@ -1,4 +1,5 @@
 import { GuidedTour, MISSIONS_LIST_TOUR } from "@/components/onboarding/GuidedTour";
+import { HelpTip } from "@/components/ui/HelpTip";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { PlateBadge } from "@/components/plate/PlateBadge";
@@ -222,6 +223,10 @@ function ClientMissions() {
         subtitle={`${missions.length} mission${missions.length > 1 ? "s" : ""} enregistrée${missions.length > 1 ? "s" : ""} sur votre compte.`}
       />
       <div className="flex items-center justify-end flex-wrap gap-4">
+        <HelpTip
+          title="Vos missions, de A à Z"
+          text="Chaque demande validée devient une mission. Ouvrez-la pour suivre le convoyeur en direct, voir les photos de l'état des lieux, télécharger les procès-verbaux et récupérer votre facture. Les demandes pas encore validées apparaissent en bas de page."
+        />
         <div className="flex items-center gap-2 flex-wrap">
           {/* View switcher */}
           <div className="inline-flex rounded border border-primary/20 bg-navy/40 p-0.5" data-tour="missions-views">
