@@ -15,6 +15,12 @@ describe("invoice selections and plates", () => {
     expect(invoiceSelectedOptions(null, "Véhicule électrique avec câble de recharge")).toEqual([]);
     expect(invoiceSelectedOptions(invoiceSourceOptions({ options_meta: { recharge_electrique: false, mise_en_main: true } }))).toEqual(["Mise en main"]);
   });
+  it("labels jockeyage services on the invoice", () => {
+    expect(invoiceSelectedOptions(["jockey_controle_technique"])).toEqual(["Jockeyage : Contrôle technique"]);
+    expect(invoiceSelectedOptions(["jockey_revision", "jockey_pneumatiques"])).toEqual(["Jockeyage : Révision / entretien constructeur", "Jockeyage : Pneumatiques (changement, permutation, saisonnier)"]);
+    expect(invoiceSelectedOptions(invoiceSourceOptions({ options_meta: { jockey_garage: true, jockey_lavage: false } }))).toEqual(["Jockeyage : Dépôt ou récupération au garage"]);
+    expect(invoiceSelectedOptions([], "Options : jockey_controle_technique")).toEqual([]);
+  });
   it("keeps both grouped delivered and returned plates", () => {
     expect(invoiceVehicles({ vehicules: [{ immatriculation: "AB-123-CD", immatriculation_retour: "EF-456-GH" }] }).map((v) => v.immatriculation)).toEqual(["AB-123-CD", "EF-456-GH"]);
   });
