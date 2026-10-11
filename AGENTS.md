@@ -1,8 +1,7 @@
-- Keep the public mobile navigation and color treatment scoped below 768px in MobileNavbar and the public mobile CSS; desktop marketing and signed-in workspaces remain independent so mobile presentation changes cannot alter their workflows.
+- Scope public mobile nav/colors below 768px in MobileNavbar and public mobile CSS, so desktop and workspaces stay unaffected.
 - Reuse LiveMissionMap for code-protected public tracking, refreshing only through the code-verified server function and returning GPS-only projections, so map behavior matches workspaces without exposing private records.
 - Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
-- Reuse public presentation assets in marketing pages only, with shared video markup for the three professional profiles, to keep their films consistent without affecting signed-in workspaces.
-- Share the public mission-order demo player across Services, professional profile pages and How It Works so each audience sees a consistent film without changing signed-in mission flows.
+- Presentation films and the mission-order demo player are shared marketing-only markup, so films stay consistent without touching workspaces.
 - Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
 - Keep document scans on the shared inspection scanner and reject unreliable automatic crop corners; incorrect crops must never cut off document details.
@@ -10,7 +9,6 @@
 - Keep the web loading screen in the root layout with its own brand tokens, so light/dark themes and workspace accents cannot recolor it.
 - Scope opaque Driver workspace surfaces and blue/green electric accents to the Driver shell, and violet/pink electric accents to the professional shell, so public marketing and unrelated workspaces keep their own design.
 - Keep the admin dashboard's operational map in a dedicated overview component, reusing the mission map engine and existing mission tables, so its collapsible mission lists do not alter other workspaces.
-- Keep the extended, locally retouched hero photo scoped to the desktop home presentation so mobile and other marketing pages retain their original framing.
 - Dark mode for admin, client and pro workspaces is a scoped CSS layer under `html.theme-dark` targeting `.admin-shell` / `.dashboard-shell-light`; light stays the default so existing workspace markup is untouched.
 - EDL photo anomaly annotations live in inspection_photos.annotations (fractional x/y, category, author, time) and render via the shared PhotoAnnotations component in every workspace, so markers stay identical across screens; only the driver EDL edits them.
 - Scope public profile accent styles to explicit audience markers on each marketing section, so professional violet and particular blue remain independent in both themes.
