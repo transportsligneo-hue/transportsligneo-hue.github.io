@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isUserMfaSessionValid } from "@/lib/user-mfa-policy";
 
 /**
  * Double authentification SMS optionnelle pour clients, pros, flottes et convoyeurs.
@@ -44,8 +45,9 @@ async function sendCode(ctx: Ctx, phone: string, purpose: "login" | "enroll") {
   const sessionId = sessionOf(ctx);
   const db = await admin();
   const since = new Date(Date.now() - 10 * 60_000).toISOString();
-  const { count } = await db.from("user_mfa_challenges")
+  const { count, error: countError } = await db.from("user_mfa_challenges")
     .select("id", { count: "exact", head: true }).eq("user_id", ctx.userId).gte("created_at", since);
+  if (countError) throw new Error("Vérification du délai d’envoi impossible");
   if ((count ?? 0) >= MAX_SENDS_PER_10MIN) throw new Error("Trop de codes envoyés. Réessayez dans 10 minutes.");
 
   const buf = new Uint32Array(1);
@@ -73,24 +75,36 @@ async function sendCode(ctx: Ctx, phone: string, purpose: "login" | "enroll") {
 async function checkCode(ctx: Ctx, code: string, purpose: "login" | "enroll") {
   const sessionId = sessionOf(ctx);
   const db = await admin();
-  const { data: ch } = await db.from("user_mfa_challenges")
+  const { data: ch, error: readError } = await db.from("user_mfa_challenges")
     .select("id, code_hash, attempts, expires_at, phone")
     .eq("user_id", ctx.userId).eq("session_id", sessionId).eq("purpose", purpose).is("consumed_at", null)
     .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (readError) throw new Error("Vérification du code indisponible");
   if (!ch || new Date(ch.expires_at).getTime() < Date.now()) throw new Error("Code expiré. Demandez un nouveau code.");
   if (ch.attempts >= MAX_ATTEMPTS) throw new Error("Trop d'essais. Demandez un nouveau code.");
+  // Reserve the attempt atomically before comparing concurrent submissions.
+  const { data: reserved, error: reserveError } = await db.from("user_mfa_challenges")
+    .update({ attempts: ch.attempts + 1 }).eq("id", ch.id).eq("attempts", ch.attempts)
+    .is("consumed_at", null).select("id").maybeSingle();
+  if (reserveError || !reserved) throw new Error("Vérification déjà en cours. Réessayez.");
   const ok = (await sha256Hex(`${ctx.userId}:${code}`)) === ch.code_hash;
   if (!ok) {
-    await db.from("user_mfa_challenges").update({ attempts: ch.attempts + 1 }).eq("id", ch.id);
     throw new Error("Code incorrect");
   }
-  await db.from("user_mfa_challenges").update({ consumed_at: new Date().toISOString() }).eq("id", ch.id);
-  await db.from("user_mfa_sessions").upsert({
-    user_id: ctx.userId, session_id: sessionId,
-    verified_at: new Date().toISOString(),
+  const { data: consumed, error: consumeError } = await db.from("user_mfa_challenges")
+    .update({ consumed_at: new Date().toISOString() }).eq("id", ch.id)
+    .is("consumed_at", null).select("id").maybeSingle();
+  if (consumeError || !consumed) throw new Error("Code déjà utilisé. Demandez un nouveau code.");
+  return { db, phone: ch.phone as string };
+}
+
+async function grantSession(ctx: Ctx, db: any, verifiedAt = new Date().toISOString()) {
+  const { error } = await db.from("user_mfa_sessions").upsert({
+    user_id: ctx.userId, session_id: sessionOf(ctx),
+    verified_at: verifiedAt,
     expires_at: new Date(Date.now() + SESSION_TTL_HOURS * 3600_000).toISOString(),
   });
-  return { db, phone: ch.phone as string };
+  if (error) throw new Error("Validation de la session impossible");
 }
 
 const codeValidator = (input: { code: string }) => {
@@ -104,15 +118,16 @@ export const getUserMfaStatus = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const ctx = context as Ctx;
     const db = await admin();
-  const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+  const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone, updated_at").eq("user_id", ctx.userId).maybeSingle();
   if (error) throw new Error("Lecture des réglages de sécurité impossible");
     const enabled = !!s?.enabled && !!s?.phone;
     let verified = !enabled;
     if (enabled) {
       const sessionId = String(ctx.claims?.session_id ?? "");
-      const { data: sess } = await db.from("user_mfa_sessions").select("expires_at")
+      const { data: sess, error: sessionError } = await db.from("user_mfa_sessions").select("verified_at, expires_at")
         .eq("user_id", ctx.userId).eq("session_id", sessionId).maybeSingle();
-      verified = !!sess && new Date(sess.expires_at).getTime() > Date.now();
+      if (sessionError) throw new Error("Vérification de la session impossible");
+      verified = isUserMfaSessionValid(sess, s.updated_at);
     }
     return { enabled, verified, maskedPhone: s?.phone ? maskPhone(s.phone) : null };
   });
@@ -122,7 +137,7 @@ export const requestLoginMfaCode = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const ctx = context as Ctx;
     const db = await admin();
-    const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone").eq("user_id", ctx.userId).maybeSingle();
+    const { data: s, error } = await db.from("user_mfa_settings").select("enabled, phone, updated_at").eq("user_id", ctx.userId).maybeSingle();
      if (error) throw new Error("Lecture des réglages de sécurité impossible");
     if (!s?.enabled || !s.phone) throw new Error("Double authentification non activée");
     return sendCode(ctx, s.phone, "login");
@@ -132,7 +147,9 @@ export const verifyLoginMfaCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(codeValidator)
   .handler(async ({ data, context }) => {
-    await checkCode(context as Ctx, data.code, "login");
+    const ctx = context as Ctx;
+    const { db } = await checkCode(ctx, data.code, "login");
+    await grantSession(ctx, db);
     return { verified: true };
   });
 
@@ -153,11 +170,17 @@ export const confirmMfaEnrollment = createServerFn({ method: "POST" })
   .inputValidator(codeValidator)
   .handler(async ({ data, context }) => {
     const ctx = context as Ctx;
+    const settingsDb = await admin();
+    const { data: existing, error: existingError } = await settingsDb.from("user_mfa_settings").select("enabled").eq("user_id", ctx.userId).maybeSingle();
+    if (existingError) throw new Error("Lecture des réglages impossible");
+    if (existing?.enabled) throw new Error("La protection est déjà activée. Vérifiez votre connexion.");
     const { db, phone } = await checkCode(ctx, data.code, "enroll");
+    const activatedAt = new Date().toISOString();
     const { error } = await db.from("user_mfa_settings").upsert({
-      user_id: ctx.userId, enabled: true, phone, updated_at: new Date().toISOString(),
+      user_id: ctx.userId, enabled: true, phone, updated_at: activatedAt,
     });
     if (error) throw new Error("Activation impossible");
+    await grantSession(ctx, db, activatedAt);
     return { enabled: true, maskedPhone: maskPhone(phone) };
   });
 
@@ -167,11 +190,12 @@ export const disableUserMfa = createServerFn({ method: "POST" })
     const ctx = context as Ctx;
     const db = await admin();
     // Désactivation seulement depuis une session déjà vérifiée (ou sans MFA).
-    const { data: s } = await db.from("user_mfa_settings").select("enabled").eq("user_id", ctx.userId).maybeSingle();
+    const { data: s, error: settingsError } = await db.from("user_mfa_settings").select("enabled, updated_at").eq("user_id", ctx.userId).maybeSingle();
+    if (settingsError) throw new Error("Lecture des réglages impossible");
     if (s?.enabled) {
-      const { data: sess } = await db.from("user_mfa_sessions").select("expires_at")
+      const { data: sess, error: sessionError } = await db.from("user_mfa_sessions").select("verified_at, expires_at")
         .eq("user_id", ctx.userId).eq("session_id", sessionOf(ctx)).maybeSingle();
-      if (!sess || new Date(sess.expires_at).getTime() < Date.now()) throw new Error("Session non vérifiée");
+      if (sessionError || !isUserMfaSessionValid(sess, s.updated_at)) throw new Error("Session non vérifiée");
     }
     const { error } = await db.from("user_mfa_settings").upsert({ user_id: ctx.userId, enabled: false, updated_at: new Date().toISOString() });
     if (error) throw new Error("Désactivation impossible");

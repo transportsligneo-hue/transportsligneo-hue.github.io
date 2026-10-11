@@ -1454,10 +1454,10 @@ function AdminNouveauDevisPage() {
                 Supprimer
               </button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-6">
               {vlines.map((v, i) => (
-                <div key={v.key} className="rounded-xl border border-pro-border bg-pro-bg-soft p-4">
-                  <div className="mb-3 flex items-center gap-2">
+                <div key={v.key} className="grouped-vehicle-panel p-4 sm:p-5">
+                  <div className="mb-4 flex items-center gap-2 border-b-2 border-pro-accent/25 pb-3">
                     <span className="text-[11.5px] font-bold uppercase tracking-wide text-pro-accent">
                       Véhicule {i + 1}
                     </span>
