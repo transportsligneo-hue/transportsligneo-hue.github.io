@@ -43,7 +43,7 @@ export function GarageConvoyProposal({ vehicleId }: { vehicleId: string }) {
       <div className="flex items-center gap-2">
         <Wrench size={16} className="text-[#2f5fff]" />
         <p className="font-semibold text-slate-900">Convoyage vers le contrôle technique proposé</p>
-        <HelpTip text="Brouillon préparé automatiquement car l'échéance approche. Rien n'est commandé ni facturé tant que vous ne validez pas la demande." />
+        <HelpTip title="Convoyage proposé" text="Brouillon préparé automatiquement car l'échéance approche. Rien n'est commandé ni facturé tant que vous ne validez pas la demande." />
       </div>
       <p className="mt-1 text-sm text-slate-600">
         Contrôle technique {days < 0 ? "dépassé depuis le" : "à faire avant le"} {new Date(due).toLocaleDateString("fr-FR")}. Le convoyeur n'est pas prévenu avant votre validation.
