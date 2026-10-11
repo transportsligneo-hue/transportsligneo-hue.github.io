@@ -46,30 +46,45 @@ export function ConseillerChat({ summary }: { summary?: string }) {
 
 function SignedInConseiller({ uid, summary }: { uid: string; summary?: string }) {
   const [convId, setConvId] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const summaryRef = useRef(summary);
   useEffect(() => {
     let alive = true;
     (async () => {
-      const { data } = await supabase
-        .from("chat_conversations")
-        .select("id")
-        .eq("kind", "conseiller")
-        .eq("client_user_id", uid)
-        .neq("status", "resolue")
-        .order("last_message_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data?.id) { if (alive) setConvId(data.id); return; }
-      const { data: created } = await supabase
-        .from("chat_conversations")
-        .insert({ kind: "conseiller", client_user_id: uid, source: summary ? "vroomy" : "client_connecte", vroomy_summary: summary || null })
-        .select("id")
-        .single();
-      if (alive && created) setConvId(created.id);
+      try {
+        const { data, error } = await supabase
+          .from("chat_conversations")
+          .select("id")
+          .eq("kind", "conseiller")
+          .eq("client_user_id", uid)
+          .neq("status", "resolue")
+          .order("last_message_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw error;
+        if (data?.id) { if (alive) setConvId(data.id); return; }
+        // Id généré côté navigateur : pas de relecture immédiate (bloquée par la règle d'accès).
+        const id = crypto.randomUUID();
+        const s = summaryRef.current;
+        const { error: insErr } = await supabase
+          .from("chat_conversations")
+          .insert({ id, kind: "conseiller", client_user_id: uid, source: s ? "vroomy" : "client_connecte", vroomy_summary: s || null });
+        if (insErr) throw insErr;
+        if (alive) setConvId(id);
+      } catch {
+        if (alive) setFailed(true);
+      }
     })();
     return () => { alive = false; };
-  }, [uid, summary]);
+  }, [uid]);
+  if (failed) return <div className="lgc-empty">Impossible d'ouvrir la conversation. Rechargez la page ou appelez le 07 82 45 61 81.</div>;
   if (!convId) return <div className="lgc-empty"><Loader2 size={18} className="animate-spin" /></div>;
-  return <ChatThread conversationId={convId} viewer="client" height={380} emptyText="Posez votre question, un conseiller vous répond ici." />;
+  return (
+    <>
+      <p className="lgc-waiting">Un conseiller va bientôt vous répondre.</p>
+      <ChatThread conversationId={convId} viewer="client" height={340} emptyText="Posez votre question, un conseiller va bientôt vous répondre." />
+    </>
+  );
 }
 
 function VisitorConseiller({ summary }: { summary?: string }) {
