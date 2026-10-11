@@ -17,6 +17,7 @@ import { legRef } from "@/lib/mission-number";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { GuidedTour, MISSION_DETAIL_TOUR } from "@/components/onboarding/GuidedTour";
+import { HelpTip } from "@/components/ui/HelpTip";
 
 interface Mission {
   id: string;
@@ -400,6 +401,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       <div data-tour="mission-vehicle" className="mission-surface p-5">
         <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
           <Car size={16} /> Véhicule
+          <HelpTip title="Le véhicule transporté" text="Retrouvez ici le modèle, la plaque, le numéro de série (VIN) et l'énergie du véhicule confié. Si la carte grise a été fournie, elle est consultable en un clic, recto et verso." />
         </h2>
         <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
           <div className="min-w-0">
@@ -463,7 +465,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
 
 
-      <Section title="Détails du convoyage" icon={<FileText size={16} />}>
+      <Section
+        title="Détails du convoyage"
+        icon={<FileText size={16} />}
+        tip={{ title: "Ce qui a été commandé", text: "Le type de trajet choisi (livraison simple, restitution et livraison, recharge ou jockeyage) et les options ajoutées à la demande. Les remarques laissées à l'équipe apparaissent aussi ici." }}
+      >
         <Field label="Type de trajet" value={/restitution|aller[-_ ]?retour/i.test(mission.type_trajet ?? "") ? "restitution et livraison" : mission.type_trajet?.replace(/_/g, " ")} />
         {options.length > 0 && (
           <div className="sm:col-span-2">
@@ -534,7 +540,9 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
 
       {attributionId && hasProofs && (
         <div data-tour="mission-pv" className="mission-surface p-5">
-          <h2 className="font-heading text-sm mission-accent uppercase mb-4">Procès-verbaux</h2>
+          <h2 className="font-heading text-sm mission-accent uppercase mb-4 flex items-center gap-2">Procès-verbaux
+            <HelpTip title="Vos documents officiels" text="Les procès-verbaux de livraison et de restitution sont remplis automatiquement à partir des informations de la mission. Téléchargez-les et conservez-les : ils font foi en cas de contrôle ou de litige." />
+          </h2>
           <MissionDocsOfficielsPanel attributionId={attributionId} pvOnly />
         </div>
       )}
@@ -543,6 +551,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         <div data-tour="mission-invoice" className="mission-surface p-5">
           <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
             <Receipt size={16} /> Facture
+            <HelpTip title="Votre facture" text="Générée automatiquement en fin de mission, elle détaille la prestation et les options choisies. Le bouton PDF télécharge le document officiel, avec le cachet et la signature de l'entreprise." />
           </h2>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
@@ -576,11 +585,12 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   );
 }
 
-function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function Section({ title, icon, tip, children }: { title: string; icon: React.ReactNode; tip?: { title: string; text: string }; children: React.ReactNode }) {
   return (
     <div className="mission-surface p-5">
       <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
         {icon} {title}
+        {tip && <HelpTip title={tip.title} text={tip.text} />}
       </h2>
       <div className="grid sm:grid-cols-2 gap-4">{children}</div>
     </div>
