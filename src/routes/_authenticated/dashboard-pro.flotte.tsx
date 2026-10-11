@@ -15,6 +15,7 @@ import { lookupPlate } from "@/lib/plate.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { VehicleCsvImport } from "@/components/flotte/VehicleCsvImport";
+import { AddVehicleDialog } from "@/components/flotte/AddVehicleDialog";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/flotte")({
   component: FleetPage,
@@ -223,7 +224,8 @@ function FleetPage() {
 
   const openDocs = (v: Vehicle) => { setPanelTab("documents"); setSelected(v); };
 
-  const openCreate = () => { setDraft({ ...EMPTY }); setErr(null); };
+  const [creating, setCreating] = useState(false);
+  const openCreate = () => setCreating(true);
   const openEdit = (v: Vehicle) => { setDraft({ ...v }); setErr(null); };
 
   const save = async () => {
@@ -543,6 +545,14 @@ function FleetPage() {
 
 
       {/* Modale édition */}
+      {creating && orgId && (
+        <AddVehicleDialog
+          organizationId={orgId}
+          onClose={() => setCreating(false)}
+          onSaved={() => void fetchVehicles()}
+          onOpenExisting={(id) => { const v = vehicles.find((x) => x.id === id); setCreating(false); if (v) setSelected(v); }}
+        />
+      )}
       {draft && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-2 sm:items-center sm:p-6">
           <div className="w-full overflow-hidden rounded-xl bg-white shadow-2xl sm:max-w-2xl">

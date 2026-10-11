@@ -8577,81 +8577,123 @@ export type Database = {
           archived_at: string | null
           assurance_cout_annuel: number | null
           assurance_expire_le: string | null
+          assurance_numero_contrat: string | null
+          assureur: string | null
+          automatismes: Json
           carte_grise_expire_le: string | null
           controle_technique_expire_le: string | null
           couleur: string | null
           created_at: string
+          derniere_revision_km: number | null
+          derniere_revision_le: string | null
           energie: string | null
+          entretien_cout_annuel: number | null
+          fin_contrat_le: string | null
           fin_de_vie_prevue: string | null
           id: string
           immatriculation: string | null
           intervalle_revision_km: number | null
+          intervalle_revision_mois: number | null
           kilometrage: number | null
+          km_contrat: number | null
+          km_moyen_mois: number | null
+          loyer_mensuel: number | null
           marque: string | null
           mise_en_circulation: string | null
+          mode_detention: string | null
           modele: string | null
           notes: string | null
           organization_id: string
+          pneumatiques: string | null
           prochaine_revision_km: number | null
           site_id: string | null
           statut: string
           type_vehicule: string | null
           updated_at: string
           valeur_revente_estimee: number | null
+          version: string | null
           vin: string | null
         }
         Insert: {
           archived_at?: string | null
           assurance_cout_annuel?: number | null
           assurance_expire_le?: string | null
+          assurance_numero_contrat?: string | null
+          assureur?: string | null
+          automatismes?: Json
           carte_grise_expire_le?: string | null
           controle_technique_expire_le?: string | null
           couleur?: string | null
           created_at?: string
+          derniere_revision_km?: number | null
+          derniere_revision_le?: string | null
           energie?: string | null
+          entretien_cout_annuel?: number | null
+          fin_contrat_le?: string | null
           fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
           intervalle_revision_km?: number | null
+          intervalle_revision_mois?: number | null
           kilometrage?: number | null
+          km_contrat?: number | null
+          km_moyen_mois?: number | null
+          loyer_mensuel?: number | null
           marque?: string | null
           mise_en_circulation?: string | null
+          mode_detention?: string | null
           modele?: string | null
           notes?: string | null
           organization_id: string
+          pneumatiques?: string | null
           prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
           type_vehicule?: string | null
           updated_at?: string
           valeur_revente_estimee?: number | null
+          version?: string | null
           vin?: string | null
         }
         Update: {
           archived_at?: string | null
           assurance_cout_annuel?: number | null
           assurance_expire_le?: string | null
+          assurance_numero_contrat?: string | null
+          assureur?: string | null
+          automatismes?: Json
           carte_grise_expire_le?: string | null
           controle_technique_expire_le?: string | null
           couleur?: string | null
           created_at?: string
+          derniere_revision_km?: number | null
+          derniere_revision_le?: string | null
           energie?: string | null
+          entretien_cout_annuel?: number | null
+          fin_contrat_le?: string | null
           fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
           intervalle_revision_km?: number | null
+          intervalle_revision_mois?: number | null
           kilometrage?: number | null
+          km_contrat?: number | null
+          km_moyen_mois?: number | null
+          loyer_mensuel?: number | null
           marque?: string | null
           mise_en_circulation?: string | null
+          mode_detention?: string | null
           modele?: string | null
           notes?: string | null
           organization_id?: string
+          pneumatiques?: string | null
           prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
           type_vehicule?: string | null
           updated_at?: string
           valeur_revente_estimee?: number | null
+          version?: string | null
           vin?: string | null
         }
         Relationships: [
@@ -9858,6 +9900,7 @@ export type Database = {
         Args: { _devis_id: string }
         Returns: undefined
       }
+      user_mfa_satisfied: { Args: never; Returns: boolean }
       user_site_ids: { Args: { _user_id: string }; Returns: string[] }
       validate_devis_lot: {
         Args: {

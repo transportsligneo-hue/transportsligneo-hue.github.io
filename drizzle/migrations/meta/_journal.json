@@ -288,6 +288,13 @@
       "when": 1791664281145,
       "tag": "0040_user_mfa_sms",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791746806198,
+      "tag": "0041_user_mfa_rls_and_vehicle_fields",
+      "breakpoints": true
     }
   ]
 }

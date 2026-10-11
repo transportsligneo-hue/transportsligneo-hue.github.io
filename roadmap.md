@@ -59,3 +59,10 @@
 - [x] Admin : blocs véhicules davantage séparés, détails et prix manuels conservés ; barèmes de lavage extérieur/intérieur/complet éditables sans montant imposé. Tests du calcul des suppléments réussis.
 - [ ] Carte sans mission : moteur Mapbox et projection globe raccordés ; contrôle local des fonds Mapbox refusé (403), rendu géographique non vérifié. Bulles contenues dans l’écran et fermeture vérifiées visuellement. Vérification sur origine autorisée requise.
 - [ ] Nouveaux fichiers plaque et ajout véhicule : reportés à la demande de l’utilisateur jusqu’à finition des corrections précédentes.
+
+## Plaque universelle et fenêtre véhicule
+- [x] Protection SMS appliquée aussi dans la base (missions, devis, factures, parc, adresses, photos)
+- [x] Composants plaque (saisie + affichage) et bulles d'aide
+- [x] Nouvelle fenêtre « Ajouter un véhicule » (flotte + onglet Parc véhicules admin)
+- [ ] Remplacer la plaque dans tous les autres écrans (estimateur, demandes, devis, driver, admin, PDF)
+- [ ] Automatismes « Bientôt disponible » : brouillon convoyage garage, km auto, immobilisation, calendrier

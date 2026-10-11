@@ -10,6 +10,7 @@ import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 import { OrgLogo } from "@/components/OrgLogo";
 import { OrgLogoUploader } from "@/components/OrgLogoUploader";
 import { OrgSitesTab } from "@/components/admin/OrgSitesTab";
+import { OrgVehiclesTab } from "@/components/admin/OrgVehiclesTab";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations/$orgId")({
   component: OrgDetail,
@@ -188,6 +189,7 @@ function OrgDetail() {
           <TabsTrigger value="missions">Missions ({missions.length})</TabsTrigger>
           <TabsTrigger value="b2b">Demandes B2B ({b2bRequests.length})</TabsTrigger>
           <TabsTrigger value="members">Membres ({members.length})</TabsTrigger>
+          <TabsTrigger value="vehicles"><Truck size={13} className="mr-1.5" />Parc véhicules</TabsTrigger>
           <TabsTrigger value="sites"><MapPin size={13} className="mr-1.5" />Sites</TabsTrigger>
           <TabsTrigger value="pricing"><Euro size={13} className="mr-1.5" />Tarification</TabsTrigger>
           <TabsTrigger value="addresses"><MapPin size={13} className="mr-1.5" />Adresses</TabsTrigger>
@@ -254,6 +256,10 @@ function OrgDetail() {
               })}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="vehicles">
+          <OrgVehiclesTab organizationId={org.id} />
         </TabsContent>
 
         <TabsContent value="sites">
