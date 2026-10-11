@@ -88,7 +88,7 @@ function ProLayout() {
   return (
     <div className="dashboard-shell-light" data-account-type={accountType}>
       <ProSidebar items={navItems}>
-        <UserMfaGate label="Espace client"><Outlet /></UserMfaGate>
+        {apercu ? <Outlet /> : <UserMfaGate label="Espace professionnel"><Outlet /></UserMfaGate>}
       </ProSidebar>
     </div>
   );

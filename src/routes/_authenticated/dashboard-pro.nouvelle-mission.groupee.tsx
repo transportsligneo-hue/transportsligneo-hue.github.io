@@ -730,13 +730,12 @@ function GroupedMissionForm() {
       </Card>
 
       {/* Récapitulatif */}
-      <Card title="Récapitulatif & estimation">
+      <Card title="Récapitulatif">
         <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               <th className="border-b border-slate-200 px-2.5 py-2 text-left text-[10.5px] font-bold uppercase text-slate-400">Véhicule</th>
               <th className="border-b border-slate-200 px-2.5 py-2 text-left text-[10.5px] font-bold uppercase text-slate-400">Trajet</th>
-              <th className="border-b border-slate-200 px-2.5 py-2 text-right text-[10.5px] font-bold uppercase text-slate-400">Prix estimé</th>
             </tr>
           </thead>
           <tbody>
@@ -750,15 +749,12 @@ function GroupedMissionForm() {
                   <span className="block font-semibold text-slate-900">{groupedTripLabel(r.tripType)}</span>
                   {depart || "—"} → {destFor(r) || "—"}
                 </td>
-                <td className="border-b border-slate-200 px-2.5 py-3 text-right font-semibold text-slate-900">
-                  {prices[r.key] != null ? eur(prices[r.key]) : pricing ? "…" : "Sur devis"}
-                </td>
               </tr>
             ))}
             {rows.length > filledRows.length && (
               <tr>
-                <td colSpan={3} className="border-b border-slate-200 px-2.5 py-3 italic text-slate-400">
-                  Renseignez les plaques et destinations restantes pour compléter l'estimation
+                <td colSpan={2} className="border-b border-slate-200 px-2.5 py-3 italic text-slate-400">
+                  Renseignez les plaques et destinations restantes pour compléter la demande
                 </td>
               </tr>
             )}
@@ -767,11 +763,7 @@ function GroupedMissionForm() {
 
         <div className="flex items-center justify-between px-1 pt-4">
           <span className="text-[12.5px] text-slate-500">
-            Total estimé ({filledRows.length}/{rows.length} véhicules)
-            {profile?.display === "ht" ? " HT" : ""}
-          </span>
-          <span className="font-heading text-2xl font-extrabold text-slate-900">
-            {eur(profile?.display === "ht" ? Math.round((total / (1 + VAT_RATE)) * 100) / 100 : total)}
+            {filledRows.length}/{rows.length} véhicules prêts
           </span>
         </div>
 
