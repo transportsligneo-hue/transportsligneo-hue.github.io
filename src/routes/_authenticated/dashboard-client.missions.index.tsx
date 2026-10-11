@@ -224,7 +224,7 @@ function ClientMissions() {
       <div className="flex items-center justify-end flex-wrap gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           {/* View switcher */}
-          <div className="inline-flex rounded border border-primary/20 bg-navy/40 p-0.5">
+          <div className="inline-flex rounded border border-primary/20 bg-navy/40 p-0.5" data-tour="missions-views">
             {VIEWS.map((v) => {
               const Icon = v.icon;
               const active = view === v.value;
@@ -257,7 +257,7 @@ function ClientMissions() {
 
       {/* Filters (hidden in kanban since columns act as filters) */}
       {view !== "kanban" && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2" data-tour="missions-filters">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -465,7 +465,7 @@ function ClientMissions() {
 
       {/* Demandes en attente de traitement admin */}
       {!loading && filter === "all" && pending.length > 0 && (
-        <div className="pt-2">
+        <div className="pt-2" data-tour="missions-pending">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading text-sm text-cream/80 tracking-wider uppercase flex items-center gap-2">
               <Clock size={14} className="text-amber-300" />
