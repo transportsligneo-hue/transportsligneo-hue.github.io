@@ -9659,6 +9659,10 @@ export type Database = {
       chat_can_access: { Args: { _conv: string }; Returns: boolean }
       chat_is_admin: { Args: { _uid: string }; Returns: boolean }
       chat_mark_read: { Args: { _conv: string }; Returns: undefined }
+      chat_open_attribution: {
+        Args: { _attribution_id: string }
+        Returns: string
+      }
       chat_open_mission: {
         Args: { _kind: string; _mission_id: string }
         Returns: string
