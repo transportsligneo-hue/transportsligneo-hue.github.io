@@ -201,6 +201,7 @@ function AdminLayout() {
     { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Comptes" },
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Comptes" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Comptes" },
+    { to: "/admin/catalogue-vehicules", label: "Catalogue véhicules", icon: Gauge, group: "Comptes" },
 
     // Activité commerciale
     { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
