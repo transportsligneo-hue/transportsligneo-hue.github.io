@@ -155,13 +155,16 @@ export function ChatThread({
         if (error) throw error;
         attachments.push({ path, name: f.name, type: f.type, size: f.size });
       }
+      const msgId = crypto.randomUUID();
       const { error } = await supabase.from("chat_messages").insert({
+        id: msgId,
         conversation_id: conversationId,
         sender_id: uid,
         body,
         attachments: attachments as never,
       });
       if (error) throw error;
+      void import("@/lib/chat-notify.functions").then((m) => m.notifyChatMessage({ data: { messageId: msgId } })).catch(() => {});
       setText("");
       setFiles([]);
     } catch {
