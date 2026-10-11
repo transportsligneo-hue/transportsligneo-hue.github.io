@@ -1,3 +1,4 @@
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -20,6 +21,7 @@ interface Props {
  * Affiché uniquement dans l'espace client authentifié (programme non public).
  */
 export default function AvoirRedemption({ devisId, prixTtc, dejaApplique = 0, onApplied }: Props) {
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
   const qc = useQueryClient();
   const fetchLoyalty = useServerFn(getMyLoyalty);
   const apply = useServerFn(applyAvoirToDevis);

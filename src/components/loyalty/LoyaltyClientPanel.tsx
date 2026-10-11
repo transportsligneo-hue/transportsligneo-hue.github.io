@@ -1,3 +1,4 @@
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Gauge, Wallet, Gift, TrendingUp } from "lucide-react";
@@ -21,7 +22,15 @@ const STATUT_LABEL: Record<string, string> = {
 };
 
 /** Panneau « Compte Kilomètres » — espace client particulier & professionnel. */
-export default function LoyaltyClientPanel({ accent = "blue" }: { accent?: "blue" | "violet" }) {
+export default function LoyaltyClientPanel(props: { accent?: "blue" | "violet" }) {
+  const loyaltyOn = useFeatureFlag("compte_kilometres");
+  if (!loyaltyOn) {
+    return <p className="rounded-xl border border-pro-border bg-pro-surface p-6 text-sm text-pro-muted">Cette rubrique n'est pas disponible pour le moment.</p>;
+  }
+  return <LoyaltyClientPanelInner {...props} />;
+}
+
+function LoyaltyClientPanelInner({ accent = "blue" }: { accent?: "blue" | "violet" }) {
   const fetchLoyalty = useServerFn(getMyLoyalty);
   const { data, isLoading } = useQuery({
     queryKey: ["loyalty", "me"],
