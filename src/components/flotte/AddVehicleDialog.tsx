@@ -207,10 +207,12 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
   ].filter(Boolean).sort((a: any, b: any) => a.d.localeCompare(b.d)) as { k: string; d: string }[];
 
   const upload = async (vehicleId: string, file: File, docType: string) => {
-    const path = `${organizationId}/${vehicleId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-    const { error } = await supabase.storage.from("vehicle-documents").upload(path, file);
-    if (error) return;
-    await supabase.from("vehicle_documents").insert({ vehicle_id: vehicleId, organization_id: organizationId, doc_type: docType, nom: file.name, storage_path: path, mime_type: file.type, taille_octets: file.size } as never);
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${organizationId}/${vehicleId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("vehicle-documents").upload(path, file, { contentType: file.type, upsert: false });
+    if (error) { toast.error(`Fichier non envoyé : ${file.name}`); return; }
+    const { error: insErr } = await supabase.from("vehicle_documents").insert({ vehicle_id: vehicleId, doc_type: docType, nom: file.name, storage_path: path, mime_type: file.type, taille_octets: file.size });
+    if (insErr) await supabase.storage.from("vehicle-documents").remove([path]);
   };
 
   const save = async (again: boolean) => {
