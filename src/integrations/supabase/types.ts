@@ -1537,6 +1537,134 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          client_user_id: string | null
+          convoyeur_user_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          last_message_at: string
+          last_message_preview: string | null
+          mission_id: string | null
+          mission_reference: string | null
+          source: string
+          status: string
+          subject: string | null
+          unread_admin: number
+          unread_participant: number
+          visitor_email: string | null
+          visitor_name: string | null
+          visitor_token: string | null
+          vroomy_summary: string | null
+        }
+        Insert: {
+          client_user_id?: string | null
+          convoyeur_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          mission_id?: string | null
+          mission_reference?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          unread_admin?: number
+          unread_participant?: number
+          visitor_email?: string | null
+          visitor_name?: string | null
+          visitor_token?: string | null
+          vroomy_summary?: string | null
+        }
+        Update: {
+          client_user_id?: string | null
+          convoyeur_user_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          mission_id?: string | null
+          mission_reference?: string | null
+          source?: string
+          status?: string
+          subject?: string | null
+          unread_admin?: number
+          unread_participant?: number
+          visitor_email?: string | null
+          visitor_name?: string | null
+          visitor_token?: string | null
+          vroomy_summary?: string | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          attachments: Json
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string | null
+          sender_type: string
+        }
+        Insert: {
+          attachments?: Json
+          body?: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: string
+        }
+        Update: {
+          attachments?: Json
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_settings: {
+        Row: {
+          advisor_available: boolean
+          id: boolean
+          offline_message: string
+          quick_replies: Json
+          updated_at: string
+        }
+        Insert: {
+          advisor_available?: boolean
+          id?: boolean
+          offline_message?: string
+          quick_replies?: Json
+          updated_at?: string
+        }
+        Update: {
+          advisor_available?: boolean
+          id?: boolean
+          offline_message?: string
+          quick_replies?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_tool_calls: {
         Row: {
           arguments: Json
@@ -9528,6 +9656,17 @@ export type Database = {
       }
       cancel_devis_lot: { Args: { _lot_id: string }; Returns: undefined }
       canonical_group_numero: { Args: { p_group_id: string }; Returns: string }
+      chat_can_access: { Args: { _conv: string }; Returns: boolean }
+      chat_is_admin: { Args: { _uid: string }; Returns: boolean }
+      chat_mark_read: { Args: { _conv: string }; Returns: undefined }
+      chat_open_attribution: {
+        Args: { _attribution_id: string }
+        Returns: string
+      }
+      chat_open_mission: {
+        Args: { _kind: string; _mission_id: string }
+        Returns: string
+      }
       convoyeur_documents_signes: {
         Args: { _user_id: string }
         Returns: boolean
@@ -9833,6 +9972,10 @@ export type Database = {
       }
       is_mission_client: {
         Args: { _mission_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mission_convoyeur: {
+        Args: { _mission_id: string; _uid: string }
         Returns: boolean
       }
       is_org_admin: {

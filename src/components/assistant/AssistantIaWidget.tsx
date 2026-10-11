@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
 import VroomyOrderFlow from "@/components/assistant/VroomyOrderFlow";
+import { ConseillerChat } from "@/components/chat/ConseillerChat";
 import {
   detectOrderIntent,
   extractOrderInfo,
@@ -173,6 +174,7 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
 export default function AssistantIaWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const [chatTab, setChatTab] = useState<"vroomy" | "conseiller">("vroomy");
   const [notif, setNotif] = useState(true);
   const [messages, setMessages] = useState<ChatMsg[]>([{ role: "assistant", content: WELCOME }]);
   const [input, setInput] = useState("");
@@ -442,6 +444,7 @@ export default function AssistantIaWidget() {
   }, [lead, typing]);
 
   if (hidden) return null;
+  // (onglet Conseiller géré via chatTab)
 
   return (
     <>
@@ -528,7 +531,23 @@ export default function AssistantIaWidget() {
           )}
         </div>
 
-        <div className="vrm-body" ref={bodyRef} role="log" aria-live="polite" aria-label="Conversation avec Vroomy" tabIndex={0}>
+        <div className="vrm-tabs" role="tablist" aria-label="Choisir un interlocuteur">
+          <button type="button" role="tab" aria-selected={chatTab === "vroomy"} className={chatTab === "vroomy" ? "on" : ""} onClick={() => setChatTab("vroomy")}>Vroomy</button>
+          <button type="button" role="tab" aria-selected={chatTab === "conseiller"} className={chatTab === "conseiller" ? "on" : ""} onClick={() => setChatTab("conseiller")}>Conseiller</button>
+        </div>
+        {chatTab === "conseiller" && (
+          <div className="vrm-conseiller-wrap">
+            <ConseillerChat
+              summary={messages
+                .filter((m) => m.role === "user")
+                .slice(-6)
+                .map((m) => `- ${m.content}`)
+                .join("\n") || undefined}
+            />
+          </div>
+        )}
+
+        <div className="vrm-body" ref={bodyRef} role="log" aria-live="polite" aria-label="Conversation avec Vroomy" tabIndex={0} style={chatTab === "conseiller" ? { display: "none" } : undefined}>
           {messages.map((m, i) => (
             <div key={i} className={`vrm-row${m.role === "user" ? " vrm-user" : ""}`}>
               {m.role === "assistant" && (
@@ -717,7 +736,7 @@ export default function AssistantIaWidget() {
           )}
         </div>
 
-        <div className="vrm-footer">
+        <div className="vrm-footer" style={chatTab === "conseiller" ? { display: "none" } : undefined}>
           <form
             className="vrm-input-row"
             onSubmit={(e) => {

@@ -146,6 +146,8 @@ import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminNouveauDevisRouteImport } from './routes/_authenticated/admin.nouveau-devis'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
+import { Route as AuthenticatedAdminMessagerieConseillerRouteImport } from './routes/_authenticated/admin.messagerie-conseiller'
+import { Route as AuthenticatedAdminMessagerieRouteImport } from './routes/_authenticated/admin.messagerie'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
@@ -975,6 +977,18 @@ const AuthenticatedAdminMessagesRoute =
     path: '/messages',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMessagerieConseillerRoute =
+  AuthenticatedAdminMessagerieConseillerRouteImport.update({
+    id: '/messagerie-conseiller',
+    path: '/messagerie-conseiller',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminMessagerieRoute =
+  AuthenticatedAdminMessagerieRouteImport.update({
+    id: '/messagerie',
+    path: '/messagerie',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminInscriptionsRoute =
   AuthenticatedAdminInscriptionsRouteImport.update({
     id: '/inscriptions',
@@ -1491,6 +1505,8 @@ export interface FileRoutesByFullPath {
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
+  '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
@@ -1697,6 +1713,8 @@ export interface FileRoutesByTo {
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
+  '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
@@ -1908,6 +1926,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/_authenticated/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
+  '/_authenticated/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
@@ -2122,6 +2142,8 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/inscriptions'
+    | '/admin/messagerie'
+    | '/admin/messagerie-conseiller'
     | '/admin/messages'
     | '/admin/notifications'
     | '/admin/nouveau-devis'
@@ -2328,6 +2350,8 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/inscriptions'
+    | '/admin/messagerie'
+    | '/admin/messagerie-conseiller'
     | '/admin/messages'
     | '/admin/notifications'
     | '/admin/nouveau-devis'
@@ -2538,6 +2562,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/informations-legales'
     | '/_authenticated/admin/inscriptions'
+    | '/_authenticated/admin/messagerie'
+    | '/_authenticated/admin/messagerie-conseiller'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/nouveau-devis'
@@ -3724,6 +3750,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMessagesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/messagerie-conseiller': {
+      id: '/_authenticated/admin/messagerie-conseiller'
+      path: '/messagerie-conseiller'
+      fullPath: '/admin/messagerie-conseiller'
+      preLoaderRoute: typeof AuthenticatedAdminMessagerieConseillerRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/messagerie': {
+      id: '/_authenticated/admin/messagerie'
+      path: '/messagerie'
+      fullPath: '/admin/messagerie'
+      preLoaderRoute: typeof AuthenticatedAdminMessagerieRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/inscriptions': {
       id: '/_authenticated/admin/inscriptions'
       path: '/inscriptions'
@@ -4331,6 +4371,8 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
+  AuthenticatedAdminMessagerieRoute: typeof AuthenticatedAdminMessagerieRoute
+  AuthenticatedAdminMessagerieConseillerRoute: typeof AuthenticatedAdminMessagerieConseillerRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminNouveauDevisRoute: typeof AuthenticatedAdminNouveauDevisRoute
@@ -4381,6 +4423,9 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminInformationsLegalesRoute:
     AuthenticatedAdminInformationsLegalesRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
+  AuthenticatedAdminMessagerieRoute: AuthenticatedAdminMessagerieRoute,
+  AuthenticatedAdminMessagerieConseillerRoute:
+    AuthenticatedAdminMessagerieConseillerRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminNouveauDevisRoute: AuthenticatedAdminNouveauDevisRoute,

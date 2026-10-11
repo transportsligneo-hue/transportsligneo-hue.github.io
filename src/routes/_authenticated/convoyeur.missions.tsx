@@ -22,6 +22,7 @@ import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
+import { MissionChatPanel } from "@/components/chat/MissionChatPanel";
 import { VehiculeDocsView } from "@/components/convoyeur/VehiculeDocsView";
 import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
@@ -803,6 +804,8 @@ function ConvoyeurMissions() {
     );
 
     const docsSlot = user ? (
+      <>
+      <MissionChatPanel attributionId={openMission.id} viewer="convoyeur" />
       <MissionV3DocsPane
         attributionId={openMission.id}
         userId={user.id}
@@ -838,6 +841,7 @@ function ConvoyeurMissions() {
             ].filter(Boolean).join(" ") || driverDisplayName,
         }}
       />
+      </>
     ) : null;
 
     // === Duo restitution et livraison : enchaînement direct sans repasser par la liste

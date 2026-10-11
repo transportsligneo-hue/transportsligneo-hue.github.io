@@ -31,6 +31,7 @@
 - Optional SMS uses shared user MFA functions; fail closed and reject grants predating reactivation to prevent stale-session approval.
 <!-- LOVABLE:END -->
 
-- Plates use shared PlateInput/PlateBadge so all screens share one normalized format.
-- User SMS MFA is enforced by restrictive RLS via user_mfa_satisfied(), so the UI gate cannot be bypassed.
-- Vehicle immobilisation runs in DB (trigger + daily cron via run_vehicle_automations) and only auto-lifts rows flagged immobilisation_auto, so manual immobilisations are never undone.
+- Plates use shared PlateInput/PlateBadge for one normalized format.
+- User SMS MFA is enforced by restrictive RLS (user_mfa_satisfied()), so the UI gate can't be bypassed.
+- Vehicle immobilisation runs in DB (trigger + daily cron) and only auto-lifts immobilisation_auto rows, so manual ones persist.
+- Human chat: separate client/convoyeur threads gated by chat_can_access(), sender role set by trigger, visitors via token server fns, so roles never cross or spoof.
