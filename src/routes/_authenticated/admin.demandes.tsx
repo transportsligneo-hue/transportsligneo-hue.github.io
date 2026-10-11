@@ -1,3 +1,4 @@
+import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -79,17 +80,11 @@ const OPTION_LABELS: Record<string, string> = {
   plein_essence: "⛽ Appoint carburant",
   mise_en_main: "🔑 Mise en main du véhicule",
   lavage: "🧽 Lavage",
-  jokeage: "🔧 Jockeyage",
+  jokeage: "Service de jockeyage",
   express: "⚡ Express",
   aller_retour: "↔ Aller-retour",
 };
 
-const JOKEAGE_LABELS: Record<string, string> = {
-  controle_technique: "Contrôle technique",
-  revision: "Révision / entretien",
-  lavage: "Lavage",
-  garage: "Dépôt ou récupération au garage",
-};
 
 function renderOptionsMeta(meta: Record<string, unknown> | null | undefined): string[] {
   if (!meta) return [];
