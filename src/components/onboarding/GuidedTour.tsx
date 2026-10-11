@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { REPLAY_HELP_EVENT } from "@/components/dashboard-pro/HelpTip";
 
@@ -19,6 +19,16 @@ export function GuidedTour({ id, steps, delay = 900 }: { id: string; steps: Tour
   const [active, setActive] = useState<TourStep[] | null>(null);
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [bubbleHeight, setBubbleHeight] = useState(240);
+  useLayoutEffect(() => {
+    const el = bubbleRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setBubbleHeight(el.getBoundingClientRect().height));
+    observer.observe(el);
+    setBubbleHeight(el.getBoundingClientRect().height);
+    return () => observer.disconnect();
+  }, [active, i, rect]);
 
   const start = useCallback(() => {
     const avail = steps.filter((s) => document.querySelector(s.target));
@@ -75,13 +85,12 @@ export function GuidedTour({ id, steps, delay = 900 }: { id: string; steps: Tour
   const pad = 8;
   const vw = window.innerWidth, vh = window.innerHeight;
   const mobile = vw < 640;
-  const below = rect.bottom + 220 < vh;
+  const below = rect.bottom + bubbleHeight + pad + 26 < vh;
   const left = Math.min(Math.max(12, rect.left), vw - 372);
+  const top = below ? rect.bottom + pad + 14 : rect.top - pad - 14 - bubbleHeight;
   const bubbleStyle: React.CSSProperties = mobile
-    ? { left: 12, right: 12, bottom: 12 }
-    : below
-      ? { left, top: rect.bottom + pad + 14, width: 360 }
-      : { left, top: Math.max(12, rect.top - pad - 14), width: 360, transform: "translateY(-100%)" };
+    ? { left: 12, right: 12, bottom: 12, maxHeight: vh - 24, overflowY: "auto" }
+    : { left, top: Math.max(12, Math.min(top, vh - bubbleHeight - 12)), width: 360, maxHeight: vh - 24, overflowY: "auto" };
 
   return createPortal(
     <div className="gt-root" role="dialog" aria-modal="true" aria-label={step.title}>
@@ -92,7 +101,7 @@ export function GuidedTour({ id, steps, delay = 900 }: { id: string; steps: Tour
       >
         <span className="gt-pulse" />
       </div>
-      <div className="gt-bubble" style={bubbleStyle}>
+      <div ref={bubbleRef} className="gt-bubble" style={bubbleStyle}>
         <div className="gt-progress">
           {active.map((_, k) => <span key={k} className={k <= i ? "on" : ""} />)}
         </div>
