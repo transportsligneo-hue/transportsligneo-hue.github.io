@@ -51,6 +51,7 @@ const SEV_CLS: Record<string, string> = {
   moyenne: "border-l-[#2f5fff] bg-[#eef2ff]",
 };
 import { PlateBadge } from "@/components/plate/PlateBadge";
+import { HelpTip } from "@/components/ui/HelpTip";
 
 function FleetTcoPage() {
   const { data: orgInfo, isLoading: orgLoading } = useCurrentOrgAccountType();
@@ -161,6 +162,7 @@ function FleetTcoPage() {
 
       {/* Filtres */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
+        <HelpTip title="Coût total de possession" text="Le TCO additionne tout ce que coûte chaque véhicule sur la période : carburant ou recharge, entretien, assurance, financement et convoyages. Le coût au kilomètre divise ce total par les kilomètres parcourus. Une alerte apparaît quand un véhicule coûte nettement plus que la moyenne du parc." />
         {([["12m", "12 mois"], ["ytd", "Année en cours"], ["all", "Depuis l'origine"]] as const).map(([id, label]) => (
           <button
             key={id}
