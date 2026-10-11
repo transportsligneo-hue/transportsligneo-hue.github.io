@@ -18,6 +18,7 @@ import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { GuidedTour, MISSION_DETAIL_TOUR } from "@/components/onboarding/GuidedTour";
 import { HelpTip } from "@/components/ui/HelpTip";
+import { MissionChatPanel } from "@/components/chat/MissionChatPanel";
 
 interface Mission {
   id: string;
@@ -577,6 +578,8 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </div>
         </div>
       )}
+
+      <MissionChatPanel missionId={missionId} viewer="client" />
 
       <p className="mission-text-muted text-xs text-center">
         Vous serez notifié par email à chaque évolution du statut de votre mission.
