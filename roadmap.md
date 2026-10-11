@@ -66,3 +66,11 @@
 - [x] Nouvelle fenêtre « Ajouter un véhicule » (flotte + onglet Parc véhicules admin)
 - [x] Remplacer la plaque dans tous les autres écrans (estimateur, demandes, devis, driver, admin, PDF)
 - [ ] Automatismes « Bientôt disponible » : brouillon convoyage garage, km auto, immobilisation, calendrier
+
+## Jockeyage, nom du parc, Compte Kilomètres
+- [x] Services de jockeyage dans demandes simple et groupée (recharge électrique conservée)
+- [x] Nom du parc synchronisé avec le nom de société
+- [x] Interrupteur admin Compte Kilomètres
+- [x] Brouillon convoyage garage (proposition sur fiche véhicule)
+- [x] Démo : onglet Parc & automatismes
+- [x] Bulles d'aide TCO et fiche véhicule

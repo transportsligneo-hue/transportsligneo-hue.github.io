@@ -160,7 +160,7 @@ export function DemoProModules({ missions, now }: { missions: ProMission[]; now:
         <div className="dpm-card">
           <h3><Gauge size={15} /> Fiche véhicule automatisée</h3>
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", margin: "8px 0 14px" }}>
-            <PlateBadge value="FG-482-KL" size="md" />
+            <PlateBadge plate="FG-482-KL" size="md" />
             <strong>Renault Mégane E-Tech</strong>
           </div>
           <ul className="dpm-team">
