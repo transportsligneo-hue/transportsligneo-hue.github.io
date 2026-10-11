@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, X, Upload, Loader2 } from "lucide-react";
+import { Check, X, Upload, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { type CatalogEntry, catalogPhotoUrl, loadCatalog, matchCatalog } from "@/lib/vehicle-catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
@@ -133,24 +134,22 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // L'onglet actif suit le défilement
+  // Photo officielle du modèle depuis le catalogue admin
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  useEffect(() => { void loadCatalog().then(setCatalog); }, []);
   useEffect(() => {
-    const root = scrollRef.current;
-    if (!root) return;
-    const onScroll = () => {
-      const secs = Array.from(root.querySelectorAll<HTMLElement>("[data-avd-sec]"));
-      let idx = 0;
-      secs.forEach((s, i) => { if (s.offsetTop - root.offsetTop <= root.scrollTop + 80) idx = i; });
-      setActive(idx);
-    };
-    root.addEventListener("scroll", onScroll, { passive: true });
-    return () => root.removeEventListener("scroll", onScroll);
-  }, []);
+    const m = matchCatalog(catalog, f.marque, f.modele);
+    if (!m?.photo_path) { setPhotoUrl(null); return; }
+    let live = true;
+    void catalogPhotoUrl(m.photo_path).then((u) => { if (live) setPhotoUrl(u); });
+    return () => { live = false; };
+  }, [catalog, f.marque, f.modele]);
 
+  // Parcours étape par étape : une seule section visible à la fois
   const goto = (i: number) => {
-    const root = scrollRef.current;
-    const el = root?.querySelector<HTMLElement>(`[data-avd-sec="${i}"]`);
-    if (root && el) root.scrollTo({ top: el.offsetTop - root.offsetTop - 8, behavior: "smooth" });
+    setActive(Math.max(0, Math.min(SECTIONS.length - 1, i)));
+    scrollRef.current?.scrollTo({ top: 0 });
   };
 
   const duplicate = useMemo(() => {
@@ -297,7 +296,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
         </nav>
 
         <div className="avd-body">
-          <div className="avd-scroll" ref={scrollRef}>
+          <div className="avd-scroll avd-steps" ref={scrollRef} data-active={active}>
             <section data-avd-sec="0">
               <h2>Identification</h2>
               <div ref={plateRef}>
@@ -448,7 +447,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
           <aside className="avd-side" aria-label="Aperçu en direct">
             <p className="avd-side-title">Aperçu en direct</p>
             <div className="avd-vcard">
-              <svg viewBox="0 0 120 48" className="avd-car" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M8 34h104M14 34l6-12c2-4 5-6 10-6h50c5 0 8 2 11 6l9 12" /><circle cx="32" cy="36" r="6" /><circle cx="88" cy="36" r="6" /><path d="M36 16l-4 10h56l-6-10" /></svg>
+              {photoUrl ? <img src={photoUrl} alt={[f.marque, f.modele].join(" ")} className="avd-photo" /> : <svg viewBox="0 0 120 48" className="avd-car" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M8 34h104M14 34l6-12c2-4 5-6 10-6h50c5 0 8 2 11 6l9 12" /><circle cx="32" cy="36" r="6" /><circle cx="88" cy="36" r="6" /><path d="M36 16l-4 10h56l-6-10" /></svg>}
               <strong>{[f.marque, f.modele].filter(Boolean).join(" ") || "Nouveau véhicule"}</strong>
               <span>{[ENERGIES.find(([e]) => e === f.energie)?.[1], CATS.find(([c]) => c === f.categorie)?.[1], f.couleur, f.kilometrage && `${Number(f.kilometrage).toLocaleString("fr-FR")} km`].filter(Boolean).join(" · ") || "Caractéristiques à renseigner"}</span>
               {f.immatriculation && <PlateBadge plate={f.immatriculation} size="md" />}
@@ -465,10 +464,19 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
         </div>
 
         <footer className="avd-foot">
-          <span>* Champs obligatoires</span>
-          <button type="button" className="avd-btn ghost" onClick={() => void requestClose()}>Annuler</button>
-          <button type="button" className="avd-btn blue" disabled={saving} onClick={() => void save(true)}>Enregistrer et en ajouter un autre</button>
-          <button type="button" className="avd-btn main" disabled={saving} onClick={() => void save(false)}>{saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />} Enregistrer le véhicule</button>
+          <span>Étape {active + 1} sur {SECTIONS.length} · * Champs obligatoires</span>
+          <button type="button" className="avd-btn ghost" onClick={() => (active === 0 ? void requestClose() : goto(active - 1))}>{active === 0 ? "Annuler" : <><ChevronLeft className="h-5 w-5" /> Étape précédente</>}</button>
+          {active < SECTIONS.length - 1 ? (
+            <>
+              <button type="button" className="avd-btn blue" disabled={saving} onClick={() => void save(false)}>Enregistrer maintenant</button>
+              <button type="button" className="avd-btn main" onClick={() => goto(active + 1)}>Étape suivante : {SECTIONS[active + 1]} <ChevronRight className="h-5 w-5" /></button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="avd-btn blue" disabled={saving} onClick={() => void save(true)}>Enregistrer et en ajouter un autre</button>
+              <button type="button" className="avd-btn main" disabled={saving} onClick={() => void save(false)}>{saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />} Enregistrer le véhicule</button>
+            </>
+          )}
         </footer>
       </div>
     </div>
