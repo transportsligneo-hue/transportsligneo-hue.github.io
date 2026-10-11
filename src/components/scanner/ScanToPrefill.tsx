@@ -11,7 +11,8 @@
  * Le parent conserve la responsabilité de mapper les champs sur son state.
  */
 import { useCallback, useState } from "react";
-import { ScanLine, Loader2, Sparkles, HelpCircle } from "lucide-react";
+import { ScanLine, Loader2, Sparkles } from "lucide-react";
+import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
@@ -51,7 +52,6 @@ export function ScanToPrefill({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const extract = useServerFn(scanDocumentExtract);
 
   const handleScanned = useCallback(async (file: File) => {
@@ -121,30 +121,7 @@ export function ScanToPrefill({
         )}
       </button>
 
-      {help && (
-        <>
-          <button
-            type="button"
-            aria-label="À quoi sert le scan ?"
-            onClick={() => setShowHelp((v) => !v)}
-            onBlur={() => setTimeout(() => setShowHelp(false), 150)}
-            className="p-1 rounded-full text-[#2f5fff]/70 hover:text-[#2f5fff] hover:bg-[#4f8cff]/10 transition"
-          >
-            <HelpCircle size={16} />
-          </button>
-          {showHelp && (
-            <div className="absolute z-50 top-full right-0 mt-2 w-72 rounded-xl bg-white border border-[#4f8cff]/30 shadow-xl p-3 text-left">
-              <p className="text-xs font-semibold text-[#0b1026] mb-1">Scan intelligent du véhicule</p>
-              <p className="text-[11px] leading-relaxed text-slate-600">
-                Photographiez la carte grise, un PV de livraison ou un bon de commande :
-                la plaque, le VIN, la marque, le modèle, l'énergie et la couleur sont
-                reconnus automatiquement et remplissent le formulaire ci-dessous.
-                Vous pouvez tout corriger ensuite.
-              </p>
-            </div>
-          )}
-        </>
-      )}
+      {help && <MissionRequestHelp topic="scanner" tone={variant === "purple" ? "violet" : "blue"} />}
 
       {open && (
         <DocumentScanner
