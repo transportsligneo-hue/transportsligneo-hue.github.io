@@ -64,5 +64,5 @@
 - [x] Protection SMS appliquée aussi dans la base (missions, devis, factures, parc, adresses, photos)
 - [x] Composants plaque (saisie + affichage) et bulles d'aide
 - [x] Nouvelle fenêtre « Ajouter un véhicule » (flotte + onglet Parc véhicules admin)
-- [ ] Remplacer la plaque dans tous les autres écrans (estimateur, demandes, devis, driver, admin, PDF)
+- [x] Remplacer la plaque dans tous les autres écrans (estimateur, demandes, devis, driver, admin, PDF)
 - [ ] Automatismes « Bientôt disponible » : brouillon convoyage garage, km auto, immobilisation, calendrier
