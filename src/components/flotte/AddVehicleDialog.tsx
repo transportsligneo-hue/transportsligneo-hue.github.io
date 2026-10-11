@@ -246,7 +246,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
     if (files.cg) await upload(vid, files.cg, "carte_grise");
     if (files.ct) await upload(vid, files.ct, "controle_technique");
     if (files.assurance) await upload(vid, files.assurance, "assurance");
-    for (const p of files.photos) await upload(vid, p, "photo");
+    for (const p of files.photos) await upload(vid, p, "autre");
     setSaving(false);
     toast.success("Véhicule enregistré");
     onSaved();
