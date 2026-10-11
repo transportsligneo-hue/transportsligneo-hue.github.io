@@ -54,7 +54,8 @@
 - [x] Titres accueil + FAQ : voile bleu + dernier mot bleu électrique (gris #3e4759 retiré), vérifié à l0027écran en clair.
 
 ## Corrections demandées le 11 octobre
-- [ ] Terminer les réglages SMS et le contrôle de connexion des espaces client, pro, flotte et convoyeur.
-- [ ] Demande groupée : plaque livraison unique, plaque retour automatique uniquement pour restitution, options communes et par véhicule sans prix affichés.
-- [ ] Admin : séparer clairement les véhicules et harmoniser les blocs de demande, conserver les détails et prix manuels.
-- [ ] Afficher la carte Mapbox même sans mission et garder les bulles intégralement à l’écran.
+- [ ] SMS : réglages raccordés aux profils client/pro/flotte/convoyeur, contrôle fermé en cas d’erreur, codes à usage unique et sessions antérieures à la réactivation rejetées. Protection des accès directs aux données encore à finaliser ; validation réelle d’activation/envoi/réception non réalisée. Session disponible admin sans identifiant de session utilisable pour son contrôle SMS.
+- [x] Demande groupée : plaque livraison unique, plaque retour avec recherche automatique uniquement pour restitution, métadonnées retour séparées, lavages communs/individuels sans prix sur les options. Contrôle depuis un vrai compte client reste non vérifié avec la session admin disponible.
+- [x] Admin : blocs véhicules davantage séparés, détails et prix manuels conservés ; barèmes de lavage extérieur/intérieur/complet éditables sans montant imposé. Tests du calcul des suppléments réussis.
+- [x] Carte Mapbox globe sans mission et bulle contenue dans l’écran : contrôle visuel isolé réussi, carte rendue, fermeture de la visite vérifiée. Contrôle dans un espace réel reste non vérifié avec la session admin disponible.
+- [ ] Nouveaux fichiers plaque et ajout véhicule : reportés à la demande de l’utilisateur jusqu’à finition des corrections précédentes.
