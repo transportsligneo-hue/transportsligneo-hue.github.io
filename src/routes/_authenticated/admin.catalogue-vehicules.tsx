@@ -10,13 +10,13 @@ export const Route = createFileRoute("/_authenticated/admin/catalogue-vehicules"
   component: CataloguePage,
 });
 
-const SUGGESTIONS: [string, string, string][] = [
-  ["Renault", "Clio", "essence"], ["Renault", "Captur", "hybride"], ["Renault", "Mégane E-Tech", "electrique"], ["Renault", "R5 E-Tech", "electrique"], ["Renault", "Austral", "hybride"], ["Renault", "Kangoo", "diesel"], ["Renault", "Trafic", "diesel"],
-  ["Peugeot", "208", "essence"], ["Peugeot", "2008", "essence"], ["Peugeot", "308", "hybride"], ["Peugeot", "3008", "hybride"], ["Peugeot", "e-208", "electrique"], ["Peugeot", "Partner", "diesel"], ["Peugeot", "Expert", "diesel"],
-  ["Citroën", "C3", "essence"], ["Citroën", "ë-C4", "electrique"], ["Citroën", "Berlingo", "diesel"], ["Dacia", "Sandero", "essence"], ["Dacia", "Duster", "essence"], ["Dacia", "Spring", "electrique"],
-  ["Tesla", "Model 3", "electrique"], ["Tesla", "Model Y", "electrique"], ["Volkswagen", "Golf", "essence"], ["Volkswagen", "Polo", "essence"], ["Volkswagen", "ID.3", "electrique"], ["Volkswagen", "ID.4", "electrique"],
-  ["Toyota", "Yaris", "hybride"], ["Toyota", "C-HR", "hybride"], ["Fiat", "500e", "electrique"], ["Kia", "EV6", "electrique"], ["Kia", "Niro", "hybride"], ["Hyundai", "Kona", "electrique"],
-  ["BMW", "Série 1", "essence"], ["BMW", "iX1", "electrique"], ["Mercedes-Benz", "Classe A", "essence"], ["Audi", "A3", "essence"], ["MG", "MG4", "electrique"], ["Skoda", "Octavia", "diesel"],
+const SUGGESTIONS: [string, string][] = [
+  ["Renault", "Clio"], ["Renault", "Captur"], ["Renault", "Mégane E-Tech"], ["Renault", "R5 E-Tech"], ["Renault", "Austral"], ["Renault", "Kangoo"], ["Renault", "Trafic"],
+  ["Peugeot", "208"], ["Peugeot", "2008"], ["Peugeot", "308"], ["Peugeot", "3008"], ["Peugeot", "e-208"], ["Peugeot", "Partner"], ["Peugeot", "Expert"],
+  ["Citroën", "C3"], ["Citroën", "ë-C4"], ["Citroën", "Berlingo"], ["Dacia", "Sandero"], ["Dacia", "Duster"], ["Dacia", "Spring"],
+  ["Tesla", "Model 3"], ["Tesla", "Model Y"], ["Volkswagen", "Golf"], ["Volkswagen", "Polo"], ["Volkswagen", "ID.3"], ["Volkswagen", "ID.4"],
+  ["Toyota", "Yaris"], ["Toyota", "C-HR"], ["Fiat", "500e"], ["Kia", "EV6"], ["Kia", "Niro"], ["Hyundai", "Kona"],
+  ["BMW", "Série 1"], ["BMW", "iX1"], ["Mercedes-Benz", "Classe A"], ["Audi", "A3"], ["MG", "MG4"], ["Skoda", "Octavia"],
 ];
 
 function Thumb({ path }: { path: string | null }) {
