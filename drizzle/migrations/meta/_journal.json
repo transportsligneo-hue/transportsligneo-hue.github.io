@@ -309,6 +309,13 @@
       "when": 1791749740219,
       "tag": "0043_vehicle_km_after_mission",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791750304266,
+      "tag": "0044_feature_flags_and_org_name_sync",
+      "breakpoints": true
     }
   ]
 }
