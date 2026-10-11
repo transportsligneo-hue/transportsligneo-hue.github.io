@@ -466,7 +466,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
           <aside className="avd-side" aria-label="Aperçu en direct">
             <p className="avd-side-title">Aperçu en direct</p>
             <div className="avd-vcard">
-              {photoUrl ? <img src={photoUrl} alt={[f.marque, f.modele].join(" ")} className="avd-photo" /> : CAT_IMG[f.categorie] ? <img src={CAT_IMG[f.categorie]} alt={CATS.find(([c]) => c === f.categorie)?.[1] ?? ""} className="avd-photo avd-cat-img" /> : <svg viewBox="0 0 120 48" className="avd-car" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M8 34h104M14 34l6-12c2-4 5-6 10-6h50c5 0 8 2 11 6l9 12" /><circle cx="32" cy="36" r="6" /><circle cx="88" cy="36" r="6" /><path d="M36 16l-4 10h56l-6-10" /></svg>}
+              {photoUrl ? <img src={photoUrl} alt={[f.marque, f.modele].join(" ")} className="avd-photo" /> : <img src={CAT_IMG[f.categorie] ?? CAT_IMG.berline} alt="" className="avd-photo avd-cat-img" />}
               <strong>{[f.marque, f.modele].filter(Boolean).join(" ") || "Nouveau véhicule"}</strong>
               <span>{[ENERGIES.find(([e]) => e === f.energie)?.[1], CATS.find(([c]) => c === f.categorie)?.[1], f.couleur, f.kilometrage && `${Number(f.kilometrage).toLocaleString("fr-FR")} km`].filter(Boolean).join(" · ") || "Caractéristiques à renseigner"}</span>
               {f.immatriculation && <PlateBadge plate={f.immatriculation} size="md" />}
