@@ -8230,6 +8230,45 @@ export type Database = {
           },
         ]
       }
+      vehicle_catalog: {
+        Row: {
+          actif: boolean
+          categorie: string | null
+          created_at: string
+          energie: string | null
+          id: string
+          marque: string
+          modele: string
+          photo_path: string | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          actif?: boolean
+          categorie?: string | null
+          created_at?: string
+          energie?: string | null
+          id?: string
+          marque: string
+          modele: string
+          photo_path?: string | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          actif?: boolean
+          categorie?: string | null
+          created_at?: string
+          energie?: string | null
+          id?: string
+          marque?: string
+          modele?: string
+          photo_path?: string | null
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       vehicle_cost_audit: {
         Row: {
           action: string
