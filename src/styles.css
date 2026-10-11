@@ -11398,3 +11398,12 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 .lig-help-round { width: 34px; height: 34px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid var(--pro-border, #e2e8f0); color: inherit; opacity: .75; transition: all .2s; }
 .lig-help-round:hover { opacity: 1; border-color: #2f5fff; box-shadow: 0 0 12px -2px rgba(47,95,255,.5); }
+
+/* Shared separation for vehicle rows, scoped to request forms. */
+.grouped-vehicle-panel {
+  border: 2px solid var(--pro-border);
+  border-left: 5px solid var(--pro-accent);
+  border-radius: 8px;
+  background: var(--pro-surface, var(--pro-bg));
+  box-shadow: var(--shadow-pro-card);
+}

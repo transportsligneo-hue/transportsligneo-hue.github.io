@@ -44,7 +44,7 @@ export function UserMfaSettingsCard({ defaultPhone = "" }: { defaultPhone?: stri
             Un code à 6 chiffres vous est demandé à chaque nouvelle connexion, en plus du mot de passe.
           </p>
         </div>
-        {!loading && (
+        {!loading && !loadError && (
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${enabled ? "bg-emerald-500/15 text-emerald-600" : "bg-pro-border text-pro-text-soft"}`}>
             {enabled ? "Active" : "Désactivée"}
           </span>
@@ -85,6 +85,11 @@ export function UserMfaSettingsCard({ defaultPhone = "" }: { defaultPhone?: stri
               Activer
             </Button>
             <Button type="button" className="px-3 py-2 text-sm text-pro-text-soft" onClick={() => setStep("phone")}>Changer de numéro</Button>
+            <Button type="button" variant="outline" disabled={busy}
+              onClick={() => run(async () => { await enroll({ data: { phone } }); setCode(""); toast.success("Nouveau code envoyé"); })}>
+              Renvoyer le code
+            </Button>
+            <Button type="button" variant="ghost" disabled={busy} onClick={() => { setStep("idle"); setCode(""); }}>Annuler</Button>
           </div>
         </div>
       )}
