@@ -13,6 +13,9 @@ export type OptionKey =
   | "recharge_electrique_livraison"
   | "plein_essence"
   | "nettoyage"
+  | "lavage_ext"
+  | "lavage_int"
+  | "lavage_full"
   | "mise_en_main"
   | "express";
 
@@ -196,6 +199,9 @@ export function computeOptionSupplements(
     recharge_electrique_livraison: "Recharge électrique pour livraison",
     plein_essence: "Appoint carburant",
     nettoyage: "Nettoyage véhicule",
+    lavage_ext: "Lavage extérieur",
+    lavage_int: "Lavage intérieur",
+    lavage_full: "Lavage extérieur + intérieur",
     mise_en_main: "Mise en main du véhicule",
     express: "Convoyage express",
   };
