@@ -349,9 +349,15 @@ function ProMissionsIndex() {
         highlight="missions"
         subtitle="De la demande à la livraison, en un seul endroit."
         actions={
-          <Link
-            to="/dashboard-pro/nouvelle-demande"
-            data-tour="new-mission"
+          <>
+            <HelpTip
+              tone="violet"
+              title="Vos missions, de A à Z"
+              text="Chaque demande validée devient une mission. Ouvrez-la pour suivre le convoyeur en direct, voir les photos de l'état des lieux, télécharger les procès-verbaux et récupérer la facture. Utilisez la recherche et les filtres pour retrouver une mission par numéro, ville, véhicule ou période."
+            />
+            <Link
+              to="/dashboard-pro/nouvelle-demande"
+              data-tour="new-mission"
             className="flex items-center gap-1.5 rounded-[9px] fleet-btn-violet px-4 py-2.5 text-[12.5px] font-semibold transition-colors"
           >
             <PlusCircle size={14} /> Nouvelle mission
