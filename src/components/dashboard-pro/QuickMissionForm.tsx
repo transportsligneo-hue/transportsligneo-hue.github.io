@@ -1,6 +1,19 @@
 import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
 import { HelpTip } from "@/components/ui/HelpTip";
 import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
+import { GuidedTour, type TourStep } from "@/components/onboarding/GuidedTour";
+
+const QUICK_TOUR: TourStep[] = [
+  { target: '.qm-card:has(> h2 [data-help-topic="trip"])', title: "Choisissez le type de prestation", body: "Livraison simple : un aller. Restitution et livraison : on livre un véhicule et on reprend l'ancien. Recharge électrique : on recharge et on ramène. Le formulaire s'adapte à votre choix." },
+  { target: 'div:has(> [data-help-topic="phone"])', title: "Scanner la carte grise", body: "Prenez la carte grise en photo, ou envoyez-la depuis votre téléphone. La marque, le modèle, la motorisation et le VIN se remplissent tout seuls." },
+  { target: 'div:has(> div > [data-help-topic="plate"])', title: "Où mettre la plaque", body: "Tapez la plaque dans ce cadre, les tirets se placent tout seuls. Cliquez sur la loupe pour retrouver le véhicule. Vous pouvez aussi tout saisir à la main." },
+  { target: '.qm-card:has(> div > h2 [data-help-topic="return"])', title: "Le véhicule repris", body: "En restitution et livraison, renseignez ici la plaque et le modèle du véhicule que nous ramenons. Il peut aussi être scanné." },
+  { target: '.qm-card:has(> h2 [data-help-topic="options"])', title: "Options et planning", body: "Ajoutez les options utiles comme le lavage ou la mise en main. Elles apparaîtront sur votre facture uniquement si vous les cochez." },
+  { target: 'div.rounded-lg:has(> div > [data-help-topic="jockeyage"])', title: "Services de jockeyage", body: "Nous emmenons votre véhicule au contrôle technique, en révision, chez le carrossier ou pour les pneus, puis nous le ramenons." },
+  { target: 'div:has(> div.mb-2 > [data-help-topic="planning"])', title: "Dates et horaires", body: "Choisissez le jour et l'heure d'enlèvement, puis ceux de livraison. En restitution et livraison, indiquez aussi le retour." },
+  { target: 'section:has(> div > h2 [data-help-topic="recap"])', title: "Récapitulatif", body: "Relisez le trajet, le véhicule et l'estimation avant l'envoi." },
+  { target: 'form:has([data-help-topic="request"]) button[type="submit"]', title: "Envoyez votre demande", body: "Un clic suffit. Notre équipe la traite sous 24 h et vous suivez ensuite la mission en direct depuis votre espace." },
+];
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -761,6 +774,7 @@ export default function QuickMissionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-2 text-sm font-semibold text-pro-text">Votre demande, étape par étape <MissionRequestHelp topic="request" /></div>
+      <GuidedTour id="quick-request" steps={QUICK_TOUR} />
       {(drafts.length > 0 || draftNumero) && (
         <section className="qm-card p-4">
           <h2 className="qm-section-title mb-2"><Save size={14} className="text-pro-accent" /> Brouillons</h2>

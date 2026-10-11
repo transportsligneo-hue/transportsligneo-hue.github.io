@@ -1,4 +1,15 @@
 import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
+import { GuidedTour, type TourStep } from "@/components/onboarding/GuidedTour";
+
+const GROUPED_TOUR: TourStep[] = [
+  { target: '[data-tour="gm-addresses"]', title: "Le trajet commun du lot", body: "Indiquez ici l'adresse d'enlèvement et de livraison partagée par tous les véhicules. Vous pouvez choisir une adresse favorite, puis personnaliser un véhicule si besoin." },
+  { target: '[data-tour="gm-vehicle"]', title: "Ajoutez vos véhicules", body: "Chaque ligne correspond à un véhicule. Saisissez sa plaque : la marque, le modèle et la motorisation se remplissent tout seuls. Ajoutez autant de lignes que nécessaire." },
+  { target: 'div.mt-3:has(> div.mb-2 > [data-help-topic="trip"])', title: "Un type de trajet par véhicule", body: "Un même lot peut mélanger livraison simple, restitution et livraison, et recharge électrique. En restitution et livraison, une seconde plaque apparaît pour le véhicule repris." },
+  { target: '[data-tour="gm-commonOptions"]', title: "Options communes", body: "Les options cochées ici s'appliquent à tout le lot : lavage, recharge, mise en main." },
+  { target: 'div:has(> div.flex > [data-help-topic="jockeyage"])', title: "Services de jockeyage", body: "Contrôle technique, révision, pneus, carrosserie : cochez les passages en atelier à prévoir pour les véhicules du lot." },
+  { target: '[data-tour="gm-planning"]', title: "Le planning du lot", body: "Choisissez la date et le créneau souhaités pour la prise en charge du groupe de véhicules." },
+  { target: '[data-tour="gm-recap"]', title: "Récapitulatif et envoi", body: "Vérifiez chaque véhicule, son trajet et l'estimation, puis envoyez. Le devis est validé lot par lot, et vous êtes prévenu à chaque étape." },
+];
 import { JOKEAGE_SERVICES } from "@/lib/jokeage-services";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
@@ -445,6 +456,7 @@ function GroupedMissionForm() {
         <Layers className="h-6 w-6 text-[#7c5cff]" /> Mission groupée
         <MissionRequestHelp topic="grouped" />
       </h1>
+      <GuidedTour id="grouped-request" steps={GROUPED_TOUR} />
       <div className="mt-4 rounded-xl border border-[#7c5cff]/25 bg-[#7c5cff]/[0.05] p-4">
         <p className="text-[13.5px] font-semibold text-slate-900">Une seule demande, des prestations mixées</p>
         <ul className="mt-2 grid gap-1.5 text-[13px] text-slate-600 sm:grid-cols-2">
@@ -816,7 +828,7 @@ function Card({
   num, title, badge, children, helpTopic,
 }: { num?: string; title: string; badge?: string; children: React.ReactNode; helpTopic?: React.ComponentProps<typeof MissionRequestHelp>["topic"] }) {
   return (
-    <section className="qm-card mb-4 p-5 md:px-6 md:py-[22px]">
+    <section className="qm-card mb-4 p-5 md:px-6 md:py-[22px]" data-tour={helpTopic ? `gm-${helpTopic}` : undefined}>
       <header className="mb-4 flex items-center gap-2.5">
         {num && (
           <span className="flex h-6 w-6 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#2f5fff] to-[#7c5cff] text-xs font-bold text-white shadow-[0_6px_14px_-6px_rgba(47,95,255,.8)]">

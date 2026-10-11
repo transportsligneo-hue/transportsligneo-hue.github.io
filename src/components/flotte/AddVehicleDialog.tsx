@@ -12,6 +12,24 @@ import { logoLigneoSeasonal } from "@/lib/seasonal-logo";
 import { plateKey, plateValidity } from "@/lib/plate-format";
 import { annualCost, daysUntil, dueTone, firstTechnicalControl, nextRevision } from "@/lib/vehicle-schedule";
 import { confirmToast } from "@/lib/confirm-toast";
+import { GuidedTour, type TourStep } from "@/components/onboarding/GuidedTour";
+import imgCitadine from "@/assets/vehicule-citadine.png.asset.json";
+import imgBerline from "@/assets/vehicule-berline.png.asset.json";
+import imgSuv from "@/assets/vehicule-suv.png.asset.json";
+import imgUtilitaire from "@/assets/vehicule-utilitaire.png.asset.json";
+import imgFourgon from "@/assets/vehicule-fourgon.png.asset.json";
+
+const CAT_IMG: Record<string, string> = { citadine: imgCitadine.url, berline: imgBerline.url, suv: imgSuv.url, utilitaire: imgUtilitaire.url, fourgon: imgFourgon.url };
+
+const AVD_TOUR: TourStep[] = [
+  { target: ".avd-pills", title: "Sept étapes, dans l'ordre", body: "Identification, caractéristiques, échéances, entretien, contrat, affectation et automatismes. Cliquez sur une pastille pour aller directement à une étape, rien n'est perdu." },
+  { target: '[data-avd-sec="0"]', title: "Commencez par la plaque", body: "Tapez la plaque dans le cadre, les tirets se placent tout seuls. La loupe retrouve la marque, le modèle et la motorisation." },
+  { target: ".avd-vcard", title: "Aperçu en direct", body: "La fiche se construit pendant la saisie. L'image suit la catégorie choisie : citadine, berline, SUV, utilitaire ou fourgon. Une vraie photo ajoutée remplace l'image." },
+  { target: ".avd-ring", title: "Dossier complet", body: "Ce cercle montre ce qui reste à remplir. Plus le dossier est complet, plus les rappels sont précis." },
+  { target: ".avd-timeline", title: "Prochaines échéances", body: "Contrôle technique, assurance, révision : les dates se calculent toutes seules et passent au rouge une fois dépassées." },
+  { target: ".avd-autocount", title: "Automatismes", body: "Rappels, relevé du kilométrage après chaque mission, proposition de convoyage au garage : tout se règle à la dernière étape." },
+  { target: ".avd-foot", title: "Avancez ou enregistrez", body: "Passez d'une étape à l'autre avec les boutons du bas. Enregistrer maintenant garde le véhicule tout de suite, vous compléterez plus tard." },
+];
 
 type Site = { id: string; nom: string };
 type Driver = { id: string; label: string };
@@ -278,6 +296,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
 
   return (
     <div className="avd-overlay" role="dialog" aria-modal="true" aria-labelledby="avd-title">
+      <GuidedTour id="add-vehicle" steps={AVD_TOUR} delay={700} />
       <div className="avd-modal">
         <header className="avd-head">
           <img src={logoLigneoSeasonal()} alt="Transports Ligneo" className="avd-logo" />
@@ -447,7 +466,7 @@ export function AddVehicleDialog({ organizationId, onClose, onSaved, onOpenExist
           <aside className="avd-side" aria-label="Aperçu en direct">
             <p className="avd-side-title">Aperçu en direct</p>
             <div className="avd-vcard">
-              {photoUrl ? <img src={photoUrl} alt={[f.marque, f.modele].join(" ")} className="avd-photo" /> : <svg viewBox="0 0 120 48" className="avd-car" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M8 34h104M14 34l6-12c2-4 5-6 10-6h50c5 0 8 2 11 6l9 12" /><circle cx="32" cy="36" r="6" /><circle cx="88" cy="36" r="6" /><path d="M36 16l-4 10h56l-6-10" /></svg>}
+              {photoUrl ? <img src={photoUrl} alt={[f.marque, f.modele].join(" ")} className="avd-photo" /> : CAT_IMG[f.categorie] ? <img src={CAT_IMG[f.categorie]} alt={CATS.find(([c]) => c === f.categorie)?.[1] ?? ""} className="avd-photo avd-cat-img" /> : <svg viewBox="0 0 120 48" className="avd-car" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M8 34h104M14 34l6-12c2-4 5-6 10-6h50c5 0 8 2 11 6l9 12" /><circle cx="32" cy="36" r="6" /><circle cx="88" cy="36" r="6" /><path d="M36 16l-4 10h56l-6-10" /></svg>}
               <strong>{[f.marque, f.modele].filter(Boolean).join(" ") || "Nouveau véhicule"}</strong>
               <span>{[ENERGIES.find(([e]) => e === f.energie)?.[1], CATS.find(([c]) => c === f.categorie)?.[1], f.couleur, f.kilometrage && `${Number(f.kilometrage).toLocaleString("fr-FR")} km`].filter(Boolean).join(" · ") || "Caractéristiques à renseigner"}</span>
               {f.immatriculation && <PlateBadge plate={f.immatriculation} size="md" />}

@@ -22,5 +22,5 @@ const topics = {
 
 export function MissionRequestHelp({ topic, tone = "violet" }: { topic: keyof typeof topics; tone?: "blue" | "violet" }) {
   const [title, text] = topics[topic];
-  return <HelpTip title={title} text={text} tone={tone} />;
+  return <span data-help-topic={topic} className="inline-flex"><HelpTip title={title} text={text} tone={tone} /></span>;
 }
