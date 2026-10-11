@@ -1,3 +1,4 @@
+import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
 import { createFileRoute } from "@tanstack/react-router";
 import ClientPageHeader from "@/components/dashboard/ClientPageHeader";
 import { useEffect, useState, type FormEvent } from "react";
@@ -8,6 +9,7 @@ import { User, Mail, Phone, Lock, Loader2, CheckCircle, AlertCircle } from "luci
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 export const Route = createFileRoute("/_authenticated/dashboard-client/profil")({
+  head: () => ({ meta: [{ title: "Mon profil client | Transports Ligneo" }, { name: "description", content: "Informations personnelles et sécurité SMS de votre compte client." }, { property: "og:title", content: "Mon profil client | Transports Ligneo" }, { property: "og:description", content: "Informations personnelles et sécurité SMS de votre compte client." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ClientProfil,
 });
 
@@ -197,6 +199,7 @@ function ClientProfil() {
           </button>
         </div>
       </form>
+      <UserMfaSettingsCard defaultPhone={form.telephone} />
     </div>
   );
 }

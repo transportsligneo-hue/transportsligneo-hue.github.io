@@ -1,3 +1,4 @@
+import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,7 @@ import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { computeNiveauProgress, niveauLabel } from "@/lib/convoyeur-niveau";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/profil")({
+  head: () => ({ meta: [{ title: "Mon profil convoyeur | Transports Ligneo" }, { name: "description", content: "Informations professionnelles et sécurité SMS de votre compte convoyeur." }, { property: "og:title", content: "Mon profil convoyeur | Transports Ligneo" }, { property: "og:description", content: "Informations professionnelles et sécurité SMS de votre compte convoyeur." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ConvoyeurProfil,
 });
 
@@ -273,6 +275,7 @@ function ConvoyeurProfil() {
           </button>
         </div>
       </form>
+      <UserMfaSettingsCard defaultPhone={form.telephone} />
     </div>
   );
 }

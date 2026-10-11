@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
@@ -45,7 +45,9 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "recharge_electrique", label: "Recharge électrique pour trajet", desc: "Brancher pour le trajet", Icon: Zap },
   { key: "recharge_electrique_livraison", label: "Recharge électrique pour livraison", desc: "Recharge avant la remise du véhicule", Icon: Zap },
   { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
-  { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
+  { key: "lavage_ext", label: "Lavage extérieur", desc: "Nettoyage de la carrosserie", Icon: Sparkle },
+  { key: "lavage_int", label: "Lavage intérieur", desc: "Nettoyage de l’habitacle", Icon: Sparkle },
+  { key: "lavage_full", label: "Lavage extérieur + intérieur", desc: "Nettoyage complet du véhicule", Icon: Sparkle },
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
 ];
 
@@ -74,6 +76,11 @@ type VehicleRow = {
   arrivee: string;
   tripType: GroupedTripType;
   immatRetour: string;
+  marqueRetour: string;
+  modeleRetour: string;
+  vinRetour: string;
+  energieRetour: string;
+  busyRetour: boolean;
   open: boolean;
   busy: boolean;
   options: Partial<Record<OptionKey, boolean>>;
@@ -83,7 +90,7 @@ type VehicleRow = {
 const newRow = (): VehicleRow => ({
   key: crypto.randomUUID(),
   immat: "", marque: "", modele: "", energie: "", type: "", vin: "", km: "", notes: "",
-  arrivee: "", tripType: "aller-simple", immatRetour: "", open: false, busy: false, options: {}, optionsOverride: false,
+  arrivee: "", tripType: "aller-simple", immatRetour: "", marqueRetour: "", modeleRetour: "", vinRetour: "", energieRetour: "", busyRetour: false, open: false, busy: false, options: {}, optionsOverride: false,
 });
 
 const fieldCls = "qm-input";
@@ -97,6 +104,9 @@ function GroupedMissionForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const createGrouped = useServerFn(createGroupedMission);
+  const lookup = useServerFn(lookupPlate);
+  const plateRequests = useRef(new Map<string, string>());
+  const plateRows = useRef<VehicleRow[]>([]);
 
   const [profile, setProfile] = useState<{ email: string; display: "ttc" | "ht" | "exempt" } | null>(null);
   const [favorites, setFavorites] = useState<FavoriteAddress[]>([]);
@@ -178,20 +188,29 @@ function GroupedMissionForm() {
   }, []);
 
   // Récupération auto par plaque (même logique que Mission simple)
-  const fetchPlate = async (row: VehicleRow) => {
-    const plate = row.immat.trim();
+  const fetchPlate = async (row: VehicleRow, retour = false) => {
+    const plate = (retour ? row.immatRetour : row.immat).trim();
+    const requestKey = `${row.key}:${retour ? "retour" : "livraison"}`;
+    if (plateRequests.current.get(requestKey) === plate) return;
+    plateRequests.current.set(requestKey, plate);
     if (plate.length < 4) {
       toast.error("Saisissez une plaque valide");
       return;
     }
-    patchRow(row.key, { busy: true });
+    patchRow(row.key, retour ? { busyRetour: true } : { busy: true });
     try {
-      const result = await lookupPlate({ data: { plate } });
+      const result = await lookup({ data: { plate } });
+      const current = plateRows.current.find((r) => r.key === row.key);
+      if (!current || (retour ? current.immatRetour : current.immat).trim() !== plate) return;
       if (!result.ok || !result.data) {
         toast.error(result.error || "Aucune donnée trouvée · remplissez manuellement");
         return;
       }
       const d = result.data;
+      if (retour) {
+        patchRow(row.key, { marqueRetour: d.marque || "", modeleRetour: d.modele || "", vinRetour: normalizeVin(d.vin || ""), energieRetour: d.energie || d.carburant || "" });
+        return;
+      }
       const patch: Partial<VehicleRow> = {};
       if (d.marque) patch.marque = d.marque;
       if (d.modele) patch.modele = d.modele;
@@ -209,11 +228,25 @@ function GroupedMissionForm() {
       patchRow(row.key, patch);
       toast.success("Informations véhicule récupérées");
     } catch {
+      plateRequests.current.delete(requestKey);
       toast.error("Service indisponible · remplissez manuellement");
     } finally {
-      patchRow(row.key, { busy: false });
+      patchRow(row.key, retour ? { busyRetour: false } : { busy: false });
     }
   };
+
+  plateRows.current = rows;
+  const plateSignature = rows.map((r) => `${r.key}:${r.immat}:${r.tripType}:${r.immatRetour}`).join("|");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      for (const row of plateRows.current) {
+        if (/^(?:[A-Z]{2}[- ]?\d{3}[- ]?[A-Z]{2}|\d{1,4}[- ]?[A-Z]{1,3}[- ]?\d{2,3})$/.test(row.immat.trim())) void fetchPlate(row);
+        if (row.tripType === "aller-retour" && /^(?:[A-Z]{2}[- ]?\d{3}[- ]?[A-Z]{2}|\d{1,4}[- ]?[A-Z]{1,3}[- ]?\d{2,3})$/.test(row.immatRetour.trim())) void fetchPlate(row, true);
+      }
+    }, 650);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plateSignature]);
 
   const enteredDestFor = useCallback(
     (r: VehicleRow) => (sameDest ? commonArrivee : r.arrivee),
@@ -319,6 +352,10 @@ function GroupedMissionForm() {
             arrivee: destFor(r),
             tripType: r.tripType,
             immatriculationRetour: r.tripType === "aller-retour" && r.immatRetour.trim() ? r.immatRetour.trim().toUpperCase() : null,
+            marqueRetour: r.tripType === "aller-retour" ? r.marqueRetour || null : null,
+            modeleRetour: r.tripType === "aller-retour" ? r.modeleRetour || null : null,
+            vinRetour: r.tripType === "aller-retour" ? r.vinRetour || null : null,
+            energieRetour: r.tripType === "aller-retour" ? r.energieRetour || null : null,
             prixTtc: prices[r.key] ?? 0,
             optionsMeta: Object.fromEntries(
               Object.entries(r.optionsOverride ? r.options : options).filter(([, v]) => !!v),
@@ -486,10 +523,10 @@ function GroupedMissionForm() {
           {rows.map((r) => {
             const info = [r.marque, r.modele].filter(Boolean).join(" ");
             return (
-              <div key={r.key} className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <div key={r.key} className="grouped-vehicle-panel p-4">
                 <div className="flex flex-wrap items-end gap-2.5">
                   <div className="w-[170px]">
-                    <span className={labelCls}>Immatriculation</span>
+                    <span className={labelCls}>Plaque livraison</span>
                     <input
                       className={`${fieldCls} font-mono font-bold tracking-[0.05em] uppercase`}
                       value={r.immat}
@@ -553,11 +590,7 @@ function GroupedMissionForm() {
                     ))}
                   </div>
                   {r.tripType === "aller-retour" && (
-                    <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
-                      <div>
-                        <span className={labelCls}>Plaque livraison</span>
-                        <input className={`${fieldCls} uppercase tracking-widest`} value={r.immat} readOnly placeholder="Plaque ci-dessus" />
-                      </div>
+                    <div className="mt-2.5">
                       <div>
                         <span className={labelCls}>Plaque retour (restitution)</span>
                         <input
@@ -567,6 +600,9 @@ function GroupedMissionForm() {
                           placeholder="AB-123-CD"
                           maxLength={32}
                         />
+                        {r.busyRetour && <Loader2 className="mt-2 h-4 w-4 animate-spin text-pro-accent" />}
+                        {(r.marqueRetour || r.modeleRetour) && <p className="mt-2 text-sm font-semibold text-pro-text">{[r.marqueRetour, r.modeleRetour].filter(Boolean).join(" ")}</p>}
+                        <input aria-label="VIN du véhicule restitué" className={`${fieldCls} mt-2 font-mono`} value={r.vinRetour} maxLength={17} onChange={(e) => patchRow(r.key, { vinRetour: normalizeVin(e.target.value) })} placeholder="VIN du véhicule restitué" />
                       </div>
                     </div>
                   )}
@@ -620,7 +656,7 @@ function GroupedMissionForm() {
                               r.options[o.key] ? "border-[#2f5fff] bg-[#eef2ff] text-[#2f5fff]" : "border-slate-200 bg-white text-slate-600"
                             }`}
                           >
-                            {o.label}{o.key === "recharge_electrique_livraison" ? ` (+${deliveryRechargeSurcharge} €)` : ""}
+                            {o.label}
                           </button>
                         ))}
                       </div>
@@ -662,7 +698,7 @@ function GroupedMissionForm() {
                 </span>
                 <span>
                   <b className="block text-[12.5px] text-slate-900">
-                    {o.label}{o.key === "recharge_electrique_livraison" ? ` (+${deliveryRechargeSurcharge} €)` : ""}
+                    {o.label}
                   </b>
                   <span className="text-[11px] text-slate-400">{o.desc}</span>
                 </span>

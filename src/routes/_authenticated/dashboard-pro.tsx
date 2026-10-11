@@ -1,3 +1,4 @@
+import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy, UserCog, CalendarDays, BarChart3, Network } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -87,7 +88,7 @@ function ProLayout() {
   return (
     <div className="dashboard-shell-light" data-account-type={accountType}>
       <ProSidebar items={navItems}>
-        <Outlet />
+        <UserMfaGate label="Espace client"><Outlet /></UserMfaGate>
       </ProSidebar>
     </div>
   );

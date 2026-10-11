@@ -77,7 +77,9 @@ const OPTIONS_DEF: { key: OptionKey; label: string; desc: string; Icon: typeof Z
   { key: "recharge_electrique", label: "Recharge électrique pour trajet", desc: "Brancher pour le trajet", Icon: Zap },
   { key: "recharge_electrique_livraison", label: "Recharge électrique pour livraison", desc: "Recharge avant la remise du véhicule", Icon: Zap },
   { key: "plein_essence", label: "Appoint carburant", desc: "Carburant ajouté selon le niveau souhaité", Icon: Fuel },
-  { key: "nettoyage", label: "Nettoyage véhicule", desc: "Lavage extérieur si utile", Icon: Sparkle },
+  { key: "lavage_ext", label: "Lavage extérieur", desc: "Nettoyage de la carrosserie", Icon: Sparkle },
+  { key: "lavage_int", label: "Lavage intérieur", desc: "Nettoyage de l’habitacle", Icon: Sparkle },
+  { key: "lavage_full", label: "Lavage extérieur + intérieur", desc: "Nettoyage complet du véhicule", Icon: Sparkle },
   { key: "mise_en_main", label: "Mise en main du véhicule", desc: "Remise en main propre avec clés et documents", Icon: KeyRound },
 ];
 
@@ -1181,9 +1183,6 @@ export default function QuickMissionForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
           {OPTIONS_DEF.map(({ key, label, desc, Icon }) => {
             const checked = !!options[key];
-            const sup = key === "recharge_electrique_livraison"
-              ? deliveryRechargeSurcharge
-              : pricing?.supplements?.[key];
             return (
               <label
                 key={key}
@@ -1202,11 +1201,6 @@ export default function QuickMissionForm({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-pro-text flex items-center gap-1.5">
                     <Icon size={13} className="text-pro-accent" /> {label}
-                    {sup != null && sup > 0 && (
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                        +{sup} €
-                      </span>
-                    )}
                   </p>
                   <p className="text-xs text-pro-text-soft mt-0.5">{desc}</p>
                 </div>

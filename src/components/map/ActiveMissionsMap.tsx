@@ -166,9 +166,9 @@ export function ActiveMissionsMap({
                 role="admin"
                 className="absolute inset-0 !rounded-none"
               />
-            ) : missions.length > 0 ? (
-              <LiveMissionMap points={[]} fleet={fleetPoints} hideOverlay className="absolute inset-0 !rounded-none" />
-            ) : null}
+            ) : (
+              <LiveMissionMap points={[]} fleet={fleetPoints} worldOverview={missions.length === 0} hideOverlay className="absolute inset-0 !rounded-none" />
+            )}
           </Suspense>
         )}
         {loading && (
