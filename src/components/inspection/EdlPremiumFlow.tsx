@@ -2362,6 +2362,11 @@ function KilometrageArea({
       <label style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600 }}>
         {step.id === "kilometrage_arrivee" ? "Kilométrage affiché à l'arrivée" : "Kilométrage affiché au départ"}
       </label>
+      {step.id === "kilometrage_arrivee" && (
+        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, margin: 0 }}>
+          Notez le kilométrage affiché au compteur à l'arrivée. Il met à jour la fiche du véhicule et la date de sa prochaine révision.
+        </p>
+      )}
       <input
         type="number"
         inputMode="numeric"
