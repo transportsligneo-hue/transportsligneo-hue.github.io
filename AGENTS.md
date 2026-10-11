@@ -34,3 +34,4 @@
 - Plates use shared PlateInput/PlateBadge so all screens share one normalized format.
 - User SMS MFA is enforced by restrictive RLS via user_mfa_satisfied(), so the UI gate cannot be bypassed.
 - Vehicle immobilisation runs in DB (trigger + daily cron via run_vehicle_automations) and only auto-lifts rows flagged immobilisation_auto, so manual immobilisations are never undone.
+- Human chat (chat_conversations/chat_messages) keeps client and convoyeur mission threads as separate conversations gated by chat_can_access(), with sender role set by a DB trigger, so clients and drivers can never read each other or spoof Ligneo; visitors only use token-scoped server functions.
