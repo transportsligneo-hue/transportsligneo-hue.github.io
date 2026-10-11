@@ -52,3 +52,9 @@
 - [x] Journal des actions par mission, préférences d'alertes, import CSV parc, bulles d'aide
 - [x] Accès démo privé sur invitation avec demande publique et gestion admin.
 - [x] Titres accueil + FAQ : voile bleu + dernier mot bleu électrique (gris #3e4759 retiré), vérifié à l0027écran en clair.
+
+## Corrections demandées le 11 octobre
+- [ ] Terminer les réglages SMS et le contrôle de connexion des espaces client, pro, flotte et convoyeur.
+- [ ] Demande groupée : plaque livraison unique, plaque retour automatique uniquement pour restitution, options communes et par véhicule sans prix affichés.
+- [ ] Admin : séparer clairement les véhicules et harmoniser les blocs de demande, conserver les détails et prix manuels.
+- [ ] Afficher la carte Mapbox même sans mission et garder les bulles intégralement à l’écran.
