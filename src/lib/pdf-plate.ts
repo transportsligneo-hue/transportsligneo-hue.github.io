@@ -1,3 +1,4 @@
+import { displayPlate } from "@/lib/plate-format";
 import type { jsPDF } from "jspdf";
 
 /**
@@ -21,13 +22,25 @@ export function plateTagWidth(doc: jsPDF, text: string, fs = 8.4): number {
   const textW = doc.getTextWidth(label) + track * Math.max(0, label.length - 1);
   doc.setFont(prevFont.fontName, prevFont.fontStyle);
   doc.setFontSize(prevSize);
-  return textW + 2.6 * 2 + 2.4 + 1.2;
+  void textW;
+  doc.setFont("courier", "bold");
+  doc.setFontSize(fs);
+  const scale = fs / 12;
+  const w = Math.max(37 * scale, doc.getTextWidth(displayPlate(text || "")) + 5 * scale + 6 * scale);
+  doc.setFont(prevFont.fontName, prevFont.fontStyle);
+  doc.setFontSize(prevSize);
+  return w;
 }
 
 /**
  * Dessine la plaque. `y` = haut du badge. Retourne la largeur occupée.
  */
 export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs = 8.4): number {
+  return drawTemplatePlate(doc, x, y, text, fs);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function legacyPlateTag(doc: jsPDF, x: number, y: number, text: string, fs = 8.4): number {
   const label = (text || "").toUpperCase();
   if (!label) return 0;
   const prevFont = doc.getFont();
@@ -69,7 +82,7 @@ export function drawPlateTag(doc: jsPDF, x: number, y: number, text: string, fs 
 
 /** Administrative plate from the supplied document templates. */
 export function drawTemplatePlate(doc: jsPDF, x: number, y: number, text: string, fs = 12): number {
-  const label = (text || "").toUpperCase();
+  const label = displayPlate(text || "");
   if (!label) return 0;
   const previous = doc.getFont();
   const previousSize = doc.getFontSize();
@@ -77,13 +90,15 @@ export function drawTemplatePlate(doc: jsPDF, x: number, y: number, text: string
   doc.setFontSize(fs);
   const scale = fs / 12;
   const band = 5 * scale;
+  doc.setFont("courier", "bold");
   const width = Math.max(37 * scale, doc.getTextWidth(label) + band + 6 * scale);
+  doc.setFont("helvetica", "bold");
   const height = 9 * scale;
   doc.setFillColor(232, 234, 239);
   doc.roundedRect(x + 0.4 * scale, y + 0.5 * scale, width, height, scale, scale, "F");
   doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(15, 23, 42);
-  doc.setLineWidth(0.45);
+  doc.setDrawColor(17, 17, 17);
+  doc.setLineWidth(0.7 * scale);
   doc.roundedRect(x, y, width, height, scale, scale, "FD");
   doc.setFillColor(9, 63, 195);
   doc.rect(x + 0.4 * scale, y + 0.4 * scale, band, height - 0.8 * scale, "F");
@@ -95,8 +110,9 @@ export function drawTemplatePlate(doc: jsPDF, x: number, y: number, text: string
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(5.5 * scale);
   doc.text("F", x + 2.9 * scale, y + 7.6 * scale, { align: "center" });
+  doc.setFont("courier", "bold");
   doc.setFontSize(fs);
-  doc.setTextColor(15, 23, 42);
+  doc.setTextColor(17, 17, 17);
   doc.text(label, x + band + 3.2 * scale, y + 6.3 * scale);
   doc.setFont(previous.fontName, previous.fontStyle);
   doc.setFontSize(previousSize);

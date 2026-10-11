@@ -295,6 +295,13 @@
       "when": 1791746806198,
       "tag": "0041_user_mfa_rls_and_vehicle_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1791749476470,
+      "tag": "0042_vehicle_immobilisation_and_automation_log",
+      "breakpoints": true
     }
   ]
 }

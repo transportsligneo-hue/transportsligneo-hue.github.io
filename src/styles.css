@@ -11545,3 +11545,13 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 @media (max-width:1024px){.avd-overlay{padding:0}.avd-modal{width:100%;height:100%;border-radius:0}.avd-body{grid-template-columns:1fr}.avd-side{display:none}}
 @media (max-width:640px){.avd-grid{grid-template-columns:1fr}.avd-head{padding:20px 16px 12px}.avd-head p{display:none}.avd-pills,.avd-scroll{padding-left:16px;padding-right:16px}.avd-foot{flex-wrap:wrap;padding:12px 16px}.avd-foot>span{width:100%}.avd-btn{flex:1;justify-content:center}}
 html:not(.theme-dark) .avd-modal.avd-light{background:#fff;color:#0b1a4a}
+
+/* Échéances véhicules dans le calendrier flotte */
+.pp-ech{background:rgba(93,224,255,.12);color:#0e7490}
+.pp-ech-soon{background:rgba(139,92,255,.14);color:#6d3df0}
+.pp-ech-urgent{background:rgba(236,72,153,.14);color:#be185d}
+.pp-ech-late{background:rgba(220,38,38,.14);color:#b91c1c}
+html.theme-dark .pp-ech{color:#5de0ff}
+html.theme-dark .pp-ech-soon{color:#b9a2ff}
+html.theme-dark .pp-ech-urgent{color:#f9a8d4}
+html.theme-dark .pp-ech-late{color:#fca5a5}

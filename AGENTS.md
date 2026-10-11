@@ -33,3 +33,4 @@
 
 - Plates use shared PlateInput/PlateBadge so all screens share one normalized format.
 - User SMS MFA is enforced by restrictive RLS via user_mfa_satisfied(), so the UI gate cannot be bypassed.
+- Vehicle immobilisation runs in DB (trigger + daily cron via run_vehicle_automations) and only auto-lifts rows flagged immobilisation_auto, so manual immobilisations are never undone.
