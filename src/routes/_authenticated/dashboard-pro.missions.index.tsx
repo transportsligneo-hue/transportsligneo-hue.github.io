@@ -377,7 +377,7 @@ function ProMissionsIndex() {
             className="w-full pl-9 pr-3 py-2 text-sm bg-pro-bg-soft border border-transparent focus:border-pro-accent focus:bg-white rounded-md outline-none transition-colors text-pro-text placeholder:text-pro-muted"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5" data-tour="missions-filters">
           {STATUTS.map((s) => (
             <button
               key={s}
@@ -392,7 +392,7 @@ function ProMissionsIndex() {
             </button>
           ))}
         </div>
-        <MissionViewSwitcher view={view} onChange={setView} className="md:ml-auto self-start" />
+        <div data-tour="missions-views"><MissionViewSwitcher view={view} onChange={setView} className="md:ml-auto self-start" /></div>
       </div>
 
       <div className="pp-filterbar flex flex-wrap items-center gap-2">
@@ -428,7 +428,7 @@ function ProMissionsIndex() {
       </div>
 
       {!loading && filter === "tous" && pendingFiltered.length > 0 && (
-        <div className="bg-white rounded-xl border border-pro-border overflow-hidden">
+        <div className="bg-white rounded-xl border border-pro-border overflow-hidden" data-tour="missions-pending">
           <div className="px-5 py-3 border-b border-pro-border flex items-center gap-2 bg-pro-bg-soft">
             <Clock size={14} className="text-pro-accent" />
             <h2 className="text-sm font-semibold text-pro-text">En cours de validation</h2>
