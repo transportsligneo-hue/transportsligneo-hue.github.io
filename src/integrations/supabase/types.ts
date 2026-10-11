@@ -8174,6 +8174,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_automation_logs: {
+        Row: {
+          automatisme: string
+          created_at: string
+          details: Json
+          id: string
+          message: string
+          organization_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          automatisme: string
+          created_at?: string
+          details?: Json
+          id?: string
+          message: string
+          organization_id: string
+          vehicle_id: string
+        }
+        Update: {
+          automatisme?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          message?: string
+          organization_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_automation_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_cost_audit: {
         Row: {
           action: string
@@ -8592,6 +8630,9 @@ export type Database = {
           fin_de_vie_prevue: string | null
           id: string
           immatriculation: string | null
+          immobilisation_auto: boolean
+          immobilisation_motif: string | null
+          immobilise_le: string | null
           intervalle_revision_km: number | null
           intervalle_revision_mois: number | null
           kilometrage: number | null
@@ -8608,6 +8649,7 @@ export type Database = {
           prochaine_revision_km: number | null
           site_id: string | null
           statut: string
+          statut_precedent: string | null
           type_vehicule: string | null
           updated_at: string
           valeur_revente_estimee: number | null
@@ -8633,6 +8675,9 @@ export type Database = {
           fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
+          immobilisation_auto?: boolean
+          immobilisation_motif?: string | null
+          immobilise_le?: string | null
           intervalle_revision_km?: number | null
           intervalle_revision_mois?: number | null
           kilometrage?: number | null
@@ -8649,6 +8694,7 @@ export type Database = {
           prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
+          statut_precedent?: string | null
           type_vehicule?: string | null
           updated_at?: string
           valeur_revente_estimee?: number | null
@@ -8674,6 +8720,9 @@ export type Database = {
           fin_de_vie_prevue?: string | null
           id?: string
           immatriculation?: string | null
+          immobilisation_auto?: boolean
+          immobilisation_motif?: string | null
+          immobilise_le?: string | null
           intervalle_revision_km?: number | null
           intervalle_revision_mois?: number | null
           kilometrage?: number | null
@@ -8690,6 +8739,7 @@ export type Database = {
           prochaine_revision_km?: number | null
           site_id?: string | null
           statut?: string
+          statut_precedent?: string | null
           type_vehicule?: string | null
           updated_at?: string
           valeur_revente_estimee?: number | null
@@ -9296,6 +9346,10 @@ export type Database = {
       }
       admin_reset_operational_data: { Args: never; Returns: Json }
       admin_run_alert_detection: { Args: never; Returns: Json }
+      admin_run_vehicle_automations: {
+        Args: { _today?: string }
+        Returns: Json
+      }
       admin_set_mission_po: {
         Args: { _apply_group?: boolean; _attribution_id: string; _po: string }
         Returns: number
@@ -9833,6 +9887,7 @@ export type Database = {
           status: string
         }[]
       }
+      run_vehicle_automations: { Args: { _today?: string }; Returns: Json }
       service_convert_demande_to_missions: {
         Args: { _converted_by: string; _demande_id: string }
         Returns: {
@@ -9910,6 +9965,10 @@ export type Database = {
           _signature: string
           _signer_name: string
         }
+        Returns: string
+      }
+      vehicle_check_immobilisation: {
+        Args: { _today?: string; _vehicle_id: string }
         Returns: string
       }
       verify_certificate: {
