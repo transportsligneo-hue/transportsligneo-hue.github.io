@@ -1,3 +1,5 @@
+import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
+
 type DocumentSource = Record<string, unknown>;
 
 export interface InvoiceVehicle {
@@ -22,7 +24,12 @@ export function invoiceSourceOptions(source: DocumentSource): string[] | null {
 export function invoiceSelectedOptions(options?: string[] | null, message?: string | null): string[] {
   const selected = options ?? (message?.match(/^Options?\s*:\s*(.*)$/im)?.[1]?.split(",") ?? []);
   return [...new Set(selected.map((value) => {
-    const normalized = value.trim().replace(/_/g, " ");
+    const trimmed = value.trim();
+    const jokeKey = trimmed.replace(/^jockey_/i, "");
+    if (/^jockey_/i.test(trimmed) && JOKEAGE_LABELS[jokeKey]) return `Jockeyage : ${JOKEAGE_LABELS[jokeKey]}`;
+    if (JOKEAGE_LABELS[trimmed]) return `Jockeyage : ${JOKEAGE_LABELS[trimmed]}`;
+    const normalized = trimmed.replace(/_/g, " ");
+    if (/^jockeyage\s*:/i.test(normalized)) return normalized;
     if (/^recharge\s+(?:électrique|electrique|elec|livraison)(?:\s|$)/i.test(normalized)) return "Recharge électrique";
     if (/^mise\s+en\s+main(?:\s+du\s+v[ée]hicule)?$/i.test(normalized)) return "Mise en main";
     return normalized;
