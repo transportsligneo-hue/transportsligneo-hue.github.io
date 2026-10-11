@@ -174,5 +174,6 @@ function VisitorConseiller({ summary }: { summary?: string }) {
         <button type="submit" className="lgc-send" disabled={busy || !text.trim()} aria-label="Envoyer"><Send size={18} /></button>
       </form>
     </div>
+    </>
   );
 }
