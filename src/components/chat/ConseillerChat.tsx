@@ -19,13 +19,15 @@ function useAdvisorStatus() {
 }
 
 /** Onglet « Conseiller » de Vroomy : conversation avec une personne de l'équipe Ligneo. */
-export function ConseillerChat({ summary }: { summary?: string }) {
+export function ConseillerChat({ summary, mode = "visitor" }: { summary?: string; mode?: "visitor" | "client" }) {
   const [uid, setUid] = useState<string | null | undefined>(undefined);
   const status = useAdvisorStatus();
 
   useEffect(() => {
+    // Site public : toujours formulaire visiteur (une session oubliée ne doit pas lier le chat à un compte).
+    if (mode === "visitor") { setUid(null); return; }
     supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null));
-  }, []);
+  }, [mode]);
 
   return (
     <div className="lgc-conseiller">

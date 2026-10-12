@@ -1,6 +1,6 @@
 import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy, UserCog, CalendarDays, BarChart3, Network } from "lucide-react";
+import { Gauge, LayoutDashboard, Truck, FileText, Building2, PlusCircle, Loader2, MapPin, Car, Users, Code2, LifeBuoy, MessageCircle, UserCog, CalendarDays, BarChart3, Network } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,6 +42,7 @@ function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[]
     { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
     { to: "/dashboard-pro/equipe", label: "Équipe & alertes", icon: UserCog },
     { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+    { to: "/dashboard-pro/conseiller", label: "Parler à un conseiller", icon: MessageCircle },
     { to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
   );
   return base;
