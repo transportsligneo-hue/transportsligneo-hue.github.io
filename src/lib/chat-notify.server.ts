@@ -45,8 +45,8 @@ export async function notifyChatMessageById(messageId: string) {
         const { data } = await supabaseAdmin.auth.admin.getUserById(conv.client_user_id);
         to = data?.user?.email ?? null;
       } else {
-        to = conv.visitor_email;
-        ctaUrl = SITE;
+        // Visiteur du site public : jamais d'email automatique (réponse en direct dans le chat).
+        to = null;
       }
     } else {
       to = ADMIN_EMAIL;

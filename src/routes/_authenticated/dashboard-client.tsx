@@ -1,6 +1,6 @@
 import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Gauge, LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText, MapPin, MailCheck, RefreshCw, LifeBuoy } from "lucide-react";
+import { Gauge, LayoutDashboard, Truck, PlusCircle, FolderOpen, UserCog, Loader2, FileText, MapPin, MailCheck, RefreshCw, LifeBuoy, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,7 @@ const navItems: ProSidebarItem[] = [
   { to: "/dashboard-client/fidelite", label: "Compte Kilomètres", icon: Gauge },
   { to: "/dashboard-client/documents", label: "Mes documents", icon: FolderOpen },
   { to: "/dashboard-client/profil", label: "Mon profil", icon: UserCog },
+  { to: "/dashboard-client/conseiller", label: "Parler à un conseiller", icon: MessageCircle },
   { to: "/dashboard-client/aide", label: "Aide & FAQ", icon: LifeBuoy },
 ];
 
