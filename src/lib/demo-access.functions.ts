@@ -23,6 +23,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
     z.object({
       nom: z.string().trim().min(2).max(120),
       societe: z.string().trim().min(1).max(160),
+      siret: z.string().transform((s) => s.replace(/\s/g, '')).pipe(z.string().regex(/^\d{14}$/, 'Le SIRET doit contenir 14 chiffres.')),
       email: z.string().trim().email().max(255),
       telephone: z.string().trim().max(30).optional().default(''),
     }).parse(d),
@@ -51,7 +52,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
     const { error: notifErr } = await supabaseAdmin.from('admin_notifications').insert({
       type: 'demo_request',
       titre: 'Nouvelle demande de démo',
-      message: `${data.nom} — ${data.societe} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
+      message: `${data.nom} — ${data.societe} · SIRET ${data.siret} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
       link: '/admin/acces-demo',
       entity_type: 'pro_demo_access',
       entity_id: row.id,
@@ -65,7 +66,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
         templateName: 'demo-demande-admin',
         recipientEmail: ADMIN_EMAIL,
         idempotencyKey: `demo-req-${row.id}`,
-        templateData: { nom: data.nom, societe: data.societe, email, telephone: data.telephone },
+        templateData: { nom: data.nom, societe: data.societe, siret: data.siret, email, telephone: data.telephone },
       })
     } catch (e) {
       console.error('demo admin notify failed', e)
