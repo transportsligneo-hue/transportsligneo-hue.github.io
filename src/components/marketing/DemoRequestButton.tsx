@@ -7,7 +7,7 @@ import { requestDemo } from "@/lib/demo-access.functions";
 
 export function DemoRequestForm({ onDone }: { onDone?: () => void }) {
   const send = useServerFn(requestDemo);
-  const [f, setF] = useState({ nom: "", societe: "", email: "", telephone: "" });
+  const [f, setF] = useState({ nom: "", societe: "", siret: "", email: "", telephone: "" });
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -36,6 +36,7 @@ export function DemoRequestForm({ onDone }: { onDone?: () => void }) {
     <form onSubmit={submit} className="demo-req-form">
       <input required minLength={2} placeholder="Nom et prénom" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} />
       <input required placeholder="Société" value={f.societe} onChange={(e) => setF({ ...f, societe: e.target.value })} />
+      <input required inputMode="numeric" pattern="[0-9 ]{14,17}" title="14 chiffres" placeholder="Numéro de SIRET" value={f.siret} onChange={(e) => setF({ ...f, siret: e.target.value.replace(/[^0-9 ]/g, "").slice(0, 17) })} />
       <input required type="email" placeholder="E-mail professionnel" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
       <input type="tel" placeholder="Téléphone (facultatif)" value={f.telephone} onChange={(e) => setF({ ...f, telephone: e.target.value })} />
       <button type="submit" className="demo-req-submit" disabled={busy}>

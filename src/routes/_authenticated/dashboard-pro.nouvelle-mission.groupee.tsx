@@ -547,7 +547,7 @@ function GroupedMissionForm() {
             return (
               <div key={r.key} className="grouped-vehicle-panel p-4">
                 <div className="flex flex-wrap items-end gap-2.5">
-                  <div className="w-[300px] max-w-full">
+                  <div className="w-[540px] max-w-full">
                     <div className="mb-2"><MissionRequestHelp topic="plate" /></div>
                     <PlateInput
                       value={r.immat}

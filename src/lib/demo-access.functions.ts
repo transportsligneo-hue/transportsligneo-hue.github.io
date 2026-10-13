@@ -23,6 +23,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
     z.object({
       nom: z.string().trim().min(2).max(120),
       societe: z.string().trim().min(1).max(160),
+      siret: z.string().transform((s) => s.replace(/\s/g, '')).pipe(z.string().regex(/^\d{14}$/, 'Le SIRET doit contenir 14 chiffres.')),
       email: z.string().trim().email().max(255),
       telephone: z.string().trim().max(30).optional().default(''),
     }).parse(d),
