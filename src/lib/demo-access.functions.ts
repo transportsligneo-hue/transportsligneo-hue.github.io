@@ -52,7 +52,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
     const { error: notifErr } = await supabaseAdmin.from('admin_notifications').insert({
       type: 'demo_request',
       titre: 'Nouvelle demande de démo',
-      message: `${data.nom} — ${data.societe} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
+      message: `${data.nom} — ${data.societe} · SIRET ${data.siret} (${email}${data.telephone ? ' · ' + data.telephone : ''})`,
       link: '/admin/acces-demo',
       entity_type: 'pro_demo_access',
       entity_id: row.id,
@@ -66,7 +66,7 @@ export const requestDemo = createServerFn({ method: 'POST' })
         templateName: 'demo-demande-admin',
         recipientEmail: ADMIN_EMAIL,
         idempotencyKey: `demo-req-${row.id}`,
-        templateData: { nom: data.nom, societe: data.societe, email, telephone: data.telephone },
+        templateData: { nom: data.nom, societe: data.societe, siret: data.siret, email, telephone: data.telephone },
       })
     } catch (e) {
       console.error('demo admin notify failed', e)
