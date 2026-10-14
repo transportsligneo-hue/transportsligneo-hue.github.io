@@ -1,7 +1,7 @@
 - Scope public mobile nav/colors below 768px in MobileNavbar and public mobile CSS, so desktop and workspaces stay unaffected.
 - Reuse LiveMissionMap for code-protected public tracking, refreshing only through the code-verified server function and returning GPS-only projections, so map behavior matches workspaces without exposing private records.
 - Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
-- Presentation films and the mission-order demo player are shared marketing-only markup, so films stay consistent without touching workspaces.
+- Films and mission-order demo player share marketing-only markup; never touch workspaces.
 - Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
 - Keep document scans on the shared inspection scanner and reject unreliable automatic crop corners; incorrect crops must never cut off document details.
@@ -24,7 +24,7 @@
 - Keep PDF pickup/delivery schedules separate via the shared mapper; never reuse pickup for delivery.
 
 - Admin access requires an SMS code per login session via AdminMfaGate and admin-mfa.functions; phones live only in admin_mfa_phones (service-role only) so a stolen password cannot re-enroll a phone.
-- PDFs share document-template-theme, pdf-plate and pdf-company-signature to keep templates and company overlays identical. Preserve personal signatures; invoice enrichment is read-only via RLS, skipped in demo.
+- PDFs share document-template-theme, pdf-plate and pdf-company-signature. Preserve personal signatures; invoice enrichment is read-only via RLS, skipped in demo. Resolve PO via invoice-document-details and linked records; use dedicated header space to avoid clipping.
 - PV downloads use sanitized vector templates via pv-mission-pdf; preserve signed originals and make client controls download-only.
 
 <!-- LOVABLE:BEGIN -->

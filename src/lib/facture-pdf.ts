@@ -19,7 +19,7 @@ import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
-import { invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "@/lib/invoice-document-details";
+import { invoicePoNumber, invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "@/lib/invoice-document-details";
 
 
 
@@ -187,14 +187,16 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   let devisMessage = f.devis_message ?? null;
   let selectedOptions = f.options;
   let vehicles = invoiceVehicles(f as unknown as Record<string, unknown>);
+  let poNumber = invoicePoNumber(f.reference_client, f.reference_label);
   if (!context?.demo) {
     try {
       // Read-only recovery for old invoices and callers omitting vehicle metadata.
       const { data: invoice } = await supabase.from("factures")
-        .select("metadata, attribution_id, mission_id, reference_client")
+        .select("metadata, attribution_id, mission_id, reference_client, reference_label")
         .eq("numero", f.numero).maybeSingle();
       const metadata = invoice?.metadata && typeof invoice.metadata === "object" && !Array.isArray(invoice.metadata)
         ? invoice.metadata as Record<string, unknown> : {};
+      poNumber = invoicePoNumber(invoice?.reference_client, invoice?.reference_label) ?? poNumber;
       if (selectedOptions == null && Array.isArray(metadata.options)) selectedOptions = metadata.options.filter((v): v is string => typeof v === "string");
       if (!devisMessage && typeof metadata.devis_message === "string") devisMessage = metadata.devis_message;
       if (!vehicles.some((v) => v.immatriculation) && Array.isArray(metadata.vehicules)) vehicles = invoiceVehicles(metadata);
@@ -215,9 +217,19 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       }
       if (trajet) {
         devisId = typeof trajet.devis_id === "string" ? trajet.devis_id : null;
+        poNumber = poNumber ?? invoicePoNumber(null, null, typeof trajet.commande_ref === "string" ? trajet.commande_ref : null);
         if (!vehicles.some((v) => v.immatriculation)) vehicles = invoiceVehicles(trajet);
       }
       const ref = invoice?.reference_client || f.reference_client;
+      // A PO can already be matched to the mission/quote before invoicing.
+      if (!poNumber) {
+        const poQuery = supabase.from("bons_commande").select("numero_po").eq("statut", "rapproche");
+        const result = invoice?.mission_id
+          ? await poQuery.eq("mission_id", invoice.mission_id)
+          : devisId ? await poQuery.eq("devis_id", devisId) : null;
+        const numbers = [...new Set((result?.data ?? []).map((po) => po.numero_po.trim()).filter(Boolean))];
+        if (numbers.length) poNumber = numbers.join(" / ");
+      }
       if (devisId || (ref && /^DEV-/i.test(ref))) {
         const query = supabase.from("devis").select("*");
         const { data: quote } = await (devisId ? query.eq("id", devisId) : query.eq("numero", ref ?? "")).maybeSingle();
@@ -308,6 +320,25 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   doc.setLineWidth(0.3);
   doc.line(L, 46, R, 46);
 
+  // Dedicated header space; never bury the PO in clipped client details.
+  if (poNumber) {
+    const poWidth = innerW * 0.62;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...INK);
+    doc.text("N° DE PO", L, 33.5);
+    let poFontSize = 17;
+    doc.setFontSize(poFontSize);
+    let poLines = doc.splitTextToSize(poNumber, poWidth) as string[];
+    while (poLines.length > 2 && poFontSize > 10) {
+      poFontSize -= 0.5;
+      doc.setFontSize(poFontSize);
+      poLines = doc.splitTextToSize(poNumber, poWidth) as string[];
+    }
+    doc.setTextColor(...BLUE);
+    doc.text(poLines, L, poLines.length > 1 ? 38.8 : 41.5, { lineHeightFactor: 0.9 });
+  }
+
   // ---------- Émetteur / Client ----------
   const colW = (innerW - 6) / 2;
   const boxTop = 49.5;
@@ -358,7 +389,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (f.client_siret) clientDetail.push(`N° SIRET : ${f.client_siret}`);
   if (f.client_tva) clientDetail.push(`N° TVA : ${f.client_tva}`);
   if (f.client_email) clientDetail.push(f.client_email);
-  if (f.reference_client?.trim()) clientDetail.push(`${f.reference_label?.trim() || "Référence dossier"} : ${f.reference_client.trim()}`);
+  if (f.reference_client?.trim() && !poNumber) clientDetail.push(`${f.reference_label?.trim() || "Référence dossier"} : ${f.reference_client.trim()}`);
   let cy2 = boxTop + 19;
   for (const l of clientDetail.slice(0, 4)) {
     doc.text((doc.splitTextToSize(l, colW - 12) as string[])[0], cX + 6, cy2);
