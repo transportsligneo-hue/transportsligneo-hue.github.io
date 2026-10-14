@@ -12,6 +12,16 @@ export interface InvoiceVehicle {
 const text = (v: unknown) => typeof v === "string" && v.trim() ? v.trim() : null;
 const record = (v: unknown): DocumentSource => v && typeof v === "object" && !Array.isArray(v) ? v as DocumentSource : {};
 
+/** A linked PO takes precedence over an internal quote/mission reference. */
+export function invoicePoNumber(reference?: string | null, label?: string | null, linkedPo?: string | null): string | null {
+  const linked = text(linkedPo);
+  if (linked) return linked;
+  const ref = text(reference);
+  if (!ref || /^(?:MIS|DEV|FAC)-/i.test(ref)) return null;
+  const kind = text(label);
+  return !kind || /\bPO\b|purchase\s*order|commande|\bBC\b/i.test(kind) ? ref : null;
+}
+
 export function invoiceSourceOptions(source: DocumentSource): string[] | null {
   if (Array.isArray(source.options)) return source.options.filter((v): v is string => typeof v === "string");
   if (source.options_meta && typeof source.options_meta === "object") {

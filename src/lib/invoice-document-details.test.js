@@ -1,7 +1,17 @@
 import { describe, expect, it } from "bun:test";
-import { invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "./invoice-document-details";
+import { invoicePoNumber, invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "./invoice-document-details";
 
 describe("invoice selections and plates", () => {
+  it("keeps the full CAT France PO when supplied", () => {
+    expect(invoicePoNumber("450001234567890", "N° de PO")).toBe("450001234567890");
+    expect(invoicePoNumber("MIS-TLG-2026-401", "Mission", "450001234567890")).toBe("450001234567890");
+  });
+  it("does not invent a PO for invoices without one", () => {
+    expect(invoicePoNumber(null, null)).toBeNull();
+    expect(invoicePoNumber("DEV-TLG-2026-120", "Devis")).toBeNull();
+    expect(invoicePoNumber("MIS-TLG-2026-401", "Mission")).toBeNull();
+    expect(invoicePoNumber("123456", "Référence dossier")).toBeNull();
+  });
   it("includes selected electric recharge", () => {
     expect(invoiceSelectedOptions(["recharge_electrique"])).toEqual(["Recharge électrique"]);
     expect(invoiceSelectedOptions(null, "Options : Recharge électrique")).toEqual(["Recharge électrique"]);
