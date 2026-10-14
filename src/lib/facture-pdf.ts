@@ -19,7 +19,7 @@ import { drawTemplatePlate } from "@/lib/pdf-plate";
 import { markDemoPdf, type PdfRenderContext } from "@/lib/pdf-render-context";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { DOCUMENT_TEMPLATE } from "@/lib/document-template-theme";
-import { invoicePoNumber, invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "@/lib/invoice-document-details";
+import { invoiceDocumentName, invoicePoNumber, invoiceSelectedOptions, invoiceSourceOptions, invoiceVehicles } from "@/lib/invoice-document-details";
 
 
 
@@ -687,11 +687,17 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   }
 
   markDemoPdf(doc, context);
-  return doc.output("blob");
+  const docTitle = invoiceDocumentName(f.numero, clientTitle, poNumber);
+  doc.setProperties({ title: docTitle });
+  const out = doc.output("blob");
+  facturePdfNames.set(out, docTitle);
+  return out;
 }
 
 
 
+
+const facturePdfNames = new WeakMap<Blob, string>();
 
 export function downloadFacturePdf(blob: Blob, numero: string) {
   const url = URL.createObjectURL(blob);
@@ -699,7 +705,7 @@ export function downloadFacturePdf(blob: Blob, numero: string) {
   a.href = url;
   // Le suffixe distingue explicitement le document régénéré des anciens PDF
   // déjà présents dans les téléchargements du navigateur/téléphone.
-  a.download = `Facture-${numero}-nouveau-modele.pdf`;
+  a.download = `${(facturePdfNames.get(blob) ?? `Facture-${numero}`).replace(/[\\/:*?"<>|]/g, "-")}.pdf`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

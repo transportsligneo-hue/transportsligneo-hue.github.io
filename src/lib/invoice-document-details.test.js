@@ -36,9 +36,9 @@ describe("invoice selections and plates", () => {
   });
 });
 import { invoiceDocumentName as docName } from "./invoice-document-details";
-test("nom facture avec PO", () => {
+it("nom facture avec PO", () => {
   expect(docName("FAC-2026-0120", "CAT France", "4500987654")).toBe("#0120 - CAT FR - 4500987654");
 });
-test("nom facture sans PO", () => {
+it("nom facture sans PO", () => {
   expect(docName("FAC-2026-0121", "Jean Dupont", null)).toBe("#0121 - Jean Dupont");
 });
