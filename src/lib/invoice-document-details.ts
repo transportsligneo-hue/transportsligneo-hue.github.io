@@ -61,3 +61,9 @@ export function invoiceVehicles(source: DocumentSource): InvoiceVehicle[] {
     return [delivered, ...(returned.immatriculation ? [returned] : [])].filter((vehicle) => Object.values(vehicle).some(Boolean));
   });
 }
+/** "#0120 - CAT FR - 4500987654" when a PO exists; never invents a PO. */
+export function invoiceDocumentName(numero: string, client: string | null | undefined, po?: string | null): string {
+  const suffix = (numero.trim().split(/[-\s]/).filter(Boolean).pop() || numero).trim();
+  const name = (client?.trim() || "Client").replace(/\bFrance\b/gi, "FR").replace(/\s+/g, " ");
+  return [`#${suffix}`, name, po?.trim() || null].filter(Boolean).join(" - ");
+}
