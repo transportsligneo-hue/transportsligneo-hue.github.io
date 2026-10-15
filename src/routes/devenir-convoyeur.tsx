@@ -35,17 +35,24 @@ function ArrowIcon({ size = 15 }: { size?: number }) {
 
 function DevenirConvoyeurPage() {
   const [email, setEmail] = useState("");
+  const [nom, setNom] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [ville, setVille] = useState("");
+  const [adresse, setAdresse] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const submit = useServerFn(subscribeNewsletter);
   const { gate, loading } = useRegistrationGate();
+  const complete = !!(email.trim() && nom.trim() && telephone.trim() && ville.trim() && adresse.trim());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!complete) { setStatus("error"); setErrorMsg("Merci de remplir tous les champs."); return; }
+    if (telephone.replace(/\D/g, "").length < 10) { setStatus("error"); setErrorMsg("Numéro de téléphone invalide."); return; }
     setStatus("loading");
     setErrorMsg("");
     try {
-      await submit({ data: { email: email.trim(), source: "convoyeur-waitlist" } });
+      await submit({ data: { email: email.trim(), nom: nom.trim(), telephone: telephone.trim(), ville: ville.trim(), adresse: adresse.trim(), source: "convoyeur-waitlist" } });
       setStatus("success");
       setEmail("");
     } catch (err) {
