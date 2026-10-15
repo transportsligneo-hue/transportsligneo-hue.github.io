@@ -35,17 +35,24 @@ function ArrowIcon({ size = 15 }: { size?: number }) {
 
 function DevenirConvoyeurPage() {
   const [email, setEmail] = useState("");
+  const [nom, setNom] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [ville, setVille] = useState("");
+  const [adresse, setAdresse] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const submit = useServerFn(subscribeNewsletter);
   const { gate, loading } = useRegistrationGate();
+  const complete = !!(email.trim() && nom.trim() && telephone.trim() && ville.trim() && adresse.trim());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!complete) { setStatus("error"); setErrorMsg("Merci de remplir tous les champs."); return; }
+    if (telephone.replace(/\D/g, "").length < 10) { setStatus("error"); setErrorMsg("Numéro de téléphone invalide."); return; }
     setStatus("loading");
     setErrorMsg("");
     try {
-      await submit({ data: { email: email.trim(), source: "convoyeur-waitlist" } });
+      await submit({ data: { email: email.trim(), nom: nom.trim(), telephone: telephone.trim(), ville: ville.trim(), adresse: adresse.trim(), source: "convoyeur-waitlist" } });
       setStatus("success");
       setEmail("");
     } catch (err) {
@@ -126,6 +133,31 @@ function DevenirConvoyeurPage() {
                     required
                   />
                 </div>
+                {([
+                  ["waitlist-nom", "Nom et prénom", "Jean Martin", nom, setNom, "name", "text"],
+                  ["waitlist-tel", "Téléphone", "06 12 34 56 78", telephone, setTelephone, "tel", "tel"],
+                  ["waitlist-ville", "Ville", "Tours", ville, setVille, "address-level2", "text"],
+                  ["waitlist-adresse", "Adresse", "12 rue Nationale, 37000 Tours", adresse, setAdresse, "street-address", "text"],
+                ] as const).map(([id, label, ph, val, set, ac, type]) => (
+                  <div key={id}>
+                    <label htmlFor={id} className="dc-waitlist-label">{label}</label>
+                    <div className="dc-waitlist-input-wrap">
+                      <input
+                        id={id}
+                        type={type}
+                        autoComplete={ac}
+                        placeholder={ph}
+                        value={val}
+                        maxLength={id === "waitlist-adresse" ? 300 : 120}
+                        onChange={(e) => set(e.target.value)}
+                        className="dc-waitlist-input"
+                        style={{ paddingLeft: 16 }}
+                        disabled={status === "loading"}
+                        required
+                      />
+                    </div>
+                  </div>
+                ))}
                 {status === "error" && (
                   <div className="dc-waitlist-error" role="alert">
                     <AlertCircle size={16} strokeWidth={2} />
@@ -135,7 +167,7 @@ function DevenirConvoyeurPage() {
                 <button
                   type="submit"
                   className="dc-btn-primary"
-                  disabled={status === "loading" || !email.trim()}
+                  disabled={status === "loading" || !complete}
                 >
                   {status === "loading" ? (
                     <>
