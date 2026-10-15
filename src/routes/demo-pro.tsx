@@ -38,9 +38,20 @@ function DemoGate() {
   const [state, setState] = useState<{ s: "load" | "ok" | "no"; societe?: string | null }>({ s: "load" });
   useEffect(() => {
     if (!token || !/^[a-f0-9]{48}$/.test(token)) { setState({ s: "no" }); return; }
-    verify({ data: { token } }).then((r) => setState(r.ok ? { s: "ok", societe: r.societe } : { s: "no" })).catch(() => setState({ s: "no" }));
+    verify({ data: { token } })
+      .then(async (r) => {
+        if (!r.ok) return setState({ s: "no" });
+        if (r.tokenHash) {
+          const { supabase } = await import("@/integrations/supabase/client");
+          await supabase.auth.signOut().catch(() => {});
+          const { error } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: r.tokenHash });
+          if (!error) { window.location.replace("/dashboard-pro"); return; }
+        }
+        setState({ s: "ok", societe: r.societe });
+      })
+      .catch(() => setState({ s: "no" }));
   }, [token, verify]);
-  if (state.s === "load") return <main className="demo-pro"><p className="demo-pro-sub">Vérification de votre accès…</p></main>;
+  if (state.s === "load") return <main className="demo-pro"><p className="demo-pro-sub">Ouverture de votre espace flotte de démonstration…</p></main>;
   if (state.s === "no")
     return (
       <main className="demo-pro demo-locked">

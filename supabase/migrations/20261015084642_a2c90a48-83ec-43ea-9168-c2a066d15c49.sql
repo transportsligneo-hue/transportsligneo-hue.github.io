@@ -1,0 +1,1 @@
+alter function public.is_demo_account() security invoker;

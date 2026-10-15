@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProSidebar, type ProSidebarItem } from "@/components/dashboard-pro/ProSidebar";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { isApercuMode, apercuAccountType } from "@/lib/apercu-mode";
+import { DemoAccountBanner, DEMO_ACCOUNT_EMAIL } from "@/components/demo/DemoAccountBanner";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro")({
@@ -56,6 +57,8 @@ function ProLayout() {
   const accountType = (apercu ? apercuAccountType() : null) ?? orgInfo?.accountType ?? "b2b_standard";
   const navItems = useMemo(() => buildNavItems(accountType), [accountType]);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isDemo = user?.email?.toLowerCase() === DEMO_ACCOUNT_EMAIL;
 
   // Un compte pro sans société rattachée en reçoit une (administrateur) :
   // sans cela import CSV, sites et équipe restent inaccessibles.
@@ -89,6 +92,7 @@ function ProLayout() {
   return (
     <div className="dashboard-shell-light" data-account-type={accountType}>
       <ProSidebar items={navItems}>
+        {isDemo && <DemoAccountBanner />}
         {apercu ? <Outlet /> : <UserMfaGate label="Espace professionnel"><Outlet /></UserMfaGate>}
       </ProSidebar>
     </div>
