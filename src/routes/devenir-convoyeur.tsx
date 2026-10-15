@@ -133,6 +133,31 @@ function DevenirConvoyeurPage() {
                     required
                   />
                 </div>
+                {([
+                  ["waitlist-nom", "Nom et prénom", "Jean Martin", nom, setNom, "name", "text"],
+                  ["waitlist-tel", "Téléphone", "06 12 34 56 78", telephone, setTelephone, "tel", "tel"],
+                  ["waitlist-ville", "Ville", "Tours", ville, setVille, "address-level2", "text"],
+                  ["waitlist-adresse", "Adresse", "12 rue Nationale, 37000 Tours", adresse, setAdresse, "street-address", "text"],
+                ] as const).map(([id, label, ph, val, set, ac, type]) => (
+                  <div key={id}>
+                    <label htmlFor={id} className="dc-waitlist-label">{label}</label>
+                    <div className="dc-waitlist-input-wrap">
+                      <input
+                        id={id}
+                        type={type}
+                        autoComplete={ac}
+                        placeholder={ph}
+                        value={val}
+                        maxLength={id === "waitlist-adresse" ? 300 : 120}
+                        onChange={(e) => set(e.target.value)}
+                        className="dc-waitlist-input"
+                        style={{ paddingLeft: 16 }}
+                        disabled={status === "loading"}
+                        required
+                      />
+                    </div>
+                  </div>
+                ))}
                 {status === "error" && (
                   <div className="dc-waitlist-error" role="alert">
                     <AlertCircle size={16} strokeWidth={2} />
@@ -142,7 +167,7 @@ function DevenirConvoyeurPage() {
                 <button
                   type="submit"
                   className="dc-btn-primary"
-                  disabled={status === "loading" || !email.trim()}
+                  disabled={status === "loading" || !complete}
                 >
                   {status === "loading" ? (
                     <>
