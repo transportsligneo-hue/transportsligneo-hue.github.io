@@ -9970,6 +9970,7 @@ export type Database = {
         Args: { _attribution_id: string; _user_id: string }
         Returns: boolean
       }
+      is_demo_account: { Args: never; Returns: boolean }
       is_mission_client: {
         Args: { _mission_id: string; _user_id: string }
         Returns: boolean
