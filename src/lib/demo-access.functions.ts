@@ -131,5 +131,11 @@ export const verifyDemoToken = createServerFn({ method: 'POST' })
       opened_at: row.opened_at ?? new Date().toISOString(),
       open_count: (row.open_count ?? 0) + 1,
     }).eq('id', row.id)
-    return { ok: true as const, societe: row.societe }
+    // Connexion au compte flotte fictif (écritures bloquées en base pour ce compte).
+    const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({ type: 'magiclink', email: DEMO_ACCOUNT_EMAIL })
+    const tokenHash = link?.properties?.hashed_token ?? null
+    if (linkErr) console.error('demo link failed', linkErr)
+    return { ok: true as const, societe: row.societe, tokenHash }
   })
+
+const DEMO_ACCOUNT_EMAIL = 'demo-flotte@transportsligneo.fr'
