@@ -14,6 +14,7 @@ import { legRef, stripLegSuffix, displayNumero } from "@/lib/mission-number";
 import { dossierTypeLabel, isAllerRetour } from "@/lib/mission-type";
 import { PilotageStrip } from "@/components/dashboard-pro/PilotageStrip";
 import { GuidedTour, PRO_DASHBOARD_TOUR } from "@/components/onboarding/GuidedTour";
+import { FleetDeadlinesCard } from "@/components/dashboard-pro/FleetDeadlinesCard";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
@@ -328,11 +329,10 @@ function ProDashboard() {
 
       {/* Grid: bar chart + CTA */}
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 mb-8">
+        {isFlotte ? <FleetDeadlinesCard /> : (
         <div className="v3-card v3-card-hover p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-v3-display text-[15px] font-semibold text-v3">
-              {isFlotte ? "Missions groupées par site" : "Missions par mois"}
-            </h3>
+            <h3 className="font-v3-display text-[15px] font-semibold text-v3">Missions par mois</h3>
             <span className="v3-link">6 derniers mois</span>
           </div>
           <div className="v3-bar-chart">
@@ -348,6 +348,7 @@ function ProDashboard() {
             ))}
           </div>
         </div>
+        )}
         <div className="v3-cta-gold p-6 flex flex-col justify-center text-center">
           <h3 className="font-v3-display text-[17px] font-semibold text-v3 m-0">
             {isFlotte ? "Programmer un lot de convoyages ?" : "Besoin d'un devis rapide ?"}

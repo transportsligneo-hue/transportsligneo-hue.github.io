@@ -78,3 +78,9 @@
 - [x] Démo : onglet Parc & automatismes
 - [x] Bulles d'aide TCO et fiche véhicule
 - [x] Images de catégories (citadine, berline, SUV, utilitaire, fourgon) et visites guidées : mission simple, groupée, ajout véhicule
+
+## Demandes du 16 octobre
+- [ ] Tableau de bord flotte : remplacer « Missions groupées par site » par les échéances du parc (CT, révision, assurance).
+- [ ] Démo : fiche mission identique au vrai espace, avec GPS.
+- [ ] Démo : signature de devis et paiement visibles mais validation bloquée.
+- [ ] Démo : remplir sites, conducteurs et véhicules avec des données fictives.
