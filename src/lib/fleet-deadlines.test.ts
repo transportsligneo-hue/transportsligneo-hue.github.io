@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { computeFleetDeadlines } from "./fleet-deadlines";
 
 const base = { id: "v", marque: null, modele: null, immatriculation: null, controle_technique_expire_le: null, assurance_expire_le: null, derniere_revision_le: null, intervalle_revision_mois: null };
