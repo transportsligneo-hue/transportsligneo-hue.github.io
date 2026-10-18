@@ -11774,3 +11774,9 @@ html.theme-dark .pp-ech-late{color:#fca5a5}
   .vrm-panel.vrm-window { transition: none; }
   .vrm-window .vrm-typing span { animation: none; }
 }
+
+/* Vroomy : saisie toujours blanche (prioritaire sur la règle globale des champs) + badge d'en-tête */
+.vrm-window input.vrm-input, .vrm-window #vrm-input { color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; caret-color: #5de0ff; }
+.vrm-window input.vrm-input::placeholder { color: #9fb2e8 !important; -webkit-text-fill-color: #9fb2e8 !important; }
+.vrm-window .vrm-avatar { position: relative; overflow: visible; }
+.vrm-window .vrm-avatar .vrm-chat-bubble { width: 22px; height: 22px; bottom: -3px; right: -3px; border-width: 2px; }

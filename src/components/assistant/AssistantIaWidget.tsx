@@ -454,6 +454,7 @@ export default function AssistantIaWidget() {
             <div className="vrm-id">
               <div className="vrm-avatar">
                 <VroomyAvatar size={48} talking={open && chatTab === "vroomy" && typing} effects={false} />
+                <span className="vrm-chat-bubble" aria-hidden="true"><MessageCircle size={12} strokeWidth={2.6} /></span>
               </div>
               <div>
                 <h2 className="vrm-title">Vroomy</h2>
