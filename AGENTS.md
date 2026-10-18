@@ -36,4 +36,4 @@
 - Vehicle immobilisation runs in DB (trigger + daily cron) and only auto-lifts immobilisation_auto rows, so manual ones persist.
 - Human chat: separate client/convoyeur threads gated by chat_can_access(), sender role set by trigger, visitors via token server fns, so roles never cross or spoof.
 
-- VroomyAvatar serves public launcher/header only; preserve chat logic/message avatars and use CSS motion/ref eye tracking to avoid pointer-driven React renders.
+- Vroomy: avatar public launcher/header only, CSS/ref motion; scoped .vrm-window tokens and existing send/advisor actions preserve chat logic.
