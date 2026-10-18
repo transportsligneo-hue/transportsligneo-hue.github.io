@@ -4,6 +4,7 @@ import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, Be
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+import { VroomyAvatar } from "@/components/VroomyAvatar";
 import VroomyOrderFlow from "@/components/assistant/VroomyOrderFlow";
 import { ConseillerChat } from "@/components/chat/ConseillerChat";
 import {
@@ -451,16 +452,14 @@ export default function AssistantIaWidget() {
       <button
         type="button"
         ref={launcherRef}
-        className="vrm-launcher vrm-chat-launcher"
+        className="vrm-launcher vrm-chat-launcher vrm-launcher-animated"
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
         style={{ display: open ? "none" : undefined }}
       >
-        <span className="vrm-launcher-mascotte">
-          <VroomyFace size={48} alt="Vroomy" />
-        </span>
+        <VroomyAvatar size={72} talking={typing} />
         <span className="vrm-chat-bubble" aria-hidden="true">
           <MessageCircle size={18} strokeWidth={2.4} />
         </span>
@@ -485,7 +484,7 @@ export default function AssistantIaWidget() {
           <div className="vrm-head-row">
             <div className="vrm-id">
               <div className="vrm-avatar">
-                <VroomyFace size={40} alt="Vroomy, la mascotte de Transports Ligneo" />
+                <VroomyAvatar size={40} talking={open && chatTab === "vroomy" && typing} effects={false} />
               </div>
               <div>
                 <h2 className="vrm-title">Vroomy</h2>
