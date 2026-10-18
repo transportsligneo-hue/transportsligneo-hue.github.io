@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Migration externe : audit local et procédure sûre v2 livrés ; 421 migrations principales et 50 Drizzle inventoriées avec SHA-256, ancien SQL consolidé signalé non validé. Aucun transfert ni changement de connexion.
+- [ ] Migration externe : obtenir export officiel de la base et fichiers Storage ; disponibilité Lovable Cloud et accès au projet cible non confirmés. Import, validation et bascule nécessitent une nouvelle autorisation.
 - [x] Priorité : numéro de PO en gros dans l’en-tête des factures, récupération en lecture seule du PO facture/trajet/commande liée. Sept tests réussis ; facture CAT fictive contrôlée visuellement sur une page. Téléchargement réel connecté non vérifié.
 - [x] Signature et tampon officiels harmonisés via la composition de référence de la facture : devis, factures, bons de commande, mandats, passages à vide, contrats et chartes. Sept PDF générés et contrôlés ; signatures personnelles et originaux signés préservés. Vérification depuis une mission connectée toujours soumise au SMS ci-dessous.
 - [x] Plaques harmonisées avec le modèle fourni ; reprise des plaques manquantes en lecture seule et options Recharge électrique/Mise en main uniquement si sélectionnées. Tests et huit PDF contrôlés ; vérification depuis une vraie mission admin toujours bloquée par le SMS.
