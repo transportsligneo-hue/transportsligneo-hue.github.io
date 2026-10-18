@@ -5,7 +5,7 @@
 - Keep document scans on the shared inspection scanner and reject unreliable automatic crop corners; incorrect crops must never cut off document details.
 - Route generated and stored mission PDF exports through the shared file downloader, preferring native sharing on mobile; object-URL clicks are unreliable in installed apps.
 - Keep the web loading screen in the root layout with its own brand tokens, so light/dark themes and workspace accents cannot recolor it.
-- Extended hero photo is desktop-home only; preserve other framing.
+- Extended hero photo is desktop-home only; keep other framing.
 - Scope opaque Driver workspace surfaces and blue/green electric accents to the Driver shell, and violet/pink electric accents to the professional shell, so public marketing and unrelated workspaces keep their own design.
 - Keep the admin dashboard's operational map in a dedicated overview component, reusing the mission map engine and existing mission tables, so its collapsible mission lists do not alter other workspaces.
 - Dark mode for admin, client and pro workspaces is a scoped CSS layer under `html.theme-dark` targeting `.admin-shell` / `.dashboard-shell-light`; light stays the default so existing workspace markup is untouched.
