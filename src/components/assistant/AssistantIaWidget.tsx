@@ -528,7 +528,7 @@ export default function AssistantIaWidget() {
             <div key={i} className={`vrm-row${m.role === "user" ? " vrm-user" : ""}`}>
               {m.role === "assistant" && (
                 <div className="vrm-msg-avatar">
-                  <VroomyFace size={24} />
+                  <VroomyAvatar size={24} effects={false} />
                 </div>
               )}
               <div className="vrm-bubble">
@@ -604,7 +604,7 @@ export default function AssistantIaWidget() {
           {typing && (
             <div className="vrm-row">
               <div className="vrm-msg-avatar">
-                <VroomyFace size={24} />
+                <VroomyAvatar size={24} effects={false} />
               </div>
               <div className="vrm-typing" role="status" aria-label="Vroomy est en train d'écrire">
                 <span />

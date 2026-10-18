@@ -24,6 +24,7 @@ import {
 
 import heroBg from "@/assets/hero-ligneo-night.jpg";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+import { VroomyAvatar } from "@/components/VroomyAvatar";
 import DevisGenerator from "@/components/DevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -192,13 +193,7 @@ export default function MobileHomeScreen() {
           className="vrm-launcher vrm-launcher--inline relative z-[1] shrink-0"
         >
           <span className="vrm-launcher-mascotte">
-            <img
-              src={vroomyMascotte.url}
-              alt="Vroomy"
-              className="vrm-mascotte object-contain"
-              loading="lazy"
-              decoding="async"
-            />
+            <VroomyAvatar size={56} effects={false} />
           </span>
           <span className="vrm-chat-bubble" aria-hidden="true">
             <MessageCircle size={16} strokeWidth={2.4} />
