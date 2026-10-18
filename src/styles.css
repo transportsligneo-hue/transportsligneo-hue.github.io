@@ -11758,6 +11758,11 @@ html.theme-dark .pp-ech-late{color:#fca5a5}
 .vrm-window .vrm-card-pdf { background: var(--vrmw-send); color: var(--vrmw-ink); }
 .vrm-window .vrm-conseiller-wrap { min-height: 0; }
 .vrm-window :is(.lgc-avail, .lgc-hint) { color: var(--vrmw-muted); }
+.vrm-window .lgc-visitor-form :is(input, textarea), .vrm-window .lgc-input textarea { color: var(--vrmw-ink); background: var(--vrmw-input); border-color: var(--vrmw-input-line); font-size: 16px; }
+.vrm-window .lgc-visitor-form :is(input, textarea)::placeholder, .vrm-window .lgc-input textarea::placeholder { color: var(--vrmw-muted); opacity: 1; }
+.vrm-window .lgc-visitor-form :is(input, textarea):focus, .vrm-window .lgc-input textarea:focus { outline: 2px solid var(--vrmw-cyan); outline-offset: 1px; }
+.vrm-window .lgc-visitor-form p, .vrm-window .lgc-waiting { color: var(--vrmw-chip-ink); font-size: 16px; }
+.vrm-window .lgc-visitor-form button { background: var(--vrmw-header); color: var(--vrmw-ink); font-size: 16px; }
 @keyframes vroomy-window-dots { 0%,80%,100% { transform: translateY(0); opacity: .4; } 40% { transform: translateY(-4px); opacity: 1; } }
 @media (max-width: 767px) {
   .vrm-panel.vrm-window { left: 8px; right: 8px; bottom: max(8px, env(safe-area-inset-bottom)); width: auto; max-width: none; height: 85dvh; }
