@@ -1,6 +1,6 @@
 - Scope public mobile nav/colors below 768px in MobileNavbar and public mobile CSS, so desktop and workspaces stay unaffected.
-- Reuse LiveMissionMap for code-protected public tracking, refreshing only through the code-verified server function and returning GPS-only projections, so map behavior matches workspaces without exposing private records.
-- Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
+- Public tracking reuses LiveMissionMap; refresh only via the code-verified server function with GPS-only projections to match workspaces without exposing private records.
+- Driver presentation video stays on public recruitment/closed-registration surfaces, never authenticated missions; preserve the admin registration gate.
 - Films and mission-order demos stay marketing-only.
 - Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
