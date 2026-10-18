@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Official Vroomy effects, independent of workspace themes. */
+:root {
+  --vroomy-disc-fill: linear-gradient(135deg,#8fb0ff,#2f5fff);
+  --vroomy-disc-shadow: 0 10px 40px rgba(47,95,255,.45);
+  --vroomy-interior-fill: radial-gradient(circle at 50% 40%,#10297a,#050e30 75%);
+  --vroomy-lid-fill: linear-gradient(#2c5cdc,#183a9e);
+  --vroomy-lamp-fill: radial-gradient(circle,rgba(255,226,140,.95),rgba(255,200,80,.35) 45%,rgba(255,200,80,0) 70%);
+  --vroomy-sheen-fill: linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+  --vroomy-halo-fill: radial-gradient(circle,rgba(47,95,255,.55),rgba(47,95,255,0) 65%);
+  --vroomy-focus: #5de0ff;
+}
+
 
 /* =========================================
    DRIVER APP CAPACITOR — green neon theme

@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Vroomy : bouton et en-tête animés ; images originales intactes, regard, ouverture/fermeture, Échap et réduction des animations vérifiés sur ordinateur et téléphone, sans erreur JavaScript. Logique du chat inchangée.
 - [x] Migration externe : audit local et procédure sûre v2 livrés ; 421 migrations principales et 50 Drizzle inventoriées avec SHA-256, ancien SQL consolidé signalé non validé. Aucun transfert ni changement de connexion.
 - [ ] Migration externe : obtenir export officiel de la base et fichiers Storage ; disponibilité Lovable Cloud et accès au projet cible non confirmés. Import, validation et bascule nécessitent une nouvelle autorisation.
 - [x] Priorité : numéro de PO en gros dans l’en-tête des factures, récupération en lecture seule du PO facture/trajet/commande liée. Sept tests réussis ; facture CAT fictive contrôlée visuellement sur une page. Téléchargement réel connecté non vérifié.

@@ -1,13 +1,13 @@
 - Scope public mobile nav/colors below 768px in MobileNavbar and public mobile CSS, so desktop and workspaces stay unaffected.
-- Reuse LiveMissionMap for code-protected public tracking, refreshing only through the code-verified server function and returning GPS-only projections, so map behavior matches workspaces without exposing private records.
-- Keep the Driver presentation video on the public convoyeur recruitment and closed-registration surfaces, not in authenticated mission flows, so the admin-controlled registration gate remains authoritative.
-- Films and mission-order demo player share marketing-only markup; never touch workspaces.
+- Public tracking reuses LiveMissionMap; refresh only via the code-verified server function with GPS-only projections to match workspaces without exposing private records.
+- Driver presentation video stays on public recruitment/closed-registration surfaces, never authenticated missions; preserve the admin registration gate.
+- Films and mission-order demos stay marketing-only.
 - Limit automatic playback of public presentation films to the first successful start per browser and film, so returning visitors retain control of sound and playback.
 - Resolve notification accent centrally from the signed-in profile or explicit actor, with admin text as a fallback, so toast and bell colors stay consistent across workspaces.
 - Keep document scans on the shared inspection scanner and reject unreliable automatic crop corners; incorrect crops must never cut off document details.
 - Route generated and stored mission PDF exports through the shared file downloader, preferring native sharing on mobile; object-URL clicks are unreliable in installed apps.
 - Keep the web loading screen in the root layout with its own brand tokens, so light/dark themes and workspace accents cannot recolor it.
-- The retouched extended hero photo is desktop-home only, so other pages keep original framing.
+- Extended hero photo is desktop-home only; preserve other framing.
 - Scope opaque Driver workspace surfaces and blue/green electric accents to the Driver shell, and violet/pink electric accents to the professional shell, so public marketing and unrelated workspaces keep their own design.
 - Keep the admin dashboard's operational map in a dedicated overview component, reusing the mission map engine and existing mission tables, so its collapsible mission lists do not alter other workspaces.
 - Dark mode for admin, client and pro workspaces is a scoped CSS layer under `html.theme-dark` targeting `.admin-shell` / `.dashboard-shell-light`; light stays the default so existing workspace markup is untouched.
@@ -35,3 +35,5 @@
 - User SMS MFA is enforced by restrictive RLS (user_mfa_satisfied()), so the UI gate can't be bypassed.
 - Vehicle immobilisation runs in DB (trigger + daily cron) and only auto-lifts immobilisation_auto rows, so manual ones persist.
 - Human chat: separate client/convoyeur threads gated by chat_can_access(), sender role set by trigger, visitors via token server fns, so roles never cross or spoof.
+
+- VroomyAvatar serves public launcher/header only; preserve chat logic/message avatars and use CSS motion/ref eye tracking to avoid pointer-driven React renders.
