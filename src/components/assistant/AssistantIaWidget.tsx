@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { Send, X, Phone, Search, Calculator, MapPin, GraduationCap, FileDown, BellOff, Bell, Building2, CarFront, ShieldCheck, ClipboardList, MessageCircle } from "lucide-react";
+import { Send, X, Phone, Calculator, MapPin, FileDown, BellOff, Bell, ClipboardList, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadVroomyDevisPdf } from "@/lib/vroomy-devis-pdf";
 import vroomyMascotte from "@/assets/vroomy-mascotte.png.asset.json";
+import { Button } from "@/components/ui/button";
 import { VroomyAvatar } from "@/components/VroomyAvatar";
 import VroomyOrderFlow from "@/components/assistant/VroomyOrderFlow";
 import { ConseillerChat } from "@/components/chat/ConseillerChat";
@@ -30,32 +31,6 @@ type VroomyCard =
   | { type: "login"; data: { url: string } };
 
 type ChatMsg = { role: "user" | "assistant"; content: string; cards?: VroomyCard[] };
-
-const QUICK_REPLIES: Record<Profil, Array<{ Icon: typeof Search; label: string }>> = {
-  client: [
-    { Icon: Calculator, label: "Combien coûte un convoyage Paris — Lyon ?" },
-    { Icon: MapPin, label: "Où en est ma mission ?" },
-    { Icon: ShieldCheck, label: "Que couvre l'assurance pendant le convoyage ?" },
-  ],
-  convoyeur: [
-    { Icon: Search, label: "Trouve-moi une mission près de Tours" },
-    { Icon: ClipboardList, label: "Y a-t-il des missions disponibles aujourd'hui ?" },
-    { Icon: GraduationCap, label: "Comment devenir convoyeur partenaire ?" },
-  ],
-};
-
-const CAPABILITIES: Record<Profil, Array<{ Icon: typeof Search; title: string; desc: string }>> = {
-  client: [
-    { Icon: Calculator, title: "Estimer un convoyage", desc: "Prix, distance et délai depuis la grille officielle" },
-    { Icon: MapPin, title: "Suivre une mission", desc: "Avec votre numéro de mission et votre email" },
-    { Icon: Phone, title: "Vous faire rappeler", desc: "Un conseiller Ligneo vous recontacte" },
-  ],
-  convoyeur: [
-    { Icon: Search, title: "Chercher une mission", desc: "Dans le vrai catalogue publié, par ville" },
-    { Icon: GraduationCap, title: "Devenir convoyeur", desc: "Prérequis, documents et Académie Ligneo" },
-    { Icon: Phone, title: "Parler à l'équipe", desc: "Rappel par un conseiller Ligneo" },
-  ],
-};
 
 const WELCOME =
   "Vrooom, bonjour ! Moi c'est Vroomy, le copilote de Transports Ligneo ! Dites-moi qui vous êtes, je m'adapte tout de suite.";
@@ -108,7 +83,7 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
           {d.distance_km ? `${d.distance_km} km · ` : ""}
           {String(d.delai_estime ?? "")} · {String(d.type_livraison ?? "")}
         </div>
-        <button
+        <Button variant="ghost"
           type="button"
           className="vrm-card-pdf"
           onClick={() => downloadVroomyDevisPdf(d)}
@@ -116,7 +91,7 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
         >
           <FileDown size={13} aria-hidden="true" />
           Exporter en PDF
-        </button>
+        </Button>
       </section>
     );
   }
@@ -184,7 +159,6 @@ export default function AssistantIaWidget() {
   const [profil, setProfil] = useState<Profil | null>(null);
   const [profilAuto, setProfilAuto] = useState(false);
   const [prenom, setPrenom] = useState<string | null>(null);
-  const [showCaps, setShowCaps] = useState(true);
   const [leadSent, setLeadSent] = useState(false);
   const [lead, setLead] = useState({ nom: "", telephone: "" });
   const [proactiveOff, setProactiveOff] = useState(false);
@@ -449,7 +423,7 @@ export default function AssistantIaWidget() {
 
   return (
     <>
-      <button
+      <Button variant="ghost"
         type="button"
         ref={launcherRef}
         className="vrm-launcher vrm-chat-launcher vrm-launcher-animated"
@@ -464,11 +438,11 @@ export default function AssistantIaWidget() {
           <MessageCircle size={18} strokeWidth={2.4} />
         </span>
 
-      </button>
+      </Button>
 
       <div
         ref={panelRef}
-        className={`vrm-panel${open ? " vrm-open" : ""}`}
+        className={`vrm-panel vrm-window${open ? " vrm-open" : ""}`}
         role="dialog"
         aria-modal="false"
         aria-label="Vroomy, assistant Transports Ligneo"
@@ -476,26 +450,21 @@ export default function AssistantIaWidget() {
         inert={!open ? true : undefined}
       >
         <div className="vrm-head">
-          <div className="vrm-speed" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
           <div className="vrm-head-row">
             <div className="vrm-id">
               <div className="vrm-avatar">
-                <VroomyAvatar size={40} talking={open && chatTab === "vroomy" && typing} effects={false} />
+                <VroomyAvatar size={48} talking={open && chatTab === "vroomy" && typing} effects={false} />
               </div>
               <div>
                 <h2 className="vrm-title">Vroomy</h2>
                 <div className="vrm-status">
                   <span className="vrm-dot" aria-hidden="true" />
-                  En ligne — réponse instantanée
+                  Assistant Transports Ligneo
                 </div>
               </div>
             </div>
             <div className="vrm-head-actions">
-              <button
+              <Button variant="ghost"
                 type="button"
                 className="vrm-close"
                 onClick={toggleProactive}
@@ -508,8 +477,8 @@ export default function AssistantIaWidget() {
                 title={proactiveOff ? "Relance automatique désactivée" : "Désactiver la relance automatique"}
               >
                 {proactiveOff ? <BellOff size={15} aria-hidden="true" /> : <Bell size={15} aria-hidden="true" />}
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 type="button"
                 className="vrm-close"
                 onClick={() => {
@@ -519,10 +488,9 @@ export default function AssistantIaWidget() {
                 aria-label="Fermer Vroomy"
               >
                 <X size={16} aria-hidden="true" />
-              </button>
+              </Button>
             </div>
           </div>
-          <p className="vrm-tagline">Toujours prêt à rouler avec vous.</p>
           {prefNotice && (
             <p className="vrm-pref-note" role="status">
               {prefNotice}
@@ -531,8 +499,8 @@ export default function AssistantIaWidget() {
         </div>
 
         <div className="vrm-tabs" role="tablist" aria-label="Choisir un interlocuteur">
-          <button type="button" role="tab" aria-selected={chatTab === "vroomy"} className={chatTab === "vroomy" ? "on" : ""} onClick={() => setChatTab("vroomy")}>Vroomy</button>
-          <button type="button" role="tab" aria-selected={chatTab === "conseiller"} className={chatTab === "conseiller" ? "on" : ""} onClick={() => setChatTab("conseiller")}>Conseiller</button>
+          <Button variant="ghost" type="button" role="tab" aria-selected={chatTab === "vroomy"} className={chatTab === "vroomy" ? "on" : ""} onClick={() => setChatTab("vroomy")}>Vroomy</Button>
+          <Button variant="ghost" type="button" role="tab" aria-selected={chatTab === "conseiller"} className={chatTab === "conseiller" ? "on" : ""} onClick={() => setChatTab("conseiller")}>Conseiller</Button>
         </div>
         {chatTab === "conseiller" && (
           <div className="vrm-conseiller-wrap">
@@ -564,57 +532,18 @@ export default function AssistantIaWidget() {
             </div>
           ))}
 
-          {!profil && (
-            <div className="vrm-roles" role="group" aria-label="Choisissez votre profil">
-              <div className="vrm-roles-label" id="vrm-roles-label">
-                Vous êtes…
-              </div>
-              <div className="vrm-roles-row">
-                <button type="button" className="vrm-role" onClick={() => setProfil("client")}>
-                  <span className="vrm-role-ico" aria-hidden="true"><Building2 size={17} strokeWidth={2} /></span>
-                  <span className="vrm-role-txt">
-                    Client
-                    <span className="vrm-role-sub">Faire convoyer un véhicule</span>
-                  </span>
-                </button>
-                <button type="button" className="vrm-role" onClick={() => setProfil("convoyeur")}>
-                  <span className="vrm-role-ico" aria-hidden="true"><CarFront size={17} strokeWidth={2} /></span>
-                  <span className="vrm-role-txt">
-                    Convoyeur
-                    <span className="vrm-role-sub">Trouver des missions</span>
-                  </span>
-                </button>
-              </div>
+          {!messages.some((m) => m.role === "user") && !orderFlow && (
+            <div className="vrm-chips vrm-welcome-chips" role="group" aria-label="Questions suggérées">
+              <Button variant="ghost" className="vrm-chip" onClick={() => void send("Estimer un convoyage")}>
+                <Calculator size={16} aria-hidden="true" /> Estimer un convoyage
+              </Button>
+              <Button variant="ghost" className="vrm-chip" onClick={() => void send("Suivre mon véhicule")}>
+                <MapPin size={16} aria-hidden="true" /> Suivre mon véhicule
+              </Button>
+              <Button variant="ghost" className="vrm-chip" onClick={() => setChatTab("conseiller")}>
+                <MessageCircle size={16} aria-hidden="true" /> Parler à un conseiller
+              </Button>
             </div>
-          )}
-
-
-          {profil && showCaps && messages.length <= 3 && (
-            <section className="vrm-caps" aria-label="Ce que Vroomy sait faire">
-              <div className="vrm-caps-head">
-                <span>Ce que Vroomy sait faire</span>
-                <button
-                  type="button"
-                  onClick={() => setShowCaps(false)}
-                  aria-label="Masquer la liste des capacités de Vroomy"
-                >
-                  <X size={13} aria-hidden="true" />
-                </button>
-              </div>
-              <ul className="vrm-cap-list">
-                {CAPABILITIES[profil].map((c) => (
-                  <li key={c.title} className="vrm-cap">
-                    <span className="vrm-cap-ic" aria-hidden="true">
-                      <c.Icon size={14} />
-                    </span>
-                    <div>
-                      <strong>{c.title}</strong>
-                      <em>{c.desc}</em>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
           )}
 
           {orderFlow && (
@@ -646,9 +575,9 @@ export default function AssistantIaWidget() {
             />
           )}
 
-          {profil === "client" && !orderFlow && (
+          {profil === "client" && hasDraft && !orderFlow && (
             <div className="vrm-chips" role="group" aria-label="Commander avec Vroomy">
-              <button
+              <Button variant="ghost"
                 type="button"
                 className="vrm-chip"
                 onClick={() => startOrderFlow(undefined, hasDraft
@@ -659,25 +588,7 @@ export default function AssistantIaWidget() {
                   <ClipboardList size={14} strokeWidth={2.2} />
                 </span>
                 {hasDraft ? "Reprendre ma commande" : "Se faire guider pas à pas"}
-              </button>
-            </div>
-          )}
-
-          {profil && !orderFlow && messages.length <= 3 && (
-            <div className="vrm-chips" role="group" aria-label="Questions suggérées">
-              {QUICK_REPLIES[profil].map((q) => (
-                <button
-                  key={q.label}
-                  type="button"
-                  className="vrm-chip"
-                  onClick={() => void send(q.label)}
-                >
-                  <span className="vrm-ic" aria-hidden="true">
-                    <q.Icon size={14} strokeWidth={2.2} />
-                  </span>
-                  {q.label}
-                </button>
-              ))}
+              </Button>
             </div>
           )}
 
@@ -722,12 +633,12 @@ export default function AssistantIaWidget() {
                 value={lead.telephone}
                 onChange={(e) => setLead((l) => ({ ...l, telephone: e.target.value }))}
               />
-              <button type="button" className="vrm-chip" onClick={() => void sendLead()}>
+              <Button variant="ghost" type="button" className="vrm-chip" onClick={() => void sendLead()}>
                 <span className="vrm-ic" aria-hidden="true">
-                  📞
+                  <Phone size={16} aria-hidden="true" />
                 </span>
                 Demander un rappel
-              </button>
+              </Button>
               <a className="vrm-call" href="tel:+33782456181">
                 <Phone size={13} aria-hidden="true" /> Appeler le 07 82 45 61 81
               </a>
@@ -750,21 +661,20 @@ export default function AssistantIaWidget() {
               id="vrm-input"
               ref={inputRef}
               className="vrm-input"
-              placeholder="Écrivez à Vroomy..."
+              placeholder="Écrivez votre message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               maxLength={1200}
             />
-            <button type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer le message">
+            <Button variant="ghost" type="submit" className="vrm-send" disabled={typing || !input.trim()} aria-label="Envoyer le message">
               <Send size={18} aria-hidden="true" />
-            </button>
+            </Button>
           </form>
 
           <p className="vrm-fine">
-            Transports Ligneo ·{" "}
-            <button type="button" className="vrm-pref-link" onClick={toggleProactive} aria-pressed={proactiveOff}>
+            <Button variant="ghost" type="button" className="vrm-pref-link" onClick={toggleProactive} aria-pressed={proactiveOff}>
               {proactiveOff ? "Réactiver les propositions automatiques" : "Ne plus me proposer d'aide automatiquement"}
-            </button>
+            </Button>
           </p>
 
         </div>
