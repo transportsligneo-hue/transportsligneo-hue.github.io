@@ -2,10 +2,11 @@
   "version": 1,
   "asset_id": "5b35a889-284d-4288-9936-9a5d1a61e613",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/5b35a889-284d-4288-9936-9a5d1a61e613/pv-model.webp",
+  "url": "https://upbsagcnytnlcbzznmer.supabase.co/storage/v1/object/public/site-assets/pv-model.webp",
   "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/5b35a889-284d-4288-9936-9a5d1a61e613/pv-model.webp",
   "original_filename": "pv-model.webp",
   "size": 12396,
   "content_type": "image/webp",
-  "created_at": "2026-08-16T20:14:55Z"
+  "created_at": "2026-08-16T20:14:55Z",
+  "lovable_url": "/__l5e/assets-v1/5b35a889-284d-4288-9936-9a5d1a61e613/pv-model.webp"
 }

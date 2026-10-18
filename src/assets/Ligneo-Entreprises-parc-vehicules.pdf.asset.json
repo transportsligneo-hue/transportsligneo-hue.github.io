@@ -2,10 +2,11 @@
   "version": 1,
   "asset_id": "f777211b-208c-4144-91ca-87ec97536057",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/f777211b-208c-4144-91ca-87ec97536057/Ligneo-Entreprises-parc-vehicules.pdf",
+  "url": "https://upbsagcnytnlcbzznmer.supabase.co/storage/v1/object/public/site-assets/Ligneo-Entreprises-parc-vehicules.pdf",
   "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/f777211b-208c-4144-91ca-87ec97536057/Ligneo-Entreprises-parc-vehicules.pdf",
   "original_filename": "Ligneo-Entreprises-parc-vehicules.pdf",
   "size": 788110,
   "content_type": "application/pdf",
-  "created_at": "2026-10-05T00:51:52Z"
+  "created_at": "2026-10-05T00:51:52Z",
+  "lovable_url": "/__l5e/assets-v1/f777211b-208c-4144-91ca-87ec97536057/Ligneo-Entreprises-parc-vehicules.pdf"
 }

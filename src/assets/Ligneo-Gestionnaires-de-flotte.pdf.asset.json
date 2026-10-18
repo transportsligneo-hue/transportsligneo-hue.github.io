@@ -2,10 +2,11 @@
   "version": 1,
   "asset_id": "1f456013-470a-4fda-ad79-3f026980e651",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/1f456013-470a-4fda-ad79-3f026980e651/Ligneo-Gestionnaires-de-flotte.pdf",
+  "url": "https://upbsagcnytnlcbzznmer.supabase.co/storage/v1/object/public/site-assets/Ligneo-Gestionnaires-de-flotte.pdf",
   "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/1f456013-470a-4fda-ad79-3f026980e651/Ligneo-Gestionnaires-de-flotte.pdf",
   "original_filename": "Ligneo-Gestionnaires-de-flotte.pdf",
   "size": 786093,
   "content_type": "application/pdf",
-  "created_at": "2026-10-05T00:51:56Z"
+  "created_at": "2026-10-05T00:51:56Z",
+  "lovable_url": "/__l5e/assets-v1/1f456013-470a-4fda-ad79-3f026980e651/Ligneo-Gestionnaires-de-flotte.pdf"
 }

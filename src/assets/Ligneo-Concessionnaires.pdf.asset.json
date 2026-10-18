@@ -2,10 +2,11 @@
   "version": 1,
   "asset_id": "afb65beb-6f0c-43bb-88d1-d3f7c1acbef1",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/afb65beb-6f0c-43bb-88d1-d3f7c1acbef1/Ligneo-Concessionnaires.pdf",
+  "url": "https://upbsagcnytnlcbzznmer.supabase.co/storage/v1/object/public/site-assets/Ligneo-Concessionnaires.pdf",
   "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/afb65beb-6f0c-43bb-88d1-d3f7c1acbef1/Ligneo-Concessionnaires.pdf",
   "original_filename": "Ligneo-Concessionnaires.pdf",
   "size": 787533,
   "content_type": "application/pdf",
-  "created_at": "2026-10-05T00:51:49Z"
+  "created_at": "2026-10-05T00:51:49Z",
+  "lovable_url": "/__l5e/assets-v1/afb65beb-6f0c-43bb-88d1-d3f7c1acbef1/Ligneo-Concessionnaires.pdf"
 }
