@@ -18,14 +18,14 @@ export const LIGNEO_BRAND_LOGO = ligneoLogoSquare;
 export const LIGNEO_BRAND_BANNER_PATH = brandBanner.url;
 
 /** Bannière officielle en URL absolue (emails, services externes). */
-export const LIGNEO_BRAND_BANNER_URL = `${LIGNEO_SITE_ORIGIN}${brandBanner.url}`;
+export const LIGNEO_BRAND_BANNER_URL = brandBanner.url.startsWith("http") ? brandBanner.url : `${LIGNEO_SITE_ORIGIN}${brandBanner.url}`;
 
 /** Sender ID SMS (si le fournisseur autorise un expéditeur personnalisé). */
 export const LIGNEO_SMS_SENDER_ID = "Ligneo";
 
 /** QR code "Avis Google" (bloc pied de page des emails clients). */
 import qrAvisGoogle from "@/assets/qr-avis-google.png.asset.json";
-export const LIGNEO_QR_AVIS_GOOGLE_URL = `${LIGNEO_SITE_ORIGIN}${qrAvisGoogle.url}`;
+export const LIGNEO_QR_AVIS_GOOGLE_URL = qrAvisGoogle.url.startsWith("http") ? qrAvisGoogle.url : `${LIGNEO_SITE_ORIGIN}${qrAvisGoogle.url}`;
 
 /** Logo carré officiel en URL absolue (emails). */
 export const LIGNEO_LOGO_SQUARE_URL = `${LIGNEO_SITE_ORIGIN}/logo-ligneo.png`;
