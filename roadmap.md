@@ -89,3 +89,5 @@
 - [ ] Démo : fiche mission identique au vrai espace, avec GPS.
 - [ ] Démo : signature de devis et paiement visibles mais validation bloquée.
 - [ ] Démo : remplir sites, conducteurs et véhicules avec des données fictives.
+
+- [ ] Local: remplacer la clé publique frontend par celle du nouveau projet (bloqué : clé fournie par l’utilisateur)
