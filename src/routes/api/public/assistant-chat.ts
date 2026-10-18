@@ -143,8 +143,8 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
 
         if (!parsed.message) return jsonError("Message manquant", 400);
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return jsonError("Assistant indisponible", 500);
+        const apiKey = process.env["LOVABLE_API_KEY"] ?? "";
+        if (!apiKey && !process.env["GEMINI_API_KEY"]) return jsonError("Assistant indisponible", 500);
 
         // --- Historique ---
         const { data: history } = await admin
