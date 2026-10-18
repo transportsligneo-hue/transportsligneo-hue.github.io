@@ -202,7 +202,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
               return Response.json({
                 conversation_id: conversationId,
                 reply:
-                  "Beaucoup de demandes en ce moment 🙏 Merci de réessayer dans quelques instants, ou appelez-nous au 07 82 45 61 81.",
+                  "Beaucoup de demandes en ce moment 🙏 Merci de réessayer dans quelques instants, ou écrivez-nous à contact@transportsligneo.fr.",
                 handoff: true,
               });
             }
@@ -210,7 +210,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
               return Response.json({
                 conversation_id: conversationId,
                 reply:
-                  "L'assistant est momentanément indisponible. Un conseiller Ligneo peut vous répondre au 07 82 45 61 81.",
+                  "L'assistant est momentanément indisponible. Un conseiller Ligneo peut vous répondre à contact@transportsligneo.fr.",
                 handoff: true,
               });
             }
@@ -220,7 +220,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
               return Response.json({
                 conversation_id: conversationId,
                 reply:
-                  "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi appeler le 07 82 45 61 81.",
+                  "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi nous écrire à contact@transportsligneo.fr.",
                 handoff: true,
               });
             }
@@ -277,7 +277,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
           return Response.json({
             conversation_id: conversationId,
             reply:
-              "Une erreur technique est survenue. Vous pouvez joindre un conseiller Ligneo au 07 82 45 61 81.",
+              "Une erreur technique est survenue. Vous pouvez joindre un conseiller Ligneo à contact@transportsligneo.fr.",
             handoff: true,
           });
         }
@@ -285,7 +285,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
 
         if (!reply) {
           reply =
-            "Je préfère ne pas répondre au hasard sur ce point. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi appeler le 07 82 45 61 81.";
+            "Je préfère ne pas répondre au hasard sur ce point. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi nous écrire à contact@transportsligneo.fr.";
         }
 
         const handoff = reply.includes("[HANDOFF]");

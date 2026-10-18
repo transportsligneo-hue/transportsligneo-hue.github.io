@@ -371,7 +371,7 @@ export default function AssistantIaWidget() {
             role: "assistant",
             content:
               data.reply ??
-              "Panne sèche de mon côté 😅 Je ne parviens pas à répondre pour le moment. Vous pouvez appeler le 07 82 45 61 81.",
+              "Panne sèche de mon côté 😅 Je ne parviens pas à répondre pour le moment. Vous pouvez nous écrire à contact@transportsligneo.fr.",
             cards: data.cards && data.cards.length > 0 ? data.cards : undefined,
           },
         ]);
@@ -382,7 +382,7 @@ export default function AssistantIaWidget() {
           {
             role: "assistant",
             content:
-              "Connexion interrompue en pleine route. Réessayez dans un instant, ou appelez-nous au 07 82 45 61 81.",
+              "Connexion interrompue en pleine route. Réessayez dans un instant, ou écrivez-nous à contact@transportsligneo.fr.",
           },
         ]);
         setHandoff(true);
@@ -418,7 +418,7 @@ export default function AssistantIaWidget() {
     } catch {
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: "Enregistrement impossible. Appelez-nous au 07 82 45 61 81." },
+        { role: "assistant", content: "Enregistrement impossible. Écrivez-nous à contact@transportsligneo.fr." },
       ]);
     } finally {
       setTyping(false);
