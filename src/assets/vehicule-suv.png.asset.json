@@ -2,10 +2,11 @@
   "version": 1,
   "asset_id": "04771726-29cd-4953-8331-bd91c191c7be",
   "project_id": "89dab15e-bf0e-453b-bb30-b452a3afe7db",
-  "url": "/__l5e/assets-v1/04771726-29cd-4953-8331-bd91c191c7be/vehicule-suv.png",
+  "url": "https://upbsagcnytnlcbzznmer.supabase.co/storage/v1/object/public/site-assets/vehicule-suv.png",
   "r2_key": "a/v1/89dab15e-bf0e-453b-bb30-b452a3afe7db/04771726-29cd-4953-8331-bd91c191c7be/vehicule-suv.png",
   "original_filename": "vehicule-suv.png",
   "size": 11223,
   "content_type": "image/png",
-  "created_at": "2026-10-11T21:42:58Z"
+  "created_at": "2026-10-11T21:42:58Z",
+  "lovable_url": "/__l5e/assets-v1/04771726-29cd-4953-8331-bd91c191c7be/vehicule-suv.png"
 }
