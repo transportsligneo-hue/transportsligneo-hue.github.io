@@ -152,6 +152,13 @@ export default function AssistantIaWidget() {
   const [open, setOpen] = useState(false);
   const [chatTab, setChatTab] = useState<"vroomy" | "conseiller">("vroomy");
   const [notif, setNotif] = useState(true);
+  const [greet, setGreet] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("vroomy-greet")) return;
+    const t1 = setTimeout(() => { sessionStorage.setItem("vroomy-greet", "1"); setGreet(true); }, 3000);
+    const t2 = setTimeout(() => setGreet(false), 6000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
   const [messages, setMessages] = useState<ChatMsg[]>([{ role: "assistant", content: WELCOME }]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -430,13 +437,14 @@ export default function AssistantIaWidget() {
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => { setGreet(false); setOpen((o) => !o); }}
         style={{ display: open ? "none" : undefined }}
       >
         <VroomyAvatar size={72} talking={typing} />
-        <span className="vrm-chat-bubble" aria-hidden="true">
-          <MessageCircle size={18} strokeWidth={2.4} />
+        <span className="vroomy-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="#2f5fff"/><g fill="#fff"><circle className="vroomy-dot" cx="8.5" cy="11" r="1.4"/><circle className="vroomy-dot" cx="12" cy="11" r="1.4"/><circle className="vroomy-dot" cx="15.5" cy="11" r="1.4"/></g></svg>
         </span>
+        {greet && !open && <span className="vroomy-greet" aria-hidden="true">Bonjour ! Je suis Vroomy.</span>}
 
       </Button>
 

@@ -31,3 +31,13 @@
 .vrm-launcher.vrm-launcher-animated::before,.vrm-launcher.vrm-launcher-animated::after{display:none!important}
 .vrm-launcher.vrm-launcher-animated .vrm-chat-bubble{z-index:3}
 .vrm-launcher.vrm-launcher-animated:focus-visible{outline:3px solid var(--vroomy-focus);outline-offset:4px}
+.vroomy-badge{position:absolute;right:-3%;bottom:-3%;width:30%;aspect-ratio:1;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.35);border:3px solid #5b83ff;z-index:3}
+.vroomy-badge svg{width:56%;height:56%;overflow:visible}
+.vroomy-dot{animation:vroomy-dots 1.2s infinite}
+.vroomy-dot:nth-child(2){animation-delay:.15s}
+.vroomy-dot:nth-child(3){animation-delay:.3s}
+@keyframes vroomy-dots{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}
+.vroomy-greet{position:absolute;bottom:calc(100% + 14px);right:0;white-space:nowrap;background:#0c1a52;color:#fff;font:600 14px/1.2 Poppins,Inter,sans-serif;border:1px solid rgba(139,164,255,.55);border-radius:16px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:vroomy-greet-in .3s ease;pointer-events:none}
+.vroomy-greet:after{content:"";position:absolute;top:100%;right:28px;border:7px solid transparent;border-top-color:#0c1a52}
+@keyframes vroomy-greet-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.vroomy-badge *,.vroomy-greet{animation:none!important}}
