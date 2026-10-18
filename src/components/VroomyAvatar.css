@@ -1,0 +1,33 @@
+.vroomy-avatar{position:relative;display:inline-block;flex-shrink:0}
+.vroomy-disc{position:absolute;inset:0;border-radius:50%;padding:3px;background:linear-gradient(135deg,#8fb0ff,#2f5fff);box-shadow:0 10px 40px rgba(47,95,255,.45)}
+.vroomy-in{width:100%;height:100%;border-radius:50%;overflow:hidden;position:relative;background:radial-gradient(circle at 50% 40%,#10297a,#050e30 75%)}
+.vroomy-carwrap{position:absolute;left:50%;top:54%;width:96%;aspect-ratio:940/671;transform:translate(-50%,-50%)}
+.vroomy-car{position:absolute;inset:0;transform-origin:50% 85%;animation:vroomy-bob 3.4s ease-in-out infinite}
+.vroomy-car .base{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vroomy-car .eye{position:absolute;inset:0;overflow:hidden;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.vroomy-car .eyeL{-webkit-mask-image:url(/vroomy/vroomy-eye-mask-left.png);mask-image:url(/vroomy/vroomy-eye-mask-left.png)}
+.vroomy-car .eyeR{-webkit-mask-image:url(/vroomy/vroomy-eye-mask-right.png);mask-image:url(/vroomy/vroomy-eye-mask-right.png)}
+.vroomy-car .eye img{position:absolute;display:block;will-change:transform}
+.vroomy-car .lid{position:absolute;inset:0;background:linear-gradient(#2c5cdc,#183a9e);transform-origin:50% 0;transform:scaleY(0);animation:vroomy-blink 5s infinite}
+.vroomy-car .eyeR .lid{animation-delay:.03s}
+.vroomy-car .lamp{position:absolute;width:19%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,226,140,.95),rgba(255,200,80,.35) 45%,rgba(255,200,80,0) 70%);mix-blend-mode:screen;animation:vroomy-lamp 1.8s ease-in-out infinite;pointer-events:none}
+.vroomy-car .lamp.l2{animation-delay:.9s}
+.vroomy-car .sheen{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.vroomy-car .sheen:after{content:"";position:absolute;top:-10%;left:0;width:14%;height:120%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg) translateX(-200%);animation:vroomy-shine 5s ease-in-out infinite}
+.vroomy-halo{position:absolute;inset:-14%;border-radius:50%;background:radial-gradient(circle,rgba(47,95,255,.55),rgba(47,95,255,0) 65%);animation:vroomy-halo 3.2s ease-in-out infinite;pointer-events:none}
+.vroomy-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #5de0ff;opacity:0;animation:vroomy-ping 3.2s ease-out infinite;pointer-events:none}
+.vroomy-ring.r2{animation-delay:1.6s}
+.vroomy-talking .vroomy-car{animation:vroomy-bob 3.4s ease-in-out infinite,vroomy-talk .22s infinite}
+@keyframes vroomy-halo{0%,100%{transform:scale(.94);opacity:.75}50%{transform:scale(1.06);opacity:1}}
+@keyframes vroomy-ping{0%{transform:scale(.92);opacity:.7}100%{transform:scale(1.35);opacity:0}}
+@keyframes vroomy-bob{0%,100%{transform:translateY(0) rotate(-1.4deg)}50%{transform:translateY(-3.5%) rotate(1.4deg)}}
+@keyframes vroomy-blink{0%,91%,100%{transform:scaleY(0)}94%{transform:scaleY(1)}97%{transform:scaleY(0)}}
+@keyframes vroomy-lamp{0%,100%{opacity:.15}50%{opacity:.8}}
+@keyframes vroomy-shine{0%,55%{transform:skewX(-18deg) translateX(-200%)}100%{transform:skewX(-18deg) translateX(900%)}}
+@keyframes vroomy-talk{0%,100%{scale:1 1}50%{scale:1.02 .97}}
+@media (prefers-reduced-motion: reduce){.vroomy-disc *,.vroomy-halo,.vroomy-ring{animation:none!important}}
+/* Bouton flottant : l'avatar remplace l'ancienne image */
+.vrm-launcher.vrm-launcher-animated{background:transparent!important;box-shadow:none!important;overflow:visible!important}
+.vrm-launcher.vrm-launcher-animated::before{display:none!important}
+.vrm-launcher.vrm-launcher-animated .vrm-chat-bubble{z-index:3}
+.vrm-launcher.vrm-launcher-animated:focus-visible{outline:3px solid #5de0ff;outline-offset:4px}
