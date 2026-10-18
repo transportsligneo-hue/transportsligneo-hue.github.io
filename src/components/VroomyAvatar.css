@@ -31,7 +31,7 @@
 .vrm-launcher.vrm-launcher-animated::before,.vrm-launcher.vrm-launcher-animated::after{display:none!important}
 .vrm-launcher.vrm-launcher-animated .vrm-chat-bubble{z-index:3}
 .vrm-launcher.vrm-launcher-animated:focus-visible{outline:3px solid var(--vroomy-focus);outline-offset:4px}
-.vroomy-badge{position:absolute;right:-3%;bottom:-3%;width:30%;aspect-ratio:1;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.35);border:3px solid #5b83ff;z-index:3}
+.vroomy-badge{position:absolute;right:-7%;bottom:-7%;width:39%;aspect-ratio:1;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.35);border:3px solid #5b83ff;z-index:3}
 .vroomy-badge svg{width:56%;height:56%;overflow:visible}
 .vroomy-dot{animation:vroomy-dots 1.2s infinite}
 .vroomy-dot:nth-child(2){animation-delay:.15s}
