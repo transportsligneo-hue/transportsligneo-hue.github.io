@@ -11758,8 +11758,8 @@ html.theme-dark .pp-ech-late{color:#fca5a5}
 .vrm-window .vrm-card-pdf { background: var(--vrmw-send); color: var(--vrmw-ink); }
 .vrm-window .vrm-conseiller-wrap { min-height: 0; }
 .vrm-window :is(.lgc-avail, .lgc-hint) { color: var(--vrmw-muted); }
-.vrm-window .lgc-visitor-form :is(input, textarea), .vrm-window .lgc-input textarea { color: var(--vrmw-ink); background: var(--vrmw-input); border-color: var(--vrmw-input-line); font-size: 16px; }
-.vrm-window .lgc-visitor-form :is(input, textarea)::placeholder, .vrm-window .lgc-input textarea::placeholder { color: var(--vrmw-muted); opacity: 1; }
+.vrm-window .lgc-visitor-form :is(input, textarea), .vrm-window .lgc-input textarea { color: var(--vrmw-ink) !important; -webkit-text-fill-color: var(--vrmw-ink); background: var(--vrmw-input); border-color: var(--vrmw-input-line); font-size: 16px; }
+.vrm-window .lgc-visitor-form :is(input, textarea)::placeholder, .vrm-window .lgc-input textarea::placeholder { color: var(--vrmw-muted) !important; -webkit-text-fill-color: var(--vrmw-muted); opacity: 1; }
 .vrm-window .lgc-visitor-form :is(input, textarea):focus, .vrm-window .lgc-input textarea:focus { outline: 2px solid var(--vrmw-cyan); outline-offset: 1px; }
 .vrm-window .lgc-visitor-form p, .vrm-window .lgc-waiting { color: var(--vrmw-chip-ink); font-size: 16px; }
 .vrm-window .lgc-visitor-form button { background: var(--vrmw-header); color: var(--vrmw-ink); font-size: 16px; }
