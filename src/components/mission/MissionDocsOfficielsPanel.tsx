@@ -1,3 +1,4 @@
+import { PlateInput } from "@/components/plate/PlateInput";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -623,8 +624,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
             onChange={(e) => setPvForm({ ...pvForm, vehicule_type: e.target.value })} />
           <input className={input} placeholder="Marque et modèle" value={pvForm.vehicule_modele}
             onChange={(e) => setPvForm({ ...pvForm, vehicule_modele: e.target.value })} />
-          <input className={input} placeholder="Immatriculation" value={pvForm.vehicule_immat}
-            onChange={(e) => setPvForm({ ...pvForm, vehicule_immat: e.target.value })} />
+          <PlateInput label="" value={pvForm.vehicule_immat} onChange={(v) => setPvForm({ ...pvForm, vehicule_immat: v })} />
           <input className={input} placeholder="Motif précis du trajet à vide" value={pvForm.motif}
             onChange={(e) => setPvForm({ ...pvForm, motif: e.target.value })} />
           <div className="flex gap-2.5">

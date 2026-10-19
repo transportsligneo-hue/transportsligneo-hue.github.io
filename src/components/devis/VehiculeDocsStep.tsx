@@ -6,6 +6,7 @@
  * - Compression côté client + caméra mobile
  * - Sauvegarde sur la table devis + flag vehicule_docs_completed
  */
+import { PlateInput } from "@/components/plate/PlateInput";
 import { useState } from "react";
 import { Upload, Loader2, CheckCircle2, AlertTriangle, Camera, FileText, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,25 +123,7 @@ export function VehiculeDocsStep({
         <label className="text-cream/70 text-xs uppercase tracking-wider mb-2 block">
           Plaque d'immatriculation
         </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={plate}
-            onChange={(e) => setPlate(e.target.value.toUpperCase())}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); searchByPlate(); } }}
-            placeholder="AB-123-CD"
-            className="flex-1 px-3 py-2.5 rounded-lg bg-navy-dark border border-cream/20 text-cream font-mono text-sm focus:border-primary outline-none uppercase"
-          />
-          <button
-            type="button"
-            onClick={searchByPlate}
-            disabled={lookingUp}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary/50 text-primary text-xs font-heading uppercase tracking-wider hover:bg-primary/10 transition-colors disabled:opacity-40"
-          >
-            {lookingUp ? <Loader2 className="animate-spin" size={14} /> : <Search size={14} />}
-            Retrouver le VIN
-          </button>
-        </div>
+        <PlateInput label="" value={plate} onChange={setPlate} onSearch={searchByPlate} searching={lookingUp} />
         <p className="text-cream/40 text-[11px] mt-1.5">
           Le VIN se remplit tout seul — vous pouvez aussi le saisir à la main ci-dessous.
         </p>

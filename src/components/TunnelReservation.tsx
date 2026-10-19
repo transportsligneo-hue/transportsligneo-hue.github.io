@@ -1,3 +1,4 @@
+import { PlateInput } from "@/components/plate/PlateInput";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Loader2, MapPin, Calendar, Car, User, Sparkles } from "lucide-react";
@@ -514,7 +515,10 @@ function Step3({ form, update }: { form: FormState; update: (n: string, v: any) 
       <div className="grid sm:grid-cols-2 gap-5">
         <Field label="Marque" name="marque" value={form.marque} onChange={update} required />
         <Field label="Modèle" name="modele" value={form.modele} onChange={update} required />
-        <Field label="Immatriculation" name="immatriculation" value={form.immatriculation} onChange={update} required />
+        <div>
+          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Immatriculation</label>
+          <PlateInput label="" value={form.immatriculation} onChange={(v) => update("immatriculation", v)} />
+        </div>
         <div>
           <label className="block text-xs uppercase tracking-wider text-cream/50 mb-2">Carburant</label>
           <select

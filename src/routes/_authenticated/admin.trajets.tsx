@@ -1,3 +1,4 @@
+import { PlateInput } from "@/components/plate/PlateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -819,7 +820,7 @@ function AdminTrajets() {
               <TextInput value={form.modele} onChange={(e) => setForm({ ...form, modele: e.target.value })} />
             </FormField>
             <FormField label="Immatriculation">
-              <TextInput value={form.immatriculation} onChange={(e) => setForm({ ...form, immatriculation: e.target.value })} />
+              <PlateInput label="" value={form.immatriculation} onChange={(v) => setForm({ ...form, immatriculation: v })} />
             </FormField>
           </div>
           <div className="grid grid-cols-3 gap-3">

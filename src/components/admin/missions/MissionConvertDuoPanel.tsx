@@ -1,3 +1,4 @@
+import { PlateInput } from "@/components/plate/PlateInput";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -129,11 +130,7 @@ export function MissionConvertDuoPanel({
             </div>
             <div>
               <label className={labelCls}>Plaque du véhicule retour</label>
-              <input
-                className={inputCls}
-                value={form.immatriculation}
-                onChange={(e) => set("immatriculation", e.target.value.toUpperCase())}
-              />
+              <PlateInput label="" value={form.immatriculation} onChange={(v) => set("immatriculation", v)} />
             </div>
             <div>
               <label className={labelCls}>VIN retour</label>

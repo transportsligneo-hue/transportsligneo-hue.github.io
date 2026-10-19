@@ -1,3 +1,4 @@
+import { PlateInput } from "@/components/plate/PlateInput";
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -143,20 +144,13 @@ function SuiviPage() {
             n'est affichée sur cette page.
           </p>
 
-          <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row">
+          <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start">
             <label htmlFor="plaque-vehicule" className="sr-only">
               Plaque d'immatriculation
             </label>
-            <input
-              id="plaque-vehicule"
-              value={plaque}
-              maxLength={12}
-              autoComplete="off"
-              autoCapitalize="characters"
-              onChange={(e) => setPlaque(e.target.value.toUpperCase())}
-              placeholder="Plaque ex. AB-123-CD"
-              className="suivi-field suivi-input w-full flex-1 px-4 py-3.5 text-[15px] tracking-[0.12em] focus:outline-none"
-            />
+            <div className="w-full flex-1">
+              <PlateInput id="plaque-vehicule" label="" tone="blue" value={plaque} onChange={setPlaque} />
+            </div>
             <label htmlFor="code-confidentiel" className="sr-only">
               Code confidentiel
             </label>

@@ -7,6 +7,7 @@
  * - Conserve le même numéro de devis et incrémente la révision (v2, v3…)
  * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
+import { PlateInput } from "@/components/plate/PlateInput";
 import { useMemo, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Loader2, Plus, RefreshCw, Save, Search, X } from 'lucide-react'
@@ -492,7 +493,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
             <Field label="Modèle"><input className={inputCls} value={f.modele} onChange={(e) => set('modele', e.target.value)} /></Field>
             <Field label="Type"><input className={inputCls} value={f.type_vehicule} onChange={(e) => set('type_vehicule', e.target.value)} /></Field>
             <Field label="Carburant"><input className={inputCls} value={f.carburant} onChange={(e) => set('carburant', e.target.value)} /></Field>
-            <Field label="Immatriculation"><input className={inputCls} value={f.immatriculation} onChange={(e) => set('immatriculation', e.target.value)} /></Field>
+            <Field label="Immatriculation"><PlateInput label="" value={f.immatriculation} onChange={(v) => set('immatriculation', v)} /></Field>
           </section>
 
           <section className="space-y-3 rounded-xl border border-pro-border p-3">

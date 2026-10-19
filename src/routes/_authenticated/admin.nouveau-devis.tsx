@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useId, useMemo, useState } from "react";
 import type { FavoriteAddressRow } from "@/components/dashboard-pro/FavoriteAddressesManager";
+import { PlateInput } from "@/components/plate/PlateInput";
 import { isElectricEnergie } from "@/lib/vehicule-electrique";
 import { lookupPlate } from "@/lib/plate.functions";
 import { HEAVY_CHECKBOX_LABEL, HEAVY_LABEL, HEAVY_SURCHARGE, HEAVY_THRESHOLD_KG } from "@/lib/plateau-poids";
@@ -1472,23 +1473,7 @@ function AdminNouveauDevisPage() {
                     )}
                   </div>
                   <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <input
-                        value={v.immat}
-                        onChange={(e) => patchVeh(v.key, { immat: e.target.value.toUpperCase(), carburant: null })}
-                        placeholder="AB-123-CD"
-                        className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => lookupVehPlate(v)}
-                        disabled={v.busy}
-                        className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                      >
-                        {v.busy ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                        Rechercher
-                      </button>
-                    </div>
+                    <PlateInput label="" value={v.immat} onChange={(val) => patchVeh(v.key, { immat: val, carburant: null })} onSearch={() => lookupVehPlate(v)} searching={!!(v.busy)} />
                     {v.msg && <p className="text-[12px] font-medium text-pro-muted">{v.msg}</p>}
                     <div className="flex flex-wrap gap-2">
                       {VEH_TYPES.map((t) => (
@@ -1510,23 +1495,7 @@ function AdminNouveauDevisPage() {
                     {v.type === "aller-retour" && (
                       <div>
                         <label className="mb-1 block text-[12px] font-semibold text-pro-muted">Plaque retour (restitution)</label>
-                        <div className="flex gap-2">
-                          <input
-                            value={v.immatRetour ?? ""}
-                            onChange={(e) => patchVeh(v.key, { immatRetour: e.target.value.toUpperCase(), carburantRetour: null })}
-                            placeholder="AB-123-CD"
-                            className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => lookupVehRetourPlate(v)}
-                            disabled={v.busyRetour}
-                            className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                          >
-                            {v.busyRetour ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                            Rechercher
-                          </button>
-                        </div>
+                        <PlateInput label="" value={v.immatRetour ?? ""} onChange={(val) => patchVeh(v.key, { immatRetour: val, carburantRetour: null })} onSearch={() => lookupVehRetourPlate(v)} searching={!!(v.busyRetour)} />
                         {v.msgRetour && <p className="mt-1 text-[12px] font-medium text-pro-muted">{v.msgRetour}</p>}
                       </div>
                     )}
@@ -1600,23 +1569,7 @@ function AdminNouveauDevisPage() {
               <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                 Immatriculation
               </label>
-              <div className="flex gap-2">
-                <input
-                  value={immat}
-                  onChange={(e) => setImmat(e.target.value.toUpperCase())}
-                  placeholder="AB-123-CD"
-                  className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSivLookup(1)}
-                  disabled={sivLoading}
-                  className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {sivLoading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                  Rechercher
-                </button>
-              </div>
+              <PlateInput label="" value={immat} onChange={(val) => setImmat(val)} onSearch={() => handleSivLookup(1)} searching={!!(sivLoading)} />
               {sivMsg && (
                 <p
                   className={`mt-2 text-[12px] font-medium ${
@@ -1640,23 +1593,7 @@ function AdminNouveauDevisPage() {
                   <label className="mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
                     Immatriculation retour
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      value={immatRetour}
-                      onChange={(e) => setImmatRetour(e.target.value.toUpperCase())}
-                      placeholder="GQ-053-MH"
-                      className="w-full rounded-lg border border-pro-border bg-white px-3.5 py-2.5 text-sm uppercase tracking-wider text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleSivLookup(2)}
-                      disabled={siv2Loading}
-                      className="flex shrink-0 items-center gap-2 rounded-lg bg-pro-accent px-4 py-2.5 text-[12.5px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                    >
-                      {siv2Loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                      Rechercher
-                    </button>
-                  </div>
+                  <PlateInput label="" value={immatRetour} onChange={(val) => setImmatRetour(val)} onSearch={() => handleSivLookup(2)} searching={!!(siv2Loading)} />
                   {siv2Msg && (
                     <p
                       className={`mt-2 text-[12px] font-medium ${

@@ -45,10 +45,12 @@ export function PlateInput({ value, onChange, onSearch, searching, label = "Imma
   const state = plateValidity(value, foreign);
   return (
     <div className={`plate-field plate-tone-${tone}`}>
-      <div className="plate-label-row">
-        <label htmlFor={inputId} className="plate-label">{label}</label>
-        {help && <HelpTip title={label} text={help} tone={tone} />}
-      </div>
+      {label !== "" && (
+        <div className="plate-label-row">
+          <label htmlFor={inputId} className="plate-label">{label}</label>
+          {help && <HelpTip title={label} text={help} tone={tone} />}
+        </div>
+      )}
       <div className="plate-row">
         <div className={`plate-shell plate-${state}`}>
           {foreign ? (
