@@ -19,15 +19,22 @@ type Section = { title: string; body: React.ReactNode };
 
 const sections: Section[] = [
   { title: "Identité de l'entreprise", body: <p>Transports Ligneo · SIREN : 753 320 001 · Siège social à Tours (37), France.</p> },
-  { title: "Objet", body: <p>Les présentes Conditions Générales de Vente (CGV) définissent les modalités de prestation de services proposées par Transports Ligneo, spécialisée dans le convoyage et le transport de véhicules avec chauffeur professionnel.</p> },
+  { title: "Objet", body: <p>Les présentes Conditions Générales de Vente (CGV) définissent les modalités de prestation de services proposées par Transports Ligneo, spécialisée dans le convoyage de véhicules avec chauffeur professionnel.</p> },
   {
     title: "Prestations",
     body: (
       <>
         <p className="mb-2">Transports Ligneo propose :</p>
         <ul className="list-disc list-inside space-y-1 ml-2">
-          <li>Le convoyage de véhicules (livraison simple ou restitution et livraison)</li>
+          <li>Le convoyage de véhicules par un chauffeur professionnel (livraison simple ou restitution et livraison)</li>
           <li>La livraison de véhicules à domicile ou sur site</li>
+          <li>La récupération et la livraison de véhicules pour les professionnels : concessions, loueurs, flottes d'entreprise, sociétés de leasing, garages</li>
+          <li>Le convoyage vers ou depuis un garage, un carrossier ou un centre de contrôle technique</li>
+          <li>Le convoyage de véhicules neufs ou d'occasion achetés par des particuliers ou des professionnels</li>
+          <li>Le convoyage de véhicules de collection, de prestige, électriques ou utilitaires</li>
+          <li>Un état des lieux avec photos et signatures au départ et à l'arrivée, remis au client</li>
+          <li>Le suivi de la mission en temps réel</li>
+          <li>Un code de remise des clés à l'enlèvement et à la livraison, pour sécuriser la transmission du véhicule</li>
           <li>Des prestations sur mesure selon la demande du client</li>
         </ul>
         <p className="mt-2">Les services sont réalisés par des chauffeurs professionnels.</p>
