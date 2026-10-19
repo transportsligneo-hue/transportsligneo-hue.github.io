@@ -115,8 +115,19 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
       .select("latitude, longitude, recorded_at, accuracy, speed")
       .eq("attribution_id", attributionId)
       .order("recorded_at", { ascending: true })
-      .then(({ data }) => {
-        if (!cancelled && data) setAllPoints(data);
+      .then(async ({ data }) => {
+        if (cancelled || !data) return;
+        // Compte démo : on recale la trace sur « maintenant » pour que le suivi paraisse toujours en direct.
+        const { data: u } = await supabase.auth.getUser();
+        const isDemo = u.user?.email?.toLowerCase() === "demo-flotte@transportsligneo.fr";
+        if (isDemo && data.length) {
+          const shift = Date.now() - new Date(data[data.length - 1].recorded_at).getTime();
+          if (shift > 0 && shift < 30 * 86_400_000) {
+            setAllPoints(data.map((pt) => ({ ...pt, recorded_at: new Date(new Date(pt.recorded_at).getTime() + shift).toISOString() })));
+            return;
+          }
+        }
+        setAllPoints(data);
       });
     return () => { cancelled = true; };
   }, [attributionId, showMap]);
