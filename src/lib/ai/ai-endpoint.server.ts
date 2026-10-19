@@ -10,7 +10,7 @@ export function resolveAiEndpoint(): AiEndpoint | null {
   if (gemini) {
     return {
       url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}`, "x-goog-api-key": gemini },
       model: (m) => m.replace(/^google\//, "").replace(/^gemini-3[^ ]*/, "gemini-2.5-flash"),
     };
   }

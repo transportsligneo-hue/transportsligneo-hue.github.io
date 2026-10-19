@@ -3,6 +3,7 @@
  * Utilisé UNIQUEMENT côté server functions IA — jamais importé en client.
  */
 import type { AiCapability } from "./types";
+import { resolveAiEndpoint } from "./ai-endpoint.server";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -58,15 +59,16 @@ export async function callVisionTool<T>(opts: {
   try {
     const content: Array<Record<string, unknown>> = [{ type: "text", text: opts.userText }];
     for (const url of opts.imageUrls) content.push({ type: "image_url", image_url: { url } });
-    const res = await fetch(GATEWAY_URL, {
+    const ep = resolveAiEndpoint();
+    const res = await fetch(ep ? ep.url : GATEWAY_URL, {
       method: "POST",
       signal: controller.signal,
-      headers: {
+      headers: ep ? ep.headers : {
         Authorization: `Bearer ${opts.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: opts.model,
+        model: ep ? ep.model(opts.model) : opts.model,
         messages: [
           { role: "system", content: opts.systemPrompt },
           { role: "user", content },

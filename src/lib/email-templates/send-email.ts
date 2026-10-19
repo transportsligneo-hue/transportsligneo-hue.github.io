@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { render } from '@react-email/render'
-import { EmailAPIError, sendLovableEmail } from '@lovable.dev/email-js'
+import { EmailAPIError, sendBrevoEmail } from '@/lib/brevo-email.server'
 import { TEMPLATES } from './registry'
 
 // Server-only: reads LOVABLE_API_KEY. Never import from client components.
@@ -37,9 +37,8 @@ export async function sendTemplateEmail(
   to: string,
   options: SendTemplateEmailOptions = {}
 ): Promise<SendTemplateEmailResult> {
-  const apiKey = process.env['LOVABLE_API_KEY']
-  if (!apiKey) {
-    throw new Error('LOVABLE_API_KEY is not configured')
+  if (!process.env['BREVO_API_KEY']) {
+    throw new Error('BREVO_API_KEY is not configured')
   }
 
   const template = TEMPLATES[templateName]
@@ -66,21 +65,15 @@ export async function sendTemplateEmail(
       : template.subject
 
   try {
-    await sendLovableEmail(
-      {
-        to: recipient,
-        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-        sender_domain: SENDER_DOMAIN,
-        subject,
-        html,
-        text,
-        purpose: 'transactional',
-        label: templateName,
-        idempotency_key: options.idempotencyKey || crypto.randomUUID(),
-        reply_to: options.replyTo,
-      },
-      { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] }
-    )
+    await sendBrevoEmail({
+      to: recipient,
+      fromName: SITE_NAME,
+      subject,
+      html,
+      text,
+      replyTo: options.replyTo,
+      tag: templateName,
+    })
   } catch (error) {
     if (error instanceof EmailAPIError && error.code === 'recipient_suppressed') {
       return { sent: false, reason: 'recipient_suppressed' }
