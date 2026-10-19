@@ -77,13 +77,13 @@ export function CreateAccountDialog({ onCreated }: Props) {
       if (!session) throw new Error("Session expirée");
 
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-account`,
+        `${import.meta.env.VITE_SB_URL}/functions/v1/admin-create-account`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            apikey: import.meta.env.VITE_SB_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
             email: form.email,

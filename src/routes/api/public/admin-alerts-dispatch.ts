@@ -2,6 +2,7 @@ import { buildAlertDetails } from '@/lib/admin-alert-details'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { sendTransactionalEmailServer } from '@/server/email-send'
+import { sbServerUrl, sbServiceRoleKey } from "@/integrations/supabase/env";
 
 /**
  * Envoi des alertes email à l'équipe admin.
@@ -36,8 +37,8 @@ const LABELS: Record<string, string> = {
 }
 
 async function handle(request: Request) {
-  const supabaseUrl = process.env['SUPABASE_URL'] ?? import.meta.env.VITE_SUPABASE_URL
-  const serviceKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
+  const supabaseUrl = sbServerUrl()
+  const serviceKey = sbServiceRoleKey()
   if (!supabaseUrl || !serviceKey) {
     return Response.json({ error: 'Server configuration error' }, { status: 500 })
   }

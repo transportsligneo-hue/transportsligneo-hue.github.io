@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { sbPublishableKey, sbServerUrl } from "@/integrations/supabase/env";
 // NOTE: pas de middleware d'auth — la recherche SIV doit fonctionner
 // sur le site public (devis), dashboard client, pro et admin.
 // La clé RapidAPI reste côté serveur uniquement.
@@ -45,8 +46,8 @@ async function verifyRecaptchaToken(token: string): Promise<boolean> {
 
 /** Valide réellement un JWT Supabase côté serveur (aucune confiance au header brut). */
 async function verifySupabaseToken(token: string): Promise<boolean> {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = sbServerUrl();
+  const key = sbPublishableKey();
   if (!url || !key) return false;
   try {
     const { createClient } = await import("@supabase/supabase-js");

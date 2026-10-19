@@ -5,6 +5,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
+import { sbPublishableKey, sbServerUrl } from "@/integrations/supabase/env";
 
 export type PublicArticle = {
   id: string;
@@ -17,8 +18,8 @@ export type PublicArticle = {
 };
 
 function publicClient() {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  return createClient<Database>(process.env["SUPABASE_URL"]!, key, {
+  const key = sbPublishableKey()!;
+  return createClient<Database>(sbServerUrl()!, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) => {
