@@ -40,6 +40,7 @@ export const requestDevisOtp = createServerFn({ method: "POST" })
     return { devisId: input.devisId, channel } as { devisId: string; channel: "email" | "sms" };
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { supabase, userId, claims } = context;
     const jwtEmail = (claims as { email?: string } | null)?.email ?? null;
 
@@ -163,6 +164,7 @@ export const verifyDevisOtp = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { supabase, userId, claims } = context;
     const jwtEmail = (claims as { email?: string } | null)?.email ?? null;
 
@@ -303,6 +305,7 @@ export const attachSignedDevisPdf = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { supabase, userId } = context;
     if (!data.pdfPath.startsWith(`${userId}/`)) {
       throw new Error("Chemin de fichier non autorisé");
@@ -343,6 +346,7 @@ export const refuseDevis = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { supabase, userId, claims } = context;
     const jwtEmail = (claims as { email?: string } | null)?.email ?? null;
 

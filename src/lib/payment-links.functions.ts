@@ -92,6 +92,7 @@ export const createPaymentLink = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     await assertAdmin(context);
     const currency = (data.currency || "EUR").toUpperCase().slice(0, 3);
     const environment = data.sandbox ? "sandbox" : "production";
@@ -208,6 +209,7 @@ export const sendPaymentLink = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     await assertAdmin(context);
     const { data: link, error } = await context.supabase
       .from("payment_links")
@@ -498,6 +500,7 @@ export const sendFactureForPaymentLink = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     await assertAdmin(context);
     const { data: link, error } = await context.supabase
       .from("payment_links")

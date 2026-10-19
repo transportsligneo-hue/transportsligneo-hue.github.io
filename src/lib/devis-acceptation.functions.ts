@@ -35,6 +35,7 @@ export const acceptDevis = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { supabase, userId, claims } = context;
     const email = (claims as { email?: string } | null)?.email ?? null;
 
