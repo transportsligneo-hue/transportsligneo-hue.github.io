@@ -254,11 +254,11 @@ const sections = [
 
 function ConfidentialitePage() {
   return (
-    <div className="r4-page min-h-screen">
+    <div className="r4-page legal-page min-h-screen">
       <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
         <Link
           to="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
+          className="legal-back mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
         >
           <ArrowLeft size={16} /> Retour à l'accueil
         </Link>
@@ -287,7 +287,7 @@ function ConfidentialitePage() {
               <article
                 key={s.id}
                 id={s.id}
-                className="glass-onyx rounded-2xl border border-white/5 p-6 transition-colors hover:border-[#e7c76a]/30 md:p-7"
+                className="legal-card rounded-2xl border border-white/5 p-6 transition-colors hover:border-[#e7c76a]/30 md:p-7"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#e7c76a]/30 bg-gradient-to-br from-[#e7c76a]/20 to-transparent text-[#e7c76a]">

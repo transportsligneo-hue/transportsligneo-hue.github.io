@@ -54,11 +54,11 @@ const sections = [
 
 function MentionsLegalesPage() {
   return (
-    <div className="r4-page min-h-screen">
+    <div className="r4-page legal-page min-h-screen">
       <section className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-[#9aa6c9] hover:text-white text-sm mb-8 transition-colors"
+          className="legal-back inline-flex items-center gap-2 text-[#9aa6c9] hover:text-white text-sm mb-8 transition-colors"
         >
           <ArrowLeft size={16} /> Retour à l'accueil
         </Link>
@@ -83,7 +83,7 @@ function MentionsLegalesPage() {
             return (
               <article
                 key={s.title}
-                className="glass-onyx rounded-2xl p-6 md:p-7 border border-white/5 hover:border-[#e7c76a]/30 transition-colors"
+                className="legal-card rounded-2xl p-6 md:p-7 border border-white/5 hover:border-[#e7c76a]/30 transition-colors"
               >
                 <div className="flex items-start gap-4">
                   <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#e7c76a]/20 to-transparent border border-[#e7c76a]/30 text-[#e7c76a]">
