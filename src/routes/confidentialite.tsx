@@ -258,7 +258,7 @@ function ConfidentialitePage() {
       <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
         <Link
           to="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
+          className="legal-back mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
         >
           <ArrowLeft size={16} /> Retour à l'accueil
         </Link>

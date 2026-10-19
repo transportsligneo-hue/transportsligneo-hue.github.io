@@ -128,7 +128,7 @@ function CGVPage() {
       <section className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-[#9aa6c9] hover:text-white text-sm mb-8 transition-colors"
+          className="legal-back inline-flex items-center gap-2 text-[#9aa6c9] hover:text-white text-sm mb-8 transition-colors"
         >
           <ArrowLeft size={16} /> Retour à l'accueil
         </Link>

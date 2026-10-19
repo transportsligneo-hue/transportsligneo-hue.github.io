@@ -52,11 +52,11 @@ function SuppressionComptePage() {
   };
 
   return (
-    <div className="r4-page min-h-screen">
+    <div className="r4-page legal-page min-h-screen">
       <section className="mx-auto max-w-2xl px-6 pb-24 pt-28">
         <Link
           to="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
+          className="legal-back mb-8 inline-flex items-center gap-2 text-sm text-[#9aa6c9] transition-colors hover:text-white"
         >
           <ArrowLeft size={16} /> Retour à l'accueil
         </Link>
@@ -75,7 +75,7 @@ function SuppressionComptePage() {
           Demandez la suppression de votre compte Transports Ligneo Driver et de vos données associées.
         </p>
 
-        <div className="glass-onyx rounded-2xl border border-white/5 p-6 md:p-8">
+        <div className="legal-card rounded-2xl border border-white/5 p-6 md:p-8">
           {status === "success" ? (
             <div className="text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#22c55e]/10 text-[#22c55e]">
