@@ -28,6 +28,19 @@ const sections = [
     ),
   },
   {
+    icon: Building2,
+    title: "Hébergement",
+    body: (
+      <p>
+        Site hébergé par : Vercel Inc.<br />
+        440 N Barranca Ave #4133, Covina, CA 91723, États-Unis<br />
+        Site : vercel.com<br /><br />
+        Base de données hébergée par : Supabase (serveurs situés en Irlande, Union européenne)<br />
+        Site : supabase.com
+      </p>
+    ),
+  },
+  {
     icon: Copyright,
     title: "Propriété intellectuelle",
     body: <p>L'ensemble des contenus (textes, images, logos) présents sur ce site sont la propriété exclusive de Transports LIGNEO, sauf mention contraire. Toute reproduction est interdite sans autorisation préalable.</p>,
@@ -41,7 +54,7 @@ const sections = [
 
 function MentionsLegalesPage() {
   return (
-    <div className="r4-page min-h-screen">
+    <div className="r4-page legal-page min-h-screen">
       <section className="max-w-4xl mx-auto px-6 pt-28 pb-20">
         <Link
           to="/"
@@ -61,7 +74,7 @@ function MentionsLegalesPage() {
           Mentions Légales
         </h1>
         <p className="text-[#9aa6c9] text-[15.5px] leading-relaxed max-w-2xl mb-12">
-          Informations légales relatives à l'éditeur du site transportsligneo.fr.
+          Informations légales relatives à l'éditeur et à l'hébergeur du site transportsligneo.fr.
         </p>
 
         <div className="grid gap-4">
@@ -70,7 +83,7 @@ function MentionsLegalesPage() {
             return (
               <article
                 key={s.title}
-                className="glass-onyx rounded-2xl p-6 md:p-7 border border-white/5 hover:border-[#e7c76a]/30 transition-colors"
+                className="legal-card rounded-2xl p-6 md:p-7 border border-white/5 hover:border-[#e7c76a]/30 transition-colors"
               >
                 <div className="flex items-start gap-4">
                   <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#e7c76a]/20 to-transparent border border-[#e7c76a]/30 text-[#e7c76a]">

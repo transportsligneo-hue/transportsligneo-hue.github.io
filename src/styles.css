@@ -11780,3 +11780,25 @@ html.theme-dark .pp-ech-late{color:#fca5a5}
 .vrm-window input.vrm-input::placeholder { color: #9fb2e8 !important; -webkit-text-fill-color: #9fb2e8 !important; }
 .vrm-window .vrm-avatar { position: relative; overflow: visible; }
 .vrm-window .vrm-avatar .vrm-chat-bubble { width: 22px; height: 22px; bottom: -3px; right: -3px; border-width: 2px; }
+
+/* ───── Pages légales : toujours sombres et lisibles, même en thème clair ───── */
+html .legal-page, html.theme-light .legal-page {
+  color: #eef2ff;
+  background:
+    radial-gradient(700px 500px at 92% -5%, rgba(63,123,255,0.22), transparent 60%),
+    radial-gradient(600px 460px at -10% 20%, rgba(217,181,74,0.10), transparent 60%),
+    linear-gradient(180deg,#0a1638 0%, #081230 100%);
+  min-height: 100vh;
+}
+html .legal-page .legal-card, html.theme-light .legal-page .legal-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  border: 1px solid rgba(231,199,106,0.18);
+  border-left: 3px solid #e7c76a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+html .legal-page .legal-card::before, html .legal-page .legal-card::after { display: none; }
+html .legal-page .legal-card h2, html .legal-page .legal-card h3,
+html .legal-page .legal-card strong, html .legal-page h1 { color: #ffffff !important; }
+html .legal-page .legal-card p, html .legal-page .legal-card li { color: #d5ddf5 !important; }
+html .legal-page .legal-card a { color: #8fb4ff !important; text-decoration: underline; }
+html .legal-page .legal-card ul li::marker { color: #e7c76a; }

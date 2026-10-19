@@ -114,9 +114,10 @@ const sections = [
       <div className="space-y-3 text-[#c8d0e6]">
         <p>Vos données peuvent être partagées avec :</p>
         <ul className="list-disc space-y-1.5 pl-5">
-          <li><strong className="text-white">Notre prestataire d'hébergement</strong> (Supabase) — hébergement sécurisé de la base de données</li>
+          <li><strong className="text-white">Nos prestataires d'hébergement</strong> (Vercel pour le site, Supabase pour la base de données, hébergée dans l'Union européenne) — hébergement sécurisé</li>
           <li><strong className="text-white">Notre prestataire de paiement</strong> (Stripe) — traitement des versements de rémunération</li>
-          <li><strong className="text-white">Notre prestataire SMS</strong> (Twilio, si activé) — envoi de notifications par SMS</li>
+          <li><strong className="text-white">Notre prestataire d'envoi de SMS et d'emails</strong> (Brevo) — notifications, codes de vérification et messages liés à vos missions</li>
+          <li><strong className="text-white">Nos prestataires techniques</strong> (Google pour l'assistant Vroomy, la lecture de documents et les cartes ; Mapbox pour les cartes ; Plate Recognizer pour la lecture de plaques) — uniquement pour fournir les fonctionnalités du site</li>
           <li><strong className="text-white">Le client à l'origine de la mission</strong> — uniquement les informations strictement nécessaires à l'exécution de la mission (prénom, contact), jamais vos données bancaires ou personnelles complètes</li>
           <li><strong className="text-white">Les autorités compétentes</strong> si la loi nous y oblige (réquisition judiciaire, obligation légale)</li>
         </ul>
@@ -144,7 +145,8 @@ const sections = [
       <ul className="list-disc space-y-2 pl-5 text-[#c8d0e6]">
         <li>Chiffrement des données en transit (HTTPS/TLS)</li>
         <li>Accès restreint aux données selon le principe du besoin d'en connaître</li>
-        <li>Hébergement sécurisé chez un prestataire certifié</li>
+        <li>Hébergement sécurisé chez des prestataires certifiés</li>
+        <li>Certains prestataires sont situés hors de l'Union européenne (États-Unis) : les transferts sont encadrés par les garanties prévues par le RGPD (clauses contractuelles types ou cadre de protection des données UE–États-Unis)</li>
       </ul>
     ),
   },
@@ -252,7 +254,7 @@ const sections = [
 
 function ConfidentialitePage() {
   return (
-    <div className="r4-page min-h-screen">
+    <div className="r4-page legal-page min-h-screen">
       <section className="mx-auto max-w-4xl px-6 pb-24 pt-28">
         <Link
           to="/"
@@ -275,7 +277,7 @@ function ConfidentialitePage() {
           Transports Ligneo Driver — éditée par Transports Ligneo, entrepreneur individuel, immatriculée sous le SIREN 753 320 001, dont le siège est situé à Tours (37), France.
         </p>
         <p className="mb-12 text-sm text-[#9aa6c9]">
-          Dernière mise à jour : 10 août 2026
+          Dernière mise à jour : 19 octobre 2026
         </p>
 
         <div className="grid gap-4">
@@ -285,7 +287,7 @@ function ConfidentialitePage() {
               <article
                 key={s.id}
                 id={s.id}
-                className="glass-onyx rounded-2xl border border-white/5 p-6 transition-colors hover:border-[#e7c76a]/30 md:p-7"
+                className="legal-card rounded-2xl border border-white/5 p-6 transition-colors hover:border-[#e7c76a]/30 md:p-7"
               >
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#e7c76a]/30 bg-gradient-to-br from-[#e7c76a]/20 to-transparent text-[#e7c76a]">
