@@ -80,7 +80,7 @@ export const requestAdminMfaCode = createServerFn({ method: "POST" })
     });
     if (!res.ok) {
       console.error("[admin-mfa] sms failed", res.error);
-      throw new Error("Envoi du SMS impossible. Réessayez dans un instant.");
+      throw new Error(`Envoi du SMS impossible. Réessayez dans un instant. [diagnostic : ${String(res.error ?? "inconnu").slice(0, 200)}]`);
     }
     return { sent: true, maskedPhone: maskPhone(p.phone) };
   });
