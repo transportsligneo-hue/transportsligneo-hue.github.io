@@ -33,7 +33,8 @@ function normalizeSender(from?: string): string {
   return value
 }
 
-const GATEWAY_URL = 'https://connector-gateway.lovable.dev/brevo'
+// Appel direct à l'API Brevo (plus de passerelle Lovable : le site tourne sur Vercel).
+const BREVO_SMS_URL = 'https://api.brevo.com/v3/transactionalSMS/sms'
 
 export async function sendSms(params: {
   to: string
@@ -44,9 +45,8 @@ export async function sendSms(params: {
     return { ok: false, error: 'Numéro de téléphone invalide.' }
   }
 
-  const LOVABLE_API_KEY = process.env['LOVABLE_API_KEY']
   const BREVO_API_KEY = process.env['BREVO_API_KEY']
-  if (!LOVABLE_API_KEY || !BREVO_API_KEY) {
+  if (!BREVO_API_KEY) {
     return { ok: false, error: 'Configuration SMS incomplète (clé Brevo manquante).' }
   }
 
@@ -57,11 +57,11 @@ export async function sendSms(params: {
   const content = params.body.trim().slice(0, 1600)
 
   try {
-    const response = await fetch(`${GATEWAY_URL}/transactionalSMS/sms`, {
+    const response = await fetch(BREVO_SMS_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'X-Connection-Api-Key': BREVO_API_KEY,
+        'api-key': BREVO_API_KEY,
+        accept: 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
