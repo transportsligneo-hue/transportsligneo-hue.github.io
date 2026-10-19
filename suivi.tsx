@@ -53,6 +53,14 @@ function SuiviPage() {
   const [access, setAccess] = useState<{ plaque: string; code: string } | null>(null);
   const requestVersion = useRef(0);
 
+  // Lien reçu par e-mail : /suivi?plaque=AB-123-CD pré-remplit la plaque (jamais le code)
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("plaque");
+      if (p) setPlaque(p.toUpperCase().slice(0, 12));
+    } catch { /* */ }
+  }, []);
+
   useEffect(() => {
     if (!access || !result?.found || result.statut === "livree" || result.statut === "annulee") return;
     let cancelled = false;
