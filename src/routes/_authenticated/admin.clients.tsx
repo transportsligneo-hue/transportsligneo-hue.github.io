@@ -14,6 +14,8 @@ import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBl
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { getClientBillingAddress, setClientBillingAddress } from "@/lib/client-billing.functions";
 import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/clients")({
@@ -45,6 +47,19 @@ function AdminClients() {
   const [selected, setSelected] = useState<ClientRow | null>(null);
   const [pricingClient, setPricingClient] = useState<ClientRow | null>(null);
   const [missions, setMissions] = useState<any[]>([]);
+  const getBilling = useServerFn(getClientBillingAddress);
+  const setBilling = useServerFn(setClientBillingAddress);
+  const [billingAddr, setBillingAddr] = useState("");
+  const [billingSaving, setBillingSaving] = useState(false);
+
+  useEffect(() => {
+    if (!selected) { setBillingAddr(""); return; }
+    let cancelled = false;
+    void getBilling({ data: { userId: selected.user_id } })
+      .then((r) => { if (!cancelled) setBillingAddr(r.adresse_facturation ?? ""); })
+      .catch(() => { if (!cancelled) setBillingAddr(""); });
+    return () => { cancelled = true; };
+  }, [selected, getBilling]);
 
   useEffect(() => {
     if (!selected) { setMissions([]); return; }
@@ -419,6 +434,38 @@ function AdminClients() {
               <DrawerField label="Inscrit le" value={new Date(selected.created_at).toLocaleDateString("fr-FR")} />
               <DrawerField label="Missions" value={String(selected.missions_count)} />
             </DrawerGrid>
+          </DrawerSection>
+
+          <DrawerSection title="Adresse de facturation" icon={<MapPin size={12} />}>
+            <p className="text-xs text-slate-500 mb-2">
+              Cette adresse apparaît sur les factures et devis de ce client (à la place de l'adresse de la mission). Laisse vide pour garder l'adresse habituelle.
+            </p>
+            <textarea
+              className="w-full rounded-lg border border-slate-200 bg-white p-2.5 text-sm text-slate-900"
+              rows={3}
+              placeholder="N° et rue, code postal, ville"
+              value={billingAddr}
+              onChange={(e) => setBillingAddr(e.target.value)}
+            />
+            <div className="mt-2">
+              <Button
+                size="sm"
+                disabled={billingSaving}
+                onClick={async () => {
+                  setBillingSaving(true);
+                  try {
+                    await setBilling({ data: { userId: selected.user_id, adresse_facturation: billingAddr } });
+                    toast.success("Adresse de facturation enregistrée");
+                  } catch (e) {
+                    toast.error(`Échec : ${e instanceof Error ? e.message : "erreur inconnue"}`);
+                  } finally {
+                    setBillingSaving(false);
+                  }
+                }}
+              >
+                {billingSaving ? "Enregistrement…" : "Enregistrer l'adresse"}
+              </Button>
+            </div>
           </DrawerSection>
 
           <DrawerSection title={`Historique missions (${missions.length})`} icon={<Truck size={12} />}>

@@ -472,7 +472,7 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
       ?? null,
     email: dInput.email ?? null,
   });
-  const d: DevisData = billing?.societe
+  const d0: DevisData = billing?.societe
     ? {
         ...dInput,
         societe: dInput.societe || billing.societe,
@@ -482,6 +482,10 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
         logo_url: dInput.logo_url || billing.logo_url,
       }
     : dInput;
+  // L'adresse de facturation définie sur la fiche client prime sur celle enregistrée dans le devis.
+  const d: DevisData = billing?.adresse_facturation
+    ? { ...d0, adresse: billing.adresse_facturation }
+    : d0;
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   applyLigneoFonts(doc);

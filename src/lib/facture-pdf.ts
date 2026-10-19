@@ -141,7 +141,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
     userId: fInput.client_user_id ?? null,
     email: fInput.client_email ?? null,
   });
-  const f: FactureData = billing?.societe
+  const f0: FactureData = billing?.societe
     ? {
         ...fInput,
         client_societe: fInput.client_societe || billing.societe,
@@ -151,6 +151,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
         client_logo_url: fInput.client_logo_url || billing.logo_url,
       }
     : fInput;
+  // L'adresse de facturation définie sur la fiche client prime sur celle enregistrée dans la facture.
+  const f: FactureData = billing?.adresse_facturation
+    ? { ...f0, client_adresse: billing.adresse_facturation }
+    : f0;
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 

@@ -25,6 +25,7 @@ import { compressImage } from "@/lib/image-compression";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
+import { HandoverCodeGate } from "@/components/inspection/HandoverCodeGate";
 import { EdlExterneGate } from "@/components/inspection/EdlExterneGate";
 import { fetchOutilExterneMission, fetchPassageExterne, type OutilExterneMission } from "@/lib/outils-externes";
 
@@ -148,7 +149,25 @@ async function uploadWithRetry(path: string, file: File, attempts = 3) {
   throw lastErr ?? new Error("Upload échoué");
 }
 
-export function EtatDesLieuxFlow({ attributionId, type, userId, onComplete, onClose }: Props) {
+export function EtatDesLieuxFlow(props: Props) {
+  const key = `handover:ok:${props.attributionId}:${props.type}`;
+  const [passed, setPassed] = useState(() => {
+    try { return typeof window !== "undefined" && sessionStorage.getItem(key) === "1"; } catch { return false; }
+  });
+  if (!passed) {
+    return (
+      <HandoverCodeGate
+        attributionId={props.attributionId}
+        kind={props.type}
+        onClose={props.onClose}
+        onPassed={() => { try { sessionStorage.setItem(key, "1"); } catch { /* */ } setPassed(true); }}
+      />
+    );
+  }
+  return <EtatDesLieuxFlowInner {...props} />;
+}
+
+function EtatDesLieuxFlowInner({ attributionId, type, userId, onComplete, onClose }: Props) {
   const storageKey = useMemo(() => flowStorageKey(attributionId, type), [attributionId, type]);
   const initialState = useMemo<StoredFlowState | null>(() => {
     if (typeof window === "undefined") return null;

@@ -414,6 +414,8 @@ export interface ClientBillingIdentity {
   siret: string | null;
   tva: string | null;
   adresse: string | null;
+  /** Adresse de facturation définie explicitement sur la fiche client / organisation (prioritaire sur les documents). */
+  adresse_facturation?: string | null;
   logo_url: string | null;
 }
 
@@ -460,18 +462,21 @@ export async function resolveClientBillingIdentity(opts: {
           siret: (org as any).siret || (profile as any).siret || null,
           tva: (org as any).vat_number || (profile as any).tva_intra || null,
           adresse: (org as any).billing_address || (profile as any).adresse_facturation || (profile as any).adresse || null,
+          adresse_facturation: ((profile as any).adresse_facturation || (org as any).billing_address || "").trim() || null,
           logo_url: (org as any).logo_url || (profile as any).logo_url || null,
         };
       }
     }
 
     const societe = ((profile as any).societe || "").trim();
-    if (!societe) return null;
+    const adrFact = (((profile as any).adresse_facturation as string | null) || "").trim() || null;
+    if (!societe && !adrFact) return null;
     return {
-      societe,
+      societe: societe || null,
       siret: (profile as any).siret || null,
       tva: (profile as any).tva_intra || null,
-      adresse: (profile as any).adresse_facturation || (profile as any).adresse || null,
+      adresse: adrFact || (profile as any).adresse || null,
+      adresse_facturation: adrFact,
       logo_url: (profile as any).logo_url || null,
     };
   } catch {
