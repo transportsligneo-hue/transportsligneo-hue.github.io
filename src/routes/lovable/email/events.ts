@@ -1,6 +1,7 @@
 import { createEmailWebhookHandler } from '@lovable.dev/email-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { createClient } from '@supabase/supabase-js'
+import { sbServerUrl, sbServiceRoleKey } from "@/integrations/supabase/env";
 
 type Reason = 'bounce' | 'complaint' | 'unsubscribe'
 
@@ -32,8 +33,8 @@ async function recordOutcome(
   messageId: string | null,
   eventId: string,
 ) {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
+  const supabaseUrl = sbServerUrl()
+  const supabaseServiceKey = sbServiceRoleKey()
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error('Server configuration error')
   }

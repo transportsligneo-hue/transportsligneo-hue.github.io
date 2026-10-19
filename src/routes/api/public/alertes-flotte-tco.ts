@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { sendTransactionalEmailServer } from '@/server/email-send'
+import { sbServerUrl, sbServiceRoleKey } from "@/integrations/supabase/env";
 
 /**
  * Alerte quotidienne "parc véhicules" (contrôles, révisions, contrats, TCO/km).
@@ -60,8 +61,8 @@ export const Route = createFileRoute('/api/public/alertes-flotte-tco')({
           return new Response('Unauthorized', { status: 401 })
         }
 
-        const supabaseUrl = process.env['SUPABASE_URL'] ?? import.meta.env.VITE_SUPABASE_URL
-        const serviceKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
+        const supabaseUrl = sbServerUrl()
+        const serviceKey = sbServiceRoleKey()
         if (!supabaseUrl || !serviceKey) {
           return Response.json({ error: 'Server configuration error' }, { status: 500 })
         }

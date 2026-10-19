@@ -27,8 +27,8 @@ async function uploadPosition(position: GpsPosition, attributionId: string, nati
   if (native) {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session) throw error ?? new Error("Session Driver expirée");
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const url = import.meta.env.VITE_SB_URL;
+    const key = import.meta.env.VITE_SB_PUBLISHABLE_KEY;
     if (!url || !key) throw new Error("Configuration GPS indisponible");
     const response = await CapacitorHttp.post({
       url: `${url}/rest/v1/mission_locations`,
