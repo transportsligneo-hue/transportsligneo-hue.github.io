@@ -176,9 +176,9 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
         const endpoint = geminiKey
           ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
           : GATEWAY_URL;
-        const modelId = geminiKey ? "gemini-2.5-flash" : MODEL;
+        const modelId = geminiKey ? (process.env["GEMINI_MODEL"] || "gemini-3.8-flash") : MODEL;
         const headers: Record<string, string> = geminiKey
-          ? { "Content-Type": "application/json", Authorization: `Bearer ${geminiKey}` }
+          ? { "Content-Type": "application/json", Authorization: `Bearer ${geminiKey}`, "x-goog-api-key": geminiKey }
           : { "Content-Type": "application/json", "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "fetch" };
 
         const convo: Array<Record<string, unknown>> = [...messages];
@@ -221,8 +221,7 @@ export const Route = createFileRoute("/api/public/assistant-chat")({
               return Response.json({
                 conversation_id: conversationId,
                 reply:
-                  "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi nous écrire à contact@transportsligneo.fr." +
-                  ` [diagnostic : ${res.status}${geminiKey ? "" : " clé GEMINI_API_KEY absente"} ${detail.replace(/\s+/g, " ").slice(0, 180)}]`,
+                  "Je ne parviens pas à répondre pour le moment. Souhaitez-vous être rappelé(e) par un conseiller ? Vous pouvez aussi nous écrire à contact@transportsligneo.fr.",
                 handoff: true,
               });
             }

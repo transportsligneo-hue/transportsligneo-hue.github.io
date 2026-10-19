@@ -67,7 +67,7 @@ async function sendCode(ctx: Ctx, phone: string, purpose: "login" | "enroll") {
   });
   if (!res.ok) {
     console.error("[user-mfa] sms failed", res.error);
-    throw new Error(`Envoi du SMS impossible. Réessayez dans un instant. [diagnostic : ${String(res.error ?? "inconnu").slice(0, 200)}]`);
+    throw new Error(`Envoi du SMS impossible. Réessayez dans un instant.`);
   }
   return { sent: true, maskedPhone: maskPhone(phone) };
 }
