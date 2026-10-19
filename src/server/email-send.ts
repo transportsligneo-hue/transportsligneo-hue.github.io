@@ -1,7 +1,7 @@
 // Server-side helper to send transactional emails WITHOUT requiring a user JWT.
 // Use this from webhooks, public server routes, and other trusted server contexts.
 // Delivery, retries, suppression and unsubscribe are handled by Lovable.
-import { EmailAPIError, sendLovableEmail } from '@lovable.dev/email-js'
+import { EmailAPIError, sendBrevoEmail } from '@/lib/brevo-email.server'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTemplateEmail } from '@/lib/email-templates/send-email'
 import { TEMPLATES } from '@/lib/email-templates/registry'
@@ -193,9 +193,8 @@ export async function sendRawEmailServer(params: {
     return { success: false, reason: 'invalid_recipient' }
   }
 
-  const apiKey = process.env['LOVABLE_API_KEY']
-  if (!apiKey) {
-    console.error('[email/server] LOVABLE_API_KEY is not configured')
+  if (!process.env['BREVO_API_KEY']) {
+    console.error('[email/server] BREVO_API_KEY is not configured')
     return { success: false, reason: 'send_failed' }
   }
 
@@ -210,20 +209,14 @@ export async function sendRawEmailServer(params: {
   }
 
   const send = () =>
-    sendLovableEmail(
-      {
-        to,
-        from: `${senderName} <noreply@${FROM_DOMAIN}>`,
-        sender_domain: SENDER_DOMAIN,
-        subject: params.subject,
-        html: params.html,
-        text: params.text ?? '',
-        purpose: 'transactional',
-        label,
-        idempotency_key: params.idempotencyKey || messageId,
-      },
-      { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] }
-    )
+    sendBrevoEmail({
+      to,
+      fromName: senderName,
+      subject: params.subject,
+      html: params.html,
+      text: params.text,
+      tag: label,
+    })
 
   try {
     try {

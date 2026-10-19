@@ -13,6 +13,7 @@
  * détient. La lecture se fait côté PC via Realtime + RLS `created_by = uid`.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { resolveAiEndpoint } from "@/lib/ai/ai-endpoint.server";
 import type { DocumentType, ExtractionResult } from "@/lib/scanner/types";
 
 const CORS = {
@@ -124,17 +125,17 @@ export const Route = createFileRoute("/api/public/scan/handoff-extract")({
 
 
           // 2. AI Gateway
-          const apiKey = process.env.LOVABLE_API_KEY;
-          if (!apiKey) {
-            console.error("[handoff-extract] LOVABLE_API_KEY missing");
+          const ep = resolveAiEndpoint();
+          if (!ep) {
+            console.error("[handoff-extract] clé IA manquante");
             return jsonResponse({ ok: false, error: "Service OCR non configuré" }, 500);
           }
 
-          const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          const aiRes = await fetch(ep.url, {
             method: "POST",
-            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            headers: ep.headers,
             body: JSON.stringify({
-              model: "google/gemini-3.8-flash",
+              model: ep.model("google/gemini-2.5-flash"),
               messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 {

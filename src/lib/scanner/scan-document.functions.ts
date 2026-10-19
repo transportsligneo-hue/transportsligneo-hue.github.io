@@ -19,6 +19,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { resolveAiEndpoint } from "@/lib/ai/ai-endpoint.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { DocumentType, ExtractionResult } from "./types";
 
@@ -142,9 +143,9 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
       // Auth : bearer token Supabase validé par le middleware requireSupabaseAuth.
       // Toute requête sans token valide est rejetée en amont (401).
 
-      const apiKey = process.env.LOVABLE_API_KEY;
-      if (!apiKey) {
-        console.error("[scan-document] LOVABLE_API_KEY missing");
+      const ep = resolveAiEndpoint();
+      if (!ep) {
+        console.error("[scan-document] clé IA manquante");
         return { ok: false, error: "Service OCR non configuré" };
       }
 
@@ -205,14 +206,11 @@ export const scanDocumentExtract = createServerFn({ method: "POST" })
         ? `\n\nOCR de référence (Azure Read, très fiable — utilise-le en priorité pour les champs texte) :\n<<<\n${azureText.slice(0, 8000)}\n>>>`
         : "";
 
-      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const aiRes = await fetch(ep.url, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: ep.headers,
         body: JSON.stringify({
-          model: "google/gemini-3.8-flash",
+          model: ep.model("google/gemini-2.5-flash"),
           messages: [
             { role: "system", content: SYSTEM_PROMPT + hint + azureBlock },
             {

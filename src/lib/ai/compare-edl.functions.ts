@@ -57,7 +57,7 @@ export const compareEdl = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }): Promise<Result> => {
     if (!data.__ok) return { ok: false, error: data.error };
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = (process.env.GEMINI_API_KEY ?? process.env.LOVABLE_API_KEY);
     if (!apiKey) return { ok: false, error: "Service IA non configuré" };
 
     const { callVisionTool, logAiUsage, pickModel, getServerAiSettings } = await import("./gateway.server");
