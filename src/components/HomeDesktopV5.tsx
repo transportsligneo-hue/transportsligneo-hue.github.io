@@ -39,40 +39,17 @@ export default function HomeDesktopV5() {
               Convoyage et logistique automobile France &amp; Europe · Assurance, carburant et péage inclus · Suivi GPS · État des lieux
             </p>
 
-            <div className="hb-wrap">
-              <div className="hb-grid3">
-                <Link to="/services" search={{ audience: "particuliers" }} className="hb-btn hb-part">
-                  <span className="hb-ic"><User size={14} strokeWidth={2.2} /></span>
-                  <span className="hb-row"><span className="hb-label">Je suis un particulier</span><span className="hb-chev">→</span></span>
-                </Link>
-                <Link to="/services" search={{ audience: "pro" }} className="hb-btn hb-pro">
-                  <span className="hb-ic"><BriefcaseBusiness size={14} strokeWidth={2.2} /></span>
-                  <span className="hb-row"><span className="hb-label">Je suis un professionnel</span><span className="hb-chev">→</span></span>
-                </Link>
-                <Link to={isAuthenticated ? homeRoute : "/login"} className="hb-btn hb-esp">
-                  <span className="hb-ic"><House size={14} strokeWidth={2.2} /></span>
-                  <span className="hb-row"><span className="hb-label">Mon espace client</span><span className="hb-chev">→</span></span>
-                </Link>
-              </div>
-              <div className="hb-divider"><span>Autres accès</span><i /></div>
-              <div className="hb-minis">
-                <Link to="/devenir-convoyeur" className="hb-mini hb-conv">
-                  <span className="hb-ic"><CarFront size={12} strokeWidth={2.2} /></span>
-                  <span className="hb-label">Je suis convoyeur</span>
-                </Link>
-                <Link to="/suivi" className="hb-mini hb-suiv">
-                  <span className="hb-ic"><MapPin size={12} strokeWidth={2.2} /></span>
-                  <span className="hb-label">Suivre mon véhicule</span>
-                </Link>
-              </div>
-            </div>
-
-            <div className="hx-contact-row">
-              <Link to="/contact" className="dg-call-btn" aria-label="Contact · Transports Ligneo">
-                <span className="dg-call-ic"><Phone size={13} strokeWidth={2.4} /></span>
-                Contact
+            <div className="hx-quick">
+              <Link to="/devenir-convoyeur" className="hx-q hx-q-conv">
+                <span className="hx-q-label">Je suis convoyeur</span>
               </Link>
-              <DemoRequestButton />
+              <Link to="/suivi" className="hx-q hx-q-suiv">
+                <span className="hx-q-label">Suivre mon véhicule</span>
+              </Link>
+              <Link to="/contact" className="hx-q hx-q-contact" aria-label="Contact · Transports Ligneo">
+                <span className="hx-q-label">Contact</span>
+              </Link>
+              <DemoRequestButton className="hx-q hx-q-demo" />
             </div>
           </div>
 

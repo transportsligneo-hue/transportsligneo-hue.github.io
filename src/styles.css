@@ -11811,3 +11811,49 @@ html .r4-page.legal-page .legal-card li::marker { color: #e7c76a; }
 html .r4-page.legal-page .legal-back { display: flex !important; width: fit-content; margin-bottom: 28px !important; color: #b4c0e6 !important; }
 html .r4-page.legal-page .legal-back:hover { color: #fff !important; }
 html .r4-page.legal-page .legal-card a[class*="bg-"] { color: #ffffff !important; text-decoration: none; }
+
+/* ───── Accès rapides de l'accueil (convoyeur / suivi / contact / démo) ───── */
+.hx-quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 560px; }
+.hx-quick .hx-q {
+  position: relative; display: flex; align-items: center; gap: 8px; min-height: 68px; padding: 0 12px 0 12px;
+  border-radius: 20px; text-decoration: none; cursor: pointer; text-align: left; overflow: hidden; isolation: isolate;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--hx-c) 30%, transparent) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(14,24,58,0.72), rgba(8,16,42,0.82)) !important;
+  border: 0 !important;
+  -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 18px 40px -22px var(--hx-c), 0 2px 0 rgba(255,255,255,0.04) inset !important;
+  color: #ffffff !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: -0.01em !important; text-transform: none !important;
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;
+}
+/* Liseré dégradé fin (clair en haut à gauche, s'efface vers le bas à droite) */
+.hx-quick .hx-q::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1; pointer-events: none;
+  background: linear-gradient(135deg, var(--hx-c), rgba(255,255,255,0.10) 45%, rgba(255,255,255,0.04) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+}
+/* Pastille d'icône : carré sombre, trait fin lumineux de la couleur du bouton */
+.hx-quick .hx-q-label::before {
+  content: ""; display: inline-block; vertical-align: middle; margin-right: 11px; width: 40px; height: 40px; border-radius: 13px;
+  background-color: rgba(255,255,255,0.05); background-repeat: no-repeat; background-position: center; background-size: 24px 24px;
+  background-image: var(--hx-icon);
+  border: 1px solid color-mix(in srgb, var(--hx-c) 45%, transparent);
+  box-shadow: inset 0 0 18px -4px color-mix(in srgb, var(--hx-c) 55%, transparent), 0 0 18px -6px var(--hx-c);
+  transition: box-shadow .25s ease, background-color .25s ease;
+}
+.hx-quick .hx-q-label { display: flex; align-items: center; color: #fff; white-space: nowrap; }
+/* Flèche dans un rond */
+.hx-quick .hx-q::after {
+  content: "→"; margin-left: auto; display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+  font-size: 14px; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.04);
+  transition: background .25s ease, color .25s ease, transform .25s ease, border-color .25s ease;
+}
+.hx-quick .hx-q:hover, .hx-quick .hx-q:focus-visible { transform: translateY(-3px); box-shadow: 0 26px 46px -20px var(--hx-c), 0 0 0 1px color-mix(in srgb, var(--hx-c) 35%, transparent) !important; }
+.hx-quick .hx-q:hover::after, .hx-quick .hx-q:focus-visible::after { background: var(--hx-c); color: #04122e; border-color: var(--hx-c); transform: translateX(2px); }
+.hx-quick .hx-q:hover .hx-q-label::before { background-color: color-mix(in srgb, var(--hx-c) 18%, transparent); box-shadow: inset 0 0 22px -2px color-mix(in srgb, var(--hx-c) 70%, transparent), 0 0 24px -4px var(--hx-c); }
+.hx-quick .demo-req-btn.hx-q > svg { display: none; }
+.hx-q-conv { --hx-c: #2ee671; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%232ee671%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%222.4%22/%3E%3Cpath d=%22M3.3 10.5h6.3M14.4 10.5h6.3M12 14.4V21%22/%3E%3C/svg%3E"); }
+.hx-q-suiv { --hx-c: #5b9bff; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%235b9bff%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%226%22 cy=%2219%22 r=%222.6%22/%3E%3Cpath d=%22M8.6 19h8.4a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.4%22/%3E%3Ccircle cx=%2218%22 cy=%225%22 r=%222.6%22/%3E%3C/svg%3E"); }
+.hx-q-contact { --hx-c: #5de0ff; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%235de0ff%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6.6 3h3l1.5 4-2 1.3a11 11 0 0 0 5.6 5.6l1.3-2 4 1.5v3A2.5 2.5 0 0 1 17.5 19 14.5 14.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.6 3z%22/%3E%3C/svg%3E"); }
+.hx-q-demo { --hx-c: #a794ff; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23b6a4ff%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%222.5%22 y=%224%22 width=%2219%22 height=%2213%22 rx=%222.5%22/%3E%3Cpath d=%22M10 8.5l5 2.5-5 2.5z%22/%3E%3Cpath d=%22M8 21h8%22/%3E%3C/svg%3E"); }
+@media (max-width: 520px) { .hx-quick { grid-template-columns: 1fr; } }

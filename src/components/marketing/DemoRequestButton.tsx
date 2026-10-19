@@ -59,7 +59,7 @@ export function DemoRequestButton({ className = "" }: { className?: string }) {
   return (
     <>
       <button type="button" className={`demo-req-btn ${className}`} onClick={() => setOpen(true)}>
-        <MonitorPlay size={15} aria-hidden /> Demander une démo
+        <MonitorPlay size={15} aria-hidden /> <span className="hx-q-label">Demander une démo</span>
       </button>
       {open && createPortal(
         <div className="demo-req-overlay" role="dialog" aria-modal="true" aria-label="Demander une démo" onClick={() => setOpen(false)}>
