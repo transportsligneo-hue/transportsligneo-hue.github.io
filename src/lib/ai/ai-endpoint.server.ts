@@ -11,7 +11,7 @@ export function resolveAiEndpoint(): AiEndpoint | null {
     return {
       url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${gemini}`, "x-goog-api-key": gemini },
-      model: (m) => m.replace(/^google\//, "").replace(/^gemini-3[^ ]*/, "gemini-2.5-flash"),
+      model: () => process.env.GEMINI_MODEL || "gemini-3.8-flash",
     };
   }
   const lovable = process.env.LOVABLE_API_KEY;
