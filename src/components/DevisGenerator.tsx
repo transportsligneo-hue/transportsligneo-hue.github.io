@@ -20,6 +20,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
+import { applyVehicleCoef } from "@/lib/vehicle-price-coef";
 
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
@@ -76,7 +77,7 @@ function getDistance(from: string, to: string): number | null {
   if (a != null && b != null) return Math.round((a + b) * 0.85);
   return null;
 }
-function calculatePrice(distance: number, departure: string, arrival: string, option: string) {
+function calculatePrice(distance: number, departure: string, arrival: string, option: string, vehicleType?: string) {
   // 1) Tarif local par département (zone agglo basée sur les codes postaux)
   const local = resolveLocalDeptTariff(departure, arrival, distance, option);
   if (local) return local;
@@ -91,7 +92,8 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
   // 3) Calcul kilométrique longue distance (inchangé)
   const rate = distance < 200 ? 1.20 : 0.85;
   const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
-  const basePrice = Math.round(distance * rate);
+  // Majoration par type de véhicule : uniquement sur la grille kilométrique (jamais sur les forfaits fixes)
+  const basePrice = applyVehicleCoef(Math.round(distance * rate), vehicleType);
   if (option === "aller-retour") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour", hasExtra: true };
   if (option === "express") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
   return { price: basePrice, label: rateLabel, finalPrice: basePrice, multiplierLabel: "", hasExtra: false };
@@ -393,8 +395,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       if (local) return local;
     }
     if (distance === null) return null;
-    return calculatePrice(distance, departure, arrival, option);
-  }, [customMatch, distance, departure, arrival, option]);
+    return calculatePrice(distance, departure, arrival, option, vehicleType);
+  }, [customMatch, distance, departure, arrival, option, vehicleType]);
 
 
 
