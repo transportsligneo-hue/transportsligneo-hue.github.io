@@ -97,6 +97,16 @@ export const sendTrackingCode = createServerFn({ method: 'POST' })
       .limit(1)
     if (recent && recent.length) throw new Error('Email déjà envoyé il y a moins d\'une minute.')
 
+    // Plaque du véhicule : c'est elle (avec le code) que le destinataire tape sur /suivi
+    const { data: trajetPlaque } = await supabaseAdmin
+      .from('trajets')
+      .select('immatriculation')
+      .eq('mission_id', mission.id)
+      .not('immatriculation', 'is', null)
+      .limit(1)
+      .maybeSingle()
+    const plaque = ((trajetPlaque as { immatriculation?: string | null } | null)?.immatriculation ?? '').toUpperCase()
+
     const { sendTransactionalEmailServer } = await import('@/server/email-send')
     const res = await sendTransactionalEmailServer({
       templateName: 'suivi-gps-destinataire',
@@ -104,9 +114,10 @@ export const sendTrackingCode = createServerFn({ method: 'POST' })
       idempotencyKey: `suivi-gps-${mission.id}-${data.email}-${Math.floor(Date.now() / 60_000)}`,
       templateData: {
         numero: mission.numero,
+        plaque,
         code: mission.tracking_code,
         destinataire: mission.contact_arrivee_nom ?? '',
-        suiviUrl: `${SITE}/suivi?numero=${encodeURIComponent(mission.numero)}`,
+        suiviUrl: plaque ? `${SITE}/suivi?plaque=${encodeURIComponent(plaque)}` : `${SITE}/suivi`,
       },
     })
 

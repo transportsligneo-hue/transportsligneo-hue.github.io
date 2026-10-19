@@ -102,7 +102,7 @@ export function SendTrackingCodeButton({
                       />
                     </label>
                     <p className="text-xs text-[#9aa6c9]">
-                      Le destinataire recevra le numéro de mission, le code et un bouton « Suivre mon véhicule ». Il ne verra que la position du véhicule.
+                      Le destinataire recevra la plaque du véhicule, le code et un bouton « Suivre mon véhicule ». Il ne verra que la position du véhicule.
                     </p>
                   </>
                 )}

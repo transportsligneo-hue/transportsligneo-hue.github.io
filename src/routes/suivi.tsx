@@ -44,14 +44,22 @@ const STATUT_LABEL: Record<string, { label: string; color: string }> = {
 const STATUT_FALLBACK = { label: "Mission suivie", color: "#4f8cff" };
 
 function SuiviPage() {
-  const [numero, setNumero] = useState("");
+  const [plaque, setPlaque] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PublicTracking | null>(null);
   const [error, setError] = useState<string | null>(null);
   const track = useServerFn(trackMissionPublic);
-  const [access, setAccess] = useState<{ numero: string; code: string } | null>(null);
+  const [access, setAccess] = useState<{ plaque: string; code: string } | null>(null);
   const requestVersion = useRef(0);
+
+  // Lien reçu par e-mail : /suivi?plaque=AB-123-CD pré-remplit la plaque (jamais le code)
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("plaque");
+      if (p) setPlaque(p.toUpperCase().slice(0, 12));
+    } catch { /* */ }
+  }, []);
 
   useEffect(() => {
     if (!access || !result?.found || result.statut === "livree" || result.statut === "annulee") return;
@@ -65,7 +73,7 @@ function SuiviPage() {
           if (!next.found) {
             setAccess(null);
             setResult(null);
-            setError("Accès au suivi indisponible. Vérifiez votre numéro et votre code.");
+            setError("Accès au suivi indisponible. Vérifiez votre plaque et votre code.");
             return;
           }
           setResult(next);
@@ -82,16 +90,10 @@ function SuiviPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Le visiteur tape juste la fin du numéro (#116, 260) — le préfixe
-    // MIS-TLG-2026- est déjà affiché. On envoie la séquence numérique : le
-    // serveur la recherche quelle que soit l'année, et les volets A/R partagent
-    // le même numéro de base.
-    const typed = numero.trim().toUpperCase();
-    const m = typed.match(/(\d{1,5})(?:\.\d+)?(?:-[LRA])?$/);
-    const value = m ? m[1] : typed;
+    const plaqueValue = plaque.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
     const codeValue = code.trim();
-    if (value.length < 1 || codeValue.length < 4) {
-      setError("Numéro ou code incorrect.");
+    if (plaqueValue.length < 4 || codeValue.length < 4) {
+      setError("Plaque ou code incorrect.");
       return;
     }
     setLoading(true);
@@ -100,19 +102,18 @@ function SuiviPage() {
     setAccess(null);
     const version = ++requestVersion.current;
     try {
-      const res = await track({ data: { numero: value, code: codeValue } });
+      const res = await track({ data: { plaque: plaqueValue, code: codeValue } });
       if (version !== requestVersion.current) return;
       setResult(res);
-      if (res.found) setAccess({ numero: value, code: codeValue });
-      // On efface les champs après la recherche : rien ne doit sembler
-      // pré-rempli, le champ repart avec son aide de saisie (#XXX).
-      setNumero("");
+      if (res.found) setAccess({ plaque: plaqueValue, code: codeValue });
+      // On efface les champs après la recherche.
+      setPlaque("");
       setCode("");
       if (!res.found) {
         setError(
           res.blocked
             ? "Trop de tentatives. Réessayez dans une dizaine de minutes."
-            : "Numéro ou code incorrect.",
+            : "Plaque ou code incorrect.",
         );
       }
     } catch {
@@ -137,33 +138,25 @@ function SuiviPage() {
             Où en est <span className="v4-accent">mon véhicule</span> ?
           </h1>
           <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
-            Tapez seulement le numéro de mission avec le dièse (ex. #116 ou #260) et votre code
-            confidentiel, tous deux indiqués dans l'e-mail de suivi. Le début du numéro est déjà
-            pré-écrit. Aucune information personnelle n'est affichée sur cette page.
+            Tapez la plaque d'immatriculation du véhicule (ex. AB-123-CD) et votre code
+            confidentiel, indiqué dans l'e-mail de suivi. Aucune information personnelle
+            n'est affichée sur cette page.
           </p>
 
           <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row">
-            <label htmlFor="numero-mission" className="sr-only">
-              Numéro de mission
+            <label htmlFor="plaque-vehicule" className="sr-only">
+              Plaque d'immatriculation
             </label>
-            <div className="suivi-field flex flex-1 items-center gap-0 px-4">
-              <span
-                aria-hidden="true"
-                className="suivi-prefix shrink-0 select-none text-[15px]"
-              >
-                MIS-TLG-2026<span className="suivi-prefix-dash">-</span><span className="suivi-prefix-hash">#</span>
-              </span>
-              <input
-                id="numero-mission"
-                value={numero}
-                maxLength={40}
-                onChange={(e) =>
-                  setNumero(e.target.value.replace(/^MIS-TLG-\d{4}-#?/i, "").slice(0, 40))
-                }
-                placeholder="XXX"
-                className="suivi-input w-full min-w-0 flex-1 bg-transparent py-3.5 text-[15px] focus:outline-none"
-              />
-            </div>
+            <input
+              id="plaque-vehicule"
+              value={plaque}
+              maxLength={12}
+              autoComplete="off"
+              autoCapitalize="characters"
+              onChange={(e) => setPlaque(e.target.value.toUpperCase())}
+              placeholder="Plaque ex. AB-123-CD"
+              className="suivi-field suivi-input w-full flex-1 px-4 py-3.5 text-[15px] tracking-[0.12em] focus:outline-none"
+            />
             <label htmlFor="code-confidentiel" className="sr-only">
               Code confidentiel
             </label>

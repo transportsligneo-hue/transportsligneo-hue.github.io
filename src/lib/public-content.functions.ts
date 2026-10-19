@@ -11,7 +11,8 @@ import type { PublicTracking } from "./public-tracking.server";
 export type { PublicTracking };
 
 const trackSchema = z.object({
-  numero: z.string().trim().min(3).max(40),
+  numero: z.string().trim().min(3).max(40).optional(),
+  plaque: z.string().trim().min(4).max(20).optional(),
   code: z.string().trim().min(4).max(16),
 });
 
@@ -19,7 +20,7 @@ export const trackMissionPublic = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => trackSchema.parse(d))
   .handler(async ({ data }): Promise<PublicTracking> => {
     const { trackMission } = await import("./public-tracking.server");
-    return trackMission({ numero: data.numero, code: data.code });
+    return trackMission({ numero: data.numero, plaque: data.plaque, code: data.code });
   });
 
 

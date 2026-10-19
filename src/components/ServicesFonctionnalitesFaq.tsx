@@ -128,6 +128,11 @@ const CATS: Cat[] = [
         q: "Que se passe-t-il en cas de dégât constaté ?",
         a: "Tout dégât est photographié et documenté dans l'état des lieux, au départ et à l'arrivée. La comparaison des deux documents permet d'identifier précisément toute anomalie et de déclencher la prise en charge.",
       },
+      {
+        label: "Remise des clés sécurisée par code (enlèvement et livraison)",
+        q: "Comment fonctionne le code de remise des clés ?",
+        a: "À l'enlèvement, le convoyeur donne un code à la personne qui lui remet les clés : elle reçoit le même code par SMS ou par e-mail et peut ainsi vérifier que c'est bien le bon convoyeur. À la livraison, c'est l'inverse : le destinataire reçoit un code par SMS ou par e-mail et le donne au convoyeur, qui le saisit pour confirmer la remise. Chaque étape est horodatée.",
+      },
     ],
   },
   {

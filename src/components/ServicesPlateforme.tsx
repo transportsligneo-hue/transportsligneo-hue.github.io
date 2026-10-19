@@ -4,7 +4,7 @@ import {
   MapPin, Bell, History, LineChart, UserCheck, BellRing,
   Camera, PenLine, FolderCheck, ScanLine, ShieldCheck, Search, AlertTriangle,
   LayoutDashboard, Building2, Receipt, Headphones, PhoneCall,
-  Bot, Code2, Wrench, Calculator, IdCard, Hash, ChevronDown,
+  Bot, Code2, Wrench, Calculator, IdCard, Hash, ChevronDown, KeyRound,
 } from "lucide-react";
 import ServicesFonctionnalitesFaq from "@/components/ServicesFonctionnalitesFaq";
 
@@ -48,6 +48,7 @@ const CATS: { title: string; items: Feat[] }[] = [
       { Icon: ShieldCheck, label: "Assurance tous risques incluse" },
       { Icon: Search, label: "Recherche par plaque" },
       { Icon: AlertTriangle, label: "Identification des dégâts" },
+      { Icon: KeyRound, label: "Remise des clés sécurisée par code (enlèvement et livraison)" },
     ],
   },
   {
@@ -86,7 +87,7 @@ export default function ServicesPlateforme({ variant = "particuliers" }: { varia
     "Devis instantané", "Commande en 2 clics", "Planification à l'avance", "Livraison simple / + restitution", "Tarifs transparents",
     "Suivi GPS en direct", "Notifications en temps réel", "Historique complet des missions", "Convoyeur dédié",
     "État des lieux photo 360°", "Signature électronique", "Devis & factures archivés", "Assurance tous risques incluse", "Identification des dégâts",
-    "Joignable rapidement",
+    "Joignable rapidement", "Remise des clés sécurisée par code (enlèvement et livraison)",
   ]);
   const categories = isPro ? CATS : CATS.map((cat) => ({ ...cat, items: cat.items.filter((item) => personalLabels.has(item.label)) })).filter((cat) => cat.items.length);
   const total = categories.reduce((n, c) => n + c.items.length, 0);

@@ -56,7 +56,8 @@ export function normalizeCode(v: string): string {
 }
 
 export async function trackMission(input: {
-  numero: string;
+  numero?: string;
+  plaque?: string;
   code: string;
 }): Promise<PublicTracking> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -76,25 +77,60 @@ export async function trackMission(input: {
 
   const code = normalizeCode(input.code);
 
-  // Le visiteur peut taper le numéro complet (MIS-TLG-2026-#116) ou juste le
-  // numéro court (116) : on normalise vers la recherche la plus souple.
-  const rawNumero = input.numero.trim().toUpperCase();
-  const shortMatch = rawNumero.match(/^#?(\d{1,5})$/);
-  const numeroPattern = shortMatch ? `%#${shortMatch[1]}` : rawNumero;
+  const missionCols =
+    "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, updated_at, tracking_code";
+  type MissionRow = {
+    id: string; numero: string; statut: string | null; ville_depart: string | null;
+    ville_arrivee: string | null; date_prise_en_charge: string | null; updated_at: string | null;
+    tracking_code: string | null;
+  };
+  let mission: MissionRow | undefined;
 
-  // Un numéro peut couvrir plusieurs lignes (aller + retour) : on prend la ligne
-  // dont le code correspond.
-  const { data: candidates } = await supabaseAdmin
-    .from("missions")
-    .select(
-      "id, numero, statut, ville_depart, ville_arrivee, date_prise_en_charge, updated_at, tracking_code",
-    )
-    .ilike("numero", numeroPattern)
-    .limit(5);
-
-  const mission = (candidates ?? []).find(
-    (m) => (m.tracking_code ?? "").toUpperCase() === code && code.length > 0,
-  );
+  const plaqueAlnum = (input.plaque ?? "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  if (plaqueAlnum.length >= 4) {
+    // Recherche par plaque : tolère tirets / espaces dans la base (AB-123-CD, AB 123 CD, AB123CD)
+    const pattern = plaqueAlnum.split("").join("%");
+    const { data: trajetsPlaque } = await supabaseAdmin
+      .from("trajets")
+      .select("mission_id")
+      .ilike("immatriculation", pattern)
+      .limit(50);
+    const missionIds = Array.from(
+      new Set((trajetsPlaque ?? []).map((t) => t.mission_id).filter(Boolean) as string[]),
+    );
+    if (missionIds.length > 0) {
+      const { data: cands } = await supabaseAdmin
+        .from("missions")
+        .select(missionCols)
+        .in("id", missionIds)
+        .limit(50);
+      const matching = ((cands ?? []) as MissionRow[]).filter(
+        (m) => (m.tracking_code ?? "").toUpperCase() === code && code.length > 0,
+      );
+      // Mission en cours / à venir en priorité, sinon la plus récente
+      const rank = (m: MissionRow) => (["livree", "annulee"].includes(mapStatut(m.statut) ?? "") ? 1 : 0);
+      matching.sort(
+        (a, b) =>
+          rank(a) - rank(b) ||
+          new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
+      );
+      mission = matching[0];
+    }
+  } else if (input.numero) {
+    // Le visiteur peut taper le numéro complet (MIS-TLG-2026-#116) ou juste le
+    // numéro court (116) : on normalise vers la recherche la plus souple.
+    const rawNumero = input.numero.trim().toUpperCase();
+    const shortMatch = rawNumero.match(/^#?(\d{1,5})$/);
+    const numeroPattern = shortMatch ? `%#${shortMatch[1]}` : rawNumero;
+    const { data: candidates } = await supabaseAdmin
+      .from("missions")
+      .select(missionCols)
+      .ilike("numero", numeroPattern)
+      .limit(5);
+    mission = ((candidates ?? []) as MissionRow[]).find(
+      (m) => (m.tracking_code ?? "").toUpperCase() === code && code.length > 0,
+    );
+  }
 
   if (!mission) {
     const windowExpired =
