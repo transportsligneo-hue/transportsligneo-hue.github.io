@@ -30,10 +30,10 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      // Le splash reste affiché jusqu'à ce que le JS appelle SplashScreen.hide()
-      // (NativeAppInit) : évite l'écran noir pendant le chargement distant.
-      launchShowDuration: 15000,
-      launchAutoHide: false,
+      // Le splash se masque seul après 3 s (et plus tôt si le JS appelle hide()),
+      // pour ne jamais rester bloqué si le site distant met du temps à charger.
+      launchShowDuration: 3000,
+      launchAutoHide: true,
       backgroundColor: "#0b1026",
       showSpinner: true,
       spinnerColor: "#4f8cff",
