@@ -35,10 +35,10 @@ function ChoisirCompte() {
     <div className="auth-shell flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-5xl auth-fade-in">
         <div className="text-center mb-10">
-          <Link to="/" className="inline-block mb-6">
+          <Link to="/" className="block mb-6">
             <img src={logoLigneo()} alt="Transports Ligneo" className="h-36 md:h-44 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
-          <div className="auth-eyebrow justify-center !text-[15px] md:!text-[17px] !tracking-[0.2em] mb-2">Créer un compte</div>
+          <div className="auth-eyebrow justify-center !flex !text-[15px] md:!text-[17px] !tracking-[0.2em] mb-2">Créer un compte</div>
           <h1 className="auth-title text-3xl md:text-[42px]">
             Choisissez votre <span className="auth-accent">profil</span>
           </h1>
