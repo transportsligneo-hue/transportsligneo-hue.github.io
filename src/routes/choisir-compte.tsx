@@ -19,13 +19,14 @@ type Card = {
   title: string;
   desc: string;
   badge?: string;
+  green?: boolean;
 };
 
 const CARDS: Card[] = [
   { to: "/inscription-client", icon: Car, title: "Particulier", desc: "Réservez le convoyage de votre véhicule en quelques clics. Devis instantané, paiement sécurisé." },
   { to: "/inscription-pro", icon: Building2, title: "Professionnel", desc: "Concession, loueur, agence : dashboard pro, tarifs négociés, facturation mensuelle.", badge: "B2B" },
   { to: "/inscription-flotte", icon: Truck, title: "Flotte", desc: "Multi-sites, gros volumes, contrat-cadre. Tarifs sur mesure et compte dédié.", badge: "Grand compte" },
-  { to: "/inscription-convoyeur", icon: UserCheck, title: "Convoyeur", desc: "Rejoignez notre réseau de chauffeurs indépendants. Validation par notre équipe sous 48 h." },
+  { to: "/inscription-convoyeur", icon: UserCheck, title: "Convoyeur", desc: "Rejoignez notre réseau de chauffeurs indépendants. Validation par notre équipe sous 48 h.", green: true },
 ];
 
 function ChoisirCompte() {
@@ -33,10 +34,10 @@ function ChoisirCompte() {
     <div className="auth-shell flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-5xl auth-fade-in">
         <div className="text-center mb-10">
-          <Link to="/" className="inline-block mb-5">
-            <img src={logoLigneo()} alt="Transports Ligneo" className="h-14 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
+          <Link to="/" className="inline-block mb-6">
+            <img src={logoLigneo()} alt="Transports Ligneo" className="h-36 md:h-44 w-auto mx-auto drop-shadow-[0_8px_20px_rgba(59,130,246,0.35)]" />
           </Link>
-          <div className="auth-eyebrow justify-center">Créer un compte</div>
+          <div className="auth-eyebrow justify-center !text-[15px] md:!text-[17px] !tracking-[0.2em] mb-2">Créer un compte</div>
           <h1 className="auth-title text-3xl md:text-[42px]">
             Choisissez votre <span className="auth-accent">profil</span>
           </h1>
@@ -46,11 +47,11 @@ function ChoisirCompte() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {CARDS.map(({ to, icon: Icon, title, desc, badge }) => (
+          {CARDS.map(({ to, icon: Icon, title, desc, badge, green }) => (
             <Link
               key={to}
               to={to}
-              className="group auth-card p-6 relative transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.5)] hover:border-blue-300/40"
+              className={"group auth-card p-6 relative transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.5)] hover:border-blue-300/40 " + (green ? "!border-emerald-400/40 !bg-emerald-500/10 hover:!border-emerald-300/70 hover:shadow-[0_20px_50px_-10px_rgba(16,185,129,0.5)]" : "")}
             >
               {badge && (
                 <div className="absolute top-3 right-3 px-2 py-0.5 bg-blue-400/15 text-blue-200 text-[10px] uppercase tracking-wider rounded-full border border-blue-300/25">
@@ -58,14 +59,14 @@ function ChoisirCompte() {
                 </div>
               )}
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/25 to-blue-400/10 border border-blue-300/25 flex items-center justify-center group-hover:from-blue-500/40 group-hover:border-blue-300/40 transition-all">
-                  <Icon size={26} className="text-blue-200" />
+                <div className={"w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center transition-all " + (green ? "from-emerald-500/30 to-emerald-400/10 border-emerald-300/40 group-hover:from-emerald-500/50" : "from-blue-500/25 to-blue-400/10 border-blue-300/25 group-hover:from-blue-500/40 group-hover:border-blue-300/40")}>
+                  <Icon size={26} className={green ? "text-emerald-300" : "text-blue-200"} />
                 </div>
                 <h2 className="font-heading text-lg text-white font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
                   {title}
                 </h2>
                 <p className="text-white/60 text-xs leading-relaxed">{desc}</p>
-                <span className="inline-flex items-center gap-1.5 text-blue-200 text-[10px] uppercase tracking-[0.18em] font-semibold group-hover:gap-2.5 transition-all pt-1">
+                <span className={"inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold group-hover:gap-2.5 transition-all pt-1 " + (green ? "text-emerald-300" : "text-blue-200")}>
                   Continuer <ArrowRight size={12} />
                 </span>
               </div>
