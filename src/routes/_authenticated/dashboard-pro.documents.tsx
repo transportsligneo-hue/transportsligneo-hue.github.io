@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat, PenLine } from "lucide-react";
+import { Search, FileText, Download, Loader2, Receipt, CreditCard, X, CheckCircle2, AlertTriangle, Repeat, PenLine } from "lucide-react";
 import { MissionLegBadge } from "@/components/mission/MissionLegBadge";
 
 import { useServerFn } from "@tanstack/react-start";
@@ -199,6 +199,8 @@ function ProDocuments() {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("ht");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [statutFilter, setStatutFilter] = useState<string>("all");
+  const [q, setQ] = useState("");
+  const [plateByMission, setPlateByMission] = useState<Record<string, string>>({});
   const [closingDevis, setClosingDevis] = useState<DevisRow | null>(null);
   const [closingReason, setClosingReason] = useState<string>("");
   const [closingSubmitting, setClosingSubmitting] = useState<boolean>(false);
@@ -253,11 +255,33 @@ function ProDocuments() {
           setRechargeFlags(rech);
         }
       }
+      // Plaques des missions facturées (pour la recherche par plaque)
+      if (missionIds.length > 0) {
+        try {
+          const { data: mrows } = await supabase.from("missions").select("id, immatriculation").in("id", missionIds);
+          if (!cancelled && mrows) {
+            const pm: Record<string, string> = {};
+            for (const m of mrows as { id: string; immatriculation: string | null }[]) if (m.immatriculation) pm[m.id] = m.immatriculation;
+            setPlateByMission(pm);
+          }
+        } catch { /* recherche par plaque indisponible : sans impact */ }
+      }
       setLoading(false);
     })();
 
     return () => { cancelled = true; };
   }, [user, reloadKey]);
+
+  const norm = (v: string | null | undefined) => (v ?? "").toLowerCase().replace(/[\s-]/g, "");
+  const matchesQ = (parts: Array<string | null | undefined>) => {
+    const needle = norm(q);
+    if (!needle) return true;
+    return parts.some((p) => norm(p).includes(needle));
+  };
+  const filteredDevis = useMemo(() => devis.filter((d) => matchesQ([
+    d.numero, d.depart, d.arrivee, d.depart_retour, d.arrivee_retour,
+    d.immatriculation, d.immatriculation_retour, d.marque, d.modele, `${d.marque ?? ""}${d.modele ?? ""}`,
+  ])), [devis, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const years = useMemo(() => {
     const set = new Set<string>();
@@ -271,18 +295,19 @@ function ProDocuments() {
   const filteredFactures = useMemo(() => {
     return factures.filter(f => {
       if (statutFilter !== "all" && f.statut !== statutFilter) return false;
+      if (!matchesQ([f.numero, f.depart, f.arrivee, f.client_societe, f.client_nom, f.client_prenom, f.designation, f.mission_id ? plateByMission[f.mission_id] : null])) return false;
       if (yearFilter !== "all") {
         const d = f.date_facture ?? f.created_at;
         if (!d || new Date(d).getFullYear().toString() !== yearFilter) return false;
       }
       return true;
     });
-  }, [factures, statutFilter, yearFilter]);
+  }, [factures, statutFilter, yearFilter, q, plateByMission]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Vue planning : devis groupés par jour de prestation, plus récents en haut. */
   const devisPlanning = useMemo(() => {
     const groups = new Map<string, DevisRow[]>();
-    for (const d of devis) {
+    for (const d of filteredDevis) {
       const key = dayKey(d.date_souhaitee ?? d.created_at);
       const arr = groups.get(key);
       if (arr) arr.push(d);
@@ -293,7 +318,7 @@ function ProDocuments() {
       if (b === "sans-date") return -1;
       return a > b ? -1 : 1;
     });
-  }, [devis]);
+  }, [filteredDevis]);
 
   /** Devis indexés par mission puis par identifiant, pour rattacher les factures. */
   const devisByMission = useMemo(() => {
@@ -493,6 +518,19 @@ function ProDocuments() {
             </button>
           );
         })}
+      </div>
+
+      <div className="relative">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Rechercher : plaque, ville, n° de devis ou de facture, marque…"
+          className="w-full rounded-xl border border-pro-border bg-white py-2.5 pl-9 pr-9 text-sm text-pro-text outline-none transition-colors placeholder:text-pro-muted focus:border-pro-accent"
+        />
+        {q && (
+          <button type="button" onClick={() => setQ("")} aria-label="Effacer la recherche" className="absolute right-3 top-1/2 -translate-y-1/2 text-pro-muted hover:text-pro-text"><X size={14} /></button>
+        )}
       </div>
 
       {tab === "devis" && (

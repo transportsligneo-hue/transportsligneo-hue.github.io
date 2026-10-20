@@ -373,7 +373,7 @@ function ProMissionsIndex() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher par n°, ville…"
+            placeholder="Rechercher : plaque, ville, n° de mission, marque, VIN…"
             className="w-full pl-9 pr-3 py-2 text-sm bg-pro-bg-soft border border-transparent focus:border-pro-accent focus:bg-white rounded-md outline-none transition-colors text-pro-text placeholder:text-pro-muted"
           />
         </div>

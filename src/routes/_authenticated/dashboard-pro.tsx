@@ -21,32 +21,43 @@ export const Route = createFileRoute("/_authenticated/dashboard-pro")({
 });
 
 function buildNavItems(accountType: "b2b_standard" | "flotte"): ProSidebarItem[] {
-  const base: ProSidebarItem[] = [
-    { to: "/dashboard-pro", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-    { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
-    { to: "/dashboard-pro/nouvelle-mission", label: "Nouvelle mission", icon: PlusCircle },
-    { to: "/dashboard-pro/calendrier", label: "Calendrier", icon: CalendarDays },
-    { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
-  ];
-  // Section Flotte : véhicules + conducteurs + sites, réservée aux comptes Flotte
-  if (accountType === "flotte") {
-    base.push(
-      { to: "/dashboard-pro/flotte", label: "Parc véhicules", icon: Car },
-      { to: "/dashboard-pro/sites", label: "Sites & agences", icon: Network },
-      { to: "/dashboard-pro/conducteurs", label: "Conducteurs", icon: Users },
-    );
+  if (accountType !== "flotte") {
+    // B2B standard : menu simple, à plat (comportement inchangé)
+    return [
+      { to: "/dashboard-pro", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+      { to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
+      { to: "/dashboard-pro/nouvelle-mission", label: "Nouvelle mission", icon: PlusCircle },
+      { to: "/dashboard-pro/calendrier", label: "Calendrier", icon: CalendarDays },
+      { to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
+      { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
+      { to: "/dashboard-pro/rapports", label: "Rapports", icon: BarChart3 },
+      { to: "/dashboard-pro/fidelite", label: "Compte Kilomètres", icon: Gauge },
+      { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
+      { to: "/dashboard-pro/equipe", label: "Équipe & alertes", icon: UserCog },
+      { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+      { to: "/dashboard-pro/conseiller", label: "Parler à un conseiller", icon: MessageCircle },
+      { to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
+    ];
   }
-  base.push(
-    { to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
-    { to: "/dashboard-pro/rapports", label: "Rapports", icon: BarChart3 },
-    { to: "/dashboard-pro/fidelite", label: "Compte Kilomètres", icon: Gauge },
-    { to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
-    { to: "/dashboard-pro/equipe", label: "Équipe & alertes", icon: UserCog },
-    { to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
-    { to: "/dashboard-pro/conseiller", label: "Parler à un conseiller", icon: MessageCircle },
-    { to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
-  );
-  return base;
+  // Flotte : menu rangé en sections repliables
+  return [
+    { group: "Essentiel", to: "/dashboard-pro", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+    { group: "Essentiel", to: "/dashboard-pro/nouvelle-mission", label: "Nouvelle mission", icon: PlusCircle },
+    { group: "Missions", to: "/dashboard-pro/missions", label: "Missions", icon: Truck },
+    { group: "Missions", to: "/dashboard-pro/calendrier", label: "Calendrier", icon: CalendarDays },
+    { group: "Parc & organisation", to: "/dashboard-pro/flotte", label: "Parc véhicules", icon: Car },
+    { group: "Parc & organisation", to: "/dashboard-pro/sites", label: "Sites & agences", icon: Network },
+    { group: "Parc & organisation", to: "/dashboard-pro/conducteurs", label: "Conducteurs", icon: Users },
+    { group: "Parc & organisation", to: "/dashboard-pro/adresses", label: "Mes adresses", icon: MapPin },
+    { group: "Facturation & suivi", to: "/dashboard-pro/documents", label: "Factures & devis", icon: FileText },
+    { group: "Facturation & suivi", to: "/dashboard-pro/rapports", label: "Rapports", icon: BarChart3 },
+    { group: "Facturation & suivi", to: "/dashboard-pro/fidelite", label: "Compte Kilomètres", icon: Gauge },
+    { group: "Compte & aide", to: "/dashboard-pro/equipe", label: "Équipe & alertes", icon: UserCog },
+    { group: "Compte & aide", to: "/dashboard-pro/societe", label: "Ma société", icon: Building2 },
+    { group: "Compte & aide", to: "/dashboard-pro/api", label: "API & Intégrations", icon: Code2 },
+    { group: "Compte & aide", to: "/dashboard-pro/conseiller", label: "Parler à un conseiller", icon: MessageCircle },
+    { group: "Compte & aide", to: "/dashboard-pro/aide", label: "Aide & FAQ", icon: LifeBuoy },
+  ];
 }
 
 function ProLayout() {

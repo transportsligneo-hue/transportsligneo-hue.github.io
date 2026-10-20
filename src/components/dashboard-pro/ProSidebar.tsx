@@ -1,13 +1,13 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import ThemeToggle from "@/components/ThemeToggle";
-import { LifeBuoy, LogOut, Menu, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, LifeBuoy, LogOut, Menu, X, type LucideIcon } from "lucide-react";
 import { REPLAY_HELP_EVENT } from "@/components/dashboard-pro/HelpTip";
 
 /** Rouvre les bulles d'aide « ? » de la page courante. */
 export function replayHelpTips() {
   window.dispatchEvent(new Event(REPLAY_HELP_EVENT));
 }
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
@@ -22,6 +22,8 @@ export interface ProSidebarItem {
   icon: LucideIcon;
   exact?: boolean;
   badge?: ReactNode;
+  /** Section repliable du menu (optionnel : sans groupe, le menu reste plat). */
+  group?: string;
 }
 
 interface Props {
@@ -103,6 +105,65 @@ export function ProSidebar({ societe, items: allItems, children, audience = "pro
       ? location.pathname === item.to
       : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
 
+  // Sections repliables (uniquement si les entrées ont un "group")
+  const grouped = items.some((i) => i.group);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("pro-sidebar-groups") || "null");
+      if (saved && typeof saved === "object") setOpenGroups((o) => ({ ...o, ...saved }));
+    } catch { /* stockage indisponible */ }
+  }, []);
+  const activeGroup = items.find((i) => i.group && isActive(i))?.group;
+  const isGroupOpen = (g: string) => openGroups[g] ?? (g === activeGroup || g === "Essentiel");
+  const toggleGroup = (g: string) => {
+    setOpenGroups((o) => {
+      const next = { ...o, [g]: !isGroupOpen(g) };
+      try { localStorage.setItem("pro-sidebar-groups", JSON.stringify(next)); } catch { /* noop */ }
+      return next;
+    });
+  };
+  const renderNav = (onNavigate?: () => void) => {
+    const link = (item: ProSidebarItem) => {
+      const active = isActive(item);
+      return (
+        <Link
+          key={item.to}
+          to={item.to}
+          onClick={onNavigate}
+          data-tour={item.to.endsWith("/missions") ? "side-missions" : undefined}
+          className={`lig-nav-item${active ? " is-active" : ""}`}
+        >
+          <span className="lig-nav-ic"><item.icon size={15} /></span>
+          <span className="flex-1">{item.label}</span>
+          {item.badge}
+        </Link>
+      );
+    };
+    if (!grouped) return items.map(link);
+    const order: string[] = [];
+    items.forEach((i) => { const g = i.group ?? "Essentiel"; if (!order.includes(g)) order.push(g); });
+    return order.map((g) => {
+      const list = items.filter((i) => (i.group ?? "Essentiel") === g);
+      const open = isGroupOpen(g);
+      const hasActive = list.some(isActive);
+      return (
+        <div key={g} className="pt-1">
+          <button
+            type="button"
+            onClick={() => toggleGroup(g)}
+            aria-expanded={open}
+            className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${hasActive ? "text-[color:var(--pro-accent)]" : "text-pro-muted hover:text-[color:var(--pro-accent)]"}`}
+          >
+            {g}
+            <ChevronDown size={13} className={`transition-transform ${open ? "" : "-rotate-90"}`} />
+          </button>
+          {open && <div className="mt-0.5 space-y-1">{list.map(link)}</div>}
+        </div>
+      );
+    });
+  };
+
   return (
     <div data-org-theme={themeAttr} className="min-h-screen flex bg-pro-bg text-pro-text">
       {/* === Sidebar Desktop === */}
@@ -117,21 +178,7 @@ export function ProSidebar({ societe, items: allItems, children, audience = "pro
         </div>
 
         <nav data-tour="side-nav" className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
-          {items.map((item) => {
-            const active = isActive(item);
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                data-tour={item.to.endsWith("/missions") ? "side-missions" : undefined}
-                className={`lig-nav-item${active ? " is-active" : ""}`}
-              >
-                <span className="lig-nav-ic"><item.icon size={15} /></span>
-                <span className="flex-1">{item.label}</span>
-                {item.badge}
-              </Link>
-            );
-          })}
+          {renderNav()}
         </nav>
 
         <div className="lig-nav p-3 border-t border-pro-border">
@@ -199,21 +246,7 @@ export function ProSidebar({ societe, items: allItems, children, audience = "pro
 
 
             <nav className="lig-nav flex-1 p-3 space-y-1 overflow-y-auto">
-              {items.map((item) => {
-                const active = isActive(item);
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileOpen(false)}
-                    className={`lig-nav-item${active ? " is-active" : ""}`}
-                  >
-                    <span className="lig-nav-ic"><item.icon size={15} /></span>
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge}
-                  </Link>
-                );
-              })}
+              {renderNav(() => setMobileOpen(false))}
             </nav>
 
             <div className="lig-nav p-3 border-t border-pro-border">
