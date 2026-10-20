@@ -20,12 +20,13 @@ type Card = {
   desc: string;
   badge?: string;
   green?: boolean;
+  pay?: string;
 };
 
 const CARDS: Card[] = [
   { to: "/inscription-client", icon: Car, title: "Particulier", desc: "Réservez le convoyage de votre véhicule en quelques clics. Devis instantané, paiement sécurisé." },
-  { to: "/inscription-pro", icon: Building2, title: "Professionnel", desc: "Concession, loueur, agence : dashboard pro, tarifs négociés, facturation mensuelle.", badge: "B2B" },
-  { to: "/inscription-flotte", icon: Truck, title: "Flotte", desc: "Multi-sites, gros volumes, contrat-cadre. Tarifs sur mesure et compte dédié.", badge: "Grand compte" },
+  { to: "/inscription-pro", icon: Building2, title: "Professionnel", desc: "Concession, loueur, agence : dashboard pro, devis instantané et suivi de vos missions.", badge: "B2B", pay: "Paiement par carte, simple et immédiat" },
+  { to: "/inscription-flotte", icon: Truck, title: "Flotte", desc: "Multi-sites, gros volumes, contrat-cadre. Tarifs sur mesure et compte dédié.", badge: "Grand compte", pay: "Facture à 15 / 30 jours, tarifs négociés" },
   { to: "/inscription-convoyeur", icon: UserCheck, title: "Convoyeur", desc: "Rejoignez notre réseau de chauffeurs indépendants. Validation par notre équipe sous 48 h.", green: true },
 ];
 
@@ -47,7 +48,7 @@ function ChoisirCompte() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {CARDS.map(({ to, icon: Icon, title, desc, badge, green }) => (
+          {CARDS.map(({ to, icon: Icon, title, desc, badge, green, pay }) => (
             <Link
               key={to}
               to={to}
@@ -66,6 +67,7 @@ function ChoisirCompte() {
                   {title}
                 </h2>
                 <p className="text-white/60 text-xs leading-relaxed">{desc}</p>
+                {pay && <p className="text-blue-200 text-[11px] font-semibold rounded-full bg-blue-400/10 border border-blue-300/20 px-3 py-1">{pay}</p>}
                 <span className={"inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-semibold group-hover:gap-2.5 transition-all pt-1 " + (green ? "text-emerald-300" : "text-blue-200")}>
                   Continuer <ArrowRight size={12} />
                 </span>

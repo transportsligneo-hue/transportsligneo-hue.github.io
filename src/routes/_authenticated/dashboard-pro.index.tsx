@@ -17,6 +17,7 @@ import { GuidedTour, PRO_DASHBOARD_TOUR } from "@/components/onboarding/GuidedTo
 import { FleetDeadlinesCard } from "@/components/dashboard-pro/FleetDeadlinesCard";
 
 
+import { PaymentTermsBanner } from "@/components/dashboard-pro/PaymentTermsBanner";
 export const Route = createFileRoute("/_authenticated/dashboard-pro/")({
   component: ProDashboard,
 });
@@ -298,6 +299,7 @@ function ProDashboard() {
 
 
 
+      <PaymentTermsBanner />
       <PilotageStrip isFlotte={isFlotte} />
 
       {/* KPIs */}

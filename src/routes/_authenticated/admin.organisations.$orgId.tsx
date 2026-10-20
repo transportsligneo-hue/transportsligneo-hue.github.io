@@ -9,6 +9,7 @@ import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAdd
 import { humanizeAction, actorLabel } from "@/lib/activity-humanizer";
 import { OrgLogo } from "@/components/OrgLogo";
 import { OrgLogoUploader } from "@/components/OrgLogoUploader";
+import { OrgPaymentTermsBlock } from "@/components/admin/OrgPaymentTermsBlock";
 import { OrgSitesTab } from "@/components/admin/OrgSitesTab";
 import { OrgVehiclesTab } from "@/components/admin/OrgVehiclesTab";
 
@@ -267,6 +268,7 @@ function OrgDetail() {
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-3">
+          <OrgPaymentTermsBlock orgId={org.id} accountType={org.account_type} value={org.conditions_paiement ?? null} />
           {owner ? (
             <ClientPricingRulesBlock clientUserId={owner.user_id} clientEmail={owner.email ?? ""} />
           ) : (
