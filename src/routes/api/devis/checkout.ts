@@ -128,7 +128,11 @@ export const Route = createFileRoute("/api/devis/checkout")({
         } catch (e: any) {
           console.error("[devis/checkout] Stripe error", e?.message);
           const raw = String(e?.message ?? "erreur inconnue");
-          const detail = raw.replace(/(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_…").slice(0, 300);
+          const k = process.env.STRIPE_SECRET_KEY
+          const keyDiag = k
+            ? `clé directe PRÉSENTE (${k.trim().slice(0, 8)}…, ${k.length} caractères)`
+            : "clé directe ABSENTE ou vide sur ce déploiement"
+          const detail = (raw.replace(/(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_…").slice(0, 250)) + ` | env=${env} | ${keyDiag}`;
           return Response.json({ error: "Checkout failed — please try again", detail }, { status: 500 });
         }
       },
