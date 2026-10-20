@@ -10,6 +10,7 @@ import { ClientLogo } from "@/components/admin/ClientLogo";
 import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle, Euro, CheckCircle2, Search, Plus, Layers, ArrowLeftRight, ArrowRight, ArrowLeft, CreditCard } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
+import { RelanceDevisButton } from "@/components/admin/RelanceDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
 import {
   PageHeader,
@@ -979,6 +980,7 @@ function DevisDrawer({
             locked={!!devis.locked_at}
             onValidated={() => onValidated(devis.id)}
           />
+          <RelanceDevisButton devisId={devis.id} numero={devis.numero} disabled={!!devis.paid_at} />
           <Button size="sm" onClick={() => onDownload(devis)} icon={<Download size={12} />}>PDF</Button>
           <Button size="sm" variant="secondary" onClick={() => onEdit(devis)} icon={<PenLine size={12} />}>
             Modifier

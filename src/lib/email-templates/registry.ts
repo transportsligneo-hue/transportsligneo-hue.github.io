@@ -59,6 +59,7 @@ import { template as fideliteExpiration } from './fidelite-expiration'
 import { template as suppressionCompteAdmin } from './suppression-compte-admin'
 import { template as refusClient } from './refus-client'
 import { template as alerteFlotteTco } from './alerte-flotte-tco'
+import { template as devisRelance } from './devis-relance'
 
 
 
@@ -68,6 +69,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'demande-confirmation': demandeConfirmation,
   'inscription-convoyeur': inscriptionConvoyeur,
   'devis-client': devisClient,
+  'devis-relance': devisRelance,
   'mission-confirmation': missionConfirmation,
   'convoyeur-validation': convoyeurValidation,
   'offre-acceptee': offreAcceptee,
