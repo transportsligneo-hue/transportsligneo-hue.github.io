@@ -1,3 +1,4 @@
+import { checkMinNotice } from "@/lib/min-notice";
 import { PlateInput } from "@/components/plate/PlateInput";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -147,6 +148,7 @@ export default function TunnelReservation({ onClose }: Props) {
 
   const handleSubmit = async () => {
     if (!user) return;
+    { const noticeErr = checkMinNotice(form.date_prise_en_charge, form.heure_prise_en_charge); if (noticeErr) { setError(noticeErr); return; } }
     setSubmitting(true);
     setError(null);
     try {

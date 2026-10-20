@@ -25,6 +25,7 @@ import { applyVehicleCoef } from "@/lib/vehicle-price-coef";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { checkMinNotice } from "@/lib/min-notice";
 import { Button } from "@/components/ui/button";
 
 type ClientType = "particulier" | "pro_ponctuel" | "pro_recurrent" | "flotte";
@@ -469,6 +470,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     // Champs obligatoires : trajet + date/heure + coordonnées
     if (!departure || !arrival) { setAccountError("Merci d'indiquer le départ et l'arrivée."); setStep(1); return; }
     if (!date || !heure) { setAccountError("La date et l'heure souhaitées sont obligatoires."); setStep(1); return; }
+    { const noticeErr = checkMinNotice(date, heure); if (noticeErr) { setAccountError(noticeErr); toast.error(noticeErr); setStep(1); return; } }
     if (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim())) {
       setAccountError("Merci de compléter les informations du véhicule."); setStep(2); return;
     }

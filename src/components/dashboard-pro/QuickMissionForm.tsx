@@ -36,6 +36,7 @@ import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
+import { checkMinNotice } from "@/lib/min-notice";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 import { guessElectricFromModel } from "@/lib/vehicule-electrique";
 
@@ -491,6 +492,7 @@ export default function QuickMissionForm({
     e.preventDefault();
     if (!user || !profile) return;
     setError(null);
+    { const noticeErr = checkMinNotice(date, heure); if (noticeErr) { setError(noticeErr); toast.error(noticeErr); return; } }
 
     if (!depart || !arrivee || !date || !heure) {
       setError("Merci de renseigner départ, arrivée, date et heure.");

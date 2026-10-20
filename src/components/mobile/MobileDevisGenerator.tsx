@@ -1,3 +1,4 @@
+import { checkMinNotice } from "@/lib/min-notice";
 import { applyVehicleCoef } from "@/lib/vehicle-price-coef";
 import { useState, useMemo, useEffect } from "react";
 import {
@@ -287,6 +288,10 @@ export default function MobileDevisGenerator() {
     if (!date || !heure) {
       window.alert("Merci d'indiquer la date et l'heure souhaitées.");
       return;
+    }
+    {
+      const noticeErr = checkMinNotice(date, heure);
+      if (noticeErr) { window.alert(noticeErr); return; }
     }
     if (option === "aller-retour" && (!dateRetour || !heureRetour)) {
       window.alert("Merci d'indiquer la date et l'heure de restitution.");
