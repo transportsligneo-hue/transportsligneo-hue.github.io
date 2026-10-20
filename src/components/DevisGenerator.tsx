@@ -26,6 +26,7 @@ import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
 import { checkMinNotice } from "@/lib/min-notice";
+import { kmBasePrice, kmRateLabel } from "@/lib/km-tarif";
 import { Button } from "@/components/ui/button";
 
 type ClientType = "particulier" | "pro_ponctuel" | "pro_recurrent" | "flotte";
@@ -91,10 +92,9 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
   // 3) Calcul kilométrique longue distance (inchangé)
-  const rate = distance < 200 ? 1.20 : 0.85;
-  const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
+  const rateLabel = kmRateLabel(distance);
   // Majoration par type de véhicule : uniquement sur la grille kilométrique (jamais sur les forfaits fixes)
-  const basePrice = applyVehicleCoef(Math.round(distance * rate), vehicleType);
+  const basePrice = applyVehicleCoef(kmBasePrice(distance), vehicleType);
   if (option === "aller-retour") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour", hasExtra: true };
   if (option === "express") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
   return { price: basePrice, label: rateLabel, finalPrice: basePrice, multiplierLabel: "", hasExtra: false };

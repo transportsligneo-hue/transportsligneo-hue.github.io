@@ -50,6 +50,7 @@ export type TripType = "aller_simple" | "aller_retour" | "express";
 
 import { resolveLocalDeptTariff } from "./pricing-departments";
 import { normalizeAddress } from "./distance-fallback";
+import { kmBasePrice, kmRateLabel } from "./km-tarif";
 
 export function calculateBasePrice(
   depart: string,
@@ -68,9 +69,8 @@ export function calculateBasePrice(
   const dist = distOverride ?? getDistance(depart, arrivee);
   if (dist == null || dist === 0) return { base: 0, label: "Distance non calculée", distance: dist };
 
-  const rate = dist < 200 ? 1.20 : 0.85;
-  const rateLabel = dist < 200 ? "1,20 €/km" : "0,85 €/km";
-  const baseKm = Math.round(dist * rate);
+  const rateLabel = kmRateLabel(dist);
+  const baseKm = kmBasePrice(dist);
   let base = baseKm;
   let label = `${dist} km × ${rateLabel}`;
   if (type === "aller_retour") { base = Math.round(baseKm * 1.5); label = `${dist} km × ${rateLabel} (restitution et livraison)`; }

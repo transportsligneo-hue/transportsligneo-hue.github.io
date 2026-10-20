@@ -503,10 +503,10 @@ export function resolveLocalDeptTariff(
 
 /**
  * Forfaits inter-départements (dans les deux sens), applicables à tous les clients.
- * Tours / Indre-et-Loire (37) ↔ Le Mans / Sarthe (72) : 120 € aller, 180 € aller-retour.
+ * Tours / Indre-et-Loire (37) ↔ Le Mans / Sarthe (72) : 140 € aller, 210 € aller-retour.
  */
 const CROSS_DEPT_TARIFFS: { a: string; b: string; label: string; simple: number; retour: number }[] = [
-  { a: "37", b: "72", label: "Forfait Tours ↔ Le Mans", simple: 120, retour: 180 },
+  { a: "37", b: "72", label: "Forfait Tours ↔ Le Mans", simple: 140, retour: 210 },
 ];
 
 function deptOf(address: string): string | null {

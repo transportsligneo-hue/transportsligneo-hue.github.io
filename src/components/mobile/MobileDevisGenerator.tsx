@@ -19,6 +19,7 @@ import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
+import { kmBasePrice, kmRateLabel } from "@/lib/km-tarif";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // === Mêmes données que la version desktop ===
@@ -101,10 +102,9 @@ function calculatePrice(distance: number, departure: string, arrival: string, op
     if (option === "express") return { price: simple, label, finalPrice: Math.round(simple * 1.20), multiplierLabel: "+20% express", hasExtra: true };
     return { price: simple, label, finalPrice: simple, multiplierLabel: "", hasExtra: false };
   }
-  const rate = distance < 200 ? 1.20 : 0.85;
-  const rateLabel = distance < 200 ? "1,20 €/km" : "0,85 €/km";
+  const rateLabel = kmRateLabel(distance);
   // Majoration par type de véhicule : uniquement sur la grille kilométrique (jamais sur les forfaits fixes)
-  const basePrice = applyVehicleCoef(Math.round(distance * rate), vehicleType);
+  const basePrice = applyVehicleCoef(kmBasePrice(distance), vehicleType);
   if (option === "aller-retour") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.5), multiplierLabel: "Tarif aller-retour avantageux", hasExtra: true };
   if (option === "express") return { price: basePrice, label: rateLabel, finalPrice: Math.round(basePrice * 1.20), multiplierLabel: "+20% express", hasExtra: true };
   return { price: basePrice, label: rateLabel, finalPrice: basePrice, multiplierLabel: "", hasExtra: false };
