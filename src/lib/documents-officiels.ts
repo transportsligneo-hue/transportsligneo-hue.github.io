@@ -1100,7 +1100,11 @@ export async function downloadBlob(blob: Blob, filename: string): Promise<void> 
   // iOS / Android installed PWAs cannot reliably download object URLs. Their
   // file share sheet offers Save to Files as well as opening the PDF.
   const file = new File([blob], filename, { type: blob.type || "application/pdf" });
-  if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+  // Sur ordinateur (Windows/Mac) on télécharge directement : la feuille « Partager »
+  // n'est utile que sur mobile / tablette.
+  const ua = navigator.userAgent || "";
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  if (isMobile && typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: filename });
       return;

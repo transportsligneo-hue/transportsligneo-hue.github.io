@@ -24,6 +24,7 @@ import {
   IconButton,
   Select,
 } from "@/components/admin/AdminUI";
+import { DocumentsViergesPanel } from "@/components/admin/DocumentsViergesPanel";
 import {
   getConvoyeurDocLabel,
   getRequiredConvoyeurDocTypes,
@@ -181,6 +182,8 @@ function AdminDocuments() {
           </>
         }
       />
+
+      <DocumentsViergesPanel />
 
       {loading ? (
         <Card className="text-center text-pro-muted py-12">Chargement…</Card>
