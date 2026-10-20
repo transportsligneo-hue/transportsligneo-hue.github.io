@@ -12,6 +12,10 @@ interface Props {
   variant?: "blue" | "green";
   /** Utilise le logo avec le bandeau DRIVER (espace convoyeur uniquement). */
   driverBadge?: boolean;
+  /** Taille du badge en px (remplace la taille du preset) : logo plus grand dans la barre du site. */
+  badgePx?: number;
+  /** Taille du texte « TRANSPORTS LIGNEO » en px (optionnel). */
+  wordPx?: number;
 }
 
 const SIZES = {
@@ -25,8 +29,9 @@ const SIZES = {
  * badge véhicule doré + wordmark (TRANSPORTS blanc · LIGNEO bleu électrique)
  * + tag optionnel doré. Remplace l'icône seule partout (app driver, site, splash, login).
  */
-export default function LigneoLockup({ size = "md", tag = null, className = "", variant, driverBadge = false }: Props) {
-  const s = SIZES[size];
+export default function LigneoLockup({ size = "md", tag = null, className = "", variant, driverBadge = false, badgePx, wordPx }: Props) {
+  const base = SIZES[size];
+  const s = { ...base, badge: badgePx ?? base.badge, word: wordPx ?? base.word };
   const isApp = useIsMobileAppShell();
   // Dans la coquille Capacitor (driver), le lockup passe en vert néon par défaut.
   const isGreen = (variant ?? (isApp ? "green" : "blue")) === "green";

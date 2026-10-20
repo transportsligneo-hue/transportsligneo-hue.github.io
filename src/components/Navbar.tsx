@@ -62,7 +62,7 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
 
           <div className="tln-bar-inner">
             <Link to="/" className="tln-brand tln-brand--col" aria-label="Accueil · Transports Ligneo">
-              <LigneoLockup size="md" driverBadge={driverBadge} />
+              <LigneoLockup size="md" driverBadge={driverBadge} badgePx={84} wordPx={19} />
               <span className="or-under-word">
                 <OctobreRoseBadge />
               </span>
