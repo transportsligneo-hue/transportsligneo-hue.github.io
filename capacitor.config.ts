@@ -17,8 +17,8 @@ const config: CapacitorConfig = {
   appName: "Ligneo Driver",
   webDir: "dist",
   server: {
-    // Point d'entrée natif : écran de connexion driver (jamais le site vitrine)
-    url: `${serverUrl}/login?app=1`,
+    // TEST TEMPORAIRE : page de diagnostic (remettre /login?app=1 ensuite)
+    url: `${serverUrl}/app-test.html`,
     cleartext: false,
     androidScheme: "https",
     allowNavigation: [

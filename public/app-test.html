@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test appli Ligneo</title>
+<style>
+body{margin:0;padding:24px 16px;background:#041B52;color:#fff;font:15px/1.5 system-ui,sans-serif}
+h1{font-size:20px;margin:0 0 4px;color:#6effcd}
+p{margin:4px 0;color:#c8d4f0}
+.row{margin:10px 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.08);word-break:break-all}
+.ok{color:#34E68C;font-weight:700}.ko{color:#ff7a7a;font-weight:700}
+a.btn{display:block;margin-top:18px;padding:14px;border-radius:12px;background:#34E68C;color:#041B52;text-align:center;font-weight:700;text-decoration:none}
+</style></head><body>
+<h1>Test appli Ligneo Driver</h1>
+<p>Si tu vois cette page, la coquille Android fonctionne.</p>
+<div id="out"></div>
+<a class="btn" href="/login?app=1">Ouvrir la connexion</a>
+<script>
+var out=document.getElementById('out');
+function add(label,val,ok){var d=document.createElement('div');d.className='row';d.innerHTML=label+' : <span class="'+(ok===false?'ko':ok===true?'ok':'')+'">'+val+'</span>';out.appendChild(d)}
+window.onerror=function(m,s,l){add('Erreur JS',m+' ('+l+')',false)};
+add('Page','affichée',true);
+add('Heure',new Date().toLocaleString('fr-FR'));
+add('Adresse',location.href);
+add('Navigateur interne',navigator.userAgent);
+var cap=window.Capacitor;
+add('Capacitor', cap?('présent, natif = '+(cap.isNativePlatform&&cap.isNativePlatform())):'absent',!!cap);
+add('Connexion internet',navigator.onLine?'oui':'non',navigator.onLine);
+fetch('/login?app=1',{cache:'no-store'}).then(function(r){return r.text().then(function(t){add('Page de connexion','code '+r.status+', '+t.length+' caractères',r.ok);
+ var m=t.match(/src="([^"]+\.js)"/g)||[];add('Fichiers JS trouvés',m.length+'',m.length>0);
+ var first=(t.match(/src="([^"]+\.js)"/)||[])[1];
+ if(first){fetch(first,{cache:'no-store'}).then(function(r2){add('Premier fichier JS','code '+r2.status,r2.ok)}).catch(function(e){add('Premier fichier JS','échec : '+e,false)})}
+})}).catch(function(e){add('Page de connexion','échec : '+e,false)});
+</script></body></html>
