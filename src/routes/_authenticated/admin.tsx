@@ -150,30 +150,30 @@ function AdminLayout() {
   }, [role]);
 
   const navItems: AdminSidebarItem[] = [
-    // Pilotage
-    { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true, group: "Pilotage" },
-    {
-      to: "/admin/notifications",
-      label: "Notifications",
-      icon: Bell,
-      group: "Pilotage",
-      badge: unreadCount > 0
-        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
-        : undefined,
-    },
-    { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Pilotage" },
-    { to: "/admin/test-notifications", label: "Test notifications", icon: Bell, group: "Pilotage" },
-
-    // Opérations
+    // Essentiel (sans titre, toujours visible)
+    { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
     {
       to: "/admin/demandes",
       label: "Demandes de convoyage",
       icon: Inbox,
-      group: "Opérations",
       badge: demandesCount > 0
         ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#2F5FFF] text-white">{demandesCount > 99 ? "99+" : demandesCount}</span>
         : undefined,
     },
+    { to: "/admin/missions", label: "Missions", icon: RouteIcon },
+    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList },
+    { to: "/admin/devis", label: "Devis", icon: Receipt },
+    { to: "/admin/factures", label: "Factures", icon: Receipt },
+    {
+      to: "/admin/notifications",
+      label: "Notifications",
+      icon: Bell,
+      badge: unreadCount > 0
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
+        : undefined,
+    },
+
+    // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
     {
       to: "/admin/alertes",
@@ -185,62 +185,51 @@ function AdminLayout() {
         : undefined,
     },
     { to: "/admin/incidents", label: "Registre des incidents", icon: AlertTriangle, group: "Opérations" },
-    { to: "/admin/missions", label: "Missions", icon: RouteIcon, group: "Opérations" },
-    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList, group: "Opérations" },
     { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
+    { to: "/admin/messagerie", label: "Chat des missions", icon: MessageSquare, group: "Opérations" },
+    { to: "/admin/messagerie-conseiller", label: "Chat conseiller", icon: MessageSquare, group: "Opérations" },
+    { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Opérations" },
 
-
-    // Marketing
-    { to: "/admin/campagnes", label: "Campagnes", icon: Megaphone, group: "Marketing" },
-
-    // Comptes
-    { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Comptes" },
-    { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Comptes" },
-    { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Comptes" },
-    { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Comptes" },
-    { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Comptes" },
-    { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Comptes" },
-    { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Comptes" },
-    { to: "/admin/catalogue-vehicules", label: "Catalogue véhicules", icon: Gauge, group: "Comptes" },
-
-    // Activité commerciale
-    { to: "/admin/devis", label: "Devis", icon: Receipt, group: "Activité" },
+    // Clients & convoyeurs
+    { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Clients & convoyeurs" },
+    { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Clients & convoyeurs" },
+    { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Clients & convoyeurs" },
+    { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Clients & convoyeurs" },
+    { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
+    { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },
     {
       to: "/admin/bons-commande",
       label: "Bons de commande",
       icon: FileCheck2,
-      group: "Activité",
+      group: "Clients & convoyeurs",
       badge: poCount > 0
         ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-[#0b1026]">{poCount > 99 ? "99+" : poCount}</span>
         : undefined,
     },
-
-
-    { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Activité" },
-    { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Activité" },
-    { to: "/admin/acces-demo", label: "Accès démo", icon: Send, group: "Activité" },
-    { to: "/admin/messagerie", label: "Chat des missions", icon: MessageSquare, group: "Opérations" },
-    { to: "/admin/messagerie-conseiller", label: "Chat conseiller", icon: MessageSquare, group: "Opérations" },
-    { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Activité" },
-    { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Activité" },
-
-
-
+    { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Clients & convoyeurs" },
+    { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Clients & convoyeurs" },
+    { to: "/admin/acces-demo", label: "Accès démo", icon: Send, group: "Clients & convoyeurs" },
 
     // Finance
-    { to: "/admin/factures", label: "Factures", icon: Receipt, group: "Finance" },
     { to: "/admin/paiements", label: "Paiements clients", icon: CreditCard, group: "Finance" },
     { to: "/admin/paiements-convoyeurs", label: "Paiements convoyeurs", icon: Wallet, group: "Finance" },
     { to: "/admin/fidelite", label: "Compte Kilomètres", icon: Gauge, group: "Finance" },
     { to: "/admin/informations-legales", label: "Informations légales", icon: Building2, group: "Finance" },
 
-    // Système
-    { to: "/admin/contenu", label: "Contenu du site", icon: FileText, group: "Système" },
-    { to: "/admin/historique", label: "Historique", icon: History, group: "Système" },
-    { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Système" },
-    { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Système" },
-    { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Système" },
-    { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Système" },
+    // Réglages & outils
+    { to: "/admin/communication", label: "Emails & push", icon: Megaphone, group: "Réglages & outils" },
+    { to: "/admin/test-notifications", label: "Test notifications", icon: Bell, group: "Réglages & outils" },
+    { to: "/admin/campagnes", label: "Campagnes", icon: Megaphone, group: "Réglages & outils" },
+    { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Réglages & outils" },
+    { to: "/admin/catalogue-vehicules", label: "Catalogue véhicules", icon: Gauge, group: "Réglages & outils" },
+    { to: "/admin/contenu", label: "Contenu du site", icon: FileText, group: "Réglages & outils" },
+    { to: "/admin/historique", label: "Historique", icon: History, group: "Réglages & outils" },
+    { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Réglages & outils" },
+    { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Réglages & outils" },
+    { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Réglages & outils" },
+    { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Réglages & outils" },
+    { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Réglages & outils" },
+
   ];
 
   // Section Super Admin : visible uniquement pour super_admin

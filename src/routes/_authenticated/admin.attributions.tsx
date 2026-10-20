@@ -179,10 +179,16 @@ function AdminAttributions() {
   const navigate = useNavigate();
   const [attributions, setAttributions] = useState<Attribution[]>([]);
   const [archivedView, setArchivedView] = useState(false);
+  // Données de test / démo : rangées à part, jamais mélangées aux vraies missions
+  const [testView, setTestView] = useState(false);
   const [statutFilter, setStatutFilter] = useState<"all" | "encours" | "terminees" | "annulees">("all");
   const clientBrands = useClientBrands(attributions.map((a) => a.trajet?.client_email));
   const pvMap = useMissionPv(attributions.map((a) => a.id));
-  const [trajetsDisponibles, setTrajetsDisponibles] = useState<Trajet[]>([]);
+  const [trajetsDisponiblesAll, setTrajetsDisponibles] = useState<Trajet[]>([]);
+  const trajetsDisponibles = useMemo(
+    () => trajetsDisponiblesAll.filter((t) => !!t.is_test_data === testView),
+    [trajetsDisponiblesAll, testView],
+  );
   const [showCreate, setShowCreate] = useState(false);
   const [assignTrajet, setAssignTrajet] = useState<Trajet | null>(null);
   const [gpsView, setGpsView] = useState<{ id: string; points: GpsPoint[] } | null>(null);
@@ -376,13 +382,19 @@ function AdminAttributions() {
     new Date(a.trajet?.date_trajet ?? a.created_at).getTime();
 
   const archivedCount = useMemo(
-    () => attributions.filter((a) => !!a.trajet?.archived_at).length,
+    () => attributions.filter((a) => !!a.trajet?.archived_at && !a.trajet?.is_test_data).length,
+    [attributions],
+  );
+
+  const testCount = useMemo(
+    () => attributions.filter((a) => !!a.trajet?.is_test_data).length,
     [attributions],
   );
 
   const visibleAttributions = useMemo(() => {
     const list = attributions.filter((a) => {
       const archived = !!a.trajet?.archived_at;
+      if (!!a.trajet?.is_test_data !== testView) return false;
       if (archivedView !== archived) return false;
       if (statutFilter === "encours") return !isClosedAttr(a);
       if (statutFilter === "terminees") return ["termine", "validee"].includes(a.statut) || a.trajet?.statut === "termine";
@@ -397,7 +409,7 @@ function AdminAttributions() {
       return cx ? attrTime(y) - attrTime(x) : attrTime(x) - attrTime(y);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attributions, archivedView, statutFilter]);
+  }, [attributions, archivedView, statutFilter, testView]);
 
   type GroupedItem =
     | { kind: "group"; gid: string; seq: string; items: Attribution[] }
@@ -569,11 +581,6 @@ function AdminAttributions() {
   const renderAttributionActions = (attribution: Attribution) => {
     const buttons: Array<{ key: string; label: string; icon: typeof CheckCircle2; variant: "secondary" | "success" | "danger"; onClick: () => void }> = [];
 
-    if (attribution.statut === "propose") {
-      buttons.push({ key: "confirm", label: "Confirmer", icon: CheckCircle2, variant: "success", onClick: () => void updateStatut(attribution, "accepte", { note: "Attribution confirmée par l'admin" }) });
-      buttons.push({ key: "refuse", label: "Refuser", icon: XCircle, variant: "danger", onClick: () => void updateStatut(attribution, "refusee", { note: "Attribution refusée par l'admin" }) });
-    }
-
     if (["propose", "accepte", "en_cours", "en_attente_validation", "refusee", "annule"].includes(attribution.statut)) {
       buttons.push({ key: "edit", label: "Modifier", icon: Edit2, variant: "secondary", onClick: () => setAssignTrajet({ id: attribution.trajet_id, depart: attribution.trajet?.depart ?? "", arrivee: attribution.trajet?.arrivee ?? "", date_trajet: attribution.trajet?.date_trajet ?? null, statut: attribution.trajet?.statut ?? "attribue" }) });
     }
@@ -595,6 +602,11 @@ function AdminAttributions() {
 
     return (
       <>
+        {attribution.statut === "propose" && (
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#2F5FFF]/40 bg-[#2F5FFF]/5 px-2.5 py-1.5 text-[12px] font-medium text-[#2F5FFF]">
+            <Clock size={12} /> En attente de la réponse du convoyeur
+          </span>
+        )}
         {buttons.map((action) => (
           <Button
             key={action.key}
@@ -885,7 +897,7 @@ function AdminAttributions() {
     <div>
       <PageHeader
         title="Attributions"
-        subtitle={`${attributions.length} attribution${attributions.length > 1 ? "s" : ""}`}
+        subtitle={`${attributions.length - testCount} attribution${attributions.length - testCount > 1 ? "s" : ""}`}
         actions={
           <>
             <CreateTestMissionButton onCreated={() => { fetchOptions(); fetchAttributions(); }} />
@@ -995,9 +1007,20 @@ function AdminAttributions() {
           </button>
         ))}
         <button
+          onClick={() => { setTestView((v) => !v); setArchivedView(false); }}
+          title="Missions de test et de démonstration, rangées à part"
+          className={`ml-auto rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
+            testView
+              ? "border-[#7c3aed] bg-[#7c3aed] text-white"
+              : "border-dashed border-[#c9b8f5] bg-white text-pro-text-soft hover:border-[#7c3aed]"
+          }`}
+        >
+          Tests &amp; démo · {testCount}
+        </button>
+        <button
           onClick={() => setArchivedView((v) => !v)}
           title="Missions terminées ou annulées depuis plus de 60 jours"
-          className={`ml-auto rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
+          className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
             archivedView
               ? "border-[#B8862A] bg-[#B8862A] text-white"
               : "border-[#e3e6ef] bg-white text-pro-text-soft hover:border-[#B8862A]"

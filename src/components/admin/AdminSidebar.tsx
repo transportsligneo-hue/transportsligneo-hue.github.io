@@ -1,7 +1,7 @@
 import { useFeatureFlag, isLoyaltyPath } from "@/hooks/useFeatureFlag";
 import { Link, useLocation } from "@tanstack/react-router";
 import ThemeToggle from "@/components/ThemeToggle";
-import { ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
@@ -41,6 +41,22 @@ export function AdminSidebar({ items: allItems, children }: Props) {
     } catch { /* storage indisponible */ }
   }, []);
 
+  // Sections repliables : "Essentiel" ouverte par défaut, la section de la page active s'ouvre seule.
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ Essentiel: true });
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("admin-sidebar-groups") || "null");
+      if (saved && typeof saved === "object") setOpenGroups((o) => ({ ...o, ...saved }));
+    } catch { /* storage indisponible */ }
+  }, []);
+  const toggleGroup = (g: string) => {
+    setOpenGroups((o) => {
+      const next = { ...o, [g]: !o[g] };
+      try { localStorage.setItem("admin-sidebar-groups", JSON.stringify(next)); } catch { /* noop */ }
+      return next;
+    });
+  };
+
   const toggleCollapsed = () => {
     setCollapsed((c) => {
       const next = !c;
@@ -61,6 +77,11 @@ export function AdminSidebar({ items: allItems, children }: Props) {
     return acc;
   }, {});
   const groupOrder = Object.keys(groups);
+  const activeGroup = groupOrder.find((g) => groups[g].some((it) => isActive(it)));
+  useEffect(() => {
+    if (activeGroup) setOpenGroups((o) => (o[activeGroup] ? o : { ...o, [activeGroup]: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeGroup]);
 
   // Onglets mobiles (raccourcis les plus utilisés sur le terrain)
   const TAB_PATHS = ["/admin", "/admin/missions", "/admin/attributions", "/admin/demandes"];
@@ -72,18 +93,28 @@ export function AdminSidebar({ items: allItems, children }: Props) {
 
   const renderNav = (onClick?: () => void, mini = false) => (
     <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
-      {groupOrder.map((g) => (
+      {groupOrder.map((g) => {
+        const isOpen = mini || g === "_main" || !!openGroups[g];
+        const hasBadge = groups[g].some((it) => !!it.badge);
+        return (
         <div key={g} className="space-y-1">
           {g !== "_main" && (
             mini ? (
               <div className="mx-3 my-2 border-t border-pro-border" />
             ) : (
-              <p className="px-3 pt-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-pro-muted">
-                {g}
-              </p>
+              <button
+                type="button"
+                onClick={() => toggleGroup(g)}
+                aria-expanded={isOpen}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors ${isOpen ? "bg-[#2F5FFF]/10 text-[#2F5FFF] shadow-[inset_0_0_0_1px_rgba(47,95,255,0.18)]" : "text-pro-muted hover:text-[#2F5FFF] hover:bg-[#2F5FFF]/5"}`}
+              >
+                <span className="flex-1 text-left">{g}</span>
+                {!isOpen && hasBadge && <span className="relative flex h-2.5 w-2.5" aria-label="Nouveautés"><span className="absolute inline-flex h-full w-full rounded-full bg-[#2F5FFF] opacity-75 animate-ping" /><span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#2F5FFF] shadow-[0_0_8px_rgba(47,95,255,0.9)] animate-pulse" /></span>}
+                <ChevronDown size={13} className={`transition-transform ${isOpen ? "" : "-rotate-90"}`} />
+              </button>
             )
           )}
-          {groups[g].map((item) => {
+          {isOpen && groups[g].map((item) => {
             const active = isActive(item);
             return (
               <Link
@@ -101,7 +132,8 @@ export function AdminSidebar({ items: allItems, children }: Props) {
             );
           })}
         </div>
-      ))}
+        );
+      })}
     </nav>
   );
 

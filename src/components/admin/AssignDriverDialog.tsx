@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, CheckCircle2, Building2, User, Send, Star } from "lucide-react";
+import { Search, MapPin, CheckCircle2, Building2, User, Send, Star, Phone } from "lucide-react";
 import { Modal, Button, FormField, SearchInput, Badge } from "./AdminUI";
 import { confirmToast } from "@/lib/confirm-toast";
 import { notifyDriver } from "@/lib/push/driver-notify";
 import { sendTransactionalEmail } from "@/lib/email/send";
+import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
+import { toast } from "sonner";
 
 interface Convoyeur {
   id: string;
@@ -54,11 +56,14 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  // direct = le convoyeur a déjà dit oui (téléphone…) ; propose = il accepte lui-même dans son appli
+  const [mode, setMode] = useState<"direct" | "propose">("direct");
 
   useEffect(() => {
     if (!open) return;
     setSelected("");
     setSearch("");
+    setMode("direct");
 
     // Charger tous les convoyeurs sauf refusés/suspendus
     supabase
@@ -217,6 +222,8 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
     setSubmitting(true);
     try {
 
+      let directDone = false;
+      let directAttributionId: string | null = null;
       if (tab === "convoyeur") {
         // 1. Update source table
         if (trip.source === "trajet") {
@@ -225,17 +232,41 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
             .update({ statut: "attribue", statut_publication: "attribue" } as never)
             .eq("id", trip.id);
 
+          let attributionId: string | null = existingAttributionId ?? null;
           if (existingAttributionId) {
             await supabase
               .from("attributions")
               .update({ convoyeur_id: selected, statut: "propose", etape_courante: null } as never)
               .eq("id", existingAttributionId);
           } else {
-            await supabase.from("attributions").insert({
-              trajet_id: trip.id,
-              convoyeur_id: selected,
-              statut: "propose",
-            });
+            const { data: created } = await supabase
+              .from("attributions")
+              .insert({
+                trajet_id: trip.id,
+                convoyeur_id: selected,
+                statut: "propose",
+              })
+              .select("id")
+              .single();
+            attributionId = (created as { id: string } | null)?.id ?? null;
+          }
+          // Accord déjà obtenu : l'attribution est confirmée tout de suite, sans que l'admin
+          // ait à cliquer « Confirmer » ensuite (même traitement que le bouton Confirmer).
+          if (mode === "direct" && attributionId) {
+            try {
+              await updateAdminMissionStatus({
+                attributionId,
+                trajetId: trip.id,
+                statut: "accepte",
+                note: "Attribué directement par l'admin (accord du convoyeur)",
+              });
+              directDone = true;
+              directAttributionId = attributionId;
+            } catch (e) {
+              toast.error("Attribution créée, mais la confirmation automatique a échoué", {
+                description: e instanceof Error ? e.message : undefined,
+              });
+            }
           }
         } else if (trip.source === "b2b_request") {
           await supabase
@@ -261,7 +292,8 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
         notifyDriver({
           convoyeurId: selected,
           trajetId: trip.source === "trajet" ? trip.id : undefined,
-          event: "mission_proposee",
+          attributionId: directDone ? directAttributionId : undefined,
+          event: directDone ? "mission_attribuee" : "mission_proposee",
         });
         await notifyClientAssignment(convoyeurLabel);
       } else {
@@ -458,6 +490,38 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
           )}
         </div>
 
+        {tab === "convoyeur" && trip.source === "trajet" && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-pro-muted">Comment l'attribuer ?</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {([
+                { id: "direct", icon: Phone, title: "Il est d'accord", sub: "Téléphone, mail, SMS… Attribution directe : la mission apparaît confirmée chez lui, rien à valider ensuite." },
+                { id: "propose", icon: Send, title: "Lui proposer", sub: "Il reçoit la mission en suggestion et accepte ou refuse lui-même dans son espace." },
+              ] as const).map((o) => {
+                const on = mode === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    onClick={() => setMode(o.id)}
+                    aria-pressed={on}
+                    className={`text-left rounded-xl border-2 p-3 transition ${on ? "border-[#2F5FFF] bg-[#2F5FFF]/5 shadow-[0_0_0_3px_rgba(47,95,255,0.10)]" : "border-pro-border bg-white hover:border-[#2F5FFF]/40"}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${on ? "bg-[#2F5FFF] text-white" : "bg-pro-bg-soft text-pro-muted"}`}>
+                        <o.icon size={15} />
+                      </span>
+                      <span className="text-sm font-semibold text-pro-text">{o.title}</span>
+                      {on && <CheckCircle2 size={16} className="ml-auto text-[#2F5FFF]" />}
+                    </span>
+                    <span className="mt-1.5 block text-xs text-pro-muted">{o.sub}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2 pt-2 border-t border-pro-border">
           <Button variant="secondary" onClick={onClose} className="flex-1">
             Annuler
@@ -468,7 +532,7 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
             icon={<Send size={14} />}
             className="flex-1"
           >
-            {submitting ? "Assignation…" : "Assigner"}
+            {submitting ? "Assignation…" : tab === "convoyeur" && trip.source === "trajet" && mode === "propose" ? "Envoyer la proposition" : "Attribuer (confirmé)"}
           </Button>
         </div>
       </div>

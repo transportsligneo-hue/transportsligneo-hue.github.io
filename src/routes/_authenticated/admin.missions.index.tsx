@@ -181,6 +181,8 @@ function AdminMissionsUnified() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<UnifiedStatus | "all">("all");
   const [archivedView, setArchivedView] = useState(false);
+  // Données de test / démo : rangées à part, jamais mélangées aux vraies missions
+  const [testView, setTestView] = useState(false);
   const [bulkFactures, setBulkFactures] = useState(false);
   const [convFilter, setConvFilter] = useState("all");
   const [payFilter, setPayFilter] = useState("all");
@@ -555,12 +557,12 @@ function AdminMissionsUnified() {
 
   /* ---------------- Filtres / tri ---------------- */
   const scopedRows = useMemo(
-    () => rows.filter((r) => (archivedView ? r.archived : !r.archived)),
-    [rows, archivedView],
+    () => rows.filter((r) => !!r.isTest === testView && (archivedView ? r.archived : !r.archived)),
+    [rows, archivedView, testView],
   );
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: scopedRows.length, archivees: rows.filter((r) => r.archived).length };
+    const c: Record<string, number> = { all: scopedRows.length, archivees: rows.filter((r) => r.archived && !r.isTest).length, tests: rows.filter((r) => r.isTest).length };
     UNIFIED_ORDER.forEach((s) => { c[s] = scopedRows.filter((r) => r.status === s).length; });
     return c;
   }, [rows, scopedRows]);
@@ -761,6 +763,13 @@ function AdminMissionsUnified() {
             {UNIFIED_STATUS[s].label} · {counts[s] ?? 0}
           </button>
         ))}
+        <button
+          className={`a6-chip ${testView ? "active" : ""}`}
+          title="Missions de test et de démonstration, rangées à part"
+          onClick={() => { setTestView((v) => !v); setArchivedView(false); setFilter("all"); }}
+        >
+          Tests &amp; démo · {counts.tests ?? 0}
+        </button>
         <button
           className={`a6-chip ${archivedView ? "active" : ""}`}
           title="Missions terminées ou annulées depuis plus de 60 jours"
