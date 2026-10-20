@@ -11857,3 +11857,91 @@ html .r4-page.legal-page .legal-card a[class*="bg-"] { color: #ffffff !important
 .hx-q-contact { --hx-c: #5de0ff; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%235de0ff%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6.6 3h3l1.5 4-2 1.3a11 11 0 0 0 5.6 5.6l1.3-2 4 1.5v3A2.5 2.5 0 0 1 17.5 19 14.5 14.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.6 3z%22/%3E%3C/svg%3E"); }
 .hx-q-demo { --hx-c: #a794ff; --hx-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23b6a4ff%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%222.5%22 y=%224%22 width=%2219%22 height=%2213%22 rx=%222.5%22/%3E%3Cpath d=%22M10 8.5l5 2.5-5 2.5z%22/%3E%3Cpath d=%22M8 21h8%22/%3E%3C/svg%3E"); }
 @media (max-width: 520px) { .hx-quick { grid-template-columns: 1fr; } }
+
+/* ===== Admin : barre latérale colorée par type de compte ===== */
+.dvx-card.kind-particulier::before { background: linear-gradient(180deg,#4f86ff,#2f5fff); }
+.dvx-card.kind-b2b::before { background: linear-gradient(180deg,#22b8d6,#0891b2); }
+.dvx-card.kind-flotte::before { background: linear-gradient(180deg,#a794ff,#7c5cff); }
+.dvx-card.kind-inconnu::before { background: linear-gradient(180deg,#c9cad2,#a3a4ac); }
+.dvx-card.is-archived::before { opacity: .45; }
+tr.row.kind-particulier > td:first-child { box-shadow: inset 4px 0 0 0 #2f5fff; }
+tr.row.kind-b2b > td:first-child { box-shadow: inset 4px 0 0 0 #0891b2; }
+tr.row.kind-flotte > td:first-child { box-shadow: inset 4px 0 0 0 #7c5cff; }
+tr.row.kind-inconnu > td:first-child { box-shadow: inset 4px 0 0 0 #c9cad2; }
+
+/* ===== Espace particulier : typographie premium =====
+   Inter partout, titres resserrés, étiquettes MAJUSCULES plus fines et lisibles. */
+.dashboard-shell-light[data-account-type="client"],
+.dashboard-shell-light[data-account-type="client"] button,
+.dashboard-shell-light[data-account-type="client"] input,
+.dashboard-shell-light[data-account-type="client"] select,
+.dashboard-shell-light[data-account-type="client"] textarea {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.dashboard-shell-light[data-account-type="client"] .font-heading,
+.dashboard-shell-light[data-account-type="client"] h1,
+.dashboard-shell-light[data-account-type="client"] h2,
+.dashboard-shell-light[data-account-type="client"] h3 {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.dashboard-shell-light[data-account-type="client"] h1 { font-weight: 700; letter-spacing: -0.03em; }
+.dashboard-shell-light[data-account-type="client"] .uppercase {
+  letter-spacing: 0.06em !important;
+  font-weight: 600;
+}
+.dashboard-shell-light[data-account-type="client"] .tracking-wider,
+.dashboard-shell-light[data-account-type="client"] .tracking-widest {
+  letter-spacing: 0.06em !important;
+}
+.dashboard-shell-light[data-account-type="client"] .text-\[10px\] { font-size: 11px; }
+.dashboard-shell-light[data-account-type="client"] .font-mono,
+.dashboard-shell-light[data-account-type="client"] .tabular-nums { font-variant-numeric: tabular-nums; }
+/* Itinéraires "Lyon → Tours" : nette, plus corsée, sans graisse lourde */
+.dashboard-shell-light[data-account-type="client"] p.text-base,
+.dashboard-shell-light[data-account-type="client"] .text-base.font-heading {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #0f1526;
+}
+
+/* ===== Espace particulier : formes douces (moins "carré") ===== */
+.dashboard-shell-light[data-account-type="client"] .rounded,
+.dashboard-shell-light[data-account-type="client"] .rounded-sm,
+.dashboard-shell-light[data-account-type="client"] .rounded-md { border-radius: 12px; }
+.dashboard-shell-light[data-account-type="client"] .rounded-lg { border-radius: 14px; }
+.dashboard-shell-light[data-account-type="client"] .rounded-xl { border-radius: 18px; }
+.dashboard-shell-light[data-account-type="client"] .rounded-2xl { border-radius: 22px; }
+.dashboard-shell-light[data-account-type="client"] .card-premium { border-radius: 22px; box-shadow: 0 1px 2px rgba(20,22,28,.04), 0 10px 30px -14px rgba(47,95,255,.14) !important; }
+/* Boutons, onglets, filtres : en pilules, texte en casse normale */
+.dashboard-shell-light[data-account-type="client"] main button.uppercase:not([class*="border-b-2"]),
+.dashboard-shell-light[data-account-type="client"] main a.uppercase {
+  text-transform: none;
+  letter-spacing: 0 !important;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding-left: 16px; padding-right: 16px;
+}
+.dashboard-shell-light[data-account-type="client"] main .inline-flex.rounded,
+.dashboard-shell-light[data-account-type="client"] main .inline-flex.rounded-lg { border-radius: 999px; }
+.dashboard-shell-light[data-account-type="client"] main .inline-flex.rounded button { border-radius: 999px; text-transform: none; letter-spacing: 0 !important; font-size: 13px; }
+/* Champs et petites pastilles */
+.dashboard-shell-light[data-account-type="client"] input:not([type="checkbox"]):not([type="radio"]),
+.dashboard-shell-light[data-account-type="client"] select,
+.dashboard-shell-light[data-account-type="client"] textarea { border-radius: 14px; }
+.dashboard-shell-light[data-account-type="client"] main .px-2.py-0\.5,
+.dashboard-shell-light[data-account-type="client"] main .px-2\.5.py-1 { border-radius: 999px; }
+
+/* Typographie du site : Space Grotesk (titres, trajets, prix), IBM Plex Mono (références) */
+.dashboard-shell-light[data-account-type="client"] .font-heading,
+.dashboard-shell-light[data-account-type="client"] main p.text-slate-900.font-medium { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.dashboard-shell-light[data-account-type="client"] main p.text-slate-900.font-medium { font-weight: 600; font-size: 16px; letter-spacing: -0.015em; }
+.dashboard-shell-light[data-account-type="client"] .text-xl.font-heading,
+.dashboard-shell-light[data-account-type="client"] .text-2xl.font-heading { font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.dashboard-shell-light[data-account-type="client"] .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; letter-spacing: 0; }
+.dashboard-shell-light[data-account-type="client"] main .text-\[10px\].uppercase { font-family: 'Space Grotesk', 'Inter', sans-serif; }

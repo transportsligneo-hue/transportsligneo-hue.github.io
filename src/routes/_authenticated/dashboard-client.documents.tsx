@@ -31,10 +31,10 @@ interface FactRow {
 }
 
 const FACT_STATUT: Record<string, { label: string; cls: string }> = {
-  emise: { label: "À régler", cls: "bg-amber-500/15 text-amber-300 border-amber-500/30" },
-  payee: { label: "Payée", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" },
-  en_retard: { label: "En retard", cls: "bg-red-500/15 text-red-300 border-red-500/30" },
-  annulee: { label: "Annulée", cls: "bg-cream/10 text-cream/60 border-cream/20" },
+  emise: { label: "À régler", cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+  payee: { label: "Payée", cls: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
+  en_retard: { label: "En retard", cls: "bg-red-500/15 text-red-700 border-red-500/30" },
+  annulee: { label: "Annulée", cls: "bg-slate-100 text-slate-600 border-slate-300" },
 };
 
 function ClientDocuments() {
@@ -114,15 +114,15 @@ function ClientDocuments() {
       <>
       {factures.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-cream/70 text-xs uppercase tracking-wider flex items-center gap-2"><Receipt size={13} /> Mes factures</h2>
+          <h2 className="text-slate-700 text-xs uppercase tracking-wider flex items-center gap-2"><Receipt size={13} /> Mes factures</h2>
           {factures.map((f) => {
-            const st = FACT_STATUT[f.statut] ?? { label: f.statut, cls: "bg-cream/10 text-cream/70 border-cream/20" };
+            const st = FACT_STATUT[f.statut] ?? { label: f.statut, cls: "bg-slate-100 text-slate-700 border-slate-300" };
             return (
               <div key={f.id} className="card-premium p-5 rounded flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">{f.numero}</p>
-                  <p className="text-cream font-heading text-sm mt-1">{Number(f.prix_ttc).toFixed(2)} € TTC</p>
-                  <p className="text-cream/50 text-xs mt-1">
+                  <p className="text-slate-500 text-[10px] uppercase tracking-wider">{f.numero}</p>
+                  <p className="text-slate-900 font-heading text-sm mt-1">{Number(f.prix_ttc).toFixed(2)} € TTC</p>
+                  <p className="text-slate-600 text-xs mt-1">
                     {f.date_facture ? new Date(f.date_facture).toLocaleDateString("fr-FR") : ""}
                     {f.mode_paiement ? ` — ${f.mode_paiement}` : ""}
                   </p>
@@ -146,9 +146,9 @@ function ClientDocuments() {
 
       {missions.length === 0 && factures.length === 0 ? (
         <div className="card-premium p-10 rounded text-center">
-          <FileText className="text-cream/20 mx-auto mb-3" size={36} />
-          <p className="text-cream/50 text-sm">Aucun document disponible pour le moment.</p>
-          <p className="text-cream/30 text-xs mt-2">Les documents apparaîtront ici une fois vos missions démarrées.</p>
+          <FileText className="text-slate-400 mx-auto mb-3" size={36} />
+          <p className="text-slate-600 text-sm">Aucun document disponible pour le moment.</p>
+          <p className="text-slate-400 text-xs mt-2">Les documents apparaîtront ici une fois vos missions démarrées.</p>
         </div>
       ) : (
 
@@ -157,12 +157,12 @@ function ClientDocuments() {
             <div key={m.mission_id} className="card-premium p-5 rounded">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
                 <div>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</p>
-                  <p className="text-cream font-heading text-sm mt-1">{m.ville_depart} → {m.ville_arrivee}</p>
+                  <p className="text-slate-500 text-[10px] uppercase tracking-wider">{m.numero}</p>
+                  <p className="text-slate-900 font-heading text-sm mt-1">{m.ville_depart} → {m.ville_arrivee}</p>
                 </div>
-                <span className="text-cream/50 text-xs">{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
+                <span className="text-slate-600 text-xs">{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
               </div>
-              <div className="text-cream/40 text-xs italic">
+              <div className="text-slate-500 text-xs italic">
                 Documents et photos d'état des lieux disponibles dès l'attribution d'un convoyeur.
               </div>
             </div>

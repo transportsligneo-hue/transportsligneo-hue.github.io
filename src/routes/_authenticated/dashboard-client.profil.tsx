@@ -117,7 +117,7 @@ function ClientProfil() {
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>;
 
-  const inputClass = "w-full bg-navy/60 border border-primary/20 rounded px-3 py-2.5 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors";
+  const inputClass = "w-full bg-slate-100 border border-slate-200 rounded px-3 py-2.5 text-slate-900 text-sm focus:border-primary/60 focus:outline-none transition-colors";
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -132,37 +132,37 @@ function ClientProfil() {
 
       {/* Profile */}
       <form onSubmit={saveProfile} className="card-premium p-6 rounded space-y-5">
-        <h2 className="font-heading text-base text-cream tracking-wider flex items-center gap-2">
+        <h2 className="font-heading text-base text-slate-900 tracking-wider flex items-center gap-2">
           <User size={16} className="text-primary" /> Informations personnelles
         </h2>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Prénom</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1">Prénom</label>
             <input type="text" value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} className={inputClass} required />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Nom</label>
+            <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1">Nom</label>
             <input type="text" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} className={inputClass} required />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1"><Mail size={11} className="inline mr-1" />Email</label>
+          <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1"><Mail size={11} className="inline mr-1" />Email</label>
           <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required />
-          <p className="text-cream/40 text-xs mt-1">Un email de confirmation sera envoyé à la nouvelle adresse avant qu'elle ne devienne active.</p>
+          <p className="text-slate-500 text-xs mt-1">Un email de confirmation sera envoyé à la nouvelle adresse avant qu'elle ne devienne active.</p>
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1"><Phone size={11} className="inline mr-1" />Téléphone</label>
+          <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1"><Phone size={11} className="inline mr-1" />Téléphone</label>
           <input type="tel" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} className={inputClass} />
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-primary/10">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-200">
           {savedMsg && (
-            <span className={`text-xs ${savedMsg.startsWith("Erreur") ? "text-destructive" : "text-green-400"}`}>{savedMsg}</span>
+            <span className={`text-xs ${savedMsg.startsWith("Erreur") ? "text-destructive" : "text-green-700"}`}>{savedMsg}</span>
           )}
-          <button type="submit" disabled={saving} className="ml-auto inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60">
+          <button type="submit" disabled={saving} className="ml-auto inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs uppercase tracking-wider font-heading hover:bg-[#1c3fc4] transition-colors disabled:opacity-60">
             {saving && <Loader2 size={12} className="animate-spin" />} Enregistrer
           </button>
         </div>
@@ -173,28 +173,28 @@ function ClientProfil() {
 
       {/* Password */}
       <form onSubmit={changePassword} className="card-premium p-6 rounded space-y-5">
-        <h2 className="font-heading text-base text-cream tracking-wider flex items-center gap-2">
+        <h2 className="font-heading text-base text-slate-900 tracking-wider flex items-center gap-2">
           <Lock size={16} className="text-primary" /> Changer mon mot de passe
         </h2>
 
         <div>
-          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Nouveau mot de passe</label>
+          <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1">Nouveau mot de passe</label>
           <input type="password" value={pwd.next} onChange={(e) => setPwd({ ...pwd, next: e.target.value })} className={inputClass} minLength={8} placeholder="Minimum 8 caractères" />
         </div>
         <div>
-          <label className="block text-xs uppercase tracking-wider text-cream/50 mb-1">Confirmer</label>
+          <label className="block text-xs uppercase tracking-wider text-slate-600 mb-1">Confirmer</label>
           <input type="password" value={pwd.confirm} onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })} className={inputClass} minLength={8} />
         </div>
 
         {pwdMsg && (
-          <div className={`flex items-center gap-2 text-xs ${pwdMsg.type === "ok" ? "text-green-400" : "text-destructive"}`}>
+          <div className={`flex items-center gap-2 text-xs ${pwdMsg.type === "ok" ? "text-green-700" : "text-destructive"}`}>
             {pwdMsg.type === "ok" ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
             {pwdMsg.text}
           </div>
         )}
 
-        <div className="flex items-center justify-end pt-2 border-t border-primary/10">
-          <button type="submit" disabled={pwdSaving || !pwd.next} className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-navy text-xs uppercase tracking-wider font-heading hover:bg-gold-light transition-colors disabled:opacity-60">
+        <div className="flex items-center justify-end pt-2 border-t border-slate-200">
+          <button type="submit" disabled={pwdSaving || !pwd.next} className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-xs uppercase tracking-wider font-heading hover:bg-[#1c3fc4] transition-colors disabled:opacity-60">
             {pwdSaving && <Loader2 size={12} className="animate-spin" />} Modifier le mot de passe
           </button>
         </div>

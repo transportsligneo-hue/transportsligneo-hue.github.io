@@ -229,7 +229,7 @@ function ClientMissions() {
         />
         <div className="flex items-center gap-2 flex-wrap">
           {/* View switcher */}
-          <div className="inline-flex rounded border border-primary/20 bg-navy/40 p-0.5" data-tour="missions-views">
+          <div className="inline-flex rounded border border-slate-200 bg-slate-100 p-0.5" data-tour="missions-views">
             {VIEWS.map((v) => {
               const Icon = v.icon;
               const active = view === v.value;
@@ -241,8 +241,8 @@ function ClientMissions() {
                   aria-label={v.label}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] uppercase tracking-wider rounded transition-all ${
                     active
-                      ? "bg-primary text-navy"
-                      : "text-cream/60 hover:text-cream"
+                      ? "bg-primary text-white"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <Icon size={13} />
@@ -269,8 +269,8 @@ function ClientMissions() {
               onClick={() => setFilter(f.value)}
               className={`px-4 py-1.5 text-xs uppercase tracking-wider rounded border transition-all ${
                 filter === f.value
-                  ? "bg-primary text-navy border-primary"
-                  : "bg-navy/40 text-cream/60 border-primary/20 hover:border-primary/50"
+                  ? "bg-primary text-white border-primary"
+                  : "bg-slate-100 text-slate-600 border-slate-200 hover:border-primary/50"
               }`}
             >
               {f.label}
@@ -283,8 +283,8 @@ function ClientMissions() {
         <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
       ) : missions.length === 0 ? (
         <div className="card-premium p-10 rounded text-center">
-          <Truck className="text-cream/20 mx-auto mb-3" size={36} />
-          <p className="text-cream/50 text-sm">Aucune mission dans cette catégorie.</p>
+          <Truck className="text-slate-400 mx-auto mb-3" size={36} />
+          <p className="text-slate-600 text-sm">Aucune mission dans cette catégorie.</p>
           <Link
             to="/dashboard-client/nouvelle-reservation"
             className="client-btn-blue mt-4 inline-flex items-center gap-2 rounded-[9px] px-4 py-2.5 text-[12.5px] font-semibold"
@@ -303,18 +303,18 @@ function ClientMissions() {
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap mb-2">
-                    <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
+                    <span className="text-slate-500 text-[10px] uppercase tracking-wider">{m.numero}</span>
                     <StatusBadge kind={missionStatusKind(m.statut)}>
                       {friendlyStatusLabel(m.statut)}
                     </StatusBadge>
                   </div>
-                  <p className="text-cream font-heading text-base flex items-center gap-2">
+                  <p className="text-slate-900 font-heading text-base flex items-center gap-2">
                     <MapPin size={14} className="text-primary shrink-0" />
                     <span className="truncate">{m.ville_depart}</span>
-                    <span className="text-cream/30">→</span>
+                    <span className="text-slate-400">→</span>
                     <span className="truncate">{m.ville_arrivee}</span>
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-cream/50 mt-2 flex-wrap">
+                  <div className="flex items-center gap-4 text-xs text-slate-600 mt-2 flex-wrap">
                     <span className="flex items-center gap-1"><Calendar size={11} />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
                     {(m.marque || m.modele) && (
                       <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}{m.immatriculation ? ` · ${m.immatriculation}` : ""}</span>
@@ -336,20 +336,20 @@ function ClientMissions() {
               className="card-premium p-5 rounded hover:border-primary/40 transition-all group flex flex-col gap-3"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
+                <span className="text-slate-500 text-[10px] uppercase tracking-wider">{m.numero}</span>
                 <StatusBadge kind={missionStatusKind(m.statut)}>{friendlyStatusLabel(m.statut)}</StatusBadge>
               </div>
               <div className="space-y-1.5">
-                <p className="text-cream text-sm flex items-center gap-2">
+                <p className="text-slate-900 text-sm flex items-center gap-2">
                   <MapPin size={12} className="text-primary shrink-0" />
                   <span className="truncate">{m.ville_depart}</span>
                 </p>
-                <p className="text-cream text-sm flex items-center gap-2">
+                <p className="text-slate-900 text-sm flex items-center gap-2">
                   <ArrowRight size={12} className="text-primary/60 shrink-0" />
                   <span className="truncate">{m.ville_arrivee}</span>
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-[11px] text-cream/50 flex-wrap pt-2 border-t border-primary/10">
+              <div className="flex items-center gap-3 text-[11px] text-slate-600 flex-wrap pt-2 border-t border-slate-200">
                 <span className="flex items-center gap-1"><Calendar size={11} />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}</span>
                 {(m.marque || m.modele) && (
                   <span className="flex items-center gap-1"><Truck size={11} />{[m.marque, m.modele].filter(Boolean).join(" ")}</span>
@@ -363,27 +363,27 @@ function ClientMissions() {
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {kanbanColumns.map((col) => (
             <div key={col.key} className="card-premium p-3 rounded flex flex-col min-h-[300px]">
-              <div className="flex items-center justify-between px-1 pb-3 mb-2 border-b border-primary/15">
-                <h3 className="text-cream/80 text-[11px] uppercase tracking-wider font-heading">{col.label}</h3>
-                <span className="text-cream/50 text-[10px] bg-navy/60 px-1.5 py-0.5 rounded">{col.items.length}</span>
+              <div className="flex items-center justify-between px-1 pb-3 mb-2 border-b border-slate-200">
+                <h3 className="text-slate-900 text-[11px] uppercase tracking-wider font-heading">{col.label}</h3>
+                <span className="text-slate-600 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">{col.items.length}</span>
               </div>
               <div className="space-y-2 flex-1">
                 {col.items.length === 0 ? (
-                  <p className="text-cream/30 text-[11px] text-center py-6">—</p>
+                  <p className="text-slate-400 text-[11px] text-center py-6">—</p>
                 ) : (
                   col.items.map((m) => (
                     <Link
                       key={m.id}
                       {...prefetchLinkProps(m)}
-                      className="block p-3 rounded bg-navy/50 border border-primary/15 hover:border-primary/40 transition-all"
+                      className="block p-3 rounded bg-slate-100 border border-slate-200 hover:border-primary/40 transition-all"
                     >
-                      <div className="text-cream/40 text-[10px] uppercase tracking-wider mb-1">{m.numero}</div>
-                      <p className="text-cream text-xs leading-snug">
+                      <div className="text-slate-500 text-[10px] uppercase tracking-wider mb-1">{m.numero}</div>
+                      <p className="text-slate-900 text-xs leading-snug">
                         <span className="truncate block">{m.ville_depart}</span>
                         <span className="text-primary/60">↓</span>
                         <span className="truncate block">{m.ville_arrivee}</span>
                       </p>
-                      <div className="flex items-center gap-1 text-[10px] text-cream/50 mt-2">
+                      <div className="flex items-center gap-1 text-[10px] text-slate-600 mt-2">
                         <Calendar size={10} />{new Date(m.date_prise_en_charge).toLocaleDateString("fr-FR")}
                       </div>
                     </Link>
@@ -405,20 +405,20 @@ function ClientMissions() {
             const isToday = d && d.toDateString() === new Date().toDateString();
             return (
               <div key={dateKey} className="card-premium rounded overflow-hidden">
-                <div className={`flex items-center justify-between px-4 py-2.5 border-b border-primary/15 ${isToday ? "bg-primary/10" : "bg-navy/60"}`}>
-                  <span className={`text-[11px] uppercase tracking-wider font-heading ${isToday ? "text-primary" : "text-cream/70"}`}>
+                <div className={`flex items-center justify-between px-4 py-2.5 border-b border-slate-200 ${isToday ? "bg-primary/10" : "bg-slate-100"}`}>
+                  <span className={`text-[11px] uppercase tracking-wider font-heading ${isToday ? "text-primary" : "text-slate-700"}`}>
                     {label} {isToday && <span className="ml-2 text-[10px] normal-case">· Aujourd'hui</span>}
                   </span>
-                  <span className="text-cream/50 text-[10px]">{list.length} mission{list.length > 1 ? "s" : ""}</span>
+                  <span className="text-slate-600 text-[10px]">{list.length} mission{list.length > 1 ? "s" : ""}</span>
                 </div>
-                <div className="divide-y divide-primary/10">
+                <div className="divide-y divide-slate-200">
                   {list.map((m) => (
                     <Link
                       key={m.id}
                       {...prefetchLinkProps(m)}
                       className="flex items-center gap-3 p-3 hover:bg-primary/5 transition-colors group"
                     >
-                      <div className="flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded bg-navy/60">
+                      <div className="flex flex-col items-center justify-center min-w-[54px] px-2 py-1 rounded bg-slate-100">
                         <span className="text-primary text-sm font-heading tabular-nums">
                           {normalizeHeure(m.heure_prise_en_charge) ?? "--:--"}
                         </span>
@@ -428,19 +428,19 @@ function ClientMissions() {
                           {m.leg_type === "aller" || m.leg_type === "retour" ? (
                             <span
                               className={`inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold ${
-                                m.leg_type === "aller" ? "bg-primary text-navy" : "bg-emerald-500 text-white"
+                                m.leg_type === "aller" ? "bg-primary text-white" : "bg-emerald-500 text-white"
                               }`}
                               title={m.leg_type === "aller" ? "Livraison" : "Restitution"}
                             >
                               {m.leg_type === "aller" ? "L" : "R"}
                             </span>
                           ) : null}
-                          <span className="text-cream/40 text-[10px] uppercase tracking-wider">{m.numero}</span>
+                          <span className="text-slate-500 text-[10px] uppercase tracking-wider">{m.numero}</span>
                           <StatusBadge kind={missionStatusKind(m.statut)}>{friendlyStatusLabel(m.statut)}</StatusBadge>
                           {(m.immatriculation ?? flags[m.id]?.plaque) && (
                             <PlateBadge plate={m.immatriculation ?? flags[m.id]?.plaque} size="sm" />
                           )}
-                          <span className="text-cream/40 text-[10px] px-1.5 py-0.5 rounded bg-navy/60">
+                          <span className="text-slate-500 text-[10px] px-1.5 py-0.5 rounded bg-slate-100">
                             {flags[m.id]?.recharge
                               ? "Recharge uniquement"
                               : m.leg_type === "aller" || m.leg_type === "retour"
@@ -448,17 +448,17 @@ function ClientMissions() {
                                 : "Livraison simple"}
                           </span>
                         </div>
-                        <p className="text-cream text-sm truncate">
-                          {m.ville_depart} <span className="text-cream/30">→</span> {m.ville_arrivee}
+                        <p className="text-slate-900 text-[15px] font-medium tracking-tight truncate">
+                          {m.ville_depart} <span className="text-slate-400">→</span> {m.ville_arrivee}
                         </p>
                         {(m.statut === "annulee" || m.statut === "annule") &&
                           (flags[m.id]?.motif || flags[m.id]?.incident) && (
-                            <p className="text-[11px] text-red-300 mt-1">
+                            <p className="text-[11px] text-red-700 mt-1">
                               Annulée : {flags[m.id]?.motif ?? flags[m.id]?.incident}
                             </p>
                           )}
                       </div>
-                      <ArrowRight size={14} className="text-cream/30 group-hover:text-primary shrink-0" />
+                      <ArrowRight size={14} className="text-slate-400 group-hover:text-primary shrink-0" />
                     </Link>
                   ))}
                 </div>
@@ -472,15 +472,15 @@ function ClientMissions() {
       {!loading && filter === "all" && pending.length > 0 && (
         <div className="pt-2" data-tour="missions-pending">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-heading text-sm text-cream/80 tracking-wider uppercase flex items-center gap-2">
-              <Clock size={14} className="text-amber-300" />
+            <h2 className="font-heading text-sm text-slate-900 tracking-wider uppercase flex items-center gap-2">
+              <Clock size={14} className="text-amber-700" />
               Demandes en cours de validation
             </h2>
             <Link to="/dashboard-client/devis" className="text-primary text-[10px] uppercase tracking-wider hover:text-gold-light transition-colors">
               Détails →
             </Link>
           </div>
-          <p className="text-cream/50 text-xs mb-3">
+          <p className="text-slate-600 text-xs mb-3">
             Ces demandes ne sont pas encore converties en mission. Notre équipe les traite et elles apparaîtront ci-dessus dès validation.
           </p>
           <div className="grid gap-2">
@@ -493,20 +493,20 @@ function ClientMissions() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <FileText size={11} className="text-primary" />
-                    <span className="text-cream/40 text-[10px] uppercase tracking-wider">{p.numero}</span>
-                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/15 text-amber-300 border-amber-500/30">
+                    <span className="text-slate-500 text-[10px] uppercase tracking-wider">{p.numero}</span>
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/15 text-amber-700 border-amber-500/30">
                       En cours de validation
                     </span>
                   </div>
-                  <p className="text-cream/85 text-sm truncate">{p.depart} → {p.arrivee}</p>
-                  <p className="text-cream/50 text-xs mt-0.5 flex flex-wrap gap-x-3">
+                  <p className="text-slate-900 text-[15px] font-medium tracking-tight truncate">{p.depart} → {p.arrivee}</p>
+                  <p className="text-slate-600 text-xs mt-0.5 flex flex-wrap gap-x-3">
                     <span><Calendar size={10} className="inline mr-1" />{new Date(p.created_at).toLocaleDateString("fr-FR")}</span>
                     {p.date_souhaitee && (
                       <span>Souhaité : {new Date(p.date_souhaitee).toLocaleDateString("fr-FR")}</span>
                     )}
                   </p>
                 </div>
-                <ArrowRight size={14} className="text-cream/30 shrink-0" />
+                <ArrowRight size={14} className="text-slate-400 shrink-0" />
               </Link>
             ))}
           </div>

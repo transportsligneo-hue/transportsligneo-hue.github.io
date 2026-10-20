@@ -17,7 +17,7 @@ function ConseillerPage() {
         highlight="un conseiller"
         subtitle="Écrivez directement à l'équipe Transports Ligneo. Vous recevez un email dès qu'un conseiller vous répond."
       />
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl" style={{ background: "#061238" }}>
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-slate-200 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]" style={{ background: "#061238" }}>
         <ConseillerChat mode="client" />
       </div>
     </div>
