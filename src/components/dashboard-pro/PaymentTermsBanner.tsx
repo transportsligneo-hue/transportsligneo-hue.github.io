@@ -21,7 +21,7 @@ export function PaymentTermsBanner() {
   const t = paymentTermsLabel(resolvePaymentTerms(stored, org.accountType));
   const Icon = t.key === "carte" ? CreditCard : FileText;
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-[#e7ebf3] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(20,22,28,0.04)]">
+    <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[#e7ebf3] bg-white px-4 py-3 shadow-[0_1px_2px_rgba(20,22,28,0.04)]">
       <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--pro-accent)]/10 text-[color:var(--pro-accent)]"><Icon size={17} /></span>
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#a3a4ac]">Vos conditions de paiement</p>
