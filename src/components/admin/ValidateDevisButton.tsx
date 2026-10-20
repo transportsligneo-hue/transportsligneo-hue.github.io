@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { BadgeCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { adminValidateDevis, type AdminValidationCanal } from "@/lib/devis-admin-validation.functions";
 
 const CANAUX: { value: AdminValidationCanal; label: string }[] = [
@@ -68,70 +69,67 @@ export function ValidateDevisButton({ devisId, numero, locked, className, onVali
         <BadgeCheck size={12} /> Valider pour le client
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => !busy && setOpen(false)}>
-          <div
-            className="w-full max-w-md rounded-2xl border border-pro-border bg-white p-5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-[15px] font-bold text-pro-text">Valider le devis {numero}</h3>
-            <p className="mt-1 text-[12px] text-pro-muted">
+      <Dialog open={open} onOpenChange={(o) => { if (!busy) setOpen(o); }}>
+        <DialogContent className="max-w-md bg-white text-slate-900">
+          <DialogHeader>
+            <DialogTitle>Valider le devis {numero}</DialogTitle>
+            <DialogDescription>
               À utiliser quand le client a donné son accord hors plateforme. La validation est horodatée et conservée comme preuve.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
 
-            <label className="mt-4 mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-              Origine de l'accord
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {CANAUX.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setCanal(c.value)}
-                  className={`rounded-lg border px-3 py-2 text-[12px] font-semibold transition ${
-                    canal === c.value
-                      ? "border-pro-accent bg-pro-accent/10 text-pro-accent"
-                      : "border-pro-border bg-white text-pro-text hover:border-pro-accent/50"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-
-            <label className="mt-4 mb-1.5 block text-[11.5px] font-semibold uppercase tracking-wide text-pro-muted">
-              Référence / note (facultatif)
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              placeholder="Ex : accord de M. Dupont par mail du 19/08 à 14h12"
-              className="w-full rounded-lg border border-pro-border bg-white px-3 py-2 text-sm text-pro-text focus:border-pro-accent focus:outline-none focus:ring-2 focus:ring-pro-accent/20"
-            />
-
-            <div className="mt-5 flex gap-2">
+          <label className="block text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">
+            Origine de l'accord
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {CANAUX.map((c) => (
               <button
+                key={c.value}
                 type="button"
-                disabled={busy}
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-lg border border-pro-border px-3 py-2.5 text-[12.5px] font-semibold text-pro-text"
+                onClick={() => setCanal(c.value)}
+                className={`rounded-lg border px-3 py-2 text-[12px] font-semibold transition ${
+                  canal === c.value
+                    ? "border-blue-600 bg-blue-50 text-blue-700"
+                    : "border-slate-200 bg-white text-slate-800 hover:border-blue-400"
+                }`}
               >
-                Annuler
+                {c.label}
               </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={submit}
-                className="admin-btn-blue flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
-              >
-                {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />}
-                Valider l'accord
-              </button>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
+
+          <label className="block text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">
+            Référence / note (facultatif)
+          </label>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            placeholder="Ex : accord de M. Dupont par mail du 19/08 à 14h12"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+          />
+
+          <div className="flex gap-2 pt-1">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setOpen(false)}
+              className="flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-[12.5px] font-semibold text-slate-800"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={submit}
+              className="admin-btn-blue flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12.5px] font-semibold text-white disabled:opacity-60"
+            >
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <BadgeCheck size={14} />}
+              Valider l'accord
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

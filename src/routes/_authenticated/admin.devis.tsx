@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useClientBrands, clientBrandOf, cleanSociete } from "@/components/admin/ClientBrand";
 import { ClientLogo } from "@/components/admin/ClientLogo";
-import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle, Euro, CheckCircle2, Search, Plus, Layers, ArrowLeftRight, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, Download, Mail, Phone, FileText, ArrowRightCircle, Eye, MapPin, Car, Calendar, User, Archive, ArchiveRestore, PenLine, History, FileSpreadsheet, XCircle, Euro, CheckCircle2, Search, Plus, Layers, ArrowLeftRight, ArrowRight, ArrowLeft, CreditCard } from "lucide-react";
 import { generateDevisPdf, downloadDevisPdf, devisRowToPdfData, type DevisData } from "@/lib/devis-pdf";
 import { ValidateDevisButton } from "@/components/admin/ValidateDevisButton";
 import { SendDocumentByEmail } from "@/components/admin/SendDocumentByEmail";
@@ -878,6 +878,26 @@ function DevisDrawer({
   const [priceInput, setPriceInput] = useState("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [refusOpen, setRefusOpen] = useState(false);
+  const [payImmediat, setPayImmediat] = useState<boolean>(true);
+  const [savingPay, setSavingPay] = useState(false);
+  useEffect(() => {
+    if (devis) setPayImmediat((devis as { paiement_immediat?: boolean | null }).paiement_immediat !== false);
+  }, [devis?.id, (devis as { paiement_immediat?: boolean | null } | null)?.paiement_immediat]);
+  const togglePay = async (next: boolean) => {
+    if (!devis) return;
+    setSavingPay(true);
+    try {
+      const { error } = await supabase.from("devis").update({ paiement_immediat: next } as never).eq("id", devis.id);
+      if (error) throw error;
+      setPayImmediat(next);
+      (devis as { paiement_immediat?: boolean | null }).paiement_immediat = next;
+      toast.success(next ? "Paiement en ligne activé pour ce devis" : "Facturation différée activée pour ce devis");
+    } catch (e) {
+      toast.error("Mise à jour impossible", { description: e instanceof Error ? e.message : "" });
+    } finally {
+      setSavingPay(false);
+    }
+  };
 
   useEffect(() => {
     if (!devis) return;
@@ -993,6 +1013,21 @@ function DevisDrawer({
           <DrawerField label="Téléphone" value={devis.telephone} />
           <DrawerField label="Créé le" value={new Date(devis.created_at).toLocaleString("fr-FR")} />
         </DrawerGrid>
+      </DrawerSection>
+
+      <DrawerSection title="Paiement en ligne" icon={<CreditCard size={12} />}>
+        <p className="mb-3 text-xs text-slate-600">
+          Cochez pour que ce devis puisse être payé par carte (Stripe). Décochez pour une facturation différée (flotte, pro récurrent).
+        </p>
+        <label className="flex items-center gap-2 text-sm text-slate-800 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={payImmediat}
+            disabled={savingPay}
+            onChange={(e) => void togglePay(e.target.checked)}
+          />
+          Exiger le règlement en ligne avant la mission
+        </label>
       </DrawerSection>
 
       <DrawerSection title="Compte client" icon={<User size={12} />}>
