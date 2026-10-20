@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge, Button, Table, THead, TH, TD } from "@/components/admin/AdminUI";
 import { Loader2, Mail, RefreshCw, Search, X } from "lucide-react";
@@ -123,19 +122,19 @@ export function AdminEmailHistory() {
 
       {selected && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4"
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full max-w-2xl max-h-[85vh] overflow-auto rounded-xl bg-pro-surface border border-pro-border p-5"
+            className="w-full max-w-2xl max-h-[90vh] overflow-auto rounded-xl bg-white text-slate-900 border border-slate-200 shadow-2xl p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3 mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-pro-text">
+                <h3 className="text-lg font-semibold text-slate-900">
                   {str((selected.metadata ?? {})["subject"]) ?? selected.template_name}
                 </h3>
-                <p className="text-xs text-pro-text-soft">
+                <p className="text-xs text-slate-500">
                   À {selected.recipient_email} ·{" "}
                   {new Date(selected.created_at).toLocaleString("fr-FR")} · {selected.template_name}
                 </p>
@@ -164,14 +163,12 @@ export function AdminEmailHistory() {
                     </div>
                   )}
                   {html && (
-                    <div
-                      className="rounded-lg border border-pro-border bg-white p-3 text-sm text-slate-800 overflow-auto"
-                      dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(html, {
-                          USE_PROFILES: { html: true },
-                          FORBID_TAGS: ["style", "form", "input", "button", "iframe", "object", "embed"],
-                        }),
-                      }}
+                    <iframe
+                      title="Aperçu du mail"
+                      sandbox=""
+                      srcDoc={html}
+                      className="w-full rounded-lg border border-slate-200 bg-white"
+                      style={{ height: "60vh" }}
                     />
                   )}
                   {docUrl && (
@@ -185,8 +182,8 @@ export function AdminEmailHistory() {
                     </a>
                   )}
                   {!message && !html && (
-                    <p className="text-sm text-pro-text-soft">
-                      Aucun contenu détaillé enregistré pour cet envoi.
+                    <p className="text-sm text-slate-600">
+                      Le contenu de ce mail n'a pas été conservé (envoi antérieur à la sauvegarde des aperçus). Les prochains mails s'afficheront tels que le client les reçoit.
                     </p>
                   )}
                 </div>

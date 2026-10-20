@@ -86,7 +86,10 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
     return { success: false, reason: 'template_not_found' }
   }
 
-  const effectiveRecipient = template.to || params.recipientEmail
+  // Notifications internes ("…-admin") : destinataire = admin, jamais choisi par l'appelant.
+  const isAdminNotif = params.templateName.endsWith('-admin')
+  const effectiveRecipient = template.to
+    || (isAdminNotif ? await getAdminNotificationEmail() : params.recipientEmail)
   if (!effectiveRecipient) {
     console.error('[email/server] no recipient resolved', params.templateName)
     return { success: false, reason: 'no_recipient' }
@@ -95,12 +98,24 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
   const templateData = await withDevisPublicLinks(params)
 
   const messageId = crypto.randomUUID()
+  let subjectText: string | null = null
+  try {
+    subjectText = typeof template.subject === 'function' ? template.subject(templateData) : (template.subject ?? null)
+  } catch { subjectText = null }
+  // Copie fidèle du mail tel que le client le reçoit (pour l'historique admin).
+  let renderedHtml: string | null = null
+  try {
+    const [{ render }, React] = await Promise.all([import('@react-email/render'), import('react')])
+    renderedHtml = await render(React.createElement(template.component, templateData as never), { pretty: false })
+    if (renderedHtml && renderedHtml.length > 200_000) renderedHtml = null
+  } catch { renderedHtml = null }
   const meta: Record<string, unknown> = {
-    subject: template.subject ?? null,
+    subject: subjectText,
     display_name: template.displayName ?? null,
     numero: templateData['numero'] ?? null,
     message: templateData['message'] ?? templateData['customMessage'] ?? null,
     doc_url: templateData['pdfUrl'] ?? templateData['signUrl'] ?? null,
+    html: renderedHtml,
   }
 
   const send = () =>
