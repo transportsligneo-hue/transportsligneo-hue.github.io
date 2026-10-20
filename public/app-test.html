@@ -1,8 +1,14 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Test appli Ligneo</title>
+<title>Ligneo Driver</title>
+<script>
+  // Les convoyeurs ne doivent jamais voir cette page de diagnostic :
+  // redirection immédiate vers la connexion (sauf si l'adresse contient ?diag=1).
+  if (location.search.indexOf("diag=1") === -1) { location.replace("/login?app=1"); }
+</script>
 <style>
+html{background:#0b1026}
 body{margin:0;padding:24px 16px;background:#041B52;color:#fff;font:15px/1.5 system-ui,sans-serif}
 h1{font-size:20px;margin:0 0 4px;color:#6effcd}
 p{margin:4px 0;color:#c8d4f0}
