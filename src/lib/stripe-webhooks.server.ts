@@ -15,6 +15,8 @@ export async function handleDevisWebhookEvent(event: StripeEvent): Promise<void>
     const sessionId = s?.id;
     const paymentIntentId = typeof s?.payment_intent === "string" ? s.payment_intent : s?.payment_intent?.id;
     const amount = Number(s?.amount_total ?? 0);
+    // Virement encaissé confirmé à la main par l'admin (aucune session Stripe).
+    const isVirement = s?.metadata?.mode === "virement";
 
     if (devisId) {
       // 1. Fetch full devis
@@ -30,7 +32,7 @@ export async function handleDevisWebhookEvent(event: StripeEvent): Promise<void>
         .update({
           statut: "convertit",
           paid_at: new Date().toISOString(),
-          stripe_session_id: sessionId,
+          stripe_session_id: isVirement ? null : sessionId,
           stripe_payment_intent_id: paymentIntentId ?? null,
           amount_paid_cents: amount,
           updated_at: new Date().toISOString(),
@@ -65,8 +67,9 @@ export async function handleDevisWebhookEvent(event: StripeEvent): Promise<void>
         const facture = await ensureFactureForDevis(devis, {
           amountCents: amount,
           missionId,
-          sessionId: sessionId ?? null,
+          sessionId: isVirement ? null : (sessionId ?? null),
           paymentIntentId: paymentIntentId ?? null,
+          ...(isVirement ? { modePaiement: "Virement bancaire" } : {}),
         });
         await sendFactureDisponibleEmail(facture);
       }
