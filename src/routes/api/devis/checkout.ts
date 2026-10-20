@@ -127,7 +127,9 @@ export const Route = createFileRoute("/api/devis/checkout")({
           return Response.json({ clientSecret: session.client_secret });
         } catch (e: any) {
           console.error("[devis/checkout] Stripe error", e?.message);
-          return Response.json({ error: "Checkout failed — please try again" }, { status: 500 });
+          const raw = String(e?.message ?? "erreur inconnue");
+          const detail = raw.replace(/(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_…").slice(0, 300);
+          return Response.json({ error: "Checkout failed — please try again", detail }, { status: 500 });
         }
       },
     },
