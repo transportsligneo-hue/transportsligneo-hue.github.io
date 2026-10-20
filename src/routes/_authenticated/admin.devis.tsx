@@ -29,6 +29,8 @@ import { InspectionPreuvesBlock } from "@/components/admin/drawers/InspectionPre
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { ConvertDevisDialog } from "@/components/admin/ConvertDevisDialog";
+import { devisConversionProblems } from "@/lib/devis-conversion-check";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { RefusDialog } from "@/components/admin/RefusDialog";
 import { AdminPurgeButton } from "@/components/admin/AdminPurgeButton";
@@ -202,15 +204,12 @@ function AdminDevisPage() {
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [convertingId, setConvertingId] = useState<string | null>(null);
 
-  const handleConvert = async (row: DevisRow) => {
-    if (row.mission_id) {
-      toast.info("Devis déjà converti", { description: `Mission ${row.mission_id.slice(0, 8)}…` });
-      return;
-    }
-    if (!(await confirmToast(`Convertir le devis ${row.numero} en mission ?`))) return;
+  const [pendingConvert, setPendingConvert] = useState<DevisRow | null>(null);
+
+  const doConvert = async (row: DevisRow, force: boolean) => {
     setConvertingId(row.id);
     try {
-      const mission = await convertDevis({ data: { devisId: row.id } });
+      const mission = await convertDevis({ data: { devisId: row.id, force } });
 
       toast.success(mission.alreadyConverted ? "Devis déjà converti" : "Mission créée", {
         description: `${mission.numero} depuis ${row.numero}`,
@@ -227,7 +226,21 @@ function AdminDevisPage() {
       toast.error("Échec conversion", { description: msg });
     } finally {
       setConvertingId(null);
+      setPendingConvert(null);
     }
+  };
+
+  const handleConvert = async (row: DevisRow) => {
+    if (row.mission_id) {
+      toast.info("Devis déjà converti", { description: `Mission ${row.mission_id.slice(0, 8)}…` });
+      return;
+    }
+    if (devisConversionProblems(row).length) {
+      setPendingConvert(row);
+      return;
+    }
+    if (!(await confirmToast(`Convertir le devis ${row.numero} en mission ?`))) return;
+    await doConvert(row, false);
   };
 
   const load = async () => {
@@ -812,6 +825,14 @@ function AdminDevisPage() {
       )}
 
 
+      <ConvertDevisDialog
+        open={!!pendingConvert}
+        numero={pendingConvert?.numero ?? ""}
+        problems={pendingConvert ? devisConversionProblems(pendingConvert) : []}
+        busy={!!pendingConvert && convertingId === pendingConvert.id}
+        onCancel={() => setPendingConvert(null)}
+        onConfirm={() => pendingConvert && doConvert(pendingConvert, true)}
+      />
       <DevisDrawer
         devis={selected}
         acceptation={selected ? acceptations[selected.id] ?? null : null}
@@ -1095,7 +1116,9 @@ function DevisDrawer({
           <DrawerField
             label="Documents"
             value={
-              devis.vehicule_docs_completed ? (
+              devis.vehicule_docs_completed && !devis.carte_grise_recto_url ? (
+                <DrawerBadge tone="amber">Véhicule de location · pas de carte grise</DrawerBadge>
+              ) : devis.vehicule_docs_completed ? (
                 <DrawerBadge tone="green">Complétés par le client</DrawerBadge>
               ) : (
                 <DrawerBadge tone="amber">En attente client</DrawerBadge>

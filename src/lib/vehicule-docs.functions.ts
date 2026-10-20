@@ -3,12 +3,17 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const saveVehiculeDocs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: { devisId: string; vin: string; recto: string; verso: string | null }) => {
+  .inputValidator((i: { devisId: string; vin?: string; recto?: string | null; verso: string | null; location?: boolean }) => {
     if (!i?.devisId) throw new Error("devisId requis");
-    const vin = String(i.vin ?? "").trim().toUpperCase();
-    if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) throw new Error("VIN invalide");
-    if (!i.recto) throw new Error("Carte grise recto requise");
-    return { ...i, vin };
+    const location = i.location === true;
+    const vinRaw = String(i.vin ?? "").trim().toUpperCase();
+    const vinOk = /^[A-HJ-NPR-Z0-9]{17}$/.test(vinRaw);
+    // Véhicule de location : pas de carte grise exigée, VIN facultatif.
+    if (!location) {
+      if (!vinOk) throw new Error("VIN invalide");
+      if (!i.recto) throw new Error("Carte grise recto requise");
+    }
+    return { ...i, location, recto: location ? null : (i.recto ?? null), vin: vinOk ? vinRaw : null };
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;

@@ -41,6 +41,7 @@ export function VehiculeDocsStep({
   const [rectoUrl, setRectoUrl] = useState<string | null>(initialRectoUrl ?? null);
   const [uploading, setUploading] = useState<"recto" | null>(null);
   const [saving, setSaving] = useState(false);
+  const [location, setLocation] = useState(false);
 
   const searchByPlate = async () => {
     const p = plate.trim();
@@ -65,7 +66,7 @@ export function VehiculeDocsStep({
   };
 
   const vinValid = VIN_REGEX.test(vin.trim());
-  const canSave = vinValid && !!rectoUrl && !saving;
+  const canSave = (location || (vinValid && !!rectoUrl)) && !saving;
 
   const upload = async (file: File, kind: "recto") => {
     if (!user) {
@@ -95,7 +96,7 @@ export function VehiculeDocsStep({
     setSaving(true);
     try {
       const { saveVehiculeDocs } = await import("@/lib/vehicule-docs.functions");
-      await saveVehiculeDocs({ data: { devisId, vin, recto: rectoUrl!, verso: null } });
+      await saveVehiculeDocs({ data: { devisId, vin: vinValid ? vin : undefined, recto: location ? null : rectoUrl, verso: null, location } });
     } catch (e) {
       setSaving(false);
       toast.error("Sauvegarde échouée", { description: e instanceof Error ? e.message : undefined });
@@ -118,6 +119,22 @@ export function VehiculeDocsStep({
         </div>
       </div>
 
+      <label className="flex items-start gap-3 rounded-lg border border-cream/20 bg-cream/5 p-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={location}
+          onChange={(e) => setLocation(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0"
+        />
+        <span className="text-sm text-cream">
+          <span className="font-semibold">Véhicule de location</span>
+          <span className="block text-xs text-cream/60 mt-0.5">
+            Je n'ai pas la carte grise : je peux continuer vers le paiement sans l'envoyer.
+          </span>
+        </span>
+      </label>
+
+      {!location && (<>
       {/* Recherche par plaque */}
       <div>
         <label className="text-cream/70 text-xs uppercase tracking-wider mb-2 block">
@@ -166,10 +183,18 @@ export function VehiculeDocsStep({
         onFile={(f) => upload(f, "recto")}
       />
 
+      </>)}
+
       {/* Checklist */}
       <div className="rounded-lg border border-cream/10 bg-cream/5 p-3 text-xs space-y-1.5">
-        <ChecklistItem ok={vinValid} label="VIN renseigné" />
-        <ChecklistItem ok={!!rectoUrl} label="Carte grise recto envoyée" />
+        {location ? (
+          <ChecklistItem ok label="Véhicule de location : carte grise non demandée" />
+        ) : (
+          <>
+            <ChecklistItem ok={vinValid} label="VIN renseigné" />
+            <ChecklistItem ok={!!rectoUrl} label="Carte grise recto envoyée" />
+          </>
+        )}
         <ChecklistItem ok={canSave} label="Prêt pour le paiement" />
       </div>
 
