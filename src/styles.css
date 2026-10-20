@@ -11945,3 +11945,32 @@ tr.row.kind-inconnu > td:first-child { box-shadow: inset 4px 0 0 0 #c9cad2; }
 .dashboard-shell-light[data-account-type="client"] .text-2xl.font-heading { font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .dashboard-shell-light[data-account-type="client"] .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 500; letter-spacing: 0; }
 .dashboard-shell-light[data-account-type="client"] main .text-\[10px\].uppercase { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+
+/* ===== Vroomy : arrivée "grosse" sur chaque page, puis réduction fluide à la taille normale ===== */
+.vrm-launcher.vrm-chat-launcher { width: 88px; height: 88px; }
+@media (max-width: 640px) { .vrm-launcher.vrm-chat-launcher { width: 78px; height: 78px; } }
+.vrm-launcher.vrm-chat-launcher.vrm-intro {
+  transform-origin: 100% 100%;
+  animation: vrmIntro 5.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes vrmIntro {
+  0%   { transform: scale(0.4); opacity: 0; }
+  8%   { transform: scale(1.55); opacity: 1; }
+  14%  { transform: scale(1.42); }
+  20%  { transform: scale(1.55); }
+  26%  { transform: scale(1.42); }
+  62%  { transform: scale(1.42); }
+  80%  { transform: scale(0.95); }
+  90%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+.vrm-launcher.vrm-chat-launcher.vrm-intro .vroomy-avatar { filter: drop-shadow(0 0 16px rgba(110, 161, 255, 0.8)); }
+@media (max-width: 640px) {
+  @keyframes vrmIntro {
+    0% { transform: scale(0.4); opacity: 0; } 10% { transform: scale(1.3); opacity: 1; }
+    60% { transform: scale(1.25); } 80% { transform: scale(0.95); } 100% { transform: scale(1); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vrm-launcher.vrm-chat-launcher.vrm-intro { animation: none; }
+}

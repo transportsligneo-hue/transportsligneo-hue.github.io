@@ -179,6 +179,15 @@ export default function AssistantIaWidget() {
   const launcherRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
+  // Entrée "grosse" à chaque changement de page, puis retour fluide à la taille normale
+  const [intro, setIntro] = useState(false);
+  useEffect(() => {
+    setIntro(false);
+    let r2 = 0;
+    const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setIntro(true)); });
+    return () => { cancelAnimationFrame(r1); if (r2) cancelAnimationFrame(r2); };
+  }, [pathname]);
+
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
@@ -433,14 +442,14 @@ export default function AssistantIaWidget() {
       <Button variant="ghost"
         type="button"
         ref={launcherRef}
-        className="vrm-launcher vrm-chat-launcher vrm-launcher-animated"
+        className={`vrm-launcher vrm-chat-launcher vrm-launcher-animated${intro ? " vrm-intro" : ""}`}
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => { setGreet(false); setOpen((o) => !o); }}
         style={{ display: open ? "none" : undefined }}
       >
-        <VroomyAvatar size={72} talking={typing} />
+        <VroomyAvatar size={88} talking={typing} />
         <span className="vroomy-badge" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="#2f5fff"/><g fill="#fff"><circle className="vroomy-dot" cx="8.5" cy="11" r="1.4"/><circle className="vroomy-dot" cx="12" cy="11" r="1.4"/><circle className="vroomy-dot" cx="15.5" cy="11" r="1.4"/></g></svg>
         </span>
