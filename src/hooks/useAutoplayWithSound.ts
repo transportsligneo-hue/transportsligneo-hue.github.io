@@ -1,11 +1,9 @@
 import { useEffect, type RefObject } from "react";
 
 /**
- * Lecture automatique une seule fois par vidéo et par navigateur,
- * avec le son activé par défaut. La lecture manuelle reste disponible ensuite.
- * Les navigateurs bloquent la lecture avec son sans interaction : on tente
- * d'abord le son, puis on bascule en muet et on réactive le son au premier
- * geste de l'utilisateur tant que le film est visible.
+ * Lecture automatique une seule fois par vidéo et par navigateur, TOUJOURS SANS SON.
+ * Le visiteur active le son lui-même avec le bouton « Activer le son » (voir SoundToggle)
+ * ou avec les commandes de la vidéo.
  */
 export function useAutoplayWithSound(
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -15,6 +13,7 @@ export function useAutoplayWithSound(
     const video = videoRef.current;
     if (!enabled || !video || typeof IntersectionObserver === "undefined") return;
 
+    video.muted = true; // jamais de son à l'arrivée sur la page
     let cancelled = false;
     let visible = false;
     let pending = false;
@@ -39,38 +38,15 @@ export function useAutoplayWithSound(
       }
     };
 
-    const addUnmuteListeners = () => {
-      const unmute = () => {
-        if (cancelled || !visible) return;
-        video.muted = false;
-        clearListeners();
-      };
-      for (const type of ["pointerdown", "touchstart", "keydown"]) {
-        document.addEventListener(type, unmute);
-        listeners.push([type, unmute]);
-      }
-    };
-
     const tryPlay = async () => {
       if (cancelled || alreadyStarted || pending || !video.paused) return;
       pending = true;
       try {
-        video.muted = false;
+        video.muted = true;
         await video.play();
         if (!cancelled) markStarted();
       } catch {
-        if (cancelled || !visible) return;
-        // Lecture avec son refusée : démarrage muet, son au premier geste.
-        video.muted = true;
-        try {
-          await video.play();
-          if (!cancelled) {
-            markStarted();
-            addUnmuteListeners();
-          }
-        } catch {
-          /* rien à faire tant qu'il n'y a pas de geste */
-        }
+        /* rien à faire tant qu'il n'y a pas de geste */
       } finally {
         pending = false;
         if (!visible) video.pause();

@@ -7,6 +7,7 @@ import driverLogo from "@/assets/logo-video-driver.png.asset.json";
 import proLogo from "@/assets/logo-video-professionnels.jpg.asset.json";
 import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
 import PresentationDemoFilm from "@/components/marketing/PresentationDemoFilm";
+import { SoundToggle } from "@/components/marketing/SoundToggle";
 
 const STEPS = [
   {
@@ -50,7 +51,7 @@ const STEPS = [
 export function ProFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Lecture automatique avec le son, dès que la vidéo entre dans le viewport
+  // Lecture automatique SANS son, dès que la vidéo entre dans le viewport (bouton « Activer le son »)
   useAutoplayWithSound(videoRef);
 
   return (
@@ -58,6 +59,7 @@ export function ProFilm() {
       <div
         className="v4-video-wrap film-neon"
         style={{
+          position: "relative",
           maxWidth: 760,
           margin: "0 auto",
           borderRadius: 22,
@@ -69,11 +71,13 @@ export function ProFilm() {
           src={presentationPro.url}
           poster={presentationProPoster.url}
           controls
+          muted
           playsInline
           preload="auto"
           className="pro-film-video"
           style={{ display: "block", width: "100%", height: "auto" }}
         />
+        <SoundToggle videoRef={videoRef} />
       </div>
     </section>
   );

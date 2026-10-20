@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useAutoplayWithSound } from "@/hooks/useAutoplayWithSound";
+import { SoundToggle } from "@/components/marketing/SoundToggle";
 
 type Props = {
   src: string;
@@ -14,15 +15,19 @@ export default function PresentationDemoFilm({ src, poster, label, className }: 
   useAutoplayWithSound(videoRef);
 
   return (
-    <video
-      ref={videoRef}
-      src={src}
-      poster={poster}
-      controls
-      playsInline
-      preload="metadata"
-      aria-label={label}
-      className={className}
-    />
+    <div className="relative">
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        controls
+        muted
+        playsInline
+        preload="metadata"
+        aria-label={label}
+        className={className}
+      />
+      <SoundToggle videoRef={videoRef} />
+    </div>
   );
 }
