@@ -304,7 +304,7 @@ function DevisPublicPage() {
                 </a>
               </div>
             ) : (
-              <DevisEmbeddedCheckout token={token} returnUrl={returnUrl} />
+              <DevisEmbeddedCheckout token={token} returnUrl={returnUrl} numero={devis.numero} montant={devis.aRegler} />
             )}
           </section>
         ) : null}

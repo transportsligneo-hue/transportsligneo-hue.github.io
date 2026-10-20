@@ -570,7 +570,7 @@ function MesFacturesEtDevis() {
                   dejaApplique={Number((active as Record<string, unknown>)["avoir_applique"] ?? 0)}
                   onApplied={() => refresh()}
                 />
-                <DevisEmbeddedCheckout devisId={active.id} returnUrl={returnUrl} />
+                <DevisEmbeddedCheckout devisId={active.id} returnUrl={returnUrl} numero={String((active as Record<string, unknown>)["numero"] ?? "")} montant={Math.max(Number((active as Record<string, unknown>)["prix_estime"] ?? 0) - Number((active as Record<string, unknown>)["avoir_applique"] ?? 0), 0)} />
               </>
             )}
 

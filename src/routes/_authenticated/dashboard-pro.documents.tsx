@@ -839,7 +839,7 @@ function ProDocuments() {
               <h2 className="font-semibold text-lg text-pro-text">Paiement — {payingDevis.numero}</h2>
               <p className="text-pro-muted text-sm mt-1">{payingDevis.depart} → {payingDevis.arrivee} · {Number(payingDevis.prix_estime).toFixed(2)} €</p>
             </div>
-            <DevisEmbeddedCheckout devisId={payingDevis.id} returnUrl={returnUrl} />
+            <DevisEmbeddedCheckout devisId={payingDevis.id} returnUrl={returnUrl} numero={payingDevis.numero} montant={Number(payingDevis.prix_estime)} />
           </div>
         </div>
       )}
