@@ -178,3 +178,16 @@ export const getDevisAcceptationStatus = createServerFn({ method: "POST" })
       version: devis?.version ?? 1,
     };
   });
+
+
+/** IP et navigateur du signataire, pour la preuve imprimée dans le PDF signé. */
+export const getSignerNetworkInfo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const ip =
+      getRequestIP({ xForwardedFor: true }) ??
+      getRequestHeader("cf-connecting-ip") ??
+      getRequestHeader("x-real-ip") ??
+      null;
+    return { ipAddress: ip, userAgent: getRequestHeader("user-agent") ?? null };
+  });

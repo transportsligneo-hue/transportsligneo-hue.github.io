@@ -9,7 +9,7 @@ import {
   attachSignedDevisPdf,
   refuseDevis,
 } from "@/lib/devis-signature-otp.functions";
-import { acceptDevis } from "@/lib/devis-acceptation.functions";
+import { acceptDevis, getSignerNetworkInfo } from "@/lib/devis-acceptation.functions";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { LogoLoader } from "@/components/brand/LogoLoader";
@@ -103,6 +103,7 @@ export function DevisAcceptationStep({
   const attachPdf = useServerFn(attachSignedDevisPdf);
   const refuse = useServerFn(refuseDevis);
   const acceptDevisFn = useServerFn(acceptDevis);
+  const getNetworkInfo = useServerFn(getSignerNetworkInfo);
   const [signing, setSigning] = useState(false);
   const { data: orgInfo } = useCurrentOrgAccountType();
   const isFlotte = orgInfo?.accountType === "flotte";
@@ -310,16 +311,25 @@ export function DevisAcceptationStep({
       });
       const pdfHash = await sha256HexOfBlob(rawPdf);
       const email = (devisRow as { email?: string }).email ?? userData.user?.email ?? "";
+      const signatureDataUrl = await new Promise<string | null>((resolve) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(typeof fr.result === "string" ? fr.result : null);
+        fr.onerror = () => resolve(null);
+        fr.readAsDataURL(signatureFile);
+      });
+      let net: { ipAddress: string | null; userAgent: string | null } = { ipAddress: null, userAgent: null };
+      try { net = await getNetworkInfo(); } catch { /* preuve non bloquante */ }
       const signedPdf = await generateDevisPdf({
         ...(devisRow as unknown as DevisData),
         version,
         acceptedAtLabel,
+        clientSignatureDataUrl: signatureDataUrl,
         otpProof: {
           email,
           method: "Signature manuscrite en ligne",
           acceptedAtLabel,
-          ipAddress: null,
-          userAgent: null,
+          ipAddress: net.ipAddress,
+          userAgent: net.userAgent ?? (typeof navigator !== "undefined" ? navigator.userAgent : null),
           cgvVersion: "v1-2026-01",
           pdfHash,
         },

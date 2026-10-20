@@ -1030,7 +1030,15 @@ export async function generateDevisPdf(dInput: DevisData, company?: CompanyInfo 
   doc.text("POUR TRANSPORTS LIGNEO", M + sigW + 11, y + 6);
 
   if (d.clientSignatureDataUrl) {
-    try { doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7, 34, 11); } catch { /* optionnel */ }
+    try {
+      // Garde les proportions de la signature manuscrite (zone max 58 × 15 mm).
+      const props = doc.getImageProperties(d.clientSignatureDataUrl);
+      const ratio = props.width && props.height ? props.width / props.height : 3;
+      let w = 58;
+      let h = w / ratio;
+      if (h > 15) { h = 15; w = h * ratio; }
+      doc.addImage(d.clientSignatureDataUrl, "PNG", M + 5, y + 7 + (15 - h) / 2, w, h);
+    } catch { /* optionnel */ }
   }
   drawCompanySignature(doc, companySignature, M + sigW + 30, y + 8);
 
