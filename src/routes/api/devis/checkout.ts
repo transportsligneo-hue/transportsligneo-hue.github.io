@@ -31,6 +31,13 @@ export const Route = createFileRoute("/api/devis/checkout")({
         if (await requestIsDemo(request)) {
           return Response.json({ error: DEMO_BLOCK_MESSAGE }, { status: 403 });
         }
+        // Interrupteur admin : carte désactivée → le client est orienté vers le virement.
+        try {
+          const { data: flag } = await supabaseAdmin.from("app_settings").select("value").eq("key", "card_payment_disabled").maybeSingle();
+          if ((flag?.value as { disabled?: boolean } | null)?.disabled) {
+            return Response.json({ error: "Card payment disabled", detail: "paiement par carte désactivé par l'administrateur" }, { status: 503 });
+          }
+        } catch { /* si la lecture échoue, on laisse le paiement normal */ }
         let body: any;
         try { body = await request.json(); } catch {
           return Response.json({ error: "Invalid JSON" }, { status: 400 });

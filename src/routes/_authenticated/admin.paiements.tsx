@@ -5,6 +5,7 @@ import { CreditCard, TrendingUp, Wallet, AlertTriangle, BarChart3, Search, Plus 
 import { EmptyState } from "@/components/admin/AdminUI";
 import { LogoLoader } from "@/components/brand/LogoLoader";
 import { PaymentLinksPanel } from "@/components/admin/PaymentLinksPanel";
+import { CardPaymentToggle } from "@/components/admin/CardPaymentToggle";
 
 export const Route = createFileRoute("/_authenticated/admin/paiements")({
   component: AdminPaiements,
@@ -197,6 +198,8 @@ function AdminPaiements() {
           <p className="dvx-sub">Cockpit financier — Stripe, B2B, factures émises</p>
         </div>
       </div>
+
+      <CardPaymentToggle />
 
       {/* ===== Statistiques ===== */}
       <div className="dvx-stats">
