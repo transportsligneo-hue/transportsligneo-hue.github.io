@@ -20,6 +20,11 @@ export function getConnectionApiKey(env: StripeEnv): string {
 }
 
 export function createStripeClient(env: StripeEnv): Stripe {
+  // Hors Lovable (Vercel) : clé secrète Stripe directe, sans passerelle.
+  const directKey = env === "sandbox" ? process.env.STRIPE_SECRET_KEY_SANDBOX : process.env.STRIPE_SECRET_KEY;
+  if (directKey) {
+    return new Stripe(directKey, { apiVersion: "2026-03-25.dahlia" });
+  }
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
 
