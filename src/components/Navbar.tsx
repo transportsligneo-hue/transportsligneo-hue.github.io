@@ -5,6 +5,7 @@ import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
 import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
+import NavTicker from "@/components/NavTicker";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Download } from "lucide-react";
 import { professionalBrochures, particulierBrochure } from "@/components/marketing/ProfessionalBrochures";
@@ -123,6 +124,8 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
                 );
               })}
             </ul>
+
+            <NavTicker />
 
             <span className="tln-sep" aria-hidden="true" />
 
