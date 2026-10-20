@@ -10,7 +10,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * Pour un build local pointant sur la preview :
  *   CAP_SERVER_URL=https://id-preview--....lovable.app npx cap sync
  */
-const serverUrl = process.env.CAP_SERVER_URL || "https://transportsligneo.fr";
+const serverUrl = process.env.CAP_SERVER_URL || "https://www.transportsligneo.fr";
 
 const config: CapacitorConfig = {
   appId: "com.transportsligneo.driver",
@@ -23,6 +23,7 @@ const config: CapacitorConfig = {
     androidScheme: "https",
     allowNavigation: [
       "transportsligneo.fr",
+    "*.transportsligneo.fr",
       "www.transportsligneo.fr",
       "*.lovable.app",
       "*.supabase.co",
