@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1026">
+<title>Ligneo Driver</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b1026;color:#e8ecff;font-family:system-ui,-apple-system,Roboto,sans-serif}
+  .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+  .spin{width:44px;height:44px;border-radius:50%;border:4px solid #25306b;border-top-color:#4f8cff;animation:r 0.9s linear infinite}
+  @keyframes r{to{transform:rotate(360deg)}}
+  a{display:none;background:#6ee79a;color:#0b1026;font-weight:700;padding:14px 22px;border-radius:12px;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="spin"></div>
+  <div>Chargement de Ligneo Driver…</div>
+  <a id="manual" href="/login?app=1">Ouvrir la connexion</a>
+</div>
+<script>
+  // Ouvre la connexion tout de suite ; si rien ne se passe, affiche un bouton manuel.
+  setTimeout(function () { window.location.replace("/login?app=1"); }, 150);
+  setTimeout(function () { document.getElementById("manual").style.display = "inline-block"; }, 5000);
+</script>
+</body>
+</html>

@@ -17,13 +17,13 @@ const config: CapacitorConfig = {
   appName: "Ligneo Driver",
   webDir: "dist",
   server: {
-    // TEST TEMPORAIRE : page de diagnostic (remettre /login?app=1 ensuite)
-    url: `${serverUrl}/app-test.html`,
+    // Page d'accueil légère qui redirige vers /login?app=1 (évite le blocage sur le splash)
+    url: `${serverUrl}/app-start.html`,
     cleartext: false,
     androidScheme: "https",
     allowNavigation: [
       "transportsligneo.fr",
-    "*.transportsligneo.fr",
+      "*.transportsligneo.fr",
       "www.transportsligneo.fr",
       "*.lovable.app",
       "*.supabase.co",
