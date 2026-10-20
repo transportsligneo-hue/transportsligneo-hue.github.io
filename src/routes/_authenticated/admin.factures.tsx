@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, FileText, FileSearch, CheckCircle2, Eye, MapPin, User, Building2, Receipt } from "lucide-react";
@@ -85,6 +86,8 @@ function AdminFacturesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("");
+  // Factures de démo / test : rangées à part, jamais mélangées aux vrais clients
+  const [testView, setTestView] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("");
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [previewRow, setPreviewRow] = useState<FactureRow | null>(null);
@@ -236,7 +239,11 @@ function AdminFacturesPage() {
     }
   };
 
+  const isTestFacture = (f: FactureRow) => isDemoOrTestIdentity({ email: f.client_email, nom: f.client_nom, prenom: f.client_prenom, societe: f.client_societe });
+  const realFactures = factures.filter((f) => !isTestFacture(f));
+  const testCount = factures.length - realFactures.length;
   const filtered = factures.filter(f => {
+    if (isTestFacture(f) !== testView) return false;
     if (statutFilter === "a_exporter") { if (f.statut === "payee" || f.statut === "annulee") return false; }
     else if (statutFilter && f.statut !== statutFilter) return false;
     if (typeFilter && f.type_facture !== typeFilter) return false;
@@ -248,9 +255,9 @@ function AdminFacturesPage() {
     return true;
   });
 
-  const totalTTC = factures.reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
-  const paid = factures.filter(f => f.statut === "payee").reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
-  const pending = factures.filter(f => f.statut === "emise" || f.statut === "en_retard").reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
+  const totalTTC = realFactures.reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
+  const paid = realFactures.filter(f => f.statut === "payee").reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
+  const pending = realFactures.filter(f => f.statut === "emise" || f.statut === "en_retard").reduce((s, f) => s + Number(f.prix_ttc || 0), 0);
 
   const eur = (n: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
 
@@ -258,7 +265,7 @@ function AdminFacturesPage() {
     <div>
       <PageHeader
         title="Factures"
-        subtitle={`${factures.length} facture${factures.length > 1 ? "s" : ""} émise${factures.length > 1 ? "s" : ""}`}
+        subtitle={`${realFactures.length} facture${realFactures.length > 1 ? "s" : ""} émise${realFactures.length > 1 ? "s" : ""}`}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
@@ -295,6 +302,14 @@ function AdminFacturesPage() {
             <option value="a_exporter">Non payées · À exporter</option>
             {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </Select>
+          <button
+            type="button"
+            onClick={() => setTestView((v) => !v)}
+            title="Factures de démonstration et de test, rangées à part"
+            className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${testView ? "border-[#7c3aed] bg-[#7c3aed] text-white" : "border-dashed border-[#c9b8f5] bg-white text-pro-text-soft hover:border-[#7c3aed]"}`}
+          >
+            Tests &amp; démo · {testCount}
+          </button>
         </div>
       </Card>
 

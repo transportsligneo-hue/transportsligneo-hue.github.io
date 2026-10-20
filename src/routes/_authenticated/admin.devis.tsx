@@ -3,6 +3,7 @@ import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { Zap as ZapIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useClientBrands, clientBrandOf, cleanSociete } from "@/components/admin/ClientBrand";
@@ -202,6 +203,8 @@ function AdminDevisPage() {
   const [dateTo, setDateTo] = useState("");
   const [sort, setSort] = useState("date_desc");
   const [showArchived, setShowArchived] = useState(false);
+  // Devis de démo / test : rangés à part, jamais mélangés aux vrais clients
+  const [testView, setTestView] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [convertingId, setConvertingId] = useState<string | null>(null);
 
@@ -367,8 +370,11 @@ function AdminDevisPage() {
   };
 
   const brands = useClientBrands(devis.map((d) => d.email));
+  const isTestDevis = (d: DevisRow) => isDemoOrTestIdentity({ email: d.email, nom: d.nom, prenom: d.prenom });
+  const testCount = devis.filter((d) => isTestDevis(d) && !d.archived_at).length;
   const filtered = devis
     .filter((d) => {
+      if (isTestDevis(d) !== testView) return false;
       if (!showArchived && d.archived_at) return false;
       if (showArchived && !d.archived_at) return false;
       const effective = isExpired(d) ? "expire" : d.statut;
@@ -424,7 +430,7 @@ function AdminDevisPage() {
           <span className="dvx-stat-ic blue"><FileText size={17} /></span>
           <p className="dvx-stat-k">Total</p>
           <p className="dvx-stat-v">{filtered.length}</p>
-          <p className="dvx-stat-t dim">{showArchived ? "Devis archivés" : "Devis actifs"}</p>
+          <p className="dvx-stat-t dim">{testView ? "Devis de test / démo" : showArchived ? "Devis archivés" : "Devis actifs"}</p>
         </div>
         <div className="dvx-stat">
           <span className="dvx-stat-ic violet"><Euro size={17} /></span>
@@ -483,6 +489,10 @@ function AdminDevisPage() {
         <label className="dvx-check">
           <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
           Voir les archivés
+        </label>
+        <label className="dvx-check" title="Devis de démonstration et de test, rangés à part">
+          <input type="checkbox" checked={testView} onChange={(e) => setTestView(e.target.checked)} />
+          Tests &amp; démo ({testCount})
         </label>
         <button type="button" className="dvx-export" onClick={exportCsv}>
           <FileSpreadsheet size={14} />
