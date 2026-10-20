@@ -12,6 +12,7 @@ const TITRES: Record<RefusType, string> = {
 };
 
 const MOTIFS_RAPIDES = [
+  "Délai trop court : nous avons besoin d'au moins 12 h pour organiser la prise en charge et le retour du convoyeur",
   "Aucun convoyeur disponible sur ces dates",
   "Trajet hors zone d'intervention",
   "Informations véhicule incomplètes",

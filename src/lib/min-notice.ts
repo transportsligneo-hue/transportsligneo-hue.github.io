@@ -1,5 +1,5 @@
 /** Délai minimum de prévenance entre la demande et la prise en charge (heures). */
-export const MIN_NOTICE_HOURS = 24;
+export const MIN_NOTICE_HOURS = 12;
 
 /** Retourne un message d'erreur si la date/heure souhaitée est trop proche, sinon null. */
 export function checkMinNotice(date: string, heure?: string | null, now: Date = new Date()): string | null {

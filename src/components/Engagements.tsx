@@ -3,7 +3,7 @@ import MapLigneo from "@/components/MapLigneo";
 
 const engagements = [
   { icon: Shield, title: "Sécurité", text: "Assurance circulation incluse sur chaque mission, véhicule protégé de A à Z." },
-  { icon: Clock, title: "Ponctualité", text: "Prise en charge à partir de 24 h selon distance. Respect strict des délais." },
+  { icon: Clock, title: "Ponctualité", text: "Prise en charge à partir de 12 h selon distance. Respect strict des délais." },
   { icon: Eye, title: "Transparence", text: "Tarifs clairs, péages et carburant inclus. Suivi en temps réel." },
   { icon: Award, title: "Expérience", text: "Plus de 6 ans d'expertise dans le convoyage automobile." },
   { icon: Globe, title: "Couverture nationale", text: "Intervention en France entière et partout en Europe." },
