@@ -16,6 +16,8 @@ import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
 import { EditableNumero } from "@/components/admin/EditableNumero";
 import { VehiculesPrixDialog } from "@/components/admin/VehiculesPrixDialog";
+import { ConvertDevisDialog } from "@/components/admin/ConvertDevisDialog";
+import { devisConversionProblems } from "@/lib/devis-conversion-check";
 import { convertDevisToMission } from "@/lib/admin-devis-conversion.functions";
 import { toast } from "sonner";
 import { AttachClientDialog } from "@/components/admin/AttachClientDialog";
@@ -281,17 +283,25 @@ function AdminDevisDetailPage() {
     }
   };
 
-  const handleConvert = async () => {
-    if (!devis || devis.mission_id) return;
-    if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
+  const [askConvert, setAskConvert] = useState(false);
+
+  const doConvert = async (force: boolean) => {
+    if (!devis) return;
     setConverting(true);
     try {
-      const mission = await convertDevis({ data: { devisId: devis.id } });
+      const mission = await convertDevis({ data: { devisId: devis.id, force } });
       toast.success(mission.alreadyConverted ? "Devis déjà converti" : "Mission créée", { description: mission.numero });
       setDevis({ ...devis, statut: "convertit", mission_id: mission.missionId });
     } catch (e) {
       toast.error("Échec conversion", { description: e instanceof Error ? e.message : "" });
-    } finally { setConverting(false); }
+    } finally { setConverting(false); setAskConvert(false); }
+  };
+
+  const handleConvert = async () => {
+    if (!devis || devis.mission_id) return;
+    if (devisConversionProblems(devis as never).length) { setAskConvert(true); return; }
+    if (!(await confirmToast(`Convertir ${devis.numero} en mission ?`))) return;
+    await doConvert(false);
   };
 
   const handleDelete = async () => {
@@ -318,6 +328,14 @@ function AdminDevisDetailPage() {
 
   return (
     <div>
+      <ConvertDevisDialog
+        open={askConvert}
+        numero={devis.numero}
+        problems={devisConversionProblems(devis as never)}
+        busy={converting}
+        onCancel={() => setAskConvert(false)}
+        onConfirm={() => doConvert(true)}
+      />
       <div className="flex items-center gap-3 mb-4">
         <Link to="/admin/devis">
           <IconButton title="Retour"><ArrowLeft size={16} /></IconButton>

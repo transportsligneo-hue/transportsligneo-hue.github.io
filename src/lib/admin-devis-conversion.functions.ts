@@ -1,10 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { devisConversionProblems } from "@/lib/devis-conversion-check";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const convertDevisToMission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ devisId: z.string().uuid() }).parse(input))
+  .inputValidator((input) => z.object({ devisId: z.string().uuid(), force: z.boolean().optional() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
@@ -25,6 +26,11 @@ export const convertDevisToMission = createServerFn({ method: "POST" })
       .maybeSingle();
     if (devisError) throw devisError;
     if (!devis) throw new Error("Devis introuvable");
+
+    if (!devis.mission_id && !data.force) {
+      const problems = devisConversionProblems(devis as never);
+      if (problems.length) throw new Error(`${problems.join(" ")} Conversion bloquée : confirmez-la depuis l’admin.`);
+    }
 
     const { data: convertedRows, error: conversionError } = await supabaseAdmin.rpc(
       "admin_convert_devis_to_missions" as never,
