@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, MessageCircle, Truck, UserRound, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatThread } from "./ChatThread";
+import "@/styles/admin-chat-v2.css";
 
 type Conv = {
   id: string;
@@ -11,6 +12,7 @@ type Conv = {
   visitor_name: string | null;
   visitor_email: string | null;
   client_user_id: string | null;
+  convoyeur_user_id?: string | null;
   source: string;
   status: "ouverte" | "en_attente" | "resolue";
   vroomy_summary: string | null;
@@ -28,7 +30,7 @@ function useConversations(mode: "missions" | "conseiller") {
     const load = async () => {
       let q = supabase
         .from("chat_conversations")
-        .select("id, kind, mission_id, mission_reference, visitor_name, visitor_email, client_user_id, source, status, vroomy_summary, unread_admin, last_message_at, last_message_preview")
+        .select("id, kind, mission_id, mission_reference, visitor_name, visitor_email, client_user_id, convoyeur_user_id, source, status, vroomy_summary, unread_admin, last_message_at, last_message_preview")
         .order("last_message_at", { ascending: false })
         .limit(300);
       q = mode === "conseiller" ? q.eq("kind", "conseiller") : q.in("kind", ["mission_client", "mission_convoyeur"]);
@@ -46,8 +48,43 @@ function useConversations(mode: "missions" | "conseiller") {
   return { rows, loading, setRows };
 }
 
+type MissionInfo = { client: string; trajet: string; vehicule: string; convoyeur: string };
+
+/** Noms, trajet et véhicule des missions affichées (une seule requête par table). */
+function useMissionInfo(rows: Conv[]) {
+  const [info, setInfo] = useState<Record<string, MissionInfo>>({});
+  const key = rows.map((r) => r.id).join(",");
+  useEffect(() => {
+    const ids = [...new Set(rows.map((r) => r.mission_id).filter(Boolean))] as string[];
+    if (!ids.length) return;
+    let alive = true;
+    void (async () => {
+      const { data: ms } = await supabase.from("missions").select("id, prenom, nom, ville_depart, ville_arrivee, marque, modele, immatriculation").in("id", ids);
+      const uids = [...new Set(rows.map((r) => r.convoyeur_user_id).filter(Boolean))] as string[];
+      const { data: cs } = uids.length ? await supabase.from("convoyeurs").select("user_id, prenom, nom").in("user_id", uids) : { data: [] as any[] };
+      const convName = new Map((cs ?? []).map((c: any) => [c.user_id, [c.prenom, c.nom].filter(Boolean).join(" ")]));
+      const convByMission = new Map<string, string>();
+      rows.forEach((r) => { if (r.mission_id && r.convoyeur_user_id) convByMission.set(r.mission_id, convName.get(r.convoyeur_user_id) ?? ""); });
+      const out: Record<string, MissionInfo> = {};
+      (ms ?? []).forEach((m: any) => {
+        out[m.id] = {
+          client: [m.prenom, m.nom].filter(Boolean).join(" "),
+          trajet: `${m.ville_depart ?? ""} → ${m.ville_arrivee ?? ""}`,
+          vehicule: [[m.marque, m.modele].filter(Boolean).join(" "), m.immatriculation].filter(Boolean).join(" · "),
+          convoyeur: convByMission.get(m.id) ?? "",
+        };
+      });
+      if (alive) setInfo(out);
+    })();
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return info;
+}
+
 export function AdminMissionInbox() {
   const { rows, loading } = useConversations("missions");
+  const info = useMissionInfo(rows);
   const [search, setSearch] = useState("");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -77,6 +114,19 @@ export function AdminMissionInbox() {
   }, [selected, tab]);
 
   const current = missions.find((m) => m.mission_id === selected);
+  const waitingSide = (m: { client: Conv | null; convoyeur: Conv | null } | undefined): "client" | "convoyeur" | null => {
+    if (!m) return null;
+    const c = m.client?.unread_admin ?? 0, v = m.convoyeur?.unread_admin ?? 0;
+    if (c > 0 && v > 0) return (m.client?.last_message_at ?? "") >= (m.convoyeur?.last_message_at ?? "") ? "client" : "convoyeur";
+    return c > 0 ? "client" : v > 0 ? "convoyeur" : null;
+  };
+  const openMission = (m: (typeof missions)[number]) => {
+    const w = waitingSide(m);
+    if (w) setTab(w === "client" ? "mission_client" : "mission_convoyeur");
+    setSelected(m.mission_id);
+  };
+  const cur = current ? info[current.mission_id] : undefined;
+  const curWait = waitingSide(current);
 
   return (
     <div className="lgc-admin">
@@ -89,12 +139,23 @@ export function AdminMissionInbox() {
         {loading ? <div className="lgc-empty"><Loader2 className="animate-spin" size={18} /></div> : missions.length === 0 ? (
           <div className="lgc-empty">Aucune conversation de mission pour le moment.</div>
         ) : missions.map((m) => (
-          <button key={m.mission_id} type="button" className={`lgc-item${selected === m.mission_id ? " active" : ""}`} onClick={() => setSelected(m.mission_id)}>
+          <button key={m.mission_id} type="button" className={`lgc-item${selected === m.mission_id ? " active" : ""}`} onClick={() => openMission(m)}>
             <div className="lgc-item-top">
               <span className="lgc-ref">{m.ref}</span>
               <span className="lgc-date">{new Date(m.last).toLocaleDateString("fr-FR")}</span>
             </div>
+            {info[m.mission_id] && (
+              <div className="lgc-item-meta">
+                <b>{info[m.mission_id].trajet}</b>
+                <span>{[info[m.mission_id].client && `Client : ${info[m.mission_id].client}`, info[m.mission_id].convoyeur && `Convoyeur : ${info[m.mission_id].convoyeur}`].filter(Boolean).join(" · ")}</span>
+              </div>
+            )}
             <div className="lgc-counts">
+              {waitingSide(m) && (
+                <span className={waitingSide(m) === "client" ? "lgc-from lgc-from-client" : "lgc-from lgc-from-conv"}>
+                  {waitingSide(m) === "client" ? <UserRound size={12} /> : <Truck size={12} />} Message {waitingSide(m) === "client" ? "du client" : "du convoyeur"}
+                </span>
+              )}
               <span className="lgc-count-blue" title="Messages client non lus"><UserRound size={12} /> {m.client?.unread_admin ?? 0}</span>
               <span className="lgc-count-green" title="Messages convoyeur non lus"><Truck size={12} /> {m.convoyeur?.unread_admin ?? 0}</span>
             </div>
@@ -107,14 +168,24 @@ export function AdminMissionInbox() {
           <div className="lgc-empty lgc-empty-big"><MessageCircle size={28} /> Sélectionnez une mission pour voir ses conversations.</div>
         ) : (
           <>
+            <div className="lgc-mission-head">
+              <div>
+                <div className="lgc-mission-ref">Mission {current?.ref}</div>
+                {cur && <div className="lgc-mission-sub">{cur.trajet}{cur.vehicule ? ` · ${cur.vehicule}` : ""}</div>}
+              </div>
+              {curWait ? (
+                <span className={`lgc-wait ${curWait === "client" ? "lgc-wait-client" : "lgc-wait-conv"}`}>
+                  <i /> {curWait === "client" ? "Nouveau message du CLIENT" : "Nouveau message du CONVOYEUR"}
+                </span>
+              ) : <span className="lgc-wait lgc-wait-none">Aucun message non lu</span>}
+            </div>
             <div className="lgc-tabs" role="tablist">
-              <button role="tab" aria-selected={tab === "mission_client"} className={`lgc-tab-blue${tab === "mission_client" ? " on" : ""}`} onClick={() => setTab("mission_client")}>
-                <UserRound size={15} /> Client {current?.client?.unread_admin ? <b>{current.client.unread_admin}</b> : null}
+              <button role="tab" aria-selected={tab === "mission_client"} className={`lgc-tab-blue${tab === "mission_client" ? " on" : ""}${curWait === "client" ? " ring" : ""}`} onClick={() => setTab("mission_client")}>
+                <UserRound size={15} /> Client{cur?.client ? ` · ${cur.client}` : ""} {current?.client?.unread_admin ? <b>{current.client.unread_admin}</b> : null}
               </button>
-              <button role="tab" aria-selected={tab === "mission_convoyeur"} className={`lgc-tab-green${tab === "mission_convoyeur" ? " on" : ""}`} onClick={() => setTab("mission_convoyeur")}>
-                <Truck size={15} /> Convoyeur {current?.convoyeur?.unread_admin ? <b>{current.convoyeur.unread_admin}</b> : null}
+              <button role="tab" aria-selected={tab === "mission_convoyeur"} className={`lgc-tab-green${tab === "mission_convoyeur" ? " on" : ""}${curWait === "convoyeur" ? " ring" : ""}`} onClick={() => setTab("mission_convoyeur")}>
+                <Truck size={15} /> Convoyeur{cur?.convoyeur ? ` · ${cur.convoyeur}` : ""} {current?.convoyeur?.unread_admin ? <b>{current.convoyeur.unread_admin}</b> : null}
               </button>
-              <span className="lgc-tab-ref">Mission {current?.ref}</span>
             </div>
             <p className="lgc-hint">Les deux fils sont séparés : le client ne voit jamais les messages du convoyeur, et inversement.</p>
             {convId ? (

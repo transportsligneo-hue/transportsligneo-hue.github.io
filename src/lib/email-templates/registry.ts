@@ -49,6 +49,7 @@ import { template as messageManuel } from './message-manuel'
 import { template as suiviGpsDestinataire } from './suivi-gps-destinataire'
 import { template as alerteAdmin } from './alerte-admin'
 import { template as devisOtpCode } from './devis-otp-code'
+import { template as chatMessageAdmin } from './chat-message-admin'
 import { template as esignInvitation } from './esign-invitation'
 import { template as esignOtpCode } from './esign-otp-code'
 import { template as esignSigne } from './esign-signe'
@@ -110,6 +111,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'suivi-gps-destinataire': suiviGpsDestinataire,
   'alerte-admin': alerteAdmin,
   'devis-otp-code': devisOtpCode,
+  'chat-message-admin': chatMessageAdmin,
   'esign-invitation': esignInvitation,
   'esign-otp-code': esignOtpCode,
   'esign-signe': esignSigne,

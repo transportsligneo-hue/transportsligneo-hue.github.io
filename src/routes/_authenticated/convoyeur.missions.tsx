@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   MapPin, Loader2, FileText, Clock,
   ChevronDown, ChevronUp, Truck, ArrowLeft, Search, Filter,
-  Check, X, ChevronRight,
+  Check, X, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { EdlPremiumFlow } from "@/components/inspection/EdlPremiumFlow";
 import { EdlErrorBoundary } from "@/components/inspection/EdlErrorBoundary";
@@ -745,15 +745,22 @@ function ConvoyeurMissions() {
     });
     const v3ProgressPct = isTermine ? 100 : Math.min(95, Math.round(((currentIdx - 1) / TOTAL) * 100));
 
-    const contactDepartTel = (t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null;
-    const contactArriveeTel = (t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone
-      ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null;
-    const clientNom = (t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null;
-    const clientInstructions = (t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null;
-    const gpsTarget = currentIdx <= 3 ? (t?.depart ?? null) : (t?.arrivee ?? null);
+    // Mission terminée : on garde la fiche consultable, mais plus aucune coordonnée (RGPD / confidentialité client).
+    const finished = DONE_STATUTS.has(openMission.statut);
+    const contactDepartTel = finished ? null : ((t as { contact_depart_tel?: string | null } | null)?.contact_depart_tel ?? null);
+    const contactArriveeTel = finished ? null : ((t as { arrivee_contact_telephone?: string | null; contact_arrivee_tel?: string | null } | null)?.arrivee_contact_telephone
+      ?? (t as { contact_arrivee_tel?: string | null } | null)?.contact_arrivee_tel ?? null);
+    const clientNom = finished ? null : ((t as { arrivee_contact_nom?: string | null } | null)?.arrivee_contact_nom ?? null);
+    const clientInstructions = finished ? null : ((t as { arrivee_contact_instructions?: string | null } | null)?.arrivee_contact_instructions ?? null);
+    const gpsTarget = finished ? null : (currentIdx <= 3 ? (t?.depart ?? null) : (t?.arrivee ?? null));
 
     const infoSlot = (
       <>
+        {finished && (
+          <div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+            Mission terminée : les adresses, numéros de téléphone et contacts du client ne sont plus affichés.
+          </div>
+        )}
         <MissionV3InfoPane
           vehicule={{
             marque: t?.marque ?? null,
@@ -770,25 +777,25 @@ function ConvoyeurMissions() {
             telephone: contactArriveeTel ?? contactDepartTel ?? null,
             type: "Particulier",
           }}
-          depart={{ ville: dep.ville, adresse: dep.adresse }}
-          arrivee={{ ville: arr.ville, adresse: arr.adresse }}
+          depart={{ ville: dep.ville, adresse: finished ? "" : dep.adresse }}
+          arrivee={{ ville: arr.ville, adresse: finished ? "" : arr.adresse }}
           contactDepartTel={contactDepartTel}
           contactArriveeTel={contactArriveeTel}
           prestations={prestationsFromMeta((t as { options_meta?: unknown } | null)?.options_meta)}
           miseEnMain={{
             depart: {
-              nom: (t as { contact_depart_nom?: string | null } | null)?.contact_depart_nom ?? null,
+              nom: finished ? null : ((t as { contact_depart_nom?: string | null } | null)?.contact_depart_nom ?? null),
               tel: contactDepartTel,
-              note: (t as { contact_depart_note?: string | null } | null)?.contact_depart_note ?? null,
+              note: finished ? null : ((t as { contact_depart_note?: string | null } | null)?.contact_depart_note ?? null),
             },
             arrivee: {
-              nom: clientNom ?? (t as { contact_arrivee_nom?: string | null } | null)?.contact_arrivee_nom ?? null,
+              nom: finished ? null : (clientNom ?? (t as { contact_arrivee_nom?: string | null } | null)?.contact_arrivee_nom ?? null),
               tel: contactArriveeTel,
-              note: clientInstructions ?? (t as { contact_arrivee_note?: string | null } | null)?.contact_arrivee_note ?? null,
+              note: finished ? null : (clientInstructions ?? (t as { contact_arrivee_note?: string | null } | null)?.contact_arrivee_note ?? null),
             },
           }}
           gpsTarget={gpsTarget}
-          livraison={t?.arrivee ?? null}
+          livraison={finished ? null : (t?.arrivee ?? null)}
           electrique={isElectricVehicle({ marque: t?.marque, modele: t?.modele, energie: (t as { vehicule_energie?: string | null } | null)?.vehicule_energie })}
           timeline={v3Timeline}
           currentIndex={Math.min(currentIdx, TOTAL)}
@@ -1153,6 +1160,13 @@ function ConvoyeurMissions() {
         ))}
       </div>
 
+      {filter === "done" && (
+        <button type="button" onClick={() => setFilter("all")}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+          ← Retour à mes missions
+        </button>
+      )}
+
       {/* List */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-pro-border p-8 text-center shadow-sm">
@@ -1171,6 +1185,18 @@ function ConvoyeurMissions() {
           activeId={activeMissionId}
           onOpen={setOpenMissionId}
         />
+      )}
+
+      {filter !== "done" && counts.done > 0 && !search && (
+        <button type="button" onClick={() => setFilter("done")}
+          className="w-full flex items-center gap-3 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 text-left shadow-sm active:scale-[.99] transition">
+          <span className="h-11 w-11 rounded-xl bg-emerald-100 text-emerald-700 grid place-items-center shrink-0"><FolderOpen size={22} /></span>
+          <span className="flex-1 min-w-0">
+            <span className="block font-semibold text-pro-text">Missions terminées</span>
+            <span className="block text-xs text-pro-text-soft">{counts.done} mission{counts.done > 1 ? "s" : ""} · consultables, sans coordonnées client</span>
+          </span>
+          <ChevronRight size={18} className="text-emerald-600 shrink-0" />
+        </button>
       )}
     </div>
     </>

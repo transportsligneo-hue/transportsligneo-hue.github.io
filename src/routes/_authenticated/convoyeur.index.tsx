@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PendingProposalsBanner } from "@/components/convoyeur/PendingProposalsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Ic, Plate } from "@/components/driver2/icons";
 import { InfosLigneoBar } from "@/components/driver2/InfosLigneo";
 import { useDriverIdentity } from "@/hooks/useDriverIdentity";
@@ -57,12 +58,15 @@ function ConvoyeurDashboard() {
       if (!conv) { setLoading(false); return; }
       setNote(conv.note_moyenne != null ? Number(conv.note_moyenne) : null);
 
-      const [catRes, attrsRes] = await Promise.all([
-        supabase.from("trajets_publies_safe" as never).select("id", { count: "exact", head: true }),
-        supabase.from("attributions").select("id, statut, trajet_id").eq("convoyeur_id", conv.id),
-      ]);
-      setCatalogueCount(catRes.count ?? 0);
-      const attrs = attrsRes.data;
+      const { count: catCount } = await supabase
+        .from("trajets_publies_safe" as never)
+        .select("id", { count: "exact", head: true });
+      setCatalogueCount(catCount ?? 0);
+
+      const { data: attrs } = await supabase
+        .from("attributions")
+        .select("id, statut, trajet_id")
+        .eq("convoyeur_id", conv.id);
 
       const now = new Date();
       const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -70,21 +74,18 @@ function ConvoyeurDashboard() {
       const termineIds = (attrs ?? []).filter((a) => a.statut === "termine").map((a) => a.trajet_id).filter(Boolean) as string[];
       setDoneCount(termineIds.length);
 
-      const DONE = new Set(["termine", "en_attente_validation", "validee", "refusee", "refuse", "annule"]);
-      const active = (attrs ?? []).filter((a) => !DONE.has(a.statut));
-      const activeTrajetIds = active.map((a) => a.trajet_id).filter(Boolean) as string[];
-
-      // Revenus du mois et missions actives chargés en parallèle (avant : une requête après l'autre).
-      const revenuePromise = (async () => {
-        if (termineIds.length === 0) return;
-        const [trsRes, remusRes] = await Promise.all([
-          supabase.from("trajets_assigned_safe" as never).select("tarif_convoyeur, updated_at").in("id", termineIds).gte("updated_at", firstOfLast.toISOString()),
-          supabase.from("remunerations_missions").select("distance_km, date_mission").eq("convoyeur_id", conv.id).neq("statut", "annule").gte("date_mission", iso(firstOfMonth)),
-        ]);
-        const rows = (trsRes.data ?? []) as unknown as Array<{ tarif_convoyeur: number | null; updated_at: string }>;
+      if (termineIds.length > 0) {
+        const { data: trs } = await supabase
+          .from("trajets_assigned_safe" as never)
+          .select("tarif_convoyeur, updated_at")
+          .in("id", termineIds)
+          .gte("updated_at", firstOfLast.toISOString());
+        const rows = (trs ?? []) as unknown as Array<{ tarif_convoyeur: number | null; updated_at: string }>;
         const thisMonth = rows.filter((t) => new Date(t.updated_at) >= firstOfMonth);
         const cur = thisMonth.reduce((s, t) => s + Number(t.tarif_convoyeur ?? 0), 0);
-        const prev = rows.filter((t) => new Date(t.updated_at) < firstOfMonth).reduce((s, t) => s + Number(t.tarif_convoyeur ?? 0), 0);
+        const prev = rows
+          .filter((t) => new Date(t.updated_at) < firstOfMonth)
+          .reduce((s, t) => s + Number(t.tarif_convoyeur ?? 0), 0);
         setRevenueMonth(cur);
         if (prev > 0) setRevenueDelta(Math.round(((cur - prev) / prev) * 100));
         const bars = [0, 0, 0, 0];
@@ -93,16 +94,28 @@ function ConvoyeurDashboard() {
           bars[w] += Number(t.tarif_convoyeur ?? 0);
         });
         setWeekBars(bars);
-        setKmMonth(Math.round((remusRes.data ?? []).reduce((s, r) => s + Number(r.distance_km ?? 0), 0)));
-      })();
-      const activePromise = activeTrajetIds.length
-        ? supabase.from("trajets_assigned_safe" as never)
-            .select("id, depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
-            .in("id", activeTrajetIds)
-        : Promise.resolve({ data: [] as unknown[] });
-      const [, activeRes] = await Promise.all([revenuePromise, activePromise]);
-      const byId = new Map(((activeRes.data ?? []) as unknown as Array<HomeMission["trajet"] & { id: string }>).map((t) => [t!.id, t]));
-      const enriched: HomeMission[] = active.map((a) => ({ id: a.id, statut: a.statut, trajet: (byId.get(a.trajet_id as string) as HomeMission["trajet"]) ?? null }));
+
+        // Kilomètres du mois : distance des rémunérations calculées (facultatif).
+        const { data: remus } = await supabase
+          .from("remunerations_missions")
+          .select("distance_km, date_mission")
+          .eq("convoyeur_id", conv.id)
+          .neq("statut", "annule")
+          .gte("date_mission", iso(firstOfMonth));
+        setKmMonth(Math.round((remus ?? []).reduce((s, r) => s + Number(r.distance_km ?? 0), 0)));
+      }
+
+      const DONE = new Set(["termine", "en_attente_validation", "validee", "refusee", "refuse", "annule"]);
+      const active = (attrs ?? []).filter((a) => !DONE.has(a.statut));
+      const enriched: HomeMission[] = [];
+      for (const a of active) {
+        const { data: t } = await supabase
+          .from("trajets_assigned_safe" as never)
+          .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
+          .eq("id", a.trajet_id)
+          .maybeSingle();
+        enriched.push({ id: a.id, statut: a.statut, trajet: (t as unknown as HomeMission["trajet"]) ?? null });
+      }
 
       // Semaine en cours (lundi → dimanche) : nombre de missions par jour.
       const monday = new Date(now);
@@ -131,14 +144,7 @@ function ConvoyeurDashboard() {
   }, [user]);
 
   if (loading) {
-    return (
-      <div className="drv2"><div className="dsk" aria-busy="true" aria-label="Chargement du tableau de bord">
-        <div className="dsk-row"><span className="dsk-av" /><span className="dsk-col"><i style={{ width: "40%" }} /><i style={{ width: "62%", height: 22 }} /></span></div>
-        <div className="dsk-card" style={{ height: 250 }} />
-        <div className="dsk-card" style={{ height: 120 }} />
-        <div className="dsk-card" style={{ height: 150 }} />
-      </div></div>
-    );
+    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
   }
 
   const now = new Date();

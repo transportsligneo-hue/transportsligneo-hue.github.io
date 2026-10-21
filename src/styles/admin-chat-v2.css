@@ -1,0 +1,61 @@
+/* Chat des missions (admin) — version claire, lisible, Client / Convoyeur bien distincts. */
+.lgc-admin { gap: 18px; grid-template-columns: 340px 1fr; }
+.lgc-admin .lgc-admin-list,
+.lgc-admin .lgc-admin-main { background: #fff; color: #0f1d3d; border: 1px solid #dfe6fb; box-shadow: 0 8px 28px -16px rgba(47,95,255,.28); border-radius: 18px; padding: 14px; }
+.lgc-admin .lgc-search { border-color: #d5def7; background: #f6f8ff; color: #6b7aa3; }
+.lgc-admin .lgc-search input { color: #0f1d3d; }
+.lgc-admin .lgc-filter { color: #5a6788; }
+.lgc-admin .lgc-item { background: #fff; border: 1px solid #e3e9fb; color: #0f1d3d; padding: 12px; transition: border-color .15s, box-shadow .15s; }
+.lgc-admin .lgc-item:hover { border-color: #b9c9fb; box-shadow: 0 6px 18px -12px rgba(47,95,255,.5); }
+.lgc-admin .lgc-item.active { border-color: #2f5fff; background: #f0f4ff; box-shadow: inset 3px 0 0 #2f5fff; }
+.lgc-admin .lgc-item-top, .lgc-admin .lgc-item-sub { color: #6b7aa3; }
+.lgc-admin .lgc-ref { color: #0f1d3d; font-weight: 700; }
+.lgc-admin .lgc-name { color: #0f1d3d; }
+.lgc-admin .lgc-preview { color: #5a6788; }
+.lgc-item-meta { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; font-size: 12px; color: #5a6788; }
+.lgc-item-meta b { color: #1f3a8a; font-weight: 600; font-size: 13px; }
+.lgc-admin .lgc-counts { flex-wrap: wrap; }
+.lgc-admin .lgc-count-blue { background: #e8efff; color: #2f5fff; }
+.lgc-admin .lgc-count-green { background: #e3f7ec; color: #15803d; }
+.lgc-from { font-weight: 700; }
+.lgc-admin .lgc-from-client { background: #2f5fff; color: #fff; }
+.lgc-admin .lgc-from-conv { background: #16a34a; color: #fff; }
+.lgc-mission-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 2px 12px; }
+.lgc-mission-ref { font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 16px; color: #0f1d3d; }
+.lgc-mission-sub { font-size: 13px; color: #5a6788; margin-top: 2px; }
+.lgc-wait { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.lgc-wait i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; animation: lgcPulse 1.4s ease-out infinite; }
+.lgc-wait-client { background: #2f5fff; color: #fff; box-shadow: 0 8px 20px -8px rgba(47,95,255,.8); }
+.lgc-wait-conv { background: #16a34a; color: #fff; box-shadow: 0 8px 20px -8px rgba(22,163,74,.8); }
+.lgc-wait-none { background: #f1f4fb; color: #7a88ab; font-weight: 500; }
+@keyframes lgcPulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 100% { box-shadow: 0 0 0 9px rgba(255,255,255,0); } }
+.lgc-admin .lgc-tabs { gap: 10px; margin-bottom: 10px; }
+.lgc-admin .lgc-tabs button { border: 1.5px solid #dbe3fa; background: #fff; color: #5a6788; padding: 10px 16px; font-weight: 600; border-radius: 12px; }
+.lgc-admin .lgc-tabs button b { background: #ef4444; color: #fff; }
+.lgc-admin .lgc-tab-blue.on { border-color: #2f5fff; background: #eef3ff; color: #2f5fff; }
+.lgc-admin .lgc-tab-green.on { border-color: #16a34a; background: #eaf8ef; color: #15803d; }
+.lgc-admin .lgc-tab-blue.ring { border-color: #2f5fff; color: #2f5fff; animation: lgcRingB 1.6s ease-out infinite; }
+.lgc-admin .lgc-tab-green.ring { border-color: #16a34a; color: #15803d; animation: lgcRingG 1.6s ease-out infinite; }
+@keyframes lgcRingB { 0% { box-shadow: 0 0 0 0 rgba(47,95,255,.45); } 100% { box-shadow: 0 0 0 10px rgba(47,95,255,0); } }
+@keyframes lgcRingG { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.45); } 100% { box-shadow: 0 0 0 10px rgba(22,163,74,0); } }
+.lgc-admin .lgc-hint { color: #7a88ab; font-size: 12px; }
+/* Fil de discussion en clair */
+.lgc-admin .lgc-thread { background: #f6f8ff; border: 1px solid #e3e9fb; color: #0f1d3d; }
+.lgc-admin .lgc-bubble { background: #fff; border: 1px solid #dfe6fb; color: #0f1d3d; box-shadow: 0 2px 8px -6px rgba(15,29,61,.3); }
+.lgc-admin .lgc-mine .lgc-bubble { color: #fff; border-color: transparent; }
+.lgc-admin .lgc-author { color: #2f5fff; }
+.lgc-admin .lgc-from-convoyeur .lgc-author { color: #15803d; }
+.lgc-admin .lgc-empty { color: #7a88ab; }
+.lgc-admin .lgc-system { background: #eef3ff; border-color: #d5def7; color: #5a6788; }
+.lgc-admin .lgc-input { background: #fff; border-top-color: #e3e9fb; }
+.lgc-admin .lgc-input textarea { background: #f6f8ff; border-color: #d5def7; color: #0f1d3d; }
+.lgc-admin .lgc-icon { background: #f6f8ff; border-color: #d5def7; color: #2f5fff; }
+.lgc-admin .lgc-quick button, .lgc-admin .lgc-files button { background: #eef3ff; border-color: #cbd8fb; color: #2f5fff; }
+.lgc-admin .lgc-statuses button { border-color: #dbe3fa; color: #5a6788; }
+.lgc-admin .lgc-statuses button.on { border-color: #2f5fff; background: #eef3ff; color: #2f5fff; }
+.lgc-admin .lgc-conv-head h3 { color: #0f1d3d; }
+.lgc-admin .lgc-conv-head a { color: #2f5fff; }
+.lgc-admin .lgc-conv-head select { background: #fff; color: #0f1d3d; border-color: #d5def7; }
+.lgc-admin .lgc-summary { background: #eef3ff; border-color: #d5def7; }
+.lgc-admin .lgc-summary p { color: #33415f; }
+.lgc-admin .lgc-availability { background: #f6f8ff; border-color: #d5def7; color: #1f3a8a; }

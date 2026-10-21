@@ -1,5 +1,4 @@
 /** Envoi d'un email à l'autre partie d'une conversation après un nouveau message. */
-const ADMIN_EMAIL = "contact@transportsligneo.fr";
 const SITE = "https://www.transportsligneo.fr";
 
 export async function notifyChatMessageById(messageId: string) {
@@ -14,7 +13,7 @@ export async function notifyChatMessageById(messageId: string) {
     if (!msg || msg.sender_type === "systeme") return;
     const { data: conv } = await supabaseAdmin
       .from("chat_conversations")
-      .select("id, kind, mission_reference, client_user_id, convoyeur_user_id, visitor_email, visitor_name")
+      .select("id, kind, mission_id, mission_reference, client_user_id, convoyeur_user_id, visitor_email, visitor_name")
       .eq("id", msg.conversation_id)
       .maybeSingle();
     if (!conv) return;
@@ -30,6 +29,28 @@ export async function notifyChatMessageById(messageId: string) {
       .lt("created_at", msg.created_at);
     if ((count ?? 0) > 0) return;
 
+    // Détails pour un mail lisible : nom de l'expéditeur, mission, trajet, véhicule.
+    let mission: any = null;
+    if (conv.mission_id) {
+      const { data } = await supabaseAdmin
+        .from("missions")
+        .select("numero, prenom, nom, ville_depart, ville_arrivee, marque, modele, immatriculation")
+        .eq("id", conv.mission_id)
+        .maybeSingle();
+      mission = data;
+    }
+    const trajet = mission ? `${mission.ville_depart ?? ""} → ${mission.ville_arrivee ?? ""}` : "";
+    const vehicule = mission ? [[mission.marque, mission.modele].filter(Boolean).join(" "), mission.immatriculation].filter(Boolean).join(" · ") : "";
+    let convoyeurName = "";
+    if (conv.convoyeur_user_id) {
+      const { data } = await supabaseAdmin.from("convoyeurs").select("prenom, nom").eq("user_id", conv.convoyeur_user_id).maybeSingle();
+      convoyeurName = [data?.prenom, data?.nom].filter(Boolean).join(" ");
+    }
+    let clientName = mission ? [mission.prenom, mission.nom].filter(Boolean).join(" ") : "";
+    if (!clientName && conv.client_user_id) {
+      const { data } = await supabaseAdmin.from("profiles").select("prenom, nom, societe").eq("user_id", conv.client_user_id).maybeSingle();
+      clientName = (data?.societe as string) || [data?.prenom, data?.nom].filter(Boolean).join(" ");
+    }
     const ref = conv.mission_reference ? `Mission ${conv.mission_reference}` : "Conseiller Ligneo";
     const extrait = (msg.body || "Pièce jointe").slice(0, 400);
     let to: string | null = null;
@@ -49,10 +70,18 @@ export async function notifyChatMessageById(messageId: string) {
         to = null;
       }
     } else {
-      to = ADMIN_EMAIL;
-      const who = msg.sender_type === "convoyeur" ? "un convoyeur" : msg.sender_type === "visiteur" ? `un visiteur (${conv.visitor_name ?? ""} ${conv.visitor_email ?? ""})` : "un client";
-      titre = `Nouveau message de ${who}`;
-      ctaUrl = `${SITE}/admin/${conv.kind === "conseiller" ? "messagerie-conseiller" : "messagerie"}`;
+      const role = msg.sender_type === "convoyeur" ? "Convoyeur" : msg.sender_type === "visiteur" ? "Visiteur" : "Client";
+      const expediteur = role === "Convoyeur" ? convoyeurName : role === "Visiteur" ? [conv.visitor_name, conv.visitor_email].filter(Boolean).join(" · ") : clientName;
+      const adminUrl = `${SITE}/admin/${conv.kind === "conseiller" ? "messagerie-conseiller" : "messagerie"}`;
+      await sendTransactionalEmailServer({
+        templateName: "chat-message-admin",
+        idempotencyKey: `chat-msg-${msg.id}`,
+        templateData: {
+          role, expediteur: expediteur || role, reference: conv.mission_reference ?? "", trajet, vehicule,
+          message: extrait, ctaUrl: adminUrl,
+        },
+      });
+      return;
     }
     if (!to) return;
     await sendTransactionalEmailServer({
@@ -63,7 +92,7 @@ export async function notifyChatMessageById(messageId: string) {
         subject: titre,
         titre,
         message: extrait,
-        reference: ref,
+        reference: [ref, trajet, vehicule].filter(Boolean).join(" · "),
         ctaLabel: "Répondre",
         ctaUrl,
       },
