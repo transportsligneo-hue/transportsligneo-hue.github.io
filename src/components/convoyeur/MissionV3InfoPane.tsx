@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   CarFront, ShieldCheck, Copy, Check, Palette, Gauge, Calendar,
   Phone, MapPin, Info, Navigation, ArrowUpRight, Zap, UserRound,
-  Navigation as NavIcon, ClipboardCheck, Package, Send, Search, Flag,
+  Navigation as NavIcon, ClipboardCheck, Package, Send, Search, Flag, Undo2, ChevronDown,
 } from "lucide-react";
 
 export interface V3TimelineStep {
@@ -42,6 +42,9 @@ interface Props {
     arrivee?: { nom?: string | null; tel?: string | null; note?: string | null };
   };
   gpsTarget?: string | null;
+  /** Adresse de livraison : sert au bloc « Préparer mon retour ». */
+  livraison?: string | null;
+  electrique?: boolean;
   timeline: V3TimelineStep[];
   currentIndex: number; // 1-based
   totalSteps: number;
@@ -85,11 +88,12 @@ function CopyBtn({ value }: { value: string }) {
     </button>
   );
 }
+import { RetourBlock } from "@/components/driver2/RetourBlock";
 import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export function MissionV3InfoPane({
   vehicule, client, depart, arrivee, instructions,
-  contactDepartTel, contactArriveeTel, miseEnMain, prestations, gpsTarget,
+  contactDepartTel, contactArriveeTel, miseEnMain, prestations, gpsTarget, livraison, electrique,
   timeline, currentIndex, totalSteps, progressPct,
 }: Props) {
   const ring = 96;
@@ -390,30 +394,39 @@ export function MissionV3InfoPane({
         </a>
       </div>
 
-      {/* Timeline */}
-      <div className="v3-card">
-        <div className="v3-head-row">
-          <div>
-            <div className="v3-tl-title">Avancement</div>
-            <div className="v3-tl-sub">Étape {currentIndex} sur {totalSteps}</div>
-          </div>
-          <div className="v3-tl-ring">
-            <svg width={ring} height={ring}>
-              <circle cx={ring/2} cy={ring/2} r={r} stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} fill="none" />
-              <circle cx={ring/2} cy={ring/2} r={r} stroke="url(#v3TlGrad)" strokeWidth={stroke} fill="none"
-                strokeDasharray={c} strokeDashoffset={c - (progressPct/100) * c} strokeLinecap="round"
-                transform={`rotate(-90 ${ring/2} ${ring/2})`} />
-              <defs>
-                <linearGradient id="v3TlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#14B866" />
-                  <stop offset="100%" stopColor="#4FE8A0" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="v3-tl-ring-pct">{progressPct}%</div>
-          </div>
-        </div>
+      {/* Préparer mon retour (replié, comme dans la maquette) */}
+      {livraison ? (
+        <details className="v3-card ret-d" open={currentIndex >= 5}>
+          <summary className="ret-sum">
+            <span className="ret-ic"><Undo2 size={18} strokeWidth={2.3} /></span>
+            <div className="av-tx">
+              <div className="av-t">Préparer mon retour</div>
+              <div className="av-s">Bus, train, covoiturage, VTC</div>
+            </div>
+            <span className="av-ch"><ChevronDown size={16} strokeWidth={2.4} /></span>
+          </summary>
+          <RetourBlock livraison={livraison} electrique={!!electrique} vehicule={vehiculeTitle} />
+        </details>
+      ) : null}
 
+      {/* Avancement (replié : anneau + étape en cours) */}
+      <details className="v3-card av-d">
+        <summary className="av-sum">
+          <div className="av-ring">
+            <svg width={40} height={40} viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="17" stroke="rgba(8,36,63,0.10)" strokeWidth="4" fill="none" />
+              <circle cx="20" cy="20" r="17" stroke="#14B866" strokeWidth="4" fill="none"
+                strokeDasharray={2 * Math.PI * 17} strokeDashoffset={2 * Math.PI * 17 * (1 - progressPct / 100)}
+                strokeLinecap="round" transform="rotate(-90 20 20)" />
+            </svg>
+            <b>{progressPct}%</b>
+          </div>
+          <div className="av-tx">
+            <div className="av-t">Avancement</div>
+            <div className="av-s">Étape {currentIndex} sur {totalSteps} · {timeline[Math.min(currentIndex, totalSteps) - 1]?.label ?? ""}</div>
+          </div>
+          <span className="av-ch"><ChevronDown size={16} strokeWidth={2.4} /></span>
+        </summary>
         <div className="v3-tl-list">
           <div className="v3-tl-line" />
           {timeline.map((step, i) => (
@@ -430,7 +443,7 @@ export function MissionV3InfoPane({
             </div>
           ))}
         </div>
-      </div>
+      </details>
     </div>
   );
 }

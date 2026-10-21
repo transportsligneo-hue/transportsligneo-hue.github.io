@@ -41,3 +41,15 @@ html.theme-dark .lgc-panel .lgc-input,html.theme-dark .lgc-panel .lgc-quick butt
 .lgc-panel .lgc-visitor-form button{background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 12px 22px -14px var(--c1)}
 .lgc-panel .lgc-err{color:#dc2626}
 html.theme-dark .lgc-panel .lgc-avail,html.theme-dark .lgc-panel .lgc-visitor-form input,html.theme-dark .lgc-panel .lgc-visitor-form textarea{background:rgba(255,255,255,.05)}
+
+/* ===== Chat mission : version compacte ===== */
+.lgc-panel{padding:12px 14px;border-radius:20px}
+.lgc-panel-head{margin-bottom:8px;gap:10px}
+.lgc-panel-head>svg{width:32px;height:32px;padding:8px;border-radius:11px}
+.lgc-panel-head h3{font-size:14px}
+.lgc-panel-head p{font-size:11.5px;margin-top:0}
+.lgc-panel .lgc-thread{min-height:0}
+.lgc-panel .lgc-body{max-height:200px;min-height:70px;overflow-y:auto}
+.lgc-panel .lgc-bubble{font-size:13.5px;padding:8px 12px}
+.lgc-panel .lgc-input textarea{min-height:34px;padding:7px 6px;font-size:14px}
+.lgc-panel .lgc-icon,.lgc-panel .lgc-send{width:34px;height:34px}

@@ -2442,3 +2442,25 @@ html.theme-dark .drv2 .dml-rel,html.theme-dark .drv2 .dml-pill--green,html.theme
 html.theme-dark .drv2 .dml-pill--blue{color:#8bb8ff}
 html.theme-dark .drv2 .dml-pill--amber{color:#ffc766}
 html.theme-dark .drv2 .dml-tag{background:rgba(255,255,255,.07)}
+
+/* ===== Mission ouverte : le dock est masqué → aucune réserve de place en bas ===== */
+body.mission-detail-open .driver-main{padding-bottom:0!important}
+body.mission-detail-open .driver-main>div{padding-bottom:0!important}
+html body.mission-detail-open .mv3-fullscreen{padding-bottom:calc(14px + env(safe-area-inset-bottom))!important;margin-bottom:0!important}
+
+/* ===== Onglet Documents : sections claires + aide « ? » ===== */
+.drv2.drv2 .v3-docs-root{gap:14px}
+.drv2.drv2 .v3-docs-root .v3-doc-summary{padding:16px}
+.drv2.drv2 .v3-docs-root .v3-doc-summary-title{display:flex;align-items:center;gap:8px;font-size:14px}
+.drv2.drv2 .v3-docs-root .dd-count{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(245,165,36,.16);color:#b26d00}
+.drv2.drv2 .v3-docs-root .dd-rows{margin-top:6px;display:flex;flex-direction:column}
+.drv2.drv2 .v3-docs-root .dd-list .v3-doc-item{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:11px 0;gap:11px}
+.drv2.drv2 .v3-docs-root .dd-list .v3-doc-item:first-child{border-top:0}
+.drv2.drv2 .v3-docs-root .dd-list .v3-doc-icon{width:36px;height:36px;border-radius:11px}
+.drv2.drv2 .v3-docs-root .dd-list .v3-doc-label{font-size:13.5px}
+.drv2.drv2 .v3-docs-root .dd-list .v3-doc-status{margin-top:4px;padding:2px 8px;font-size:9.5px}
+.dd-help{position:relative;display:inline-flex}
+.dd-help button{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(20,184,102,.5);background:transparent;color:#0b7a43;font-size:11px;font-weight:800;line-height:1;display:grid;place-items:center;padding:0}
+.dd-help-tip{position:absolute;left:-6px;top:28px;z-index:20;width:240px;padding:10px 12px;border-radius:12px;background:#08243f;color:#eaf6ef;font-size:12px;font-weight:500;line-height:1.4;text-transform:none;letter-spacing:0;box-shadow:0 14px 30px -10px rgba(0,0,0,.45)}
+.drv2.drv2 .v3-docs-root .v3-doc-summary{overflow:visible}
+.dd-help-tip{left:-30px;width:min(250px,72vw)}

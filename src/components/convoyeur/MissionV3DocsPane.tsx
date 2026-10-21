@@ -80,6 +80,16 @@ const STATUS_ACCENT: Record<DocStatus, DocItem["accent"]> = {
   manquant: "pink",
 };
 
+function Help({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="dd-help">
+      <button type="button" aria-label="Explication" aria-expanded={open} onClick={() => setOpen(o => !o)}>?</button>
+      {open && <span className="dd-help-tip" role="note">{text}</span>}
+    </span>
+  );
+}
+
 export function MissionV3DocsPane({
   attributionId, userId,
   inspectionDepartDone, inspectionArriveeDone,
@@ -312,50 +322,18 @@ export function MissionV3DocsPane({
 
       <div className="v3-doc-summary">
         <div className="v3-doc-summary-head">
-          <div className="v3-doc-summary-title">Dossier de mission</div>
+          <div className="v3-doc-summary-title">Dossier de mission<Help text="Avancement de vos documents. À 100 %, tout est prêt pour envoyer la mission à l'admin." /></div>
           <div className="v3-doc-summary-pill">{validated}/{total} validés</div>
         </div>
         <div className="v3-doc-progress"><div className="v3-doc-progress-fill" style={{ width: `${pct}%` }} /></div>
       </div>
 
-      <div className="v3-doc-summary">
+      <div className="v3-doc-summary dd-list">
         <div className="v3-doc-summary-head">
-          <div className="v3-doc-summary-title">Documents à télécharger</div>
+          <div className="v3-doc-summary-title">Pièces du dossier<Help text="Ce qu'il faut avoir pour clôturer la mission. Touchez une ligne pour l'ouvrir, ou utilisez Scanner / Importer pour l'ajouter." /></div>
+          <div className="dd-count">{total - validated > 0 ? `${total - validated} à fournir` : "Complet"}</div>
         </div>
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
-          {([["restitution", "État des lieux d'enlèvement"], ["livraison", "État des lieux d'arrivée"]] as const).map(([v, l]) => (
-            <button key={v} type="button" disabled={!edlContext || !!edlBusy} onClick={() => void downloadEdlPapier(v)}
-              className="v3-doc-item" style={{ padding: 12 }}>
-              <div className="v3-doc-body"><div className="v3-doc-label">{l}</div></div>
-              {edlBusy === v ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} className="v3-doc-chev" />}
-            </button>
-          ))}
-          <div className="v3-doc-item" style={{ padding: 12, cursor: "default", flexWrap: "wrap" }}>
-            <div className="v3-doc-body"><div className="v3-doc-label">PV de livraison</div>
-              <div style={{ fontSize: 11.5, color: "#8FB2E8", marginTop: 4 }}>Rempli avec les infos de la mission, ou vierge à compléter.</div></div>
-            <div style={{ display: "flex", gap: 8, width: "100%", marginTop: 8 }}>
-              <button type="button" disabled={!edlContext || pvBusy} onClick={() => void pvRempli()}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[#0A1230] bg-gradient-to-r from-[#2FD8FF] to-[#2F6BFF] disabled:opacity-60">
-                {pvBusy ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} Remplir automatiquement
-              </button>
-              <button type="button" onClick={() => void pvVierge()}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold border border-[rgba(120,180,255,0.3)] text-[#EAF3FF]">
-                <Upload size={14} /> Télécharger vierge
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="v3-doc-summary">
-        <div className="v3-doc-summary-head">
-          <div className="v3-doc-summary-title">Documents officiels</div>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <MissionDocsOfficielsPanel attributionId={attributionId} userId={userId} variant="dark" />
-        </div>
-      </div>
-
+        <div className="dd-rows">
       {loading ? (
         <div className="flex justify-center py-6"><Loader2 className="animate-spin text-[#2FD8FF]" size={20} /></div>
       ) : (
@@ -424,6 +402,46 @@ export function MissionV3DocsPane({
           );
         })
       )}
+        </div>
+      </div>
+      <div className="v3-doc-summary">
+        <div className="v3-doc-summary-head">
+          <div className="v3-doc-summary-title">Documents à télécharger<Help text="Versions papier à imprimer et à faire signer sur place. Le PV peut être pré-rempli avec les infos de la mission." /></div>
+        </div>
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+          {([["restitution", "État des lieux d'enlèvement"], ["livraison", "État des lieux d'arrivée"]] as const).map(([v, l]) => (
+            <button key={v} type="button" disabled={!edlContext || !!edlBusy} onClick={() => void downloadEdlPapier(v)}
+              className="v3-doc-item" style={{ padding: 12 }}>
+              <div className="v3-doc-body"><div className="v3-doc-label">{l}</div></div>
+              {edlBusy === v ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} className="v3-doc-chev" />}
+            </button>
+          ))}
+          <div className="v3-doc-item" style={{ padding: 12, cursor: "default", flexWrap: "wrap" }}>
+            <div className="v3-doc-body"><div className="v3-doc-label">PV de livraison</div>
+              <div style={{ fontSize: 11.5, color: "#8FB2E8", marginTop: 4 }}>Rempli avec les infos de la mission, ou vierge à compléter.</div></div>
+            <div style={{ display: "flex", gap: 8, width: "100%", marginTop: 8 }}>
+              <button type="button" disabled={!edlContext || pvBusy} onClick={() => void pvRempli()}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[#0A1230] bg-gradient-to-r from-[#2FD8FF] to-[#2F6BFF] disabled:opacity-60">
+                {pvBusy ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} Remplir automatiquement
+              </button>
+              <button type="button" onClick={() => void pvVierge()}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold border border-[rgba(120,180,255,0.3)] text-[#EAF3FF]">
+                <Upload size={14} /> Télécharger vierge
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="v3-doc-summary">
+        <div className="v3-doc-summary-head">
+          <div className="v3-doc-summary-title">Documents officiels<Help text="Documents générés par Ligneo pour cette mission (fiche, états des lieux, PV). Ils sont conservés dans le dossier du client." /></div>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <MissionDocsOfficielsPanel attributionId={attributionId} userId={userId} variant="dark" />
+        </div>
+      </div>
+
     </div>
   );
 }

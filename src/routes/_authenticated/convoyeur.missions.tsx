@@ -20,6 +20,7 @@ import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCockpit";
 import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { DriverMissionList } from "@/components/driver2/DriverMissionList";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
@@ -787,6 +788,8 @@ function ConvoyeurMissions() {
             },
           }}
           gpsTarget={gpsTarget}
+          livraison={t?.arrivee ?? null}
+          electrique={isElectricVehicle({ marque: t?.marque, modele: t?.modele, energie: (t as { vehicule_energie?: string | null } | null)?.vehicule_energie })}
           timeline={v3Timeline}
           currentIndex={Math.min(currentIdx, TOTAL)}
           totalSteps={TOTAL}
