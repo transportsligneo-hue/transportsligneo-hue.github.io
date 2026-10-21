@@ -2394,3 +2394,51 @@ html.theme-dark .mv3-back-btn{color:#EAF3FF!important}
 html.theme-dark .mv3-live-block,html.theme-dark .mv3-docs-card{background:rgba(255,255,255,.05)!important;border-color:rgba(120,180,255,.16)!important;color:#EAF3FF!important}
 html.theme-dark .mv3-live-title{color:#EAF3FF!important}
 html.theme-dark .mv3-live-mapbtn{background:rgba(255,255,255,.06)!important;color:#EAF3FF!important}
+
+/* ===== Mes missions : liste raffinée ===== */
+.drv2 .dml{display:flex;flex-direction:column;gap:20px}
+.drv2 .dml-dayh{display:flex;align-items:center;gap:8px;padding:0 4px 8px}
+.drv2 .dml-dayt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.drv2 .dml-rel{font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:99px;background:rgba(20,184,102,.14);color:#0b8a4c}
+.drv2 .dml-cnt{margin-left:auto;font-size:11px;color:var(--ink3)}
+.drv2 .dml-card{display:block;width:100%;text-align:left;margin:0 0 10px;padding:14px 14px 12px;border-radius:18px;background:var(--driver-surface,#fff);border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden;color:var(--ink);transition:transform .15s,box-shadow .15s}
+.drv2 .dml-card:active{transform:scale(.99)}
+.drv2 .dml-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink3);opacity:.5}
+.drv2 .dml-card--blue::before{background:#2F7DFF;opacity:1}
+.drv2 .dml-card--green::before{background:#14B866;opacity:1}
+.drv2 .dml-card--amber::before{background:#F5A524;opacity:1}
+.drv2 .dml-card--red::before{background:#E5484D;opacity:1}
+.drv2 .dml-card.is-active{border-color:rgba(20,184,102,.5)}
+.drv2 .dml-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.drv2 .dml-time{display:inline-flex;align-items:center;gap:5px;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.drv2 .dml-time svg{color:var(--ink3)}
+.drv2 .dml-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(106,134,126,.14);color:var(--ink2)}
+.drv2 .dml-pill--blue{background:rgba(47,125,255,.13);color:#2468d8}
+.drv2 .dml-pill--green{background:rgba(20,184,102,.14);color:#0b8a4c}
+.drv2 .dml-pill--amber{background:rgba(245,165,36,.16);color:#b26d00}
+.drv2 .dml-pill--red{background:rgba(229,72,77,.13);color:#c4282d}
+.drv2 .dml-pill i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:dmlp 1.4s infinite}
+@keyframes dmlp{50%{opacity:.3}}
+.drv2 .dml-num{margin-left:auto;font-size:10.5px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.drv2 .dml-route{display:flex;gap:11px}
+.drv2 .dml-rail{display:flex;flex-direction:column;align-items:center;padding:5px 0 5px}
+.drv2 .dml-rail i{width:9px;height:9px;border-radius:50%;border:2px solid #14B866;background:transparent}
+.drv2 .dml-rail i.b{background:#14B866}
+.drv2 .dml-rail u{flex:1;width:2px;min-height:18px;margin:3px 0;background:repeating-linear-gradient(to bottom,var(--ink3) 0 3px,transparent 3px 6px);opacity:.5}
+.drv2 .dml-addrs{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1}
+.drv2 .dml-addrs p{margin:0;font-size:13.5px;line-height:1.3;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.drv2 .dml-addrs small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:1px}
+.drv2 .dml-foot{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:center;margin-top:13px;padding-top:11px;border-top:1px dashed var(--line)}
+.drv2 .dml-veh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.drv2 .dml-vname{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.drv2 .dml-tags{grid-column:1;display:flex;gap:6px;flex-wrap:wrap}
+.drv2 .dml-tag{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:8px;background:rgba(8,90,60,.07);color:var(--ink2)}
+.drv2 .dml-tag--ok{background:rgba(20,184,102,.14);color:#0b8a4c}
+.drv2 .dml-end{grid-column:2;grid-row:1 / span 2;display:flex;align-items:center;gap:8px}
+.drv2 .dml-price{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.drv2 .dml-go{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(20,184,102,.12);color:#0b8a4c}
+html.theme-dark .drv2 .dml-card{background:var(--driver-surface)}
+html.theme-dark .drv2 .dml-rel,html.theme-dark .drv2 .dml-pill--green,html.theme-dark .drv2 .dml-go,html.theme-dark .drv2 .dml-tag--ok{color:#4FE8A0}
+html.theme-dark .drv2 .dml-pill--blue{color:#8bb8ff}
+html.theme-dark .drv2 .dml-pill--amber{color:#ffc766}
+html.theme-dark .drv2 .dml-tag{background:rgba(255,255,255,.07)}

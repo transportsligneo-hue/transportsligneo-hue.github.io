@@ -20,6 +20,7 @@ import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCockpit";
 import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { DriverMissionList } from "@/components/driver2/DriverMissionList";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
@@ -1111,7 +1112,7 @@ function ConvoyeurMissions() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
-        <p className="text-pro-text-soft text-xs mt-0.5">Tapez une mission pour voir le détail et le parcours étape par étape</p>
+        <p className="text-pro-text-soft text-xs mt-0.5">{missions.length} mission{missions.length > 1 ? "s" : ""} · touchez une mission pour le détail et le parcours</p>
       </div>
 
       {/* Search */}
@@ -1122,7 +1123,7 @@ function ConvoyeurMissions() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher (ville, immat, marque…)"
-          className="w-full pl-9 pr-3 py-2.5 bg-white border border-pro-border rounded-xl text-sm placeholder:text-pro-muted focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full pl-9 pr-3 py-3 bg-white border border-pro-border rounded-2xl text-sm shadow-sm placeholder:text-pro-muted focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
 
@@ -1147,7 +1148,6 @@ function ConvoyeurMissions() {
             )}
           </button>
         ))}
-        <MissionViewSwitcher view={view} onChange={setView} className="ml-auto shrink-0 self-center" />
       </div>
 
       {/* List */}
@@ -1161,20 +1161,13 @@ function ConvoyeurMissions() {
             <p className="text-pro-text-soft text-xs mt-1.5">{emptyMessages[filter].hint}</p>
           )}
         </div>
-      ) : view !== "list" ? (
-        <MissionViewsBody view={view} items={viewItems} />
       ) : (
-        <div className="space-y-3">
-          {filtered.map(m => (
-            <MissionCard
-              key={m.id}
-              mission={m}
-              showTarif={typeConvoyeur === "independant"}
-              isActive={m.id === activeMissionId}
-              onOpen={() => setOpenMissionId(m.id)}
-            />
-          ))}
-        </div>
+        <DriverMissionList
+          missions={filtered}
+          showTarif={typeConvoyeur === "independant"}
+          activeId={activeMissionId}
+          onOpen={setOpenMissionId}
+        />
       )}
     </div>
     </>
