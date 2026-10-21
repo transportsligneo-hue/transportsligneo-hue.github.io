@@ -333,8 +333,8 @@ export function MissionV3InfoPane({
                 transform={`rotate(-90 ${ring/2} ${ring/2})`} />
               <defs>
                 <linearGradient id="v3TlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2F6BFF" />
-                  <stop offset="100%" stopColor="#2FD8FF" />
+                  <stop offset="0%" stopColor="#14B866" />
+                  <stop offset="100%" stopColor="#4FE8A0" />
                 </linearGradient>
               </defs>
             </svg>

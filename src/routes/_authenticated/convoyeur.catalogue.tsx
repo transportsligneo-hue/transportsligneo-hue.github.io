@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +23,15 @@ import "@/styles/driver-v2.css";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/catalogue")({
   component: ConvoyeurCatalogue,
+  errorComponent: ({ error }) => (
+    <div className="drv2">
+      <div className="card" style={{ margin: 16, textAlign: "center" }}>
+        <p className="sm bold">Le catalogue n'a pas pu s'afficher</p>
+        <p className="tiny mut" style={{ marginTop: 8, wordBreak: "break-word" }}>{String((error as Error)?.message ?? error)}</p>
+        <button type="button" className="btn" style={{ marginTop: 14 }} onClick={() => window.location.reload()}>Réessayer</button>
+      </div>
+    </div>
+  ),
 });
 
 interface MyOffer {
@@ -440,7 +450,7 @@ function ConvoyeurCatalogue() {
         {geo.error && <div className="card" style={{ padding: 14, fontSize: 13, color: "#b91c1c" }}>Position indisponible : {geo.error}</div>}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin" size={26} /></div>
+          <DriverLoader label="Chargement du catalogue…" />
         ) : filtered.length === 0 ? (
           <div className="card" style={{ textAlign: "center", padding: 28 }}>
             <p className="sm semi">Aucune mission pour cette recherche.</p>

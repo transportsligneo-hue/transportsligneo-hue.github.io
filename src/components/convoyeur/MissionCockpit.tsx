@@ -30,6 +30,7 @@ import {
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
+import { geocodeAddress, haversineKm } from "@/lib/geocode";
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { DriverSelfieCapture, hasLocalSelfieDone, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
@@ -105,6 +106,8 @@ interface Props {
   arriveeVille?: string | null;
   /** Adresse complète de livraison, utilisée pour lancer Waze / Google Maps. */
   arriveeAdresse?: string | null;
+  /** Adresse complète d'enlèvement (contrôle de proximité 2 km). */
+  departAdresse?: string | null;
   activeTab?: "action" | "info" | "docs";
   onTabChange?: (tab: "action" | "info" | "docs") => void;
   infoSlot?: ReactNode;
@@ -131,6 +134,7 @@ export function MissionCockpit({
   departVille,
   arriveeVille,
   arriveeAdresse,
+  departAdresse,
   activeTab = "action",
   onTabChange,
   infoSlot,
@@ -341,6 +345,36 @@ export function MissionCockpit({
     }
   }
 
+  /** Le convoyeur doit être à moins de 2 km du lieu pour valider l'arrivée / lancer l'état des lieux. */
+  async function ensureNear(adresse: string | null | undefined, ville: string | null | undefined, lieu: string): Promise<boolean> {
+    const cible = adresse || ville;
+    if (!cible) return true; // aucune adresse connue : on ne bloque pas
+    const tid = toast.loading("Vérification de votre position…");
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        if (typeof navigator === "undefined" || !navigator.geolocation) return reject(new Error("no-geo"));
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 });
+      });
+      const g = await geocodeAddress(cible);
+      if (!g) return true; // adresse introuvable : on ne bloque pas sur une erreur de notre côté
+      const km = haversineKm({ lat: pos.coords.latitude, lng: pos.coords.longitude }, { lat: g.lat, lng: g.lng });
+      if (km > 2) {
+        toast.error(`Vous êtes à ${km < 10 ? km.toFixed(1) : Math.round(km)} km du ${lieu}`, {
+          description: "Rapprochez-vous à moins de 2 km pour continuer.",
+        });
+        return false;
+      }
+      return true;
+    } catch {
+      toast.error("Position introuvable", {
+        description: "Activez la localisation de votre téléphone pour confirmer votre arrivée.",
+      });
+      return false;
+    } finally {
+      toast.dismiss(tid);
+    }
+  }
+
   async function handleAdvance() {
     setBusy(true);
     try {
@@ -350,9 +384,11 @@ export function MissionCockpit({
           setOpenSelfie(true);
           break;
         case "edl_depart":
+          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement"))) break;
           onStartInspection("depart");
           break;
         case "edl_arrivee":
+          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison"))) break;
           onStartInspection("arrivee");
           break;
         case "demarrer":
@@ -369,6 +405,7 @@ export function MissionCockpit({
           await Promise.resolve(onUpdated());
           break;
         case "arrive_depart":
+          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement"))) break;
           await persistEtape("sur_place");
           await Promise.resolve(onUpdated());
           // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
@@ -385,6 +422,7 @@ export function MissionCockpit({
           if (arriveeAdresse || arriveeVille) setOpenNavChoice(true);
           break;
         case "arrive_livraison":
+          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison"))) break;
           await persistEtape("arrive_destination");
           await Promise.resolve(onUpdated());
           // Pas d'ouverture automatique : le conducteur déclenche l'EDL d'arrivée
@@ -479,7 +517,7 @@ export function MissionCockpit({
 
   return (
     <>
-      <div className="mv3-root">
+      <div className="drv2"><div className="mv3-root">
         <style>{`
           .mv3-root { font-family: 'Inter', sans-serif; color: #EAF3FF;
             border-radius: 26px; overflow: hidden; position: relative; isolation: isolate;
@@ -601,11 +639,6 @@ export function MissionCockpit({
           .mv3-hero-route-city { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; }
           .mv3-hero-route-arrow { color: #2FD8FF; font-weight: 800; flex-shrink: 0; }
 
-          .mv3-logo50 { position: relative; width: 132px; flex-shrink: 0; aspect-ratio: 912 / 865; }
-          .mv3-logo50 img { width: 100%; height: 100%; display: block; }
-          .mv3-logo50-pct { position: absolute; left: 52.4%; top: 18.3%; transform: translate(-50%, -50%);
-            font-weight: 900; font-size: 19px; letter-spacing: .01em; color: #41f0a4; white-space: nowrap; line-height: 1;
-            text-shadow: 0 0 8px rgba(65,240,164,.75), 0 0 18px rgba(65,240,164,.4); font-variant-numeric: tabular-nums; }
           .mv3-tabs { display: flex; gap: 8px; padding: 0 14px; margin-top: 6px; position: relative; z-index: 1; }
           .mv3-tab { flex: 1; padding: 11px 12px; border-radius: 14px;
             background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.12);
@@ -631,9 +664,23 @@ export function MissionCockpit({
             </div>
           </div>
           <div className="mv3-hero-mid">
-            <div className="mv3-logo50" aria-label={`Mission terminée à ${progressPct} %`}>
-              <img src={logo50} alt="" />
-              <span className="mv3-logo50-pct">{progressPct}&nbsp;%</span>
+            <div className="mv3-ring-wrap" style={{ width: ringSize, height: ringSize }}>
+              <svg width={ringSize} height={ringSize}>
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="rgba(255,255,255,0.07)" strokeWidth={ringStroke} fill="none" />
+                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="url(#mv3RingGrad)" strokeWidth={ringStroke} fill="none"
+                  strokeDasharray={ringC} strokeDashoffset={ringC - ringPct * ringC} strokeLinecap="round"
+                  transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`} className="mv3-ring-progress" />
+                <defs>
+                  <linearGradient id="mv3RingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#14B866" />
+                    <stop offset="100%" stopColor="#4FE8A0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="mv3-ring-label">
+                <span className="mv3-ring-num">{Math.min(visualIdx + 1, totalVisual)}</span>
+                <span className="mv3-ring-den">/ {totalVisual} étapes</span>
+              </div>
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div className="mv3-hero-title">{currentDef.label}</div>
@@ -652,23 +699,19 @@ export function MissionCockpit({
             </div>
           </div>
 
-          <svg viewBox="0 0 320 64" className="mv3-road-svg" preserveAspectRatio="none">
-            <path d="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C280,44 290,20 314,20"
-              fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3" strokeLinecap="round" />
-            <path d="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C280,44 290,20 314,20"
-              fill="none" stroke="url(#mv3RoadGrad)" strokeWidth="3" strokeLinecap="round"
-              strokeDasharray="440" strokeDashoffset={440 - ringPct * 440} className="mv3-road-fill" />
-            <defs>
-              <linearGradient id="mv3RoadGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#2F6BFF" />
-                <stop offset="100%" stopColor="#2FD8FF" />
-              </linearGradient>
-            </defs>
-            <circle r="5.5" fill="#2FD8FF">
-              <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto"
-                path="M6,52 C60,52 60,12 120,12 C180,12 180,44 240,44 C290,20 314,20 314,20" keyPoints="0;0.28" keyTimes="0;1" />
-            </circle>
-          </svg>
+          <div className="road">
+            <div className="road-top">
+              <span><MapPin size={13} /> {departVille ?? " "}</span>
+              <span>{arriveeVille ?? " "} <Flag size={13} /></span>
+            </div>
+            <div className="road-track">
+              <div className="road-fill" style={{ width: `${Math.max(progressPct, 8)}%` }} />
+              <span className="road-logo" style={{ left: `${Math.min(Math.max(progressPct, 14), 90)}%` }}>
+                <img src={logo50} alt="" />
+                <b>{progressPct}&nbsp;%</b>
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* TABS */}
@@ -709,8 +752,8 @@ export function MissionCockpit({
                     transform={`rotate(-90 ${badgeSize / 2} ${badgeSize / 2})`} className="mv3-badge-ring-progress" />
                   <defs>
                     <linearGradient id="mv3BadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#2F6BFF" />
-                      <stop offset="100%" stopColor="#2FD8FF" />
+                      <stop offset="0%" stopColor="#14B866" />
+                      <stop offset="100%" stopColor="#4FE8A0" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -810,6 +853,7 @@ export function MissionCockpit({
             <div className="mv3-slot">{docsSlot}</div>
           )}
         </div>
+      </div>
       </div>
 
       {openNavChoice && (arriveeAdresse || arriveeVille) && (

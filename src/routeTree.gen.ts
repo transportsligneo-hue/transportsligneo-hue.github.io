@@ -210,6 +210,7 @@ import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksRappelMissionJ1RouteImport } from './routes/api/public/hooks/rappel-mission-j1'
+import { Route as ApiPublicHooksRetardMissionRouteImport } from './routes/api/public/hooks/retard-mission'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
@@ -1358,6 +1359,12 @@ const ApiPublicHooksRappelMissionJ1Route =
     path: '/api/public/hooks/rappel-mission-j1',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRetardMissionRoute =
+  ApiPublicHooksRetardMissionRouteImport.update({
+    id: '/api/public/hooks/retard-mission',
+    path: '/api/public/hooks/retard-mission',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
@@ -1652,6 +1659,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
+  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -1862,6 +1870,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
+  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -2083,6 +2092,7 @@ export interface FileRoutesById {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
+  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
@@ -2304,6 +2314,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
+    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2514,6 +2525,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
+    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2734,6 +2746,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
+    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
@@ -2836,6 +2849,7 @@ export interface RootRouteChildren {
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicHooksRappelMissionJ1Route: typeof ApiPublicHooksRappelMissionJ1Route
+  ApiPublicHooksRetardMissionRoute: typeof ApiPublicHooksRetardMissionRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
@@ -4263,6 +4277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRappelMissionJ1RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/retard-mission': {
+      id: '/api/public/hooks/retard-mission'
+      path: '/api/public/hooks/retard-mission'
+      fullPath: '/api/public/hooks/retard-mission'
+      preLoaderRoute: typeof ApiPublicHooksRetardMissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/scan/handoff-extract': {
       id: '/api/public/scan/handoff-extract'
       path: '/api/public/scan/handoff-extract'
@@ -4966,6 +4987,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicHooksRappelMissionJ1Route: ApiPublicHooksRappelMissionJ1Route,
+  ApiPublicHooksRetardMissionRoute: ApiPublicHooksRetardMissionRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,

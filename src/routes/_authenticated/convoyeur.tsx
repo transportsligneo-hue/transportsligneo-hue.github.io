@@ -1,4 +1,5 @@
 import { UserMfaGate } from "@/components/security/UserMfaGate";
+import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -55,17 +56,13 @@ function ConvoyeurLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
-        <Loader2 className="animate-spin text-emerald-600" size={32} />
-      </div>
+      <DriverLoader full />
     );
   }
 
   if (!isAuthenticated || (role && role !== "convoyeur")) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-pro-bg">
-        <Loader2 className="animate-spin text-emerald-600" size={32} />
-      </div>
+      <DriverLoader full />
     );
   }
 

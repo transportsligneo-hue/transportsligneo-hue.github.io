@@ -1,3 +1,4 @@
+import { useSnappedTrail } from "./snap-trail";
 import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -109,6 +110,16 @@ async function fetchRoute(a: LL, b: LL): Promise<Array<[number, number]>> {
   } catch {
     /* fallback */
   }
+  try {
+    const r = await fetch(
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`,
+    );
+    const d = await r.json();
+    const coords = d?.routes?.[0]?.geometry?.coordinates as [number, number][] | undefined;
+    if (coords?.length) return coords.map(([lng, lat]) => [lat, lng] as [number, number]);
+  } catch {
+    /* ligne directe en dernier recours */
+  }
   return [
     [a.lat, a.lng],
     [b.lat, b.lng],
@@ -182,6 +193,7 @@ export function MapboxLiveMap({
 
   const [places, setPlaces] = useState<{ a: LL | null; b: LL | null }>({ a: null, b: null });
   const [route, setRoute] = useState<Array<[number, number]>>([]);
+  const snappedTrail = useSnappedTrail(points);
   const [milestone, setMilestone] = useState<NextMilestone | null>(null);
   // Tick pour rafraîchir la fraîcheur du signal sans recharger la page
   const [nowTs, setNowTs] = useState(() => Date.now());
@@ -517,7 +529,7 @@ export function MapboxLiveMap({
     (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? metrics.done : []));
 
     // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
-    const trail = points.map((p) => [p.latitude, p.longitude] as [number, number]);
+    const trail = snappedTrail;
     (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(
       lineFeature(trail.length >= 2 ? trail : []),
     );
@@ -529,7 +541,7 @@ export function MapboxLiveMap({
       trail.forEach(([lat, lng]) => b.extend([lng, lat]));
       map.fitBounds(b, { padding: 60, duration: 0, maxZoom: 14 });
     }
-  }, [metrics, route, points, ready, signalLost]);
+  }, [metrics, route, points, snappedTrail, ready, signalLost]);
 
   // ——— Véhicule : interpolation fluide + rotation
   useEffect(() => {

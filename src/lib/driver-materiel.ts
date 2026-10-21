@@ -2,9 +2,9 @@
 export const VEHICULE_TYPES: Array<{ key: string; label: string; icon: string }> = [
   { key: "plateau", label: "Camion plateau", icon: "ramp" },
   { key: "plateau_rem", label: "Plateau remorque", icon: "ramp" },
-  { key: "porteur", label: "Porte-voitures", icon: "truck" },
+  { key: "porteur_35", label: "Porte-voitures 3,5 t", icon: "truck" },
+  { key: "porteur_35p", label: "Porte-voitures +3,5 t", icon: "truck" },
   { key: "remorque", label: "Remorque", icon: "link2" },
-  { key: "fourgon", label: "Fourgon", icon: "truck" },
   { key: "wg", label: "Plaque W Garage", icon: "plateW" },
 ];
 

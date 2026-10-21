@@ -8,7 +8,7 @@ import utilitaire from "@/assets/driver-v2/cat-utilitaire.png";
 import fourgon from "@/assets/driver-v2/cat-fourgon.png";
 
 const CATIMG: Record<VehicleCategory, string> = { Citadine: citadine, Berline: berline, SUV: suv, Utilitaire: utilitaire, Fourgon: fourgon };
-export const shortCity = (x: string) => String(x).split(",").pop()!.trim();
+export const shortCity = (x?: string | null) => String(x ?? "").split(",").pop()!.trim();
 
 /** Pastille de catégorie du véhicule (éclair si électrique). */
 export function VehicleTile({ marque, modele, ev }: { marque?: string | null; modele?: string | null; ev: boolean }) {
@@ -58,7 +58,9 @@ export function MissionChips({ ev, categorie, carburant, miseEnMain, requis }: {
 }
 
 /** Mini-carte décorative du trajet (mêmes tracés que l'appli validée). */
-export function RouteMap({ dep, arr, km, near }: { dep: string; arr: string; km?: number | null; near?: number | null }) {
+export function RouteMap({ dep: depIn, arr: arrIn, km, near }: { dep?: string | null; arr?: string | null; km?: number | null; near?: number | null }) {
+  const dep = depIn ?? "";
+  const arr = arrIn ?? "";
   const id = `rm${dep.length}${arr.length}${Math.round(km ?? 0)}`;
   const pill: React.CSSProperties = { position: "absolute", fontSize: 10.5, fontWeight: 800, background: "rgba(255,255,255,.92)", border: "1px solid var(--line)", borderRadius: 999, padding: "2px 9px" };
   return (

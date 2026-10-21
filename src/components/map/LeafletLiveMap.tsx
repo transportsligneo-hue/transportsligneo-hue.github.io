@@ -1,3 +1,4 @@
+import { useSnappedTrail } from "./snap-trail";
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -119,6 +120,16 @@ async function fetchRoute(a: LL, b: LL): Promise<Array<[number, number]>> {
     if (!coords?.length) throw new Error("empty");
     return coords.map(([lng, lat]) => [lat, lng] as [number, number]);
   } catch {
+    try {
+      const r2 = await fetch(
+        `https://routing.openstreetmap.de/routed-car/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`,
+      );
+      const d2 = await r2.json();
+      const c2 = d2?.routes?.[0]?.geometry?.coordinates as [number, number][] | undefined;
+      if (c2?.length) return c2.map(([lng, lat]) => [lat, lng] as [number, number]);
+    } catch {
+      /* ligne directe en dernier recours */
+    }
     return [
       [a.lat, a.lng],
       [b.lat, b.lng],
@@ -153,6 +164,7 @@ export function LeafletLiveMap({
 
   const [places, setPlaces] = useState<{ a: LL | null; b: LL | null }>({ a: null, b: null });
   const [route, setRoute] = useState<Array<[number, number]>>([]);
+  const snappedTrail = useSnappedTrail(points);
 
   const last = points.length ? points[points.length - 1] : null;
   const [nowTs, setNowTs] = useState(() => Date.now());
@@ -383,14 +395,14 @@ export function LeafletLiveMap({
       trailLineRef.current = null;
       return;
     }
-    const coords = points.map((p) => [p.latitude, p.longitude] as [number, number]);
+    const coords = snappedTrail;
     if (!trailLineRef.current) {
       trailLineRef.current = L.polyline(coords, {
         color: BRAND, weight: 5, opacity: 1, lineCap: "round", lineJoin: "round",
       }).addTo(map);
     } else trailLineRef.current.setLatLngs(coords);
     trailLineRef.current.bringToFront();
-  }, [points]);
+  }, [points, snappedTrail]);
 
   // ——— Marqueur véhicule : interpolation douce + rotation
   useEffect(() => {

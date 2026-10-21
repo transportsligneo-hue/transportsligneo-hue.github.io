@@ -185,14 +185,9 @@ function ConvoyeurDashboard() {
               <span className="eyebrow sp">Prochaine mission</span>
               {when && <span className="chipx"><Ic n="clock" s={12} /> {when}</span>}
             </div>
-            <div className="rt">
-              <div className="dots"><i /><u /><i /></div>
-              <div className="sp">
-                <p className="semi trunc" style={{ fontSize: 14.5 }}>{t.depart}</p>
-                <p className="tiny mut" style={{ margin: "2px 0 14px" }}>Enlèvement</p>
-                <p className="semi trunc" style={{ fontSize: 14.5 }}>{t.arrivee}</p>
-                <p className="tiny mut" style={{ marginTop: 2 }}>Livraison</p>
-              </div>
+            <div className="nmr">
+              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Enlèvement</small><b>{t.depart}</b></div></div>
+              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Livraison</small><b>{t.arrivee}</b></div></div>
             </div>
             <div className="row" style={{ marginTop: 14, gap: 8 }}>
               {(t.marque || t.modele) && <span className="chipx"><Ic n="car" s={12} /> {[t.marque, t.modele].filter(Boolean).join(" ")}</span>}

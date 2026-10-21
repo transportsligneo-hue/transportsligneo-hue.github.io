@@ -98,7 +98,7 @@ export function CatalogueMissionCard({
   onQuickApply,
   onAuction,
 }: Props) {
-  const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
+  const price = Number(t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0) || 0;
   const isAR = Boolean(t.isGroupedAr || (!!t.leg_type && t.leg_type !== "simple"));
   const urgent = t.urgence === "immediat" || t.urgence === "urgent";
   const fresh = t.published_at ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000 : false;

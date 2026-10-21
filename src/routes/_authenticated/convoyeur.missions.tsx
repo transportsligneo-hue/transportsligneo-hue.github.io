@@ -20,6 +20,7 @@ import { MissionCockpit } from "@/components/convoyeur/MissionCockpit";
 import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCockpit";
 import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
+import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { MissionChatPanel } from "@/components/chat/MissionChatPanel";
@@ -643,9 +644,7 @@ function ConvoyeurMissions() {
 
   if (loading) {
     return inspectionOverlay ?? nonRoulantOverlay ?? (
-      <div className="min-h-[60vh] flex items-center justify-center bg-[#050a1f]">
-        <Loader2 className="animate-spin text-[#d4af37]" size={24} />
-      </div>
+      <DriverLoader label="Ouverture de la mission…" />
     );
   }
 
@@ -1032,6 +1031,7 @@ function ConvoyeurMissions() {
             departVille={dep.ville}
             arriveeVille={arr.ville}
             arriveeAdresse={t?.arrivee ?? null}
+            departAdresse={t?.depart ?? null}
             activeTab={detailTab}
             onTabChange={setDetailTab}
             infoSlot={infoSlot}

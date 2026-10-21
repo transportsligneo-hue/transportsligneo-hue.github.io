@@ -62,10 +62,10 @@ interface DocItem {
 
 
 const ACCENT: Record<DocItem["accent"], { bg: string; border: string; color: string }> = {
-  green: { bg: "rgba(52,232,176,0.10)", border: "rgba(52,232,176,0.35)", color: "#34E8B0" },
-  amber: { bg: "rgba(255,182,72,0.10)", border: "rgba(255,182,72,0.35)", color: "#FFB648" },
-  pink:  { bg: "rgba(255,80,110,0.10)", border: "rgba(255,80,110,0.35)", color: "#FF6B85" },
-  cyan:  { bg: "rgba(47,216,255,0.10)", border: "rgba(47,216,255,0.35)", color: "#2FD8FF" },
+  green: { bg: "rgba(20,184,102,0.12)", border: "rgba(20,184,102,0.35)", color: "#0b9a5a" },
+  amber: { bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.38)", color: "#b9740a" },
+  pink:  { bg: "rgba(236,72,99,0.10)", border: "rgba(236,72,99,0.35)", color: "#d43a5a" },
+  cyan:  { bg: "rgba(20,184,102,0.12)", border: "rgba(20,184,102,0.35)", color: "#0b9a5a" },
 };
 
 const STATUS_LABEL: Record<DocStatus, string> = {
