@@ -39,9 +39,13 @@ import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/docum
 
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
+import { RetourBlock } from "@/components/driver2/RetourBlock";
+import "@/styles/driver-v2.css";
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import {
   EDL_PREMIUM_SEQUENCE,
+  ARRIVEE_SIGNATURE_STEPS,
+  EDL_RECAP_STEP,
   EDL_TOTAL_STEPS,
   EDL_SECTION_LABEL,
   type EdlStepDef,
@@ -63,6 +67,8 @@ interface Props {
   vehicule?: VehiculeInfo;
   /** Pour signatures client : nom à afficher par défaut */
   defaultClientName?: string;
+  /** Adresse de livraison : point de départ du bloc « Préparer mon retour » (EDL d'arrivée). */
+  livraison?: string;
   onComplete: () => void;
   onClose: () => void;
 }
@@ -191,7 +197,7 @@ function newCaptureId() {
 }
 
 export function EdlPremiumFlow({
-  attributionId, type, userId, driverName, defaultClientName, vehicule,
+  attributionId, type, userId, driverName, defaultClientName, vehicule, livraison,
   onComplete, onClose,
 }: Props) {
   // Carburant véhicule (depuis attribution → trajet → demande). Sert à filtrer
@@ -256,15 +262,23 @@ export function EdlPremiumFlow({
       if (step.id === "kilometrage_arrivee" && type !== "arrivee") return false;
       return true;
     });
-    if (type !== "arrivee") return base;
-    // ARRIVÉE : on commence par le compteur (kilométrage saisi + photo compteur),
-    // puis le câble électrique s'il y a lieu, avant le tour du véhicule.
-    const priority = ["kilometrage_arrivee", "compteur", "cable_electrique"];
-    const head = priority
-      .map((id) => base.find((s) => s.id === id))
-      .filter((s): s is EdlStepDef => Boolean(s));
-    const rest = base.filter((s) => !head.includes(s));
-    return [...head, ...rest];
+    if (type !== "arrivee") return [...base, { ...EDL_RECAP_STEP, phase: "depart" as const }];
+    // ARRIVÉE (même ordre que l'appli validée) : tour du véhicule, photos libres,
+    // carte grise, PV de livraison, puis les deux signatures juste après le PV,
+    // le kilométrage, et le récapitulatif. Le selfie final et l'envoi à l'admin
+    // viennent ensuite, depuis la mission.
+    const LATE = ["photos_libres_degats", "carte_grise", "pv_livraison", "kilometrage_arrivee"];
+    const pick = (id: string) => base.find((x) => x.id === id);
+    const tour = base.filter((x) => !LATE.includes(x.id));
+    const tail = [
+      pick("photos_libres_degats"),
+      pick("carte_grise"),
+      pick("pv_livraison"),
+      ...ARRIVEE_SIGNATURE_STEPS,
+      pick("kilometrage_arrivee"),
+      { ...EDL_RECAP_STEP, phase: "arrivee" as const },
+    ].filter((x): x is EdlStepDef => Boolean(x));
+    return [...tour, ...tail];
   }, [type, isElectric]);
   const TOTAL = STEPS.length;
 
@@ -352,7 +366,7 @@ export function EdlPremiumFlow({
 
   const currentStep = STEPS[safeIndex];
   const currentState = currentStep ? states[currentStep.id] : undefined;
-  const completed = STEPS.filter(s => states[s.id]?.status === "success").length;
+  const completed = STEPS.filter(s => (s.id === "edl_recap" ? safeIndex === TOTAL - 1 : states[s.id]?.status === "success")).length;
   const progressPct = TOTAL > 0 ? Math.round((completed / TOTAL) * 100) : 0;
 
   // === Persistence
@@ -1274,7 +1288,7 @@ export function EdlPremiumFlow({
     const s = currentState?.status;
     if (currentStep.kind === "extras") return true;
     // Étape finale "admin_validated" : on autorise toujours à terminer le parcours côté driver.
-    if (currentStep.kind === "validation" && currentStep.id === "admin_validated") {
+    if (currentStep.kind === "validation" && (currentStep.id === "admin_validated" || currentStep.id === "edl_recap")) {
       return true;
     }
     if (isStepBypassed(currentStep)) return true;
@@ -1638,6 +1652,7 @@ export function EdlPremiumFlow({
               state={currentState}
               vehicule={vehicule}
               onTrigger={handleValidationStep}
+              retour={type === "arrivee" ? { livraison: livraison ?? "", electrique: isElectric } : undefined}
             />
           )}
 
@@ -1719,7 +1734,7 @@ export function EdlPremiumFlow({
             {completing
               ? "Finalisation…"
               : safeIndex === TOTAL - 1
-                ? "Terminer la mission"
+                ? "Terminer l'état des lieux"
                 : currentStep.kind === "photo" || currentStep.kind === "scan"
                   ? "Photo suivante"
                   : "Étape suivante"}
@@ -2125,10 +2140,40 @@ function SignatureArea({
 }
 
 function ValidationArea({
-  step, state, vehicule, onTrigger,
-}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void }) {
+  step, state, vehicule, onTrigger, retour,
+}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void; retour?: { livraison: string; electrique: boolean } }) {
   const done = state?.status === "success";
   const vehTitle = [vehicule?.marque, vehicule?.modele].filter(Boolean).join(" ");
+
+  // Récapitulatif de fin d'EDL : aucune mention de l'admin (le selfie final et l'envoi viennent après).
+  if (step.id === "edl_recap") {
+    return (
+      <div className="space-y-3">
+        <div className="edl-glass p-4 space-y-2">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold">Véhicule inspecté</p>
+          {vehTitle && <p className="text-sm font-semibold text-white">{vehTitle}</p>}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-[var(--edl-text-soft)]">Plaque</span>
+            <span className="text-sm font-bold text-white tabular-nums" style={{ opacity: vehicule?.immatriculation ? 1 : 0.45 }}>
+              {vehicule?.immatriculation || "Non renseignée"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-[var(--edl-text-soft)]">VIN</span>
+            <span className="text-sm font-semibold text-white truncate" style={{ opacity: vehicule?.vin ? 1 : 0.45 }}>
+              {vehicule?.vin || "Non renseigné"}
+            </span>
+          </div>
+        </div>
+        {retour && (
+          <div className="edl-glass ret-edl p-4">
+            <p className="text-sm font-bold text-white mb-3">Préparer mon retour</p>
+            <RetourBlock livraison={retour.livraison} electrique={retour.electrique} />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (step.id === "admin_validated") {
     return (

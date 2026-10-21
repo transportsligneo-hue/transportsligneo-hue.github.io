@@ -20,6 +20,7 @@ import tq_arriere_droit from "@/assets/edl/05-3q-arriere-droit.jpg";
 import jante_ar_droite from "@/assets/edl/06-jante-arriere-droite.jpg";
 import face_arriere from "@/assets/edl/07-face-arriere.jpg";
 import coffre_ouvert from "@/assets/edl/08-coffre-ouvert.jpg";
+import cable_exemple from "@/assets/edl/09b-cable-electrique.jpg";
 import tq_arriere_gauche from "@/assets/edl/09-3q-arriere-gauche.jpg";
 import jante_ar_gauche from "@/assets/edl/10-jante-arriere-gauche.jpg";
 import jante_av_gauche from "@/assets/edl/12-jante-avant-gauche.jpg";
@@ -103,6 +104,7 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
   // Conditionnel : véhicule électrique uniquement
   { num: 9, id: "cable_electrique", kind: "photo", section: "exterieur", phase: "depart",
     label: "Câble électrique", hint: "Photo du/des câble(s) de recharge fournis avec le véhicule",
+    example: cable_exemple,
     electricOnly: true },
 
   { num: 10, id: "trois_quart_arriere_gauche", kind: "photo", section: "exterieur", phase: "depart",
@@ -123,11 +125,11 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
 
   // ─── Intérieur ───
   { num: 14, id: "siege_avant", kind: "photo", section: "interieur", phase: "depart",
-    label: "Siège avant", hint: "Tableau de bord + sièges avant",
+    label: "Siège avant", hint: "Les deux sièges avant, vus depuis la porte conducteur ouverte",
     example: interieur_avant },
 
   { num: 15, id: "siege_arriere", kind: "photo", section: "interieur", phase: "depart",
-    label: "Siège arrière", hint: "Banquette arrière",
+    label: "Siège arrière", hint: "La banquette arrière, vue depuis la porte arrière ouverte",
     example: interieur_arriere },
 
   { num: 16, id: "compteur", kind: "photo", section: "interieur", phase: "depart",
@@ -143,11 +145,11 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
 
   // ─── Documents · scan auto OCR ───
   { num: 18, id: "pv_livraison", kind: "scan", section: "documents", phase: "depart",
-    label: "PV restitution et livraison", hint: "Cadrez le document, contours détectés automatiquement",
+    label: "PV de livraison", hint: "Scannez le PV de livraison que le client vient de signer sur papier",
     example: pv_livraison },
 
   { num: 19, id: "carte_grise", kind: "scan", section: "documents", phase: "depart",
-    label: "Carte grise", hint: "Cadrez la carte grise, OCR automatique",
+    label: "Carte grise", hint: "Scannez la carte grise du véhicule, ou la photocopie remise par le client",
     example: carte_grise },
 
   { num: 20, id: "photos_libres_degats", kind: "extras", section: "documents", phase: "depart",
@@ -191,6 +193,16 @@ export const ARRIVEE_SIGNATURE_STEPS: EdlStepDef[] = [
     label: "Signature arrivée · client final",
     hint: "Faites signer le réceptionnaire" },
 ];
+
+/**
+ * Dernière étape de chaque EDL : récapitulatif (plaque, VIN) puis « Terminer l'état des lieux ».
+ * Aucune mention de l'admin ici : le selfie final et l'envoi à l'admin se font ensuite, depuis la mission.
+ */
+export const EDL_RECAP_STEP: EdlStepDef = {
+  num: 99, id: "edl_recap", kind: "validation", section: "cloture", phase: "depart",
+  label: "Récapitulatif de l'état des lieux",
+  hint: "Contrôle final avant de continuer",
+};
 
 export const EDL_TOTAL_STEPS = EDL_PREMIUM_SEQUENCE.length;
 

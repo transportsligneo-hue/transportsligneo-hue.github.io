@@ -6,7 +6,6 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   prepareHandoverCode,
   validateHandoverCode,
-  confirmHandoverGiven,
   skipHandoverCode,
 } from "@/lib/handover-code.functions";
 
@@ -19,18 +18,15 @@ interface Props {
 
 /**
  * Code de remise (type Uber).
- * - depart : le convoyeur lit le code affiché à la personne qui lui remet les clés.
- * - arrivee : le client donne son code (reçu par SMS/e-mail), le convoyeur le tape.
+ * Dans les deux cas le client donne son code (reçu par SMS/e-mail), le convoyeur le tape.
  */
 export function HandoverCodeGate({ attributionId, kind, onPassed, onClose }: Props) {
   const prepare = useServerFn(prepareHandoverCode);
   const validate = useServerFn(validateHandoverCode);
-  const confirm = useServerFn(confirmHandoverGiven);
   const skip = useServerFn(skipHandoverCode);
 
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [code, setCode] = useState<string | null>(null);
   const [sentVia, setSentVia] = useState<"sms" | "email" | null>(null);
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +39,6 @@ export function HandoverCodeGate({ attributionId, kind, onPassed, onClose }: Pro
         const r: any = await prepare({ data: { attributionId, kind } });
         if (!alive) return;
         if (r.done) { onPassed(); return; }
-        setCode(r.code ?? null);
         setSentVia(r.sentVia ?? null);
       } catch (e) {
         console.warn("[handover] prepare failed", e);
@@ -68,13 +63,6 @@ export function HandoverCodeGate({ attributionId, kind, onPassed, onClose }: Pro
     setBusy(false);
   };
 
-  const doConfirmGiven = async () => {
-    setBusy(true);
-    try { await confirm({ data: { attributionId, kind } }); onPassed(); }
-    catch { toast.error("Erreur, réessaie"); }
-    setBusy(false);
-  };
-
   const doValidate = async () => {
     setBusy(true); setError(null);
     try {
@@ -95,28 +83,11 @@ export function HandoverCodeGate({ attributionId, kind, onPassed, onClose }: Pro
       </div>
       {loading ? (
         <div className="flex-1 grid place-items-center"><Loader2 className="animate-spin" /></div>
-      ) : kind === "depart" ? (
-        <>
-          <h2 className="text-xl font-bold">Donne ce code à la personne qui te remet les clés</h2>
-          <div className="text-center text-6xl font-extrabold tracking-[0.25em] bg-blue-50 text-blue-700 rounded-2xl py-6">
-            {code ?? "----"}
-          </div>
-          <p className="text-sm text-slate-600">
-            {sentVia
-              ? `Elle a reçu le même code ${via}. Si les deux codes sont identiques, c'est bien toi.`
-              : "Aucun mobile ni e-mail pour envoyer le code : donne-le oralement et préviens l'admin si besoin."}
-          </p>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button disabled={busy || !code} onClick={doConfirmGiven}
-            className="bg-blue-600 text-white rounded-xl py-3 font-bold disabled:opacity-50">
-            J'ai donné le code → commencer l'état des lieux
-          </button>
-        </>
       ) : (
         <>
-          <h2 className="text-xl font-bold">Demande le code de livraison au client</h2>
+          <h2 className="text-xl font-bold">{kind === "depart" ? "Demande le code d'enlèvement au client" : "Demande le code de livraison au client"}</h2>
           <p className="text-sm text-slate-600">
-            {sentVia ? `Le client a reçu un code à 4 chiffres ${via}.` : "Aucun mobile ni e-mail disponible pour envoyer le code."}
+            {sentVia ? `Le client a reçu un code à 4 chiffres ${via}. Un e-mail de confirmation lui sera envoyé dès que tu le valides.` : "Aucun mobile ni e-mail disponible pour envoyer le code."}
           </p>
           <input
             inputMode="numeric" maxLength={4} value={typed} disabled={locked}
