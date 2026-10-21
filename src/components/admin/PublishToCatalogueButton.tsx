@@ -19,6 +19,13 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
   const [allowCounter, setAllowCounter] = useState(true);
   const [expiresH, setExpiresH] = useState(168);
   const [busy, setBusy] = useState(false);
+  const [equip, setEquip] = useState<string[]>([]);
+  const [carburant, setCarburant] = useState<"rembourse" | "plein">("rembourse");
+  const [miseEnMain, setMiseEnMain] = useState(false);
+  const [auction, setAuction] = useState(false);
+  const [plafond, setPlafond] = useState("");
+  const [auctionH, setAuctionH] = useState(48);
+  const [rankVisible, setRankVisible] = useState(true);
 
   const submit = async () => {
     setBusy(true);
@@ -27,8 +34,20 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
       _allow_counter_offer: allowCounter,
       _expires_in_hours: expiresH,
     });
+    if (error) { setBusy(false); toast.error(error.message); return; }
+    // Options du catalogue (équipements, carburant, enchère) : colonnes ajoutées par la migration driver v2
+    const db = supabase as unknown as { from: (t: string) => any };
+    const { error: e2 } = await db.from("trajets").update({
+      equipements_requis: equip,
+      carburant_mode: carburant,
+      mise_en_main: miseEnMain,
+      enchere_active: auction,
+      enchere_plafond: auction && plafond ? Number(plafond) : null,
+      enchere_fin: auction ? new Date(Date.now() + auctionH * 3600_000).toISOString() : null,
+      enchere_classement_visible: rankVisible,
+    }).eq("id", trajetId);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (e2) { toast.error(e2.message); return; }
     toast.success("Mission publiée au catalogue");
     setOpen(false);
     onDone?.();
@@ -66,6 +85,42 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
             <label className="block text-xs font-semibold text-pro-text-soft mb-1">Durée d'affichage (heures)</label>
             <input type="number" min={1} value={expiresH} onChange={(e) => setExpiresH(Number(e.target.value))}
               className="w-full mb-4 px-3 py-2 rounded-lg border border-pro-border text-sm" />
+
+            <p className="text-xs font-semibold text-pro-text-soft mb-1">Équipement exigé</p>
+            <div className="flex flex-wrap gap-3 mb-3 text-sm">
+              {([["plateau", "Plateau"], ["wg", "W Garage"], ["elec", "Câble recharge"]] as const).map(([k, l]) => (
+                <label key={k} className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={equip.includes(k)} onChange={() => setEquip((q) => q.includes(k) ? q.filter((x) => x !== k) : [...q, k])} />{l}
+                </label>
+              ))}
+            </div>
+            <label className="block text-xs font-semibold text-pro-text-soft mb-1">Carburant</label>
+            <select value={carburant} onChange={(e) => setCarburant(e.target.value as "rembourse" | "plein")}
+              className="w-full mb-3 px-3 py-2 rounded-lg border border-pro-border text-sm">
+              <option value="rembourse">Carburant remboursé</option>
+              <option value="plein">Plein fourni</option>
+            </select>
+            <label className="flex items-center gap-2 mb-3 text-sm">
+              <input type="checkbox" checked={miseEnMain} onChange={(e) => setMiseEnMain(e.target.checked)} />
+              <span>Mise en main au client</span>
+            </label>
+            <label className="flex items-center gap-2 mb-2 text-sm font-semibold">
+              <input type="checkbox" checked={auction} onChange={(e) => setAuction(e.target.checked)} />
+              <span>Mission en enchère</span>
+            </label>
+            {auction && (
+              <div className="mb-4 space-y-2 pl-6">
+                <input type="number" min={0} placeholder="Plafond (€), vide = prix +25 %" value={plafond} onChange={(e) => setPlafond(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-pro-border text-sm" />
+                <input type="number" min={1} value={auctionH} onChange={(e) => setAuctionH(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-lg border border-pro-border text-sm" />
+                <p className="text-[11px] text-pro-text-soft">Durée de l'enchère en heures</p>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={rankVisible} onChange={(e) => setRankVisible(e.target.checked)} />
+                  <span>Afficher le classement aux convoyeurs</span>
+                </label>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <button onClick={() => setOpen(false)} className="flex-1 px-4 py-2 rounded-lg border border-pro-border text-sm">Annuler</button>
