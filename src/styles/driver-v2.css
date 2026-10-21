@@ -2533,3 +2533,28 @@ html.theme-dark .rcp-card{background:#0f2a22;border-color:rgba(79,232,160,.22)}
 html.theme-dark .rcp-veh,html.theme-dark .rcp-row b,html.theme-dark .rcp-tile b{color:#eaf6ef}
 html.theme-dark .rcp-tile{background:#123228;border-color:rgba(79,232,160,.2)}
 html.theme-dark .rcp-row,html.theme-dark .rcp-tile small{color:#9dbdb0}
+
+/* ---- Chargement : écran de démarrage + squelette du tableau de bord ---- */
+.drv2 .dl{animation:dlfade .25s ease-out both}
+.drv2 .dl-wrap{width:104px;height:104px}
+.drv2 .dl-wrap img{width:68px;height:68px;border-radius:18px;animation:dlbreath 2.2s ease-in-out infinite}
+.drv2 .dl-ring{border-width:2px;animation-duration:1.3s}
+.drv2 .dl-halo{position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle,rgba(20,184,102,.22),rgba(20,184,102,0) 68%);animation:dlhalo 2.2s ease-in-out infinite}
+.drv2 .dl-brand{display:block;margin-top:18px;font-size:13px;letter-spacing:.16em;color:#0b2a1f;font-weight:800;text-align:center}
+.drv2 .dl-brand em{display:block;font-style:normal;color:#14B866;letter-spacing:.3em;font-size:11px;margin-top:2px}
+.drv2 .dl-bar{display:block;width:120px;height:3px;border-radius:3px;background:rgba(20,184,102,.15);overflow:hidden;margin:14px auto 2px}
+.drv2 .dl-bar i{display:block;width:40%;height:100%;border-radius:3px;background:linear-gradient(90deg,#14B866,#4FE8A0);animation:dlbar 1.2s ease-in-out infinite}
+.drv2 .dl p{font-weight:600;opacity:.6;margin-top:6px}
+@keyframes dlfade{from{opacity:0}to{opacity:1}}
+@keyframes dlbreath{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes dlhalo{0%,100%{opacity:.6;transform:scale(.95)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes dlbar{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
+.drv2 .dsk{display:flex;flex-direction:column;gap:14px;padding:6px 2px}
+.drv2 .dsk-row{display:flex;align-items:center;gap:14px;padding:4px 0 8px}
+.drv2 .dsk-col{flex:1;display:flex;flex-direction:column;gap:8px}
+.drv2 .dsk-av,.drv2 .dsk i,.drv2 .dsk-card{background:linear-gradient(100deg,rgba(20,184,102,.08) 20%,rgba(20,184,102,.18) 40%,rgba(20,184,102,.08) 60%);background-size:220% 100%;animation:dsk 1.3s ease-in-out infinite}
+.drv2 .dsk-av{width:56px;height:56px;border-radius:18px}
+.drv2 .dsk i{display:block;height:12px;border-radius:8px}
+.drv2 .dsk-card{border-radius:24px;border:1px solid rgba(20,184,102,.12)}
+@keyframes dsk{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.drv2 .dl *,.drv2 .dsk *,.drv2 .dsk-card{animation:none!important}}
