@@ -180,6 +180,7 @@ function AdminParametres() {
           <DevisAcceptationToggleCard />
           <DriverScreenProtectionCard />
           <AvisGoogleCard />
+          <RappelsClientsCard />
           <AvisGoogleHistoryCard />
         </TabsContent>
 
@@ -691,6 +692,61 @@ function RelancesCard() {
   );
 }
 
+
+function RappelsClientsCard() {
+  const [channel, setChannel] = useState<"email" | "sms" | "email+sms" | "off">("email");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("app_settings").select("value").eq("key", "client_rappel_j1").maybeSingle();
+      const c = (data as { value?: { channel?: string } } | null)?.value?.channel;
+      if (c === "sms" || c === "email+sms" || c === "off" || c === "email") setChannel(c);
+      setLoading(false);
+    })();
+  }, []);
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert({ key: "client_rappel_j1", value: { channel } as unknown as never }, { onConflict: "key" });
+    setSaving(false);
+    if (error) toast.error("Échec sauvegarde", { description: error.message });
+    else toast.success("Rappels clients enregistrés");
+  };
+  return (
+    <Card>
+      <h2 className="font-semibold text-pro-text">Rappels clients (la veille)</h2>
+      <p className="text-xs text-pro-muted mt-1">
+        La veille de la mission : « le convoyeur sera présent demain pour récupérer votre véhicule » (client d'enlèvement)
+        et « votre véhicule sera livré demain » (contact de livraison).
+      </p>
+      <div className="mt-4 space-y-3">
+        <FormField label="Canal d'envoi">
+          <select
+            value={channel}
+            disabled={loading}
+            onChange={(e) => setChannel(e.target.value as typeof channel)}
+            className="w-full rounded-md border border-pro-border bg-transparent px-2 py-1.5 text-xs text-pro-text outline-none focus:border-pro-accent"
+          >
+            <option value="email">E-mail</option>
+            <option value="sms">SMS</option>
+            <option value="email+sms">E-mail + SMS</option>
+            <option value="off">Désactivé</option>
+          </select>
+        </FormField>
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving || loading}
+          className="rounded-md bg-pro-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+        >
+          {saving ? "Enregistrement…" : "Enregistrer"}
+        </button>
+      </div>
+    </Card>
+  );
+}
 
 function AvisGoogleCard() {
   const [url, setUrl] = useState("");

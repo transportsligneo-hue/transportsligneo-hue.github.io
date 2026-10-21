@@ -11,6 +11,22 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** "2026-10-21" + "12:20" (heure de Paris) → instant UTC. */
+function parisToDate(date: string | null, heure: string | null): Date | null {
+  if (!date) return null;
+  const hhmm = (heure ?? "00:00").slice(0, 5);
+  const naive = new Date(`${date.slice(0, 10)}T${hhmm}:00Z`);
+  if (Number.isNaN(naive.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Paris",
+    hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+  }).formatToParts(naive);
+  const g = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  const asParis = Date.UTC(g("year"), g("month") - 1, g("day"), g("hour") % 24, g("minute"));
+  return new Date(naive.getTime() - (asParis - naive.getTime()));
+}
+
 export interface MissionEtaBaseline {
   initialEtaAt: string | null;
   delayMinutes: number | null;
@@ -98,6 +114,54 @@ export const reportMissionEta = createServerFn({ method: "POST" })
     const closed = ["terminee", "termine", "validee", "annulee", "refusee"].includes(
       String((visible as { statut?: string }).statut ?? ""),
     );
+
+    // Garde-fous anti fausses alertes : on ne parle de « retard » que si
+    //  1) l'heure d'enlèvement prévue est passée, et
+    //  2) le convoyeur a réellement avancé depuis la référence (sinon l'ETA
+    //     « dérive » juste parce que l'horloge tourne).
+    let started = false;
+    const trajetId = (visible as { trajet_id?: string | null }).trajet_id ?? null;
+    if (trajetId) {
+      const { data: tj } = await supabaseAdmin
+        .from("trajets")
+        .select("date_trajet, heure_trajet")
+        .eq("id", trajetId)
+        .maybeSingle();
+      const planned = parisToDate(
+        (tj as { date_trajet?: string | null } | null)?.date_trajet ?? null,
+        (tj as { heure_trajet?: string | null } | null)?.heure_trajet ?? null,
+      );
+      started = !planned || Date.now() >= planned.getTime();
+    } else {
+      started = true;
+    }
+    const { data: base } = await supabaseAdmin
+      .from("mission_eta_tracking")
+      .select("initial_remaining_km")
+      .eq("attribution_id", data.attributionId)
+      .maybeSingle();
+    const initKm = (base as { initial_remaining_km?: number | null } | null)?.initial_remaining_km;
+    const moved =
+      typeof initKm === "number" && typeof data.remainingKm === "number"
+        ? initKm - data.remainingKm >= 2
+        : false;
+
+    if (!started || !moved) {
+      if (!started) {
+        // Avant l'heure prévue : la référence suit l'ETA courant.
+        await supabaseAdmin
+          .from("mission_eta_tracking")
+          .update({
+            initial_eta_at: data.etaAt,
+            initial_remaining_km: data.remainingKm ?? null,
+            last_alert_bucket: 0,
+            last_alert_at: null,
+          } as never)
+          .eq("attribution_id", data.attributionId);
+        return { initialEtaAt: data.etaAt, delayMinutes: 0, thresholdMinutes: threshold };
+      }
+      return { initialEtaAt: row.initial_eta_at, delayMinutes: 0, thresholdMinutes: threshold };
+    }
 
     const bucket = delay > 0 ? Math.floor(delay / threshold) : 0;
 

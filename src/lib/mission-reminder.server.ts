@@ -279,6 +279,13 @@ export async function runMissionReminders(): Promise<{ found: number; sent: numb
     results.push(await sendMissionReminder(row.id))
   }
 
+  try {
+    const { runClientReminders } = await import('@/lib/client-reminder.server')
+    await runClientReminders(tomorrow)
+  } catch (e) {
+    console.error('[rappel-j1] rappels clients échoués', e)
+  }
+
   return { found: results.length, sent: results.filter((r) => r.sent).length, results }
 }
 

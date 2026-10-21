@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Ic } from "@/components/driver2/icons";
 import { useInfosLigneo, type InfoKind, type InfoLigneo } from "@/hooks/useInfosLigneo";
+import { VroomyAvatar } from "@/components/VroomyAvatar";
 import logo from "@/assets/driver-v2/logo.png";
 
 // Teintes sourdes et sobres : un simple point de couleur identifie le type, pas de pictogramme.
@@ -97,6 +98,7 @@ function StoryViewer({ queue, startId, onSeen, onClose }: { queue: InfoLigneo[];
               <p key={n}>{lines.map((l, m) => (<span key={m}>{l}{m < lines.length - 1 && <br />}</span>))}</p>
             ))}
           </div>
+          <div className="inf2-vroomy"><VroomyAvatar size={72} /></div>
         </div>
         <button className="inf2-tap l" onClick={() => setI(Math.max(0, i - 1))} aria-label="Précédent" />
         <button className="inf2-tap r" onClick={next} aria-label="Suivant" />
