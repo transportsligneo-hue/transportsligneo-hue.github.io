@@ -6,6 +6,7 @@
  *   - démarrage / arrivée / inspection
  *   - signatures et PV désormais portés par l'inspection
  */
+import logo50 from "@/assets/driver-v2/logo-50-sans-pct.png";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { notifyDeliveryDone } from "@/lib/google-review.functions";
@@ -600,6 +601,11 @@ export function MissionCockpit({
           .mv3-hero-route-city { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; }
           .mv3-hero-route-arrow { color: #2FD8FF; font-weight: 800; flex-shrink: 0; }
 
+          .mv3-logo50 { position: relative; width: 132px; flex-shrink: 0; aspect-ratio: 912 / 865; }
+          .mv3-logo50 img { width: 100%; height: 100%; display: block; }
+          .mv3-logo50-pct { position: absolute; left: 52.4%; top: 18.3%; transform: translate(-50%, -50%);
+            font-weight: 900; font-size: 19px; letter-spacing: .01em; color: #41f0a4; white-space: nowrap; line-height: 1;
+            text-shadow: 0 0 8px rgba(65,240,164,.75), 0 0 18px rgba(65,240,164,.4); font-variant-numeric: tabular-nums; }
           .mv3-tabs { display: flex; gap: 8px; padding: 0 14px; margin-top: 6px; position: relative; z-index: 1; }
           .mv3-tab { flex: 1; padding: 11px 12px; border-radius: 14px;
             background: rgba(255,255,255,0.04); border: 1px solid rgba(120,180,255,0.12);
@@ -625,23 +631,9 @@ export function MissionCockpit({
             </div>
           </div>
           <div className="mv3-hero-mid">
-            <div className="mv3-ring-wrap" style={{ width: ringSize, height: ringSize }}>
-              <svg width={ringSize} height={ringSize}>
-                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="rgba(255,255,255,0.07)" strokeWidth={ringStroke} fill="none" />
-                <circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="url(#mv3RingGrad)" strokeWidth={ringStroke} fill="none"
-                  strokeDasharray={ringC} strokeDashoffset={ringC - ringPct * ringC} strokeLinecap="round"
-                  transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`} className="mv3-ring-progress" />
-                <defs>
-                  <linearGradient id="mv3RingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#2F6BFF" />
-                    <stop offset="100%" stopColor="#2FD8FF" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="mv3-ring-label">
-                <span className="mv3-ring-num">{Math.min(visualIdx + 1, totalVisual)}</span>
-                <span className="mv3-ring-den">/ {totalVisual} étapes</span>
-              </div>
+            <div className="mv3-logo50" aria-label={`Mission terminée à ${progressPct} %`}>
+              <img src={logo50} alt="" />
+              <span className="mv3-logo50-pct">{progressPct}&nbsp;%</span>
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div className="mv3-hero-title">{currentDef.label}</div>

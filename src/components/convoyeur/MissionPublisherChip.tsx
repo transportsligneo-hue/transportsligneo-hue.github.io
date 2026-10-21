@@ -50,14 +50,14 @@ export function MissionPublisherChip({ nom, logoUrl, verifie, compact }: Props) 
       <div
         className="mt-2.5 flex items-center gap-2 rounded-full px-2.5 py-1.5"
         style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(140,170,255,0.16)",
+          background: "rgba(20,184,102,0.07)",
+          border: "1px solid var(--line, rgba(140,170,255,0.16))",
         }}
       >
         {logo}
-        <span className="min-w-0 truncate text-[11.5px] font-bold text-[#e6ecff]">{label}</span>
+        <span className="min-w-0 truncate text-[11.5px] font-bold" style={{ color: "var(--ink, #e6ecff)" }}>{label}</span>
         {verifie && (
-          <span className="ml-auto flex shrink-0 items-center gap-1 text-[9.5px] font-extrabold text-[#5b83ff]">
+          <span className="ml-auto flex shrink-0 items-center gap-1 text-[9.5px] font-extrabold text-[#0b8f52]">
             <BadgeCheck size={12} /> Vérifié
           </span>
         )}

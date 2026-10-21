@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import { generateEdlPapierPdf, downloadBlob, type EdlPapierVariant } from "@/lib/documents-officiels";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
+import { generatePvLivraisonRempli, PV_LIVRAISON_VIERGE_URL } from "@/lib/pv-livraison-vierge";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 
@@ -166,6 +167,34 @@ export function MissionV3DocsPane({
     }
   };
 
+  const [pvBusy, setPvBusy] = useState(false);
+  const pvRempli = async () => {
+    if (!edlContext || pvBusy) return;
+    setPvBusy(true);
+    try {
+      const blob = await generatePvLivraisonRempli({
+        numero: edlContext.numero,
+        donneur: edlContext.societe ?? edlContext.client,
+        marque_modele: edlContext.marque_modele,
+        immatriculation: edlContext.immatriculation,
+        vin: edlContext.vin,
+        kilometrage: edlContext.kilometrage_depart,
+        carburant: edlContext.carburant,
+        depart: edlContext.depart,
+        arrivee: edlContext.arrivee,
+        date_enlevement: edlContext.date_prevue,
+      });
+      await downloadBlob(blob, `PV-livraison-${(edlContext.numero || "mission").replace(/[^a-zA-Z0-9-]/g, "")}.pdf`);
+    } catch { toast.error("Génération du PV impossible"); }
+    finally { setPvBusy(false); }
+  };
+  const pvVierge = async () => {
+    try {
+      const r = await fetch(PV_LIVRAISON_VIERGE_URL);
+      await downloadBlob(await r.blob(), "PV-livraison-vierge.pdf");
+    } catch { toast.error("Téléchargement impossible"); }
+  };
+
   const pvEnlev = findDoc(["pv_enlevement", "pv_depart"]);
   const contrat = findDoc(["contrat"]);
   const attest = findDoc(["assurance", "attestation_assurance"]);
@@ -287,6 +316,35 @@ export function MissionV3DocsPane({
           <div className="v3-doc-summary-pill">{validated}/{total} validés</div>
         </div>
         <div className="v3-doc-progress"><div className="v3-doc-progress-fill" style={{ width: `${pct}%` }} /></div>
+      </div>
+
+      <div className="v3-doc-summary">
+        <div className="v3-doc-summary-head">
+          <div className="v3-doc-summary-title">Documents à télécharger</div>
+        </div>
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+          {([["restitution", "État des lieux d'enlèvement"], ["livraison", "État des lieux d'arrivée"]] as const).map(([v, l]) => (
+            <button key={v} type="button" disabled={!edlContext || !!edlBusy} onClick={() => void downloadEdlPapier(v)}
+              className="v3-doc-item" style={{ padding: 12 }}>
+              <div className="v3-doc-body"><div className="v3-doc-label">{l}</div></div>
+              {edlBusy === v ? <Loader2 size={16} className="animate-spin" /> : <Printer size={16} className="v3-doc-chev" />}
+            </button>
+          ))}
+          <div className="v3-doc-item" style={{ padding: 12, cursor: "default", flexWrap: "wrap" }}>
+            <div className="v3-doc-body"><div className="v3-doc-label">PV de livraison</div>
+              <div style={{ fontSize: 11.5, color: "#8FB2E8", marginTop: 4 }}>Rempli avec les infos de la mission, ou vierge à compléter.</div></div>
+            <div style={{ display: "flex", gap: 8, width: "100%", marginTop: 8 }}>
+              <button type="button" disabled={!edlContext || pvBusy} onClick={() => void pvRempli()}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-[#0A1230] bg-gradient-to-r from-[#2FD8FF] to-[#2F6BFF] disabled:opacity-60">
+                {pvBusy ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} Remplir automatiquement
+              </button>
+              <button type="button" onClick={() => void pvVierge()}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold border border-[rgba(120,180,255,0.3)] text-[#EAF3FF]">
+                <Upload size={14} /> Télécharger vierge
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="v3-doc-summary">

@@ -4,8 +4,8 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 
 /**
  * Codes de remise (type Uber).
- *  - depart  : le convoyeur voit un code, le lit à la personne qui lui remet les clés
- *              (la personne reçoit le même code par SMS pour vérifier).
+ *  - depart  : la personne qui remet les clés reçoit un code par SMS / e-mail, le donne au
+ *              convoyeur qui le saisit. Un e-mail de confirmation part aussitôt au client.
  *  - arrivee : le destinataire reçoit un code par SMS, le donne au convoyeur qui le saisit.
  */
 const Input = z.object({ attributionId: z.string().uuid(), kind: z.enum(['depart', 'arrivee']) })
@@ -77,7 +77,7 @@ export const prepareHandoverCode = createServerFn({ method: 'POST' })
     const num = attr.numero_mission ? ` (mission ${attr.numero_mission})` : ''
     const message =
       data.kind === 'depart'
-        ? `Transports Ligneo${num} : votre convoyeur doit vous donner le code ${row.code} avant de prendre les clés. S'il ne le donne pas, ne remettez pas le véhicule.`
+        ? `Transports Ligneo${num} : votre code d'enlèvement est ${row.code}. Donnez-le au convoyeur au moment de lui remettre les clés, et uniquement à lui.`
         : `Transports Ligneo${num} : votre code de livraison est ${row.code}. Donnez-le au convoyeur à la remise du véhicule uniquement.`
 
     let smsOk = !!row.sms_sent_at
@@ -93,7 +93,7 @@ export const prepareHandoverCode = createServerFn({ method: 'POST' })
         await sendBrevoEmail({
           to: email,
           fromName: 'Transports Ligneo',
-          subject: data.kind === 'depart' ? 'Code de remise du véhicule' : 'Votre code de livraison',
+          subject: data.kind === 'depart' ? 'Votre code d\'enlèvement' : 'Votre code de livraison',
           html: `<p style="font-family:Arial,sans-serif;font-size:16px">${message.replace(row.code, `<b style="font-size:24px">${row.code}</b>`)}</p>`,
           text: message,
         })
@@ -106,14 +106,7 @@ export const prepareHandoverCode = createServerFn({ method: 'POST' })
     }
     const phone = smsOk ? (via ?? 'sms') : null
 
-    if (data.kind === 'depart') {
-      if (!row.shown_at) {
-        await supabaseAdmin.from('handover_codes').update({ shown_at: new Date().toISOString() } as never).eq('id', row.id)
-      }
-      // Le convoyeur voit le code de départ (c'est lui qui le donne)
-      return { done: false as const, code: row.code as string, smsSent: smsOk, sentVia: phone as 'sms' | 'email' | null, hasPhone: !!phone }
-    }
-    // Arrivée : le code n'est JAMAIS renvoyé au convoyeur
+    // Le code n'est JAMAIS renvoyé au convoyeur : il le reçoit du client
     return { done: false as const, smsSent: smsOk, sentVia: phone as 'sms' | 'email' | null, hasPhone: !!phone }
   })
 
@@ -121,7 +114,7 @@ export const validateHandoverCode = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => Input.extend({ code: z.string().trim().min(4).max(4) }).parse(i))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await loadContext(context.supabase, context.userId, data.attributionId)
+    const { supabaseAdmin, attr, trajet } = await loadContext(context.supabase, context.userId, data.attributionId)
     const { data: row } = await supabaseAdmin
       .from('handover_codes').select('*').eq('attribution_id', data.attributionId).eq('kind', data.kind).maybeSingle()
     if (!row) throw new Error('Code introuvable.')
@@ -133,6 +126,26 @@ export const validateHandoverCode = createServerFn({ method: 'POST' })
       return { ok: false, locked: r.attempts + 1 >= 5 }
     }
     await supabaseAdmin.from('handover_codes').update({ validated_at: new Date().toISOString() } as never).eq('id', r.id)
+    // E-mail de confirmation instantané au client (n'empêche jamais la validation)
+    try {
+      const email: string | null =
+        (data.kind === 'depart' ? trajet.client_email : trajet.arrivee_contact_email || trajet.client_email) || null
+      if (email) {
+        const { sendBrevoEmail } = await import('@/lib/brevo-email.server')
+        const num = attr.numero_mission ? ` (mission ${attr.numero_mission})` : ''
+        const heure = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris', dateStyle: 'short', timeStyle: 'short' })
+        const texte = data.kind === 'depart'
+          ? `Votre convoyeur Transports Ligneo vient de saisir votre code d'enlèvement${num} le ${heure}. Il prend en charge votre véhicule : un état des lieux photo va être réalisé.`
+          : `Votre code de livraison${num} vient d'être validé le ${heure}. Votre véhicule vous a bien été remis.`
+        await sendBrevoEmail({
+          to: email,
+          fromName: 'Transports Ligneo',
+          subject: data.kind === 'depart' ? 'Votre véhicule est pris en charge' : 'Votre véhicule a été livré',
+          html: `<p style="font-family:Arial,sans-serif;font-size:16px;line-height:1.5">${texte}</p><p style="font-family:Arial,sans-serif;font-size:13px;color:#667">Ce n'était pas vous ? Contactez-nous au 07 82 45 61 81.</p>`,
+          text: texte,
+        })
+      }
+    } catch { /* best effort */ }
     return { ok: true }
   })
 

@@ -1,11 +1,15 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogOut, Menu, X, type LucideIcon } from "lucide-react";
+import { LogOut, type LucideIcon } from "lucide-react";
 import DriverDock from "@/components/convoyeur/DriverDock";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import ThemeToggle from "@/components/ThemeToggle";
 import driverBadge from "@/assets/ligneo-driver-badge.png.asset.json";
+import { Ic } from "@/components/driver2/icons";
+import { DriverBell } from "@/components/driver2/DriverBell";
+import { DriverPlusSheet } from "@/components/driver2/DriverPlusSheet";
+import "@/styles/driver-v2.css";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface ConvoyeurSidebarItem {
@@ -31,7 +35,8 @@ export function ConvoyeurSidebar({ items, children }: Props) {
   const { logout, user } = useAuth();
   const { theme } = useTheme();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
+  useEffect(() => { setPlusOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     const prevHtml = document.documentElement.style.background;
@@ -58,7 +63,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
     }`;
 
   return (
-    <div className="driver-shell flex">
+    <div className="driver-shell drv2-bg flex">
       {/* === Sidebar Desktop premium === */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 driver-nav-surface w-64 flex-col border-r border-[rgba(52,230,140,0.18)] bg-[rgba(4,27,82,0.72)] backdrop-blur-2xl">
         <div className="px-5 py-5 border-b border-[rgba(52,230,140,0.18)] flex items-center gap-3">
@@ -99,80 +104,26 @@ export function ConvoyeurSidebar({ items, children }: Props) {
         </div>
       </aside>
 
-      {/* === Mobile Header premium glass === */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 driver-nav-surface border-b border-[rgba(52,230,140,0.20)] bg-[rgba(4,27,82,0.78)] backdrop-blur-2xl">
-        <div style={{ height: "env(safe-area-inset-top)" }} className="bg-[rgba(4,27,82,0.95)]" />
-        <div className="h-11 px-3.5 flex items-center justify-between gap-3">
-          <DriverBrand size="sm" />
-          <div className="flex items-center gap-2 shrink-0">
-            <NotificationBell />
-            <button
-              onClick={() => logout()}
-              className="w-9 h-9 rounded-xl border border-[rgba(52,230,140,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
-              aria-label="Déconnexion"
-              title="Déconnexion"
-            >
-              <LogOut size={16} />
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="w-9 h-9 rounded-xl border border-[rgba(52,230,140,0.28)] bg-white/[0.06] backdrop-blur-xl flex items-center justify-center text-white active:scale-95 transition-transform"
-              aria-label="Menu"
-            >
-              <Menu size={16} />
-            </button>
+      {/* === En-tête mobile (identique à l'appli validée) === */}
+      <div className="drv2 md:hidden">
+        <header
+          className="hdr"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 40, height: "calc(50px + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}
+        >
+          <div className="brand">
+            <img src={driverBadge.url} alt="Transports Ligneo Driver" />
+            <div><b>Transports Ligneo</b><i>Driver</i></div>
           </div>
-        </div>
-      </header>
+          <div className="hbtns">
+            <DriverBell />
+            <button className="hbtn" onClick={() => logout()} aria-label="Déconnexion" title="Déconnexion"><Ic n="out" s={16} /></button>
+            <button className="hbtn" onClick={() => setPlusOpen(true)} aria-label="Menu"><Ic n="menu" s={16} /></button>
+          </div>
+        </header>
+      </div>
 
-      {/* === Mobile Drawer === */}
-      {mobileMenuOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 z-50 bg-[#041B52]/70 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)} />
-          <aside className="md:hidden fixed inset-y-0 left-0 z-[55] driver-nav-surface w-80 bg-[rgba(4,27,82,0.95)] backdrop-blur-2xl border-r border-[rgba(52,230,140,0.30)] flex flex-col safe-top safe-bottom animate-sheet-up">
-            <div className="px-5 py-4 border-b border-[rgba(52,230,140,0.20)] flex items-center justify-between">
-              <DriverBrand />
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-[rgba(52,230,140,0.28)] flex items-center justify-center text-white"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-              {items.map((item) => {
-                const active = isActive(item);
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all ${
-                      active
-                        ? "bg-gradient-to-r from-[rgba(24,201,110,0.32)] via-[rgba(52,230,140,0.16)] to-transparent text-white font-semibold"
-                        : "text-[#D6E4FF] hover:bg-white/[0.06]"
-                    }`}
-                  >
-                    <item.icon size={18} className={active ? "text-[#34E68C]" : "text-[#A8C2FF]"} />
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge}
-                  </Link>
-                );
-              })}
-            </nav>
-            <div className="p-3 border-t border-[rgba(52,230,140,0.20)] space-y-1">
-              <ThemeToggle variant="full" className="w-full justify-start" />
-              <button
-                onClick={() => logout()}
-                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[#D6E4FF] hover:bg-red-500/10 hover:text-red-300"
-              >
-                <LogOut size={17} />
-                Déconnexion
-              </button>
-            </div>
-          </aside>
-        </>
-      )}
+      {/* === Menu Plus (identique au dock et au bouton menu) === */}
+      {plusOpen && <div className="md:hidden"><DriverPlusSheet onClose={() => setPlusOpen(false)} /></div>}
 
       {/* === Main === */}
       <main className="flex-1 md:ml-64 pb-bottom-nav md:pb-0 min-h-[100svh] md:min-h-screen flex flex-col w-full driver-main">
@@ -180,7 +131,7 @@ export function ConvoyeurSidebar({ items, children }: Props) {
       </main>
 
       {/* === Dock mobile premium (Tableau de bord · Mes missions · Catalogue · Plus) === */}
-      <DriverDock items={items} isActive={isActive} />
+      <DriverDock items={items} isActive={isActive} onOpenPlus={() => setPlusOpen(true)} plusOpen={plusOpen} />
 
     </div>
   );

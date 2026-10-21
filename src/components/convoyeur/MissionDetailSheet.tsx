@@ -584,7 +584,7 @@ export function MissionDetailSheet({
             {/* Retour (aller simple uniquement) */}
             {!isAR && (
               <div className="cat-card">
-                <ReturnTripHelper depart={t.arrivee} arrivee={t.depart} />
+                <ReturnTripHelper livraison={t.arrivee} vehicule={[t.marque, t.modele].filter(Boolean).join(" ")} electrique={isElectricEnergie(t.type_carburant) || guessElectricFromModel(t.marque, t.modele)} />
               </div>
             )}
           </div>

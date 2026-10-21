@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, X, ArrowRight, ChevronRight, ChevronDown } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -31,13 +31,16 @@ const PROGRESS_BY_ETAPE: Record<string, number> = {
 export default function DriverDock({
   items,
   isActive,
+  onOpenPlus,
+  plusOpen,
 }: {
   items: ConvoyeurSidebarItem[];
   isActive: (item: ConvoyeurSidebarItem) => boolean;
+  onOpenPlus: () => void;
+  plusOpen: boolean;
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [moreOpen, setMoreOpen] = useState(false);
   const [catalogueCount, setCatalogueCount] = useState(0);
   // Nombre de missions catalogue déjà vues : le badge disparaît après consultation.
   const [catalogueSeen, setCatalogueSeen] = useState<number>(() => {
@@ -46,7 +49,7 @@ export default function DriverDock({
   });
   const [active, setActive] = useState<ActiveMission | null>(null);
   // Masquage temporaire du dock (étapes critiques : signature, EDL).
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = false;
 
   useEffect(() => {
     let cancelled = false;
@@ -131,17 +134,7 @@ export default function DriverDock({
 
   return (
     <>
-      <nav aria-label="Navigation convoyeur" className={`md:hidden ldock-zone${collapsed ? " is-collapsed" : ""}`}>
-        <button
-          type="button"
-          onClick={() => setCollapsed((v) => !v)}
-          aria-label={collapsed ? "Afficher la barre de navigation" : "Masquer la barre de navigation"}
-          aria-expanded={!collapsed}
-          className="ldock-toggle"
-        >
-          <ChevronDown size={16} />
-        </button>
-
+      <nav aria-label="Navigation convoyeur" className={`md:hidden ldock-zone drv2${collapsed ? " is-collapsed" : ""}`}>
         <div className="ldock">
           <Link to="/convoyeur" className={`ldock-item${activeDash ? " is-active" : ""}`}>
             <span className="ldock-ic">
@@ -152,7 +145,7 @@ export default function DriverDock({
           </Link>
 
           <Link to="/convoyeur/missions" className="ldock-item is-raised" aria-label="Mes missions">
-            <span className="ldock-fab" style={activeMissions ? { boxShadow: "0 14px 30px rgba(47,95,255,0.75), 0 0 0 6px #040b28" } : undefined}>
+            <span className="ldock-fab" data-active={activeMissions ? "1" : undefined}>
               <ClipboardCheck strokeWidth={2.2} />
             </span>
             <span>Mes missions</span>
@@ -172,8 +165,8 @@ export default function DriverDock({
           </Link>
 
           <button
-            onClick={() => setMoreOpen(true)}
-            className={`ldock-item${activeOverflow ? " is-active" : ""}`}
+            onClick={onOpenPlus}
+            className={`ldock-item${activeOverflow || plusOpen ? " is-active" : ""}`}
             aria-label="Plus"
           >
             <span className="ldock-ic">
@@ -185,45 +178,6 @@ export default function DriverDock({
         </div>
       </nav>
 
-      {moreOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 z-[55] bg-[#041B52]/70 backdrop-blur-md" onClick={() => setMoreOpen(false)} />
-          <div className="md:hidden fixed inset-x-0 bottom-0 z-[60] safe-bottom animate-sheet-up">
-            <div className="bg-[rgba(6,18,56,0.96)] backdrop-blur-2xl border-t border-[rgba(140,170,255,0.28)] rounded-t-3xl p-4 pb-6">
-              <div className="w-10 h-1 bg-white/15 rounded-full mx-auto mb-3" />
-              <div className="flex items-center justify-between mb-3 px-1">
-                <h3 className="text-white font-semibold text-sm">Menu</h3>
-                <button
-                  onClick={() => setMoreOpen(false)}
-                  className="w-9 h-9 rounded-2xl bg-white/[0.06] border border-[rgba(140,170,255,0.28)] flex items-center justify-center text-white"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {overflow.map((item) => {
-                  const on = isActive(item);
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      onClick={() => setMoreOpen(false)}
-                      className={`flex flex-col items-center justify-center gap-1.5 p-3 min-h-[80px] rounded-2xl border transition-all ${
-                        on
-                          ? "border-[rgba(91,131,255,0.55)] bg-[rgba(47,95,255,0.18)] text-white shadow-[0_0_24px_rgba(47,95,255,0.30)]"
-                          : "border-[rgba(140,170,255,0.18)] bg-white/[0.05] text-[#D6E4FF]"
-                      }`}
-                    >
-                      <item.icon size={20} className={on ? "text-[#5b83ff]" : "text-[#9aa8d9]"} />
-                      <span className="text-[10px] text-center leading-tight tracking-wide font-semibold">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </>
   );
 }

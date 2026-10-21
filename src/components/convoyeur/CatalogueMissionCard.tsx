@@ -3,6 +3,10 @@ import { missionRequiredNiveau } from "@/lib/mission-level";
 import { niveauLabel, canAccessNiveau } from "@/lib/convoyeur-niveau";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 import { MissionPublisherChip } from "./MissionPublisherChip";
+import { Ic } from "@/components/driver2/icons";
+import { AuctionStrip, EnchTile, MissionChips, RouteMap, VehicleTile, type AuctionInfo } from "@/components/driver2/mission-bits";
+import { vehicleCategory } from "@/lib/vehicle-category";
+import "@/styles/driver-v2.css";
 
 export interface CatalogTrajet {
   id: string;
@@ -35,6 +39,11 @@ export interface CatalogTrajet {
   publisher_nom?: string | null;
   publisher_logo_url?: string | null;
   publisher_verifie?: boolean | null;
+  /** Options du catalogue (fonction list_catalogue_extras). */
+  equipements_requis?: string[];
+  carburant_mode?: string | null;
+  mise_en_main?: boolean;
+  enchere?: AuctionInfo | null;
   groupedLegs?: CatalogTrajet[];
   isGroupedAr?: boolean;
 }
@@ -50,36 +59,9 @@ interface Props {
   driverNiveau?: string | null;
   onOpen: () => void;
   onQuickApply: () => void;
+  /** Ouvre la fiche d'enchère (missions en enchère). */
+  onAuction?: () => void;
 }
-
-/* ---------- Icônes (identiques à la maquette) ---------- */
-const S = (p: { children: React.ReactNode; fill?: string; sw?: number }) => (
-  <svg viewBox="0 0 24 24" fill={p.fill ?? "none"} stroke={p.fill ? "none" : "currentColor"} strokeWidth={p.sw ?? 2.4}>
-    {p.children}
-  </svg>
-);
-const IcoLink = () => (
-  <S>
-    <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
-  </S>
-);
-const IcoArrow = () => (<S><path d="M5 12h14M13 5l7 7-7 7" /></S>);
-const IcoDoc = () => (<S><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" /><path d="M14 2v6h6" /></S>);
-const IcoBolt = () => (<S fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></S>);
-const IcoThermal = () => (
-  <S sw={2}>
-    <path d="M6 22h8a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2z" />
-    <path d="M18 5l3 3v9" />
-    <path d="M18 11V5h-3" />
-    <circle cx="10" cy="17" r="1.5" fill="currentColor" />
-  </S>
-);
-const IcoCal = () => (<S sw={2}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></S>);
-const IcoClock = () => (<S sw={2}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></S>);
-const IcoCheck = () => (<S sw={2}><path d="M9 11l3 3 8-8" /></S>);
-const IcoPin = () => (<S sw={2}><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></S>);
-const IcoCar = () => (<S sw={2}><path d="M5 17h14M6 17v2M18 17v2" /><path d="M4 13l1.5-5A2 2 0 0 1 7.4 6.6h9.2A2 2 0 0 1 18.5 8L20 13v4H4z" /></S>);
-const IcoLock = () => (<S sw={2}><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 1 1 8 0v3" /></S>);
 
 function useCountdown(iso: string | null) {
   const [now, setNow] = useState(() => Date.now());
@@ -114,25 +96,18 @@ export function CatalogueMissionCard({
   driverNiveau,
   onOpen,
   onQuickApply,
+  onAuction,
 }: Props) {
   const price = t.prix_convoyeur_fixe ?? t.prix_convoyeur ?? t.prix_suggere ?? 0;
   const isAR = Boolean(t.isGroupedAr || (!!t.leg_type && t.leg_type !== "simple"));
   const urgent = t.urgence === "immediat" || t.urgence === "urgent";
-  const fresh = t.published_at
-    ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000
-    : false;
+  const fresh = t.published_at ? Date.now() - new Date(t.published_at).getTime() < 24 * 3600_000 : false;
   const countdown = useCountdown(t.proposal_expires_at);
-  const requis = missionRequiredNiveau({
-    niveau_requis: t.niveau_requis,
-    distance_km: t.distance_km,
-    urgence: t.urgence,
-  });
+  const requis = missionRequiredNiveau({ niveau_requis: t.niveau_requis, distance_km: t.distance_km, urgence: t.urgence });
   const level = niveauLabel(requis);
   const locked = !canAccessNiveau(driverNiveau, requis);
   const isElectric =
-    isElectricEnergie(t.type_carburant) ||
-    isElectricEnergie(t.vehicule_energie) ||
-    guessElectricFromModel(t.marque, t.modele);
+    isElectricEnergie(t.type_carburant) || isElectricEnergie(t.vehicule_energie) || guessElectricFromModel(t.marque, t.modele);
 
   const legs = [t, ...(t.groupedLegs ?? [])];
   const retourLeg = legs.find((l) => l.leg_type === "retour");
@@ -143,136 +118,89 @@ export function CatalogueMissionCard({
   const routeArrivee = allerLeg?.arrivee ?? (t.leg_type === "retour" ? t.depart : t.arrivee);
   const routeRetour = retourLeg?.arrivee ?? routeDepart;
   const dateLabel = t.date_trajet
-    ? new Date(t.date_trajet).toLocaleDateString("fr-FR", { day: "2-digit", month: "long" })
+    ? new Date(t.date_trajet).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })
     : null;
+  const vehicule = [t.marque, t.modele].filter(Boolean).join(" ");
+  const ench = t.enchere ?? null;
 
   return (
-    <article className={`cat2-card${locked ? " is-locked" : ""}`} onClick={onOpen}>
-      {/* Badges */}
-      <div className="cat2-badges">
-        <span className={`cat2-badge ${isAR ? "linked" : "simple"}`}>
-          {isAR ? <IcoLink /> : <IcoArrow />}
-          {isAR ? "restitution et livraison" : "Livraison simple"}
-        </span>
-        {isAR && (
-          <span className="cat2-badge doc"><IcoDoc />2 états des lieux</span>
-        )}
-        <span className="cat2-badge level">
-          {locked && <IcoLock />}
-          {level}
-        </span>
-        {urgent && <span className="cat2-badge urgent"><IcoBolt />Urgente</span>}
-        {fresh && <span className="cat2-badge new">Nouveau</span>}
-        {isElectric ? (
-          <span className="cat2-ev">
-            <span className="bolt"><IcoBolt /></span>
-            Électrique
+    <div className="drv2">
+      <article className={`card cmx${locked ? " is-locked" : ""}`} onClick={onOpen} style={locked ? { opacity: 0.78 } : undefined}>
+        <div className="vhead" style={{ padding: "0 0 10px" }}>
+          <VehicleTile marque={t.marque} modele={t.modele} ev={isElectric} />
+          {ench && <EnchTile />}
+        </div>
+
+        <div className="row" style={{ gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
+          {urgent && <span className="badge-new badge-urg">Urgente</span>}
+          {fresh && <span className="badge-new">Nouveau</span>}
+          <span className="badge-new" style={{ background: "rgba(47,95,255,.1)", color: "#2147c9", borderColor: "rgba(47,95,255,.3)" }}>
+            {locked && <Ic n="lock" s={11} sw={2.4} />}{level}
           </span>
-        ) : (
-          <span className="cat2-thermal"><IcoThermal />Thermique</span>
-        )}
-      </div>
-
-      <MissionPublisherChip
-        compact
-        nom={t.publisher_nom}
-        logoUrl={t.publisher_logo_url}
-        verifie={t.publisher_verifie}
-      />
-
-      {/* Itinéraire */}
-      <div className="cat2-route">
-        <div className="cat2-stop pickup">
-          <div className="cat2-eyebrow">Prise en charge du véhicule</div>
-          <div className="cat2-addr">{routeDepart}</div>
+          {isAR && <span className="badge-new">Restitution et livraison</span>}
+          <span className="sp" />
+          {dateLabel && <span className="tiny mut">{dateLabel}{t.heure_trajet ? ` · ${t.heure_trajet.slice(0, 5)}` : ""}</span>}
         </div>
-        <div className="cat2-stop delivery">
-          <div className="cat2-eyebrow">Livraison du véhicule</div>
-          <div className="cat2-addr">{routeArrivee}</div>
-          {isAR && (
-            <span className="cat2-tag">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
-              </svg>
-              Étape liée à la restitution
-            </span>
-          )}
-        </div>
-        {isAR && (
-          <div className="cat2-stop restitution">
-            <div className="cat2-eyebrow">Restitution du véhicule</div>
-            <div className="cat2-addr">{routeRetour}</div>
+
+        <MissionChips
+          ev={isElectric}
+          categorie={vehicleCategory(t.marque, t.modele)}
+          carburant={t.carburant_mode}
+          miseEnMain={t.mise_en_main}
+          requis={t.equipements_requis}
+        />
+
+        <MissionPublisherChip compact nom={t.publisher_nom} logoUrl={t.publisher_logo_url} verifie={t.publisher_verifie} />
+
+        <RouteMap dep={routeDepart} arr={routeArrivee} km={t.distance_km} near={distanceFromMe ?? null} />
+
+        <div className="row" style={{ gap: 12, marginTop: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <i style={{ width: 10, height: 10, borderRadius: "50%", background: "#14B866" }} />
+            <i style={{ width: 1, height: isAR ? 52 : 26, background: "var(--line)" }} />
+            <i style={{ width: 10, height: 10, borderRadius: "50%", background: "#2f5fff" }} />
+            {isAR && (<><i style={{ width: 1, height: 26, background: "var(--line)" }} /><i style={{ width: 10, height: 10, borderRadius: "50%", background: "#8b5cf6" }} /></>)}
           </div>
-        )}
-      </div>
-
-      {/* Méta */}
-      <div className="cat2-meta">
-        {dateLabel && (
-          <div className="cat2-meta-item"><IcoCal /><b>{dateLabel}</b></div>
-        )}
-        {t.heure_trajet && (
-          <div className="cat2-meta-item"><IcoClock /><b>{t.heure_trajet.slice(0, 5)}</b></div>
-        )}
-        {isAR && <div className="cat2-meta-item"><IcoCheck />Mission groupée</div>}
-        {typeof t.distance_km === "number" && (
-          <div className="cat2-meta-item"><IcoCar />{Math.round(t.distance_km)} km</div>
-        )}
-        {distanceFromMe != null && (
-          <div className="cat2-meta-item"><IcoPin />à {Math.round(distanceFromMe)} km de vous</div>
-        )}
-        {countdown && (
-          <div className="cat2-meta-item"><IcoClock />{countdown}</div>
-        )}
-      </div>
-
-      {/* Prix + statut */}
-      <div className="cat2-price-row">
-        <div className="cat2-price">
-          <div className="k">Rémunération</div>
-          <div className="v">
-            {price.toFixed(0)}
-            <span className="cur">€</span>
+          <div className="sp">
+            <p className="semi" style={{ fontSize: 15 }}>{routeDepart}</p>
+            <p className="semi" style={{ fontSize: 15, marginTop: 14 }}>{routeArrivee}</p>
+            {isAR && <p className="semi" style={{ fontSize: 15, marginTop: 14 }}>{routeRetour}</p>}
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <p className="tiny mut">Rémunération</p>
+            <p className="brex-amount" style={{ fontSize: 22 }}>{price.toFixed(0)} €</p>
+            {typeof t.distance_km === "number" && <p className="tiny mut">{Math.round(t.distance_km)} km</p>}
           </div>
         </div>
-        {myOfferStatus ? (
-          <span className="cat2-status">
-            <span className="dt" />
-            {OFFER_LABEL[myOfferStatus] ?? "En attente"}
-            {typeof myOfferPrice === "number" ? ` · ${myOfferPrice.toFixed(0)} €` : ""}
-          </span>
-        ) : (
-          <span className="cat2-status ok"><span className="dt" />Disponible</span>
-        )}
-      </div>
 
-      {/* CTA */}
-      {locked ? (
-        <button type="button" className="cat2-accept locked" disabled>
-          <IcoLock />
-          Réservé aux convoyeurs {level}
-          {requis === "confirme" ? "+" : ""}
-        </button>
-      ) : myOfferStatus ? (
-        <button
-          type="button"
-          className="cat2-accept"
-          onClick={(e) => { e.stopPropagation(); onOpen(); }}
-        >
-          <IcoDoc />
-          Voir ma candidature
-        </button>
-      ) : (
-        <button
-          type="button"
-          className="cat2-accept"
-          disabled={!canApply}
-          onClick={(e) => { e.stopPropagation(); if (canApply) onQuickApply(); }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>
-          Accepter la mission
-        </button>
-      )}
-    </article>
+        <div className="row xs soft" style={{ marginTop: 12, gap: 8 }}>
+          <Ic n="car" s={13} /> <b style={{ whiteSpace: "nowrap" }}>{vehicule || "Véhicule à confirmer"}</b>
+          <span className="mut tiny">· {isAR ? "Livraison + restitution" : "Enlèvement + livraison"}</span>
+        </div>
+        {countdown && <p className="tiny mut" style={{ marginTop: 8 }}><Ic n="clock" s={11} sw={2.4} /> {countdown}</p>}
+
+        {ench && <AuctionStrip a={ench} />}
+
+        {locked ? (
+          <button type="button" className="btn" disabled style={{ marginTop: 14, opacity: 0.6 }}>
+            <Ic n="lock" s={15} sw={2.4} /> Réservé aux convoyeurs {level}{requis === "confirme" ? "+" : ""}
+          </button>
+        ) : ench ? (
+          <button type="button" className="btn aucbtn" style={{ marginTop: 12 }} disabled={!canApply}
+            onClick={(e) => { e.stopPropagation(); if (canApply) onAuction?.(); }}>
+            <Ic n="hammer" s={17} sw={2.3} /> {ench.mon_offre != null ? `Modifier mon offre (${Math.round(ench.mon_offre)} €)` : "Faire une offre"}
+          </button>
+        ) : myOfferStatus ? (
+          <button type="button" className="btn" style={{ marginTop: 14 }} onClick={(e) => { e.stopPropagation(); onOpen(); }}>
+            {OFFER_LABEL[myOfferStatus] ?? "Candidature envoyée"}{typeof myOfferPrice === "number" ? ` · ${myOfferPrice.toFixed(0)} €` : ""} ✓
+          </button>
+        ) : (
+          <button type="button" className="btn" style={{ marginTop: 14 }} disabled={!canApply}
+            onClick={(e) => { e.stopPropagation(); if (canApply) onQuickApply(); }}>
+            Je me positionne
+          </button>
+        )}
+      </article>
+    </div>
   );
 }

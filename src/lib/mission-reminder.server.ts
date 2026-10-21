@@ -143,7 +143,7 @@ export async function sendMissionReminder(
       .select('id, prenom, nom, email, user_id')
       .eq('id', a.convoyeur_id)
       .maybeSingle()
-    const c = conv as { prenom?: string; email?: string } | null
+    const c = conv as { prenom?: string; email?: string; user_id?: string } | null
 
     const numero = a.numero_mission ?? t.numero_mission ?? ''
     const docsUrl = `${SITE_URL}/convoyeur/documents-mission/${a.id}`
@@ -215,6 +215,25 @@ export async function sendMissionReminder(
       pushOk = Boolean(r?.ok)
     } catch (e) {
       console.error('[rappel-j1] push échoué', a.id, e)
+    }
+
+    // Notification dans l'appli (cloche) avec la checklist avant l'enlèvement
+    try {
+      const cu = (conv as { user_id?: string } | null)?.user_id
+      if (cu) {
+        await supabaseAdmin.from('user_notifications' as never).insert({
+          user_id: cu,
+          type: 'mission_rappel_j1',
+          category: 'mission',
+          priority: 'high',
+          titre: `Demain : mission ${numero || ''}`.trim(),
+          message: `${[t.marque, t.modele].filter(Boolean).join(' ')} · ${t.depart ?? ''} → ${t.arrivee ?? ''}. Avant de partir : gilet jaune dans l'habitacle, tenue correcte, permis sur toi.`,
+          link: `/convoyeur/missions?open=${a.id}`,
+          dedup_key: `rappel-j1-${a.id}`,
+        } as never)
+      }
+    } catch (e) {
+      console.error('[rappel-j1] notification appli échouée', a.id, e)
     }
 
     await supabaseAdmin
