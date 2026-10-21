@@ -112,7 +112,8 @@ export const esignList = createServerFn({ method: "POST" })
   .inputValidator((d: { refType?: string; refId?: string; limit?: number }) => d ?? {})
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    let q = (context.supabase as any)
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    let q = supabaseAdmin
       .from("esign_requests")
       .select("id, kind, title, ref_type, ref_id, signer_name, signer_email, signer_phone, signer_company, status, sent_at, opened_at, signed_at, declined_at, decline_reason, expires_at, signed_doc_path, dossier_path, last_reminder_at, created_at")
       .order("created_at", { ascending: false })
@@ -136,7 +137,8 @@ export const esignEvents = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const S = await import("@/lib/esign.server");
-    const { data: events } = await (context.supabase as any)
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const { data: events } = await supabaseAdmin
       .from("esign_events").select("seq, type, payload, ip_address, created_at, hash").eq("request_id", data.id).order("seq");
     return { events: events ?? [], chainOk: await S.chainOk(data.id) };
   });

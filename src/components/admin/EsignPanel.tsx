@@ -36,6 +36,11 @@ interface Row {
   signed_doc_path: string | null;
 }
 
+const errMsg = (e: unknown, fallback: string) => {
+  const m = (e as { message?: unknown } | null)?.message;
+  return typeof m === "string" && m ? m.replace(/^.*Error:\s*/, "") : fallback;
+};
+
 function fileToBase64(f: Blob): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
@@ -82,7 +87,7 @@ export default function EsignPanel(p: EsignPanelProps) {
     try {
       const r = await list({ data: { refType: p.refType, refId: p.refId } });
       setRows(r.items as Row[]);
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Chargement impossible"); } finally { setLoading(false); }
+    } catch (e) { toast.error(errMsg(e, "Chargement impossible")); } finally { setLoading(false); }
   }, [list, p.refType, p.refId]);
   useEffect(() => { void load(); }, [load]);
 
@@ -98,15 +103,15 @@ export default function EsignPanel(p: EsignPanelProps) {
       } });
       toast.success(r.emailSent ? "Document envoyé pour signature." : "Demande créée, mais l'e-mail n'a pas pu partir.");
       setFile(null); await load();
-    } catch (e) { toast.error(e instanceof Error ? e.message.replace(/^.*Error:\s*/, "") : "Envoi impossible"); } finally { setBusy(null); }
+    } catch (e) { toast.error(errMsg(e, "Envoi impossible")); } finally { setBusy(null); }
   };
   const act = async (id: string, fn: () => Promise<unknown>, ok: string) => {
     setBusy(id);
-    try { await fn(); toast.success(ok); await load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Action impossible"); } finally { setBusy(null); }
+    try { await fn(); toast.success(ok); await load(); } catch (e) { toast.error(errMsg(e, "Action impossible")); } finally { setBusy(null); }
   };
   const download = async (id: string, which: "signed" | "dossier" | "original") => {
     try { const u = await dl({ data: { id } }); const url = u[which]; if (url) window.open(url, "_blank"); else toast.error("Fichier indisponible."); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Téléchargement impossible"); }
+    catch (e) { toast.error(errMsg(e, "Téléchargement impossible")); }
   };
   const toggleLog = async (id: string) => {
     if (open === id) { setOpen(null); return; }
