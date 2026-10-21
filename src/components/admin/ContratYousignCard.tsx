@@ -20,6 +20,7 @@ import {
   getLastChartePageCount,
 } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
+import EsignPanel from "@/components/admin/EsignPanel";
 
 interface Props {
   convoyeurId: string;
@@ -269,6 +270,23 @@ export default function ContratYousignCard(props: Props) {
           </p>
         </>
       )}
+
+      <details className="mt-5 border-t border-pro-border pt-4">
+        <summary className="cursor-pointer text-sm font-medium text-pro-text">Signature électronique Ligneo (sans Yousign)</summary>
+        <div className="mt-3">
+          <EsignPanel
+            kind="contrat_convoyeur"
+            refType="convoyeur"
+            refId={props.convoyeurId}
+            title="Envoyer le contrat de partenariat"
+            defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "" }}
+            getPdf={() => generateContratConvoyeurPdf(
+              { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null },
+              company,
+            )}
+          />
+        </div>
+      </details>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   Handshake,
   UserRound,
   PenLine,
+  FileSignature,
   Radar,
   GraduationCap,
   Megaphone,
@@ -208,6 +209,7 @@ function AdminLayout() {
         : undefined,
     },
     { to: "/admin/acceptations", label: "Preuves d'acceptation", icon: PenLine, group: "Clients & convoyeurs" },
+    { to: "/admin/signatures", label: "Signatures électroniques", icon: FileSignature, group: "Clients & convoyeurs" },
     { to: "/admin/b2b-leads", label: "Partenariats", icon: Handshake, group: "Clients & convoyeurs" },
     { to: "/admin/acces-demo", label: "Accès démo", icon: Send, group: "Clients & convoyeurs" },
 

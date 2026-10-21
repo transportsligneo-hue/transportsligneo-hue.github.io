@@ -44,6 +44,7 @@ import { Route as SuiviRouteImport } from './routes/suivi'
 import { Route as SuppressionCompteRouteImport } from './routes/suppression-compte'
 import { Route as TarifsRouteImport } from './routes/tarifs'
 import { Route as TestSmsRouteImport } from './routes/test-sms'
+import { Route as VerifierSignatureRouteImport } from './routes/verifier-signature'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedConvoyeurRouteImport } from './routes/_authenticated/convoyeur'
 import { Route as AuthenticatedDashboardClientRouteImport } from './routes/_authenticated/dashboard-client'
@@ -64,6 +65,7 @@ import { Route as InvitationEquipeTokenRouteImport } from './routes/invitation-e
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
+import { Route as SignatureTokenRouteImport } from './routes/signature.$token'
 import { Route as SignerIndexRouteImport } from './routes/signer.index'
 import { Route as SignerTokenRouteImport } from './routes/signer.$token'
 import { Route as VerifyCertificatTokenRouteImport } from './routes/verify-certificat.$token'
@@ -107,6 +109,7 @@ import { Route as AuthenticatedAdminPaiementsConvoyeursRouteImport } from './rou
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
 import { Route as AuthenticatedAdminScanDocumentRouteImport } from './routes/_authenticated/admin.scan-document'
+import { Route as AuthenticatedAdminSignaturesRouteImport } from './routes/_authenticated/admin.signatures'
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
 import { Route as AuthenticatedAdminTestNotificationsRouteImport } from './routes/_authenticated/admin.test-notifications'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
@@ -403,6 +406,11 @@ const TestSmsRoute = TestSmsRouteImport.update({
   path: '/test-sms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VerifierSignatureRoute = VerifierSignatureRouteImport.update({
+  id: '/verifier-signature',
+  path: '/verifier-signature',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -505,6 +513,11 @@ const ScanIndexRoute = ScanIndexRouteImport.update({
 const ScanTokenRoute = ScanTokenRouteImport.update({
   id: '/scan/$token',
   path: '/scan/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignatureTokenRoute = SignatureTokenRouteImport.update({
+  id: '/signature/$token',
+  path: '/signature/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignerIndexRoute = SignerIndexRouteImport.update({
@@ -758,6 +771,12 @@ const AuthenticatedAdminScanDocumentRoute =
   AuthenticatedAdminScanDocumentRouteImport.update({
     id: '/scan-document',
     path: '/scan-document',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSignaturesRoute =
+  AuthenticatedAdminSignaturesRouteImport.update({
+    id: '/signatures',
+    path: '/signatures',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminSuperAdminRoute =
@@ -1498,6 +1517,7 @@ export interface FileRoutesByFullPath {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
+  '/verifier-signature': typeof VerifierSignatureRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -1516,6 +1536,7 @@ export interface FileRoutesByFullPath {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
@@ -1560,6 +1581,7 @@ export interface FileRoutesByFullPath {
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
+  '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -1718,6 +1740,7 @@ export interface FileRoutesByTo {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
+  '/verifier-signature': typeof VerifierSignatureRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
@@ -1730,6 +1753,7 @@ export interface FileRoutesByTo {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
@@ -1774,6 +1798,7 @@ export interface FileRoutesByTo {
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
+  '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -1931,6 +1956,7 @@ export interface FileRoutesById {
   '/suppression-compte': typeof SuppressionCompteRoute
   '/tarifs': typeof TarifsRoute
   '/test-sms': typeof TestSmsRoute
+  '/verifier-signature': typeof VerifierSignatureRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/convoyeur': typeof AuthenticatedConvoyeurRouteWithChildren
   '/_authenticated/dashboard-client': typeof AuthenticatedDashboardClientRouteWithChildren
@@ -1949,6 +1975,7 @@ export interface FileRoutesById {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
@@ -1993,6 +2020,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
   '/_authenticated/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
+  '/_authenticated/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/_authenticated/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
@@ -2153,6 +2181,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
+    | '/verifier-signature'
     | '/admin'
     | '/convoyeur'
     | '/dashboard-client'
@@ -2171,6 +2200,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
@@ -2215,6 +2245,7 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/scan-document'
+    | '/admin/signatures'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
@@ -2373,6 +2404,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
+    | '/verifier-signature'
     | '/notifications'
     | '/a/$code'
     | '/actualites/$slug'
@@ -2385,6 +2417,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites'
@@ -2429,6 +2462,7 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/parametres-ia'
     | '/admin/scan-document'
+    | '/admin/signatures'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
@@ -2585,6 +2619,7 @@ export interface FileRouteTypes {
     | '/suppression-compte'
     | '/tarifs'
     | '/test-sms'
+    | '/verifier-signature'
     | '/_authenticated/admin'
     | '/_authenticated/convoyeur'
     | '/_authenticated/dashboard-client'
@@ -2603,6 +2638,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
@@ -2647,6 +2683,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
     | '/_authenticated/admin/scan-document'
+    | '/_authenticated/admin/signatures'
     | '/_authenticated/admin/super-admin'
     | '/_authenticated/admin/test-notifications'
     | '/_authenticated/admin/trajets'
@@ -2807,6 +2844,7 @@ export interface RootRouteChildren {
   SuppressionCompteRoute: typeof SuppressionCompteRoute
   TarifsRoute: typeof TarifsRoute
   TestSmsRoute: typeof TestSmsRoute
+  VerifierSignatureRoute: typeof VerifierSignatureRoute
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
@@ -2815,6 +2853,7 @@ export interface RootRouteChildren {
   InvitationEquipeTokenRoute: typeof InvitationEquipeTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
+  SignatureTokenRoute: typeof SignatureTokenRoute
   SignerTokenRoute: typeof SignerTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
@@ -3115,6 +3154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestSmsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/verifier-signature': {
+      id: '/verifier-signature'
+      path: '/verifier-signature'
+      fullPath: '/verifier-signature'
+      preLoaderRoute: typeof VerifierSignatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -3253,6 +3299,13 @@ declare module '@tanstack/react-router' {
       path: '/scan/$token'
       fullPath: '/scan/$token'
       preLoaderRoute: typeof ScanTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signature/$token': {
+      id: '/signature/$token'
+      path: '/signature/$token'
+      fullPath: '/signature/$token'
+      preLoaderRoute: typeof SignatureTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signer/': {
@@ -3554,6 +3607,13 @@ declare module '@tanstack/react-router' {
       path: '/scan-document'
       fullPath: '/admin/scan-document'
       preLoaderRoute: typeof AuthenticatedAdminScanDocumentRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/signatures': {
+      id: '/_authenticated/admin/signatures'
+      path: '/signatures'
+      fullPath: '/admin/signatures'
+      preLoaderRoute: typeof AuthenticatedAdminSignaturesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/super-admin': {
@@ -4505,6 +4565,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
   AuthenticatedAdminScanDocumentRoute: typeof AuthenticatedAdminScanDocumentRoute
+  AuthenticatedAdminSignaturesRoute: typeof AuthenticatedAdminSignaturesRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
   AuthenticatedAdminTestNotificationsRoute: typeof AuthenticatedAdminTestNotificationsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
@@ -4561,6 +4622,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
   AuthenticatedAdminScanDocumentRoute: AuthenticatedAdminScanDocumentRoute,
+  AuthenticatedAdminSignaturesRoute: AuthenticatedAdminSignaturesRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
   AuthenticatedAdminTestNotificationsRoute:
     AuthenticatedAdminTestNotificationsRoute,
@@ -4943,6 +5005,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuppressionCompteRoute: SuppressionCompteRoute,
   TarifsRoute: TarifsRoute,
   TestSmsRoute: TestSmsRoute,
+  VerifierSignatureRoute: VerifierSignatureRoute,
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
@@ -4951,6 +5014,7 @@ const rootRouteChildren: RootRouteChildren = {
   InvitationEquipeTokenRoute: InvitationEquipeTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
+  SignatureTokenRoute: SignatureTokenRoute,
   SignerTokenRoute: SignerTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
