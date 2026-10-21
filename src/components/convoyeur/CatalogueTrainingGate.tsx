@@ -12,9 +12,9 @@ export function CatalogueTrainingGate() {
   const statut = resolveTrainingStatut(false, completedCount);
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-[calc(88px+env(safe-area-inset-bottom))] md:mb-0">
       <div
-        className="relative min-h-[calc(100vh-2rem)] px-4 sm:px-6 lg:px-8 pt-10 pb-24 text-white"
+        className="relative min-h-[calc(100svh-2rem)] px-4 sm:px-6 lg:px-8 pt-10 pb-[calc(88px+7rem)] md:pb-24 text-white"
         style={{
           background:
             "radial-gradient(120% 80% at 50% 0%, #0b1a44 0%, #060e28 55%, #030814 100%)",

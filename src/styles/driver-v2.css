@@ -2076,7 +2076,7 @@ html.theme-dark .drv2 .inf2 header em{color:#6effcd;background:rgba(79,232,160,.
 .drv2.drv2 .road{position:relative;z-index:1;padding:6px 4px 4px}
 .drv2.drv2 .road-top{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:40px;padding:0 2px}
 .drv2.drv2 .road-top span{display:flex;align-items:center;gap:5px}
-.drv2.drv2 .road-logo{position:absolute;bottom:-20px;width:104px;aspect-ratio:912/865;transform:translateX(-50%);transition:left 1s cubic-bezier(.4,0,.2,1);z-index:3;pointer-events:none}
+.drv2.drv2 .road-logo{position:absolute;bottom:-26px;width:138px;aspect-ratio:600/569;transform:translateX(-50%);transition:left 1s cubic-bezier(.4,0,.2,1);z-index:3;pointer-events:none}
 .drv2.drv2 .road-logo img{position:relative;width:100%;height:100%;display:block;z-index:2}
 .drv2.drv2 .road-logo b{position:absolute;left:52.4%;top:18.3%;transform:translate(-50%,-50%);font-size:14px;font-weight:900;color:#41f0a4;white-space:nowrap;line-height:1;z-index:3;text-shadow:0 0 8px rgba(65,240,164,.75)}
 .drv2.drv2 .road-top{margin-bottom:76px!important}
@@ -2353,3 +2353,44 @@ html.theme-light .edl-shell .pa-editor-frame{background:#0f2a22;box-shadow:0 16p
 .drv2 .v3-ev b{color:var(--ink)}
 .drv2 .v3-chip.eco{color:#1d5fd1;background:rgba(47,139,255,.08);border-color:rgba(47,139,255,.3)}
 .drv2 .v3-chip-row .v3-chip.eco{color:#1d5fd1}
+
+/* Éclair électrique : toujours bleu néon */
+.ic-bolt{color:#18b4ff!important;filter:drop-shadow(0 0 3px rgba(24,180,255,.95)) drop-shadow(0 0 8px rgba(24,180,255,.55))}
+.drv2 .vbolt .ic-bolt{color:#fff!important}
+.drv2 .v3-chip-row .v3-chip.eco{color:#0a6fd1}
+
+/* ===== EDL : niveau carburant / batterie (curseur) ===== */
+.edl-niv{padding:16px;border-radius:18px;background:#fff;border:1px solid rgba(20,184,102,.2);box-shadow:0 12px 28px -18px rgba(8,36,63,.3);display:flex;flex-direction:column;gap:10px}
+html.theme-dark .edl-niv{background:rgba(255,255,255,.06);border-color:rgba(79,232,160,.25)}
+.edl-niv-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--edl-text)}
+.edl-niv-head span{display:inline-flex;align-items:center;gap:8px}
+.edl-niv-head b{font-size:26px;font-weight:800;color:var(--tone,#14B866);letter-spacing:-.5px}
+.edl-niv-bar{height:10px;border-radius:99px;background:rgba(20,184,102,.12);overflow:hidden}
+.edl-niv-bar i{display:block;height:100%;border-radius:99px;background:var(--tone,#14B866);box-shadow:0 0 12px var(--tone,#14B866);transition:width .2s}
+.edl-niv input[type=range]{width:100%;height:34px;background:transparent;-webkit-appearance:none;appearance:none;margin:0}
+.edl-niv input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:rgba(20,184,102,.18)}
+.edl-niv input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-12px;border-radius:50%;background:#fff;border:3px solid var(--tone,#14B866);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.edl-niv input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:rgba(20,184,102,.18)}
+.edl-niv input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--tone,#14B866)}
+.edl-niv-ticks{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--edl-muted);margin-top:-4px}
+.edl-niv-quick{display:flex;gap:6px}
+.edl-niv-quick button{flex:1;padding:9px 0;border-radius:11px;border:1px solid rgba(20,184,102,.25);background:transparent;font-weight:800;font-size:12.5px;color:var(--edl-text-soft)}
+.edl-niv-quick button.on{background:rgba(20,184,102,.16);border-color:#14B866;color:#0b7a43}
+
+/* ===== Page mission : plus de grand bloc sombre / bande blanche en bas ===== */
+html .mv3-fullscreen{background:transparent!important;min-height:0!important;color:#08243f;padding-bottom:calc(8px + env(safe-area-inset-bottom))!important}
+html.theme-dark .mv3-fullscreen{color:#EAF3FF}
+html .mv3-backbar{background:rgba(238,246,241,.88)!important;border-bottom:1px solid rgba(20,184,102,.16)!important}
+html .mv3-back-btn{color:#08243f!important}
+html .mv3-back-btn:hover{background:rgba(20,184,102,.10)!important}
+html .mv3-live-pill-top{background:linear-gradient(120deg,#14B866,#4FE8A0)!important;color:#fff!important}
+html .mv3-live-pill-top-dot{background:#fff!important}
+html .mv3-live-block,html .mv3-docs-card{background:#fff!important;border:1px solid rgba(20,184,102,.18)!important;color:#08243f!important;box-shadow:0 12px 28px -18px rgba(8,36,63,.3)}
+html .mv3-live-title{color:#08243f!important}
+html .mv3-live-sub{color:#5a7a86!important}
+html .mv3-live-mapbtn{background:#eff7f2!important;border-color:rgba(20,184,102,.2)!important;color:#08243f!important}
+html.theme-dark .mv3-backbar{background:rgba(6,11,36,.85)!important;border-bottom-color:rgba(120,180,255,.1)!important}
+html.theme-dark .mv3-back-btn{color:#EAF3FF!important}
+html.theme-dark .mv3-live-block,html.theme-dark .mv3-docs-card{background:rgba(255,255,255,.05)!important;border-color:rgba(120,180,255,.16)!important;color:#EAF3FF!important}
+html.theme-dark .mv3-live-title{color:#EAF3FF!important}
+html.theme-dark .mv3-live-mapbtn{background:rgba(255,255,255,.06)!important;color:#EAF3FF!important}
