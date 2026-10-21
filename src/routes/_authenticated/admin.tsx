@@ -20,8 +20,8 @@ import {
   UserRound,
   PenLine,
   Radar,
-  Megaphone,
   GraduationCap,
+  Megaphone,
   Sparkles,
   Crown,
   ClipboardList,
@@ -197,6 +197,7 @@ function AdminLayout() {
     { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Clients & convoyeurs" },
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },
+    { to: "/admin/infos-ligneo", label: "Infos Ligneo", icon: Megaphone, group: "Clients & convoyeurs" },
     {
       to: "/admin/bons-commande",
       label: "Bons de commande",

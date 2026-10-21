@@ -93,6 +93,7 @@ import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
+import { Route as AuthenticatedAdminInfosLigneoRouteImport } from './routes/_authenticated/admin.infos-ligneo'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
 import { Route as AuthenticatedAdminMessagerieRouteImport } from './routes/_authenticated/admin.messagerie'
 import { Route as AuthenticatedAdminMessagerieConseillerRouteImport } from './routes/_authenticated/admin.messagerie-conseiller'
@@ -118,7 +119,9 @@ import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_a
 import { Route as AuthenticatedConvoyeurFinancesRouteImport } from './routes/_authenticated/convoyeur.finances'
 import { Route as AuthenticatedConvoyeurFormationRouteImport } from './routes/_authenticated/convoyeur.formation'
 import { Route as AuthenticatedConvoyeurHistoriqueRouteImport } from './routes/_authenticated/convoyeur.historique'
+import { Route as AuthenticatedConvoyeurMaterielRouteImport } from './routes/_authenticated/convoyeur.materiel'
 import { Route as AuthenticatedConvoyeurMissionsRouteImport } from './routes/_authenticated/convoyeur.missions'
+import { Route as AuthenticatedConvoyeurNotificationsRouteImport } from './routes/_authenticated/convoyeur.notifications'
 import { Route as AuthenticatedConvoyeurProfilRouteImport } from './routes/_authenticated/convoyeur.profil'
 import { Route as AuthenticatedDashboardClientIndexRouteImport } from './routes/_authenticated/dashboard-client.index'
 import { Route as AuthenticatedDashboardClientAdressesRouteImport } from './routes/_authenticated/dashboard-client.adresses'
@@ -672,6 +675,12 @@ const AuthenticatedAdminInformationsLegalesRoute =
     path: '/informations-legales',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminInfosLigneoRoute =
+  AuthenticatedAdminInfosLigneoRouteImport.update({
+    id: '/infos-ligneo',
+    path: '/infos-ligneo',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminInscriptionsRoute =
   AuthenticatedAdminInscriptionsRouteImport.update({
     id: '/inscriptions',
@@ -822,10 +831,22 @@ const AuthenticatedConvoyeurHistoriqueRoute =
     path: '/historique',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
+const AuthenticatedConvoyeurMaterielRoute =
+  AuthenticatedConvoyeurMaterielRouteImport.update({
+    id: '/materiel',
+    path: '/materiel',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
 const AuthenticatedConvoyeurMissionsRoute =
   AuthenticatedConvoyeurMissionsRouteImport.update({
     id: '/missions',
     path: '/missions',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
+const AuthenticatedConvoyeurNotificationsRoute =
+  AuthenticatedConvoyeurNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
 const AuthenticatedConvoyeurProfilRoute =
@@ -1518,6 +1539,7 @@ export interface FileRoutesByFullPath {
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
+  '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -1542,7 +1564,9 @@ export interface FileRoutesByFullPath {
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
   '/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
+  '/convoyeur/materiel': typeof AuthenticatedConvoyeurMaterielRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/convoyeur/notifications': typeof AuthenticatedConvoyeurNotificationsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
@@ -1728,6 +1752,7 @@ export interface FileRoutesByTo {
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
+  '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -1751,7 +1776,9 @@ export interface FileRoutesByTo {
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
   '/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
   '/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
+  '/convoyeur/materiel': typeof AuthenticatedConvoyeurMaterielRoute
   '/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/convoyeur/notifications': typeof AuthenticatedConvoyeurNotificationsRoute
   '/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
@@ -1943,6 +1970,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
+  '/_authenticated/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
   '/_authenticated/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/_authenticated/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -1967,7 +1995,9 @@ export interface FileRoutesById {
   '/_authenticated/convoyeur/finances': typeof AuthenticatedConvoyeurFinancesRoute
   '/_authenticated/convoyeur/formation': typeof AuthenticatedConvoyeurFormationRouteWithChildren
   '/_authenticated/convoyeur/historique': typeof AuthenticatedConvoyeurHistoriqueRoute
+  '/_authenticated/convoyeur/materiel': typeof AuthenticatedConvoyeurMaterielRoute
   '/_authenticated/convoyeur/missions': typeof AuthenticatedConvoyeurMissionsRoute
+  '/_authenticated/convoyeur/notifications': typeof AuthenticatedConvoyeurNotificationsRoute
   '/_authenticated/convoyeur/profil': typeof AuthenticatedConvoyeurProfilRoute
   '/_authenticated/dashboard-client/adresses': typeof AuthenticatedDashboardClientAdressesRoute
   '/_authenticated/dashboard-client/aide': typeof AuthenticatedDashboardClientAideRoute
@@ -2161,6 +2191,7 @@ export interface FileRouteTypes {
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
+    | '/admin/infos-ligneo'
     | '/admin/inscriptions'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
@@ -2185,7 +2216,9 @@ export interface FileRouteTypes {
     | '/convoyeur/finances'
     | '/convoyeur/formation'
     | '/convoyeur/historique'
+    | '/convoyeur/materiel'
     | '/convoyeur/missions'
+    | '/convoyeur/notifications'
     | '/convoyeur/profil'
     | '/dashboard-client/adresses'
     | '/dashboard-client/aide'
@@ -2371,6 +2404,7 @@ export interface FileRouteTypes {
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
+    | '/admin/infos-ligneo'
     | '/admin/inscriptions'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
@@ -2394,7 +2428,9 @@ export interface FileRouteTypes {
     | '/convoyeur/documents'
     | '/convoyeur/finances'
     | '/convoyeur/historique'
+    | '/convoyeur/materiel'
     | '/convoyeur/missions'
+    | '/convoyeur/notifications'
     | '/convoyeur/profil'
     | '/dashboard-client/adresses'
     | '/dashboard-client/aide'
@@ -2585,6 +2621,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/informations-legales'
+    | '/_authenticated/admin/infos-ligneo'
     | '/_authenticated/admin/inscriptions'
     | '/_authenticated/admin/messagerie'
     | '/_authenticated/admin/messagerie-conseiller'
@@ -2609,7 +2646,9 @@ export interface FileRouteTypes {
     | '/_authenticated/convoyeur/finances'
     | '/_authenticated/convoyeur/formation'
     | '/_authenticated/convoyeur/historique'
+    | '/_authenticated/convoyeur/materiel'
     | '/_authenticated/convoyeur/missions'
+    | '/_authenticated/convoyeur/notifications'
     | '/_authenticated/convoyeur/profil'
     | '/_authenticated/dashboard-client/adresses'
     | '/_authenticated/dashboard-client/aide'
@@ -3405,6 +3444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInformationsLegalesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/infos-ligneo': {
+      id: '/_authenticated/admin/infos-ligneo'
+      path: '/infos-ligneo'
+      fullPath: '/admin/infos-ligneo'
+      preLoaderRoute: typeof AuthenticatedAdminInfosLigneoRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/inscriptions': {
       id: '/_authenticated/admin/inscriptions'
       path: '/inscriptions'
@@ -3580,11 +3626,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConvoyeurHistoriqueRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
+    '/_authenticated/convoyeur/materiel': {
+      id: '/_authenticated/convoyeur/materiel'
+      path: '/materiel'
+      fullPath: '/convoyeur/materiel'
+      preLoaderRoute: typeof AuthenticatedConvoyeurMaterielRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
     '/_authenticated/convoyeur/missions': {
       id: '/_authenticated/convoyeur/missions'
       path: '/missions'
       fullPath: '/convoyeur/missions'
       preLoaderRoute: typeof AuthenticatedConvoyeurMissionsRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
+    '/_authenticated/convoyeur/notifications': {
+      id: '/_authenticated/convoyeur/notifications'
+      path: '/notifications'
+      fullPath: '/convoyeur/notifications'
+      preLoaderRoute: typeof AuthenticatedConvoyeurNotificationsRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
     '/_authenticated/convoyeur/profil': {
@@ -4410,6 +4470,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
+  AuthenticatedAdminInfosLigneoRoute: typeof AuthenticatedAdminInfosLigneoRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
   AuthenticatedAdminMessagerieRoute: typeof AuthenticatedAdminMessagerieRoute
   AuthenticatedAdminMessagerieConseillerRoute: typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -4462,6 +4523,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
   AuthenticatedAdminInformationsLegalesRoute:
     AuthenticatedAdminInformationsLegalesRoute,
+  AuthenticatedAdminInfosLigneoRoute: AuthenticatedAdminInfosLigneoRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
   AuthenticatedAdminMessagerieRoute: AuthenticatedAdminMessagerieRoute,
   AuthenticatedAdminMessagerieConseillerRoute:
@@ -4526,7 +4588,9 @@ interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurFinancesRoute: typeof AuthenticatedConvoyeurFinancesRoute
   AuthenticatedConvoyeurFormationRoute: typeof AuthenticatedConvoyeurFormationRouteWithChildren
   AuthenticatedConvoyeurHistoriqueRoute: typeof AuthenticatedConvoyeurHistoriqueRoute
+  AuthenticatedConvoyeurMaterielRoute: typeof AuthenticatedConvoyeurMaterielRoute
   AuthenticatedConvoyeurMissionsRoute: typeof AuthenticatedConvoyeurMissionsRoute
+  AuthenticatedConvoyeurNotificationsRoute: typeof AuthenticatedConvoyeurNotificationsRoute
   AuthenticatedConvoyeurProfilRoute: typeof AuthenticatedConvoyeurProfilRoute
   AuthenticatedConvoyeurIndexRoute: typeof AuthenticatedConvoyeurIndexRoute
   AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute: typeof AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute
@@ -4545,7 +4609,10 @@ const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
       AuthenticatedConvoyeurFormationRouteWithChildren,
     AuthenticatedConvoyeurHistoriqueRoute:
       AuthenticatedConvoyeurHistoriqueRoute,
+    AuthenticatedConvoyeurMaterielRoute: AuthenticatedConvoyeurMaterielRoute,
     AuthenticatedConvoyeurMissionsRoute: AuthenticatedConvoyeurMissionsRoute,
+    AuthenticatedConvoyeurNotificationsRoute:
+      AuthenticatedConvoyeurNotificationsRoute,
     AuthenticatedConvoyeurProfilRoute: AuthenticatedConvoyeurProfilRoute,
     AuthenticatedConvoyeurIndexRoute: AuthenticatedConvoyeurIndexRoute,
     AuthenticatedConvoyeurDocumentsMissionAttributionIdRoute:

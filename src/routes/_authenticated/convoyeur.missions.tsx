@@ -602,6 +602,7 @@ function ConvoyeurMissions() {
           vin: (inspectionMission?.trajet as { vin?: string | null; vehicule_vin?: string | null } | null | undefined)?.vin || (inspectionMission?.trajet as { vehicule_vin?: string | null } | null | undefined)?.vehicule_vin || null,
         }}
         defaultClientName={inspectionMission?.trajet?.marque ? undefined : undefined}
+        livraison={inspectionMission?.trajet?.arrivee ?? undefined}
         onComplete={handleInspectionComplete}
         onClose={closeInspection}
       />

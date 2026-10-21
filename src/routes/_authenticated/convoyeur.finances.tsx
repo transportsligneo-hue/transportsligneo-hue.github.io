@@ -1,313 +1,270 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { MesRemunerations } from "@/components/convoyeur/MesRemunerations";
 import { supabase } from "@/integrations/supabase/client";
+import { Ic } from "@/components/driver2/icons";
 import {
-  ArrowLeft, TrendingUp, Wallet, CreditCard, FileDown,
-  ArrowUpRight, ArrowDownRight, Loader2, Pencil, Check, X,
-} from "lucide-react";
+  decomposer, downloadFile, toCsv,
+  type Ajustement, type PaiementConvoyeur, type Remuneration,
+} from "@/lib/finances-convoyeurs";
+import "@/styles/driver-v2.css";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/finances")({
   component: FinancesPage,
 });
 
-interface PaidMission {
-  id: string;
-  ref: string;
-  date: string;
-  depart: string;
-  arrivee: string;
-  montant: number;
-  updated_at: string;
-  paid: boolean;
-}
+const MONTHS_SHORT = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+const MONTHS_FULL = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
-const MONTHS_FR = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-const MONTHS_FULL = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const fmtE = (v: number) =>
+  (Math.round(v * 100) / 100).toLocaleString("fr-FR", { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const shortDate = (d: string | null | undefined) => {
+  if (!d) return "—";
+  const x = new Date(d);
+  return `${String(x.getDate()).padStart(2, "0")} ${MONTHS_SHORT[x.getMonth()]}.`;
+};
+const maskIban = (iban: string) => {
+  const c = iban.replace(/\s+/g, "").toUpperCase();
+  return c.length < 8 ? c : `${c.slice(0, 4)} •••• •••• •••• ${c.slice(-7)}`;
+};
 
-function maskIban(iban: string): string {
-  const clean = iban.replace(/\s+/g, "").toUpperCase();
-  if (clean.length < 8) return clean;
-  return `${clean.slice(0, 4)} •••• •••• ${clean.slice(-4)}`;
-}
+type Tab = "all" | "paid" | "pending";
+type Route = { depart: string; arrivee: string };
+const city = (x: string) => String(x).split(",").pop()!.trim();
 
 function FinancesPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [missions, setMissions] = useState<PaidMission[]>([]);
-  const [iban, setIban] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem("convoyeur_iban") ?? "";
+  const [remus, setRemus] = useState<Remuneration[]>([]);
+  const [ajust, setAjust] = useState<Ajustement[]>([]);
+  const [paiements, setPaiements] = useState<PaiementConvoyeur[]>([]);
+  const [routes, setRoutes] = useState<Record<string, Route>>({});
+  const [tab, setTab] = useState<Tab>("all");
+  const [iban, setIban] = useState(() => {
+    try { return localStorage.getItem("convoyeur_iban") ?? ""; } catch { return ""; }
   });
-  const [editingIban, setEditingIban] = useState(false);
-  const [ibanDraft, setIbanDraft] = useState(iban);
+  const [editIban, setEditIban] = useState(false);
+  const [ibanDraft, setIbanDraft] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    (async () => {
-      const { data: conv } = await supabase
-        .from("convoyeurs").select("id").eq("user_id", user.id).maybeSingle();
-      if (!conv) { setLoading(false); return; }
-
-      const { data: attrs } = await supabase
-        .from("attributions")
-        .select("id, statut, trajet_id")
-        .eq("convoyeur_id", conv.id)
-        .in("statut", ["termine"]);
-
-      const trajetIds = (attrs ?? []).map((a) => a.trajet_id).filter(Boolean) as string[];
-      if (trajetIds.length === 0) { setLoading(false); return; }
-
-      const since = new Date();
-      since.setMonth(since.getMonth() - 11);
-      since.setDate(1);
-
-      const { data: trs } = await supabase
-        .from("trajets_assigned_safe" as never)
-        .select("id, depart, arrivee, date_trajet, tarif_convoyeur, updated_at, numero_mission")
-        .in("id", trajetIds)
-        .gte("updated_at", since.toISOString());
-
-      const now = Date.now();
-      const rows: PaidMission[] = (trs ?? []).map((t) => {
-        const dt = (t as any).updated_at as string;
-        const paid = now - new Date(dt).getTime() > 1000 * 60 * 60 * 24 * 7; // payé si >7j
-        return {
-          id: (t as any).id,
-          ref: (t as any).numero_mission ?? (t as any).id?.slice(0, 8).toUpperCase() ?? "—",
-          date: (t as any).date_trajet ?? dt,
-          depart: (t as any).depart ?? "—",
-          arrivee: (t as any).arrivee ?? "—",
-          montant: Number((t as any).tarif_convoyeur ?? 0),
-          updated_at: dt,
-          paid,
-        };
-      }).sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1));
-
-      setMissions(rows);
+    void (async () => {
+      const { data: rows } = await supabase
+        .from("remunerations_missions").select("*").order("date_mission", { ascending: false }).limit(300);
+      const list = (rows ?? []) as unknown as Remuneration[];
+      setRemus(list);
+      if (list.length) {
+        const [{ data: aj }, { data: tr }] = await Promise.all([
+          supabase.from("remuneration_ajustements").select("*").in("remuneration_id", list.map((r) => r.id)),
+          supabase.from("trajets_assigned_safe" as never).select("id,depart,arrivee" as never).in("id" as never, list.map((r) => r.trajet_id) as never),
+        ]);
+        setAjust((aj ?? []) as unknown as Ajustement[]);
+        const m: Record<string, Route> = {};
+        ((tr ?? []) as unknown as Array<{ id: string; depart: string; arrivee: string }>).forEach((t) => { m[t.id] = t; });
+        setRoutes(m);
+      }
+      const { data: pays } = await supabase
+        .from("paiements_convoyeurs").select("*").order("created_at", { ascending: false }).limit(60);
+      setPaiements((pays ?? []) as unknown as PaiementConvoyeur[]);
       setLoading(false);
     })();
   }, [user]);
 
-  const { thisMonth, lastMonth, delta, monthly, currentLabel } = useMemo(() => {
-    const now = new Date();
-    const y = now.getFullYear(), m = now.getMonth();
-    const inMonth = (d: Date, yy: number, mm: number) => d.getFullYear() === yy && d.getMonth() === mm;
+  const payById = useMemo(() => new Map(paiements.map((p) => [p.id, p])), [paiements]);
+  const live = useMemo(() => remus.filter((r) => r.statut !== "annule"), [remus]);
+  const isPaid = (r: Remuneration) => r.statut === "paye";
 
-    const thisMonth = missions
-      .filter((x) => inMonth(new Date(x.updated_at), y, m))
-      .reduce((s, x) => s + x.montant, 0);
-    const lm = m === 0 ? { y: y - 1, m: 11 } : { y, m: m - 1 };
-    const lastMonth = missions
-      .filter((x) => inMonth(new Date(x.updated_at), lm.y, lm.m))
-      .reduce((s, x) => s + x.montant, 0);
-    const delta = lastMonth > 0 ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) : null;
+  const now = new Date();
+  const y = now.getFullYear(), mo = now.getMonth();
+  const inMonth = (r: Remuneration, yy: number, mm: number) => {
+    const d = r.date_mission ? new Date(r.date_mission) : null;
+    return !!d && d.getFullYear() === yy && d.getMonth() === mm;
+  };
+  const month = live.filter((r) => inMonth(r, y, mo));
+  const sum = (a: Remuneration[]) => a.reduce((s, r) => s + Number(r.montant_total), 0);
+  const monthPaid = month.filter(isPaid), monthPend = month.filter((r) => !isPaid(r));
+  const prev = mo === 0 ? { y: y - 1, m: 11 } : { y, m: mo - 1 };
+  const prevTotal = sum(live.filter((r) => inMonth(r, prev.y, prev.m)));
+  const delta = prevTotal > 0 ? Math.round(((sum(month) - prevTotal) / prevTotal) * 100) : null;
 
-    const monthly: { label: string; total: number }[] = [];
+  const nextTransfer = useMemo(() => {
+    const future = paiements
+      .filter((p) => (p.statut === "prepare" || p.statut === "envoye") && p.date_execution)
+      .map((p) => p.date_execution as string).sort();
+    return future[0] ? shortDate(future[0]) : "À venir";
+  }, [paiements]);
+
+  const bars = useMemo(() => {
+    const out: { label: string; total: number }[] = [];
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(y, m - i, 1);
-      const total = missions
-        .filter((x) => inMonth(new Date(x.updated_at), d.getFullYear(), d.getMonth()))
-        .reduce((s, x) => s + x.montant, 0);
-      monthly.push({ label: MONTHS_FR[d.getMonth()], total });
+      const d = new Date(y, mo - i, 1);
+      out.push({ label: MONTHS_SHORT[d.getMonth()], total: sum(live.filter((r) => inMonth(r, d.getFullYear(), d.getMonth()))) });
     }
-    return { thisMonth, lastMonth, delta, monthly, currentLabel: MONTHS_FULL[m] };
-  }, [missions]);
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live]);
+  const maxBar = Math.max(1, ...bars.map((b) => b.total));
 
+  const list = (tab === "all" ? month : tab === "paid" ? monthPaid : monthPend);
 
-  const maxMonthly = Math.max(1, ...monthly.map((x) => x.total));
+  const stmts = useMemo(() => {
+    const out: { y: number; m: number; total: number }[] = [];
+    for (let i = 1; i <= 3; i++) {
+      const d = new Date(y, mo - i, 1);
+      const t = sum(live.filter((r) => inMonth(r, d.getFullYear(), d.getMonth())));
+      if (t > 0) out.push({ y: d.getFullYear(), m: d.getMonth(), total: t });
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [live]);
 
-  const saveIban = () => {
-    const clean = ibanDraft.replace(/\s+/g, "").toUpperCase();
-    localStorage.setItem("convoyeur_iban", clean);
-    setIban(clean);
-    setEditingIban(false);
+  const downloadStatement = (yy: number, mm: number) => {
+    const rows = live.filter((r) => inMonth(r, yy, mm)).map((r) => ({
+      mission: r.numero_mission ?? "", date: r.date_mission ?? "", statut: r.statut, total: String(r.montant_total),
+    }));
+    downloadFile(toCsv(rows, ["mission", "date", "statut", "total"]), `releve-${yy}-${String(mm + 1).padStart(2, "0")}.csv`);
   };
 
-  if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
-  }
+  const saveIban = () => {
+    const c = ibanDraft.replace(/\s+/g, "").toUpperCase();
+    try { localStorage.setItem("convoyeur_iban", c); } catch { /* ignore */ }
+    setIban(c);
+    setEditIban(false);
+  };
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" size={28} /></div>;
+
+  const line = (l: string, v: number, cls?: "pos" | "neg") =>
+    v ? (
+      <div className={`fl-l ${cls ?? ""}`}><span>{l}</span><b>{(cls === "neg" ? "− " : cls === "pos" && v > 0 ? "+ " : "") + fmtE(Math.abs(v))}</b></div>
+    ) : null;
 
   return (
-    <div className="space-y-5 pb-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          to="/convoyeur"
-          className="w-10 h-10 rounded-2xl border border-[rgba(96,165,250,0.28)] bg-white/[0.04] flex items-center justify-center text-[#c9d6f2] active:scale-95 transition-transform"
-          aria-label="Retour"
-        >
-          <ArrowLeft size={17} />
-        </Link>
-        <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#4EA8FF]">Espace Finances</p>
-          <h1 className="text-[24px] leading-tight font-bold text-white">Mes revenus</h1>
+    <div className="drv2">
+      <div className="stack fin">
+        <div className="row">
+          <div className="sp"><h1>Espace Finances</h1><p className="sub">Chaque euro expliqué, mission par mission.</p></div>
+          <span className="rv-mo fmo">{cap(MONTHS_FULL[mo])} {y}</span>
         </div>
-      </div>
 
-      {/* Résumé */}
-      <div className="relative overflow-hidden rounded-[24px] border border-[rgba(217,181,74,0.35)] bg-gradient-to-br from-[#0e1e4a] via-[#0a1738] to-[#081230] p-5 shadow-[0_18px_45px_-20px_rgba(0,0,0,0.7)]">
-        <span className="pointer-events-none absolute -top-14 -right-14 w-52 h-52 rounded-full bg-[radial-gradient(circle,rgba(217,181,74,0.22),transparent_70%)]" />
-        <div className="relative flex items-start justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.15em] font-bold text-[#c9d6f2]">
-              {currentLabel.charAt(0).toUpperCase() + currentLabel.slice(1)} {new Date().getFullYear()}
-            </p>
-            <p className="fin-amount-hero text-[44px] font-bold text-[#f5b940] tabular-nums leading-none mt-2 drop-shadow-[0_0_18px_rgba(217,181,74,0.4)]">
-              {thisMonth.toFixed(0)} <span className="text-[26px]">€</span>
-            </p>
-            {delta !== null ? (
-              <p className="flex items-center gap-1.5 text-[12px] mt-3">
-                {delta >= 0 ? (
-                  <ArrowUpRight size={14} className="text-[#34d399]" />
-                ) : (
-                  <ArrowDownRight size={14} className="text-[#f87171]" />
-                )}
-                <span className={`font-semibold ${delta >= 0 ? "text-[#34d399]" : "text-[#f87171]"}`}>
-                  {delta > 0 ? "+" : ""}{delta}%
-                </span>
-                <span className="text-[#8fa3cc]">vs mois dernier ({lastMonth.toFixed(0)} €)</span>
-              </p>
-            ) : (
-              <p className="text-[12px] mt-3 text-[#8fa3cc]">Premier mois d'activité rémunéré</p>
-            )}
+        <div className="fh">
+          <div className="fh-t">
+            <small>Total du mois</small><b>{fmtE(sum(month))}</b>
+            {delta !== null && <span className="delta">{delta >= 0 ? "↗ +" : "↘ "}{delta} % vs {MONTHS_FULL[prev.m]}</span>}
           </div>
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2F7DFF] to-[#1a5ad6] flex items-center justify-center shadow-[0_0_16px_rgba(78,168,255,0.55)] shrink-0">
-            <TrendingUp size={18} className="text-white" />
+          <div className="fh-bar"><i style={{ width: `${sum(month) ? Math.round((sum(monthPaid) / sum(month)) * 100) : 0}%` }} /></div>
+          <div className="fh-g">
+            <div><small>Déjà versé</small><b>{fmtE(sum(monthPaid))}</b></div>
+            <div><small>En attente</small><b>{fmtE(sum(monthPend))}</b></div>
+            <div><small>Prochain virement</small><b>{nextTransfer}</b></div>
           </div>
         </div>
-      </div>
 
-      {/* Graphique 6 mois */}
-      <div className="rounded-[22px] border border-[rgba(96,165,250,0.18)] bg-gradient-to-br from-[#0c1a42] via-[#0a1636] to-[#081230] p-4">
-        <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#4EA8FF]">Évolution 6 mois</p>
-        <div className="mt-4 flex items-end justify-between gap-2 h-32">
-          {monthly.map((mo, i) => {
-            const h = Math.max(6, Math.round((mo.total / maxMonthly) * 100));
-            const active = i === monthly.length - 1;
-            return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2 min-w-0">
-                <div className="w-full flex flex-col items-center justify-end h-full">
-                  <span className={`text-[9px] tabular-nums mb-1 ${active ? "fin-month-active" : "text-[#8fa3cc]"}`}>
-                    {mo.total > 0 ? `${mo.total.toFixed(0)}` : ""}
-                  </span>
-                  <div
-                    className={`w-full max-w-[26px] rounded-t-lg transition-all duration-500 ${
-                      active
-                        ? "bg-gradient-to-t from-[#f5b940] to-[#fbd776] shadow-[0_0_12px_rgba(217,181,74,0.55)]"
-                        : "bg-gradient-to-t from-[#2F7DFF] to-[#4EA8FF]"
-                    }`}
-                    style={{ height: `${h}%` }}
-                  />
+        <div className="ftabs">
+          {([["all", "Toutes", month.length], ["paid", "Payées", monthPaid.length], ["pending", "En attente", monthPend.length]] as const).map(([k, l, n]) => (
+            <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}<em>{n}</em></button>
+          ))}
+        </div>
+
+        {list.length === 0 && <p className="mut" style={{ textAlign: "center", padding: "18px 0" }}>Aucune mission à afficher ce mois-ci.</p>}
+        {list.map((r) => {
+          const rt = routes[r.trajet_id];
+          const pay = r.paiement_id ? payById.get(r.paiement_id) : undefined;
+          const lignes = decomposer(r, ajust.filter((a) => a.remuneration_id === r.id));
+          const bonus = ajust.filter((a) => a.remuneration_id === r.id && !a.annule && Number(a.montant) > 0 && a.categorie !== "frais");
+          const malus = ajust.filter((a) => a.remuneration_id === r.id && !a.annule && Number(a.montant) < 0);
+          const paid = isPaid(r);
+          const validated = paid || r.statut === "valide";
+          const steps: [string, string][] = [
+            ["Mission clôturée", shortDate(r.date_mission)],
+            ["Validée par Ligneo", validated ? "Fait" : "En cours"],
+            [paid ? "Virement effectué" : "Virement prévu", shortDate(pay?.date_execution ?? (paid ? r.date_mission : null)) === "—" ? "À venir" : shortDate(pay?.date_execution)],
+          ];
+          return (
+            <details className="fm" key={r.id}>
+              <summary>
+                <div className="fm-i"><Ic n={paid ? "check" : "clock"} s={16} sw={2.4} /></div>
+                <div className="sp">
+                  <b>{rt ? `${city(rt.depart)} → ${city(rt.arrivee)}` : "Mission"}</b>
+                  <small>{shortDate(r.date_mission)} · Mission {r.numero_mission ?? "—"}</small>
                 </div>
-                <span className={`text-[10px] font-semibold ${active ? "fin-month-active text-[#f5b940]" : "text-[#8fa3cc]"}`}>
-                  {mo.label}
-                </span>
+                <div className="fm-r"><b>{fmtE(Number(r.montant_total))}</b><span className={`st ${paid ? "ok" : "todo"}`}>{paid ? "Payée" : "En attente"}</span></div>
+                <span className="fm-ch"><Ic n="chevd" s={15} sw={2.4} /></span>
+              </summary>
+              <div className="fm-b">
+                <div className="fl-t">Détail de la rémunération</div>
+                {lignes.length === 0 && <p className="tiny mut">Détail en cours de calcul.</p>}
+                {lignes.map((l, i) => (
+                  <div key={i} className={`fl-l ${l.montant < 0 ? "neg" : l.label.startsWith("Frais") || l.label.startsWith("Prime") ? "pos" : ""}`}>
+                    <span>{l.label}{l.detail ? <small style={{ display: "block", opacity: 0.6 }}>{l.detail}</small> : null}</span>
+                    <b>{(l.montant < 0 ? "− " : l.label.startsWith("Frais") || l.label.startsWith("Prime") ? "+ " : "") + fmtE(Math.abs(l.montant))}</b>
+                  </div>
+                ))}
+                {bonus.length + malus.length === 0 && null}
+                <div className="fl-l tot"><span>Net à percevoir</span><b>{fmtE(Number(r.montant_total))}</b></div>
+                <div className="fl-t" style={{ marginTop: 14 }}>Suivi du paiement</div>
+                <div className="fl-s">
+                  {steps.map((x, i) => (
+                    <div key={i} className={paid || (i < 2 && x[1] !== "En cours") ? "ok" : i === 1 && x[1] === "En cours" ? "cur" : ""}>
+                      <i /><span>{x[0]}</span><small>{x[1]}</small>
+                    </div>
+                  ))}
+                </div>
+                <div className="row" style={{ gap: 8, marginTop: 12 }}>
+                  {pay?.facture_url
+                    ? <a className="fl-btn" href={pay.facture_url} target="_blank" rel="noreferrer"><Ic n="file" s={14} sw={2.2} />Relevé PDF</a>
+                    : <button className="fl-btn" onClick={() => downloadStatement(new Date(r.date_mission ?? Date.now()).getFullYear(), new Date(r.date_mission ?? Date.now()).getMonth())}><Ic n="file" s={14} sw={2.2} />Relevé</button>}
+                  <a className="fl-btn" href="mailto:contact@transportsligneo.fr?subject=Question%20r%C3%A9mun%C3%A9ration"><Ic n="phone" s={14} sw={2.2} />Une question ?</a>
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+            </details>
+          );
+        })}
 
-      {/* Paiements à venir */}
-      {/* Rémunérations officielles (mêmes chiffres que l'admin) */}
-      <section>
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <Wallet size={14} className="text-[#34d399]" />
-          <h2 className="text-[13px] font-bold text-white">Détail de mes rémunérations</h2>
+        <div className="card">
+          <p className="brex-label-xs">Évolution sur 6 mois</p>
+          <div className="bars" style={{ margin: "8px 0 22px" }}>
+            {bars.map((b, i) => <div key={i} style={{ height: `${Math.max(6, Math.round((b.total / maxBar) * 100))}%` }}><small>{b.label}</small></div>)}
+          </div>
         </div>
-        <MesRemunerations userId={user?.id} />
-      </section>
 
-
-      {/* Moyen de paiement */}
-      <section>
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <CreditCard size={14} className="text-[#60a5fa]" />
-          <h2 className="text-[13px] font-bold text-white">Moyen de paiement</h2>
-        </div>
-        <div className="rounded-[18px] border border-[rgba(96,165,250,0.22)] bg-gradient-to-br from-[#0c1a42] to-[#081230] p-4">
-          {editingIban ? (
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-[0.14em] font-bold text-[#8fa3cc]">IBAN</label>
-              <input
-                autoFocus
-                value={ibanDraft}
-                onChange={(e) => setIbanDraft(e.target.value.toUpperCase())}
-                placeholder="FR76 1234 5678 9012 3456 7890 123"
-                className="w-full px-3 py-2.5 rounded-xl bg-[#04091c] border border-[rgba(96,165,250,0.35)] text-white text-[13px] tabular-nums outline-none focus:border-[#4EA8FF]"
-              />
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={saveIban}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[#2F7DFF] to-[#1a5ad6] text-white text-[13px] font-semibold shadow-[0_10px_20px_-8px_rgba(47,125,255,0.6)]"
-                >
-                  <Check size={15} /> Enregistrer
-                </button>
-                <button
-                  onClick={() => { setIbanDraft(iban); setEditingIban(false); }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[rgba(96,165,250,0.28)] text-[#c9d6f2] text-[13px]"
-                >
-                  <X size={15} />
-                </button>
+        <div className="card">
+          <div className="row"><p className="sm bold sp">Moyen de paiement</p>{iban && <span className="st ok"><Ic n="check2" s={11} sw={3.2} /> Enregistré</span>}</div>
+          {editIban ? (
+            <div style={{ marginTop: 10 }}>
+              <input className="fld" autoFocus placeholder="FR76 1234 5678 9012 3456 7890 123" value={ibanDraft} onChange={(e) => setIbanDraft(e.target.value.toUpperCase())} />
+              <div className="row" style={{ gap: 8, marginTop: 10 }}>
+                <button className="btn" onClick={saveIban}>Enregistrer</button>
+                <button className="btn ghost" onClick={() => setEditIban(false)}>Annuler</button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl border border-[rgba(96,165,250,0.35)] bg-gradient-to-br from-[#0d1f4d] to-[#0a1638] flex items-center justify-center shrink-0">
-                <CreditCard size={17} className="text-[#60a5fa]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-[0.14em] font-bold text-[#8fa3cc]">RIB enregistré</p>
-                <p className="text-[14px] font-semibold text-white tabular-nums mt-0.5 truncate">
-                  {iban ? maskIban(iban) : "Non configuré"}
-                </p>
-              </div>
-              <button
-                onClick={() => { setIbanDraft(iban); setEditingIban(true); }}
-                className="w-9 h-9 rounded-xl border border-[rgba(96,165,250,0.28)] bg-white/[0.04] flex items-center justify-center text-[#c9d6f2] active:scale-95"
-                aria-label="Modifier"
-              >
-                <Pencil size={14} />
-              </button>
+            <div className="fiban">
+              <Ic n="wallet" s={18} sw={2.1} />
+              <div className="sp"><b>{iban ? maskIban(iban) : "Non configuré"}</b><small>Virement sous 2 à 5 jours après validation</small></div>
+              <button className="nlink" onClick={() => { setIbanDraft(iban); setEditIban(true); }}>Modifier</button>
             </div>
           )}
         </div>
-      </section>
 
-      {/* Documents */}
-      <section>
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <FileDown size={14} className="text-[#a78bfa]" />
-          <h2 className="text-[13px] font-bold text-white">Relevés mensuels</h2>
+        <div className="card">
+          <p className="sm bold" style={{ marginBottom: 6 }}>Relevés mensuels</p>
+          {stmts.length === 0 && <p className="tiny mut">Vos relevés apparaîtront ici après votre premier mois complet.</p>}
+          {stmts.map((s) => (
+            <div className="docrow" key={`${s.y}-${s.m}`}>
+              <Ic n="file" s={16} /><span className="sp">Relevé {cap(MONTHS_FULL[s.m])} {s.y} · {fmtE(s.total)}</span>
+              <button className="hbtn" onClick={() => downloadStatement(s.y, s.m)} aria-label="Télécharger"><Ic n="up" s={14} /></button>
+            </div>
+          ))}
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {monthly.slice().reverse().slice(0, 4).map((mo, i) => {
-            const disabled = mo.total === 0;
-            return (
-              <button
-                key={i}
-                disabled={disabled}
-                onClick={() => window.print()}
-                className={`flex items-center gap-3 p-3 rounded-[16px] border transition-all ${
-                  disabled
-                    ? "border-[rgba(96,165,250,0.10)] bg-white/[0.02] opacity-50 cursor-not-allowed"
-                    : "border-[rgba(167,139,250,0.28)] bg-gradient-to-br from-[#1a1230] to-[#0a1636] active:scale-[0.97]"
-                }`}
-              >
-                <div className="w-9 h-9 rounded-xl border border-[rgba(167,139,250,0.35)] bg-[rgba(139,108,224,0.14)] flex items-center justify-center shrink-0">
-                  <FileDown size={15} className="text-[#a78bfa]" />
-                </div>
-                <div className="min-w-0 flex-1 text-left">
-                  <p className="text-[12px] font-semibold text-white truncate">Relevé {mo.label}</p>
-                  <p className="text-[10px] text-[#8fa3cc] tabular-nums">{mo.total.toFixed(0)} €</p>
-                </div>
-              </button>
-            );
-          })}
+
+        <div className="fnote">
+          <Ic n="shield" s={16} sw={2.2} />
+          <p><b>Comment c'est calculé ?</b> Votre rémunération = tarif de la mission + frais remboursés sur justificatifs (carburant, péages) + bonus − pénalités éventuelles. Rien n'est retenu sans être détaillé ici.</p>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

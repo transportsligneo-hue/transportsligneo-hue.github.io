@@ -16,6 +16,9 @@ import { haversineKm } from "@/lib/geo/haversine";
 import { geocodeAddress } from "@/lib/geocode";
 import { canAccessNiveau, niveauLabel } from "@/lib/convoyeur-niveau";
 import { missionRequiredNiveau } from "@/lib/mission-level";
+import { AuctionSheet } from "@/components/driver2/AuctionSheet";
+import { Ic } from "@/components/driver2/icons";
+import "@/styles/driver-v2.css";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/catalogue")({
   component: ConvoyeurCatalogue,
@@ -37,7 +40,7 @@ const DEFAULT_FILTERS: CatalogueFilterState = {
   leg: "all",
   urgent: false,
   electric: false,
-  radiusKm: 100,
+  radiusKm: null,
   sort: "date",
 };
 
@@ -100,6 +103,8 @@ function ConvoyeurCatalogue() {
   const [filters, setFilters] = useState<CatalogueFilterState>(DEFAULT_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [auctionId, setAuctionId] = useState<string | null>(null);
+  const [equip, setEquip] = useState<string[]>([]);
   const [coords, setCoords] = useState<Record<string, { lat: number; lng: number }>>({});
 
   const geo = useGeolocation();
@@ -132,7 +137,20 @@ function ConvoyeurCatalogue() {
       .in("attribution_mode" as never, ["catalogue", "mixte"] as never)
       .order("published_at" as never, { ascending: false })
       .limit(200);
-    if (data) setTrajets(data as unknown as CatalogTrajet[]);
+    if (data) {
+      // Options du catalogue (équipements, carburant, enchères) : fonction dédiée, la vue n'est pas modifiée
+      const { data: ex } = await supabase.rpc("list_catalogue_extras" as never);
+      const extras = new Map<string, Partial<CatalogTrajet> & { trajet_id: string }>();
+      ((ex as unknown as Array<Partial<CatalogTrajet> & { trajet_id: string }>) ?? []).forEach((e) => extras.set(e.trajet_id, e));
+      setTrajets(
+        (data as unknown as CatalogTrajet[]).map((t) => {
+          const e = extras.get(t.id);
+          return e
+            ? { ...t, equipements_requis: e.equipements_requis ?? [], carburant_mode: e.carburant_mode ?? null, mise_en_main: !!e.mise_en_main, enchere: e.enchere ?? null }
+            : t;
+        }),
+      );
+    }
 
     if (convoyeurId) {
       const { data: offers } = await supabase
@@ -235,6 +253,7 @@ function ConvoyeurCatalogue() {
         !(t.urgence === "urgent" || t.urgence === "immediat")
       )
         return false;
+      if (equip.length && !equip.every((q) => (t.equipements_requis ?? []).includes(q))) return false;
       if (filters.electric) {
         const carb = (t.type_carburant ?? "").toLowerCase();
         const model = `${t.marque ?? ""} ${t.modele ?? ""}`.toLowerCase();
@@ -273,7 +292,7 @@ function ConvoyeurCatalogue() {
       );
     });
     return list;
-  }, [enriched, filters, geo.position]);
+  }, [enriched, filters, geo.position, equip]);
 
   // Auto-switch to proximity sort when geo enables
   useEffect(() => {
@@ -321,6 +340,7 @@ function ConvoyeurCatalogue() {
   };
 
   const openTrajet = openId ? catalogueTrajets.find((t) => t.id === openId) : null;
+  const auctionTrajet = auctionId ? catalogueTrajets.find((t) => t.id === auctionId) : null;
   const openDist =
     openTrajet && geo.position
       ? enriched.find((e) => e.t.id === openTrajet.id)?.dist ?? null
@@ -331,205 +351,137 @@ function ConvoyeurCatalogue() {
     return <CatalogueTrainingGate />;
   }
 
-  const zoneValue = filters.radiusKm == null ? "all" : String(filters.radiusKm);
+  const [sortOpen, setSortOpen] = useState(false);
+  const zones: Array<[number | null, string]> = [[null, "Toutes zones"], [30, "< 30 km"], [50, "< 50 km"], [100, "< 100 km"]];
+  const sorts: Array<[CatalogueFilterState["sort"], string]> = [["date", "Plus récentes"], ["prix", "Mieux payées"], ["distance", "Plus courtes"]];
+  const EQ: Array<[string, string, string]> = [["plateau", "Plateau", "ramp"], ["wg", "W Garage", "plateW"], ["elec", "Câble recharge", "bolt"]];
 
-  const chevron = (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-
-  const chipToutesActive =
-    filters.leg === "all" && !filters.urgent && !filters.electric;
+  const toggleNear = async () => {
+    if (geo.position) {
+      geo.clear();
+      setFilters((f) => ({ ...f, sort: "date" }));
+      return;
+    }
+    const { ensureLocationPermission, isNativeApp } = await import("@/lib/native/bridge");
+    const ok = await ensureLocationPermission();
+    if (!ok) {
+      toast.error(
+        isNativeApp()
+          ? "Localisation refusée. Activez-la dans Réglages > Applications > Ligneo Driver > Autorisations > Position."
+          : "Autorisez la géolocalisation dans votre navigateur.",
+      );
+      return;
+    }
+    geo.request();
+  };
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8">
-      <div className="cat2">
-        {/* ===== FILTRES ===== */}
-        <div className="cat2-filters">
-          <div className="cat2-filter-row">
-            <div className="cat2-select-wrap">
-              <select
-                className="cat2-select"
-                value={zoneValue}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setFilters((f) => ({ ...f, radiusKm: v === "all" ? null : Number(v) }));
-                }}
-              >
-                <option value="all">Toutes zones</option>
-                <option value="30">Moins de 30 km</option>
-                <option value="50">Moins de 50 km</option>
-                <option value="100">Moins de 100 km</option>
-              </select>
-              {chevron}
-            </div>
-            <div className="cat2-select-wrap">
-              <select
-                className="cat2-select"
-                value={filters.sort}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, sort: e.target.value as CatalogueFilterState["sort"] }))
-                }
-              >
-                <option value="date">Tri : Plus récentes</option>
-                <option value="prix">Tri : Mieux payées</option>
-                <option value="distance">Tri : Plus courtes</option>
-                <option value="proximite">Tri : Autour de moi</option>
-              </select>
-              {chevron}
-            </div>
-          </div>
-
-          <div className="cat2-chips">
-            <button
-              type="button"
-              className={`cat2-chip is-near${geo.position ? " is-active" : ""}`}
-              onClick={async () => {
-                if (geo.position) {
-                  geo.clear();
-                  setFilters((f) => ({ ...f, sort: "date" }));
-                  return;
-                }
-                const { ensureLocationPermission, isNativeApp } = await import(
-                  "@/lib/native/bridge"
-                );
-                const ok = await ensureLocationPermission();
-                if (!ok) {
-                  toast.error(
-                    isNativeApp()
-                      ? "Localisation refusée. Activez-la dans Réglages > Applications > Ligneo Driver > Autorisations > Position."
-                      : "Autorisez la géolocalisation dans votre navigateur.",
-                  );
-                  return;
-                }
-                geo.request();
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" />
-                <circle cx="12" cy="9" r="2.5" />
-              </svg>
-              {geo.loading ? "Localisation…" : "Autour de moi"}
-            </button>
-
-            <button
-              type="button"
-              className={`cat2-chip${chipToutesActive ? " is-active" : ""}`}
-              onClick={() =>
-                setFilters((f) => ({ ...f, leg: "all", urgent: false, electric: false }))
-              }
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-              Toutes
-            </button>
-
-            <button
-              type="button"
-              className={`cat2-chip${filters.leg === "simple" ? " is-active" : ""}`}
-              onClick={() =>
-                setFilters((f) => ({ ...f, leg: f.leg === "simple" ? "all" : "simple" }))
-              }
-            >
-              Livraison simple
-            </button>
-
-            <button
-              type="button"
-              className={`cat2-chip${filters.leg === "ar" ? " is-active" : ""}`}
-              onClick={() => setFilters((f) => ({ ...f, leg: f.leg === "ar" ? "all" : "ar" }))}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" />
-              </svg>
-              restitution et livraison
-            </button>
-
-            <button
-              type="button"
-              className={`cat2-chip is-gold${filters.urgent ? " is-active" : ""}`}
-              onClick={() => setFilters((f) => ({ ...f, urgent: !f.urgent }))}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
-              </svg>
-              Urgentes
-            </button>
-
-            <button
-              type="button"
-              className={`cat2-chip is-elec${filters.electric ? " is-active" : ""}`}
-              onClick={() => setFilters((f) => ({ ...f, electric: !f.electric }))}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
-              </svg>
-              Électrique
-            </button>
-          </div>
+    <div className="drv2">
+      <div className="stack">
+        <div>
+          <h1>Catalogue missions</h1>
+          <p className="sub">Trajets ouverts, positionnez-vous en un clic.</p>
         </div>
 
-        {!validated && (
-          <div className="mx-4 rounded-xl border border-sky-300/40 bg-sky-500/10 px-4 py-3 text-xs text-sky-100">
-            Votre compte doit être validé pour candidater aux missions.
-          </div>
-        )}
-        {geo.error && (
-          <div className="mx-4 mt-2 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-2 text-xs text-red-100">
-            Position indisponible : {geo.error}
-          </div>
-        )}
+        <button
+          className={`btn ${geo.position ? "" : "green"}`}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, ...(geo.position ? { background: "#fff", color: "#0b6b46", border: "2px solid #14B866", boxShadow: "none" } : {}) }}
+          onClick={() => void toggleNear()}
+        >
+          <Ic n="pin" s={18} /> {geo.loading ? "Localisation…" : geo.position ? "Autour de moi : activé" : "Missions autour de moi"}
+        </button>
 
-        <div className="cat2-count">
-          {loading
-            ? "Chargement…"
-            : `${filtered.length} mission${filtered.length > 1 ? "s" : ""} affichée${filtered.length > 1 ? "s" : ""}`}
-          <span className="line" />
+        <div className="catbar">
+          <div className="search">
+            <Ic n="search" s={14} />
+            <input
+              className="fld"
+              placeholder="Ville de départ ou d'arrivée…"
+              value={filters.search}
+              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+            />
+          </div>
+          <button className={`sortbtn ${sortOpen ? "on" : ""}`} onClick={() => setSortOpen((v) => !v)} aria-label="Trier">
+            <Ic n="sort" s={17} sw={2.2} />
+          </button>
         </div>
-
-        {/* ===== CARTES ===== */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-[#5b83ff]" size={26} />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="mx-4 my-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] py-16 text-center text-sm text-white/60">
-            <RouteIcon className="mx-auto mb-3 text-white/40" size={30} />
-            Aucune mission ne correspond à ces critères.
-          </div>
-        ) : (
-          <div className="cat2-cards">
-            {filtered.map(({ t, dist }) => {
-              const mine = [t, ...(t.groupedLegs ?? [])]
-                .map((leg) => myOffers[leg.id])
-                .find(Boolean);
-              const requis = missionRequiredNiveau({
-                niveau_requis: t.niveau_requis,
-                distance_km: t.distance_km,
-                urgence: t.urgence,
-              });
-              const locked = !canAccessNiveau(driverNiveau, requis);
-              const openLocked = () =>
-                toast.info(
-                  `Mission réservée aux convoyeurs ${niveauLabel(requis)}. Continuez à enchaîner les missions pour débloquer ce niveau.`,
-                );
+        {sortOpen && (
+          <div className="sortpop">
+            <small>Trier par</small>
+            {sorts.map(([k, l]) => {
+              const on = !geo.position && filters.sort === k;
               return (
-                <CatalogueMissionCard
-                  key={t.id}
-                  trajet={t}
-                  distanceFromMe={dist}
-                  myOfferStatus={mine?.statut ?? null}
-                  myOfferPrice={mine?.prix_propose ?? null}
-                  canApply={canApply && !locked}
-                  driverNiveau={driverNiveau}
-                  onOpen={() => (locked ? openLocked() : setOpenId(t.id))}
-                  onQuickApply={() => (locked ? openLocked() : setOpenId(t.id))}
-                />
+                <button key={k} className={on ? "on" : ""} onClick={() => { setSortOpen(false); setFilters((f) => ({ ...f, sort: k })); }}>
+                  {l}{on && <Ic n="check2" s={14} sw={3} />}
+                </button>
               );
             })}
           </div>
+        )}
+
+        <div className="filters fl2">
+          {zones.map(([z, l]) => (
+            <button key={l} className={`fl ${(filters.radiusKm ?? null) === z ? "on" : ""}`} onClick={() => setFilters((f) => ({ ...f, radiusKm: z }))}>{l}</button>
+          ))}
+          <i className="fsep" />
+          {EQ.map(([k, l, ic]) => (
+            <button key={k} className={`fl fle ${equip.includes(k) ? "on" : ""}`} onClick={() => setEquip((q) => (q.includes(k) ? q.filter((x) => x !== k) : [...q, k]))}>
+              <Ic n={ic} s={13} sw={2.3} />{l}
+            </button>
+          ))}
+          <i className="fsep" />
+          <button className={`fl ${filters.urgent ? "on" : ""}`} onClick={() => setFilters((f) => ({ ...f, urgent: !f.urgent }))}>Urgentes</button>
+          <button className={`fl ${filters.leg === "ar" ? "on" : ""}`} onClick={() => setFilters((f) => ({ ...f, leg: f.leg === "ar" ? "all" : "ar" }))}>Restitution et livraison</button>
+        </div>
+
+        {!validated && (
+          <div className="card" style={{ padding: 14, fontSize: 13 }}>Votre compte doit être validé pour candidater aux missions.</div>
+        )}
+        {geo.error && <div className="card" style={{ padding: 14, fontSize: 13, color: "#b91c1c" }}>Position indisponible : {geo.error}</div>}
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20"><Loader2 className="animate-spin" size={26} /></div>
+        ) : filtered.length === 0 ? (
+          <div className="card" style={{ textAlign: "center", padding: 28 }}>
+            <p className="sm semi">Aucune mission pour cette recherche.</p>
+            <p className="xs mut" style={{ marginTop: 6 }}>Essayez une autre ville ou élargissez la zone.</p>
+          </div>
+        ) : (
+          filtered.map(({ t, dist }) => {
+            const mine = [t, ...(t.groupedLegs ?? [])].map((leg) => myOffers[leg.id]).find(Boolean);
+            const requis = missionRequiredNiveau({ niveau_requis: t.niveau_requis, distance_km: t.distance_km, urgence: t.urgence });
+            const locked = !canAccessNiveau(driverNiveau, requis);
+            const openLocked = () =>
+              toast.info(`Mission réservée aux convoyeurs ${niveauLabel(requis)}. Continuez à enchaîner les missions pour débloquer ce niveau.`);
+            return (
+              <CatalogueMissionCard
+                key={t.id}
+                trajet={t}
+                distanceFromMe={dist}
+                myOfferStatus={mine?.statut ?? null}
+                myOfferPrice={mine?.prix_propose ?? null}
+                canApply={canApply && !locked}
+                driverNiveau={driverNiveau}
+                onOpen={() => (locked ? openLocked() : setOpenId(t.id))}
+                onQuickApply={() => (locked ? openLocked() : setOpenId(t.id))}
+                onAuction={() => setAuctionId(t.id)}
+              />
+            );
+          })
+        )}
+
+        {auctionTrajet?.enchere && (
+          <AuctionSheet
+            trajetId={auctionTrajet.id}
+            depart={auctionTrajet.depart}
+            arrivee={auctionTrajet.arrivee}
+            marque={[auctionTrajet.marque, auctionTrajet.modele].filter(Boolean).join(" ")}
+            km={auctionTrajet.distance_km}
+            dateLabel={auctionTrajet.date_trajet}
+            initial={auctionTrajet.enchere}
+            onClose={() => setAuctionId(null)}
+            onChanged={() => fetchData()}
+          />
         )}
 
         {openTrajet && (
@@ -546,4 +498,3 @@ function ConvoyeurCatalogue() {
     </div>
   );
 }
-

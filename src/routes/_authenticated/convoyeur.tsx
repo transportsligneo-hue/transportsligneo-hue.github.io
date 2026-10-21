@@ -12,6 +12,7 @@ import {
   Sparkles,
   GraduationCap,
   Wallet,
+  Wrench,
 } from "lucide-react";
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -29,6 +30,7 @@ const navItems: ConvoyeurSidebarItem[] = [
   { to: "/convoyeur/catalogue", label: "Catalogue missions", shortLabel: "Catalogue", icon: Sparkles },
   { to: "/convoyeur/missions", label: "Mes missions", shortLabel: "Mes missions", icon: Truck },
   { to: "/convoyeur/disponibilites", label: "Disponibilités", shortLabel: "Agenda", icon: CalendarDays },
+  { to: "/convoyeur/materiel", label: "Mon matériel", shortLabel: "Matériel", icon: Wrench },
   { to: "/convoyeur/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
   { to: "/convoyeur/historique", label: "Historique", icon: History },
   { to: "/convoyeur/finances", label: "Finances", shortLabel: "Finances", icon: Wallet },
