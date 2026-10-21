@@ -32,11 +32,10 @@ export default function MobileAppGate() {
   // Voile plein écran : empêche tout affichage du site vitrine dans l'app
   if (!offLimits) return null;
   return (
-    <div
-      aria-hidden
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0b1026]"
-    >
-      <span className="h-8 w-8 animate-spin rounded-full border-2 border-[#e7c76a]/30 border-t-[#e7c76a]" />
+    <div aria-hidden className="lb-screen">
+      <div className="lb-mark"><i className="lb-halo" /><img src="/logo-ligneo.png" alt="" /></div>
+      <strong className="lb-brand">TRANSPORTS LIGNEO<em>DRIVER</em></strong>
+      <span className="lb-bar"><b /></span>
     </div>
   );
 }

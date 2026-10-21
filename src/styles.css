@@ -12245,3 +12245,17 @@ body.is-driver-app .auth-driver-theme .auth-card .text-white\/40{color:#6b8579}
 body.is-driver-app .auth-driver-theme .auth-card .bg-white\/10{background:rgba(20,184,102,.25)}
 body.is-driver-app .auth-driver-theme .text-white\/45{color:#6b8579}
 body.is-driver-app .auth-driver-theme .auth-link-lg.is-gold{color:#0b7a43;background:#fff;border:1px solid rgba(20,184,102,.35)}
+
+/* ===== Chargement Ligneo : logo qui respire + barre verte (aucun rond qui tourne) ===== */
+.lb-mark{position:relative;display:grid;place-items:center;width:104px;height:104px}
+.lb-mark img{width:68px;height:68px;border-radius:18px;box-shadow:0 10px 26px rgba(20,184,102,.4);animation:lb-breath 1.8s ease-in-out infinite;object-fit:contain}
+.lb-halo{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(52,230,140,.45),transparent 68%);animation:lb-breath 1.8s ease-in-out infinite}
+@keyframes lb-breath{50%{transform:scale(1.08);opacity:.85}}
+.lb-bar{display:block;width:140px;height:5px;border-radius:9px;background:rgba(20,184,102,.2);overflow:hidden}
+.lb-bar b{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd);animation:lb-run 1.2s ease-in-out infinite}
+@keyframes lb-run{0%{margin-left:-40%}100%{margin-left:100%}}
+.lb-label{font-size:12px;font-weight:700;letter-spacing:.04em;color:#4c6b5c;margin:0}
+.lb-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(520px 320px at 0% 0%,rgba(52,230,140,.25),transparent 70%),linear-gradient(180deg,#e6f3ec,#cfe2d8)}
+.lb-brand{font-size:14px;letter-spacing:.16em;color:#0b2a1f;font-weight:800;text-align:center}
+.lb-brand em{display:block;font-style:normal;color:#12a35f;letter-spacing:.34em;font-size:11px;margin-top:3px}
+@media (prefers-reduced-motion:reduce){.lb-mark img,.lb-halo,.lb-bar b{animation:none}}
