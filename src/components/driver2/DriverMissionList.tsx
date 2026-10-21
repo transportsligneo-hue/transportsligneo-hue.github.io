@@ -1,3 +1,4 @@
+import "@/styles/driver-v2.css";
 import { Ic, Plate } from "@/components/driver2/icons";
 import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { resolveMissionStatus, type MissionCardData } from "@/components/convoyeur/MissionCard";
@@ -51,7 +52,7 @@ export function DriverMissionList({
   }
 
   return (
-    <div className="dml">
+    <div className="drv2"><div className="dml">
       {groups.map((g) => {
         const { title, rel } = dayLabel(g.date);
         return (
@@ -114,6 +115,6 @@ export function DriverMissionList({
           </section>
         );
       })}
-    </div>
+    </div></div>
   );
 }
