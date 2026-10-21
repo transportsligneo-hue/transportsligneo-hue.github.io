@@ -1,3 +1,5 @@
+import "@/styles/client-mission-v2.css";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { MissionHistory } from "./MissionHistory";
 import { EdlComparison } from "@/components/mission/EdlComparison";
 import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
@@ -18,6 +20,7 @@ import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
 import { GuidedTour, MISSION_DETAIL_TOUR } from "@/components/onboarding/GuidedTour";
 import { HelpTip } from "@/components/ui/HelpTip";
+import { MissionDossierClient } from "@/components/mission/MissionDossierClient";
 import { MissionChatPanel } from "@/components/chat/MissionChatPanel";
 
 interface Mission {
@@ -57,6 +60,7 @@ interface ClientMissionDetailViewProps {
 export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour aux missions" }: ClientMissionDetailViewProps) {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"suivi" | "vehicule" | "docs" | "messages">("suivi");
   const [attributionId, setAttributionId] = useState<string | null>(null);
   const [trajetId, setTrajetId] = useState<string | null>(null);
   const [convoyeurId, setConvoyeurId] = useState<string | null>(null);
@@ -65,6 +69,10 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const [downloadingEdl, setDownloadingEdl] = useState(false);
   const [facture, setFacture] = useState<{ id: string; numero: string; prix_ttc: number; statut: string; pdf_url: string | null; date_facture: string | null } | null>(null);
   const [downloadingFact, setDownloadingFact] = useState(false);
+  // Mission finie : on ouvre directement sur le dossier (facture, carte grise, réserves).
+  useEffect(() => {
+    if (mission && ["terminee", "termine", "validee"].includes(mission.statut)) setTab("docs");
+  }, [mission?.id, mission?.statut]);
   const [arrivalContact, setArrivalContact] = useState<{ nom: string | null; prenom: string | null; societe: string | null; telephone: string | null; telephone2: string | null; instructions: string | null; adresse: string | null } | null>(null);
 
   useEffect(() => {
@@ -321,7 +329,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
   const options = Array.isArray(mission.options) ? mission.options as Array<{ label: string; price: number }> : [];
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="cmx space-y-6 max-w-3xl">
       <GuidedTour id="mission-detail" steps={MISSION_DETAIL_TOUR} delay={1800} />
       <Link to={backTo} className="inline-flex items-center gap-2 mission-text-muted text-xs uppercase tracking-wider hover:mission-accent transition-colors">
         <ArrowLeft size={14} /> {backLabel}
@@ -369,6 +377,33 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
         )}
       </div>
 
+      {/* Onglets (mise en page : mêmes blocs, rangés par thème) */}
+      <div className="sticky top-2 z-20" role="tablist" aria-label="Sections de la mission">
+        <div className="mission-surface flex gap-1 overflow-x-auto p-1">
+          {([
+            ["suivi", "Suivi"],
+            ["vehicule", "Véhicule & lieux"],
+            ["docs", "Documents"],
+            ["messages", "Messages"],
+          ] as const).map(([k, label]) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={tab === k}
+              onClick={() => setTab(k)}
+              className={`flex-1 shrink-0 whitespace-nowrap rounded-md px-4 py-2 font-heading text-xs tracking-wider transition-colors ${
+                tab === k ? "bg-[#00AEEF] text-white" : "mission-text-soft hover:mission-text"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+
+      <div hidden={tab !== "suivi"} className="space-y-6">
       {attributionId && (
         <MissionTrackingPanel
           attributionId={attributionId}
@@ -382,23 +417,9 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
       {attributionId && <div data-tour="mission-photos"><EdlComparison attributionId={attributionId} /></div>}
 
       <div data-tour="mission-history"><MissionHistory missionId={missionId} createdAt={mission?.created_at} /></div>
+      </div>
 
-      {attributionId && hasProofs && (
-        <div data-tour="mission-report" className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <p className="font-heading text-sm mission-text tracking-wider">Rapport de mission (PDF unique)</p>
-            <p className="mission-text-soft text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
-          </div>
-          <button
-            onClick={handleDownloadEdl}
-            disabled={downloadingEdl}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#00AEEF] text-white font-heading text-xs tracking-[0.15em] uppercase hover:bg-[#0098d1] transition-colors rounded disabled:opacity-50"
-          >
-            {downloadingEdl ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} Télécharger PDF
-          </button>
-        </div>
-      )}
-
+      <div hidden={tab !== "vehicule"} className="space-y-6">
       <div data-tour="mission-vehicle" className="mission-surface p-5">
         <h2 className="font-heading text-sm mission-accent tracking-[0.15em] uppercase flex items-center gap-2 mb-4">
           <Car size={16} /> Véhicule
@@ -422,9 +443,7 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           {mission.immatriculation && (
             <div className="shrink-0">
               <p className="mission-text-muted text-[10px] uppercase tracking-wider mb-1 text-right">Plaque</p>
-              <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-[#00AEEF] text-white font-mono font-bold tracking-[0.18em] text-sm shadow-md border border-[#00AEEF]">
-                {mission.immatriculation}
-              </span>
+              <PlateBadge plate={mission.immatriculation} size="md" />
             </div>
           )}
         </div>
@@ -463,8 +482,6 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </div>
         )}
       </div>
-
-
 
       <Section
         title="Détails du convoyage"
@@ -538,6 +555,33 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </div>
         </div>
       )}
+      </div>
+
+      <div hidden={tab !== "docs"} className="space-y-6">
+      <MissionDossierClient
+        attributionId={attributionId}
+        trajetId={trajetId}
+        termine={["terminee", "termine", "validee"].includes(mission.statut)}
+        facture={facture}
+        onDownloadFacture={handleDownloadFacture}
+        downloadingFact={downloadingFact}
+      />
+
+      {attributionId && hasProofs && (
+        <div data-tour="mission-report" className="mission-surface p-5 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="font-heading text-sm mission-text tracking-wider">Rapport de mission (PDF unique)</p>
+            <p className="mission-text-soft text-xs mt-1">Toutes les preuves (photos, signatures, EDL) consolidées dans un PDF unique.</p>
+          </div>
+          <button
+            onClick={handleDownloadEdl}
+            disabled={downloadingEdl}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#00AEEF] text-white font-heading text-xs tracking-[0.15em] uppercase hover:bg-[#0098d1] transition-colors rounded disabled:opacity-50"
+          >
+            {downloadingEdl ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} Télécharger PDF
+          </button>
+        </div>
+      )}
 
       {attributionId && hasProofs && (
         <div data-tour="mission-pv" className="mission-surface p-5">
@@ -578,8 +622,11 @@ export function ClientMissionDetailView({ missionId, backTo, backLabel = "Retour
           </div>
         </div>
       )}
+      </div>
 
+      <div hidden={tab !== "messages"} className="space-y-6">
       <MissionChatPanel missionId={missionId} viewer="client" />
+      </div>
 
       <p className="mission-text-muted text-xs text-center">
         Vous serez notifié par email à chaque évolution du statut de votre mission.

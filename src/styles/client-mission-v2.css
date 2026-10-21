@@ -1,0 +1,42 @@
+/* Espace client (particulier + flotte/pro) · page mission — habillage moderne. Scopé sous .cmx */
+.cmx{--c-blue:#2f7bff;--c-cyan:#19b4f5;--c-ink:#27325a;--c-ink2:#5a6788;--c-line:#e3eaf8;font-family:'Inter',system-ui,sans-serif}
+.cmx .mission-text{color:var(--c-ink)}
+.cmx .mission-text-soft{color:var(--c-ink2)}
+.cmx .mission-text-muted{color:#8794b6}
+.cmx .font-bold,.cmx .font-semibold,.cmx b,.cmx strong{font-weight:600}
+
+/* Cartes */
+.cmx .mission-surface,.cmx .mission-surface-soft{position:relative;border-radius:22px;border:1px solid var(--c-line);background:linear-gradient(180deg,#f4f9ff 0,#fff 110px);box-shadow:0 1px 2px rgba(40,70,140,.04),0 20px 44px -28px rgba(47,123,255,.32);--chip:#19b4f5;--chipbg:rgba(25,180,245,.12)}
+.cmx .mission-surface::before{content:"";position:absolute;left:22px;right:22px;top:0;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--chip),transparent 70%)}
+.cmx div:nth-of-type(4n+3).mission-surface{--chip:#7c5cff;--chipbg:rgba(124,92,255,.11)}
+.cmx div:nth-of-type(4n+4).mission-surface{--chip:#0ea5a4;--chipbg:rgba(14,165,164,.11)}
+.cmx div:nth-of-type(4n+5).mission-surface{--chip:#f59e0b;--chipbg:rgba(245,158,11,.13)}
+
+/* Typographie : fini le tout-majuscule espacé */
+.cmx h1,.cmx h2,.cmx h3,.cmx .font-heading{font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.005em}
+.cmx h1{font-weight:700;color:#1e2b5e}
+.cmx h2[class*="uppercase"],.cmx h3[class*="uppercase"],.cmx p.font-heading[class*="uppercase"],.cmx span.font-heading[class*="uppercase"]{text-transform:none;letter-spacing:0;font-weight:600;color:#1e2b5e}
+.cmx .mission-accent{color:var(--c-blue)}
+.cmx .tracking-wider,.cmx .tracking-\[0\.15em\],.cmx .tracking-\[0\.18em\]{letter-spacing:.02em}
+.cmx [class*="uppercase"].mission-text-muted{letter-spacing:.08em;font-weight:500}
+
+/* Onglets */
+.cmx [role="tablist"]>div{border-radius:18px;border:1px solid var(--c-line);background:#fff;padding:5px;box-shadow:0 14px 30px -22px rgba(47,123,255,.45)}
+.cmx [role="tab"]{border-radius:13px;font:500 14px 'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:0;text-transform:none;color:var(--c-ink2);padding:10px 16px}
+.cmx [role="tab"]:hover{background:#eff6ff;color:var(--c-blue)}
+.cmx [role="tab"][aria-selected="true"]{background:linear-gradient(135deg,#34c3ff,#2f7bff);color:#fff;box-shadow:0 10px 20px -10px rgba(47,123,255,.8)}
+
+/* Boutons */
+.cmx button[class*="bg-[#00AEEF]"]:not([role="tab"]),.cmx a[class*="bg-[#00AEEF]"]:not([class*="/10"]){background:linear-gradient(135deg,#34c3ff,#2f7bff);color:#fff;border:0;border-radius:12px;text-transform:none;letter-spacing:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-weight:500;box-shadow:0 10px 20px -10px rgba(47,123,255,.75);transition:transform .15s,box-shadow .15s}
+.cmx button[class*="bg-[#00AEEF]"]:not([role="tab"]):hover{transform:translateY(-1px);box-shadow:0 14px 24px -12px rgba(47,123,255,.85)}
+.cmx button[class*="bg-[#00AEEF]/10"],.cmx a[class*="bg-[#00AEEF]/10"]{background:rgba(47,123,255,.08);border-radius:12px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--c-blue)}
+.cmx button[class*="border"]:not([role="tab"]){border-radius:12px;font-weight:500}
+
+/* Lignes et blocs internes */
+.cmx .rounded-xl.border,.cmx .rounded-2xl.border{border-color:var(--c-line)}
+.cmx input:not([type="checkbox"]):not([type="radio"]),.cmx textarea,.cmx select{border-radius:12px;border-color:var(--c-line)}
+.cmx input:focus,.cmx textarea:focus{border-color:var(--c-blue)!important;box-shadow:0 0 0 3px rgba(47,123,255,.14)!important;outline:none}
+.cmx .plate-wrap{position:relative;display:inline-flex}
+.cmx [role="tablist"]>.mission-surface{background:#fff;border-radius:18px}
+.cmx [role="tablist"]>.mission-surface::before{display:none}
+.cmx [role="tab"]{letter-spacing:0!important;text-transform:none!important}
