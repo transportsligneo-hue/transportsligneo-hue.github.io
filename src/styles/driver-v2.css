@@ -2579,3 +2579,7 @@ html.theme-dark .rcp-row,html.theme-dark .rcp-tile small{color:#9dbdb0}
 .drv2 .dl-ring{display:none!important}
 .drv2 .dl-bar{width:140px;height:5px;border-radius:9px;background:rgba(20,184,102,.18)}
 .drv2 .dl-bar i{border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd)}
+
+/* Boutons « Prendre la photo » / « Envoyer » : verts (plus de jaune) */
+.drv2 .edl-cta-gold,.drv2 .rch-cta-gold{background:linear-gradient(135deg,#14B866 0%,#22cf7c 55%,#4FE8A0 100%)!important;color:#04261a!important;box-shadow:0 14px 34px -12px rgba(20,184,102,.65),inset 0 1px 0 rgba(255,255,255,.35)!important}
+.drv2 .edl-cta-gold svg,.drv2 .rch-cta-gold svg{color:#04261a}
