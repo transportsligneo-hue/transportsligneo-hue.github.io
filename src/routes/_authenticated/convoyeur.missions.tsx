@@ -21,6 +21,7 @@ import { RechargeMissionCockpit } from "@/components/convoyeur/RechargeMissionCo
 import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { isElectricVehicle } from "@/lib/vehicule-electrique";
+import { TesterMissionButton } from "@/components/convoyeur/TesterMissionButton";
 import { DriverMissionList } from "@/components/driver2/DriverMissionList";
 import { DriverDoneMissionList } from "@/components/driver2/DriverDoneMissionList";
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
@@ -1131,6 +1132,8 @@ function ConvoyeurMissions() {
         <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes missions</h1>
         <p className="text-pro-text-soft text-xs mt-0.5">{missions.length} mission{missions.length > 1 ? "s" : ""} · touchez une mission pour le détail et le parcours</p>
       </div>
+
+      <TesterMissionButton onCreated={() => window.location.reload()} />
 
       {/* Search */}
       <div className="relative">
