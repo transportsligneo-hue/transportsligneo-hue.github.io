@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -133,7 +134,7 @@ function MaterielPage() {
     else setVehicules((l) => l.filter((v) => v.id !== id));
   }
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" size={28} /></div>;
+  if (loading) return <PageSkeleton />;
 
   const okPermis = permis.length > 0;
   const pick = (k: "cg" | "ass") => (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -9,6 +9,13 @@ export default function PwaSplash() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Dans l'appli installée (native ou PWA), pas de second écran de bienvenue :
+    // on arrive directement sur le contenu.
+    const standalone = window.matchMedia?.("(display-mode: standalone)").matches
+      || (navigator as unknown as { standalone?: boolean }).standalone === true
+      || /LigneoDriverApp/i.test(navigator.userAgent)
+      || new URLSearchParams(window.location.search).get("app") === "1";
+    if (standalone) return;
     setVisible(true);
     // Verrouille le scroll pendant l'anim
     const prevOverflow = document.body.style.overflow;

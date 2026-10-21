@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { PASS_SCORE } from "@/lib/formation/types";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
@@ -33,11 +34,15 @@ function ModulePage() {
     if (module) void touchVisit(module.id);
   }, [module?.id]);
 
+  // Rattrapage : quiz déjà réussi mais module jamais marqué « terminé »
+  // (l'utilisateur avait quitté la page sans cliquer sur « Module suivant »).
+  useEffect(() => {
+    if (module && p && !p.completed && (p.quiz_score ?? 0) >= PASS_SCORE) void markCompleted(module.id);
+  }, [module?.id, p?.completed, p?.quiz_score]);
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#2F5FFF]" />
-      </div>
+      <PageSkeleton />
     );
   }
   if (!module) {
@@ -132,7 +137,7 @@ function ModulePage() {
         questions={module.quiz_questions}
         bestScore={p?.quiz_score ?? null}
         attempts={p?.attempts_count ?? 0}
-        onPassed={() => void reload()}
+        onPassed={() => void markCompleted(module.id)}
       />
 
       <nav className="flex items-center justify-between gap-3 pb-6">
@@ -150,7 +155,7 @@ function ModulePage() {
         <button
           type="button"
           onClick={async () => {
-            if ((p?.quiz_score ?? 0) >= PASS_SCORE) await markCompleted(module.id);
+            if (!module.quiz_questions.length || (p?.quiz_score ?? 0) >= PASS_SCORE) await markCompleted(module.id);
             if (next) navigate({ to: "/convoyeur/formation/module/$id", params: { id: next.id } });
             else navigate({ to: "/convoyeur/formation" });
           }}

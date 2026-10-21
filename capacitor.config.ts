@@ -33,10 +33,10 @@ const config: CapacitorConfig = {
     SplashScreen: {
       // Le splash se masque seul après 3 s (et plus tôt si le JS appelle hide()),
       // pour ne jamais rester bloqué si le site distant met du temps à charger.
-      launchShowDuration: 3000,
+      launchShowDuration: 800,
       launchAutoHide: true,
       backgroundColor: "#0b1026",
-      showSpinner: true,
+      showSpinner: false,
       spinnerColor: "#4f8cff",
       androidSpinnerStyle: "large",
       androidScaleType: "CENTER_CROP",

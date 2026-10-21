@@ -22,7 +22,8 @@ import { isRechargeSeule } from "@/components/admin/RechargeBadge";
 import { PremiumMissionHero, type TimelineStep } from "@/components/convoyeur/PremiumMissionHero";
 import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { DriverMissionList } from "@/components/driver2/DriverMissionList";
-import { DriverLoader } from "@/components/driver2/DriverLoader";
+import { DriverDoneMissionList } from "@/components/driver2/DriverDoneMissionList";
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { MissionV3InfoPane, type V3TimelineStep } from "@/components/convoyeur/MissionV3InfoPane";
 import { MissionV3DocsPane } from "@/components/convoyeur/MissionV3DocsPane";
 import { MissionChatPanel } from "@/components/chat/MissionChatPanel";
@@ -248,13 +249,18 @@ function ConvoyeurMissions() {
             .maybeSingle(),
           supabase
             .from("inspections")
-            .select("type, statut")
+            .select("type, statut, updated_at")
             .eq("attribution_id", attr.id),
         ]);
         const trajet = trajetRes.data as MissionCardData["trajet"];
 
         const inspDepart = inspections?.some(i => i.type === "depart" && i.statut === "complete");
         const inspArrivee = inspections?.some(i => i.type === "arrivee" && i.statut === "complete");
+        const livraisonAt = (inspections ?? [])
+          .filter((i: any) => i.type === "arrivee" && i.statut === "complete")
+          .map((i: any) => i.updated_at as string)
+          .sort()
+          .pop() ?? null;
 
         return {
           id: attr.id,
@@ -268,6 +274,7 @@ function ConvoyeurMissions() {
           leg_type: (trajetRes.data as { leg_type?: string | null } | null)?.leg_type ?? null,
           inspectionDepart: !!inspDepart,
           inspectionArrivee: !!inspArrivee,
+          livraison_at: livraisonAt,
           non_roulant:
             !!(trajetRes.data as { non_roulant?: boolean } | null)?.non_roulant ||
             !!((trajetRes.data as { options_meta?: { plateau?: boolean } | null } | null)?.options_meta?.plateau),
@@ -663,7 +670,7 @@ function ConvoyeurMissions() {
 
   if (loading) {
     return inspectionOverlay ?? nonRoulantOverlay ?? (
-      <DriverLoader label="Ouverture de la mission…" />
+      <PageSkeleton />
     );
   }
 
@@ -1179,7 +1186,9 @@ function ConvoyeurMissions() {
           )}
         </div>
       ) : (
-        <DriverMissionList
+        filter === "done" ? (
+          <DriverDoneMissionList missions={filtered} />
+        ) : <DriverMissionList
           missions={filtered}
           showTarif={typeConvoyeur === "independant"}
           activeId={activeMissionId}

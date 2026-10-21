@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -134,7 +135,7 @@ function FinancesPage() {
     setEditIban(false);
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" size={28} /></div>;
+  if (loading) return <PageSkeleton />;
 
   const line = (l: string, v: number, cls?: "pos" | "neg") =>
     v ? (

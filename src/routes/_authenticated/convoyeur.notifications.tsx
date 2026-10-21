@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -53,7 +54,7 @@ function DriverNotifications() {
     if (n.link && n.link.startsWith("/")) void navigate({ to: n.link as never });
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" size={28} /></div>;
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="drv2">

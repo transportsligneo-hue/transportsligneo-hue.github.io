@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DriverLoader } from "@/components/driver2/DriverLoader";
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -450,7 +450,7 @@ function ConvoyeurCatalogue() {
         {geo.error && <div className="card" style={{ padding: 14, fontSize: 13, color: "#b91c1c" }}>Position indisponible : {geo.error}</div>}
 
         {loading ? (
-          <DriverLoader label="Chargement du catalogue…" />
+          <PageSkeleton />
         ) : filtered.length === 0 ? (
           <div className="card" style={{ textAlign: "center", padding: 28 }}>
             <p className="sm semi">Aucune mission pour cette recherche.</p>

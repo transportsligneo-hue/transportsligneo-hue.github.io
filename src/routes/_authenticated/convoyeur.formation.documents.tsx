@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { FolderOpen, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
@@ -39,9 +40,7 @@ function DocumentsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#2F5FFF]" />
-      </div>
+      <PageSkeleton />
     );
   }
 

@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
@@ -95,7 +96,7 @@ function ConvoyeurProfil() {
     else { setPwd({ next: "", confirm: "" }); setPwdMsg({ type: "ok", text: "Mot de passe modifié avec succès." }); }
   };
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
+  if (loading) return <PageSkeleton />;
 
   const inputClass = "w-full bg-white border border-pro-border rounded-lg px-3 py-2.5 text-pro-text text-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400/30 focus:outline-none transition-colors";
 

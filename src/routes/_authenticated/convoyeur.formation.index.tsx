@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { GraduationCap, PlayCircle, Sparkles, ArrowRight, Award, Loader2, X } from "lucide-react";
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
 });
 
 const TOUR = [
-  { title: "Votre parcours", text: "8 modules à suivre dans l'ordre. Votre progression est enregistrée automatiquement." },
+  { title: "Votre parcours", text: "8 modules à suivre dans l'ordre que vous voulez : ouvrez celui qui vous convient. Votre progression est enregistrée automatiquement." },
   { title: "Reprise automatique", text: "À chaque reconnexion, vous repartez du dernier module non terminé." },
   { title: "Quiz et validation", text: "Chaque module se valide par un quiz (100% minimum), tentatives illimitées." },
   { title: "Besoin d'aide ?", text: "La FAQ et l'équipe Ligneo sont accessibles depuis chaque page." },
@@ -67,9 +68,7 @@ function FormationHome() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-[#2F5FFF]" />
-      </div>
+      <PageSkeleton />
     );
   }
 

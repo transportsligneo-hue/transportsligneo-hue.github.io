@@ -35,6 +35,8 @@ export interface MissionCardData {
   } | null;
   inspectionDepart?: boolean;
   inspectionArrivee?: boolean;
+  /** Heure réelle de fin de l'état des lieux de livraison (missions terminées). */
+  livraison_at?: string | null;
   /** Lot administratif : plusieurs missions distinctes, attribuables ensemble. */
   lot?: { ref: string | null; plaques: string[]; total: number } | null;
 }

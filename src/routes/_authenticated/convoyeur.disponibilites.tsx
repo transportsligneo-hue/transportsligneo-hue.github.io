@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,7 +158,7 @@ function ConvoyeurDisponibilites() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>
+        <PageSkeleton />
       ) : (
         <div className="grid lg:grid-cols-[1fr_300px] gap-4">
           {/* Calendar */}

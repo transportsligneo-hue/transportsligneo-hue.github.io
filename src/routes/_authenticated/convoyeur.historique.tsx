@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,7 +58,7 @@ function ConvoyeurHistorique() {
     })();
   }, [user]);
 
-  if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" size={24} /></div>;
+  if (loading) return <PageSkeleton />;
 
   const isRefused = (s: string) => s === "refuse" || s === "refusee";
 

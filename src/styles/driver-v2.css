@@ -2558,3 +2558,19 @@ html.theme-dark .rcp-row,html.theme-dark .rcp-tile small{color:#9dbdb0}
 .drv2 .dsk-card{border-radius:24px;border:1px solid rgba(20,184,102,.12)}
 @keyframes dsk{0%{background-position:120% 0}100%{background-position:-120% 0}}
 @media (prefers-reduced-motion:reduce){.drv2 .dl *,.drv2 .dsk *,.drv2 .dsk-card{animation:none!important}}
+
+/* ---- Missions terminées : cartes de consultation ---- */
+.drv2 .ddl{display:flex;flex-direction:column;gap:14px}
+.drv2 .ddl-card{background:#fff;border:1px solid rgba(20,184,102,.16);border-left:4px solid #14B866;border-radius:22px;padding:16px;box-shadow:0 10px 26px -18px rgba(11,42,31,.35);display:flex;flex-direction:column;gap:12px}
+.drv2 .ddl-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.drv2 .ddl-date{font-weight:700;color:#0b2a1f;text-transform:capitalize;font-size:15px}
+.drv2 .ddl-num{font-size:12px;color:#6b7f76;white-space:nowrap}
+.drv2 .ddl-times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.drv2 .ddl-times>div{background:#f1faf5;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.drv2 .ddl-times small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4c8a6b;font-weight:700}
+.drv2 .ddl-times b{display:flex;align-items:center;gap:6px;font-size:17px;color:#0b2a1f}
+.drv2 .ddl-route{margin:0;font-size:15px;font-weight:600;color:#0b2a1f}
+.drv2 .ddl-route span{color:#14B866;margin:0 4px}
+.drv2 .ddl-veh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;color:#3d5a4d;font-weight:600}
+.drv2 .ddl-pv{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 16px;border-radius:14px;border:0;background:linear-gradient(180deg,#1fcb7b,#12a35f);color:#fff;font-weight:700;font-size:15px;box-shadow:0 10px 20px -10px rgba(18,163,95,.7)}
+.drv2 .ddl-pv:disabled{opacity:.7}

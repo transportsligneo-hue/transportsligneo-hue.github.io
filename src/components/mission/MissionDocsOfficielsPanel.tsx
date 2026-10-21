@@ -1,5 +1,5 @@
 import { PlateInput } from "@/components/plate/PlateInput";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FileText, Printer, Download, Loader2, FilePlus2, FileCheck2, Eye, PenLine, ShieldCheck } from "lucide-react";
@@ -47,6 +47,9 @@ interface Props {
   pvPrefillMotif?: string | null;
   /** Incrémenter cette clé ouvre le formulaire passage à vide. */
   pvOpenKey?: number;
+  /** Génère et télécharge ce PV dès que les données sont chargées (bouton « PV » de la liste driver). */
+  autoPv?: PvVariant;
+  onAutoDone?: () => void;
 }
 
 interface TrajetLite {
@@ -109,7 +112,7 @@ const SOURCE_LABELS: Record<string, string> = {
   otp: "code de validation client",
 };
 
-export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0, pvOnly = false }: Props) {
+export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "light", pvPrefillMotif, pvOpenKey = 0, pvOnly = false, autoPv, onAutoDone }: Props) {
   const dark = variant === "dark";
   const [trajet, setTrajet] = useState<TrajetLite | null>(null);
   const [convoyeur, setConvoyeur] = useState<ConvoyeurLite | null>(null);
@@ -505,6 +508,16 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     Object.keys(signatures).some((k) => k.startsWith(`${docType}:`))
       ? "Compléter les signatures"
       : "Faire signer ce document";
+
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (!autoPv || loading || !trajet || autoRan.current) return;
+    autoRan.current = true;
+    void downloadPv(autoPv).finally(() => onAutoDone?.());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPv, loading, trajet]);
+
+  if (autoPv) return null;
 
   if (loading) {
     return <div className="flex justify-center py-6"><Loader2 className="animate-spin text-primary" size={20} /></div>;
