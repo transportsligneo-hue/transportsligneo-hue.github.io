@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import EsignPanel from "@/components/admin/EsignPanel";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, Download, Loader2, ArrowRightCircle, Trash2, Mail, Phone,
@@ -416,6 +417,22 @@ function AdminDevisDetailPage() {
               <p className="flex items-center gap-2"><Mail size={12} />{devis.email}</p>
               {devis.telephone && <p className="flex items-center gap-2"><Phone size={12} />{devis.telephone}</p>}
             </div>
+          </Card>
+
+          <Card>
+            <details>
+              <summary className="cursor-pointer text-sm font-medium text-pro-text">Faire signer le devis (signature électronique)</summary>
+              <div className="mt-3">
+                <EsignPanel
+                  kind="devis"
+                  refType="devis"
+                  refId={devis.id}
+                  title="Envoyer le devis à signer"
+                  defaults={{ title: `Devis ${devis.numero}`, name: `${devis.prenom ?? ""} ${devis.nom ?? ""}`.trim(), email: devis.email ?? "", phone: devis.telephone ?? "", company: devis._profile?.societe ?? "" }}
+                  getPdf={() => generateDevisPdf(buildDevisData(devis))}
+                />
+              </div>
+            </details>
           </Card>
 
           <Card>

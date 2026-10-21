@@ -43,6 +43,7 @@ function SignaturePage() {
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<Info | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
+  const [missing, setMissing] = useState<string[]>([]);
   const [step, setStep] = useState<Step>("read");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -61,6 +62,7 @@ function SignaturePage() {
       if (!r.found) { setInfo(null); return; }
       setInfo(r.request as Info);
       setDocUrl(r.docUrl);
+      setMissing(r.missingDocs ?? []);
       const st = r.request.status;
       if (st === "signed") setStep("done");
       else if (st === "declined") setStep("declined");
@@ -161,6 +163,15 @@ function SignaturePage() {
     {titleCard}
   </>);
   if (step === "declined") return shell(<div className={card + " text-center"}><XCircle className="mx-auto text-slate-400" size={40} /><h1 className="mt-3 text-lg font-semibold">Signature refusée</h1><p className="text-sm text-[#5a6788] mt-1">Votre refus a été transmis à Transports Ligneo. Vous pouvez fermer cette page.</p></div>);
+
+  if (missing.length > 0) return shell(<>
+    {titleCard}
+    <div className={card + " space-y-2"}>
+      <div className="font-semibold text-amber-700">Documents à déposer avant de signer</div>
+      <p className="text-sm text-[#5a6788]">Pour pouvoir signer votre contrat, déposez d'abord dans votre espace convoyeur (Documents) : <b>{missing.join(", ")}</b>. Revenez ensuite sur ce lien.</p>
+      <a className={btn} href="/convoyeur/documents">Aller à mes documents</a>
+    </div>
+  </>);
 
   const declineBox = (
     <div className="text-center">

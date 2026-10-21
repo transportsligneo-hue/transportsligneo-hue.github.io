@@ -231,3 +231,16 @@ export async function chainOk(requestId: string): Promise<boolean> {
   const { data } = await supabaseAdmin.rpc("esign_verify_chain" as never, { _request_id: requestId } as never);
   return data === true;
 }
+
+/** Pièces obligatoires manquantes d'un convoyeur (identité, permis, RIB, assurance, KBIS si indépendant). */
+export async function missingConvoyeurDocs(convoyeurId: string): Promise<string[]> {
+  const { getRequiredConvoyeurDocTypes, normalizeConvoyeurDocType } = await import("@/lib/convoyeur-documents");
+  const { data: conv } = await supabaseAdmin.from("convoyeurs").select("type_convoyeur").eq("id", convoyeurId).maybeSingle();
+  const { data: docs } = await supabaseAdmin.from("documents_convoyeurs").select("type_document, statut_validation").eq("convoyeur_id", convoyeurId);
+  const have = new Set(
+    (docs ?? [])
+      .filter((d: any) => d.statut_validation !== "refuse" && d.statut_validation !== "a_renvoyer")
+      .map((d: any) => normalizeConvoyeurDocType(d.type_document)),
+  );
+  return getRequiredConvoyeurDocTypes(conv?.type_convoyeur).filter((d) => !have.has(d.key)).map((d) => d.label);
+}

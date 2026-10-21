@@ -64,6 +64,10 @@ export const esignCreate = createServerFn({ method: "POST" })
     const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const meta = reqMeta();
 
+    if (data.kind === "contrat_convoyeur" && data.refType === "convoyeur" && data.refId) {
+      const missing = await S.missingConvoyeurDocs(data.refId);
+      if (missing.length) throw new Error(`Pièces manquantes : ${missing.join(", ")}. Le convoyeur doit les déposer avant de signer.`);
+    }
     const bytes = S.b64ToBytes(data.pdfBase64);
     if (bytes.length < 200 || bytes.length > 15 * 1024 * 1024) throw new Error("PDF invalide ou trop volumineux (15 Mo max).");
     if (String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") throw new Error("Le fichier n'est pas un PDF.");
@@ -206,6 +210,8 @@ export const esignPublicGet = createServerFn({ method: "POST" })
       await S.logEvent(r.id, "opened", {}, reqMeta());
       r.status = "opened";
     }
+    const missing = r.kind === "contrat_convoyeur" && r.ref_type === "convoyeur" && r.ref_id && ["opened", "sent"].includes(r.status)
+      ? await S.missingConvoyeurDocs(r.ref_id) : [];
     const out = PUBLIC_FIELDS(r);
     out.maskedEmail = S.maskEmail(r.signer_email);
     out.maskedPhone = r.signer_phone && r.signer_phone.replace(/\D/g, "").length >= 10 ? S.maskPhone(r.signer_phone) : undefined;
@@ -214,7 +220,7 @@ export const esignPublicGet = createServerFn({ method: "POST" })
     if (["opened", "signed"].includes(r.status)) {
       docUrl = (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(path, 3600)).data?.signedUrl ?? null;
     }
-    return { found: true as const, request: out, docUrl };
+    return { found: true as const, request: out, docUrl, missingDocs: missing };
   });
 
 export const esignPublicSendOtp = createServerFn({ method: "POST" })
@@ -300,6 +306,10 @@ export const esignPublicSign = createServerFn({ method: "POST" })
     if (r.status === "signed") return { ok: true, alreadySigned: true };
     if (!["sent", "opened"].includes(r.status)) throw new Error("Ce document ne peut plus être signé.");
 
+    if (r.kind === "contrat_convoyeur" && r.ref_type === "convoyeur" && r.ref_id) {
+      const missing = await S.missingConvoyeurDocs(r.ref_id);
+      if (missing.length) throw new Error(`Déposez d'abord vos documents (${missing.join(", ")}) pour pouvoir signer.`);
+    }
     // code validé récemment ?
     const since = new Date(Date.now() - S.OTP_VERIFIED_VALID_MIN * 60_000).toISOString();
     const { data: otp } = await supabaseAdmin.from("esign_otps").select("id, channel").eq("request_id", r.id)
@@ -413,4 +423,58 @@ export const esignVerifyHash = createServerFn({ method: "POST" })
       title: r.title as string, signerName: r.signer_name as string, status: r.status as string,
       signedAt: (r.signed_at ?? null) as string | null, chainOk: ch, sealOk, reference: r.id as string,
     };
+  });
+
+/* ---------------------- Convoyeur : mon contrat à signer ---------------------- */
+async function myConvoyeurId(context: { supabase: any; userId: string }): Promise<string | null> {
+  const { data } = await context.supabase.from("convoyeurs").select("id").eq("user_id", context.userId).maybeSingle();
+  return data?.id ?? null;
+}
+
+export const esignMyContrat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const S = await import("@/lib/esign.server");
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const cid = await myConvoyeurId(context);
+    if (!cid) return { exists: false as const };
+    const { data: row } = await supabaseAdmin.from("esign_requests")
+      .select("id, status, title, signed_at, expires_at").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
+      .in("status", ["sent", "opened", "signed", "expired"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (!row) return { exists: false as const };
+    const missing = row.status === "signed" ? [] : await S.missingConvoyeurDocs(cid);
+    const expired = row.status === "expired" || (row.status !== "signed" && new Date(row.expires_at) < new Date());
+    return { exists: true as const, id: row.id as string, status: (expired ? "expired" : row.status) as string, title: row.title as string, signedAt: (row.signed_at ?? null) as string | null, missing };
+  });
+
+/** Nouveau lien de signature pour le convoyeur connecté (remplace l'ancien). */
+export const esignMyLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const S = await import("@/lib/esign.server");
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const cid = await myConvoyeurId(context);
+    if (!cid) throw new Error("Fiche convoyeur introuvable.");
+    const missing = await S.missingConvoyeurDocs(cid);
+    if (missing.length) throw new Error(`Déposez d'abord vos documents : ${missing.join(", ")}.`);
+    const { data: row } = await supabaseAdmin.from("esign_requests").select("id, status")
+      .eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
+      .in("status", ["sent", "opened", "expired"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (!row) throw new Error("Aucun contrat en attente de signature.");
+    const token = S.newToken();
+    await supabaseAdmin.from("esign_requests").update({
+      token_hash: await S.sha256Text(token), status: "sent", expires_at: new Date(Date.now() + 14 * 86_400_000).toISOString(),
+    }).eq("id", row.id);
+    await S.logEvent(row.id, "link_regenerated", { by: "signer_account" }, reqMeta());
+    return { link: `${S.SITE_URL}/signature/${token}` };
+  });
+
+/** Admin : pièces manquantes d'un convoyeur. */
+export const esignConvoyeurDocsStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { convoyeurId: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const S = await import("@/lib/esign.server");
+    return { missing: await S.missingConvoyeurDocs(data.convoyeurId) };
   });
