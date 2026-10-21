@@ -118,176 +118,125 @@ export function PlateCheckGate({
   const isMatch = result?.ok && result.status === "match";
   const isMismatch = result?.ok && (result.status === "mismatch" || result.status === "no_reference");
 
+  const stage: "idle" | "busy" | "match" | "mismatch" = busy ? "busy" : isMatch ? "match" : isMismatch ? "mismatch" : "idle";
+
   return (
-    <div className="edl-shell fixed inset-x-0 top-0 z-[112] flex flex-col" style={{ height: "100dvh", maxHeight: "100dvh" }}>
-      <header className="edl-glass-strong rounded-none border-x-0 border-t-0 px-4 py-3 flex items-center gap-3 shrink-0">
-        <button
-          type="button" onClick={onClose} aria-label="Quitter"
-          className="w-10 h-10 rounded-xl edl-glass flex items-center justify-center hover:scale-95 transition"
-        >
-          <X size={18} className="text-white" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold">
-            Étape préalable
-          </p>
-          <p className="text-sm font-semibold text-white truncate">
-            Vérification du véhicule · {phase === "depart" ? "prise en charge" : "restitution"}
-          </p>
-        </div>
-      </header>
+    <div className="drv2">
+      <div className="edl-shell fixed inset-x-0 top-0 z-[112] flex flex-col pg" style={{ height: "100dvh", maxHeight: "100dvh" }}>
+        <header className="pg-hdr">
+          <button type="button" onClick={onClose} aria-label="Quitter" className="pg-x"><X size={18} /></button>
+          <div className="pg-ht">
+            <small>Étape 1 · {phase === "depart" ? "Prise en charge" : "Restitution"}</small>
+            <b>Scanner la plaque</b>
+          </div>
+          {numeroMission ? <span className="pg-num">{numeroMission}</span> : null}
+        </header>
 
-      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <div className="edl-glass p-4 flex items-start gap-3">
-            <ScanLine size={18} className="text-[var(--edl-cyan)] mt-0.5 shrink-0" />
-            <p className="text-[13px] leading-relaxed text-[var(--edl-text-soft)]">
-              Scannez la plaque d'immatriculation du véhicule pour confirmer qu'il s'agit
-              bien du véhicule de la mission avant de démarrer les photos.
-            </p>
+        <main className="pg-main">
+          <div className="pg-exp">
+            <small>Plaque attendue</small>
+            <span className="pg-plate"><i><u>F</u></i><b>{expectedDisplay}</b></span>
           </div>
 
-          <div className="edl-glass p-4">
-            <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-text-soft)] font-bold mb-1">
-              Plaque attendue {numeroMission ? `· ${numeroMission}` : ""}
-            </p>
-            <p className="text-2xl font-black text-white tracking-[0.14em]">{expectedDisplay}</p>
-          </div>
+          <button
+            type="button"
+            className={`pg-vf is-${stage}`}
+            onClick={() => !busy && fileRef.current?.click()}
+            aria-label="Photographier la plaque"
+          >
+            {preview ? <img src={preview} alt="Plaque scannée" /> : <span className="pg-ghost"><i /><b>AA-123-AA</b></span>}
+            <span className="pg-c tl" /><span className="pg-c tr" /><span className="pg-c bl" /><span className="pg-c br" />
+            {stage === "busy" && <span className="pg-scan" />}
+            <span className="pg-cap">
+              {stage === "busy" ? <><Loader2 size={14} className="animate-spin" /> Lecture de la plaque…</>
+                : stage === "match" ? <><Check size={14} strokeWidth={3} /> Plaque reconnue</>
+                : stage === "mismatch" ? <><AlertTriangle size={14} /> Plaque différente</>
+                : <><Camera size={14} /> Touchez pour photographier la plaque</>}
+            </span>
+          </button>
 
-          {preview && (
-            <div className="rounded-2xl overflow-hidden border border-[rgba(120,180,255,0.18)]">
-              <img src={preview} alt="Plaque scannée" className="w-full object-cover max-h-48" />
-            </div>
-          )}
-
-          {busy && (
-            <div className="edl-glass p-4 flex items-center gap-3 text-[13px] text-white">
-              <Loader2 size={16} className="animate-spin text-[var(--edl-cyan)]" />
-              Lecture de la plaque en cours…
-            </div>
+          {stage === "idle" && (
+            <ul className="pg-tips">
+              <li><ScanLine size={15} /> Placez-vous devant ou derrière le véhicule</li>
+              <li><Check size={15} /> Plaque entière dans le cadre, bien lisible</li>
+              <li><RefreshCw size={15} /> Évitez les reflets et le contre-jour</li>
+            </ul>
           )}
 
           {isMatch && (
-            <div
-              className="rounded-2xl p-4 flex items-start gap-3"
-              style={{ border: "1px solid rgba(52,232,176,0.45)", background: "rgba(52,232,176,0.10)" }}
-            >
-              <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "#34E8B0", color: "#06231A" }}>
-                <Check size={18} strokeWidth={3} />
-              </span>
+            <div className="pg-ok">
+              <span><Check size={18} strokeWidth={3} /></span>
               <div>
-                <p className="text-[15px] font-bold text-white">Véhicule confirmé : {result?.scanned}</p>
-                <p className="text-[12px] text-[var(--edl-text-soft)] mt-1">
-                  La plaque scannée correspond au dossier de mission.
-                </p>
+                <b>Véhicule confirmé · {result?.scanned}</b>
+                <p>La plaque correspond au dossier de mission.</p>
               </div>
             </div>
           )}
 
           {isMismatch && (
-            <div
-              className="rounded-2xl p-4 space-y-3"
-              style={{ border: "1px solid rgba(255,79,94,0.5)", background: "rgba(255,79,94,0.10)" }}
-            >
-              <p className="flex items-center gap-2 text-[14px] font-bold text-white">
-                <AlertTriangle size={18} className="text-[#ff4f5e]" />
+            <div className="pg-ko">
+              <p>
+                <AlertTriangle size={17} />
                 {result?.status === "no_reference"
                   ? "Aucune plaque enregistrée dans le dossier mission"
-                  : "Attention, la plaque scannée ne correspond pas au véhicule attendu pour cette mission"}
+                  : "Cette plaque ne correspond pas au véhicule de la mission"}
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl p-3" style={{ background: "rgba(20,32,72,0.6)" }}>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--edl-text-soft)] font-bold">Attendue</p>
-                  <p className="text-lg font-black text-white tracking-[0.12em]">{expectedDisplay}</p>
-                </div>
-                <div className="rounded-xl p-3" style={{ background: "rgba(255,79,94,0.14)" }}>
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-[#ffb3ba] font-bold">Scannée</p>
-                  <p className="text-lg font-black text-white tracking-[0.12em]">{result?.scanned ?? "—"}</p>
-                </div>
+              <div className="pg-cmp">
+                <div><small>Attendue</small><b>{expectedDisplay}</b></div>
+                <div className="bad"><small>Scannée</small><b>{result?.scanned ?? "—"}</b></div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button" onClick={() => { setResult(null); fileRef.current?.click(); }}
-                  className="h-12 rounded-xl flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
-                  style={{ border: "1px solid rgba(120,180,255,0.35)", background: "rgba(20,32,72,0.6)" }}
-                >
-                  <RefreshCw size={15} /> Rescanner
-                </button>
-                <button
-                  type="button" onClick={() => setIncident(true)}
-                  className="h-12 rounded-xl flex items-center justify-center gap-2 text-[13px] font-semibold text-white"
-                  style={{ border: "1px solid rgba(255,79,94,0.5)", background: "rgba(255,79,94,0.18)" }}
-                >
-                  <ShieldAlert size={15} /> Signaler un problème
-                </button>
+              <div className="pg-acts">
+                <button type="button" onClick={() => { setResult(null); fileRef.current?.click(); }}><RefreshCw size={15} /> Rescanner</button>
+                <button type="button" className="red" onClick={() => setIncident(true)}><ShieldAlert size={15} /> Signaler</button>
               </div>
-              <button
-                type="button" onClick={continueAnyway}
-                className="w-full h-11 rounded-xl text-[12px] font-semibold text-[var(--edl-text-soft)] underline underline-offset-4"
-              >
+              <button type="button" className="pg-any" onClick={continueAnyway}>
                 Continuer malgré tout (l'écart sera tracé dans le dossier)
               </button>
             </div>
           )}
 
           {(manualOpen || result?.status === "low_confidence" || result?.status === "no_plate") && !isMatch && (
-            <div className="edl-glass p-4 space-y-3">
-              <p className="flex items-center gap-2 text-[13px] font-semibold text-white">
-                <Keyboard size={16} className="text-[var(--edl-cyan)]" />
-                Plaque illisible ? Saisie manuelle en secours
-              </p>
-              <PlateInput
-                value={manual}
-                onChange={setManual}
-                label="Plaque du véhicule"
-                tone="blue"
-              />
-              <button
-                type="button" onClick={runManual} disabled={busy || !manual.trim()}
-                className="edl-cta w-full h-12 flex items-center justify-center gap-2 text-[14px] disabled:opacity-40 disabled:pointer-events-none"
-              >
+            <div className="pg-man">
+              <p><Keyboard size={16} /> Plaque illisible ? Saisie manuelle</p>
+              <PlateInput value={manual} onChange={setManual} label="Plaque du véhicule" tone="blue" />
+              <button type="button" onClick={runManual} disabled={busy || !manual.trim()} className="pg-cta">
                 <Check size={16} /> Vérifier cette plaque
               </button>
             </div>
           )}
-        </div>
-      </main>
 
-      <footer
-        className="edl-glass-strong rounded-none border-x-0 border-b-0 shrink-0 px-4 pt-3 safe-bottom space-y-2"
-        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-      >
-        <input
-          ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void runScan(f); }}
-        />
-        {isMatch ? (
-          <button
-            type="button" onClick={onValidated}
-            className="edl-cta w-full h-14 flex items-center justify-center gap-2 text-base"
-          >
-            Continuer vers les photos <ArrowRight size={18} />
-          </button>
-        ) : (
-          <button
-            type="button" onClick={() => fileRef.current?.click()} disabled={busy}
-            className="edl-cta w-full h-14 flex items-center justify-center gap-2 text-base disabled:opacity-50 disabled:pointer-events-none"
-          >
-            {busy ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-            {result ? "Rescanner la plaque" : "Scanner la plaque"}
-          </button>
+          {stage === "idle" && !manualOpen && (
+            <button type="button" className="pg-link" onClick={() => setManualOpen(true)}>
+              <Keyboard size={14} /> Saisir la plaque à la main
+            </button>
+          )}
+        </main>
+
+        <footer className="pg-ftr" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <input
+            ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void runScan(f); }}
+          />
+          {isMatch ? (
+            <button type="button" onClick={onValidated} className="pg-cta">Continuer vers les photos <ArrowRight size={18} /></button>
+          ) : (
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="pg-cta">
+              {busy ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+              {result ? "Rescanner la plaque" : "Scanner la plaque"}
+            </button>
+          )}
+        </footer>
+
+        {incident && (
+          <IncidentReportSheet
+            attributionId={attributionId}
+            userId={userId}
+            numeroMission={numeroMission ?? undefined}
+            onClose={() => setIncident(false)}
+            onReported={() => setIncident(false)}
+          />
         )}
-      </footer>
-
-      {incident && (
-        <IncidentReportSheet
-          attributionId={attributionId}
-          userId={userId}
-          numeroMission={numeroMission ?? undefined}
-          onClose={() => setIncident(false)}
-          onReported={() => setIncident(false)}
-        />
-      )}
+      </div>
     </div>
   );
 }

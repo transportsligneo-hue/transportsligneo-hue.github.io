@@ -2289,9 +2289,9 @@ function ChecklistArea({
     gap: 12,
     padding: "14px 16px",
     borderRadius: 12,
-    border: `1px solid ${active ? "rgba(212,175,55,0.55)" : "rgba(255,255,255,0.12)"}`,
-    background: active ? "rgba(212,175,55,0.10)" : "rgba(255,255,255,0.03)",
-    color: "white",
+    border: `1px solid ${active ? "rgba(20,184,102,0.7)" : "rgba(20,184,102,0.22)"}`,
+    background: active ? "rgba(20,184,102,0.12)" : "rgba(255,255,255,0.06)",
+    color: "var(--edl-text)",
     cursor: "pointer",
     fontSize: 15,
     fontWeight: 500,
@@ -2302,7 +2302,7 @@ function ChecklistArea({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "8px 4px 12px" }}>
-      <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, margin: 0 }}>
+      <p style={{ color: "var(--edl-text-soft)", fontSize: 13, margin: 0 }}>
         Cochez la présence de chaque équipement avant de continuer.
       </p>
 
@@ -2329,7 +2329,7 @@ function ChecklistArea({
 
 
       <div style={{ marginTop: 4 }}>
-        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>
+        <p style={{ color: "var(--edl-text)", fontSize: 13, fontWeight: 600, margin: "0 0 8px" }}>
           Roue de secours
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
@@ -2345,9 +2345,9 @@ function ChecklistArea({
               style={{
                 padding: "12px 8px",
                 borderRadius: 10,
-                border: `1px solid ${roue === opt.v ? "rgba(212,175,55,0.6)" : "rgba(255,255,255,0.15)"}`,
-                background: roue === opt.v ? "rgba(212,175,55,0.18)" : "rgba(255,255,255,0.04)",
-                color: "white",
+                border: `1px solid ${roue === opt.v ? "rgba(20,184,102,0.7)" : "rgba(20,184,102,0.22)"}`,
+                background: roue === opt.v ? "rgba(20,184,102,0.14)" : "rgba(255,255,255,0.06)",
+                color: "var(--edl-text)",
                 fontSize: 13,
                 fontWeight: 500,
                 cursor: "pointer",
@@ -2371,9 +2371,9 @@ function ChecklistArea({
           borderRadius: 12,
           border: "none",
           background: canValidate
-            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#d4af37,#e7c76a)")
-            : "rgba(255,255,255,0.10)",
-          color: canValidate ? "#0b1026" : "rgba(255,255,255,0.5)",
+            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#14B866,#4FE8A0)")
+            : "rgba(20,184,102,0.14)",
+          color: canValidate ? "#04261a" : "var(--edl-muted)",
           fontSize: 15,
           fontWeight: 700,
           cursor: canValidate && !isSaving ? "pointer" : "not-allowed",
@@ -2404,11 +2404,11 @@ function KilometrageArea({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "8px 4px 12px" }}>
-      <label style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: 600 }}>
+      <label style={{ color: "var(--edl-text)", fontSize: 13, fontWeight: 600 }}>
         {step.id === "kilometrage_arrivee" ? "Kilométrage affiché à l'arrivée" : "Kilométrage affiché au départ"}
       </label>
       {step.id === "kilometrage_arrivee" && (
-        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, margin: 0 }}>
+        <p style={{ color: "var(--edl-text-soft)", fontSize: 14, margin: 0 }}>
           Notez le kilométrage affiché au compteur à l'arrivée. Il met à jour la fiche du véhicule et la date de sa prochaine révision.
         </p>
       )}
@@ -2423,9 +2423,9 @@ function KilometrageArea({
           width: "100%",
           padding: "20px 18px",
           borderRadius: 14,
-          border: "1px solid rgba(255,255,255,0.18)",
-          background: "rgba(255,255,255,0.05)",
-          color: "white",
+          border: "1px solid rgba(20,184,102,0.3)",
+          background: "rgba(255,255,255,0.7)",
+          color: "var(--edl-text)",
           fontSize: 28,
           fontWeight: 700,
           textAlign: "center",
@@ -2434,7 +2434,7 @@ function KilometrageArea({
         }}
         autoFocus
       />
-      <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, margin: 0, textAlign: "center" }}>
+      <p style={{ color: "var(--edl-muted)", fontSize: 12, margin: 0, textAlign: "center" }}>
         Lisez la valeur exacte sur le compteur, sans virgule ni unité.
       </p>
       <button
@@ -2446,9 +2446,9 @@ function KilometrageArea({
           borderRadius: 12,
           border: "none",
           background: valid
-            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#d4af37,#e7c76a)")
-            : "rgba(255,255,255,0.10)",
-          color: valid ? "#0b1026" : "rgba(255,255,255,0.5)",
+            ? (isSaved ? "rgba(34,197,94,0.85)" : "linear-gradient(135deg,#14B866,#4FE8A0)")
+            : "rgba(20,184,102,0.14)",
+          color: valid ? "#04261a" : "var(--edl-muted)",
           fontSize: 15,
           fontWeight: 700,
           cursor: valid && !isSaving ? "pointer" : "not-allowed",

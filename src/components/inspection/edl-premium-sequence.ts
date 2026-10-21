@@ -72,74 +72,77 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Équipements véhicule",
     hint: "Vérifiez la présence des équipements de sécurité avant le départ" },
 
-  // ─── Extérieur · tour véhicule ───
-  { num: 2, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
-    label: "Avant", hint: "Cadrez la face avant complète, calandre + phares visibles",
+  // ─── Premier réflexe : démarrer le véhicule et photographier le compteur ───
+  { num: 3, id: "compteur", kind: "photo", section: "interieur", phase: "depart",
+    label: "Démarrer le véhicule · compteur",
+    hint: "Montez à bord et mettez le contact : photographiez le compteur, kilométrage et niveau de carburant bien lisibles",
+    example: compteur },
+
+  // ─── Côté droit : avant, intérieur, arrière ───
+  { num: 4, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
+    label: "Avant", hint: "Descendez du véhicule, puis cadrez la face avant complète, calandre + phares visibles",
     example: face_avant },
 
-  { num: 3, id: "trois_quart_avant_droite", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 5, id: "trois_quart_avant_droite", kind: "photo", section: "exterieur", phase: "depart",
     label: "Trois quarts avant droit", hint: "Vue 3/4 avant du côté droit",
     example: tq_avant_droit },
 
-  { num: 4, id: "jante_avant_droite", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 6, id: "jante_avant_droite", kind: "photo", section: "exterieur", phase: "depart",
     label: "Jante avant droite", hint: "Gros plan jante avant droite",
     example: jante_av_droite },
 
-  { num: 5, id: "jante_arriere_droite", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 7, id: "siege_avant", kind: "photo", section: "interieur", phase: "depart",
+    label: "Siège avant", hint: "Les deux sièges avant, vus depuis la porte conducteur ouverte",
+    example: interieur_avant },
+
+  { num: 8, id: "siege_arriere", kind: "photo", section: "interieur", phase: "depart",
+    label: "Siège arrière", hint: "La banquette arrière, vue depuis la porte arrière ouverte",
+    example: interieur_arriere },
+
+  { num: 9, id: "jante_arriere_droite", kind: "photo", section: "exterieur", phase: "depart",
     label: "Jante arrière droite", hint: "Gros plan jante arrière droite",
     example: jante_ar_droite },
 
-  { num: 6, id: "trois_quart_arriere_droite", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 10, id: "trois_quart_arriere_droite", kind: "photo", section: "exterieur", phase: "depart",
     label: "Trois quarts arrière droit", hint: "Vue 3/4 arrière du côté droit",
     example: tq_arriere_droit },
 
-  { num: 7, id: "face_arriere", kind: "photo", section: "exterieur", phase: "depart",
+  // ─── Arrière puis côté gauche ───
+  { num: 11, id: "face_arriere", kind: "photo", section: "exterieur", phase: "depart",
     label: "Arrière", hint: "Cadrez la face arrière complète",
     example: face_arriere },
 
-  { num: 8, id: "coffre_ouvert", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 12, id: "coffre_ouvert", kind: "photo", section: "exterieur", phase: "depart",
     label: "Coffre ouvert", hint: "Coffre grand ouvert, intérieur visible",
     example: coffre_ouvert },
 
   // Conditionnel : véhicule électrique uniquement
-  { num: 9, id: "cable_electrique", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 13, id: "cable_electrique", kind: "photo", section: "exterieur", phase: "depart",
     label: "Câble électrique", hint: "Photo du/des câble(s) de recharge fournis avec le véhicule",
     example: cable_exemple,
     electricOnly: true },
 
-  { num: 10, id: "trois_quart_arriere_gauche", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 14, id: "trois_quart_arriere_gauche", kind: "photo", section: "exterieur", phase: "depart",
     label: "Trois quarts arrière gauche", hint: "Vue 3/4 arrière du côté gauche",
     example: tq_arriere_gauche },
 
-  { num: 11, id: "jante_arriere_gauche", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 15, id: "jante_arriere_gauche", kind: "photo", section: "exterieur", phase: "depart",
     label: "Jante arrière gauche", hint: "Gros plan jante arrière gauche",
     example: jante_ar_gauche },
 
-  { num: 12, id: "jante_avant_gauche", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 16, id: "jante_avant_gauche", kind: "photo", section: "exterieur", phase: "depart",
     label: "Jante avant gauche", hint: "Gros plan jante avant gauche",
     example: jante_av_gauche },
 
-  { num: 13, id: "trois_quart_avant_gauche", kind: "photo", section: "exterieur", phase: "depart",
+  { num: 17, id: "trois_quart_avant_gauche", kind: "photo", section: "exterieur", phase: "depart",
     label: "Trois quarts avant gauche", hint: "Vue 3/4 avant du côté gauche",
     example: tq_avant_gauche },
 
-  // ─── Intérieur ───
-  { num: 14, id: "siege_avant", kind: "photo", section: "interieur", phase: "depart",
-    label: "Siège avant", hint: "Les deux sièges avant, vus depuis la porte conducteur ouverte",
-    example: interieur_avant },
-
-  { num: 15, id: "siege_arriere", kind: "photo", section: "interieur", phase: "depart",
-    label: "Siège arrière", hint: "La banquette arrière, vue depuis la porte arrière ouverte",
-    example: interieur_arriere },
-
-  { num: 16, id: "compteur", kind: "photo", section: "interieur", phase: "depart",
-    label: "Compteur", hint: "Kilométrage + niveau carburant lisibles",
-    example: compteur },
-
-  { num: 17, id: "photos_cles", kind: "photo", section: "interieur", phase: "depart",
+  // ─── Clés et kit ───
+  { num: 18, id: "photos_cles", kind: "photo", section: "interieur", phase: "depart",
     label: "Clés du véhicule", hint: "Photo des clés fournies (double compris si présent)" },
 
-  { num: 18, id: "kit_securite", kind: "photo", section: "interieur", phase: "depart",
+  { num: 19, id: "kit_securite", kind: "photo", section: "interieur", phase: "depart",
     label: "Kit de sécurité", hint: "Gilet jaune + triangle de signalisation",
     example: kit_securite },
 

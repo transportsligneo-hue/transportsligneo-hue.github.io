@@ -6,10 +6,10 @@
  * - Édition réservée au convoyeur pendant son EDL ; lecture seule ailleurs.
  */
 import { useEffect, useRef, useState } from "react";
-import { Slash, Circle, Zap, Droplets, Trash2 } from "lucide-react";
+import { Slash, Circle, Zap, Droplets, Sparkles, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AnnotationCategory = "rayure" | "bosse" | "impact" | "salissure";
+export type AnnotationCategory = "rayure" | "bosse" | "eclat" | "impact" | "salissure";
 
 export interface PhotoAnnotation {
   id: string;
@@ -22,10 +22,11 @@ export interface PhotoAnnotation {
 }
 
 export const ANNOTATION_CATEGORIES: Record<AnnotationCategory, { label: string; color: string; Icon: typeof Slash }> = {
-  rayure: { label: "Rayure", color: "#e4504a", Icon: Slash },
-  bosse: { label: "Bosse", color: "#d98a2b", Icon: Circle },
-  impact: { label: "Impact", color: "#9b4de0", Icon: Zap },
-  salissure: { label: "Salissure", color: "#5b83ff", Icon: Droplets },
+  bosse: { label: "Bosse", color: "#f08a24", Icon: Circle },
+  eclat: { label: "Éclat", color: "#8b5cf6", Icon: Sparkles },
+  rayure: { label: "Rayure", color: "#ef4444", Icon: Slash },
+  impact: { label: "Impact", color: "#ec4899", Icon: Zap },
+  salissure: { label: "Salissure", color: "#2f8bff", Icon: Droplets },
 };
 
 export function parseAnnotations(raw: unknown): PhotoAnnotation[] {
