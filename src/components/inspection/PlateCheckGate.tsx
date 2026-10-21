@@ -19,6 +19,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { verifyMissionPlate, recordPlateOverride, type PlateCheckResult } from "@/lib/plate-check.functions";
 import { IncidentReportSheet } from "@/components/mission/IncidentReportSheet";
 import { PlateInput } from "@/components/plate/PlateInput";
+import { PlateLiveCamera } from "@/components/inspection/PlateLiveCamera";
 
 interface Props {
   attributionId: string;
@@ -51,6 +52,8 @@ export function PlateCheckGate({
   const [manualOpen, setManualOpen] = useState(false);
   const [manual, setManual] = useState("");
   const [incident, setIncident] = useState(false);
+  const [live, setLive] = useState(false);
+  const startScan = () => setLive(true);
   const photoPathRef = useRef<string | null>(null);
 
   const verify = useServerFn(verifyMissionPlate);
@@ -141,7 +144,7 @@ export function PlateCheckGate({
           <button
             type="button"
             className={`pg-vf is-${stage}`}
-            onClick={() => !busy && fileRef.current?.click()}
+            onClick={() => !busy && startScan()}
             aria-label="Photographier la plaque"
           >
             {preview ? <img src={preview} alt="Plaque scannée" /> : <span className="pg-ghost"><i /><b>AA-123-AA</b></span>}
@@ -186,7 +189,7 @@ export function PlateCheckGate({
                 <div className="bad"><small>Scannée</small><b>{result?.scanned ?? "—"}</b></div>
               </div>
               <div className="pg-acts">
-                <button type="button" onClick={() => { setResult(null); fileRef.current?.click(); }}><RefreshCw size={15} /> Rescanner</button>
+                <button type="button" onClick={() => { setResult(null); startScan(); }}><RefreshCw size={15} /> Rescanner</button>
                 <button type="button" className="red" onClick={() => setIncident(true)}><ShieldAlert size={15} /> Signaler</button>
               </div>
               <button type="button" className="pg-any" onClick={continueAnyway}>
@@ -220,12 +223,20 @@ export function PlateCheckGate({
           {isMatch ? (
             <button type="button" onClick={onValidated} className="pg-cta">Continuer vers les photos <ArrowRight size={18} /></button>
           ) : (
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="pg-cta">
+            <button type="button" onClick={startScan} disabled={busy} className="pg-cta">
               {busy ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
               {result ? "Rescanner la plaque" : "Scanner la plaque"}
             </button>
           )}
         </footer>
+
+        {live && (
+          <PlateLiveCamera
+            onCapture={(f) => { setLive(false); void runScan(f); }}
+            onClose={() => setLive(false)}
+            onFallback={() => { setLive(false); fileRef.current?.click(); }}
+          />
+        )}
 
         {incident && (
           <IncidentReportSheet

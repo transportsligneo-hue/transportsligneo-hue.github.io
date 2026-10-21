@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2, Check, AlertCircle, PenLine, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import "@/styles/driver-v2.css";
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import {
   saveMissionSignature,
@@ -28,7 +29,7 @@ interface Props {
   defaultClientName?: string;
   onClose: () => void;
   /** Appelé quand les 2 signatures sont enregistrées (ou déjà présentes). */
-  onComplete: () => void;
+  onComplete: () => void | Promise<void>;
 }
 
 interface SigState {
@@ -85,7 +86,7 @@ export function ArriveeSignatureSheet({
       const firstUndone = STEPS.findIndex(
         (s) => !data.some((r) => r.kind === s.kind),
       );
-      if (firstUndone >= 0) setStepIdx(firstUndone);
+      if (firstUndone >= 0) setStepIdx((cur) => Math.max(cur, firstUndone));
       else setStepIdx(STEPS.length); // toutes faites
     })();
     return () => { cancelled = true; };
@@ -123,23 +124,26 @@ export function ArriveeSignatureSheet({
     }
   };
 
-  useEffect(() => {
-    if (allDone) {
-      // léger délai pour laisser l'utilisateur voir la confirmation
-      const t = setTimeout(() => onComplete(), 400);
-      return () => clearTimeout(t);
-    }
-  }, [allDone, onComplete]);
+  // Plus de fermeture automatique : le convoyeur confirme lui-même l'envoi (écran de fin ci-dessous).
+  const [sending, setSending] = useState(false);
+  const finish = async () => {
+    if (sending) return;
+    setSending(true);
+    try { await onComplete(); } finally { setSending(false); }
+  };
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-[#0b1026] text-white">
-          <div className="flex items-center gap-2">
-            <PenLine size={18} className="text-[#d4af37]" />
-            <p className="text-sm font-semibold">Signatures d'arrivée</p>
+      <div className="drv2 bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3.5 text-[#04321c]" style={{ background: "linear-gradient(120deg,#14B866,#4FE8A0)" }}>
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/45"><PenLine size={17} /></span>
+            <div>
+              <p className="text-sm font-bold leading-tight">Signatures de livraison</p>
+              <p className="text-[11px] opacity-75">Étape {Math.min(stepIdx + 1, STEPS.length)} sur {STEPS.length}</p>
+            </div>
           </div>
-          <button onClick={onClose} aria-label="Fermer" className="p-1.5 hover:bg-white/10 rounded-lg">
+          <button onClick={onClose} aria-label="Fermer" className="p-1.5 hover:bg-white/30 rounded-lg">
             <X size={18} />
           </button>
         </div>
@@ -169,17 +173,18 @@ export function ArriveeSignatureSheet({
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {allDone ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-600 flex items-center justify-center text-white">
-                <Check size={28} />
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-[#04321c]" style={{ background: "linear-gradient(135deg,#14B866,#4FE8A0)", boxShadow: "0 14px 28px -10px rgba(20,184,102,.7)" }}>
+                <Check size={30} strokeWidth={3} />
               </div>
-              <p className="text-base font-semibold text-slate-900">Signatures enregistrées</p>
-              <p className="text-sm text-slate-600">Vous pouvez envoyer la mission à l'admin.</p>
+              <p className="text-lg font-bold text-slate-900">Livraison signée</p>
+              <p className="text-sm text-slate-600">Les deux signatures sont enregistrées.<br />Il ne reste qu'à envoyer le dossier pour validation.</p>
               <button
-                onClick={onComplete}
-                className="mt-2 inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700"
+                onClick={finish}
+                disabled={sending}
+                className="sigx-ok mt-3 w-full disabled:opacity-60"
               >
-                Continuer <ChevronRight size={16} />
+                {sending ? <><Loader2 size={18} className="animate-spin" /> Un instant…</> : <>Continuer vers l'envoi <ChevronRight size={18} /></>}
               </button>
             </div>
           ) : currentStep ? (
@@ -193,16 +198,17 @@ export function ArriveeSignatureSheet({
               </div>
 
               {currentStep.kind === "client_end" && (
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-700 mb-1">
-                    Nom du client réceptionnaire
-                  </label>
+                <div className="sigx-field">
+                  <label htmlFor="arr-client-name">Nom du client réceptionnaire</label>
                   <input
+                    id="arr-client-name"
                     type="text"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    placeholder="Prénom Nom"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    onKeyDown={(e) => { if (e.key === "Enter") (e.currentTarget as HTMLInputElement).blur(); }}
+                    enterKeyHint="done"
+                    autoComplete="off"
+                    placeholder="Prénom et nom"
                   />
                 </div>
               )}

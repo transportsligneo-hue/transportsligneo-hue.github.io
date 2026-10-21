@@ -40,6 +40,7 @@ import { isNativeScannerAvailable, scanNativeDocument } from "@/lib/native/docum
 import { useMissionGates } from "@/hooks/useMissionGates";
 import { isElectricEnergie, guessElectricFromModel } from "@/lib/vehicule-electrique";
 import { RetourBlock } from "@/components/driver2/RetourBlock";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import "@/styles/driver-v2.css";
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import {
@@ -1679,6 +1680,23 @@ export function EdlPremiumFlow({
               vehicule={vehicule}
               onTrigger={handleValidationStep}
               retour={type === "arrivee" ? { livraison: livraison ?? "", electrique: isElectric } : undefined}
+              recap={(() => {
+                const photoSteps = STEPS.filter((x) => x.kind === "photo");
+                const sigSteps = STEPS.filter((x) => x.kind === "signature");
+                const kmStep = STEPS.filter((x) => x.kind === "kilometrage").map((x) => states[x.id]).find((x) => x?.kilometrage != null);
+                const equip = STEPS.filter((x) => x.kind === "checklist").map((x) => states[x.id]?.equipements).find(Boolean) ?? null;
+                return {
+                  type,
+                  photosDone: photoSteps.filter((x) => states[x.id]?.status === "success").length,
+                  photosTotal: photoSteps.length,
+                  extras: Object.values(states).reduce((n, x) => n + (x?.extras?.filter((e) => e.status === "success").length ?? 0), 0),
+                  km: kmStep?.kilometrage ?? null,
+                  niveau: kmStep?.niveau ?? null,
+                  equip,
+                  sigDone: sigSteps.filter((x) => states[x.id]?.status === "success").length,
+                  sigTotal: sigSteps.length,
+                };
+              })()}
             />
           )}
 
@@ -1808,7 +1826,7 @@ export function EdlPremiumFlow({
   );
 
   if (typeof document === "undefined") return null;
-  return createPortal(overlay, document.body);
+  return createPortal(<div className="drv2">{overlay}</div>, document.body);
 }
 
 /* ═════════════════════════ SUB-COMPONENTS ═════════════════════════ */
@@ -2127,16 +2145,17 @@ function SignatureArea({
   return (
     <div className="space-y-3">
       {isClient && !done && (
-        <div className="edl-glass p-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-[var(--edl-cyan)]">
-            Nom du signataire
-          </label>
+        <div className="sigx-field">
+          <label htmlFor="sig-client-name">Nom du signataire</label>
           <input
+            id="sig-client-name"
             type="text"
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            placeholder="Nom et prénom"
-            className="mt-2 w-full h-11 px-3 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/40 focus:border-[var(--edl-cyan)] focus:outline-none"
+            onKeyDown={(e) => { if (e.key === "Enter") (e.currentTarget as HTMLInputElement).blur(); }}
+            enterKeyHint="done"
+            autoComplete="off"
+            placeholder="Prénom et nom"
           />
         </div>
       )}
@@ -2157,45 +2176,74 @@ function SignatureArea({
           </button>
         </div>
       ) : (
-        <div className="edl-glass p-3">
-          <SignatureCanvas key={step.id} onValidate={onSign} disabled={state?.status === "uploading"} />
-        </div>
+        <SignatureCanvas key={step.id} onValidate={onSign} disabled={state?.status === "uploading"} />
       )}
     </div>
   );
 }
 
+type RecapData = {
+  type: "depart" | "arrivee";
+  photosDone: number; photosTotal: number; extras: number;
+  km: number | null; niveau: number | null;
+  equip: StepState["equipements"] | null;
+  sigDone: number; sigTotal: number;
+};
+
 function ValidationArea({
-  step, state, vehicule, onTrigger, retour,
-}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void; retour?: { livraison: string; electrique: boolean } }) {
+  step, state, vehicule, onTrigger, retour, recap,
+}: { step: EdlStepDef; state?: StepState; vehicule?: VehiculeInfo; onTrigger: () => void; retour?: { livraison: string; electrique: boolean }; recap?: RecapData }) {
   const done = state?.status === "success";
   const vehTitle = [vehicule?.marque, vehicule?.modele].filter(Boolean).join(" ");
 
   // Récapitulatif de fin d'EDL : aucune mention de l'admin (le selfie final et l'envoi viennent après).
   if (step.id === "edl_recap") {
+    const eq = recap?.equip;
+    const yes = (v: boolean) => (v ? "Oui" : "Non");
+    const roueLabel = eq?.roue === "secours" ? "Roue de secours" : eq?.roue === "kit" ? "Kit anti-crevaison" : eq?.roue === "aucun" ? "Aucune" : "—";
     return (
-      <div className="space-y-3">
-        <div className="edl-glass p-4 space-y-2">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--edl-cyan)] font-bold">Véhicule inspecté</p>
-          {vehTitle && <p className="text-sm font-semibold text-white">{vehTitle}</p>}
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-[var(--edl-text-soft)]">Plaque</span>
-            <span className="text-sm font-bold text-white tabular-nums" style={{ opacity: vehicule?.immatriculation ? 1 : 0.45 }}>
-              {vehicule?.immatriculation || "Non renseignée"}
-            </span>
+      <div className="rcp">
+        <section className="rcp-hero">
+          <span className="rcp-badge"><Check size={20} strokeWidth={3} /></span>
+          <div>
+            <b>État des lieux {recap?.type === "arrivee" ? "d'arrivée" : "de départ"} terminé</b>
+            <small>Vérifiez le récapitulatif puis terminez.</small>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-[var(--edl-text-soft)]">VIN</span>
-            <span className="text-sm font-semibold text-white truncate" style={{ opacity: vehicule?.vin ? 1 : 0.45 }}>
-              {vehicule?.vin || "Non renseigné"}
-            </span>
-          </div>
-        </div>
+        </section>
+
+        <section className="rcp-card">
+          <h4>Véhicule inspecté</h4>
+          {vehTitle && <p className="rcp-veh">{vehTitle}</p>}
+          <div className="rcp-plate">{vehicule?.immatriculation ? <PlateBadge plate={vehicule.immatriculation} size="md" /> : <span className="rcp-na">Plaque non renseignée</span>}</div>
+          <div className="rcp-row"><span>N° de série (VIN)</span><b className={vehicule?.vin ? "" : "rcp-na"}>{vehicule?.vin || "Non renseigné"}</b></div>
+        </section>
+
+        <section className="rcp-grid">
+          <div className="rcp-tile"><small>Photos</small><b>{recap ? `${recap.photosDone}/${recap.photosTotal}` : "—"}</b>{!!recap?.extras && <em>+{recap.extras} libre{recap.extras > 1 ? "s" : ""}</em>}</div>
+          <div className="rcp-tile"><small>Signatures</small><b>{recap ? `${recap.sigDone}/${recap.sigTotal}` : "—"}</b></div>
+          <div className="rcp-tile"><small>Kilométrage</small><b>{recap?.km != null ? `${recap.km.toLocaleString("fr-FR")} km` : "—"}</b></div>
+          <div className="rcp-tile"><small>Niveau</small><b>{recap?.niveau != null ? `${recap.niveau} %` : "—"}</b></div>
+        </section>
+
+        {eq && (
+          <section className="rcp-card">
+            <h4>Équipements constatés</h4>
+            <div className="rcp-chips">
+              <span className={eq.extincteur ? "ok" : "ko"}>Extincteur · {yes(eq.extincteur)}</span>
+              <span className={eq.kit_securite ? "ok" : "ko"}>Kit de sécurité · {yes(eq.kit_securite)}</span>
+              {vehicule && (retour?.electrique || eq.cable_charge) ? <span className={eq.cable_charge ? "ok" : "ko"}>Câble de charge · {yes(eq.cable_charge)}</span> : null}
+              <span className={eq.tapis_sol ? "ok" : "ko"}>Tapis de sol · {yes(eq.tapis_sol)}</span>
+              <span className={eq.doubles_cles ? "ok" : "ko"}>Doubles clés · {yes(eq.doubles_cles)}</span>
+              <span className="ok">{roueLabel}</span>
+            </div>
+          </section>
+        )}
+
         {retour && (
-          <div className="edl-glass ret-edl p-4">
-            <p className="text-sm font-bold text-white mb-3">Préparer mon retour</p>
+          <section className="rcp-card rcp-retour">
+            <h4>Préparer mon retour</h4>
             <RetourBlock livraison={retour.livraison} electrique={retour.electrique} />
-          </div>
+          </section>
         )}
       </div>
     );

@@ -12,7 +12,7 @@ interface Props {
 export function ReturnTripHelper({ livraison, electrique, vehicule }: Props) {
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-white">Préparer mon retour</h4>
+      <h4 className="text-sm font-semibold text-[#08243f]">Préparer mon retour</h4>
       <RetourBlock livraison={livraison} electrique={electrique} vehicule={vehicule} />
     </div>
   );
