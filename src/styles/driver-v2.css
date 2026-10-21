@@ -2574,3 +2574,8 @@ html.theme-dark .rcp-row,html.theme-dark .rcp-tile small{color:#9dbdb0}
 .drv2 .ddl-veh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;color:#3d5a4d;font-weight:600}
 .drv2 .ddl-pv{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 16px;border-radius:14px;border:0;background:linear-gradient(180deg,#1fcb7b,#12a35f);color:#fff;font-weight:700;font-size:15px;box-shadow:0 10px 20px -10px rgba(18,163,95,.7)}
 .drv2 .ddl-pv:disabled{opacity:.7}
+
+/* Chargement : pas de rond qui tourne, juste la barre verte (comme la maquette) */
+.drv2 .dl-ring{display:none!important}
+.drv2 .dl-bar{width:140px;height:5px;border-radius:9px;background:rgba(20,184,102,.18)}
+.drv2 .dl-bar i{border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd)}

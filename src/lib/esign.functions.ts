@@ -48,13 +48,14 @@ export const esignCreate = createServerFn({ method: "POST" })
     (d: {
       kind: Kind; title: string; refType?: string | null; refId?: string | null;
       signerName: string; signerEmail: string; signerPhone?: string | null; signerCompany?: string | null;
-      pdfBase64: string; expiryDays?: number;
+      pdfBase64?: string; pdfPath?: string; expiryDays?: number;
     }) => {
       if (!KINDS.includes(d.kind)) throw new Error("Type de document invalide");
       if (!d.title?.trim()) throw new Error("Titre requis");
       if (!d.signerName?.trim()) throw new Error("Nom du signataire requis");
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.signerEmail ?? "")) throw new Error("E-mail du signataire invalide");
-      if (!d.pdfBase64) throw new Error("Document PDF requis");
+      if (!d.pdfBase64 && !d.pdfPath) throw new Error("Document PDF requis");
+      if (d.pdfPath && !/^pending\/[0-9a-f-]{36}\.pdf$/.test(d.pdfPath)) throw new Error("Chemin du document invalide");
       return d;
     },
   )
@@ -68,7 +69,15 @@ export const esignCreate = createServerFn({ method: "POST" })
       const missing = await S.missingConvoyeurDocs(data.refId);
       if (missing.length) throw new Error(`Pièces manquantes : ${missing.join(", ")}. Le convoyeur doit les déposer avant de signer.`);
     }
-    const bytes = S.b64ToBytes(data.pdfBase64);
+    let bytes: Uint8Array;
+    if (data.pdfPath) {
+      const dlr = await supabaseAdmin.storage.from(S.BUCKET).download(data.pdfPath);
+      if (dlr.error || !dlr.data) throw new Error("Document envoyé introuvable, réessayez.");
+      bytes = new Uint8Array(await dlr.data.arrayBuffer());
+      await supabaseAdmin.storage.from(S.BUCKET).remove([data.pdfPath]);
+    } else {
+      bytes = S.b64ToBytes(data.pdfBase64 as string);
+    }
     if (bytes.length < 200 || bytes.length > 15 * 1024 * 1024) throw new Error("PDF invalide ou trop volumineux (15 Mo max).");
     if (String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") throw new Error("Le fichier n'est pas un PDF.");
 
@@ -105,6 +114,19 @@ export const esignCreate = createServerFn({ method: "POST" })
     });
     await S.logEvent(id, mail.success ? "invitation_sent" : "invitation_failed", { to: S.maskEmail(data.signerEmail), reason: mail.reason ?? null }, meta);
     return { id, link, emailSent: mail.success };
+  });
+
+/** Étape 1 : adresse d'envoi direct vers le stockage (évite la limite de taille des requêtes du site). */
+export const esignUploadUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const S = await import("@/lib/esign.server");
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const path = `pending/${crypto.randomUUID()}.pdf`;
+    const r = await supabaseAdmin.storage.from(S.BUCKET).createSignedUploadUrl(path);
+    if (r.error || !r.data) throw new Error(`Envoi du document impossible : ${r.error?.message ?? "inconnu"}`);
+    return { path, token: r.data.token as string };
   });
 
 export const esignList = createServerFn({ method: "POST" })

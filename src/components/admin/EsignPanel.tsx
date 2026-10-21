@@ -6,9 +6,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { BellRing, ChevronDown, Download, FileSignature, Loader2, Send, ShieldCheck, XCircle } from "lucide-react";
 import {
-  esignCancel, esignCreate, esignDownloadUrls, esignEvents, esignList, esignRemind,
+  esignCancel, esignCreate, esignUploadUrl, esignDownloadUrls, esignEvents, esignList, esignRemind,
 } from "@/lib/esign.functions";
 
 type Kind = "devis" | "contrat_convoyeur" | "contrat_pro" | "autre";
@@ -63,6 +64,7 @@ export interface EsignPanelProps {
 
 export default function EsignPanel(p: EsignPanelProps) {
   const create = useServerFn(esignCreate);
+  const upUrl = useServerFn(esignUploadUrl);
   const list = useServerFn(esignList);
   const remind = useServerFn(esignRemind);
   const cancel = useServerFn(esignCancel);
@@ -91,6 +93,12 @@ export default function EsignPanel(p: EsignPanelProps) {
   }, [list, p.refType, p.refId]);
   useEffect(() => { void load(); }, [load]);
 
+  const uploadPdf = async (blob: Blob) => {
+    const u = await upUrl();
+    const { error } = await supabase.storage.from("esign-docs").uploadToSignedUrl(u.path, u.token, blob, { contentType: "application/pdf" });
+    if (error) throw new Error(`Envoi du document impossible : ${error.message}`);
+    return u.path;
+  };
   const send = async () => {
     setBusy("send");
     try {
@@ -99,7 +107,7 @@ export default function EsignPanel(p: EsignPanelProps) {
       const r = await create({ data: {
         kind, title, refType: p.refType ?? null, refId: p.refId ?? null,
         signerName: name, signerEmail: email, signerPhone: phone || null, signerCompany: company || null,
-        pdfBase64: await fileToBase64(blob), expiryDays: days,
+        pdfPath: await uploadPdf(blob), expiryDays: days,
       } });
       toast.success(r.emailSent ? "Document envoyé pour signature." : "Demande créée, mais l'e-mail n'a pas pu partir.");
       setFile(null); await load();

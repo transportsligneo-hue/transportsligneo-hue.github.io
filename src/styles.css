@@ -12124,3 +12124,124 @@ body .tln-bar .r4-nav-link.nav-accent-purple.is-active,
 body:not(.is-driver-app) .tln-bar .r4-nav-link.nav-accent-purple.is-active {
   animation: none !important;
 }
+
+/* ============================================================
+   ÉTAT DES LIEUX · même style que la nouvelle appli Driver
+   Palette verte (#14B866 / #4FE8A0), clair par défaut, sombre en option.
+   Aucun changement de fonctionnement : couleurs et surfaces uniquement.
+   ============================================================ */
+/* --- SOMBRE : mêmes couleurs, sur fond profond --- */
+.edl-shell {
+  --edl-electric: #14B866;
+  --edl-electric-glow: #22cf7c;
+  --edl-cyan: #4FE8A0;
+  --edl-navy-deep: #06140f;
+  --edl-navy: #0a1f17;
+  --edl-navy-2: #0e2a20;
+  --edl-text: #f2fbf6;
+  --edl-text-soft: #cfe6da;
+  --edl-muted: #8fb3a2;
+  --edl-gold: #4FE8A0;
+  background:
+    radial-gradient(1000px 560px at 0% -10%, rgba(20,184,102,0.26), transparent 60%),
+    radial-gradient(800px 480px at 120% 0%, rgba(79,232,160,0.16), transparent 60%),
+    linear-gradient(180deg, #06140f 0%, #0a1f17 50%, #06140f 100%);
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+.edl-shell .edl-glass { background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)); border: 1px solid rgba(79,232,160,0.18); }
+.edl-shell .edl-glass-strong { background: linear-gradient(180deg, rgba(14,42,32,0.78), rgba(10,31,23,0.7)); border: 1px solid rgba(79,232,160,0.28); box-shadow: 0 18px 50px -18px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08); }
+.edl-shell .edl-cta, .edl-shell .edl-cta-gold {
+  background: linear-gradient(135deg, #14B866 0%, #22cf7c 55%, #4FE8A0 100%);
+  color: #04261a;
+  box-shadow: 0 14px 34px -12px rgba(20,184,102,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.edl-shell .edl-cta:hover, .edl-shell .edl-cta-gold:hover { box-shadow: 0 18px 44px -12px rgba(20,184,102,0.75), inset 0 1px 0 rgba(255,255,255,0.4); }
+.edl-shell .edl-chip { background: rgba(20,184,102,0.18); border-color: rgba(79,232,160,0.42); color: #c9f5de; }
+.edl-shell .edl-chip-gold { background: rgba(79,232,160,0.14); border-color: rgba(79,232,160,0.45); color: #8ef0bd; }
+.edl-shell .edl-chip-success { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); color: #6ee7b7; }
+.edl-shell .edl-electric-bar { background: linear-gradient(90deg, #14B866 0%, #4FE8A0 100%); box-shadow: 0 0 14px rgba(79,232,160,0.5); }
+.edl-shell .edl-photo-frame { border: 1px solid rgba(79,232,160,0.25); background: linear-gradient(180deg, rgba(10,31,23,0.6), rgba(6,20,15,0.6)); }
+.edl-shell .edl-photo-frame::after { background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(6,20,15,0.55) 100%); }
+.edl-shell .edl-pulse { animation: edlGreenPulse 1800ms ease-in-out infinite; }
+@keyframes edlGreenPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79,232,160,0.5), 0 0 22px rgba(20,184,102,0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(79,232,160,0), 0 0 30px rgba(20,184,102,0.7); }
+}
+
+/* --- CLAIR : comme la nouvelle appli --- */
+html.theme-light .edl-shell {
+  --edl-electric: #14B866;
+  --edl-electric-glow: #22cf7c;
+  --edl-cyan: #0b8f52;
+  --edl-text: #08243f;
+  --edl-text-soft: #3a5a58;
+  --edl-muted: #6a867e;
+  --edl-gold: #0b8f52;
+  background:
+    radial-gradient(520px 300px at 0% 0%, rgba(20,184,102,0.10), transparent 70%),
+    radial-gradient(480px 300px at 100% 8%, rgba(79,232,160,0.14), transparent 70%),
+    linear-gradient(180deg, #eff7f2 0%, #e1eee6 100%);
+  color: #08243f;
+}
+html.theme-light .edl-shell .edl-glass {
+  background: #f8fcfa; border: 1px solid rgba(20,184,102,0.13);
+  box-shadow: 0 1px 2px rgba(13,27,74,0.04), 0 10px 30px -12px rgba(20,184,102,0.18);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+html.theme-light .edl-shell .edl-glass-strong {
+  background: linear-gradient(180deg, #ffffff, #f2faf6); border: 1px solid rgba(20,184,102,0.2);
+  box-shadow: 0 14px 36px -16px rgba(20,184,102,0.3), inset 0 1px 0 #fff;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+html.theme-light .edl-shell .edl-chip { background: rgba(20,184,102,0.10); border-color: rgba(20,184,102,0.28); color: #0b7a43; backdrop-filter: none; }
+html.theme-light .edl-shell .edl-chip-gold { background: rgba(20,184,102,0.10); border-color: rgba(20,184,102,0.3); color: #0b7a43; }
+html.theme-light .edl-shell .edl-chip-success { background: rgba(18,185,129,0.12); border-color: rgba(18,185,129,0.4); color: #047857; }
+html.theme-light .edl-shell .edl-photo-frame { border: 1px solid rgba(20,184,102,0.22); background: #0f2a22; box-shadow: 0 16px 36px -18px rgba(20,184,102,0.45); }
+html.theme-light .edl-shell .text-white,
+html.theme-light .edl-shell .text-white\/70 { color: #08243f; }
+html.theme-light .edl-shell .edl-photo-frame .text-white { color: #fff; }
+html.theme-light .edl-shell .border-white\/10,
+html.theme-light .edl-shell .border-white\/15 { border-color: rgba(20,184,102,0.18); }
+html.theme-light .edl-shell .bg-white\/8,
+html.theme-light .edl-shell .bg-white\/\[0\.04\] { background-color: rgba(20,184,102,0.07); }
+html.theme-light .edl-shell .text-red-200, html.theme-light .edl-shell .text-red-300 { color: #b91c1c; }
+html.theme-light .edl-shell .text-amber-100, html.theme-light .edl-shell .text-amber-200, html.theme-light .edl-shell .text-amber-300 { color: #92400e; }
+html.theme-light .edl-shell .text-emerald-100, html.theme-light .edl-shell .text-emerald-300 { color: #047857; }
+html.theme-light .edl-shell input, html.theme-light .edl-shell textarea { color: #08243f; }
+html.theme-light .edl-shell .placeholder-white\/40::placeholder { color: #8aa396; }
+html.theme-light .edl-shell button.edl-glass { color: #08243f; }
+html.theme-light .edl-shell .edl-photo-frame .edl-chip,
+html.theme-light .edl-shell .edl-photo-frame .edl-chip-gold { background: rgba(5,20,14,0.62); border-color: rgba(79,232,160,0.55); color: #8ef0bd; backdrop-filter: blur(8px); }
+html.theme-light .edl-shell .edl-photo-frame .edl-chip-success { background: rgba(5,20,14,0.62); border-color: rgba(110,231,183,0.6); color: #6ee7b7; }
+
+
+/* Choix du GPS : fenêtre centrée */
+@keyframes navChoicePop {
+  from { opacity: 0; transform: scale(0.88) translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.nav-choice-pop { animation: navChoicePop 0.28s cubic-bezier(0.2, 1.2, 0.4, 1); }
+
+.auth-btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:#fff;color:#1f2937;font-weight:700;font-size:14.5px;box-shadow:0 8px 22px -14px rgba(0,0,0,.5)}
+.auth-btn-google:disabled{opacity:.6}
+
+/* ===== Connexion de l'appli convoyeur : clair et vert, comme la maquette ===== */
+body.is-driver-app .auth-shell.auth-driver-theme{background:radial-gradient(520px 320px at 0% 0%,rgba(52,230,140,.25),transparent 70%),radial-gradient(480px 300px at 100% 10%,rgba(79,232,160,.16),transparent 70%),linear-gradient(180deg,#e6f3ec,#cfe2d8)!important}
+body.is-driver-app .auth-shell.auth-driver-theme::before{display:none}
+body.is-driver-app .auth-driver-theme .auth-title{color:#08243f}
+body.is-driver-app .auth-driver-theme .auth-accent{color:#12a35f;background:none;-webkit-text-fill-color:#12a35f}
+body.is-driver-app .auth-driver-theme .auth-subtle{color:#4c6b5c}
+body.is-driver-app .auth-driver-theme .auth-card{background:transparent;border:0;box-shadow:none;backdrop-filter:none;color:#08243f;padding-left:0;padding-right:0}
+body.is-driver-app .auth-driver-theme .auth-label{color:#5d7a6c}
+body.is-driver-app .auth-driver-theme .auth-input{background:#f4fbf7;border:1px solid rgba(20,184,102,.25);color:#08243f}
+body.is-driver-app .auth-driver-theme .auth-input::placeholder{color:#8aa397}
+body.is-driver-app .auth-driver-theme .auth-input:focus{border-color:#14B866;box-shadow:0 0 0 3px rgba(20,184,102,.18);background:#fff}
+body.is-driver-app .auth-driver-theme .auth-field-icon{color:#12a35f}
+body.is-driver-app .auth-driver-theme .auth-btn-primary{background:linear-gradient(135deg,#14B866,#4FE8A0);color:#04261a;box-shadow:0 14px 30px -12px rgba(20,184,102,.6);border:0}
+body.is-driver-app .auth-driver-theme .auth-link{color:#0b7a43}
+body.is-driver-app .auth-driver-theme label,body.is-driver-app .auth-driver-theme .auth-card span{color:inherit}
+body.is-driver-app .auth-driver-theme .auth-card .border-white\/10{border-color:rgba(20,184,102,.25)}
+body.is-driver-app .auth-driver-theme .auth-card .text-white\/40{color:#6b8579}
+body.is-driver-app .auth-driver-theme .auth-card .bg-white\/10{background:rgba(20,184,102,.25)}
+body.is-driver-app .auth-driver-theme .text-white\/45{color:#6b8579}
+body.is-driver-app .auth-driver-theme .auth-link-lg.is-gold{color:#0b7a43;background:#fff;border:1px solid rgba(20,184,102,.35)}
