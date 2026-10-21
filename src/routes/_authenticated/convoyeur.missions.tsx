@@ -29,6 +29,23 @@ import { displayNumero } from "@/lib/mission-number";
 import { hasPendingDriverSelfie, setPendingDriverSelfie } from "@/components/mission/DriverSelfieCapture";
 import { MissionViewSwitcher, MissionViewsBody, useMissionView, type MissionViewItem } from "@/components/dashboard/MissionViews";
 
+const PRESTA_DEF: Record<string, { label: string; desc: string }> = {
+  mise_en_main: { label: "Mise en main du véhicule", desc: "Présenter le véhicule au client : fonctionnement, équipements, clés et documents remis en main propre." },
+  recharge_electrique: { label: "Recharge électrique pour le trajet", desc: "Brancher le véhicule pour qu'il arrive avec assez de batterie." },
+  recharge_electrique_livraison: { label: "Recharge électrique avant livraison", desc: "Recharger le véhicule avant de le remettre au client." },
+  plein_essence: { label: "Appoint carburant", desc: "Faire le plein selon le niveau souhaité par le client." },
+  lavage_ext: { label: "Lavage extérieur", desc: "Nettoyage de la carrosserie." },
+  lavage_int: { label: "Lavage intérieur", desc: "Nettoyage de l'habitacle." },
+  lavage_full: { label: "Lavage extérieur + intérieur", desc: "Nettoyage complet du véhicule." },
+};
+function prestationsFromMeta(meta: unknown): { key: string; label: string; desc: string }[] {
+  if (!meta || typeof meta !== "object") return [];
+  const m = meta as Record<string, unknown>;
+  const list = Object.keys(PRESTA_DEF).filter((k) => m[k] === true).map((k) => ({ key: k, ...PRESTA_DEF[k] }));
+  if (typeof m.autre_note === "string" && m.autre_note.trim()) list.push({ key: "autre", label: "Demande particulière", desc: m.autre_note.trim() });
+  return list;
+}
+
 export const Route = createFileRoute("/_authenticated/convoyeur/missions")({
   validateSearch: (search: Record<string, unknown>): { open?: string; f?: string } => ({
     open: typeof search.open === "string" && search.open ? search.open : undefined,
@@ -755,6 +772,7 @@ function ConvoyeurMissions() {
           arrivee={{ ville: arr.ville, adresse: arr.adresse }}
           contactDepartTel={contactDepartTel}
           contactArriveeTel={contactArriveeTel}
+          prestations={prestationsFromMeta((t as { options_meta?: unknown } | null)?.options_meta)}
           miseEnMain={{
             depart: {
               nom: (t as { contact_depart_nom?: string | null } | null)?.contact_depart_nom ?? null,

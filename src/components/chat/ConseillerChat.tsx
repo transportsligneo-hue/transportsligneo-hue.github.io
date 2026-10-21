@@ -1,3 +1,4 @@
+import "@/styles/chat-v2.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

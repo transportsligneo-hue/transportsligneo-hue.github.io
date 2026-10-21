@@ -27,3 +27,17 @@
 html.theme-dark .lgc-panel{--ink:#eef2ff;--ink2:#aab4d6;--line:rgba(255,255,255,.09);background:linear-gradient(180deg,#0c1840,#081233)}
 html.theme-dark .lgc-panel .lgc-bubble{background:rgba(255,255,255,.06)}
 html.theme-dark .lgc-panel .lgc-input,html.theme-dark .lgc-panel .lgc-quick button,html.theme-dark .lgc-panel .lgc-files button{background:rgba(255,255,255,.05)}
+
+/* Chat conseiller (pages client / pro) : même carte fondue */
+.lgc-panel.lgc-page{max-width:46rem;margin:0 auto;padding:20px}
+.lgc-panel .lgc-conseiller{gap:14px}
+.lgc-panel .lgc-avail{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink2);font-size:12.5px;font-weight:600;box-shadow:0 6px 14px -12px rgba(20,40,110,.4)}
+.lgc-panel .lgc-avail.on{color:#0b7a43;border-color:rgba(20,184,102,.35)}
+.lgc-panel .lgc-waiting{margin:0;padding:10px 14px;border-radius:14px;background:var(--cs);border:0;color:var(--ink2);font-size:13px}
+.lgc-panel .lgc-visitor-form{gap:10px}
+.lgc-panel .lgc-visitor-form p{color:var(--ink2);font-size:14px}
+.lgc-panel .lgc-visitor-form input,.lgc-panel .lgc-visitor-form textarea{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:12px 14px}
+.lgc-panel .lgc-visitor-form input:focus,.lgc-panel .lgc-visitor-form textarea:focus{outline:2px solid var(--c1);outline-offset:1px}
+.lgc-panel .lgc-visitor-form button{background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 12px 22px -14px var(--c1)}
+.lgc-panel .lgc-err{color:#dc2626}
+html.theme-dark .lgc-panel .lgc-avail,html.theme-dark .lgc-panel .lgc-visitor-form input,html.theme-dark .lgc-panel .lgc-visitor-form textarea{background:rgba(255,255,255,.05)}

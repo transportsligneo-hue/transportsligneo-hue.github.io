@@ -152,7 +152,7 @@ function MaterielPage() {
         <div className="grp"><span>Mes véhicules de transport</span><i /></div>
         {vehicules.length === 0 && <p className="eqnote">Aucun véhicule déclaré pour le moment.</p>}
         {vehicules.map((v) => {
-          const t = VEHICULE_TYPES.find((x) => x.key === v.type) ?? (v.type === "porteur_35" ? { key: "porteur_35", label: "Porte-voitures 3,5 t", icon: "truck" } : VEHICULE_TYPES[0]);
+          const t = VEHICULE_TYPES.find((x) => x.key === v.type) ?? (v.type === "remorque" ? { key: "remorque", label: "Remorque", icon: "link2" } : VEHICULE_TYPES[0]);
           return (
             <div className="vcard" key={v.id}>
               <span className="vc-ic"><Ic n={t.icon} s={20} sw={2.1} /></span>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   CarFront, ShieldCheck, Copy, Check, Palette, Gauge, Calendar,
-  Phone, MapPin, Info, Navigation, ArrowUpRight, Zap, BatteryCharging, UserRound,
+  Phone, MapPin, Info, Navigation, ArrowUpRight, Zap, UserRound,
   Navigation as NavIcon, ClipboardCheck, Package, Send, Search, Flag,
 } from "lucide-react";
 
@@ -34,6 +34,9 @@ interface Props {
   contactDepartTel?: string | null;
   contactArriveeTel?: string | null;
   /** Mise en main : qui remet / réceptionne le véhicule, consignes libres. */
+  /** Prestations demandées par le client (options de la mission). */
+  prestations?: { key: string; label: string; desc: string }[];
+  /** Contacts sur place (enlèvement / livraison). */
   miseEnMain?: {
     depart?: { nom?: string | null; tel?: string | null; note?: string | null };
     arrivee?: { nom?: string | null; tel?: string | null; note?: string | null };
@@ -86,7 +89,7 @@ import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export function MissionV3InfoPane({
   vehicule, client, depart, arrivee, instructions,
-  contactDepartTel, contactArriveeTel, miseEnMain, gpsTarget,
+  contactDepartTel, contactArriveeTel, miseEnMain, prestations, gpsTarget,
   timeline, currentIndex, totalSteps, progressPct,
 }: Props) {
   const ring = 96;
@@ -97,7 +100,6 @@ export function MissionV3InfoPane({
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(gpsTarget)}`
     : "#";
 
-  const isElec = !!vehicule.energie && /[eé]lect/i.test(vehicule.energie);
   const mmDepart = miseEnMain?.depart;
   const mmArrivee = miseEnMain?.arrivee;
 
@@ -245,7 +247,7 @@ export function MissionV3InfoPane({
         <div className="v3-chip-row">
           {vehicule.energie && (
             <span className={`v3-chip ${/[eé]lect/i.test(vehicule.energie) ? "eco" : ""}`}>
-              {/[eé]lect/i.test(vehicule.energie) && <Zap size={13} strokeWidth={2.6} fill="#2f8bff" color="#2f8bff" />}
+              {/[eé]lect/i.test(vehicule.energie) && <Zap size={14} strokeWidth={2.4} className="ic-bolt" fill="currentColor" />}
               {vehicule.energie}
             </span>
           )}
@@ -328,13 +330,13 @@ export function MissionV3InfoPane({
         )}
       </div>
 
-      {/* Mise en main */}
+      {/* Contacts sur place */}
       <div className="v3-card">
         <div className="v3-head-row">
-          <span className="v3-eyebrow"><UserRound size={14} /> Mise en main</span>
+          <span className="v3-eyebrow"><UserRound size={14} /> Contacts sur place</span>
         </div>
         <div className="v3-mm">
-          {([["Enlèvement : qui vous remet le véhicule", mmDepart], ["Livraison : qui le réceptionne", mmArrivee]] as const).map(([lbl, m]) => (
+          {([["Enlèvement", mmDepart], ["Livraison", mmArrivee]] as const).map(([lbl, m]) => (
             <div className="v3-mm-item" key={lbl}>
               <div className="v3-mm-lbl">{lbl}</div>
               <div className="v3-mm-who">
@@ -346,19 +348,30 @@ export function MissionV3InfoPane({
           ))}
           <p className="v3-mm-tip">
             <Info size={14} />
-            <span>Le véhicule peut être remis par un proche, le gardien, un collègue ou le gestionnaire de flotte. L'adresse peut changer ou ne pas avoir de numéro : en cas de doute, appelez avant de partir.</span>
+            <span>L'interlocuteur peut être un proche, le gardien, un collègue ou le gestionnaire de flotte. L'adresse peut changer ou ne pas avoir de numéro : en cas de doute, appelez avant de partir.</span>
           </p>
         </div>
-        {isElec && (
-          <div className="v3-ev">
-            <BatteryCharging size={18} strokeWidth={2.2} />
-            <div>
-              <b>Recharge électrique</b>
-              Vérifiez la batterie au départ et à l'arrivée, gardez le câble de recharge dans le véhicule et suivez les consignes de recharge du client si elles sont indiquées ci-dessus.
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Prestations demandées */}
+      {prestations && prestations.length > 0 && (
+        <div className="v3-card">
+          <div className="v3-head-row">
+            <span className="v3-eyebrow"><ClipboardCheck size={14} /> Prestations demandées</span>
+          </div>
+          <div className="v3-mm">
+            {prestations.map((p) => (
+              <div className={`v3-mm-item v3-presta${/recharge/.test(p.key) ? " ev" : ""}`} key={p.key}>
+                <div className="v3-mm-who">
+                  {/recharge/.test(p.key) ? <Zap size={16} className="ic-bolt" fill="currentColor" /> : <Check size={16} />}
+                  <span style={{ minWidth: 0 }}>{p.label}</span>
+                </div>
+                <p className="v3-mm-note">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick actions */}
       <div className="v3-quick-grid">

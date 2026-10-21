@@ -119,6 +119,8 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
   const [clientSociete, setClientSociete] = useState<string | null>(null);
   const [kmDepart, setKmDepart] = useState<number | null>(null);
   const [kmArrivee, setKmArrivee] = useState<number | null>(null);
+  const [nivDepart, setNivDepart] = useState<number | null>(null);
+  const [nivArrivee, setNivArrivee] = useState<number | null>(null);
   const [dommages, setDommages] = useState<PvDommage[]>([]);
   const [pvSignes, setPvSignes] = useState<SignedPvDoc[]>([]);
   /** Signatures collectées, indexées par « document:emplacement ». */
@@ -210,6 +212,12 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
     const insp = ((inspRes.data as { kilometrage_depart: number | null; kilometrage_arrivee: number | null }[] | null) ?? []);
     setKmDepart(insp.find((i) => i.kilometrage_depart != null)?.kilometrage_depart ?? null);
     setKmArrivee(insp.find((i) => i.kilometrage_arrivee != null)?.kilometrage_arrivee ?? null);
+    try {
+      const { data: nvData } = await supabase.from("inspections").select("niveau_energie_depart, niveau_energie_arrivee" as string).eq("attribution_id", attributionId);
+      const nv = (nvData as unknown as { niveau_energie_depart?: number | null; niveau_energie_arrivee?: number | null }[] | null) ?? [];
+      setNivDepart(nv.find((i) => i.niveau_energie_depart != null)?.niveau_energie_depart ?? null);
+      setNivArrivee(nv.find((i) => i.niveau_energie_arrivee != null)?.niveau_energie_arrivee ?? null);
+    } catch { /* colonnes pas encore créées */ }
 
     const nrPhotos = ((nrRes.data as { photos: unknown }[] | null)?.[0]?.photos ?? []) as {
       vue?: string;
@@ -331,7 +339,10 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         marque_modele: marqueModele,
         immatriculation: immat,
         vin: trajet.vin || trajet.vehicule_vin,
-        kilometrage_depart: trajet.vehicule_km != null ? String(trajet.vehicule_km) : null,
+        kilometrage_depart: kmDepart != null ? String(kmDepart) : trajet.vehicule_km != null ? String(trajet.vehicule_km) : null,
+        kilometrage_arrivee: kmArrivee != null ? String(kmArrivee) : null,
+        niveau_depart: nivDepart != null ? String(nivDepart) : null,
+        niveau_arrivee: nivArrivee != null ? String(nivArrivee) : null,
         carburant: trajet.vehicule_energie,
         depart: trajet.depart,
         arrivee: trajet.arrivee,
@@ -367,7 +378,7 @@ export function MissionDocsOfficielsPanel({ attributionId, userId, variant = "li
         vin: trajet.vin || trajet.vehicule_vin,
         kilometrage_depart: kmDepart != null ? String(kmDepart) : trajet.vehicule_km != null ? String(trajet.vehicule_km) : null,
         kilometrage_arrivee: kmArrivee != null ? String(kmArrivee) : null,
-        carburant: trajet.vehicule_energie,
+        carburant: [trajet.vehicule_energie, nivArrivee != null ? `niveau ${nivArrivee} %` : nivDepart != null ? `niveau ${nivDepart} %` : null].filter(Boolean).join(" · ") || null,
         lieu_prise_en_charge: trajet.depart,
         lieu_livraison: trajet.arrivee,
         date_prise_en_charge: [trajet.date_trajet, trajet.heure_trajet].filter(Boolean).join(" ") || null,

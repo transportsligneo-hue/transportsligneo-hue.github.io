@@ -24,7 +24,7 @@ import { createPortal } from "react-dom";
 import {
   ArrowLeft, ArrowRight, Camera, Check, Loader2, X, RefreshCw,
   ShieldCheck, PenLine, ScanLine, UserCircle2, Sparkles, FileText, MapPin,
-  ShieldAlert, FileSearch,
+  ShieldAlert, FileSearch, Zap, Fuel,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,6 +105,8 @@ interface StepState {
   };
   /** Kilométrage saisi */
   kilometrage?: number;
+  /** Niveau carburant / batterie saisi (0-100 %) */
+  niveau?: number;
 }
 
 interface StoredState {
@@ -267,7 +269,7 @@ export function EdlPremiumFlow({
     // carte grise, PV de livraison, puis les deux signatures juste après le PV,
     // le kilométrage, et le récapitulatif. Le selfie final et l'envoi à l'admin
     // viennent ensuite, depuis la mission.
-    const LATE = ["photos_libres_degats", "carte_grise", "pv_livraison", "kilometrage_arrivee"];
+    const LATE = ["photos_libres_degats", "carte_grise", "pv_livraison"];
     const pick = (id: string) => base.find((x) => x.id === id);
     const tour = base.filter((x) => !LATE.includes(x.id));
     const tail = [
@@ -275,7 +277,6 @@ export function EdlPremiumFlow({
       pick("carte_grise"),
       pick("pv_livraison"),
       ...ARRIVEE_SIGNATURE_STEPS,
-      pick("kilometrage_arrivee"),
       { ...EDL_RECAP_STEP, phase: "arrivee" as const },
     ].filter((x): x is EdlStepDef => Boolean(x));
     return [...tour, ...tail];
@@ -830,32 +831,57 @@ export function EdlPremiumFlow({
     }
   };
 
-  /** Valide une étape kilométrage (depart ou arrivée) et persiste la valeur. */
-  const validateKilometrage = async (value: number) => {
+  /** Valide l'étape kilométrage + niveau d'énergie, puis lance le contrôle anti-triche (non bloquant). */
+  const validateKilometrage = async (value: number, niveau: number) => {
     const stepId = currentStep.id;
     if (!Number.isFinite(value) || value <= 0) {
       toast.error("Saisissez un kilométrage valide");
       return;
     }
-    setState(stepId, { status: "uploading", kilometrage: value });
+    setState(stepId, { status: "uploading", kilometrage: value, niveau });
     try {
       const insId = await ensureInspection();
-      const payload = stepId === "kilometrage_arrivee"
-        ? { kilometrage_arrivee: value }
-        : { kilometrage_depart: value };
-      const { error } = await supabase
+      const arr = stepId === "kilometrage_arrivee";
+      const payload = arr
+        ? { kilometrage_arrivee: value, niveau_energie_arrivee: niveau }
+        : { kilometrage_depart: value, niveau_energie_depart: niveau };
+      let { error } = await supabase
         .from("inspections")
-        .update(payload)
+        .update(payload as never)
         .eq("id", insId);
+      if (error) {
+        // Colonne « niveau » pas encore créée côté base : on enregistre au moins le kilométrage.
+        const r2 = await supabase
+          .from("inspections")
+          .update((arr ? { kilometrage_arrivee: value } : { kilometrage_depart: value }) as never)
+          .eq("id", insId);
+        error = r2.error;
+      }
       if (error) throw error;
-      setState(stepId, { status: "success", kilometrage: value });
-      toast.success("Kilométrage enregistré");
+      setState(stepId, { status: "success", kilometrage: value, niveau });
+      toast.success("Kilométrage et niveau enregistrés");
+      void supabase.functions.invoke("edl-compteur-read", {
+        body: { mode: "verify", inspection_id: insId, attribution_id: attributionId, phase: arr ? "arrivee" : "depart", declared: { km: value, level_pct: niveau } },
+      }).catch(() => { /* contrôle non bloquant */ });
     } catch (err) {
-      setState(stepId, { status: "error", kilometrage: value, error: err instanceof Error ? err.message : "Erreur" });
+      setState(stepId, { status: "error", kilometrage: value, niveau, error: err instanceof Error ? err.message : "Erreur" });
       toast.error("Enregistrement impossible", { description: "Réessayez dans quelques secondes." });
     }
   };
 
+  /** Lecture automatique du compteur sur la photo (aide à la saisie, jamais bloquante). */
+  const readCompteur = async (): Promise<{ km: number | null; level_pct: number | null; suspicious: boolean } | null> => {
+    try {
+      const insId = await ensureInspection();
+      const { data, error } = await supabase.functions.invoke("edl-compteur-read", {
+        body: { mode: "read", inspection_id: insId, attribution_id: attributionId, phase: type },
+      });
+      if (error || !data) return null;
+      return data as { km: number | null; level_pct: number | null; suspicious: boolean };
+    } catch {
+      return null;
+    }
+  };
 
   const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.files?.[0];
@@ -1661,7 +1687,7 @@ export function EdlPremiumFlow({
           )}
 
           {currentStep.kind === "kilometrage" && (
-            <KilometrageArea step={currentStep} state={currentState} onValidate={validateKilometrage} />
+            <KilometrageArea step={currentStep} state={currentState} onValidate={validateKilometrage} electric={isElectric} hasPhoto={states["compteur"]?.status === "success"} onRead={readCompteur} />
           )}
 
 
@@ -2386,32 +2412,76 @@ function ChecklistArea({
   );
 }
 
-// ─────────────────────────── KILOMÉTRAGE ───────────────────────────
+// ─────────────────────────── KILOMÉTRAGE + NIVEAU ───────────────────────────
 function KilometrageArea({
   step,
   state,
   onValidate,
+  electric,
+  hasPhoto,
+  onRead,
 }: {
   step: EdlStepDef;
   state?: StepState;
-  onValidate: (value: number) => void;
+  onValidate: (km: number, niveau: number) => void;
+  electric: boolean;
+  hasPhoto: boolean;
+  onRead: () => Promise<{ km: number | null; level_pct: number | null; suspicious: boolean } | null>;
 }) {
   const [raw, setRaw] = useState<string>(state?.kilometrage ? String(state.kilometrage) : "");
+  const [niveau, setNiveau] = useState<number>(state?.niveau ?? 50);
+  const [touched, setTouched] = useState<boolean>(state?.niveau != null);
+  const [auto, setAuto] = useState<"idle" | "reading" | "done" | "none">("idle");
+  const [suspicious, setSuspicious] = useState(false);
   const value = Number(raw);
-  const valid = Number.isFinite(value) && value > 0 && value < 9999999;
+  const validKm = Number.isFinite(value) && value > 0 && value < 9999999;
+  const valid = validKm && touched;
   const isSaved = state?.status === "success";
   const isSaving = state?.status === "uploading";
+  const arr = step.id === "kilometrage_arrivee";
+  const label = electric ? "Niveau de batterie" : "Niveau de carburant";
+
+  // Lecture automatique de la photo : pré-remplit, l'utilisateur confirme.
+  useEffect(() => {
+    if (!hasPhoto || state?.kilometrage || auto !== "idle") return;
+    let alive = true;
+    setAuto("reading");
+    void onRead().then((r) => {
+      if (!alive) return;
+      if (!r || (r.km == null && r.level_pct == null)) { setAuto("none"); return; }
+      if (r.km != null && r.km > 0) setRaw(String(r.km));
+      if (r.level_pct != null) { setNiveau(Math.max(0, Math.min(100, Math.round(r.level_pct / 5) * 5))); setTouched(true); }
+      setSuspicious(!!r.suspicious);
+      setAuto("done");
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPhoto]);
+
+  const tone = niveau <= 15 ? "#ef4444" : niveau <= 30 ? "#f59e0b" : electric ? "#18b4ff" : "#14B866";
+  const Icon = electric ? <Zap size={20} className="ic-bolt" fill="currentColor" /> : <Fuel size={20} color={tone} />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "8px 4px 12px" }}>
-      <label style={{ color: "var(--edl-text)", fontSize: 13, fontWeight: 600 }}>
-        {step.id === "kilometrage_arrivee" ? "Kilométrage affiché à l'arrivée" : "Kilométrage affiché au départ"}
-      </label>
-      {step.id === "kilometrage_arrivee" && (
-        <p style={{ color: "var(--edl-text-soft)", fontSize: 14, margin: 0 }}>
-          Notez le kilométrage affiché au compteur à l'arrivée. Il met à jour la fiche du véhicule et la date de sa prochaine révision.
+      {auto === "reading" && (
+        <p style={{ color: "var(--edl-muted)", fontSize: 12.5, margin: 0, display: "flex", gap: 8, alignItems: "center" }}>
+          <Loader2 size={14} className="animate-spin" /> Lecture du compteur sur votre photo…
         </p>
       )}
+      {auto === "done" && (
+        <p style={{ color: "#0b7a43", fontSize: 12.5, margin: 0, fontWeight: 600 }}>
+          ✓ Valeurs lues sur la photo : vérifiez et corrigez si besoin.
+        </p>
+      )}
+      {suspicious && (
+        <p style={{ color: "#b45309", fontSize: 12.5, margin: 0 }}>
+          La photo du compteur doit être prise sur place, directement sur le tableau de bord. Reprenez-la si besoin.
+        </p>
+      )}
+
+      <label style={{ color: "var(--edl-text)", fontSize: 13, fontWeight: 700 }}>
+        {arr ? "Kilométrage affiché à l'arrivée" : "Kilométrage affiché au départ"}
+      </label>
       <input
         type="number"
         inputMode="numeric"
@@ -2421,7 +2491,7 @@ function KilometrageArea({
         placeholder="Ex : 124583"
         style={{
           width: "100%",
-          padding: "20px 18px",
+          padding: "18px 18px",
           borderRadius: 14,
           border: "1px solid rgba(20,184,102,0.3)",
           background: "rgba(255,255,255,0.7)",
@@ -2432,15 +2502,37 @@ function KilometrageArea({
           letterSpacing: "0.05em",
           outline: "none",
         }}
-        autoFocus
       />
+
+      <div className="edl-niv" style={{ ["--tone" as string]: tone }}>
+        <div className="edl-niv-head">
+          <span>{Icon}{label}</span>
+          <b>{touched ? `${niveau} %` : "—"}</b>
+        </div>
+        <div className="edl-niv-bar"><i style={{ width: `${touched ? niveau : 0}%` }} /></div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={niveau}
+          onChange={(e) => { setNiveau(Number(e.target.value)); setTouched(true); }}
+          aria-label={label}
+        />
+        <div className="edl-niv-ticks"><span>Vide</span><span>¼</span><span>½</span><span>¾</span><span>Plein</span></div>
+        <div className="edl-niv-quick">
+          {[0, 25, 50, 75, 100].map((n) => (
+            <button key={n} type="button" className={touched && niveau === n ? "on" : ""} onClick={() => { setNiveau(n); setTouched(true); }}>{n} %</button>
+          ))}
+        </div>
+      </div>
       <p style={{ color: "var(--edl-muted)", fontSize: 12, margin: 0, textAlign: "center" }}>
-        Lisez la valeur exacte sur le compteur, sans virgule ni unité.
+        {electric ? "Lisez le pourcentage de batterie sur l'écran du véhicule." : "Lisez la jauge : ½ réservoir = 50 %."} Le niveau figure sur le PV et l'état des lieux.
       </p>
       <button
         type="button"
         disabled={!valid || isSaving}
-        onClick={() => onValidate(value)}
+        onClick={() => onValidate(value, niveau)}
         style={{
           padding: "14px 16px",
           borderRadius: 12,
@@ -2455,7 +2547,7 @@ function KilometrageArea({
           opacity: isSaving ? 0.7 : 1,
         }}
       >
-        {isSaving ? "Enregistrement…" : isSaved ? `✓ ${value.toLocaleString("fr-FR")} km enregistrés` : "Valider le kilométrage"}
+        {isSaving ? "Enregistrement…" : isSaved ? `✓ ${value.toLocaleString("fr-FR")} km · ${niveau} % enregistrés` : validKm && !touched ? "Indiquez le niveau" : "Valider"}
       </button>
     </div>
   );

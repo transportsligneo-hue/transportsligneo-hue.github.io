@@ -88,7 +88,15 @@ export async function buildLegDossierData(attributionId: string, numero: string)
   const trajet = (trajRes.data ?? null) as Record<string, unknown> | null;
   if (!trajet) return null;
 
-  const insps = (inspRes.data ?? []) as { id: string; type: string; equipements: unknown; kilometrage_depart: number | null; kilometrage_arrivee: number | null }[];
+  const insps = (inspRes.data ?? []) as unknown as { id: string; type: string; equipements: unknown; kilometrage_depart: number | null; kilometrage_arrivee: number | null; niveau_energie_depart?: number | null; niveau_energie_arrivee?: number | null }[];
+  const niveaux = { depart: null as number | null, arrivee: null as number | null };
+  try {
+    const { data: nv } = await supabase.from("inspections").select("type, niveau_energie_depart, niveau_energie_arrivee" as string).eq("attribution_id", attributionId);
+    for (const r of ((nv ?? []) as unknown as { type: string; niveau_energie_depart: number | null; niveau_energie_arrivee: number | null }[])) {
+      if (r.type === "depart") niveaux.depart = r.niveau_energie_depart ?? niveaux.depart;
+      if (r.type === "arrivee") niveaux.arrivee = r.niveau_energie_arrivee ?? niveaux.arrivee;
+    }
+  } catch { /* colonnes pas encore créées : on ignore */ }
   const inspDepart = insps.find((i) => i.type === "depart");
   const inspArrivee = insps.find((i) => i.type === "arrivee");
 
@@ -139,6 +147,8 @@ export async function buildLegDossierData(attributionId: string, numero: string)
     equipements: (inspDepart?.equipements ?? inspArrivee?.equipements ?? null) as Record<string, unknown> | null,
     kilometrage_depart: inspDepart?.kilometrage_depart ?? null,
     kilometrage_arrivee: inspArrivee?.kilometrage_arrivee ?? null,
+    niveau_energie_depart: niveaux.depart,
+    niveau_energie_arrivee: niveaux.arrivee,
     photosDepart,
     photosArrivee,
     signatures: ((sigRes.data ?? []) as { kind: string; signature_data: string | null }[]).map((s) => ({
