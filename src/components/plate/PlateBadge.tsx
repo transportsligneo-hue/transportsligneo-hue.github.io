@@ -1,3 +1,4 @@
+import "@/styles/plate-premium.css";
 import { displayPlate } from "@/lib/plate-format";
 import { PlateBand } from "@/components/plate/PlateInput";
 

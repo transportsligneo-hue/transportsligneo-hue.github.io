@@ -5,6 +5,7 @@ import { resolveGroupInvoiceBasis } from "@/lib/facture-group";
 
 import {
   ArrowLeft,
+  ChevronDown,
   MapPin,
   Car,
   User,
@@ -88,6 +89,7 @@ import { RechargePreuvesBlock } from "@/components/admin/RechargePreuvesBlock";
 
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import { PlateBadge } from "@/components/plate/PlateBadge";
+import "@/styles/admin-mission-v2.css";
 
 export const Route = createFileRoute("/_authenticated/admin/missions/$missionId")({
   component: AdminMissionDetail,
@@ -288,6 +290,11 @@ function AdminMissionDetail() {
   const [clientSociete, setClientSociete] = useState<string | null>(null);
   const [clientTypeClient, setClientTypeClient] = useState<string | null>(null);
   const [clientUserId, setClientUserId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"apercu" | "finances" | "vehicule" | "docs" | "controle">("apercu");
+  const goTo = (t: "apercu" | "finances" | "vehicule" | "docs" | "controle", id: string, block: ScrollLogicalPosition = "start") => {
+    setTab(t);
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block }), 60);
+  };
 
   useEffect(() => {
     if (!trajet) return;
@@ -1066,7 +1073,7 @@ function AdminMissionDetail() {
   });
 
   return (
-    <div className="space-y-5">
+    <div className="amx space-y-5">
       {/* === Back === */}
       <div className="flex items-center justify-between gap-2">
         <Link
@@ -1232,7 +1239,7 @@ function AdminMissionDetail() {
                 <span className="truncate">MAJ {lastUpdate}</span>
               </div>
             </div>
-            <div className="mt-5 h-[360px] min-h-[360px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[430px] sm:min-h-[430px]">
+            <div className="mt-5 h-[200px] min-h-[200px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[240px] sm:min-h-[240px]">
               <AdminLiveMissionMap
                 attributionId={attribution.id}
                 points={gpsPoints}
@@ -1393,134 +1400,8 @@ function AdminMissionDetail() {
 
 
 
-      <AdminMissionARBanner
-        trajetId={trajet.id}
-        groupId={trajet.mission_group_id}
-        legType={trajet.leg_type}
-        currentPrix={trajet.prix ?? null}
-        onPriceSaved={(p) => setTrajet({ ...trajet, prix: p })}
-        onGroupChanged={fetchAll}
-      />
-
-      <MissionLotPlaquesPanel
-        trajetId={trajet.id}
-        lotId={(trajet as unknown as { lot_id?: string | null }).lot_id ?? null}
-        devisId={(trajet as unknown as { devis_id?: string | null }).devis_id ?? null}
-        lotReference={(trajet as unknown as { lot_reference?: string | null }).lot_reference ?? null}
-        baseNumero={missionNumber}
-        onPricesSaved={fetchAll}
-      />
-
-      <div className="mb-4">
-        <PoLinkCard missionId={trajet.mission_id ?? undefined} devisId={trajet.devis_id ?? undefined} />
-      </div>
-
-      <MissionPriceCard
-        trajetId={trajet.id}
-        groupId={trajet.mission_group_id}
-        legType={trajet.leg_type}
-        currentPrix={trajet.prix ?? null}
-        currentPrixConvoyeur={trajet.prix_convoyeur ?? trajet.tarif_convoyeur ?? null}
-        onSaved={({ prix, prixConvoyeur }) =>
-          setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
-        }
-      />
-
-      {/* === PO & facturation === */}
-      <Card>
-        <div className="flex items-center gap-2 mb-3">
-          <Receipt size={15} className="text-pro-accent" />
-          <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
-            PO &amp; facturation
-          </h3>
-        </div>
-        {linkedFactureId ? (
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
-            <div className="flex-1 min-w-[220px]">
-              <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300 mb-1.5">
-                <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
-                {savingPo && <Loader2 size={11} className="animate-spin" />}
-              </label>
-              <input
-                id="po-number-emise"
-                value={poNumber}
-                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
-                onBlur={(e) => void savePo(e.target.value)}
-                maxLength={60}
-                placeholder="Ex. PO-2026-0042"
-                className="w-full rounded-xl border border-emerald-500/40 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40"
-              />
-              <p className="mt-1.5 text-[11px] text-pro-muted">
-                Le PO est reporté sur la facture existante, puis le PDF est régénéré.
-                {trajet.mission_group_id ? " Facture unique pour le duo restitution et livraison (montant global)." : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
-                onClick={regenerateFacturePdf}
-                disabled={regeneratingFacturePdf}
-              >
-                Régénérer le PDF
-              </Button>
-              <Link
-                to="/admin/factures"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-              >
-                Voir les factures
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/[0.07] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
-            <div className="flex-1 min-w-[220px]">
-              <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 mb-1.5">
-                <Receipt size={12} /> N° de PO / commande client
-                {savingPo && <Loader2 size={11} className="animate-spin" />}
-              </label>
-              <input
-                id="po-number"
-                value={poNumber}
-                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
-                onBlur={(e) => void savePo(e.target.value)}
-                maxLength={60}
-                placeholder="Ex. PO-2026-0042"
-                className="w-full rounded-xl border border-amber-400/50 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-400/40"
-              />
-              <p className="mt-1.5 text-[11px] text-pro-muted">
-                {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
-                {trajet.mission_group_id
-                  ? " Un seul PO et UNE seule facture pour le duo restitution et livraison (montant global)."
-                  : ""}
-                {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
-              </p>
-            </div>
-            <Button
-              icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
-              onClick={generateFacture}
-              disabled={generatingFacture || !trajet?.prix}
-            >
-              Générer facture
-            </Button>
-          </div>
-        )}
-        <PoHistoryPanel
-          attributionId={attribution.id}
-          refreshKey={poHistoryKey}
-          className="w-full text-left mt-3"
-        />
-      </Card>
-
-
-
-
-
-
       {/* === Timeline progression === */}
-      <Card>
-        <h3 className="text-sm font-semibold text-pro-text-soft uppercase tracking-wider mb-4">
-          Progression
-        </h3>
+      <Card padded={false} className="px-4 py-3">
         <ol className="flex items-center justify-between gap-2">
           {TIMELINE_STEPS.map((step, idx) => {
             const active = idx <= currentStepIndex;
@@ -1535,7 +1416,7 @@ function AdminMissionDetail() {
                     }`}
                   />
                   <span
-                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors ${
                       current
                         ? "role-admin-bg text-white border-transparent"
                         : active
@@ -1556,7 +1437,7 @@ function AdminMissionDetail() {
                   />
                 </div>
                 <span
-                  className={`text-[10px] sm:text-xs mt-1.5 uppercase tracking-wider ${
+                  className={`text-[10px] mt-1 uppercase tracking-wider ${
                     active ? "text-pro-text font-semibold" : "text-pro-muted"
                   }`}
                 >
@@ -1568,10 +1449,37 @@ function AdminMissionDetail() {
         </ol>
       </Card>
 
+      {/* === Onglets de la mission (mise en page : mêmes blocs, rangés par thème) === */}
+      <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-pro-bg/90 backdrop-blur" role="tablist" aria-label="Sections de la mission">
+        <div className="flex gap-1 overflow-x-auto rounded-2xl border border-pro-border bg-pro-surface p-1 shadow-sm">
+          {([
+            ["apercu", "Vue d'ensemble"],
+            ["finances", "Finances"],
+            ["vehicule", "Fiche & photos"],
+            ["docs", "Documents"],
+            ["controle", "Contrôle admin"],
+          ] as const).map(([k, label]) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={tab === k}
+              onClick={() => setTab(k)}
+              className={`shrink-0 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
+                tab === k ? "bg-pro-accent text-white shadow-sm" : "text-pro-text-soft hover:text-pro-text hover:bg-pro-surface-2"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* === Grid principal === */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className={`grid grid-cols-1 gap-5 ${tab === "apercu" ? "lg:grid-cols-3" : ""}`}>
         {/* Colonne gauche : trajet + client + convoyeur */}
-        <div className="space-y-5 lg:col-span-2">
+        <div className={`space-y-5 ${tab === "apercu" ? "lg:col-span-2" : ""}`}>
+          <div hidden={tab !== "apercu"} className="space-y-5">
           {/* Trajet */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
@@ -1634,7 +1542,7 @@ function AdminMissionDetail() {
                 type="button"
                 onClick={() => {
                   setEditOpenKey((k) => k + 1);
-                  document.getElementById("edit-fiche")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  goTo("vehicule", "edit-fiche", "start");
                 }}
                 className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-pro-accent/40 text-pro-accent text-xs font-semibold hover:bg-pro-accent/10 transition-colors"
               >
@@ -1649,20 +1557,11 @@ function AdminMissionDetail() {
                 title={plateCheck
                   ? `Plaque vérifiée par scan le ${new Date(plateCheck.created_at).toLocaleString("fr-FR")}`
                   : "Copier la plaque"}
-                className={`group inline-flex items-center gap-2 rounded-lg border-2 px-3 py-1.5 shadow-sm transition-colors ${
-                  plateCheck
-                    ? "border-emerald-500 bg-emerald-50 hover:border-emerald-600"
-                    : "border-pro-text/70 bg-white hover:border-pro-accent"
-                }`}
+                className="plate-wrap !rounded-xl !border-0 !bg-transparent !p-0 !shadow-none hover:!translate-y-0"
               >
-                <span className={`text-[9px] font-bold tracking-[0.12em] leading-none ${plateCheck ? "text-emerald-600" : "text-pro-accent"}`}>F</span>
-                <span className={`font-mono text-base sm:text-lg font-bold tracking-[0.14em] leading-none ${plateCheck ? "text-emerald-700" : "text-pro-text"}`}>
-                  {plaquePrincipale || "—"}
-                </span>
-                {plateCheck ? (
-                  <CheckCircle2 size={14} className="text-emerald-600" />
-                ) : (
-                  <Copy size={12} className="text-pro-muted group-hover:text-pro-accent" />
+                <PlateBadge plate={plaquePrincipale} size="md" />
+                {plateCheck && (
+                  <span className="plate-check"><CheckCircle2 size={13} /></span>
                 )}
               </button>
               {plateCheck && (
@@ -1789,6 +1688,152 @@ function AdminMissionDetail() {
             )}
           </Card>
 
+          {/* Incidents signalés par le convoyeur */}
+          <MissionIncidentsPanel
+            attributionId={attribution.id}
+            isGroup={Boolean(trajet.mission_group_id)}
+            onPassageAVide={(motif) => {
+              setPvMotif(motif);
+              setPvOpenKey((k) => k + 1);
+              goTo("docs", "docs-officiels", "center");
+            }}
+            onCloture={(categorie, motif) => {
+              setCloturePrefill({ categorie, motif });
+              setClotureKey((k) => k + 1);
+              goTo("controle", "cloture-admin", "center");
+            }}
+          />
+
+          </div>
+          <div hidden={tab !== "finances"} className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
+      <AdminMissionARBanner
+        trajetId={trajet.id}
+        groupId={trajet.mission_group_id}
+        legType={trajet.leg_type}
+        currentPrix={trajet.prix ?? null}
+        onPriceSaved={(p) => setTrajet({ ...trajet, prix: p })}
+        onGroupChanged={fetchAll}
+      />
+
+      <MissionLotPlaquesPanel
+        trajetId={trajet.id}
+        lotId={(trajet as unknown as { lot_id?: string | null }).lot_id ?? null}
+        devisId={(trajet as unknown as { devis_id?: string | null }).devis_id ?? null}
+        lotReference={(trajet as unknown as { lot_reference?: string | null }).lot_reference ?? null}
+        baseNumero={missionNumber}
+        onPricesSaved={fetchAll}
+      />
+
+      <div className="mb-4">
+        <PoLinkCard missionId={trajet.mission_id ?? undefined} devisId={trajet.devis_id ?? undefined} />
+      </div>
+
+      <MissionPriceCard
+        trajetId={trajet.id}
+        groupId={trajet.mission_group_id}
+        legType={trajet.leg_type}
+        currentPrix={trajet.prix ?? null}
+        currentPrixConvoyeur={trajet.prix_convoyeur ?? trajet.tarif_convoyeur ?? null}
+        onSaved={({ prix, prixConvoyeur }) =>
+          setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
+        }
+      />
+
+      {/* === PO & facturation === */}
+      <Card>
+        <div className="flex items-center gap-2 mb-3">
+          <Receipt size={15} className="text-pro-accent" />
+          <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+            PO &amp; facturation
+          </h3>
+        </div>
+        {linkedFactureId ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="po-number-emise" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-300 mb-1.5">
+                <Receipt size={12} /> Facture émise{linkedFactureNumero ? ` · ${linkedFactureNumero}` : ""} — N° de PO
+                {savingPo && <Loader2 size={11} className="animate-spin" />}
+              </label>
+              <input
+                id="po-number-emise"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                onBlur={(e) => void savePo(e.target.value)}
+                maxLength={60}
+                placeholder="Ex. PO-2026-0042"
+                className="w-full rounded-xl border border-emerald-500/40 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40"
+              />
+              <p className="mt-1.5 text-[11px] text-pro-muted">
+                Le PO est reporté sur la facture existante, puis le PDF est régénéré.
+                {trajet.mission_group_id ? " Facture unique pour le duo restitution et livraison (montant global)." : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                icon={regeneratingFacturePdf ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                onClick={regenerateFacturePdf}
+                disabled={regeneratingFacturePdf}
+              >
+                Régénérer le PDF
+              </Button>
+              <Link
+                to="/admin/factures"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+              >
+                Voir les factures
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/[0.07] p-4 flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="po-number" className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 mb-1.5">
+                <Receipt size={12} /> N° de PO / commande client
+                {savingPo && <Loader2 size={11} className="animate-spin" />}
+              </label>
+              <input
+                id="po-number"
+                value={poNumber}
+                onChange={(e) => setPoNumber(e.target.value.slice(0, 60))}
+                onBlur={(e) => void savePo(e.target.value)}
+                maxLength={60}
+                placeholder="Ex. PO-2026-0042"
+                className="w-full rounded-xl border border-amber-400/50 bg-pro-surface px-3 py-2 text-sm text-pro-text placeholder:text-pro-muted outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-400/40"
+              />
+              <p className="mt-1.5 text-[11px] text-pro-muted">
+                {poNumber.trim() ? "Il apparaîtra sur la facture PDF." : "À saisir avant de générer la facture — ne l'oubliez pas."}
+                {trajet.mission_group_id
+                  ? " Un seul PO et UNE seule facture pour le duo restitution et livraison (montant global)."
+                  : ""}
+                {isSecondaryLeg ? " Ce volet Restitution est facturé avec la Livraison." : ""}
+              </p>
+            </div>
+            <Button
+              icon={generatingFacture ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+              onClick={generateFacture}
+              disabled={generatingFacture || !trajet?.prix}
+            >
+              Générer facture
+            </Button>
+          </div>
+        )}
+        <PoHistoryPanel
+          attributionId={attribution.id}
+          refreshKey={poHistoryKey}
+          className="w-full text-left mt-3"
+        />
+      </Card>
+
+
+
+
+
+
+          {/* Liens de paiement (Revolut / Stripe) */}
+          <PaymentLinksPanel missionId={attribution.id} title="Paiements — liens rattachés" />
+
+          </div>
+          <div hidden={tab !== "vehicule"} className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
           {/* Édition admin de la fiche mission — plaques, VIN, adresses, contacts */}
           <div id="edit-fiche">
             <MissionEditInfosPanel
@@ -1916,58 +1961,8 @@ function AdminMissionDetail() {
           </Card>
 
 
-          {/* Incidents signalés par le convoyeur */}
-          <MissionIncidentsPanel
-            attributionId={attribution.id}
-            isGroup={Boolean(trajet.mission_group_id)}
-            onPassageAVide={(motif) => {
-              setPvMotif(motif);
-              setPvOpenKey((k) => k + 1);
-              document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-            onCloture={(categorie, motif) => {
-              setCloturePrefill({ categorie, motif });
-              setClotureKey((k) => k + 1);
-              document.getElementById("cloture-admin")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }}
-          />
-
-          {/* Clôture administrative : annulation motivée */}
-          <div id="cloture-admin">
-            <MissionClotureAdminPanel
-              attributionId={attribution.id}
-              statut={attribution.statut}
-              isGroup={Boolean(trajet.mission_group_id)}
-              prefill={cloturePrefill}
-              prefillKey={clotureKey}
-              onChanged={() => { void fetchAll(); }}
-              onPassageAVide={(motif) => {
-                setPvMotif(motif);
-                setPvOpenKey((k) => k + 1);
-                document.getElementById("docs-officiels")?.scrollIntoView({ behavior: "smooth", block: "center" });
-              }}
-            />
           </div>
-
-          {/* Transformer un aller simple en restitution et livraison */}
-          <MissionConvertDuoPanel
-            trajetId={trajet.id}
-            isDuo={isDuo}
-            depart={trajet.depart}
-            arrivee={trajet.arrivee}
-            date={trajet.date_trajet}
-            immatriculation={trajet.immatriculation ?? trajet.vehicule_immatriculation ?? null}
-            vin={trajet.vin ?? trajet.vehicule_vin ?? null}
-            marque={trajet.marque}
-            modele={trajet.modele}
-            prix={trajet.prix}
-            onConverted={() => { void fetchAll(); }}
-          />
-
-
-
-
-
+          <div hidden={tab !== "docs"} className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
           {/* Documents officiels */}
           <div id="docs-officiels">
           <Card>
@@ -1992,9 +1987,6 @@ function AdminMissionDetail() {
             contactEmail={trajet.arrivee_contact_email}
             contactTelephone={trajet.arrivee_contact_telephone}
           />
-
-          {/* Liens de paiement (Revolut / Stripe) */}
-          <PaymentLinksPanel missionId={attribution.id} title="Paiements — liens rattachés" />
 
           {/* Notification fin de mission (renvoi manuel) */}
           <MissionNotifAdminPanel attributionId={attribution.id} />
@@ -2024,6 +2016,44 @@ function AdminMissionDetail() {
             />
           </Card>
 
+          </div>
+          <div hidden={tab !== "controle"} className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
+          {/* Clôture administrative : annulation motivée */}
+          <div id="cloture-admin">
+            <MissionClotureAdminPanel
+              attributionId={attribution.id}
+              statut={attribution.statut}
+              isGroup={Boolean(trajet.mission_group_id)}
+              prefill={cloturePrefill}
+              prefillKey={clotureKey}
+              onChanged={() => { void fetchAll(); }}
+              onPassageAVide={(motif) => {
+                setPvMotif(motif);
+                setPvOpenKey((k) => k + 1);
+                goTo("docs", "docs-officiels", "center");
+              }}
+            />
+          </div>
+
+          {/* Transformer un aller simple en restitution et livraison */}
+          <MissionConvertDuoPanel
+            trajetId={trajet.id}
+            isDuo={isDuo}
+            depart={trajet.depart}
+            arrivee={trajet.arrivee}
+            date={trajet.date_trajet}
+            immatriculation={trajet.immatriculation ?? trajet.vehicule_immatriculation ?? null}
+            vin={trajet.vin ?? trajet.vehicule_vin ?? null}
+            marque={trajet.marque}
+            modele={trajet.modele}
+            prix={trajet.prix}
+            onConverted={() => { void fetchAll(); }}
+          />
+
+
+
+
+
           {/* Traçabilité double signature (départ + arrivée, convoyeur + client) */}
           <MissionTraceability attributionId={attribution.id} variant="full" />
 
@@ -2038,10 +2068,11 @@ function AdminMissionDetail() {
 
           {/* Surcouche admin : bypass / désactivation des étapes obligatoires */}
           <AdminStepOverridesPanel attributionId={attribution.id} />
+          </div>
         </div>
 
         {/* Colonne droite : convoyeur + client + GPS + activité + admin */}
-        <div className="space-y-5">
+        <div hidden={tab !== "apercu"} className="space-y-5">
           {/* Convoyeur */}
           {convoyeur && (
             <Card>
@@ -2106,13 +2137,16 @@ function AdminMissionDetail() {
           )}
 
           {/* Contact livraison (point d'arrivée) */}
-          <Card>
-            <div className="flex items-center gap-2 mb-3">
+          <Card padded={false}>
+            <details className="group p-5" open={Boolean(contactNom || contactTel) || undefined}>
+            <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
               <Phone size={15} className="text-pro-accent" />
               <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
                 Contact livraison
               </h3>
-            </div>
+              <ChevronDown size={15} className="ml-auto text-pro-muted transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-3" />
             <p className="text-pro-muted text-xs mb-3">
               Personne à appeler à l'arrivée. Visible par le convoyeur dans son interface mobile.
             </p>
@@ -2168,6 +2202,7 @@ function AdminMissionDetail() {
                 Enregistrer
               </Button>
             </div>
+            </details>
           </Card>
 
 
@@ -2211,10 +2246,15 @@ function AdminMissionDetail() {
           </Card>
 
           {/* Note admin */}
-          <Card>
-            <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider mb-2">
-              Note interne admin
-            </h3>
+          <Card padded={false}>
+            <details className="group p-5" open={adminNote ? true : undefined}>
+            <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
+              <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">
+                Note interne admin
+              </h3>
+              <ChevronDown size={15} className="ml-auto text-pro-muted transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-2" />
             <textarea
               value={adminNote}
               onChange={(e) => setAdminNote(e.target.value)}
@@ -2231,6 +2271,7 @@ function AdminMissionDetail() {
             >
               Enregistrer
             </Button>
+            </details>
           </Card>
         </div>
       </div>

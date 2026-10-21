@@ -1,0 +1,63 @@
+/* Admin · page mission — habillage moderne, couleurs douces, sans noir. Scopé sous .amx */
+.amx{--a-blue:#2f5fff;--a-ink:#27325a;--a-ink2:#5a6788;--a-line:#e5eaf7;--a-mut:#8794b6;font-family:'Inter',system-ui,sans-serif;color:var(--a-ink)}
+.amx .text-pro-text,.amx .text-foreground{color:var(--a-ink)}
+.amx .text-pro-text-soft{color:var(--a-ink2)}
+.amx .font-bold,.amx .font-semibold,.amx b,.amx strong{font-weight:600}
+.amx button{font-weight:500}
+
+/* Cartes : fond teinté, liseré de couleur différent par bloc */
+.amx .shadow-pro-card,.amx div.bg-card.border.rounded-xl{position:relative;border-radius:22px;border:1px solid var(--a-line);background:linear-gradient(180deg,#f6f8ff 0,#fff 110px);box-shadow:0 1px 2px rgba(40,60,130,.04),0 20px 44px -28px rgba(47,95,255,.32);--chip:#2f5fff;--chipbg:rgba(47,95,255,.10)}
+.amx div.bg-card.border.rounded-xl{padding:20px}
+.amx .shadow-pro-card::before,.amx div.bg-card.border.rounded-xl::before{content:"";position:absolute;left:22px;right:22px;top:0;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--chip),transparent 70%)}
+.amx *:nth-child(4n+2)>.shadow-pro-card,.amx .shadow-pro-card:nth-child(4n+2){--chip:#7c5cff;--chipbg:rgba(124,92,255,.11)}
+.amx .shadow-pro-card:nth-child(4n+3){--chip:#0ea5a4;--chipbg:rgba(14,165,164,.11)}
+.amx .shadow-pro-card:nth-child(4n+4){--chip:#f59e0b;--chipbg:rgba(245,158,11,.13)}
+
+/* Titres */
+.amx h3[class*="uppercase"]{text-transform:none;letter-spacing:0;font:600 15px/1.2 'Plus Jakarta Sans','Inter',sans-serif;color:#1e2b5e}
+.amx div:has(> h3[class*="uppercase"]) > svg:first-child{width:30px;height:30px;padding:7px;border-radius:10px;background:var(--chipbg,rgba(47,95,255,.1));color:var(--chip,#2f5fff);flex:none}
+.amx h1{font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.015em;font-weight:700;color:#1e2b5e}
+.amx p[class*="uppercase"]{color:#7d8bb5;font-weight:500}
+
+/* Onglets */
+.amx [role="tablist"]>div{border-radius:18px;border:1px solid var(--a-line);background:#fff;padding:5px;box-shadow:0 14px 30px -22px rgba(47,95,255,.4)}
+.amx [role="tab"]{border-radius:13px;font:500 14px 'Plus Jakarta Sans','Inter',sans-serif;color:var(--a-ink2);padding:9px 18px}
+.amx [role="tab"]:hover{background:#f1f4ff;color:var(--a-blue)}
+.amx [role="tab"][aria-selected="true"]{background:linear-gradient(135deg,#5b86ff,#2f5fff);color:#fff;box-shadow:0 10px 20px -10px rgba(47,95,255,.8)}
+
+/* Le "noir" devient bleu */
+.amx .bg-pro-accent{background:#2f5fff}
+.amx .text-pro-accent{color:var(--a-blue)}
+.amx .border-pro-accent{border-color:#2f5fff}
+.amx .bg-pro-text,.amx .bg-black{background:#2f5fff}
+.amx [class*="bg-[#0b1026]"]{background:#2f5fff}
+
+/* Boutons */
+.amx button[class*="rounded-md"],.amx button[class*="rounded-lg"],.amx button[class*="rounded-xl"]:not([role="tab"]):not([class*="w-11"]){border-radius:12px;transition:transform .15s,box-shadow .15s,background .15s,border-color .15s}
+.amx button[class*="rounded-md"]:not(:disabled):hover,.amx button[class*="rounded-lg"]:not(:disabled):hover{transform:translateY(-1px)}
+.amx button.border-pro-border,.amx button.border-pro-accent\/40{background:#fff;border:1px solid var(--a-line);color:#3a4a7c;box-shadow:0 2px 6px -3px rgba(47,95,255,.18)}
+.amx button.border-pro-border:not(:disabled):hover,.amx button.border-pro-accent\/40:not(:disabled):hover{border-color:rgba(47,95,255,.5);color:var(--a-blue);box-shadow:0 10px 20px -12px rgba(47,95,255,.55);background:#f7f9ff}
+.amx button.bg-pro-accent:not([role="tab"]){background:linear-gradient(135deg,#5b86ff,#2f5fff);color:#fff;border:0;box-shadow:0 10px 20px -10px rgba(47,95,255,.75)}
+.amx button.bg-pro-accent:not([role="tab"]):disabled{background:#dfe5f5;color:#9aa6c6;box-shadow:none}
+.amx button.bg-red-600{background:#fff3f5;color:#d6336c;border:1px solid #ffd3dc;box-shadow:none}
+.amx button.bg-red-600:not(:disabled):hover{background:#ffe8ee;box-shadow:0 10px 20px -14px rgba(214,51,108,.7)}
+.amx button.border-red-300{background:#fff;border-color:#ffd3dc;color:#d6336c}
+.amx button.bg-red-50{background:#fff3f5;border-color:#ffd3dc;color:#d6336c}
+.amx button.bg-emerald-50{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
+.amx .admin-btn-blue{animation:none!important;background:linear-gradient(135deg,#5b86ff,#2f5fff)!important;box-shadow:0 10px 20px -10px rgba(47,95,255,.75)!important;border-radius:12px}
+.amx button.bg-card{border-radius:16px;border-color:var(--a-line);background:#fff;box-shadow:0 2px 6px -3px rgba(47,95,255,.15)}
+.amx button.bg-card:hover{border-color:rgba(47,95,255,.5);box-shadow:0 12px 24px -14px rgba(47,95,255,.5);transform:translateY(-1px)}
+.amx button.bg-primary{background:linear-gradient(135deg,#5b86ff,#2f5fff);border-radius:12px;box-shadow:0 10px 20px -10px rgba(47,95,255,.7)}
+.amx button.text-primary{color:var(--a-blue);border-color:rgba(47,95,255,.3);background:rgba(47,95,255,.06)}
+
+/* Champs */
+.amx input:not([type="checkbox"]):not([type="radio"]),.amx textarea,.amx select{border-radius:12px;border-color:var(--a-line);background:#fafbff}
+.amx input:focus,.amx textarea:focus,.amx select:focus{border-color:var(--a-blue)!important;box-shadow:0 0 0 3px rgba(47,95,255,.14)!important;outline:none}
+
+/* Listes */
+.amx .divide-y.rounded-xl{border-radius:16px;border-color:var(--a-line);background:#fff}
+.amx [class*="bg-amber-50"]{background:#fff8e6}
+
+/* Plaque vérifiée */
+.amx .plate-wrap{position:relative;display:inline-flex}
+.amx .plate-check{position:absolute;right:-8px;top:-8px;width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 4px 10px -2px rgba(22,163,74,.6)}

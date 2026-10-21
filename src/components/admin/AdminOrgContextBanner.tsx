@@ -37,10 +37,10 @@ const THEME: Record<OrgContextKind, { label: string; bg: string; ring: string; c
   },
   particulier: {
     label: "Client particulier",
-    bg: "linear-gradient(120deg,#0b1338,#111a3d 55%,#1a2555)",
-    ring: "rgba(212,175,55,.30)",
-    chipBg: "rgba(212,175,55,.18)",
-    chipText: "#f7e2a1",
+    bg: "linear-gradient(120deg,#2f5fff,#5b86ff 55%,#8fb0ff)",
+    ring: "rgba(143,176,255,.45)",
+    chipBg: "rgba(255,255,255,.2)",
+    chipText: "#ffffff",
   },
 };
 
