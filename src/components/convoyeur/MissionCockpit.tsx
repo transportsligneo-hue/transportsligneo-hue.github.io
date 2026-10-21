@@ -151,8 +151,6 @@ export function MissionCockpit({
   // Checklist sécurité bloquante avant "En route pour récupérer le véhicule".
   const [checklistDone, setChecklistDone] = useState(false);
   const [openChecklist, setOpenChecklist] = useState(false);
-  const [openChecklistLiv, setOpenChecklistLiv] = useState(false);
-  const [livChecklistDone, setLivChecklistDone] = useState(false);
   const [openNavChoice, setOpenNavChoice] = useState(false);
   const [optimisticEtape, setOptimisticEtape] = useState<string | null>(currentEtape);
   // Optimiste : dès qu'on confirme la sauvegarde du selfie, on déverrouille
@@ -418,10 +416,6 @@ export function MissionCockpit({
           }
           break;
         case "demarrer_livraison":
-          if (!livChecklistDone) {
-            setOpenChecklistLiv(true);
-            break;
-          }
           await persistEtape("en_livraison");
           await Promise.resolve(onUpdated());
           // Choix du GPS (Waze / Google Maps) avec l'adresse de livraison pré-remplie.
@@ -905,25 +899,6 @@ export function MissionCockpit({
         />
       )}
 
-      {openChecklistLiv && (
-        <DepartureChecklistSheet
-          kind="livraison"
-          attributionId={attributionId}
-          userId={userId}
-          onClose={() => setOpenChecklistLiv(false)}
-          onValidated={async () => {
-            setLivChecklistDone(true);
-            setOpenChecklistLiv(false);
-            try {
-              await persistEtape("en_livraison");
-              await Promise.resolve(onUpdated());
-              if (arriveeAdresse || arriveeVille) setOpenNavChoice(true);
-            } catch {
-              toast.error("Impossible de démarrer le trajet, réessayez.");
-            }
-          }}
-        />
-      )}
 
       {openChecklist && (
         <DepartureChecklistSheet

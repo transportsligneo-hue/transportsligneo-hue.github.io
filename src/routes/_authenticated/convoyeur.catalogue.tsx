@@ -113,6 +113,7 @@ function ConvoyeurCatalogue() {
   const [filters, setFilters] = useState<CatalogueFilterState>(DEFAULT_FILTERS);
   const [openId, setOpenId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
   const [auctionId, setAuctionId] = useState<string | null>(null);
   const [equip, setEquip] = useState<string[]>([]);
   const [coords, setCoords] = useState<Record<string, { lat: number; lng: number }>>({});
@@ -361,7 +362,6 @@ function ConvoyeurCatalogue() {
     return <CatalogueTrainingGate />;
   }
 
-  const [sortOpen, setSortOpen] = useState(false);
   const zones: Array<[number | null, string]> = [[null, "Toutes zones"], [30, "< 30 km"], [50, "< 50 km"], [100, "< 100 km"]];
   const sorts: Array<[CatalogueFilterState["sort"], string]> = [["date", "Plus récentes"], ["prix", "Mieux payées"], ["distance", "Plus courtes"]];
   const EQ: Array<[string, string, string]> = [["plateau", "Plateau", "ramp"], ["wg", "W Garage", "plateW"], ["elec", "Câble recharge", "bolt"]];

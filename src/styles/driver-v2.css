@@ -2338,3 +2338,18 @@ html.theme-light .edl-shell .pa-del{background:rgba(239,68,68,.1);color:#dc2626}
 html.theme-light .edl-shell .pa-editor-frame{background:#0f2a22;box-shadow:0 16px 36px -18px rgba(20,184,102,.45)}
 .edl-shell .pa-menu{flex-wrap:wrap;justify-content:center;max-width:min(92vw,330px)}
 .edl-shell .pa-menu-btn{min-width:54px}
+.drv2 .vf-c div{flex-wrap:wrap}.drv2 .vf-c button{flex:1 0 34px}
+
+/* ===== Infos mission : adresses longues, mise en main, recharge ===== */
+.drv2 .v3-info-root,.drv2 .v3-card{min-width:0;max-width:100%}
+.drv2 .v3-route-addr,.drv2 .v3-mm-note,.drv2 .v3-instructions p,.drv2 .v3-client-name,.drv2 .v3-veh-title{overflow-wrap:anywhere;word-break:break-word;min-width:0}
+.drv2 .v3-mm-item{background:#eff7f2;border-color:var(--line)}
+.drv2 .v3-mm-lbl{color:var(--ink3)}
+.drv2 .v3-mm-who{color:var(--ink)}
+.drv2 .v3-mm-who a{color:#0b7a43}
+.drv2 .v3-mm-note{color:var(--ink2)}
+.drv2 .v3-mm-tip{color:var(--ink3)}
+.drv2 .v3-ev{background:rgba(47,139,255,.07);border-color:rgba(47,139,255,.28);color:var(--ink2)}
+.drv2 .v3-ev b{color:var(--ink)}
+.drv2 .v3-chip.eco{color:#1d5fd1;background:rgba(47,139,255,.08);border-color:rgba(47,139,255,.3)}
+.drv2 .v3-chip-row .v3-chip.eco{color:#1d5fd1}

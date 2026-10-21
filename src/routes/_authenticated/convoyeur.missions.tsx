@@ -753,9 +753,20 @@ function ConvoyeurMissions() {
           }}
           depart={{ ville: dep.ville, adresse: dep.adresse }}
           arrivee={{ ville: arr.ville, adresse: arr.adresse }}
-          instructions={clientInstructions}
           contactDepartTel={contactDepartTel}
           contactArriveeTel={contactArriveeTel}
+          miseEnMain={{
+            depart: {
+              nom: (t as { contact_depart_nom?: string | null } | null)?.contact_depart_nom ?? null,
+              tel: contactDepartTel,
+              note: (t as { contact_depart_note?: string | null } | null)?.contact_depart_note ?? null,
+            },
+            arrivee: {
+              nom: clientNom ?? (t as { contact_arrivee_nom?: string | null } | null)?.contact_arrivee_nom ?? null,
+              tel: contactArriveeTel,
+              note: clientInstructions ?? (t as { contact_arrivee_note?: string | null } | null)?.contact_arrivee_note ?? null,
+            },
+          }}
           gpsTarget={gpsTarget}
           timeline={v3Timeline}
           currentIndex={Math.min(currentIdx, TOTAL)}

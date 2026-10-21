@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   CarFront, ShieldCheck, Copy, Check, Palette, Gauge, Calendar,
-  Phone, MapPin, Info, Navigation, ArrowUpRight,
+  Phone, MapPin, Info, Navigation, ArrowUpRight, Zap, BatteryCharging, UserRound,
   Navigation as NavIcon, ClipboardCheck, Package, Send, Search, Flag,
 } from "lucide-react";
 
@@ -33,6 +33,11 @@ interface Props {
   instructions?: string | null;
   contactDepartTel?: string | null;
   contactArriveeTel?: string | null;
+  /** Mise en main : qui remet / réceptionne le véhicule, consignes libres. */
+  miseEnMain?: {
+    depart?: { nom?: string | null; tel?: string | null; note?: string | null };
+    arrivee?: { nom?: string | null; tel?: string | null; note?: string | null };
+  };
   gpsTarget?: string | null;
   timeline: V3TimelineStep[];
   currentIndex: number; // 1-based
@@ -81,7 +86,7 @@ import { PlateBadge } from "@/components/plate/PlateBadge";
 
 export function MissionV3InfoPane({
   vehicule, client, depart, arrivee, instructions,
-  contactDepartTel, contactArriveeTel, gpsTarget,
+  contactDepartTel, contactArriveeTel, miseEnMain, gpsTarget,
   timeline, currentIndex, totalSteps, progressPct,
 }: Props) {
   const ring = 96;
@@ -91,6 +96,10 @@ export function MissionV3InfoPane({
   const gpsHref = gpsTarget
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(gpsTarget)}`
     : "#";
+
+  const isElec = !!vehicule.energie && /[eé]lect/i.test(vehicule.energie);
+  const mmDepart = miseEnMain?.depart;
+  const mmArrivee = miseEnMain?.arrivee;
 
   const vehiculeTitle = [vehicule.marque, vehicule.modele].filter(Boolean).join(" ") || "Véhicule";
 
@@ -133,6 +142,24 @@ export function MissionV3InfoPane({
         .v3-veh-foot { display: flex; align-items: center; gap: 14px; margin-top: 14px; font-size: 12.5px; color: #9098AE; position: relative; z-index:1; }
         .v3-veh-foot > span { display: inline-flex; align-items: center; gap: 6px; }
         .v3-veh-foot .sep { width: 1px; height: 12px; background: rgba(120,180,255,0.2); }
+
+        .v3-route-addr, .v3-mm-note, .v3-instructions p { overflow-wrap: anywhere; word-break: break-word; min-width: 0; }
+        .v3-route-row > div:last-child { min-width: 0; }
+        .v3-chip.eco svg { flex-shrink: 0; }
+
+        /* Mise en main */
+        .v3-mm { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .v3-mm-item { padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(120,180,255,0.14); min-width: 0; }
+        .v3-mm-lbl { font-size: 10.5px; font-weight: 800; color: #7C93C2; letter-spacing: .7px; text-transform: uppercase; }
+        .v3-mm-who { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; font-weight: 700; color: #EAF3FF; min-width: 0; overflow-wrap: anywhere; }
+        .v3-mm-who a { margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #2FD8FF; text-decoration: none; font-weight: 800; }
+        .v3-mm-note { margin: 8px 0 0; font-size: 12.5px; line-height: 1.5; color: #C7CCDA; }
+        .v3-mm-tip { margin: 2px 0 0; font-size: 12px; line-height: 1.5; color: #9098AE; display: flex; gap: 8px; }
+        .v3-mm-tip svg { flex-shrink: 0; margin-top: 2px; }
+        .v3-ev { position: relative; z-index: 1; margin-top: 12px; display: flex; gap: 10px; padding: 12px 14px; border-radius: 14px;
+          background: rgba(47,139,255,0.08); border: 1px solid rgba(47,139,255,0.3); font-size: 12.5px; line-height: 1.5; color: #C7CCDA; }
+        .v3-ev svg { color: #2f8bff; flex-shrink: 0; margin-top: 1px; }
+        .v3-ev b { color: #EAF3FF; display: block; font-size: 13px; margin-bottom: 2px; }
 
         /* Client card */
         .v3-client-head { display: flex; align-items: center; gap: 12px; position: relative; z-index:1; }
@@ -218,7 +245,7 @@ export function MissionV3InfoPane({
         <div className="v3-chip-row">
           {vehicule.energie && (
             <span className={`v3-chip ${/[eé]lect/i.test(vehicule.energie) ? "eco" : ""}`}>
-              {/[eé]lect/i.test(vehicule.energie) && "⚡ "}
+              {/[eé]lect/i.test(vehicule.energie) && <Zap size={13} strokeWidth={2.6} fill="#2f8bff" color="#2f8bff" />}
               {vehicule.energie}
             </span>
           )}
@@ -297,6 +324,38 @@ export function MissionV3InfoPane({
           <div className="v3-instructions">
             <Info size={16} strokeWidth={2.2} />
             <p>{instructions}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Mise en main */}
+      <div className="v3-card">
+        <div className="v3-head-row">
+          <span className="v3-eyebrow"><UserRound size={14} /> Mise en main</span>
+        </div>
+        <div className="v3-mm">
+          {([["Enlèvement : qui vous remet le véhicule", mmDepart], ["Livraison : qui le réceptionne", mmArrivee]] as const).map(([lbl, m]) => (
+            <div className="v3-mm-item" key={lbl}>
+              <div className="v3-mm-lbl">{lbl}</div>
+              <div className="v3-mm-who">
+                <span style={{ minWidth: 0 }}>{m?.nom || "Le client"}</span>
+                {m?.tel && <a href={`tel:${m.tel}`}><Phone size={14} strokeWidth={2.4} />{m.tel}</a>}
+              </div>
+              {m?.note && <p className="v3-mm-note">{m.note}</p>}
+            </div>
+          ))}
+          <p className="v3-mm-tip">
+            <Info size={14} />
+            <span>Le véhicule peut être remis par un proche, le gardien, un collègue ou le gestionnaire de flotte. L'adresse peut changer ou ne pas avoir de numéro : en cas de doute, appelez avant de partir.</span>
+          </p>
+        </div>
+        {isElec && (
+          <div className="v3-ev">
+            <BatteryCharging size={18} strokeWidth={2.2} />
+            <div>
+              <b>Recharge électrique</b>
+              Vérifiez la batterie au départ et à l'arrivée, gardez le câble de recharge dans le véhicule et suivez les consignes de recharge du client si elles sont indiquées ci-dessus.
+            </div>
           </div>
         )}
       </div>

@@ -4,7 +4,7 @@ export type LigneoTheme = "dark" | "light";
 /** Préférence choisie par le visiteur : clair, sombre, ou celle de son appareil. */
 export type LigneoThemePreference = LigneoTheme | "system";
 
-const STORAGE_KEY = "ligneo-theme";
+const STORAGE_KEY = "ligneo-theme-v2";
 
 interface ThemeCtx {
   /** Thème réellement appliqué. */

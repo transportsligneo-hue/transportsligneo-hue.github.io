@@ -71,7 +71,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap",
       },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
@@ -144,7 +144,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
           // Applique le thème mémorisé avant l'affichage (clair par défaut, pas de flash sombre).
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('ligneo-theme');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}",
+              "try{var t=localStorage.getItem('ligneo-theme-v2');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}",
           }}
         />
         <HeadContent />

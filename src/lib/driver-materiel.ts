@@ -2,11 +2,14 @@
 export const VEHICULE_TYPES: Array<{ key: string; label: string; icon: string }> = [
   { key: "plateau", label: "Camion plateau", icon: "ramp" },
   { key: "plateau_rem", label: "Plateau remorque", icon: "ramp" },
-  { key: "porteur_35", label: "Porte-voitures 3,5 t", icon: "truck" },
   { key: "porteur_35p", label: "Porte-voitures +3,5 t", icon: "truck" },
   { key: "remorque", label: "Remorque", icon: "link2" },
   { key: "wg", label: "Plaque W Garage", icon: "plateW" },
 ];
+
+/** Types pouvant embarquer plusieurs véhicules (choix de 1 à 8). */
+export const MULTI_CAPACITE = ["plateau_rem", "porteur_35p", "remorque"];
+export const CAPACITE_MAX = 8;
 
 export const OUTILS: Array<{ key: string; label: string; icon: string }> = [
   { key: "booster", label: "Booster de démarrage", icon: "bolt" },

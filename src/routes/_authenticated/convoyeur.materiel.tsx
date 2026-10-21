@@ -5,7 +5,9 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Ic } from "@/components/driver2/icons";
-import { OUTILS, PERMIS, PERMIS_GROUPES, VEHICULE_TYPES } from "@/lib/driver-materiel";
+import { CAPACITE_MAX, MULTI_CAPACITE, OUTILS, PERMIS, PERMIS_GROUPES, VEHICULE_TYPES } from "@/lib/driver-materiel";
+import { lookupPlate } from "@/lib/plate.functions";
+import { useServerFn } from "@tanstack/react-start";
 import { displayPlate } from "@/lib/plate-format";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/materiel")({
@@ -25,14 +27,15 @@ interface Vehicule {
 
 interface VForm {
   type: string;
-  nom: string;
+  marque: string;
+  modele: string;
   plaque: string;
   cap: number;
   cg: File | null;
   ass: File | null;
 }
 
-const EMPTY_FORM: VForm = { type: "plateau", nom: "", plaque: "", cap: 1, cg: null, ass: null };
+const EMPTY_FORM: VForm = { type: "plateau", marque: "", modele: "", plaque: "", cap: 1, cg: null, ass: null };
 
 function MaterielPage() {
   const { user } = useAuth();
@@ -43,6 +46,8 @@ function MaterielPage() {
   const [permis, setPermis] = useState<string[]>([]);
   const [form, setForm] = useState<VForm | null>(null);
   const [saving, setSaving] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const lookup = useServerFn(lookupPlate);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
@@ -71,9 +76,25 @@ function MaterielPage() {
     else toast.success("Matériel enregistré");
   }
 
+  async function searchPlate() {
+    if (!form) return;
+    setSearching(true);
+    try {
+      const r = await lookup({ data: { plate: form.plaque.trim() } });
+      if (!r.ok || !r.data) { toast.error(r.error || "Aucune donnée trouvée, remplissez à la main"); return; }
+      const d = r.data;
+      setForm((f) => (f ? { ...f, marque: f.marque || d.marque || "", modele: f.modele || d.modele || "" } : f));
+      toast.success("Véhicule trouvé");
+    } catch {
+      toast.error("Recherche indisponible, remplissez à la main");
+    } finally {
+      setSearching(false);
+    }
+  }
+
   async function addVehicule() {
     if (!form || !convoyeurId || !user?.id) return;
-    if (!form.nom.trim() && form.type !== "wg") { toast.error("Donnez un nom au véhicule"); return; }
+    if (!form.marque.trim() && !form.modele.trim() && !form.plaque.trim()) { toast.error("Indiquez la marque, le modèle ou la plaque"); return; }
     if (!form.cg || !form.ass) { toast.error("Ajoutez la carte grise et l'assurance"); return; }
     setSaving(true);
     try {
@@ -89,9 +110,9 @@ function MaterielPage() {
       const { error } = await db.from("convoyeur_vehicules").insert({
         convoyeur_id: convoyeurId,
         type: form.type,
-        nom: form.nom.trim() || label,
+        nom: [form.marque.trim(), form.modele.trim()].filter(Boolean).join(" ") || label,
         immatriculation: form.plaque.trim().toUpperCase() || null,
-        capacite: form.type === "wg" ? 1 : form.cap,
+        capacite: MULTI_CAPACITE.includes(form.type) ? form.cap : 1,
         carte_grise_path: cgPath,
         assurance_path: assPath,
       });
@@ -131,13 +152,13 @@ function MaterielPage() {
         <div className="grp"><span>Mes véhicules de transport</span><i /></div>
         {vehicules.length === 0 && <p className="eqnote">Aucun véhicule déclaré pour le moment.</p>}
         {vehicules.map((v) => {
-          const t = VEHICULE_TYPES.find((x) => x.key === v.type) ?? VEHICULE_TYPES[0];
+          const t = VEHICULE_TYPES.find((x) => x.key === v.type) ?? (v.type === "porteur_35" ? { key: "porteur_35", label: "Porte-voitures 3,5 t", icon: "truck" } : VEHICULE_TYPES[0]);
           return (
             <div className="vcard" key={v.id}>
               <span className="vc-ic"><Ic n={t.icon} s={20} sw={2.1} /></span>
               <div className="sp">
                 <b>{v.nom}</b>
-                <small>{t.label} · {v.type === "wg" ? "Circule sans carte grise" : `${v.capacite} véhicule${v.capacite > 1 ? "s" : ""} par trajet`}</small>
+                <small>{t.label} · {v.type === "wg" ? "Circule sans carte grise" : (MULTI_CAPACITE.includes(v.type) ? `${v.capacite} véhicule${v.capacite > 1 ? "s" : ""} par trajet` : "1 véhicule par trajet")}</small>
                 {v.immatriculation && <em>{displayPlate(v.immatriculation)}</em>}
                 <span className="vc-ok"><Ic n="check2" s={11} sw={3.2} />{v.type === "wg" ? "Certificat" : "Carte grise"}</span>
                 <span className="vc-ok"><Ic n="check2" s={11} sw={3.2} />Assurance</span>
@@ -157,13 +178,21 @@ function MaterielPage() {
                 </button>
               ))}
             </div>
-            <input className="fld" placeholder={form.type === "wg" ? "Nom (facultatif)" : "Nom du véhicule (ex : Plateau Iveco)"} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
-            <input className="fld" placeholder={form.type === "wg" ? "Numéro W Garage (ex : WW 123 37)" : "Immatriculation (ex : AB-123-CD)"} value={form.plaque} onChange={(e) => setForm({ ...form, plaque: e.target.value })} />
-            {form.type !== "wg" && (
+            <input className="fld" placeholder="Marque (ex : Iveco)" value={form.marque} onChange={(e) => setForm({ ...form, marque: e.target.value })} />
+            <input className="fld" placeholder="Modèle (ex : Daily 35S14)" value={form.modele} onChange={(e) => setForm({ ...form, modele: e.target.value })} />
+            <div className="row" style={{ gap: 8 }}>
+              <input className="fld" style={{ flex: 1, minWidth: 0 }} placeholder={form.type === "wg" ? "Numéro W Garage (ex : WW 123 37)" : "Plaque (ex : AB-123-CD)"} value={form.plaque} onChange={(e) => setForm({ ...form, plaque: e.target.value })} />
+              {form.type !== "wg" && (
+                <button type="button" className="btn green" style={{ flex: "0 0 auto", padding: "0 16px" }} disabled={searching || form.plaque.trim().length < 4} onClick={() => void searchPlate()}>
+                  {searching ? "…" : "Rechercher"}
+                </button>
+              )}
+            </div>
+            {MULTI_CAPACITE.includes(form.type) && (
               <div className="vf-c">
                 <span>Véhicules transportables</span>
                 <div>
-                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                  {Array.from({ length: CAPACITE_MAX }, (_, i) => i + 1).map((n) => (
                     <button key={n} className={form.cap === n ? "on" : ""} onClick={() => setForm({ ...form, cap: n })}>{n}</button>
                   ))}
                 </div>

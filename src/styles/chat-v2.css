@@ -1,0 +1,29 @@
+/* Messagerie mission (client / convoyeur) : carte claire, fondue, sans gros bloc bleu */
+.lgc-panel{--c1:#2f5fff;--c2:#5b83ff;--cs:rgba(47,95,255,.10);--ink:#0b1b3a;--ink2:#51607f;--line:rgba(14,40,90,.10);
+  position:relative;background:linear-gradient(180deg,#ffffff 0%,#f5f8ff 100%);border:1px solid var(--line);border-radius:24px;padding:18px;color:var(--ink);
+  box-shadow:0 24px 50px -30px rgba(20,40,110,.35),0 2px 6px rgba(20,40,110,.05);overflow:hidden}
+.lgc-panel::before{content:"";position:absolute;inset:-30% -20% auto auto;width:70%;height:70%;background:radial-gradient(closest-side,var(--cs),transparent 70%);pointer-events:none}
+.lgc-panel-green{--c1:#14b866;--c2:#4fe8a0;--cs:rgba(20,184,102,.12);background:linear-gradient(180deg,#ffffff 0%,#f2faf5 100%)}
+.lgc-panel>*{position:relative}
+.lgc-panel-head{display:flex;gap:12px;align-items:center;margin-bottom:14px;color:var(--c1)}
+.lgc-panel-head>svg{flex:none;width:40px;height:40px;padding:10px;border-radius:14px;background:var(--cs);box-sizing:border-box}
+.lgc-panel-head h3{font-family:Poppins,sans-serif;font-weight:600;font-size:15.5px;color:var(--ink);margin:0;letter-spacing:-.1px}
+.lgc-panel-head p{font-size:13px;color:var(--ink2);margin:2px 0 0;line-height:1.35}
+.lgc-panel .lgc-thread{background:transparent;border:0;border-radius:0;color:var(--ink);min-height:260px}
+.lgc-panel .lgc-body{padding:4px 2px 10px;gap:10px;scrollbar-width:thin}
+.lgc-panel .lgc-empty{color:var(--ink2);font-size:13.5px}
+.lgc-panel .lgc-bubble{background:#fff;border:1px solid var(--line);color:var(--ink);box-shadow:0 6px 16px -12px rgba(20,40,110,.35);font-size:14.5px;border-radius:18px 18px 18px 6px}
+.lgc-panel .lgc-mine .lgc-bubble{background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;border-color:transparent;border-radius:18px 18px 6px 18px;box-shadow:0 12px 22px -14px var(--c1)}
+.lgc-panel .lgc-author{color:var(--c1);font-size:11.5px;letter-spacing:.2px}
+.lgc-panel .lgc-system{background:var(--cs);border-color:transparent;color:var(--ink2)}
+.lgc-panel .lgc-att-file{background:rgba(0,0,0,.06)}
+.lgc-panel .lgc-mine .lgc-att-file{background:rgba(255,255,255,.2)}
+.lgc-panel .lgc-quick button,.lgc-panel .lgc-files button{border:1px solid var(--line);background:#fff;color:var(--ink2)}
+.lgc-panel .lgc-input{margin-top:4px;padding:6px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 20px -16px rgba(20,40,110,.4);align-items:flex-end}
+.lgc-panel .lgc-input textarea{border:0;background:transparent;color:var(--ink);min-height:40px;padding:10px 8px;font-size:15px}
+.lgc-panel .lgc-input textarea:focus{outline:none}
+.lgc-panel .lgc-icon{border:0;background:transparent;color:var(--ink2);width:40px;height:40px}
+.lgc-panel .lgc-send{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 10px 18px -10px var(--c1)}
+html.theme-dark .lgc-panel{--ink:#eef2ff;--ink2:#aab4d6;--line:rgba(255,255,255,.09);background:linear-gradient(180deg,#0c1840,#081233)}
+html.theme-dark .lgc-panel .lgc-bubble{background:rgba(255,255,255,.06)}
+html.theme-dark .lgc-panel .lgc-input,html.theme-dark .lgc-panel .lgc-quick button,html.theme-dark .lgc-panel .lgc-files button{background:rgba(255,255,255,.05)}
