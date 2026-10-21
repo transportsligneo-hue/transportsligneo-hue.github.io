@@ -29,7 +29,7 @@ import {
 interface Props {
   onCancel: () => void;
   onScanned: (file: File) => void | Promise<void>;
-  /** Accent visuel : doré (EDL) ou bleu électrique (scan documents véhicule). */
+  /** Accent visuel : vert (EDL) ou bleu électrique (scan documents véhicule). */
   accent?: "gold" | "blue";
   /** Titre affiché en mode live. */
   title?: string;
@@ -207,9 +207,9 @@ export function DocumentScanner({
   accent = "gold",
   title = "Scanner un document",
 }: Props) {
-  const ACC = accent === "blue" ? "#4f8cff" : "#d4af37";
+  const ACC = accent === "blue" ? "#4f8cff" : "#34E68C";
   const ACC_FG = accent === "blue" ? "#0b1026" : "#0b1026";
-  const ACC_SOFT = accent === "blue" ? "rgba(79,140,255,0.12)" : "rgba(212,175,55,0.10)";
+  const ACC_SOFT = accent === "blue" ? "rgba(79,140,255,0.12)" : "rgba(52,230,140,0.12)";
   // fallback natif
   const fileRef = useRef<HTMLInputElement>(null);
   // caméra live
@@ -422,7 +422,7 @@ export function DocumentScanner({
               if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             });
             ctx.closePath();
-            ctx.fillStyle = accent === "blue" ? "rgba(79,140,255,0.18)" : "rgba(212,175,55,0.16)";
+            ctx.fillStyle = accent === "blue" ? "rgba(79,140,255,0.18)" : "rgba(52,230,140,0.18)";
             ctx.fill();
             ctx.lineWidth = 3;
             ctx.strokeStyle = "#22c55e";
