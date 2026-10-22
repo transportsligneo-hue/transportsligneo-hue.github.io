@@ -47,25 +47,3 @@ export function GoogleG({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
-
-/** Petite carte de France avec une épingle sur Tours. */
-export function FranceTours({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 100 100" className={className} aria-hidden="true">
-      <path
-        d="M50.3 9.2 47.3 10.0 46.0 16.0 43.2 18.4 37.8 21.6 30.7 20.0 28.5 20.4 29.1 28.8 26.4 28.4 19.8 26.8 12.7 28.0 11.6 30.8 13.8 34.4 18.7 35.6 25.3 39.6 30.7 48.4 31.3 52.8 30.7 60.8 28.8 69.6 33.4 75.2 41.1 75.2 54.1 78.0 53.9 75.2 54.1 72.4 57.4 70.4 62.3 70.4 66.7 71.6 70.0 72.8 73.2 72.0 76.8 68.0 78.1 67.4 74.9 63.2 75.9 56.8 74.3 50.4 70.5 48.0 70.5 45.6 75.4 37.6 78.7 36.8 78.4 29.6 81.9 25.6 72.1 21.6 68.9 21.2 63.7 16.8 60.1 15.2 54.7 11.6Z"
-        fill="rgba(47,95,255,.16)"
-        stroke="#5b8fff"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <g transform="translate(0 0)">
-        <circle cx="41" cy="38.5" r="9" fill="rgba(46,230,113,.25)">
-          <animate attributeName="r" values="5;12;5" dur="2s" repeatCount="indefinite" />
-        </circle>
-        <path d="M41 47.5c-5-6-8-9-8-13a8 8 0 0 1 16 0c0 4-3 7-8 13Z" fill="#ff4d5e" />
-        <circle cx="41" cy="34.5" r="3" fill="#fff" />
-      </g>
-    </svg>
-  );
-}

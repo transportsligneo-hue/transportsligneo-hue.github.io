@@ -3,10 +3,11 @@ import { Briefcase, ChevronRight, Clock, LogIn, Route as RouteIcon, ShieldCheck,
 import StoreBadges from "@/components/public/StoreBadges";
 import MobileGoogleReviews from "@/components/mobile/MobileGoogleReviews";
 import MobileFaq from "@/components/mobile/MobileFaq";
-import { FranceTours, GoogleG, RouteAB, SteeringWheel } from "@/components/mobile/MobileIcons";
+import { GoogleG, RouteAB, SteeringWheel } from "@/components/mobile/MobileIcons";
 import DevisGenerator from "@/components/DevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
+import carteFrance from "@/assets/carte-france-tours.png";
 import "@/styles/mobile-home-v2.css";
 
 /**
@@ -121,7 +122,7 @@ export default function MobileHomeScreen() {
       {/* === Pied de page === */}
       <footer>
         <div className="mh2-foot">
-          <FranceTours className="mh2-map" />
+          <img src={carteFrance} alt="Carte de France : Transports Ligneo est basé à Tours" className="mh2-map" width={78} height={78} loading="lazy" />
           <div style={{ minWidth: 0 }}>
             <b>Basé à Tours (37)</b>
             <small>07 82 45 61 81 · contact@transportsligneo.fr</small>
