@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import Contact from "@/components/Contact";
 import FAQ from "@/components/FAQ";
+import MobileContactScreen from "@/components/mobile/MobileContactScreen";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 
@@ -30,12 +31,15 @@ function ContactPage() {
   const [profil, setProfil] = useState<"particulier" | "pro">("particulier");
   return (
     <>
-      <Navbar />
-      <main>
-         <Contact onProfilChange={setProfil} />
-         <FAQ audience={profil} />
-      </main>
-      <Footer />
+      <MobileContactScreen />
+      <div className="hidden md:block">
+        <Navbar />
+        <main>
+          <Contact onProfilChange={setProfil} />
+          <FAQ audience={profil} />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

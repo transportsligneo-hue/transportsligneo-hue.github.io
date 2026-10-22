@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import CommentCaMarcheTimeline from "@/components/CommentCaMarcheTimeline";
+import MobileCommentCaMarcheScreen from "@/components/mobile/MobileCommentCaMarcheScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/comment-ca-marche")({
@@ -22,11 +23,14 @@ export const Route = createFileRoute("/comment-ca-marche")({
 function CommentCaMarchePage() {
   return (
     <>
-      <Navbar />
-      <main>
-        <CommentCaMarcheTimeline />
-      </main>
-      <Footer />
+      <MobileCommentCaMarcheScreen />
+      <div className="hidden md:block">
+        <Navbar />
+        <main>
+          <CommentCaMarcheTimeline />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

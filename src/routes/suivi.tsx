@@ -6,6 +6,7 @@ import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck, CarFront, Us
 import Navbar from "@/components/Navbar";
 import { PlateBadge } from "@/components/plate/PlateBadge";
 import Footer from "@/components/Footer";
+import MobileSuiviScreen from "@/components/mobile/MobileSuiviScreen";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
 
 const LiveMissionMap = lazy(() =>
@@ -126,57 +127,7 @@ function SuiviPage() {
 
   const statut = result?.statut ? (STATUT_LABEL[result.statut] ?? STATUT_FALLBACK) : null;
 
-  return (
-    <>
-      <Navbar />
-      <main id="main-content" className="r4-page">
-        <section className="mx-auto max-w-[860px] px-5 pb-20 pt-[150px]">
-          <div className="v4-hero-eyebrow">
-            <span className="dot" />
-            Suivi de mission
-          </div>
-          <h1 className="mb-3 font-heading text-[34px] leading-tight text-white md:text-[42px]">
-            Où en est <span className="v4-accent">mon véhicule</span> ?
-          </h1>
-          <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
-            Tapez la plaque d'immatriculation du véhicule (ex. AB-123-CD) et votre code
-            confidentiel, indiqué dans l'e-mail de suivi. Aucune information personnelle
-            n'est affichée sur cette page.
-          </p>
-
-          <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start">
-            <label htmlFor="plaque-vehicule" className="sr-only">
-              Plaque d'immatriculation
-            </label>
-            <div className="w-full flex-1">
-              <PlateInput id="plaque-vehicule" label="" tone="blue" value={plaque} onChange={setPlaque} />
-            </div>
-            <label htmlFor="code-confidentiel" className="sr-only">
-              Code confidentiel
-            </label>
-            <input
-              id="code-confidentiel"
-              value={code}
-              maxLength={16}
-              autoComplete="off"
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="Code ex. A7K9P2"
-              className="suivi-field suivi-input w-full px-4 py-3.5 text-[15px] tracking-[0.18em] focus:outline-none sm:w-[190px]"
-            />
-            <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-              <span className="ml-2">Suivre</span>
-            </button>
-          </form>
-
-
-          {error && (
-            <div className="mb-6 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-[13.5px] text-[#ffb4b4]">
-              {error}
-            </div>
-          )}
-
-          {result?.found && statut && (
+  const resultBlock = (result?.found && statut ? (
             <div className="rounded-2xl border border-[#7aa3ff]/20 bg-white/[0.03] p-6">
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <span
@@ -264,10 +215,77 @@ function SuiviPage() {
                 de la mission ne sont pas affichés ici. Connectez-vous à votre espace pour le détail complet.
               </p>
             </div>
-          )}
-        </section>
-      </main>
-      <Footer />
+          ) : null);
+
+  return (
+    <>
+      {/* Mobile · écran dédié navy */}
+      <MobileSuiviScreen
+        plaque={plaque}
+        setPlaque={setPlaque}
+        code={code}
+        setCode={setCode}
+        onSubmit={submit}
+        loading={loading}
+        error={error}
+      >
+        {resultBlock}
+      </MobileSuiviScreen>
+
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <Navbar />
+        <main id="main-content" className="r4-page">
+          <section className="mx-auto max-w-[860px] px-5 pb-20 pt-[150px]">
+            <div className="v4-hero-eyebrow">
+              <span className="dot" />
+              Suivi de mission
+            </div>
+            <h1 className="mb-3 font-heading text-[34px] leading-tight text-white md:text-[42px]">
+              Où en est <span className="v4-accent">mon véhicule</span> ?
+            </h1>
+            <p className="mb-8 max-w-[560px] text-[14.5px] leading-relaxed text-[#9aa6c9]">
+              Tapez la plaque d'immatriculation du véhicule (ex. AB-123-CD) et votre code
+              confidentiel, indiqué dans l'e-mail de suivi. Aucune information personnelle
+              n'est affichée sur cette page.
+            </p>
+
+            <form onSubmit={submit} className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <label htmlFor="plaque-vehicule" className="sr-only">
+                Plaque d'immatriculation
+              </label>
+              <div className="w-full flex-1">
+                <PlateInput id="plaque-vehicule" label="" tone="blue" value={plaque} onChange={setPlaque} />
+              </div>
+              <label htmlFor="code-confidentiel" className="sr-only">
+                Code confidentiel
+              </label>
+              <input
+                id="code-confidentiel"
+                value={code}
+                maxLength={16}
+                autoComplete="off"
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="Code ex. A7K9P2"
+                className="suivi-field suivi-input w-full px-4 py-3.5 text-[15px] tracking-[0.18em] focus:outline-none sm:w-[190px]"
+              />
+              <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
+                {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                <span className="ml-2">Suivre</span>
+              </button>
+            </form>
+
+            {error && (
+              <div className="mb-6 rounded-xl border border-[#ef4444]/30 bg-[#ef4444]/10 px-4 py-3 text-[13.5px] text-[#ffb4b4]">
+                {error}
+              </div>
+            )}
+
+            {resultBlock}
+          </section>
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

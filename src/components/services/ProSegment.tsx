@@ -8,13 +8,13 @@ import ProTimeline, { ProFilm } from "@/components/services/ProTimeline";
 import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProfessionalBrochures from "@/components/marketing/ProfessionalBrochures";
 
-const audiences = [
+export const audiences = [
   { Icon: Building2, title: "Concessions", desc: "Transferts inter-sites, livraisons clients, restitutions : gagnez du temps sur vos flux quotidiens." },
   { Icon: Truck, title: "Loueurs", desc: "Repositionnement de véhicules entre agences, restitution en fin de contrat, gestion de pics saisonniers." },
   { Icon: Clock, title: "Gestionnaires de flotte", desc: "Pilotage complet du parc : missions groupées, planification récurrente, reporting par site." },
 ];
 
-const features = [
+export const features = [
   { Icon: LayoutDashboard, title: "Tableau de bord dédié", desc: "Vue d'ensemble de vos missions en cours, terminées et à venir, en temps réel." },
   { Icon: Calendar, title: "Planifiez plusieurs convoyages en une seule opération.", desc: "Missions groupées : plusieurs véhicules de votre parc en une seule commande planifiée." },
   { Icon: Users, title: "Utilisateurs & sites", desc: "Gérez les accès par site : chaque responsable ne voit que son périmètre." },

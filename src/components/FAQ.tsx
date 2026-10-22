@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Phone } from "lucide-react";
 
-const faqs = [
+export const faqs = [
   { q: "Quels types de véhicules pouvez-vous convoyer ?", a: "Nous convoyons tous types de véhicules : citadines, berlines, SUV, utilitaires, véhicules de collection et même poids lourds légers. Contactez-nous pour toute demande spécifique." },
   { q: "Les péages et le carburant sont-ils inclus dans le prix ?", a: "Oui, nos tarifs incluent systématiquement les péages et le carburant nécessaires au transport de votre véhicule. Aucun frais caché." },
   { q: "Quel est le délai de prise en charge ?", a: "Selon la distance et la disponibilité, nous prenons en charge votre véhicule à partir de 12 heures après votre demande (pour une urgence, appelez-nous). Une majoration de 30 % s'applique pour les missions express et les interventions hors horaires." },

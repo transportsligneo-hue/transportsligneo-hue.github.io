@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
 import AProposContent from "@/components/AProposContent";
+import MobileAProposScreen from "@/components/mobile/MobileAProposScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/a-propos")({
@@ -22,11 +23,14 @@ export const Route = createFileRoute("/a-propos")({
 function AProposPage() {
   return (
     <>
-      <Navbar />
-      <main>
-        <AProposContent />
-      </main>
-      <Footer />
+      <MobileAProposScreen />
+      <div className="hidden md:block">
+        <Navbar />
+        <main>
+          <AProposContent />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

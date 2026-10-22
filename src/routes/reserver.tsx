@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import TunnelReservation from "@/components/TunnelReservation";
 import Navbar from "@/components/Navbar";
+import MobileReserverScreen from "@/components/mobile/MobileReserverScreen";
 import Footer from "@/components/Footer";
 
 export const Route = createFileRoute("/reserver")({
@@ -19,7 +20,9 @@ export const Route = createFileRoute("/reserver")({
 
 function ReserverPage() {
   return (
-    <div className="min-h-screen bg-navy section-bg">
+    <>
+    <MobileReserverScreen />
+    <div className="hidden min-h-screen bg-navy section-bg md:block">
       <Navbar />
       <main className="pt-32 pb-16 px-4">
         <div className="max-w-3xl mx-auto">
@@ -47,5 +50,6 @@ function ReserverPage() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

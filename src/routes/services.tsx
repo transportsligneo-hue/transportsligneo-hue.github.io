@@ -1,5 +1,6 @@
 import { createFileRoute, useSearch, useNavigate } from "@tanstack/react-router";
 import Navbar from "@/components/Navbar";
+import MobileServicesScreen from "@/components/mobile/MobileServicesScreen";
 import ServicesContent from "@/components/ServicesContent";
 import Engagements from "@/components/Engagements";
 import Footer from "@/components/Footer";
@@ -29,15 +30,24 @@ function ServicesPage() {
 
   return (
     <>
-      <Navbar />
-      <main>
-        <ServicesContent
-          audience={audience}
-          onAudienceChange={(a) => navigate({ to: "/services", search: { audience: a } })}
-        />
-        <Engagements audience={audience} />
-      </main>
-      <Footer />
+      {/* Mobile · écran dédié navy */}
+      <MobileServicesScreen
+        audience={audience}
+        onAudienceChange={(a) => navigate({ to: "/services", search: { audience: a } })}
+      />
+
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <Navbar />
+        <main>
+          <ServicesContent
+            audience={audience}
+            onAudienceChange={(a) => navigate({ to: "/services", search: { audience: a } })}
+          />
+          <Engagements audience={audience} />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

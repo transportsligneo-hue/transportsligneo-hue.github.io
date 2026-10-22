@@ -6,7 +6,7 @@ import ServicesPlateforme from "@/components/ServicesPlateforme";
 import ProSegment from "@/components/services/ProSegment";
 import { ParticulierBrochure } from "@/components/marketing/ProfessionalBrochures";
 
-const services = [
+export const services = [
   {
     Icon: Car,
     title: "Achat à distance",

@@ -4,21 +4,21 @@ import { ShieldCheck, Phone, Zap, CheckCircle, Flame, Users, Monitor } from "luc
 const FOUNDING_YEAR = 2021;
 const yearsOfExperience = Math.max(1, new Date().getFullYear() - FOUNDING_YEAR);
 
-const stats = [
+export const stats = [
   { v: String(yearsOfExperience), l: "Ans d'expérience" },
   { v: "Tours", l: "Base opérationnelle" },
   { v: "France", l: "& Europe" },
   { v: "100%", l: "Digitalisé" },
 ];
 
-const valeurs = [
+export const valeurs = [
   { Icon: ShieldCheck, title: "Rigueur", desc: "Chaque mission suit un protocole strict, du départ à la livraison." },
   { Icon: Phone, title: "Discrétion", desc: "Vos véhicules et vos données sont traités en toute confidentialité." },
   { Icon: Zap, title: "Réactivité", desc: "Un interlocuteur dédié, joignable 7j/7, pour répondre à tout imprévu." },
   { Icon: CheckCircle, title: "Transparence", desc: "Tarifs tout inclus, sans frais cachés ni surprise à la livraison." },
 ];
 
-const timeline = [
+export const timeline = [
   { year: String(FOUNDING_YEAR), tag: "Passion", title: "Les débuts à Tours", desc: "Olivier Gourlaouen démarre son activité de convoyage automobile, avec pour ambition la rigueur d'un grand groupe et la proximité d'une équipe locale.", Icon: Flame },
   { year: "2025", tag: "Croissance", title: "Développement de l'équipe", desc: "Constitution d'une équipe de convoyeurs formés et intégration de convoyeurs indépendants certifiés en renfort.", Icon: Users },
   { year: "2026", tag: "Digital", title: "Lancement de la plateforme", desc: "Mise en ligne du devis instantané, du suivi GPS et de la signature électronique pour une expérience 100% digitale.", Icon: Monitor },
