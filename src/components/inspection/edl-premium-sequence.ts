@@ -75,8 +75,16 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
   // ─── Premier réflexe : démarrer le véhicule et photographier le compteur ───
   { num: 3, id: "compteur", kind: "photo", section: "interieur", phase: "depart",
     label: "Démarrer le véhicule · compteur",
-    hint: "Montez à bord et mettez le contact : photographiez le compteur, kilométrage et niveau de carburant bien lisibles",
+    hint: "Montez à bord et démarrez le moteur (le contact seul ne suffit pas). Attendez que l'aiguille du compte-tours se stabilise vers 1 (environ 1 000 tr/min), puis photographiez le tableau de bord : voyants, jauge de carburant et kilométrage bien lisibles",
     example: compteur },
+
+  // ─── Kilométrage + niveau (juste après la photo du compteur) ───
+  { num: 21, id: "kilometrage_depart", kind: "kilometrage", section: "interieur", phase: "depart",
+    label: "Kilométrage et niveau d'énergie",
+    hint: "Relevez le kilométrage et le niveau de carburant ou de batterie affichés au compteur" },
+  { num: 24, id: "kilometrage_arrivee", kind: "kilometrage", section: "interieur", phase: "arrivee",
+    label: "Kilométrage et niveau d'énergie",
+    hint: "Relevez le kilométrage et le niveau de carburant ou de batterie affichés au compteur" },
 
   // ─── Côté droit : avant, intérieur, arrière ───
   { num: 4, id: "face_avant", kind: "photo", section: "exterieur", phase: "depart",
@@ -159,11 +167,6 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Photos libres / dégâts",
     hint: "Ajoutez si besoin des photos complémentaires : dégâts, remarques, accessoires ou détail utile. Étape optionnelle." },
 
-  // ─── Kilométrage départ ───
-  { num: 21, id: "kilometrage_depart", kind: "kilometrage", section: "cloture", phase: "depart",
-    label: "Kilométrage de départ",
-    hint: "Saisissez le kilométrage exact affiché au compteur avant le départ" },
-
   // ─── Signatures départ (toujours dans le flow EDL départ) ───
   { num: 22, id: "signature_driver_start", kind: "signature", section: "cloture", phase: "depart",
     signatureKind: "driver_start",
@@ -175,10 +178,6 @@ export const EDL_PREMIUM_SEQUENCE: EdlStepDef[] = [
     label: "Signature départ · client / parc",
     hint: "Faites signer le donneur d'ordre (concession, parc, client)" },
 
-  // ─── Kilométrage arrivée (filtré sur phase=arrivee) ───
-  { num: 24, id: "kilometrage_arrivee", kind: "kilometrage", section: "cloture", phase: "arrivee",
-    label: "Kilométrage d'arrivée",
-    hint: "Saisissez le kilométrage exact affiché au compteur à l'arrivée" },
 ];
 
 /**
