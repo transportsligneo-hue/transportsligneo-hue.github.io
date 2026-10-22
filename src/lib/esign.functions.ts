@@ -502,3 +502,76 @@ export const esignConvoyeurDocsStatus = createServerFn({ method: "POST" })
     const S = await import("@/lib/esign.server");
     return { missing: await S.missingConvoyeurDocs(data.convoyeurId) };
   });
+
+/**
+ * Admin : lit le Kbis déposé par le convoyeur et en extrait SIRET, dénomination et adresse du siège,
+ * pour pré-remplir le contrat de partenariat (aucune saisie à refaire).
+ */
+export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { convoyeurId: string }) => d)
+  .handler(async ({ data, context }): Promise<{ ok: boolean; siret: string | null; adresse: string | null; denomination: string | null; error?: string }> => {
+    await assertAdmin(context);
+    const none = { ok: false, siret: null, adresse: null, denomination: null };
+    try {
+      const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
+      const db = admin as any;
+      const { normalizeConvoyeurDocType } = await import("@/lib/convoyeur-documents");
+      const { data: docs } = await db
+        .from("documents_convoyeurs")
+        .select("type_document, url_fichier, nom_fichier, statut_validation, created_at")
+        .eq("convoyeur_id", data.convoyeurId)
+        .order("created_at", { ascending: false });
+      const kbis = (docs ?? []).find(
+        (d: any) => normalizeConvoyeurDocType(d.type_document) === "kbis" && d.statut_validation !== "refuse",
+      );
+      if (!kbis) return { ...none, error: "Aucun Kbis déposé." };
+
+      const { data: blob, error } = await db.storage.from("convoyeur-documents").download(kbis.url_fichier);
+      if (error || !blob) return { ...none, error: "Kbis illisible." };
+      if (blob.size > 9_000_000) return { ...none, error: "Kbis trop volumineux." };
+      const ext = String(kbis.nom_fichier ?? kbis.url_fichier).toLowerCase().split(".").pop() ?? "";
+      const mime = blob.type && blob.type !== "application/octet-stream"
+        ? blob.type
+        : ext === "pdf" ? "application/pdf" : ext === "png" ? "image/png" : "image/jpeg";
+      const b64 = Buffer.from(await blob.arrayBuffer()).toString("base64");
+
+      const apiKey = process.env.GEMINI_API_KEY ?? process.env.LOVABLE_API_KEY;
+      if (!apiKey) return { ...none, error: "Service IA non configuré." };
+      const { callVisionTool, pickModel, getServerAiSettings } = await import("@/lib/ai/gateway.server");
+      const settings = await getServerAiSettings();
+      if (settings && !settings.ai_enabled) return { ...none, error: "IA désactivée." };
+      const res = await callVisionTool<{ siret?: string; denomination?: string; adresse?: string }>({
+        apiKey,
+        model: pickModel("ocr_documents", settings?.model_overrides),
+        systemPrompt:
+          "Tu lis un extrait Kbis / avis de situation SIRENE français. Renvoie uniquement ce qui est écrit sur le document : " +
+          "SIRET à 14 chiffres (ou SIREN à 9 chiffres + NIC), dénomination ou nom de l'entrepreneur, adresse complète du siège ou de l'établissement. " +
+          "Si une information est absente ou illisible, laisse le champ vide. N'invente rien.",
+        userText: "Extrais le SIRET, la dénomination et l'adresse de ce document.",
+        imageUrls: [`data:${mime};base64,${b64}`],
+        tool: {
+          name: "report_kbis",
+          description: "Retourne les informations du Kbis.",
+          parameters: {
+            type: "object",
+            properties: {
+              siret: { type: "string" },
+              denomination: { type: "string" },
+              adresse: { type: "string" },
+            },
+            required: [],
+          },
+        },
+        timeoutMs: 25_000,
+      });
+      if (!res.ok) return { ...none, error: res.error };
+      const digits = String(res.data.siret ?? "").replace(/\D/g, "");
+      const siret = digits.length === 14 ? digits.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4") : digits.length === 9 ? digits.replace(/^(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3") : null;
+      const adresse = String(res.data.adresse ?? "").replace(/\s+/g, " ").trim() || null;
+      const denomination = String(res.data.denomination ?? "").trim() || null;
+      return { ok: !!(siret || adresse), siret, adresse, denomination, error: siret || adresse ? undefined : "Rien de lisible sur le Kbis." };
+    } catch {
+      return { ...none, error: "Lecture du Kbis impossible." };
+    }
+  });

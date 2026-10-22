@@ -9,7 +9,7 @@ import { AlertCircle, CheckCircle2, FileSignature } from "lucide-react";
 import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import EsignPanel from "@/components/admin/EsignPanel";
-import { esignConvoyeurDocsStatus } from "@/lib/esign.functions";
+import { esignConvoyeurDocsStatus, esignConvoyeurKbisInfo } from "@/lib/esign.functions";
 
 interface Props {
   convoyeurId: string;
@@ -28,6 +28,26 @@ export default function ContratYousignCard(props: Props) {
   const [siret, setSiret] = useState(props.siret ?? "");
   const [adresse, setAdresse] = useState(props.adresse ?? "");
   const [permis, setPermis] = useState(props.permisNumero ?? "");
+  const kbisInfo = useServerFn(esignConvoyeurKbisInfo);
+  const [kbisState, setKbisState] = useState<"idle" | "loading" | "done" | "none">("idle");
+  const [denomination, setDenomination] = useState("");
+
+  // SIRET + adresse repris automatiquement du Kbis déposé à l'inscription.
+  useEffect(() => {
+    if (props.siret && props.adresse) return;
+    let dead = false;
+    setKbisState("loading");
+    void kbisInfo({ data: { convoyeurId: props.convoyeurId } })
+      .then((r) => {
+        if (dead) return;
+        if (r.siret) setSiret((v) => v || r.siret!);
+        if (r.adresse) setAdresse((v) => v || r.adresse!);
+        if (r.denomination) setDenomination(r.denomination);
+        setKbisState(r.ok ? "done" : "none");
+      })
+      .catch(() => { if (!dead) setKbisState("none"); });
+    return () => { dead = true; };
+  }, [kbisInfo, props.convoyeurId, props.siret, props.adresse]);
 
   useEffect(() => {
     void docsStatus({ data: { convoyeurId: props.convoyeurId } }).then((r) => setMissing(r.missing)).catch(() => setMissing(null));
@@ -42,6 +62,9 @@ export default function ContratYousignCard(props: Props) {
       ) : missing ? (
         <p className="mt-2 text-sm text-emerald-700 flex gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0" />Toutes les pièces obligatoires sont déposées : le contrat peut être envoyé.</p>
       ) : null}
+      {kbisState === "loading" && <p className="mt-3 text-xs text-pro-text-soft">Lecture du Kbis pour remplir le SIRET et l'adresse…</p>}
+      {kbisState === "done" && <p className="mt-3 text-xs text-emerald-700">SIRET et adresse repris automatiquement du Kbis{denomination ? ` (${denomination})` : ""}. Vous pouvez les corriger.</p>}
+      {kbisState === "none" && !siret && <p className="mt-3 text-xs text-pro-text-soft">Kbis non lisible : saisissez le SIRET et l'adresse à la main.</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <label className="text-xs text-pro-text-soft">SIRET<input value={siret} onChange={(e) => setSiret(e.target.value)} className={input} placeholder="000 000 000 00000" /></label>
         <label className="text-xs text-pro-text-soft">Adresse<input value={adresse} onChange={(e) => setAdresse(e.target.value)} className={input} placeholder="Adresse complète" /></label>
@@ -53,7 +76,7 @@ export default function ContratYousignCard(props: Props) {
           refType="convoyeur"
           refId={props.convoyeurId}
           title="Envoyer le contrat pour signature"
-          defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "" }}
+          defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "", company: denomination }}
           getPdf={() => generateContratConvoyeurPdf(
             { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null },
             company,
