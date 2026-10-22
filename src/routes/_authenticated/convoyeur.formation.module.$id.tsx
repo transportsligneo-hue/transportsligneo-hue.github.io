@@ -2,7 +2,7 @@ import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { PASS_SCORE } from "@/lib/formation/types";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, ArrowRight, Clock3, Download, Loader2, Target, Video, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, Loader2, Target, Video, CheckCircle2 } from "lucide-react";
 import { useTraining } from "@/lib/formation/useTraining";
 import ModuleContent from "@/components/formation/ModuleContent";
 import ChecklistBlock from "@/components/formation/ChecklistBlock";
@@ -72,9 +72,6 @@ function ModulePage() {
         </div>
         <h1 className="mt-1.5 text-xl font-semibold text-pro-text">{module.title}</h1>
         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-pro-muted">
-          <span className="inline-flex items-center gap-1">
-            <Clock3 size={12} /> {module.duration_minutes} min
-          </span>
           <span>Mise à jour {new Date(module.last_updated).toLocaleDateString("fr-FR")}</span>
         </div>
         {module.objectives.length > 0 && (

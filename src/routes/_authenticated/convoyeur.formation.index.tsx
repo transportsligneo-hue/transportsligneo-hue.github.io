@@ -160,7 +160,7 @@ function FormationHome() {
                 </span>
               </div>
               <h3 className="mt-1.5 text-sm font-semibold text-pro-text">{m.title}</h3>
-              <p className="mt-1 text-xs text-pro-muted">{m.duration_minutes} min · {m.quiz_questions.length} questions</p>
+              <p className="mt-1 text-xs text-pro-muted">{m.quiz_questions.length} questions</p>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#2F5FFF]">
                 Ouvrir <ArrowRight size={12} />
               </span>

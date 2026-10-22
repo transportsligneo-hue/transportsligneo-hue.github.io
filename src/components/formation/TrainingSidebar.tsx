@@ -61,7 +61,7 @@ export function TrainingSidebar({
                   {m.order_index}. {m.title}
                 </span>
                 <span className="block text-[11px] text-pro-muted">
-                  {STATUS_LABEL[st]} · {m.duration_minutes} min
+                  {STATUS_LABEL[st]}
                 </span>
               </span>
             </Link>
