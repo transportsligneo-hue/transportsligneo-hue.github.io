@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LayoutDashboard, ClipboardCheck, Truck, MoreHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -48,8 +48,33 @@ export default function DriverDock({
     return Number(window.localStorage.getItem(CATALOGUE_SEEN_KEY) ?? 0) || 0;
   });
   const [active, setActive] = useState<ActiveMission | null>(null);
-  // Masquage temporaire du dock (étapes critiques : signature, EDL).
-  const collapsed = false;
+  // Dock rétractable : se cache en descendant dans la page, revient en remontant,
+  // et peut être replié / rouvert à la main avec la languette.
+  const [collapsed, setCollapsed] = useState(false);
+  const manualRef = useRef(false);
+  const lastY = useRef(new WeakMap<object, number>());
+
+  useEffect(() => {
+    const onScroll = (e: Event) => {
+      const t = (e.target === document ? document.scrollingElement : e.target) as HTMLElement | null;
+      if (!t || typeof t.scrollTop !== "number") return;
+      if (t.scrollHeight - t.clientHeight < 120) return; // page trop courte : on laisse le dock
+      const y = t.scrollTop;
+      const prev = lastY.current.get(t) ?? y;
+      const dy = y - prev;
+      if (Math.abs(dy) < 8) return;
+      lastY.current.set(t, y);
+      if (dy > 0 && y > 80) {
+        manualRef.current = false;
+        setCollapsed(true);
+      } else if (dy < 0 || y <= 24) {
+        manualRef.current = false;
+        setCollapsed(false);
+      }
+    };
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -176,6 +201,17 @@ export default function DriverDock({
             <i className="ldock-dot" />
           </button>
         </div>
+        <button
+          type="button"
+          className="ldock-handle"
+          aria-label={collapsed ? "Afficher la barre de navigation" : "Masquer la barre de navigation"}
+          onClick={() => {
+            manualRef.current = true;
+            setCollapsed((c) => !c);
+          }}
+        >
+          {collapsed ? <ChevronUp strokeWidth={2.6} /> : <ChevronDown strokeWidth={2.6} />}
+        </button>
       </nav>
 
     </>
