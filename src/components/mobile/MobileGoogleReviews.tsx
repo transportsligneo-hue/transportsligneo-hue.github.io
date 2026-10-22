@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
-import logoCat from "@/assets/logo-cat.png";
-import logoTransak from "@/assets/logo-transakauto.png";
+import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
+import logoTransak from "@/assets/transakauto-new.png.asset.json";
 
 const PARTNERS = [
-  { src: logoCat, alt: "CAT France" },
-  { src: logoTransak, alt: "TransakAuto" },
+  { src: logoCat.url, alt: "CAT France" },
+  { src: logoTransak.url, alt: "TransakAuto" },
 ];
 
 /** Mini bandeau défilant des partenaires, version fine du desktop. */
@@ -22,8 +22,8 @@ function MiniPartners() {
         {[0, 1].map((k) => (
           <div key={k} className="logo-marquee-track" aria-hidden={k === 1 ? true : undefined}>
             {loop.map((p, i) => (
-              <div key={i} className="shrink-0 flex items-center justify-center h-11">
-                <img src={p.src} alt={k === 0 ? p.alt : ""} loading="lazy" decoding="async" className="h-9 w-auto object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(168,85,247,.75)) drop-shadow(0 0 14px rgba(217,70,239,.45))" }} />
+              <div key={i} className="shrink-0 flex items-center justify-center h-[76px]">
+                <img src={p.src} alt={k === 0 ? p.alt : ""} loading="lazy" decoding="async" className="h-[72px] w-auto object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(168,85,247,.75)) drop-shadow(0 0 14px rgba(217,70,239,.45))" }} />
               </div>
             ))}
           </div>
@@ -86,11 +86,11 @@ export default function MobileGoogleReviews() {
 
   return (
     <div className="mh2-sec" aria-labelledby="mh2-avis-title">
+      <MiniPartners />
       <div className="mh2-h2">Note Google</div>
       <h2 id="mh2-avis-title" className="mh2-t2">
         Ils nous font <em>confiance</em>
       </h2>
-      <MiniPartners />
       <div className="mh2-gb" aria-label="Note Google 4,8 sur 5">
         <GoogleG size={30} />
         <div>
