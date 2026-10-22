@@ -2585,23 +2585,26 @@ html.theme-dark .rcp-row,html.theme-dark .rcp-tile small{color:#9dbdb0}
 .drv2 .edl-cta-gold svg,.drv2 .rch-cta-gold svg{color:#04261a}
 .drv2 .edl-chip-gold{background:rgba(20,184,102,.14)!important;border-color:rgba(20,184,102,.4)!important;color:#0b7a43!important}
 
-
-/* ===== Dock compact, bas, rétractable (scroll auto + languette) ===== */
-.drv2 .ldock-zone{padding:0 14px max(env(safe-area-inset-bottom),6px);bottom:0}
-.drv2 .ldock{padding:5px 4px 6px;border-radius:20px;box-shadow:0 10px 26px -10px rgba(4,27,82,.55),inset 0 1px 0 rgba(255,255,255,.06)}
-.drv2 .ldock-item{gap:2px;padding:4px 2px;font-size:10px;font-weight:700;border-radius:14px}
-.drv2 .ldock-item svg{width:20px;height:20px}
-.drv2 .ldock-item.is-active .ldock-ic::before{inset:-5px -9px;border-radius:12px}
-.drv2 .ldock-dot{display:none}
-.drv2 .ldock-badge{top:-1px;right:18%;min-width:15px;height:15px;font-size:8.5px}
-.drv2 .ldock-item.is-raised{margin-top:-18px}
-.drv2 .ldock-fab{width:44px;height:44px;border-radius:15px;box-shadow:0 8px 18px rgba(24,201,110,.45),0 0 0 4px #06214f}
-.drv2 .ldock-fab svg{width:21px;height:21px}
-.drv2 .ldock-item.is-raised span{margin-top:3px}
-.drv2 .ldock-zone .ldock{transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .22s ease}
-.drv2 .ldock-zone.is-collapsed .ldock{transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none}
-/* languette : petit repli au-dessus du dock, qui reste en bas quand il est rangé */
-.drv2 .ldock-handle{position:absolute;left:50%;bottom:calc(100% - 3px);transform:translateX(-50%);width:46px;height:18px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(52,230,140,.28);border-bottom:0;border-radius:10px 10px 0 0;background:rgba(6,33,79,.94);color:#8fb0c9;transition:bottom .32s cubic-bezier(.32,.72,0,1),border-radius .2s,color .2s}
-.drv2 .ldock-handle svg{width:15px;height:15px}
-.drv2 .ldock-zone.is-collapsed .ldock-handle{bottom:max(env(safe-area-inset-bottom),6px);border-bottom:1px solid rgba(52,230,140,.28);border-radius:12px;height:22px;width:52px;color:#34E68C;box-shadow:0 6px 16px -6px rgba(4,27,82,.6)}
-.drv2 .ldock-zone{position:fixed}
+/* ===== Dock fin, bas, rétractable (scroll auto + languette) ===== */
+html .drv2.drv2.ldock-zone{position:fixed!important;left:0!important;right:0!important;bottom:0!important;padding:0 16px max(env(safe-area-inset-bottom),8px)!important;display:flex!important;justify-content:center!important;background:transparent!important}
+html .drv2.drv2.ldock-zone .ldock{width:100%!important;max-width:392px!important;padding:3px 6px 4px!important;border-radius:20px!important;background:rgba(255,255,255,.95)!important;border:1px solid rgba(20,184,102,.22)!important;box-shadow:0 10px 24px -12px rgba(8,36,63,.45),inset 0 1px 0 #fff!important;--dk:#f4faf7}
+html .drv2.drv2.ldock-zone .ldock::before{display:none!important}
+html .drv2.drv2.ldock-zone .ldock-item{gap:1px!important;padding:5px 2px 3px!important;font-size:9.5px!important;border-radius:14px!important;color:#6c8798!important}
+html .drv2.drv2.ldock-zone .ldock-item span:not(.ldock-ic):not(.ldock-fab){font-size:9.5px!important;font-weight:700!important;line-height:1.1!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-active,html .drv2.drv2.ldock-zone .ldock-item.is-active span:not(.ldock-fab){color:#0b7a43!important}
+html .drv2.drv2.ldock-zone .ldock-item svg{width:19px!important;height:19px!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-active svg{color:#0b8f52!important;transform:none!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-active .ldock-ic::before{inset:-3px -10px -1px -10px!important;border-radius:12px!important;animation:none!important;background:rgba(20,184,102,.12)!important;box-shadow:none!important}
+html .drv2.drv2.ldock-zone .ldock-dot{display:none!important}
+html .drv2.drv2.ldock-zone .ldock-badge{top:0!important;right:20%!important;min-width:14px!important;height:14px!important;font-size:8px!important;box-shadow:0 0 0 2px #fff!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-raised{margin-top:-17px!important}
+html .drv2.drv2.ldock-zone .ldock-fab{width:40px!important;height:40px!important;border-radius:14px!important;box-shadow:0 7px 16px rgba(20,184,102,.38),0 0 0 4px #f4faf7!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-raised.is-active .ldock-fab{transform:none!important;box-shadow:0 7px 16px rgba(20,184,102,.45),0 0 0 4px #f4faf7!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-raised.is-active .ldock-fab::after{display:none!important}
+html .drv2.drv2.ldock-zone .ldock-fab svg{width:20px!important;height:20px!important}
+html .drv2.drv2.ldock-zone .ldock-item.is-raised span:not(.ldock-fab){margin-top:2px!important}
+html .drv2.drv2.ldock-zone .ldock{transition:transform .34s cubic-bezier(.32,.72,0,1),opacity .22s ease!important}
+html .drv2.drv2.ldock-zone.is-collapsed .ldock{transform:translateY(calc(100% + 26px))!important;opacity:0!important;pointer-events:none!important}
+html .drv2.drv2.ldock-zone .ldock-handle{position:absolute;right:30px;left:auto;bottom:calc(100% - 2px);width:40px;height:16px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(20,184,102,.22);border-bottom:0;border-radius:9px 9px 0 0;background:rgba(255,255,255,.95);color:#6c8798;transition:bottom .34s cubic-bezier(.32,.72,0,1),border-radius .2s,color .2s,width .2s,height .2s;pointer-events:auto}
+html .drv2.drv2.ldock-zone .ldock-handle svg{width:14px;height:14px}
+html .drv2.drv2.ldock-zone.is-collapsed .ldock-handle{position:fixed;right:24px;bottom:max(env(safe-area-inset-bottom),8px);border-bottom:1px solid rgba(20,184,102,.3);border-radius:12px;height:22px;width:50px;color:#0b8f52;box-shadow:0 6px 16px -6px rgba(8,36,63,.4)}

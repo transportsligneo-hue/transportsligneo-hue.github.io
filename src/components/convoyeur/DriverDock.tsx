@@ -60,7 +60,7 @@ export default function DriverDock({
       if (!t || typeof t.scrollTop !== "number") return;
       if (t.scrollHeight - t.clientHeight < 120) return; // page trop courte : on laisse le dock
       const y = t.scrollTop;
-      const prev = lastY.current.get(t) ?? y;
+      const prev = lastY.current.get(t) ?? 0;
       const dy = y - prev;
       if (Math.abs(dy) < 8) return;
       lastY.current.set(t, y);
