@@ -287,8 +287,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (uid && typeof window !== "undefined") {
       try { localStorage.removeItem(PROFILE_CACHE_PREFIX + uid); } catch { /* ignore */ }
     }
-    await supabase.auth.signOut();
-    // onAuthStateChange remettra les états à zéro
+    // Session locale uniquement (le téléphone ne déconnecte pas les autres appareils),
+    // avec un délai maximum : sans réseau, le bouton ne doit jamais rester bloqué.
+    try { await withTimeout(supabase.auth.signOut({ scope: "local" }), 4000); } catch { /* on continue */ }
+    // Retour net à l'écran de connexion (repart d'un état propre, sans écran de chargement qui traîne)
+    if (typeof window !== "undefined") window.location.replace("/login");
   }, []);
 
 
