@@ -127,8 +127,8 @@ export function useGpsTracking({ attributionId, active, intervalMs = 4000 }: Use
       if (!ok) { onError({ message: "Location permission denied" }); return; }
       if (!isNativeApp()) { startWeb(); return; }
       void BackgroundGeolocation.addWatcher({
-        backgroundTitle: "Suivi de la mission Ligneo",
-        backgroundMessage: "Votre trajet avec le véhicule est en cours.",
+        backgroundTitle: "Ligneo Driver · Position collectée",
+        backgroundMessage: "Votre position est partagée en direct pendant la mission.",
         distanceFilter: 5,
         stale: false,
         requestPermissions: true,

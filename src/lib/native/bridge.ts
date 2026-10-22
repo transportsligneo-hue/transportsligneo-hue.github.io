@@ -30,9 +30,20 @@ export async function ensureLocationPermission(): Promise<boolean> {
   try {
     const { Geolocation } = await import("@capacitor/geolocation");
     const status = await Geolocation.checkPermissions();
-    if (status.location === "granted") return true;
-    const asked = await Geolocation.requestPermissions();
-    return asked.location === "granted";
+    if (status.location !== "granted") {
+      // Information claire AVANT la demande système (exigence Google Play)
+      const { showLocationDisclosure } = await import("@/lib/native/locationDisclosure");
+      if (!(await showLocationDisclosure())) return false;
+      const asked = await Geolocation.requestPermissions();
+      if (asked.location !== "granted") return false;
+    }
+    // Android 13+ : sans cette autorisation, la notification de suivi n'apparaît pas
+    try {
+      const { PushNotifications } = await import("@capacitor/push-notifications");
+      const n = await PushNotifications.checkPermissions();
+      if (n.receive !== "granted") await PushNotifications.requestPermissions();
+    } catch { /* noop */ }
+    return true;
   } catch {
     return false;
   }

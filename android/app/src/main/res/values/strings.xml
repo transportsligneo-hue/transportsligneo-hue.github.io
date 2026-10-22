@@ -4,4 +4,6 @@
     <string name="title_activity_main">Ligneo Driver</string>
     <string name="package_name">com.transportsligneo.driver</string>
     <string name="custom_url_scheme">com.transportsligneo.driver</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_notification</string>
+    <string name="capacitor_background_geolocation_notification_color">#16A34A</string>
 </resources>
