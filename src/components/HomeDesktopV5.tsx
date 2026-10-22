@@ -126,19 +126,7 @@ export default function HomeDesktopV5() {
         </div>
       </section>
 
-      {/* ============ PREUVE SOCIALE ============ */}
-      <section className="v5-trust">
-        <div className="v5-trust-label">Ils nous confient leurs <span className="hx-neon">véhicules</span></div>
-        <div className="v5-trust-sub">Partenaires & clients de référence</div>
-        <div className="v5-marquee-mask">
-          <div className="v5-marquee-track">
-            {Array.from({ length: 8 }).flatMap((_, i) => [
-              <div key={`c-${i}`} className="v5-logo-item"><img src={logoCat.url} alt="Groupe CAT" /></div>,
-              <div key={`t-${i}`} className="v5-logo-item"><img src={logoTransak.url} alt="TransakAuto" /></div>,
-            ])}
-          </div>
-        </div>
-      </section>
+      <AvisSection />
 
       <section className="v4-section">
         <div className="hx-figures">
@@ -153,7 +141,19 @@ export default function HomeDesktopV5() {
         </div>
       </section>
 
-      <AvisSection />
+      {/* ============ PREUVE SOCIALE ============ */}
+      <section className="v5-trust">
+        <div className="v5-trust-label">Ils nous confient leurs <span className="hx-neon">véhicules</span></div>
+        <div className="v5-trust-sub">Partenaires & clients de référence</div>
+        <div className="v5-marquee-mask">
+          <div className="v5-marquee-track">
+            {Array.from({ length: 8 }).flatMap((_, i) => [
+              <div key={`c-${i}`} className="v5-logo-item"><img src={logoCat.url} alt="Groupe CAT" /></div>,
+              <div key={`t-${i}`} className="v5-logo-item"><img src={logoTransak.url} alt="TransakAuto" /></div>,
+            ])}
+          </div>
+        </div>
+      </section>
 
       {/* ============ ESPACE LIGNEO ============ */}
       <section className="v4-section">

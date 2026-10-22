@@ -1,5 +1,49 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import logoCat from "@/assets/logo-cat.png";
+import logoTransak from "@/assets/logo-transakauto.png";
+
+const PARTNERS = [
+  { src: logoCat, alt: "CAT France" },
+  { src: logoTransak, alt: "TransakAuto" },
+];
+
+/** Mini bandeau défilant des partenaires, version fine du desktop. */
+function MiniPartners() {
+  const loop = [...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS];
+  return (
+    <div className="logo-marquee-mask overflow-hidden -mx-5 px-1 mb-4" aria-label="Ils nous confient leurs véhicules">
+      <div className="logo-marquee">
+        {[0, 1].map((k) => (
+          <div key={k} className="logo-marquee-track" aria-hidden={k === 1 ? true : undefined}>
+            {loop.map((p, i) => (
+              <div key={i} className="shrink-0 flex items-center justify-center h-8">
+                <img src={p.src} alt={k === 0 ? p.alt : ""} loading="lazy" decoding="async" className="logo-grayscale h-6 w-auto object-contain" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Étoiles partielles : 4,8 → la dernière étoile n'est remplie qu'à 80 %. */
+function PartialStars({ rating }: { rating: number }) {
+  const row = (dim: boolean) => (
+    <span style={{ display: "inline-flex", whiteSpace: "nowrap", opacity: dim ? 0.25 : 1 }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} size={13} className="mh-i" />
+      ))}
+    </span>
+  );
+  return (
+    <span style={{ position: "relative", display: "inline-flex" }} aria-hidden="true">
+      {row(true)}
+      <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: `${(rating / 5) * 100}%` }}>{row(false)}</span>
+    </span>
+  );
+}
 import { useServerFn } from "@tanstack/react-start";
 import { getAvisPublics } from "@/lib/avis.functions";
 import { GoogleG } from "@/components/mobile/MobileIcons";
@@ -40,6 +84,7 @@ export default function MobileGoogleReviews() {
       <h2 id="mh2-avis-title" className="mh2-t2">
         Ils nous font <em>confiance</em>
       </h2>
+      <MiniPartners />
       <div className="mh2-gb" aria-label="Note Google 4,8 sur 5">
         <GoogleG size={30} />
         <div>
@@ -47,9 +92,7 @@ export default function MobileGoogleReviews() {
             {String(GOOGLE_RATING).replace(".", ",")}<small>/5</small>
           </b>
           <div className="mh2-gs">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={13} className="mh-i" />
-            ))}
+            <PartialStars rating={GOOGLE_RATING} />
           </div>
         </div>
         <span>Avis Google</span>
