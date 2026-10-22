@@ -1239,7 +1239,7 @@ function AdminMissionDetail() {
                 <span className="truncate">MAJ {lastUpdate}</span>
               </div>
             </div>
-            <div className="mt-5 h-[200px] min-h-[200px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[240px] sm:min-h-[240px]">
+            <div className="mt-5 h-[340px] min-h-[340px] w-full overflow-hidden rounded-xl border border-pro-border sm:h-[400px] sm:min-h-[400px]">
               <AdminLiveMissionMap
                 attributionId={attribution.id}
                 points={gpsPoints}
@@ -1247,7 +1247,7 @@ function AdminMissionDetail() {
                 destination={trajet.arrivee}
                 title={missionNumber}
                 className="h-full min-h-full w-full !rounded-none"
-                completed={attribution.statut === "termine"}
+                completed={["termine", "terminee", "validee", "livree", "en_attente_validation"].includes(String(attribution.statut)) || ["termine", "terminee", "livree"].includes(String((trajet as { statut?: string }).statut))}
                 completedPlaque={plaquePrincipale || null}
               />
             </div>

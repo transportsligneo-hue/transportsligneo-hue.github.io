@@ -26,6 +26,7 @@ const BRAND = "#2F5FFF";
 const BRAND_DARK = "#1c3fc4";
 const GOLD = "#B8862A";
 const REST = "#c9d2e3";
+const RETOUR = "#10B981";
 
 const CSS_ID = "ligneo-mapbox-css";
 const MAP_CSS = `
@@ -134,6 +135,45 @@ function lineFeature(coords: Array<[number, number]>): GeoJSON.Feature<GeoJSON.L
   };
 }
 
+/** Trace GPS : coupe les segments trop longs (positions espacées) pour ne jamais tirer de trait droit. */
+const MAX_TRAIL_GAP_KM = 3;
+function trailFeature(coords: Array<[number, number]>): GeoJSON.Feature<GeoJSON.MultiLineString> {
+  const lines: number[][][] = [];
+  let cur: number[][] = [];
+  for (let i = 0; i < coords.length; i++) {
+    const [lat, lng] = coords[i];
+    if (i > 0) {
+      const d = haversineKm({ lat: coords[i - 1][0], lng: coords[i - 1][1] }, { lat, lng });
+      if (d > MAX_TRAIL_GAP_KM) {
+        if (cur.length >= 2) lines.push(cur);
+        cur = [];
+      }
+    }
+    cur.push([lng, lat]);
+  }
+  if (cur.length >= 2) lines.push(cur);
+  return { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: lines } };
+}
+
+/** Aller-retour : sépare la trace au point le plus éloigné du départ si le véhicule est revenu vers son point de départ. */
+function splitAllerRetour(trail: Array<[number, number]>): { aller: Array<[number, number]>; retour: Array<[number, number]> } {
+  if (trail.length < 6) return { aller: trail, retour: [] };
+  const o = { lat: trail[0][0], lng: trail[0][1] };
+  let k = 0;
+  let maxD = 0;
+  trail.forEach(([lat, lng], i) => {
+    const d = haversineKm(o, { lat, lng });
+    if (d > maxD) {
+      maxD = d;
+      k = i;
+    }
+  });
+  const end = trail[trail.length - 1];
+  const backD = haversineKm(o, { lat: end[0], lng: end[1] });
+  if (maxD < 5 || k < 2 || trail.length - 1 - k < 3 || backD > maxD * 0.7) return { aller: trail, retour: [] };
+  return { aller: trail.slice(0, k + 1), retour: trail.slice(k) };
+}
+
 function dotEl(color: string, label?: string) {
   const el = document.createElement("div");
   el.style.cssText = `width:16px;height:16px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,.28)`;
@@ -190,6 +230,8 @@ export function MapboxLiveMap({
   const headingRef = useRef(0);
   const fittedRef = useRef(false);
   const [ready, setReady] = useState(false);
+  const hasReturnRef = useRef(false);
+  const [hasReturn, setHasReturn] = useState(false);
 
   const [places, setPlaces] = useState<{ a: LL | null; b: LL | null }>({ a: null, b: null });
   const [route, setRoute] = useState<Array<[number, number]>>([]);
@@ -328,6 +370,23 @@ export function MapboxLiveMap({
     };
   }, [route, points, last, nowTs]);
 
+  // ——— Synthèse de fin de mission (heures, durée, distance, vitesse moyenne)
+  const doneStats = useMemo(() => {
+    if (!completed || !last) return null;
+    const t1 = new Date(last.recorded_at);
+    const t0 = points.length ? new Date(points[0].recorded_at) : null;
+    const durMin = t0 ? Math.max(0, Math.round((t1.getTime() - t0.getTime()) / 60_000)) : 0;
+    const hhmm = (d: Date) => d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const avg = durMin >= 5 && distanceKm >= 1 ? Math.round(distanceKm / (durMin / 60)) : null;
+    return {
+      arrivalTime: hhmm(t1),
+      arrivalDate: t1.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+      departTime: t0 && durMin > 0 ? hhmm(t0) : null,
+      durMin,
+      avg: avg && avg < 160 ? avg : null,
+    };
+  }, [completed, last, points, distanceKm]);
+
   // ——— Prochaine étape clé (frontière / pause) — recalcul par paliers de 5 %
   const milestoneKey = metrics ? `${Math.floor(metrics.progress / 5)}-${route.length}` : "";
   useEffect(() => {
@@ -399,7 +458,7 @@ export function MapboxLiveMap({
     map.on("load", () => {
       map.addSource("ligneo-rest", { type: "geojson", data: lineFeature([]) });
       map.addSource("ligneo-done", { type: "geojson", data: lineFeature([]) });
-      map.addSource("ligneo-trail", { type: "geojson", data: lineFeature([]) });
+      map.addSource("ligneo-trail", { type: "geojson", data: trailFeature([]) });
       map.addLayer({
         id: "ligneo-rest-line",
         type: "line",
@@ -421,6 +480,14 @@ export function MapboxLiveMap({
         source: "ligneo-trail",
         layout: { "line-cap": "round", "line-join": "round" },
         paint: { "line-color": BRAND, "line-width": 5, "line-opacity": 1, "line-blur": 0.5 },
+      });
+      map.addSource("ligneo-trail-back", { type: "geojson", data: trailFeature([]) });
+      map.addLayer({
+        id: "ligneo-trail-back-line",
+        type: "line",
+        source: "ligneo-trail-back",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": RETOUR, "line-width": 5, "line-opacity": 1, "line-blur": 0.5 },
       });
       readyRef.current = true;
       setReady(true);
@@ -525,14 +592,18 @@ export function MapboxLiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? (signalLost ? route : metrics.rest) : []));
-    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics ? metrics.done : []));
+    // Itinéraire routier réel uniquement : un « itinéraire » à 2 points = ligne droite de secours, jamais dessinée.
+    const realRoute = route.length > 2;
+    (map.getSource("ligneo-rest") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics && realRoute ? (signalLost ? route : metrics.rest) : []));
+    (map.getSource("ligneo-done") as mapboxgl.GeoJSONSource | undefined)?.setData(lineFeature(metrics && realRoute ? metrics.done : []));
 
     // Trace réellement parcourue (positions du convoyeur), même sans itinéraire.
     const trail = snappedTrail;
-    (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(
-      lineFeature(trail.length >= 2 ? trail : []),
-    );
+    const legs = trail.length >= 2 ? splitAllerRetour(trail) : { aller: [], retour: [] };
+    (map.getSource("ligneo-trail") as mapboxgl.GeoJSONSource | undefined)?.setData(trailFeature(legs.aller));
+    (map.getSource("ligneo-trail-back") as mapboxgl.GeoJSONSource | undefined)?.setData(trailFeature(legs.retour));
+    hasReturnRef.current = legs.retour.length >= 2;
+    setHasReturn(hasReturnRef.current);
 
     if (!fittedRef.current && (route.length || trail.length)) {
       fittedRef.current = true;
@@ -654,14 +725,6 @@ export function MapboxLiveMap({
           <BadgeCheck size={13} style={{ color: "#2ee671", filter: "drop-shadow(0 0 4px rgba(46,230,113,.8))" }} />
           Mission terminée{title ? ` · ${title}` : ""}
         </div>
-      ) : (signalLost && !fleet?.length && (last || isAdmin)) ? (
-        <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-lg backdrop-blur">
-          <AlertTriangle size={12} />
-          {!last ? "Aucune position GPS reçue" : isAdmin && signalAgeMin != null
-            ? `Position non actualisée depuis ${formatMinutesShort(signalAgeMin)} · emplacement actuel inconnu`
-            : "Position GPS non actualisée · emplacement actuel inconnu"}
-          {title ? ` · ${title}` : ""}
-        </div>
       ) : !signalLost ? (
         <div className="absolute left-3 top-3 z-[400] inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
           <span className="relative flex h-2 w-2">
@@ -672,10 +735,10 @@ export function MapboxLiveMap({
         </div>
       ) : null}
 
-      {/* Carte d'informations flottante */}
-      {!hideOverlay && !completed && signalLost && last && (
-        <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:max-w-[340px] rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 shadow-lg">
-          Position du {new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} uniquement. La position actuelle ne peut pas être déterminée.
+      {hasReturn && (
+        <div className="absolute left-3 top-12 z-[400] inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[11px] font-semibold text-slate-700 shadow-lg backdrop-blur">
+          <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full" style={{ background: BRAND }} />Aller</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-4 rounded-full" style={{ background: RETOUR }} />Retour</span>
         </div>
       )}
 
@@ -701,30 +764,51 @@ export function MapboxLiveMap({
                 <p className="text-[13px] font-extrabold tracking-wide text-white" style={{ textShadow: "0 0 10px rgba(46,230,113,.45)" }}>
                   Mission terminée
                 </p>
-                <p className="text-[10.5px] font-medium text-slate-300">
-                  {last
-                    ? `Livrée le ${new Date(last.recorded_at).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}`
-                    : "Trajet achevé"}
+                <p className="text-[10.5px] font-medium capitalize text-slate-300">
+                  {doneStats ? doneStats.arrivalDate : "Trajet achevé"}
                 </p>
               </div>
-            </div>
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
               {completedPlaque && (
                 <span
-                  className="inline-flex items-center rounded-md px-2 py-1 tracking-widest text-white"
-                  style={{ background: "rgba(47,95,255,.28)", border: "1px solid rgba(79,142,255,.6)", boxShadow: "0 0 10px rgba(79,142,255,.35)" }}
+                  className="ml-auto inline-flex shrink-0 items-center rounded-md px-2 py-1 text-[11px] font-bold tracking-widest text-white"
+                  style={{ background: "rgba(47,95,255,.28)", border: "1px solid rgba(79,142,255,.6)" }}
                 >
                   {completedPlaque}
                 </span>
               )}
-              {distanceKm >= 1 && (
+            </div>
+
+            {doneStats && (
+              <div className="mt-3 flex items-end justify-between gap-3 border-t border-white/10 pt-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Arrivée</p>
+                  <p className="text-[26px] font-extrabold leading-none tabular-nums text-white">{doneStats.arrivalTime}</p>
+                </div>
+                {doneStats.departTime && (
+                  <div className="text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Départ</p>
+                    <p className="text-lg font-bold leading-none tabular-nums text-slate-200">{doneStats.departTime}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+              {doneStats && doneStats.durMin > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-slate-200" style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.16)" }}>
-                  <Route size={11} /> {distanceKm >= 100 ? Math.round(distanceKm) : distanceKm.toFixed(1)} km parcourus
+                  <Clock size={11} /> {formatDureeMinutes(doneStats.durMin)}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 rounded-full px-2 py-1" style={{ background: "rgba(46,230,113,.12)", border: "1px solid rgba(46,230,113,.4)", color: "#7cf2a8" }}>
-                Suivi GPS clôturé
-              </span>
+              {distanceKm >= 1 && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-slate-200" style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.16)" }}>
+                  <Route size={11} /> {distanceKm >= 100 ? Math.round(distanceKm) : distanceKm.toFixed(1)} km
+                </span>
+              )}
+              {doneStats?.avg && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-slate-200" style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.16)" }}>
+                  <Gauge size={11} /> {doneStats.avg} km/h moy.
+                </span>
+              )}
             </div>
           </div>
         </div>
