@@ -33,9 +33,9 @@ const config: CapacitorConfig = {
     SplashScreen: {
       // Le splash se masque seul après 3 s (et plus tôt si le JS appelle hide()),
       // pour ne jamais rester bloqué si le site distant met du temps à charger.
-      launchShowDuration: 800,
+      launchShowDuration: 3000,
       launchAutoHide: true,
-      backgroundColor: "#0b1026",
+      backgroundColor: "#dcebe3",
       showSpinner: false,
       spinnerColor: "#4f8cff",
       androidSpinnerStyle: "large",
@@ -58,7 +58,7 @@ const config: CapacitorConfig = {
     backgroundColor: "#0b1026",
   },
   android: {
-    backgroundColor: "#0b1026",
+    backgroundColor: "#dcebe3",
     // Keeps the foreground location service active after the WebView is backgrounded.
     useLegacyBridge: true,
     // Permet d'inspecter la WebView via chrome://inspect en cas de blocage
