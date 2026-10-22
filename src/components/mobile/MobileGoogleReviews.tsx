@@ -61,7 +61,7 @@ export default function MobileGoogleReviews() {
               <span className="mh2-av" style={{ background: g.color }}>{g.name[0].toUpperCase()}</span>
               <div>
                 <b>{g.name}</b>
-                <span>Avis Google · {g.when}</span>
+                <span>{g.role}</span>
               </div>
               <GoogleG size={18} />
             </div>

@@ -4,7 +4,7 @@ export type GoogleReview = {
   name: string;
   note: number;
   text: string;
-  when: string;
+  role: string;
   color: string;
 };
 
@@ -16,7 +16,7 @@ export const GOOGLE_REVIEWS: GoogleReview[] = [
     name: "Emmanuel M.",
     note: 5,
     text: "Ponctualité, réactivité… service impeccable ! Le convoyeur est très sympathique, ce qui ne gâche rien.",
-    when: "octobre 2026",
+    role: "Particulier",
     color: "#0f6b4f",
   },
   {
@@ -24,7 +24,7 @@ export const GOOGLE_REVIEWS: GoogleReview[] = [
     name: "Ju B.",
     note: 5,
     text: "Très bonne expérience avec Transports Ligneo ! Équipe sérieuse, réactive et professionnelle. Le suivi est impeccable, les délais respectés et la prestation s’est déroulée sans aucun souci. Un service de confiance que je recommande sans hésitation.",
-    when: "octobre 2026",
+    role: "Concessionnaire auto, professionnel de l’automobile",
     color: "#1d5fa8",
   },
   {
@@ -32,7 +32,7 @@ export const GOOGLE_REVIEWS: GoogleReview[] = [
     name: "Steph F.",
     note: 4,
     text: "Beaucoup de réactivité dans la communication.",
-    when: "octobre 2026",
+    role: "Particulier",
     color: "#8e3fb0",
   },
 ];
