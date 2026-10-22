@@ -24,7 +24,7 @@ export const GOOGLE_REVIEWS: GoogleReview[] = [
     name: "Ju B.",
     note: 5,
     text: "Très bonne expérience avec Transports Ligneo ! Équipe sérieuse, réactive et professionnelle. Le suivi est impeccable, les délais respectés et la prestation s’est déroulée sans aucun souci. Un service de confiance que je recommande sans hésitation.",
-    role: "Concessionnaire auto, professionnel de l’automobile",
+    role: "Professionnel de l’automobile",
     color: "#1d5fa8",
   },
   {
