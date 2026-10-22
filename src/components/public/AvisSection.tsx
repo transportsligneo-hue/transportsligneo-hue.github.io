@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getAvisPublics } from "@/lib/avis.functions";
+import { GOOGLE_REVIEWS } from "@/lib/google-reviews";
 
 type AvisRow = {
   id: string;
@@ -54,7 +55,34 @@ export default function AvisSection() {
         </div>
       </div>
 
-      {avis.length > 0 && <div className="mx-auto grid max-w-[1180px] gap-5 px-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-[1180px] gap-5 px-5 sm:grid-cols-2 lg:grid-cols-3">
+        {GOOGLE_REVIEWS.map((g) => (
+          <article
+            key={g.id}
+            className="relative overflow-hidden rounded-2xl border border-[#7aa3ff]/25 p-6 shadow-[0_24px_50px_-28px_rgba(47,95,255,0.7)]"
+            style={{ background: "linear-gradient(160deg, rgba(18,40,120,0.55), rgba(8,20,70,0.55))" }}
+          >
+            <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full" style={{ background: "radial-gradient(circle, rgba(91,143,255,0.35), transparent 70%)" }} />
+            <div className="relative mb-4 flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full text-[16px] font-bold text-white" style={{ background: g.color }}>
+                {g.name[0].toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13.5px] font-bold text-white">{g.name}</p>
+                <p className="text-[11.5px] text-[#9aa6c9]">Avis Google · {g.when}</p>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            </div>
+            <div className="relative mb-3 flex gap-1" aria-label={`Note ${g.note} sur 5`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={15} className={i < g.note ? "fill-[#f5b400] text-[#f5b400]" : "text-[#4a5680]"} />
+              ))}
+            </div>
+            <p className="relative text-[13.5px] leading-relaxed text-[#d5ddf5]">{g.text}</p>
+          </article>
+        ))}
+      </div>
+      {avis.length > 0 && <div className="mx-auto mt-5 grid max-w-[1180px] gap-5 px-5 sm:grid-cols-2 lg:grid-cols-3">
         {avis.map((a) => (
           <article
             key={a.id}

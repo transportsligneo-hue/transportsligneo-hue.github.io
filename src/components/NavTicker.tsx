@@ -16,6 +16,7 @@ type Msg = {
   cta: string;
   to?: "/comment-ca-marche" | "/tarifs" | "/services" | "/devenir-convoyeur";
   href?: string;
+  action?: "vroomy";
 };
 
 const WIDE: ArtKind[] = ["plate", "code", "google"];
@@ -26,16 +27,16 @@ const GOOGLE_FALLBACK = "https://www.google.com/maps/search/?api=1&query=Transpo
 const MESSAGES: Msg[] = [
   { art: "driver", theme: "green", title: "Appli Convoyeur", sub: "En phase de test", cta: "play", to: "/devenir-convoyeur" },
   { art: "gps", theme: "blue", title: "Suivi GPS en direct", sub: "Votre véhicule, du départ à l'arrivée", cta: "Voir", to: "/comment-ca-marche" },
-  { art: "shield", theme: "cyan", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "Découvrir", to: "/comment-ca-marche" },
+  { art: "shield", theme: "cyan", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "", to: "/comment-ca-marche" },
   { art: "plate", theme: "blue", title: "Saisissez la plaque", sub: "Le véhicule se remplit seul", cta: "Essayer", to: "/tarifs" },
-  { art: "code", theme: "violet", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "Découvrir", to: "/comment-ca-marche" },
+  { art: "code", theme: "violet", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "", to: "/comment-ca-marche" },
   { art: "quote", theme: "violet", title: "Devis en 30 secondes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
   { art: "photo", theme: "pink", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },
-  { art: "vroomy", theme: "pink", tag: "Nouveau", title: "Vroomy", sub: "Votre assistant, en direct", cta: "Essayer", to: "/comment-ca-marche" },
-  { art: "google", theme: "orange", title: "4,7/5 sur Google", sub: "Laissez-nous un avis", cta: "Mon avis", href: "GOOGLE_REVIEW" },
+  { art: "vroomy", theme: "pink", tag: "Nouveau", title: "Vroomy", sub: "Votre assistant, en direct", cta: "Essayer", to: "/comment-ca-marche", action: "vroomy" },
+  { art: "google", theme: "orange", title: "4,8/5 sur Google", sub: "Laissez-nous un avis", cta: "Mon avis", href: "GOOGLE_REVIEW" },
   { art: "linkedin", theme: "blue", title: "Retrouvez-nous", sub: "Transports Ligneo sur LinkedIn", cta: "Suivre", href: "https://www.linkedin.com/company/transports-ligneo/" },
   { art: "wheel", theme: "green", title: "Devenez convoyeur", sub: "Rejoignez notre réseau", cta: "Postuler", to: "/devenir-convoyeur" },
-  { art: "verified", theme: "green", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Découvrir", to: "/comment-ca-marche" },
+  { art: "verified", theme: "green", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "", to: "/comment-ca-marche" },
   { art: "card", theme: "cyan", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
   { art: "invoice", theme: "orange", title: "Facture à 30 jours", sub: "Flottes et grands comptes", cta: "Pour les pros", to: "/services" },
 ];
@@ -135,7 +136,7 @@ function Art({ kind }: { kind: ArtKind }) {
           <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
           <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
         </g>
-        <text x="48" y="22" textAnchor="middle" fontSize="15" fontWeight="800" fill="#0f172a" fontFamily="Poppins,sans-serif">4,7</text>
+        <text x="48" y="22" textAnchor="middle" fontSize="15" fontWeight="800" fill="#0f172a" fontFamily="Poppins,sans-serif">4,8</text>
         {[0, 1, 2, 3, 4].map((i) => (
           <path key={i} className={`tln-art-star tln-art-star--${i}`} d="m0-4.2 1.2 2.6 2.8.3-2.1 1.9.6 2.8L0 1.9-2.5 3.4l.6-2.8L-4-1.3l2.8-.3z" transform={`translate(${21 + i * 7.6} 36.5) scale(1.2)`} fill="#fbbc04" />
         ))}
@@ -279,10 +280,20 @@ export default function NavTicker() {
               <path d="M23.6 10.4 28 13c1.3.8 1.3 2.2 0 3l-4.4 2.6L19 15z" fill="#ffd400" />
             </svg>
             <span><small>Bientôt sur</small><b>Google Play</b></span>
-          </span> : <span className="tln-ticker-cta">{m.cta}</span>}
+          </span> : m.cta ? <span className="tln-ticker-cta">{m.cta}</span> : null}
         </a>
       ) : (
-        <Link to={m.to ?? "/"} className="tln-ticker-link" aria-live="polite">
+        <Link
+          to={m.to ?? "/"}
+          className="tln-ticker-link"
+          aria-live="polite"
+          onClick={(e) => {
+            if (m.action === "vroomy") {
+              e.preventDefault();
+              window.dispatchEvent(new Event("ligneo:assistant-open"));
+            }
+          }}
+        >
         <span key={`i${pos}`} className={`tln-ticker-ic tln-ticker-ic--${m.art}${WIDE.includes(m.art) ? " is-wide" : ""}`}>
           <Art kind={m.art} />
         </span>
@@ -298,7 +309,7 @@ export default function NavTicker() {
               <path d="M23.6 10.4 28 13c1.3.8 1.3 2.2 0 3l-4.4 2.6L19 15z" fill="#ffd400" />
             </svg>
             <span><small>Bientôt sur</small><b>Google Play</b></span>
-          </span> : <span className="tln-ticker-cta">{m.cta}</span>}
+          </span> : m.cta ? <span className="tln-ticker-cta">{m.cta}</span> : null}
         </Link>
       )}
       <button type="button" className="tln-ticker-nav tln-ticker-nav--prev" aria-label="Pub précédente" onClick={(e) => { stop(e); go(cur - 1); }}>‹</button>

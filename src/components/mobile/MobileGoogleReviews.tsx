@@ -3,6 +3,7 @@ import { Star } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getAvisPublics } from "@/lib/avis.functions";
 import { GoogleG } from "@/components/mobile/MobileIcons";
+import { GOOGLE_RATING, GOOGLE_REVIEWS } from "@/lib/google-reviews";
 
 type AvisRow = {
   id: string;
@@ -43,7 +44,7 @@ export default function MobileGoogleReviews() {
         <GoogleG size={30} />
         <div>
           <b>
-            4,8<small>/5</small>
+            {String(GOOGLE_RATING).replace(".", ",")}<small>/5</small>
           </b>
           <div className="mh2-gs">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -53,24 +54,40 @@ export default function MobileGoogleReviews() {
         </div>
         <span>Avis Google</span>
       </div>
-      {avis.length > 0 && (
-        <div className="mh2-rev">
-          {avis.map((a) => (
-            <article key={a.id} className="mh2-rv">
-              <div className="mh2-gs" aria-label={`Note ${a.note} sur 5`}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={13} className="mh-i" style={i < a.note ? undefined : { opacity: 0.25 }} />
-                ))}
+      <div className="mh2-rev">
+        {GOOGLE_REVIEWS.map((g) => (
+          <article key={g.id} className="mh2-rv mh2-rv--g">
+            <div className="mh2-rv-h">
+              <span className="mh2-av" style={{ background: g.color }}>{g.name[0].toUpperCase()}</span>
+              <div>
+                <b>{g.name}</b>
+                <span>Avis Google · {g.when}</span>
               </div>
-              <p>« {a.commentaire} »</p>
-              <small>
-                {a.nom_affiche_public}
-                {[a.ville, a.type_client].filter(Boolean).length > 0 && ` · ${[a.ville, a.type_client].filter(Boolean).join(" · ")}`}
-              </small>
-            </article>
-          ))}
-        </div>
-      )}
+              <GoogleG size={18} />
+            </div>
+            <div className="mh2-gs" aria-label={`Note ${g.note} sur 5`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={13} className="mh-i" style={i < g.note ? undefined : { opacity: 0.25 }} />
+              ))}
+            </div>
+            <p>{g.text}</p>
+          </article>
+        ))}
+        {avis.map((a) => (
+          <article key={a.id} className="mh2-rv">
+            <div className="mh2-gs" aria-label={`Note ${a.note} sur 5`}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} size={13} className="mh-i" style={i < a.note ? undefined : { opacity: 0.25 }} />
+              ))}
+            </div>
+            <p>« {a.commentaire} »</p>
+            <small>
+              {a.nom_affiche_public}
+              {[a.ville, a.type_client].filter(Boolean).length > 0 && ` · ${[a.ville, a.type_client].filter(Boolean).join(" · ")}`}
+            </small>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
