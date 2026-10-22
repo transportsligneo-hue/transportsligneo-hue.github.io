@@ -12293,3 +12293,20 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-badge {
   border-color: #00e676;
   box-shadow: 0 10px 26px -6px rgba(0, 150, 80, 0.55), 0 0 22px rgba(0, 230, 118, 0.7), 0 0 44px rgba(0, 230, 118, 0.3);
 }
+
+/* Logo Driver : carré d'origine (plus de rond qui coupe le logo), simple liseré néon vert. */
+.ligneo-lockup--green .ligneo-lockup-badge,
+body.is-driver-app .auth-driver-theme .ligneo-lockup-badge {
+  border-radius: 16px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 1.5px solid #00e676 !important;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.75), 0 0 22px rgba(0, 230, 118, 0.35) !important;
+}
+.ligneo-lockup--green .ligneo-lockup-logo,
+body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
+  padding: 0 !important;
+  border-radius: 14px;
+  object-fit: contain;
+  filter: none !important;
+}
