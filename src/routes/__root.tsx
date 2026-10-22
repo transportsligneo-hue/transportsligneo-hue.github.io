@@ -144,12 +144,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
           // Applique le thème mémorisé avant l'affichage (clair par défaut, pas de flash sombre).
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('ligneo-theme-v2');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}",
+              "try{var t=localStorage.getItem('ligneo-theme-v2');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}try{if(/LigneoDriverApp/.test(navigator.userAgent)){document.documentElement.classList.add('ligneo-app');}}catch(e){}",
           }}
         />
         <HeadContent />
       </head>
       <body>
+        {/* Écran de démarrage de l'app (visible uniquement dans la coquille Android) : aucun blanc avant l'hydratation */}
+        <div id="lg-boot" className="lb-screen" aria-hidden="true" suppressHydrationWarning>
+          <div className="lb-mark"><i className="lb-halo" /><img src="/logo-ligneo.png" alt="" /></div>
+          <strong className="lb-brand">TRANSPORTS LIGNEO<em>DRIVER</em></strong>
+          <span className="lb-bar"><b /></span>
+        </div>
         {children}
         <Scripts />
       </body>

@@ -11204,8 +11204,8 @@ html .r4-page.services-engagements .engag-map-card .hx-map-caption p.engagements
 }
 .nav-progress::before {
   content: ""; position: absolute; inset: 0; width: 40%;
-  background: linear-gradient(90deg, transparent, #3b82f6 40%, #7dd3fc);
-  box-shadow: 0 0 12px rgba(59,130,246,0.8);
+  background: linear-gradient(90deg, transparent, #14B866 40%, #6effcd);
+  box-shadow: 0 0 12px rgba(20,184,102,0.7);
   animation: navProgressSlide 1s ease-in-out infinite;
 }
 @keyframes navProgressSlide {
@@ -12259,3 +12259,12 @@ body.is-driver-app .auth-driver-theme .auth-link-lg.is-gold{color:#0b7a43;backgr
 .lb-brand{font-size:14px;letter-spacing:.16em;color:#0b2a1f;font-weight:800;text-align:center}
 .lb-brand em{display:block;font-style:normal;color:#12a35f;letter-spacing:.34em;font-size:11px;margin-top:3px}
 @media (prefers-reduced-motion:reduce){.lb-mark img,.lb-halo,.lb-bar b{animation:none}}
+
+
+/* ===== Coquille Android : démarrage vert, jamais de blanc, aucun rond qui tourne ===== */
+#lg-boot{display:none}
+html.ligneo-app,html.ligneo-app body{background:#dcebe3}
+html.ligneo-app #lg-boot{display:flex;transition:opacity .35s ease,visibility .35s}
+html.ligneo-app.ligneo-ready #lg-boot{opacity:0;visibility:hidden;pointer-events:none}
+html.ligneo-app .animate-spin{animation:none!important;visibility:hidden}
+html.ligneo-app .nav-progress{height:3px}

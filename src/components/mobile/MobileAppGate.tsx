@@ -29,6 +29,21 @@ export default function MobileAppGate() {
     }
   }, [isApp, isLoading, isAuthenticated, homeRoute, offLimits, navigate]);
 
+  // Libère l'écran de démarrage vert une fois la session lue (minimum 1,4 s pour une entrée propre).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    if (!root.classList.contains("ligneo-app")) return;
+    const release = () => root.classList.add("ligneo-ready");
+    if (isLoading) {
+      const safety = window.setTimeout(release, 7000);
+      return () => window.clearTimeout(safety);
+    }
+    const wait = Math.max(0, 1400 - Math.round(performance.now()));
+    const t = window.setTimeout(release, wait);
+    return () => window.clearTimeout(t);
+  }, [isLoading]);
+
   // Voile plein écran : empêche tout affichage du site vitrine dans l'app
   if (!offLimits) return null;
   return (

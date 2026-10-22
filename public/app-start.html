@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#dcebe3">
 <title>Ligneo Driver</title>
-<script>window.location.replace("/login?app=1");</script>
 <style>
   html,body{margin:0;height:100%;background:#dcebe3;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(520px 320px at 0% 0%,rgba(52,230,140,.25),transparent 70%),linear-gradient(180deg,#e6f3ec,#cfe2d8)}
@@ -24,6 +23,17 @@
 <body>
 <div class="wrap"><div class="m"><i></i><img src="/logo-ligneo.png" alt=""></div><strong>TRANSPORTS LIGNEO<em>DRIVER</em></strong><span class="bar"><b></b></span></div>
 <a id="manual" href="/login?app=1">Ouvrir la connexion</a>
-<script>setTimeout(function () { document.getElementById("manual").style.display = "inline-block"; }, 5000);</script>
+<script>
+(function () {
+  // Cache l'écran d'ouverture Android dès que cette page est dessinée (identique : aucune coupure visible).
+  function hideSplash() {
+    try { var C = window.Capacitor; if (C && C.Plugins && C.Plugins.SplashScreen) C.Plugins.SplashScreen.hide({ fadeOutDuration: 150 }); } catch (e) {}
+  }
+  window.addEventListener("load", function () { hideSplash(); setTimeout(hideSplash, 300); });
+  // Reste affichée assez longtemps pour être vue, puis ouvre la connexion.
+  setTimeout(function () { window.location.replace("/login?app=1"); }, 1600);
+  setTimeout(function () { document.getElementById("manual").style.display = "inline-block"; }, 6000);
+})();
+</script>
 </body>
 </html>
