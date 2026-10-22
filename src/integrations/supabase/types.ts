@@ -10162,6 +10162,10 @@ export type Database = {
         Args: { _choice: number; _module_id: string }
         Returns: Json
       }
+      complete_module: {
+        Args: { _module_id: string }
+        Returns: boolean
+      }
       submit_case_study_at: {
         Args: { _case_index: number; _choice: number; _module_id: string }
         Returns: Json

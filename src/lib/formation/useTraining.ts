@@ -76,12 +76,8 @@ export function useTraining() {
   const markCompleted = useCallback(
     async (moduleId: string) => {
       if (!userId) return;
-      await supabase
-        .from("module_progress")
-        .upsert(
-          { user_id: userId, module_id: moduleId, completed: true, completed_at: new Date().toISOString() },
-          { onConflict: "user_id,module_id" },
-        );
+      const { error } = await supabase.rpc("complete_module", { _module_id: moduleId });
+      if (error) console.error("complete_module", error);
       await load();
     },
     [userId, load],
