@@ -12,18 +12,24 @@ const PARTNERS = [
 function MiniPartners() {
   const loop = [...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS];
   return (
-    <div className="logo-marquee-mask overflow-hidden -mx-5 px-1 mb-4" aria-label="Ils nous confient leurs véhicules">
+    <div className="mb-5">
+    <div className="mh2-h2" style={{ textAlign: "center" }}>Partenaires &amp; clients de référence</div>
+    <h2 className="mh2-t2" style={{ textAlign: "center" }}>
+      Ils nous confient leurs <span style={{ color: "#c084fc", fontStyle: "normal", textShadow: "0 0 14px rgba(192,132,252,.7)" }}>véhicules</span>
+    </h2>
+    <div className="logo-marquee-mask overflow-hidden -mx-5 px-1" aria-label="Ils nous confient leurs véhicules">
       <div className="logo-marquee">
         {[0, 1].map((k) => (
           <div key={k} className="logo-marquee-track" aria-hidden={k === 1 ? true : undefined}>
             {loop.map((p, i) => (
-              <div key={i} className="shrink-0 flex items-center justify-center h-8">
-                <img src={p.src} alt={k === 0 ? p.alt : ""} loading="lazy" decoding="async" className="logo-grayscale h-6 w-auto object-contain" />
+              <div key={i} className="shrink-0 flex items-center justify-center h-11">
+                <img src={p.src} alt={k === 0 ? p.alt : ""} loading="lazy" decoding="async" className="h-9 w-auto object-contain" style={{ filter: "drop-shadow(0 0 6px rgba(168,85,247,.75)) drop-shadow(0 0 14px rgba(217,70,239,.45))" }} />
               </div>
             ))}
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }
