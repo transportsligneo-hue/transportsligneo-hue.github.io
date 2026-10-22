@@ -1,7 +1,7 @@
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { FolderOpen, FileText, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { FolderOpen, FileText, ShieldCheck, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -45,43 +45,33 @@ function DocumentsPage() {
   }
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-lg font-semibold text-pro-text flex items-center gap-2">
-        <FolderOpen size={18} className="text-[#2F5FFF]" /> Mes documents
-      </h1>
-      <p className="text-sm text-pro-muted">
-        Rappel du module conformité : vos documents doivent être valides en permanence pour rester éligible aux missions.
+    <div className="fm-card">
+      <div className="fm-card-h" style={{ marginBottom: 6 }}>
+        <h1 className="fm-card-t"><span className="fm-ic"><FolderOpen size={16} /></span> Mes documents</h1>
+      </div>
+      <p className="fm-fine" style={{ marginBottom: 14 }}>
+        Vos documents doivent rester valides en permanence pour que vous puissiez accepter des missions.
       </p>
       {docs.length === 0 ? (
-        <div className="rounded-2xl border border-pro-border bg-white p-8 text-center text-sm text-pro-muted">
-          Aucun document enregistré pour le moment.
-        </div>
+        <p className="fm-empty" style={{ textAlign: "center", padding: "18px 0" }}>Aucun document enregistré pour le moment.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="fm-docs">
           {docs.map((d) => {
             const valid = d.statut_validation === "approuve";
             const refused = d.statut_validation === "refuse";
             return (
-              <li key={d.id} className="rounded-xl border border-pro-border bg-white p-4 flex items-center gap-3">
-                <FileText size={16} className="text-pro-muted shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-pro-text capitalize">{d.type_document.replace(/_/g, " ")}</p>
-                  <p className="text-xs text-pro-muted">
-                    {d.nom_fichier} · déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                  </p>
+              <li key={d.id} className="fm-doc">
+                <span className="fm-doc-i"><FileText size={18} /></span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <b>{d.type_document.replace(/_/g, " ")}</b>
+                  <small>{d.nom_fichier} · déposé le {new Date(d.created_at).toLocaleDateString("fr-FR")}</small>
                 </div>
                 {refused ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-red-100 text-red-700 px-2.5 py-1 text-[11px] font-semibold">
-                    <AlertTriangle size={12} /> Refusé
-                  </span>
+                  <span className="fm-badge ko"><AlertTriangle size={12} /> Refusé</span>
                 ) : valid ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold">
-                    <ShieldCheck size={12} /> Valide
-                  </span>
+                  <span className="fm-badge ok"><ShieldCheck size={12} /> Valide</span>
                 ) : (
-                  <span className="rounded-full bg-pro-bg-soft text-pro-muted px-2.5 py-1 text-[11px] font-semibold">
-                    En attente
-                  </span>
+                  <span className="fm-badge">En attente</span>
                 )}
               </li>
             );

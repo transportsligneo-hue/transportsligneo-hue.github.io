@@ -4,19 +4,19 @@ import { AlertTriangle, Lightbulb } from "lucide-react";
 function GlossaryTerm({ term, definition }: { term: string; definition: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <span className="relative inline-block">
+    <span style={{ position: "relative", display: "inline-block" }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="driver-training-glossary underline decoration-dotted decoration-2 underline-offset-4 text-inherit font-medium"
+        className="fm-gl"
       >
         {term}
       </button>
       {open && (
-        <span className="driver-training-tooltip absolute z-30 left-0 top-full mt-1 w-64 rounded-lg text-xs leading-relaxed p-3 shadow-xl border">
-          <span className="driver-training-accent block font-semibold mb-1">{term}</span>
+        <span className="fm-tt">
+          <b>{term}</b>
           {definition}
         </span>
       )}
@@ -41,7 +41,7 @@ function renderInline(text: string, key: string) {
     typeof p !== "string"
       ? [p]
       : p.split(/\*\*(.+?)\*\*/g).map((s, si) =>
-          si % 2 === 1 ? <strong key={`${key}-b${pi}-${si}`} className="font-semibold text-pro-text">{s}</strong> : s,
+          si % 2 === 1 ? <strong key={`${key}-b${pi}-${si}`}>{s}</strong> : s,
         ),
   );
 }
@@ -58,12 +58,9 @@ export function ModuleContent({ content }: { content: string }) {
   const flush = (k: string) => {
     if (!bullets.length) return;
     out.push(
-      <ul key={k} className="space-y-1.5 my-3">
+      <ul key={k}>
         {bullets.map((b, i) => (
-          <li key={i} className="flex gap-2 text-sm text-pro-text-soft leading-relaxed">
-            <span className="driver-training-dot mt-[7px] h-1.5 w-1.5 rounded-full shrink-0" />
-            <span>{renderInline(b, `${k}-${i}`)}</span>
-          </li>
+          <li key={i}><span>{renderInline(b, `${k}-${i}`)}</span></li>
         ))}
       </ul>,
     );
@@ -81,19 +78,16 @@ export function ModuleContent({ content }: { content: string }) {
     if (!line) return;
     if (line.startsWith("## ")) {
       out.push(
-        <h3 key={k} className="text-base font-semibold text-pro-text mt-6 mb-2 flex items-center gap-2">
-          <span className="h-4 w-1 rounded-full bg-[#2F5FFF]" />
-          {line.slice(3)}
-        </h3>,
+        <h3 key={k}><i />{line.slice(3)}</h3>,
       );
       return;
     }
     if (line.startsWith("!! ")) {
       out.push(
-        <div key={k} className="driver-training-pending my-4 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
-          <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-900 leading-relaxed">
-            <span className="font-semibold block mb-0.5">Point de vigilance</span>
+        <div key={k} className="fm-call warn">
+          <AlertTriangle size={18} />
+          <p style={{ margin: 0 }}>
+            <b>Point de vigilance</b>
             {renderInline(line.slice(3), k)}
           </p>
         </div>,
@@ -102,10 +96,10 @@ export function ModuleContent({ content }: { content: string }) {
     }
     if (line.startsWith(">> ")) {
       out.push(
-        <div key={k} className="my-4 rounded-xl border border-[#2F5FFF]/30 bg-[#2F5FFF]/5 p-4 flex gap-3">
-          <Lightbulb size={18} className="text-[#2F5FFF] shrink-0 mt-0.5" />
-          <p className="text-sm text-pro-text leading-relaxed">
-            <span className="font-semibold block mb-0.5 text-[#2F5FFF]">Conseil terrain</span>
+        <div key={k} className="fm-call tip">
+          <Lightbulb size={18} />
+          <p style={{ margin: 0 }}>
+            <b>Conseil terrain</b>
             {renderInline(line.slice(3), k)}
           </p>
         </div>,
@@ -113,14 +107,12 @@ export function ModuleContent({ content }: { content: string }) {
       return;
     }
     out.push(
-      <p key={k} className="text-sm text-pro-text-soft leading-relaxed my-2">
-        {renderInline(line, k)}
-      </p>,
+      <p key={k}>{renderInline(line, k)}</p>,
     );
   });
   flush("ul-end");
 
-  return <div>{out}</div>;
+  return <div className="fm-prose">{out}</div>;
 }
 
 export default ModuleContent;

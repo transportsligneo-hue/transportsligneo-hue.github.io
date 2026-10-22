@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/formation/faq")({
@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/faq")(
 
 const FAQ = [
   {
-    q: "Combien de temps dure la formation complète ?",
-    a: "Environ 2 heures au total, réparties sur 8 modules. Vous pouvez la suivre en plusieurs fois : votre progression est enregistrée automatiquement.",
+    q: "Combien de temps faut-il prévoir pour la formation ?",
+    a: "Elle compte 8 modules, à suivre à votre rythme. Vous pouvez la faire en plusieurs fois : votre progression est enregistrée automatiquement.",
   },
   {
     q: "Que se passe-t-il si j'échoue à un quiz ?",
@@ -42,21 +42,18 @@ const FAQ = [
 function FaqPage() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <div className="rounded-2xl border border-pro-border bg-white p-5">
-      <h1 className="text-lg font-semibold text-pro-text flex items-center gap-2">
-        <HelpCircle size={18} className="text-[#2F5FFF]" /> Questions fréquentes
-      </h1>
-      <div className="mt-4 divide-y divide-pro-border">
+    <div className="fm-card">
+      <div className="fm-card-h">
+        <h1 className="fm-card-t"><span className="fm-ic"><HelpCircle size={16} /></span> Questions fréquentes</h1>
+      </div>
+      <div className="fm-faq">
         {FAQ.map((f, i) => (
-          <div key={i} className="py-3">
-            <button
-              type="button"
-              onClick={() => setOpen(open === i ? null : i)}
-              className="w-full text-left text-sm font-medium text-pro-text"
-            >
-              {f.q}
+          <div key={i} className={`fm-fq${open === i ? " open" : ""}`}>
+            <button type="button" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}>
+              <span>{f.q}</span>
+              <ChevronDown size={17} />
             </button>
-            {open === i && <p className="mt-2 text-sm text-pro-text-soft leading-relaxed">{f.a}</p>}
+            {open === i && <p>{f.a}</p>}
           </div>
         ))}
       </div>

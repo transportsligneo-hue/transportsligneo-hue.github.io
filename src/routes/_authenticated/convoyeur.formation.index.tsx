@@ -1,13 +1,13 @@
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { GraduationCap, PlayCircle, Sparkles, ArrowRight, Award, Loader2, X } from "lucide-react";
+import { GraduationCap, Play, Sparkles, ChevronRight, Award, Check, LifeBuoy, X } from "lucide-react";
 import { useTraining } from "@/lib/formation/useTraining";
 import { moduleStatus, STATUS_LABEL } from "@/lib/formation/types";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateAttestationPdf } from "@/lib/formation/attestation-pdf";
-import { TrainingStatusBadge, resolveTrainingStatut } from "@/components/convoyeur/TrainingStatusBadge";
+import { resolveTrainingStatut } from "@/components/convoyeur/TrainingStatusBadge";
 
 export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
   head: () => ({
@@ -24,10 +24,10 @@ export const Route = createFileRoute("/_authenticated/convoyeur/formation/")({
 });
 
 const TOUR = [
-  { title: "Votre parcours", text: "8 modules à suivre dans l'ordre que vous voulez : ouvrez celui qui vous convient. Votre progression est enregistrée automatiquement." },
-  { title: "Reprise automatique", text: "À chaque reconnexion, vous repartez du dernier module non terminé." },
-  { title: "Quiz et validation", text: "Chaque module se valide par un quiz (100% minimum), tentatives illimitées." },
-  { title: "Besoin d'aide ?", text: "La FAQ et l'équipe Ligneo sont accessibles depuis chaque page." },
+  { title: "Votre parcours", text: "8 modules, dans l'ordre qui vous convient. Votre progression est enregistrée automatiquement." },
+  { title: "Reprise automatique", text: "À chaque connexion, vous repartez du dernier module non terminé." },
+  { title: "Quiz de validation", text: "Chaque module se valide par un quiz (100 % requis). Les tentatives sont illimitées." },
+  { title: "Besoin d'aide ?", text: "La FAQ et l'équipe Ligneo restent accessibles depuis chaque page." },
 ];
 
 function FormationHome() {
@@ -72,47 +72,50 @@ function FormationHome() {
     );
   }
 
+  const statut = resolveTrainingStatut(allDone, completedCount);
+  const statutLabel = statut === "validee" ? "Formation validée" : statut === "en_cours" ? "Formation en cours" : "À démarrer";
+  const R = 32;
+  const C = 2 * Math.PI * R;
+
   return (
-    <div className="space-y-4">
-      <section className="driver-training-hero rounded-2xl overflow-hidden border border-pro-border p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="driver-training-accent text-[11px] uppercase tracking-[0.22em] font-semibold flex items-center gap-2">
-            <GraduationCap size={14} /> Espace formation interne
-          </p>
-          <TrainingStatusBadge
-            statut={resolveTrainingStatut(allDone, completedCount)}
-            percent={percent}
-          />
+    <>
+      <section className="fm-hero">
+        <div className="fm-hero-row">
+          <div style={{ minWidth: 0 }}>
+            <p className="fm-eyebrow"><GraduationCap size={14} /> Formation Ligneo</p>
+            <h1 className="fm-hero-t">Bonjour {firstName}</h1>
+          </div>
+          <div className="fm-ring" role="img" aria-label={`Progression ${percent} %`}>
+            <svg viewBox="0 0 76 76" aria-hidden="true">
+              <circle cx="38" cy="38" r={R} fill="none" stroke="rgba(255,255,255,.16)" strokeWidth="7" />
+              <circle cx="38" cy="38" r={R} fill="none" stroke="url(#fmg)" strokeWidth="7" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - percent / 100)} style={{ transition: "stroke-dashoffset .7s" }} />
+              <defs><linearGradient id="fmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#14B866" /><stop offset="1" stopColor="#6effcd" /></linearGradient></defs>
+            </svg>
+            <b>{percent}%</b>
+          </div>
         </div>
-        <h1 className="mt-2 text-2xl font-semibold">Bienvenue {firstName} 👋</h1>
-        <p className="mt-2 text-sm driver-training-copy max-w-2xl leading-relaxed">
-          « Cette formation, c'est ce qui garantit la même qualité de service sur chaque mission Ligneo. Elle couvre
-          l'essentiel du terrain : conformité de vos documents, états des lieux, sécurité, incidents et clôture de
-          mission. Prenez le temps, elle vous protège autant qu'elle protège nos clients. »
+        <p className="fm-quote">
+          Cette formation garantit la même qualité de service sur chaque mission Ligneo : documents, états des lieux,
+          sécurité, incidents et clôture. Prenez le temps, elle vous protège autant qu'elle protège nos clients.
         </p>
-        <p className="mt-2 text-xs driver-training-accent">— Responsable exploitation, Transports Ligneo</p>
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <p className="fm-sign">Responsable exploitation, Transports Ligneo</p>
+        <div className="fm-bar"><i style={{ width: `${percent}%` }} /></div>
+        <div className="fm-foot">
+          <span className="fm-meta">{completedCount} module{completedCount > 1 ? "s" : ""} validé{completedCount > 1 ? "s" : ""} sur {modules.length} · {statutLabel}</span>
           {nextModule && (
-            <Link
-              to="/convoyeur/formation/module/$id"
-              params={{ id: nextModule.id }}
-              className="driver-training-button rounded-xl text-sm font-semibold px-5 py-2.5 flex items-center gap-2"
-            >
-              <PlayCircle size={16} />
+            <Link to="/convoyeur/formation/module/$id" params={{ id: nextModule.id }} className="fm-cta">
+              <Play size={16} fill="currentColor" />
               {completedCount === 0 ? "Commencer la formation" : "Reprendre où je me suis arrêté"}
             </Link>
           )}
-          <span className="text-sm driver-training-copy">
-            {completedCount}/{modules.length} modules · {percent}%
-          </span>
         </div>
       </section>
 
       {allDone && (
-        <section className="driver-training-hero rounded-2xl border p-6 text-center">
-          <Sparkles className="mx-auto driver-training-accent" />
-          <h2 className="mt-2 text-xl font-semibold">Félicitations {firstName}, formation terminée !</h2>
-          <p className="text-sm driver-training-copy mt-1">
+        <section className="fm-hero fm-win">
+          <Sparkles size={26} color="#6effcd" style={{ margin: "0 auto" }} />
+          <h2 className="fm-hero-t">Félicitations {firstName}</h2>
+          <p className="fm-quote" style={{ margin: "8px auto 0" }}>
             Vous avez validé les {modules.length} modules. Votre attestation interne est disponible.
           </p>
           <button
@@ -126,69 +129,60 @@ function FormationHome() {
                 modulesCount: modules.length,
               })
             }
-            className="driver-training-button mt-4 inline-flex items-center gap-2 rounded-xl text-sm font-semibold px-5 py-2.5"
+            className="fm-cta"
+            style={{ marginTop: 16 }}
           >
             <Award size={16} /> Télécharger mon attestation
           </button>
         </section>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-2">
+      <div className="fm-sec"><span>Les modules</span><em>{completedCount}/{modules.length}</em><i /></div>
+      <section className="fm-list">
         {modules.map((m) => {
           const st = moduleStatus(progress[m.id]);
+          const cls = st === "done" ? " done" : st === "in_progress" ? " prog" : "";
           return (
             <button
               key={m.id}
               type="button"
               onClick={() => navigate({ to: "/convoyeur/formation/module/$id", params: { id: m.id } })}
-              className="text-left rounded-2xl border border-pro-border bg-white p-4 hover:border-[#2F5FFF]/40 hover:shadow-sm transition-all"
+              className={`fm-mod${cls}`}
             >
-              <div className="flex items-center justify-between">
-                <span className="driver-training-accent text-[11px] font-semibold uppercase tracking-wider">
-                  Module {m.order_index} {m.tag ? `· ${m.tag}` : ""}
-                </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    st === "done"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : st === "in_progress"
-                        ? "driver-training-in-progress"
-                        : "bg-pro-bg-soft text-pro-muted"
-                  }`}
-                >
-                  {STATUS_LABEL[st]}
-                </span>
-              </div>
-              <h3 className="mt-1.5 text-sm font-semibold text-pro-text">{m.title}</h3>
-              <p className="mt-1 text-xs text-pro-muted">{m.quiz_questions.length} questions</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#2F5FFF]">
-                Ouvrir <ArrowRight size={12} />
+              <span className="fm-n">{st === "done" ? <Check size={18} strokeWidth={3} /> : m.order_index}</span>
+              <span className="fm-mt">
+                <b>{m.title}</b>
+                <small>{m.tag ? `${m.tag} · ` : ""}{m.quiz_questions.length} questions</small>
               </span>
+              <span className="fm-st">{STATUS_LABEL[st]}</span>
+              <ChevronRight size={16} className="fm-chev" />
             </button>
           );
         })}
       </section>
 
+      <div className="fm-help">
+        <LifeBuoy size={18} />
+        <p style={{ margin: 0 }}><b>Besoin d'aide ?</b> Consultez la FAQ ou contactez le responsable exploitation, Transports Ligneo.</p>
+      </div>
+
       {tourStep !== null && TOUR[tourStep] && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4 overscroll-contain"
-          style={{
-            paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)",
-          }}
-        >
-          <div role="dialog" aria-modal="true" aria-labelledby="driver-tour-title" className="driver-tour-panel w-full max-w-sm rounded-2xl p-5 shadow-2xl">
-            <div className="flex items-start justify-between">
-              <h3 id="driver-tour-title" className="text-sm font-semibold">{TOUR[tourStep].title}</h3>
-              <button type="button" aria-label="Fermer" onClick={closeTour}><X size={16} /></button>
+        <div className="fm-ov" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 96px)" }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="driver-tour-title" className="fm-pop">
+            <div className="fm-pop-h">
+              <h3 id="driver-tour-title">{TOUR[tourStep].title}</h3>
+              <button type="button" aria-label="Fermer" onClick={closeTour} className="fm-x"><X size={16} /></button>
             </div>
-            <p className="mt-2 text-sm driver-tour-copy">{TOUR[tourStep].text}</p>
-            <div className="mt-4 flex items-center justify-between">
-              <span className="text-xs driver-tour-copy">{tourStep + 1}/{TOUR.length}</span>
+            <p>{TOUR[tourStep].text}</p>
+            <div className="fm-pop-f">
+              <span className="fm-dots" aria-label={`Étape ${tourStep + 1} sur ${TOUR.length}`}>
+                {TOUR.map((_, i) => <i key={i} className={i === tourStep ? "on" : ""} />)}
+              </span>
               <button
                 type="button"
                 onClick={() => (tourStep + 1 < TOUR.length ? setTourStep(tourStep + 1) : closeTour())}
-                className="driver-training-button rounded-lg text-xs font-semibold px-4 py-2"
+                className="fm-cta"
+                style={{ height: 42, padding: "0 18px" }}
               >
                 {tourStep + 1 < TOUR.length ? "Suivant" : "C'est parti"}
               </button>
@@ -196,6 +190,6 @@ function FormationHome() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

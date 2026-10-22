@@ -2,7 +2,7 @@ import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { PASS_SCORE } from "@/lib/formation/types";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, ArrowRight, Download, Loader2, Target, Video, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download, Target, Video, CheckCircle2, Check } from "lucide-react";
 import { useTraining } from "@/lib/formation/useTraining";
 import ModuleContent from "@/components/formation/ModuleContent";
 import ChecklistBlock from "@/components/formation/ChecklistBlock";
@@ -47,9 +47,9 @@ function ModulePage() {
   }
   if (!module) {
     return (
-      <div className="rounded-2xl border border-pro-border bg-white p-8 text-center">
-        <p className="text-sm text-pro-muted">Module introuvable.</p>
-        <Link to="/convoyeur/formation" className="mt-3 inline-block text-sm text-[#2F5FFF] font-medium">
+      <div className="fm-card" style={{ textAlign: "center" }}>
+        <p className="fm-fine">Ce module est introuvable.</p>
+        <Link to="/convoyeur/formation" className="fm-link" style={{ marginTop: 8 }}>
           Retour au parcours
         </Link>
       </div>
@@ -57,64 +57,47 @@ function ModulePage() {
   }
 
   return (
-    <div className="space-y-4">
-      <header className="rounded-2xl border border-pro-border bg-white p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="driver-training-accent text-[11px] font-semibold uppercase tracking-[0.18em]">
+    <div className="fm">
+      <header className="fm-card">
+        <div className="fm-card-h" style={{ marginBottom: 0 }}>
+          <span className="fm-eb">
             Module {module.order_index}
             {module.tag ? ` · ${module.tag}` : ""}
           </span>
           {p?.completed && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold">
-              <CheckCircle2 size={12} /> Terminé
-            </span>
+            <span className="fm-done"><CheckCircle2 size={13} /> Terminé</span>
           )}
         </div>
-        <h1 className="mt-1.5 text-xl font-semibold text-pro-text">{module.title}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-pro-muted">
-          <span>Mise à jour {new Date(module.last_updated).toLocaleDateString("fr-FR")}</span>
-        </div>
+        <h1 className="fm-h1">{module.title}</h1>
+        <p className="fm-upd">Mis à jour le {new Date(module.last_updated).toLocaleDateString("fr-FR")}</p>
         {module.objectives.length > 0 && (
-         <div className="driver-training-objectives mt-4 rounded-xl border border-pro-border p-4">
-             <p className="text-xs font-semibold text-pro-text flex items-center gap-1.5">
-              <Target size={13} className="text-[#2F5FFF]" /> Objectifs du module
-            </p>
-            <ul className="mt-2 space-y-1">
+          <div className="fm-obj">
+            <p className="fm-obj-t"><Target size={14} /> Ce que vous allez retenir</p>
+            <ul>
               {module.objectives.map((o, i) => (
-                <li key={i} className="text-sm text-pro-text-soft flex gap-2">
-                   <span className="driver-training-accent">•</span>
-                  {o}
-                </li>
+                <li key={i}><Check size={14} strokeWidth={3} />{o}</li>
               ))}
             </ul>
           </div>
         )}
       </header>
 
-      <section className="rounded-2xl border border-pro-border bg-white p-5">
+      <section className="fm-card">
         <ModuleContent content={module.content} />
-        <div className="mt-4 flex flex-wrap gap-2">
-          {module.video_url && (
-            <a
-              href={module.video_url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-pro-border px-3 py-2 text-xs font-medium text-pro-text hover:border-[#2F5FFF]/40"
-            >
-              <Video size={14} className="text-[#2F5FFF]" /> Vidéo du module
-            </a>
-          )}
-          {module.resource_url && (
-            <a
-              href={module.resource_url}
-              target="_blank"
-              rel="noreferrer"
-               className="inline-flex items-center gap-2 rounded-lg border border-pro-border px-3 py-2 text-xs font-medium text-pro-text hover:border-[#2F5FFF]/50"
-            >
-               <Download size={14} className="driver-training-accent" /> {module.resource_label ?? "Ressource à télécharger"}
-            </a>
-          )}
-        </div>
+        {(module.video_url || module.resource_url) && (
+          <div className="fm-res">
+            {module.video_url && (
+              <a href={module.video_url} target="_blank" rel="noreferrer" className="fm-resb">
+                <Video size={15} /> Vidéo du module
+              </a>
+            )}
+            {module.resource_url && (
+              <a href={module.resource_url} target="_blank" rel="noreferrer" className="fm-resb">
+                <Download size={15} /> {module.resource_label ?? "Document à télécharger"}
+              </a>
+            )}
+          </div>
+        )}
       </section>
 
       {module.checklist_items.length > 0 && (
@@ -137,14 +120,10 @@ function ModulePage() {
         onPassed={() => void markCompleted(module.id)}
       />
 
-      <nav className="flex items-center justify-between gap-3 pb-6">
+      <nav className="fm-nav">
         {prev ? (
-          <Link
-            to="/convoyeur/formation/module/$id"
-            params={{ id: prev.id }}
-             className="driver-training-secondary inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium"
-          >
-            <ArrowLeft size={15} /> Module précédent
+          <Link to="/convoyeur/formation/module/$id" params={{ id: prev.id }} className="fm-ghost">
+            <ArrowLeft size={16} /> Précédent
           </Link>
         ) : (
           <span />
@@ -156,9 +135,9 @@ function ModulePage() {
             if (next) navigate({ to: "/convoyeur/formation/module/$id", params: { id: next.id } });
             else navigate({ to: "/convoyeur/formation" });
           }}
-           className="driver-training-button inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
+          className="fm-cta"
         >
-          {next ? "Module suivant" : "Terminer le parcours"} <ArrowRight size={15} />
+          {next ? "Module suivant" : "Terminer le parcours"} <ArrowRight size={16} />
         </button>
       </nav>
     </div>

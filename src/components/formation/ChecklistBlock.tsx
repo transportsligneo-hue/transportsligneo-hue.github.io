@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckSquare, Square } from "lucide-react";
+import { Check, ListChecks } from "lucide-react";
 
 export function ChecklistBlock({
   items,
@@ -22,31 +22,19 @@ export function ChecklistBlock({
   const done = items.filter((_, i) => local[String(i)]).length;
 
   return (
-    <section className="rounded-2xl border border-pro-border bg-white p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-pro-text">Checklist du module</h3>
-        <span className="text-xs text-pro-muted">
-          {done}/{items.length} — sauvegarde automatique
-        </span>
+    <section className="fm-card">
+      <div className="fm-card-h">
+        <h3 className="fm-card-t"><span className="fm-ic"><ListChecks size={16} /></span> À vérifier avant la mission</h3>
+        <span className="fm-sub">{done}/{items.length}</span>
       </div>
-      <ul className="space-y-2">
+      <ul className="fm-chk">
         {items.map((it, i) => {
           const checked = !!local[String(i)];
           return (
             <li key={i}>
-              <button
-                type="button"
-                onClick={() => toggle(i)}
-                className={`w-full flex items-start gap-3 text-left rounded-xl border px-3 py-2.5 transition-all ${
-                  checked ? "driver-training-correct border-emerald-300 bg-emerald-50" : "border-pro-border hover:border-[#2F5FFF]/40"
-                }`}
-              >
-                {checked ? (
-                  <CheckSquare size={17} className="text-emerald-600 shrink-0 mt-0.5" />
-                ) : (
-                  <Square size={17} className="text-pro-muted shrink-0 mt-0.5" />
-                )}
-                <span className={`text-sm ${checked ? "text-emerald-900 line-through/0" : "text-pro-text-soft"}`}>{it}</span>
+              <button type="button" onClick={() => toggle(i)} className={`fm-ck${checked ? " on" : ""}`} aria-pressed={checked}>
+                <span className="fm-cb"><Check size={14} strokeWidth={3.2} /></span>
+                <span>{it}</span>
               </button>
             </li>
           );

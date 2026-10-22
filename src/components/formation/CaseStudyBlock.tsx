@@ -31,40 +31,26 @@ export function CaseStudyBlock({
   };
 
   return (
-    <section className="rounded-2xl border border-pro-border bg-white p-5">
-      <h3 className="text-sm font-semibold text-pro-text flex items-center gap-2 mb-2">
-        <Puzzle size={16} className="text-[#2F5FFF]" /> Étude de cas{total > 1 ? ` ${caseIndex + 1}/${total}` : ""}
-      </h3>
-      <p className="text-sm text-pro-text-soft leading-relaxed mb-4">{caseStudy.scenario}</p>
-      <div className="space-y-2">
-        {(caseStudy.choices ?? []).map((c, i) => (
-          <button
-            key={i}
-            type="button"
-            disabled={loading}
-            onClick={() => void choose(i)}
-            className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition-all ${
-              selected === i
-                ? feedback
-                  ? feedback.correct
-                    ? "driver-training-correct border-emerald-400 bg-emerald-50 text-emerald-900"
-                    : "driver-training-incorrect border-red-300 bg-red-50 text-red-900"
-                  : "driver-training-selected border-[#2F5FFF] bg-[#2F5FFF]/5 text-pro-text"
-                : "border-pro-border hover:border-[#2F5FFF]/40 text-pro-text-soft"
-            }`}
-          >
-            {c.label}
-          </button>
-        ))}
+    <section className="fm-card">
+      <div className="fm-card-h">
+        <h3 className="fm-card-t"><span className="fm-ic"><Puzzle size={16} /></span> Mise en situation{total > 1 ? ` ${caseIndex + 1}/${total}` : ""}</h3>
       </div>
-      {loading && <p className="mt-3 text-xs text-pro-muted flex items-center gap-2"><Loader2 size={12} className="animate-spin" /> Analyse…</p>}
+      <p className="fm-q" style={{ fontWeight: 500, lineHeight: 1.65, marginBottom: 14 }}>{caseStudy.scenario}</p>
+      <div className="fm-opts">
+        {(caseStudy.choices ?? []).map((c, i) => {
+          const state = selected === i ? (feedback ? (feedback.correct ? " ok" : " ko") : " sel") : "";
+          return (
+            <button key={i} type="button" disabled={loading} onClick={() => void choose(i)} className={`fm-opt${state}`}>
+              <span className="fm-l">{String.fromCharCode(65 + i)}</span>
+              <span>{c.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      {loading && <p className="fm-fine" style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}><Loader2 size={13} className="fm-spin" /> Analyse en cours</p>}
       {feedback && (
-        <div
-          className={`mt-4 rounded-xl p-4 text-sm flex gap-3 ${
-            feedback.correct ? "driver-training-correct bg-emerald-50 text-emerald-900" : "driver-training-pending bg-amber-50 text-amber-900"
-          }`}
-        >
-          {feedback.correct ? <CheckCircle2 size={18} className="shrink-0" /> : <XCircle size={18} className="shrink-0" />}
+        <div className={`fm-fb ${feedback.correct ? "ok" : "ko"}`}>
+          {feedback.correct ? <CheckCircle2 size={18} color="#14B866" /> : <XCircle size={18} color="#d97706" />}
           <span>{feedback.feedback}</span>
         </div>
       )}
