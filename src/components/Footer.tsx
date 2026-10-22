@@ -11,7 +11,7 @@ const trustItems = [
   { icon: Shield, label: "Assurance incluse" },
   { icon: Clock, label: "Disponible 7j/7" },
   { icon: CheckCircle2, label: "0 frais caché" },
-  { icon: Zap, label: "Devis en 30s" },
+  { icon: Zap, label: "Devis en 2 min" },
 ];
 
 const navLinks: { label: string; to: string }[] = [

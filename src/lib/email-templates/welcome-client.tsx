@@ -6,7 +6,7 @@ interface Props { prenom?: string; clientLogoUrl?: string; clientName?: string }
 
 const Email = ({ prenom, clientLogoUrl, clientName }: Props) => (
   <LigneoEmailShell
-    preview="Votre compte est prêt — estimez votre premier convoyage en 30 secondes."
+    preview="Votre compte est prêt — estimez votre premier convoyage en 2 minutes."
     tagline="Compte créé"
     title={prenom ? `Bienvenue, ${prenom} 👋` : 'Bienvenue 👋'}
     intro="Votre compte Transports Ligneo est activé. Vous pouvez dès maintenant estimer un trajet, réserver un convoyage et suivre vos missions en temps réel depuis votre espace client."
@@ -17,7 +17,7 @@ const Email = ({ prenom, clientLogoUrl, clientName }: Props) => (
   >
     <SimpleCard
       title="Prochaine étape"
-      subtitle="Faites votre premier devis instantané — réponse en moins de 30 secondes, sans engagement."
+      subtitle="Faites votre premier devis instantané — réponse en moins de 2 minutes, sans engagement."
     />
   </LigneoEmailShell>
 )

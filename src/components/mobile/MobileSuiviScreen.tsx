@@ -89,7 +89,7 @@ export default function MobileSuiviScreen({
       {children ? <div className="mp-res mp-panel" style={{ margin: "16px" }}>{children}</div> : null}
 
       <div className="mp-trust">
-        {["Assurance incluse", "Disponible 7j/7", "0 frais caché", "Devis en 30 s"].map((t) => (
+        {["Assurance incluse", "Disponible 7j/7", "0 frais caché", "Devis en 2 min"].map((t) => (
           <span key={t}><CheckCircle2 />{t}</span>
         ))}
       </div>

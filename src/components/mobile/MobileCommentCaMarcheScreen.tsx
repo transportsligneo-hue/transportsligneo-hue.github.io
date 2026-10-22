@@ -10,7 +10,7 @@ import { PageCta, PageHero, useReveal } from "@/components/mobile/MobilePageBits
 import { RouteAB } from "@/components/mobile/MobileIcons";
 
 const steps = [
-  { Icon: RouteAB, title: "Estimez", text: "Prix en 30 secondes, sans compte." },
+  { Icon: RouteAB, title: "Estimez", text: "Prix en 2 minutes, sans compte." },
   { Icon: FileCheck2, title: "Validez", text: "Signature en ligne, on s’occupe du reste." },
   { Icon: Truck, title: "On convoie", text: "Un pro au volant, suivi GPS en direct." },
   { Icon: ShieldCheck, title: "Vous recevez", text: "État des lieux, facture et PV automatiques." },
@@ -54,7 +54,7 @@ export default function MobileCommentCaMarcheScreen() {
 
       <PageCta
         title={<>Prêt à <em>partir ?</em></>}
-        text="Estimez votre trajet en 30 secondes."
+        text="Estimez votre trajet en 2 minutes."
         to="/tarifs"
         label="Estimer mon trajet"
       />

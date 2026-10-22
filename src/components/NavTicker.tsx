@@ -30,7 +30,7 @@ const MESSAGES: Msg[] = [
   { art: "shield", theme: "cyan", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "", to: "/comment-ca-marche" },
   { art: "plate", theme: "blue", title: "Saisissez la plaque", sub: "Le véhicule se remplit seul", cta: "Essayer", to: "/tarifs" },
   { art: "code", theme: "violet", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "", to: "/comment-ca-marche" },
-  { art: "quote", theme: "violet", title: "Devis en 30 secondes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
+  { art: "quote", theme: "violet", title: "Devis en 2 minutes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
   { art: "photo", theme: "pink", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },
   { art: "vroomy", theme: "pink", tag: "Nouveau", title: "Vroomy", sub: "Votre assistant, en direct", cta: "Essayer", to: "/comment-ca-marche", action: "vroomy" },
   { art: "google", theme: "orange", title: "4,8/5 sur Google", sub: "Laissez-nous un avis", cta: "Mon avis", href: "GOOGLE_REVIEW" },
@@ -70,7 +70,7 @@ function Art({ kind }: { kind: ArtKind }) {
         <rect x="14" y="18" width="18" height="2.5" rx="1.2" fill="#c4b5fd" />
         <rect x="14" y="24" width="15" height="2.5" rx="1.2" fill="#c4b5fd" />
         <rect x="14" y="31" width="18" height="6" rx="3" fill="#d946ef" />
-        <text x="23" y="36" textAnchor="middle" fontSize="5.4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">30 s</text>
+        <text x="23" y="36" textAnchor="middle" fontSize="5.4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">2 min</text>
       </svg>
     );
   if (kind === "plate")

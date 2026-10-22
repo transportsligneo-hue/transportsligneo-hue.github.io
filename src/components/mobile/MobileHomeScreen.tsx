@@ -1,13 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Briefcase, ChevronRight, Clock, LogIn, Route as RouteIcon, ShieldCheck, Star, User } from "lucide-react";
-import StoreBadges from "@/components/public/StoreBadges";
+import MobileFooter from "@/components/mobile/MobileFooter";
 import MobileGoogleReviews from "@/components/mobile/MobileGoogleReviews";
 import MobileFaq from "@/components/mobile/MobileFaq";
 import { GoogleG, RouteAB, SteeringWheel } from "@/components/mobile/MobileIcons";
 import DevisGenerator from "@/components/DevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import heroBg from "@/assets/hero-ligneo-night.jpg";
-import carteFrance from "@/assets/carte-france-tours.png";
 import "@/styles/mobile-home-v2.css";
 
 /**
@@ -87,7 +86,7 @@ export default function MobileHomeScreen() {
         <div className="mh2-steps">
           <div className="mh2-step">
             <div className="mh2-n">1</div>
-            <div><b>Estimez en 30 secondes</b><p>Départ, arrivée, date : prix immédiat.</p></div>
+            <div><b>Estimez en 2 minutes</b><p>Départ, arrivée, date : prix immédiat.</p></div>
             <RouteAB className="mh2-si mh-i" />
           </div>
           <div className="mh2-step">
@@ -119,27 +118,7 @@ export default function MobileHomeScreen() {
       <MobileGoogleReviews />
       <MobileFaq />
 
-      {/* === Pied de page === */}
-      <footer>
-        <div className="mh2-foot">
-          <img src={carteFrance} alt="Carte de France : Transports Ligneo est basé à Tours" className="mh2-map" width={78} height={78} loading="lazy" />
-          <div style={{ minWidth: 0 }}>
-            <b>Basé à Tours (37)</b>
-            <small>07 82 45 61 81 · contact@transportsligneo.fr</small>
-          </div>
-        </div>
-        <div className="mh2-links">
-          <Link to="/suivi">Suivi mission</Link>
-          <Link to="/actualites">Actualités</Link>
-          <Link to="/cgv">CGV</Link>
-          <Link to="/mentions-legales">Mentions</Link>
-          <Link to="/confidentialite">Privacy</Link>
-        </div>
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-          <StoreBadges />
-        </div>
-        <p className="mh2-copy">© {new Date().getFullYear()} Transports LIGNEO</p>
-      </footer>
+      <MobileFooter />
     </div>
   );
 }
