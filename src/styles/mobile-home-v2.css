@@ -1,0 +1,215 @@
+/* =========================================================
+   Accueil mobile v2 · fidèle à la maquette "accueil mobile client"
+   Visuel uniquement : aucune logique modifiée.
+   ========================================================= */
+
+/* ---------- Thèmes ---------- */
+.mh2-root {
+  --mh-bg: #050a1c; --mh-card: rgba(255,255,255,.06); --mh-line: rgba(140,170,255,.18);
+  --mh-ink: #f4f7ff; --mh-ink2: #aab6d8; --mh-ink3: #7482ab;
+  --mh-blue: #2f5fff; --mh-blue2: #5b8fff; --mh-neon: #6ea1ff; --mh-glow: rgba(47,95,255,.5);
+  --mh-gold: #e3bd5a; --mh-sh: 0 18px 40px -18px rgba(0,0,0,.7); --mh-ring: #050a1c;
+  --mh-path-title: #f4f7ff;
+}
+html.theme-light .mh2-root {
+  --mh-bg: #eef3ff; --mh-card: #ffffff; --mh-line: rgba(30,60,140,.13);
+  --mh-ink: #16246a; --mh-ink2: #52639b; --mh-ink3: #8392bd; --mh-neon: #2f5fff;
+  --mh-sh: 0 14px 30px -16px rgba(30,60,140,.3); --mh-ring: #eef3ff;
+}
+.mh2-root {
+  position: relative; min-height: 100vh; overflow-x: hidden;
+  background: var(--mh-bg); color: var(--mh-ink);
+  padding-top: calc(56px + env(safe-area-inset-top));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.mh2-root svg.mh-i, .mh2-root .mh-i { flex: none; }
+
+/* ---------- Hero ---------- */
+.mh2-hero { position: relative; height: 400px; overflow: hidden; }
+.mh2-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mh2-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(5,10,28,.25), rgba(5,10,28,.2) 30%, rgba(5,10,28,.82) 80%, var(--mh-bg));
+}
+html.theme-light .mh2-hero::before {
+  background: linear-gradient(180deg, rgba(4,10,38,.35), rgba(5,12,50,.2) 28%, rgba(8,20,80,.82) 80%, var(--mh-bg));
+}
+.mh2-hero-c { position: absolute; left: 20px; right: 20px; bottom: 44px; z-index: 2; color: #fff; }
+.mh2-kick { display: flex; align-items: center; gap: 8px; font: 600 10.5px 'Inter', sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #9dc0ff; }
+.mh2-kick i { width: 6px; height: 6px; border-radius: 50%; background: #5b94ff; box-shadow: 0 0 8px #5b94ff; }
+.mh2-hero h1 { font: 800 32px/1.08 'Poppins', sans-serif; margin: 12px 0 10px; letter-spacing: -.01em; color: #fff; }
+.mh2-hero h1 em { font-style: normal; color: #7fb0ff; text-shadow: 0 0 18px rgba(91,143,255,.8); }
+.mh2-hero p { font-size: 13px; line-height: 1.5; color: #dbe3ff; max-width: 300px; margin: 0; }
+
+/* ---------- Trio de confiance ---------- */
+.mh2-trust { display: flex; gap: 8px; margin: -14px 16px 0; position: relative; z-index: 3; }
+.mh2-trust > div {
+  flex: 1; border-radius: 18px; padding: 12px 6px 11px; text-align: center;
+  font: 600 10.5px/1.25 'Inter', sans-serif; color: #b9c6ee;
+  background: linear-gradient(160deg, rgba(18,40,120,.92), rgba(8,20,70,.94));
+  border: 1px solid rgba(140,175,255,.4);
+  box-shadow: 0 16px 30px -14px rgba(20,50,170,.8), inset 0 1px 0 rgba(255,255,255,.18);
+  position: relative; overflow: hidden;
+}
+.mh2-trust > div::before { content: ""; position: absolute; top: -24px; left: 50%; width: 70px; height: 50px; margin-left: -35px; border-radius: 50%; background: radial-gradient(circle, rgba(91,143,255,.5), transparent 70%); }
+.mh2-ti { position: relative; width: 30px; height: 30px; margin: 0 auto 6px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; color: #fff; background: linear-gradient(135deg, #2559f0, #6ea1ff); box-shadow: 0 0 14px rgba(91,143,255,.8); }
+.mh2-trust > div:first-child .mh-i { fill: #fff; }
+.mh2-trust b { display: block; font: 800 16px 'Poppins', sans-serif; color: #fff; letter-spacing: -.01em; }
+.mh2-gg { display: inline-flex; align-items: center; gap: 4px; background: #fff; color: #16246a; border-radius: 99px; padding: 2px 7px 2px 4px; font: 700 9.5px 'Inter', sans-serif; }
+
+/* ---------- Sections ---------- */
+.mh2-sec { padding: 0 16px; margin-top: 26px; }
+.mh2-h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font: 600 10.5px 'Space Grotesk', 'Inter', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--mh-blue2); }
+.mh2-h2::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--mh-blue2); box-shadow: 0 0 8px var(--mh-blue2); }
+.mh2-t2 { font: 800 22px/1.15 'Poppins', sans-serif; margin: 0 0 14px; letter-spacing: -.01em; color: var(--mh-ink); }
+.mh2-t2 em { font-style: normal; color: var(--mh-neon); }
+
+/* ---------- Estimateur : panneau bleu nuit (vrai DevisGenerator) ---------- */
+.mh2-est {
+  padding: 18px 16px; border-radius: 28px; color: #f4f7ff;
+  background: radial-gradient(300px 220px at 100% 0%, rgba(63,123,255,.35), transparent 65%), linear-gradient(170deg, #0b1a55, #060f33);
+  border: 1px solid rgba(120,160,255,.3); box-shadow: 0 30px 60px -24px rgba(20,50,160,.7);
+}
+.mh2-est .dg-flat { transform: none; }
+/* Date + heure côte à côte, véhicule pleine largeur */
+.mh2-est .dg-flat > .grid.mt-4 { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.mh2-est .dg-flat > .grid.mt-4 > :first-child { grid-column: 1 / -1; }
+.mh2-est .dg-flat > .grid:first-child { gap: 10px; }
+.mh2-est .dg-flat > .grid.mt-5 { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.mh2-est .dg-flat-toggle { padding: 12px 8px; font-size: 10.5px; letter-spacing: .1em; border-radius: 14px; white-space: normal; line-height: 1.25; text-align: center; }
+.mh2-est .dg-flat-cta { padding: 16px 18px; font-size: 12px; letter-spacing: .1em; border-radius: 16px; }
+.mh2-est .dg-flat-field { padding: 11px 14px; border-radius: 16px; }
+.mh2-est .dg-flat-field--lg { padding: 11px 14px; }
+.mh2-est .dg-flat-label { font: 700 9.5px 'Inter', sans-serif; letter-spacing: .18em; margin-bottom: 4px; }
+.mh2-est .dg-flat-input { font-size: 15px; }
+.mh2-est .dg-flat-input--lg { font-size: 15px; height: 24px; }
+.mh2-est .dg-flat-trust { grid-template-columns: 1fr 1fr; gap: 9px 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(140,170,255,.22); }
+/* Rendu bleu nuit forcé, même en thème clair (le site force du texte sombre) */
+html body .mh2-est .dg-estimator :is(label, span, p, h3, h4) { color: #b9c6ee !important; }
+html body .mh2-est .dg-estimator .dg-flat-field { background: rgba(255,255,255,.07) !important; border-color: rgba(140,170,255,.22) !important; box-shadow: none !important; }
+html body .mh2-est .dg-estimator .dg-flat-field:hover,
+html body .mh2-est .dg-estimator .dg-flat-field:focus-within { border-color: #5b8fff !important; }
+html body .mh2-est .dg-estimator .dg-flat-label,
+html body .mh2-est .dg-estimator .dg-flat-label svg { color: #8fa2d8 !important; text-shadow: none !important; filter: none !important; }
+html body .mh2-est .dg-estimator .dg-flat-label svg { color: #5b8fff !important; }
+html body .mh2-est .dg-estimator input.dg-flat-input,
+html body .mh2-est .dg-estimator select.dg-flat-input { color: #f4f7ff !important; color-scheme: dark; }
+html body .mh2-est .dg-estimator .dg-flat-input::placeholder { color: rgba(185,198,238,.6) !important; }
+html body .mh2-est .dg-estimator .dg-flat-toggle { background: rgba(255,255,255,.07) !important; border-color: rgba(140,170,255,.22) !important; color: #b9c6ee !important; box-shadow: none !important; }
+html body .mh2-est .dg-estimator .dg-flat-toggle.is-active { background: linear-gradient(120deg, #2559f0, #4b8bff) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 10px 22px -8px rgba(47,95,255,.5) !important; }
+html body .mh2-est .dg-estimator .dg-flat-cta, html body .mh2-est .dg-estimator .dg-flat-cta span { color: #fff !important; }
+html body .mh2-est .dg-estimator .dg-flat-trust { border-top-color: rgba(140,170,255,.22); }
+html body .mh2-est .dg-estimator .dg-flat-trust span { background: transparent !important; border: 0 !important; padding: 0 !important; justify-content: flex-start; font-size: 11px; color: #b9c6ee !important; text-align: left; }
+html body .mh2-est .dg-estimator .dg-flat-trust svg { color: #16a34a !important; }
+
+/* ---------- Qui êtes-vous ---------- */
+.mh2-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mh2-path {
+  --c: #2f5fff; display: flex; align-items: center; gap: 10px; min-height: 62px; padding: 10px 12px; border-radius: 16px;
+  color: #f5f7ff; font: 600 12px/1.25 'Poppins', sans-serif; text-decoration: none; min-width: 0;
+  background: color-mix(in srgb, var(--c) 20%, #0a1638); border: 1px solid color-mix(in srgb, var(--c) 70%, transparent);
+  box-shadow: 0 0 18px -6px var(--c); animation: mh2Pg 3s ease-in-out infinite; transition: transform .15s;
+}
+.mh2-path:nth-child(2) { --c: #a794ff; animation-delay: .5s; }
+.mh2-path:nth-child(3) { --c: #2ee671; animation-delay: 1s; }
+.mh2-path:nth-child(4) { --c: #5de0ff; animation-delay: 1.5s; }
+.mh2-path svg { color: var(--c); font-size: 20px; filter: drop-shadow(0 0 5px var(--c)); }
+.mh2-path:active { transform: scale(.97); }
+@keyframes mh2Pg { 0%,100% { box-shadow: 0 0 14px -8px var(--c); } 50% { box-shadow: 0 0 26px -2px var(--c); } }
+
+/* ---------- Comment ça marche ---------- */
+.mh2-band { background: linear-gradient(180deg, transparent, rgba(47,95,255,.07), transparent); padding-top: 18px; padding-bottom: 6px; }
+.mh2-steps { display: flex; flex-direction: column; gap: 12px; }
+.mh2-step {
+  position: relative; display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 20px; overflow: hidden;
+  background: linear-gradient(135deg, #0d1f63, #081340); border: 1px solid rgba(120,160,255,.3);
+  box-shadow: 0 18px 36px -18px rgba(20,50,160,.8);
+  animation: mh2StepIn .7s cubic-bezier(.2,.8,.2,1) both;
+}
+.mh2-step:nth-child(2) { animation-delay: .15s; }
+.mh2-step:nth-child(3) { animation-delay: .3s; }
+@keyframes mh2StepIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.mh2-step::before { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(91,143,255,.4), transparent 70%); }
+.mh2-step:not(:last-child)::after { content: ""; position: absolute; left: 34px; bottom: -14px; height: 14px; border-left: 2px dashed rgba(91,143,255,.8); }
+.mh2-n { position: relative; width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; font: 800 18px 'Poppins', sans-serif; color: #fff; background: linear-gradient(135deg, #2559f0, #6ea1ff); box-shadow: 0 0 0 4px rgba(91,143,255,.2), 0 0 20px rgba(91,143,255,.7); animation: mh2Np 2.4s ease-in-out infinite; }
+@keyframes mh2Np { 50% { box-shadow: 0 0 0 7px rgba(91,143,255,.12), 0 0 30px rgba(91,143,255,.95); } }
+.mh2-step b { display: block; font: 700 14.5px 'Poppins', sans-serif; color: #fff; }
+.mh2-step p { font-size: 12px; color: #b9c6ee; line-height: 1.45; margin: 3px 0 0; }
+.mh2-step .mh2-si { margin-left: auto; color: #7fb0ff; font-size: 22px; position: relative; }
+
+/* ---------- Suivre mon véhicule ---------- */
+.mh2-track {
+  position: relative; overflow: hidden; display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 22px; color: #fff; text-decoration: none;
+  border: 1px solid rgba(140,175,255,.6); background: linear-gradient(120deg, #1f4be0, #4b8bff);
+  box-shadow: 0 18px 40px -12px rgba(47,95,255,.9); animation: mh2Tp 2.6s ease-in-out infinite;
+}
+@keyframes mh2Tp { 50% { box-shadow: 0 18px 40px -12px rgba(47,95,255,.9), 0 0 0 7px rgba(91,143,255,.18); } }
+.mh2-ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; font-size: 19px; color: #fff; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.5); }
+.mh2-track b { font: 700 15px 'Poppins', sans-serif; display: block; }
+.mh2-track p { font-size: 11.5px; color: #e2eaff; margin: 3px 0 0; line-height: 1.4; }
+.mh2-track .mh2-go { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.2); display: grid; place-items: center; flex: none; }
+
+/* ---------- Avis Google ---------- */
+.mh2-gb { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 18px; background: var(--mh-card); border: 1px solid var(--mh-line); box-shadow: var(--mh-sh); margin-bottom: 12px; }
+.mh2-gb b { font: 800 24px 'Poppins', sans-serif; color: var(--mh-ink); }
+.mh2-gb b small { font-size: 13px; opacity: .6; }
+.mh2-gs { display: flex; gap: 2px; color: #f5b400; font-size: 13px; }
+.mh2-gs svg { fill: currentColor; }
+.mh2-gb > span { margin-left: auto; font: 600 11px 'Inter', sans-serif; color: var(--mh-ink3); }
+.mh2-rev { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 8px; margin: 0 -16px; scrollbar-width: none; }
+.mh2-rev::-webkit-scrollbar { display: none; }
+.mh2-rv { flex: none; width: 250px; border-radius: 18px; padding: 15px; background: var(--mh-card); border: 1px solid var(--mh-line); box-shadow: var(--mh-sh); }
+.mh2-rv .mh2-gs { color: var(--mh-gold); }
+.mh2-rv p { font-size: 12px; line-height: 1.5; margin: 8px 0 9px; color: var(--mh-ink2); }
+.mh2-rv small { font: 700 11px 'Inter', sans-serif; color: var(--mh-ink); }
+
+/* ---------- FAQ ---------- */
+.mh2-faq { border: 1px solid var(--mh-line); background: var(--mh-card); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; box-shadow: var(--mh-sh); }
+.mh2-faq.is-open { border-color: var(--mh-blue2); }
+.mh2-faq button { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; font: 600 13px 'Inter', sans-serif; color: var(--mh-ink); }
+.mh2-faq .mh2-pl { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none; background: rgba(47,95,255,.12); color: var(--mh-blue); font: 700 16px 'Inter', sans-serif; }
+.mh2-faq .mh2-a { font: 400 12px/1.5 'Inter', sans-serif; color: var(--mh-ink2); margin-top: 10px; }
+
+/* ---------- Pied de page ---------- */
+.mh2-foot { margin: 26px 16px 0; border-radius: 20px; border: 1px solid var(--mh-line); background: var(--mh-card); padding: 14px; display: flex; gap: 12px; align-items: center; }
+.mh2-foot b { font-size: 13px; color: var(--mh-ink); }
+.mh2-foot small { display: block; font-size: 11px; color: var(--mh-ink3); margin-top: 2px; }
+.mh2-map { width: 52px; height: 52px; flex: none; border-radius: 14px; background: rgba(47,95,255,.08); border: 1px solid var(--mh-line); padding: 4px; }
+.mh2-links { margin: 18px 16px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 12px; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--mh-ink3); }
+.mh2-links a { color: inherit; text-decoration: none; }
+.mh2-copy { text-align: center; font-size: 10px; color: var(--mh-ink3); margin: 14px 0 0; }
+
+/* =========================================================
+   En-tête mobile (toutes les pages publiques) : logo carré + téléphone/menu
+   ========================================================= */
+@media (max-width: 767px) {
+  .mnav-bar { background: linear-gradient(180deg, #040a26, #0a1a52) !important; box-shadow: 0 10px 30px -12px rgba(4,10,40,.6) !important; }
+  .mh2-logo { width: 40px; height: 40px; border-radius: 13px; object-fit: cover; flex: none; box-shadow: 0 0 14px rgba(79,140,255,.75); }
+  .mh2-word { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 13.5px; letter-spacing: .01em; white-space: nowrap; color: #fff !important; text-transform: none !important; }
+  .mnav-bar .mh2-word span, html.theme-light .mnav-bar .mh2-word span { color: #6ea1ff !important; text-shadow: 0 0 10px rgba(91,143,255,.55); }
+  .mh2-phone {
+    width: 38px; height: 38px; border-radius: 19px; display: grid; place-items: center; color: #2ee671;
+    border: 1px solid rgba(140,170,255,.35); background: rgba(255,255,255,.08);
+  }
+  .mh2-phone svg { filter: drop-shadow(0 0 5px rgba(46,230,113,.7)); }
+  .mnav-bar .mnav-menu-trigger { width: 38px; height: 38px; border-radius: 19px; background: rgba(255,255,255,.08); border: 1px solid rgba(140,170,255,.35); }
+}
+
+/* =========================================================
+   Barre du bas : fine, repliable (public mobile)
+   ========================================================= */
+.ldock-zone.mh2-dock { padding: 0 14px 12px; padding-bottom: max(env(safe-area-inset-bottom), 12px); }
+.mh2-dock .ldock { border-radius: 22px; padding: 6px 6px 7px; background: rgba(10,20,58,.92); box-shadow: 0 16px 34px -12px rgba(20,40,120,.55); }
+.mh2-dock .ldock-item { gap: 3px; padding: 5px 4px; font-size: 10px; color: #7d8fc7; }
+.mh2-dock .ldock-item svg { width: 20px; height: 20px; }
+.mh2-dock .ldock-item.is-active { color: #fff; }
+.mh2-dock .ldock-item.is-active .ldock-ic::before { inset: -6px; }
+.mh2-dock .ldock-item.is-raised { margin-top: -22px; }
+.mh2-dock .ldock-fab { width: 48px; height: 48px; border-radius: 16px; box-shadow: 0 10px 22px rgba(47,95,255,.6), 0 0 0 5px var(--mh-ring, #050a1c); }
+html.theme-light .mh2-dock .ldock-fab { box-shadow: 0 10px 22px rgba(47,95,255,.6), 0 0 0 5px #eef3ff; }
+.mh2-dock .ldock-fab svg { width: 22px; height: 22px; }
+.mh2-dock .ldock-item.is-raised span { margin-top: 2px; color: #dfe6ff; }
+.mh2-dock .ldock-toggle { width: 38px; height: 38px; left: 16px; background: rgba(47,95,255,.95); border-color: rgba(143,163,217,.45); }
+.ldock-zone.mh2-dock.is-collapsed .ldock-toggle { bottom: 14px; }
+@media (min-width: 768px) { .ldock-zone.mh2-dock { display: none; } }

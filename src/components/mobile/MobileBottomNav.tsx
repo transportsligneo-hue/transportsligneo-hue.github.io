@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Home, Truck, Sparkles, User, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Home, Truck, User, ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { RouteAB } from "@/components/mobile/MobileIcons";
+import "@/styles/mobile-home-v2.css";
 import { useAuth } from "@/hooks/useAuth";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
@@ -13,6 +15,20 @@ export default function MobileBottomNav() {
   const navigate = useNavigate();
   const { isAuthenticated, role } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const lastY = useRef(0);
+
+  // Se replie quand on descend dans la page, réapparaît quand on remonte.
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY.current) < 8) return;
+      setCollapsed(y > lastY.current && y > 120);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const inDashboard =
     location.pathname.startsWith("/dashboard-client") ||
@@ -41,7 +57,7 @@ export default function MobileBottomNav() {
 
 
   return (
-    <nav aria-label="Navigation principale" className={`md:hidden ldock-zone${collapsed ? " is-collapsed" : ""}`}>
+    <nav aria-label="Navigation principale" className={`md:hidden ldock-zone mh2-dock${collapsed ? " is-collapsed" : ""}`}>
       <button
         type="button"
         onClick={() => setCollapsed((v) => !v)}
@@ -70,7 +86,7 @@ export default function MobileBottomNav() {
 
         <button onClick={goEstimer} className="ldock-item is-raised" aria-label="Estimer mon trajet">
           <span className="ldock-fab">
-            <Sparkles strokeWidth={2.1} />
+            <RouteAB />
           </span>
           <span>Estimer</span>
         </button>

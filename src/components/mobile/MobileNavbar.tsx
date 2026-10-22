@@ -6,6 +6,7 @@ import logoDriver from "@/assets/logo-driver.png.asset.json";
 import ThemePreference from "@/components/ThemePreference";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Button } from "@/components/ui/button";
+import "@/styles/mobile-home-v2.css";
 
 type NavAccent = "b2b" | undefined;
 const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; search?: { audience: "pro" | "particuliers" } }> = [
@@ -43,19 +44,18 @@ export default function MobileNavbar() {
       <div className="mnav-bar r4-topbar-mobile">
         <div className="grid h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:px-4">
           <Link to="/" className="flex min-w-0 items-center gap-2 overflow-hidden" aria-label="Transports Ligneo · Accueil">
-            <img src={pathname === "/devenir-convoyeur" ? logoDriver.url : logoLigneo()} alt="" className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 object-contain" />
+            <img src={pathname === "/devenir-convoyeur" ? logoDriver.url : logoLigneo()} alt="" className="mh2-logo" />
             <span className="min-w-0 flex flex-col gap-[3px]">
-              <span className="mnav-wordmark truncate font-black text-[15px] sm:text-[17px] uppercase">
+              <span className="mnav-wordmark mh2-word truncate">
                 TRANSPORTS <span>LIGNEO</span>
               </span>
               <span className="w-fit"><OctobreRoseBadge compact /></span>
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
-            <a href="tel:+33782456181" className="nav-phone-block mnav-phone-compact md:hidden" aria-label="Appeler Transports Ligneo au 07 82 45 61 81">
-              <span className="nav-phone-icon"><Phone size={13} strokeWidth={2.4} /></span>
-              <span className="mnav-phone-label">Appeler</span>
-            </a>
+            <Link to="/contact" className="mh2-phone md:hidden" aria-label="Contacter Transports Ligneo">
+              <Phone size={17} strokeWidth={2.3} />
+            </Link>
             <div className="hidden md:block"><ThemePreference variant="compact" /></div>
             <Button type="button" variant="ghost" size="icon" className="mnav-menu-trigger md:hidden" aria-label={open ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
               {open ? <X /> : <Menu />}
