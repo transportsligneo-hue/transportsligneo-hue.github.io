@@ -27,7 +27,7 @@ export default function MobileCommentCaMarcheScreen() {
       <div className="mp-vid">
         <div className="mp-vt">
           <button type="button" className={!pro ? "on" : ""} onClick={() => setPro(false)}>Particuliers</button>
-          <button type="button" className={pro ? "on pro" : ""} onClick={() => setPro(true)}>Pros</button>
+          <button type="button" className={pro ? "on pro" : ""} onClick={() => setPro(true)}>Professionnels</button>
         </div>
         <PresentationDemoFilm
           key={pro ? "pro" : "part"}

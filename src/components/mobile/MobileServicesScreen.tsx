@@ -49,7 +49,7 @@ export default function MobileServicesScreen({
           <User size={14} /> Particuliers
         </button>
         <button type="button" role="tab" aria-selected={pro} className={pro ? "on pro" : ""} onClick={() => onAudienceChange("pro")}>
-          <Briefcase size={14} /> Pros
+          <Briefcase size={14} /> Professionnels
         </button>
       </div>
 
