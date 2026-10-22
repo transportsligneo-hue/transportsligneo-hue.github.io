@@ -238,6 +238,8 @@ function LoginPage() {
               size="lg"
               variant={isMobileApp || tab === "pro" ? "green" : "blue"}
               driverBadge={isMobileApp || tab === "pro"}
+              badgePx={isMobileApp ? 72 : undefined}
+              wordPx={isMobileApp ? 21 : undefined}
               className="justify-center relative z-10"
             />
           </Link>
