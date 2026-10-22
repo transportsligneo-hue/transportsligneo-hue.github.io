@@ -188,6 +188,16 @@ export default function AssistantIaWidget() {
     return () => { cancelAnimationFrame(r1); if (r2) cancelAnimationFrame(r2); };
   }, [pathname]);
 
+  // Mobile uniquement : après ~6 s, Vroomy se range sur le côté, il ne reste qu'une petite languette
+  const [docked, setDocked] = useState(false);
+  useEffect(() => {
+    setDocked(false);
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 640px)").matches) return;
+    const t = setTimeout(() => setDocked(true), 6500);
+    return () => clearTimeout(t);
+  }, [pathname]);
+  useEffect(() => { if (open) setDocked(false); }, [open]);
+
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
@@ -442,7 +452,7 @@ export default function AssistantIaWidget() {
       <Button variant="ghost"
         type="button"
         ref={launcherRef}
-        className={`vrm-launcher vrm-chat-launcher vrm-launcher-animated${intro ? " vrm-intro" : ""}`}
+        className={`vrm-launcher vrm-chat-launcher vrm-launcher-animated${intro ? " vrm-intro" : ""}${docked ? " vrm-docked" : ""}`}
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
@@ -456,6 +466,12 @@ export default function AssistantIaWidget() {
         {greet && !open && <span className="vroomy-greet" aria-hidden="true">Bonjour ! Je suis Vroomy.</span>}
 
       </Button>
+
+      {docked && !open && (
+        <button type="button" className="vrm-tab" aria-label="Déplier Vroomy" onClick={() => setDocked(false)}>
+          <span aria-hidden="true">‹</span>
+        </button>
+      )}
 
       <div
         ref={panelRef}

@@ -12310,3 +12310,24 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   object-fit: contain;
   filter: none !important;
 }
+
+
+/* ===== Vroomy mobile : rangé sur le côté après quelques secondes, languette pour le déplier ===== */
+.vrm-tab { display: none; }
+@media (max-width: 640px) {
+  .vrm-launcher.vrm-chat-launcher { transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .3s ease; }
+  .vrm-launcher.vrm-chat-launcher.vrm-docked,
+  .vrm-launcher.vrm-chat-launcher.vrm-intro.vrm-docked {
+    animation: none; transform: translateX(calc(100% + 24px)); opacity: 0; pointer-events: none;
+  }
+  .vrm-tab {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; right: 0; bottom: 151px; z-index: 60;
+    width: 22px; height: 52px; padding: 0; border: 0; cursor: pointer;
+    border-radius: 14px 0 0 14px; color: #fff; font-size: 20px; line-height: 1;
+    background: linear-gradient(180deg, #4d7bff, #2f5fff);
+    box-shadow: 0 8px 20px -6px rgba(47,95,255,.6);
+    animation: vrmTabIn .4s ease both;
+  }
+}
+@keyframes vrmTabIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
