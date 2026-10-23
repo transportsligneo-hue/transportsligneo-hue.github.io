@@ -1,5 +1,6 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Phone, X } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Menu, Phone, User, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { logoLigneoSeasonal as logoLigneo } from "@/lib/seasonal-logo";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
@@ -27,6 +28,15 @@ const HIDDEN_PREFIXES = [
 export default function MobileNavbar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, role } = useAuth();
+  const goEspace = () => {
+    setOpen(false);
+    if (!isAuthenticated) return navigate({ to: "/login" });
+    if (role === "admin" || role === "super_admin") return navigate({ to: "/admin" });
+    if (role === "convoyeur") return navigate({ to: "/convoyeur" });
+    return navigate({ to: "/dashboard-client" });
+  };
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -80,6 +90,9 @@ export default function MobileNavbar() {
           className={`mnav-sheet-link${link.accent === "b2b" ? " is-pro" : ""}`} onClick={() => setOpen(false)}>
           {link.label}
         </Link>)}
+        <button type="button" tabIndex={open ? 0 : -1} onClick={goEspace} className="mnav-sheet-link flex items-center gap-2">
+          <User size={16} /> {isAuthenticated ? "Mon espace" : "Connexion"}
+        </button>
         <ThemePreference variant="full" />
       </nav>
     </header>
