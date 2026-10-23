@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
 import ogHome from "@/assets/og-accueil-ligneo.jpg.asset.json";
 
-const OG_IMAGE = `https://transportsligneo.fr${ogHome.url}`;
+const OG_IMAGE = ogHome.url.startsWith("http") ? ogHome.url : `https://transportsligneo.fr${ogHome.url}`;
 
 export const Route = createFileRoute("/")({
   component: Index,
