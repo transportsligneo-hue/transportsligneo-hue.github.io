@@ -30,7 +30,7 @@ const MESSAGES: Msg[] = [
   { art: "driver", theme: "green", kick: "Application", title: "Appli Convoyeur", sub: "En phase de test", cta: "play", to: "/devenir-convoyeur" },
   { art: "gps", theme: "blue", kick: "Suivi", title: "Suivi GPS en direct", sub: "Du départ à l'arrivée, en direct", cta: "Voir", to: "/comment-ca-marche" },
   { art: "shield", theme: "cyan", kick: "Sécurité", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "En savoir plus", to: "/comment-ca-marche" },
-  { art: "plate", theme: "blue", kick: "Astuce", title: "Recherche par plaque", sub: "Infos véhicule remplies seules", cta: "Essayer", to: "/tarifs" },
+  { art: "plate", theme: "blue", kick: "Astuce", title: "Recherche par plaque", sub: "Marque, modèle, VIN, motorisation remplis", cta: "Essayer", to: "/tarifs" },
   { art: "code", theme: "violet", kick: "Sécurité", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "Voir", to: "/comment-ca-marche" },
   { art: "quote", theme: "violet", kick: "Devis", title: "Devis en 2 minutes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
   { art: "photo", theme: "pink", kick: "État des lieux", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },

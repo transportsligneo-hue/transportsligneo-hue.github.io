@@ -207,7 +207,7 @@ export function Scene({ kind }: { kind: SceneKind }) {
           </g>
           <g className="tns-type"><text x="36" y="19.5" textAnchor="middle" fontSize="9.5" fontWeight="800" fill="#0f172a" fontFamily={MONO} textLength="40" lengthAdjust="spacingAndGlyphs">AB-123-CD</text></g>
           <g className="tns-lens"><circle cx="66" cy="14" r="6.5" fill="rgba(255,255,255,.2)" stroke="#fff" strokeWidth="2.5" /><path d="m71 19 6 6" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" /></g>
-          {[["Marque", "Renault", 33], ["Modèle", "Clio V", 40], ["Énergie", "Essence", 47]].map(([k, v, y], i) => (
+          {[["Marque", "Renault", 33], ["Modèle", "Clio V", 40], ["VIN", "VF1RJA00…", 47]].map(([k, v, y], i) => (
             <g key={k as string} className={`tns-rise tns-r${i}`} style={{ animationDelay: `${1.3 + i * 0.35}s` }}>
               <rect x="4" y={(y as number) - 5} width="78" height="6.5" rx="3.25" fill="rgba(255,255,255,.14)" />
               <text x="9" y={(y as number) - 0.6} fontSize="3.8" fontWeight="700" fill="#cfe0ff" fontFamily={SANS}>{k}</text>
