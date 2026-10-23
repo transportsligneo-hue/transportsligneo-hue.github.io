@@ -73,10 +73,11 @@ const sections: Section[] = [
       <>
         <p className="mb-2">Le paiement peut être effectué par les moyens suivants :</p>
         <ul className="list-disc list-inside space-y-1 ml-2">
+          <li>Carte bancaire, en ligne, au moment de la validation du devis (moyen de paiement par défaut pour les particuliers et les professionnels)</li>
           <li>Virement bancaire</li>
-          <li>Espèces</li>
-          <li>Autres moyens selon accord</li>
+          <li>Espèces ou autres moyens selon accord</li>
         </ul>
+        <p className="mt-2"><strong>Paiement différé.</strong> Le paiement par virement à 30 jours sur facture est réservé aux flottes et grands comptes, après ouverture d'un compte professionnel et accord écrit de Transports Ligneo. Il n'est pas proposé aux autres clients, qui règlent par carte bancaire.</p>
         <p className="mt-2">Le paiement peut être exigé avant ou à la fin de la prestation.</p>
       </>
     ),

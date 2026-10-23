@@ -5,7 +5,7 @@ import logoDriver from "@/assets/logo-driver.png.asset.json";
  * (devis, facture, appli convoyeur, carte de suivi, code de livraison, LinkedIn, API).
  * Chaque scène est relancée à chaque changement d'annonce (clé React côté parent).
  */
-export const SCENE_KINDS = ["quote", "invoice", "driver", "wheel", "gps", "code", "linkedin", "api"] as const;
+export const SCENE_KINDS = ["quote", "invoice", "driver", "wheel", "gps", "code", "linkedin", "api", "shield", "photo", "verified", "google", "plate"] as const;
 export type SceneKind = (typeof SCENE_KINDS)[number];
 export const isScene = (k: string): k is SceneKind => (SCENE_KINDS as readonly string[]).includes(k);
 
@@ -139,6 +139,83 @@ export function Scene({ kind }: { kind: SceneKind }) {
           <span className="tns-bubble tns-bubble--b">♥</span>
           <span className="tns-bubble tns-bubble--c">+1</span>
         </div>
+      );
+    case "shield":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <circle className="tns-halo" cx="43" cy="26" r="17" fill="none" stroke="#5eead4" strokeWidth="1.4" />
+          <path className="tns-pop" d="M43 4 63 11.5v14c0 11-8 19.4-20 24.5C31 45 23 36.5 23 25.5v-14z" fill="url(#tnsShieldG)" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
+          <defs><linearGradient id="tnsShieldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#22d3ee" /><stop offset="1" stopColor="#2563eb" /></linearGradient></defs>
+          <path className="tns-check" d="m33.5 27 7 7 13-14.5" stroke="#fff" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none" pathLength="100" />
+          <g className="tns-fade tns-d3"><rect x="48" y="38" width="34" height="13" rx="6.5" fill="#0b1a4d" stroke="#5eead4" strokeWidth="1" /><text x="65" y="47.2" textAnchor="middle" fontSize="5.4" fontWeight="800" fill="#5eead4" fontFamily={SANS}>Assuré</text></g>
+          <g className="tns-rise tns-d4"><g transform="translate(2 40)">{<path d="M2 8.5V6.2c0-.7.4-1.3 1-1.5l3-1.2C7 3 7.8 2 9 2h4c1.2 0 2 .6 2.7 1.5L18 5l2 .6c.6.2 1 .7 1 1.4v1.5c0 .5-.4 1-1 1H2.8c-.4 0-.8-.4-.8-.8z" fill="#fff" />}<circle cx="6" cy="9.4" r="1.9" fill="#0b1a4d" stroke="#fff" strokeWidth="1" /><circle cx="16" cy="9.4" r="1.9" fill="#0b1a4d" stroke="#fff" strokeWidth="1" /></g></g>
+          <circle className="tns-spark" cx="68" cy="9" r="2" fill="#fff" /><circle className="tns-spark tns-d2" cx="16" cy="14" r="1.6" fill="#fff" />
+        </svg>
+      );
+    case "photo":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <rect className="tns-pop" x="3" y="3" width="80" height="50" rx="8" fill="#1b0f3a" stroke="rgba(255,255,255,.3)" strokeWidth="1" />
+          <path className="tns-fade" d="M18 33c0-3 1.5-5 4-6l6-3c2-1.8 4-2.8 7-2.8h10c3 0 5 1 7 3l4 2.8 6 1.2c2.5.5 4 2.2 4 4.8V37H18z" fill="#cbd5e1" />
+          <path className="tns-fade" d="m31 24 3-3.5h12l5 3.5z" fill="#7dd3fc" />
+          <circle className="tns-fade" cx="29" cy="37" r="5" fill="#0f172a" stroke="#cbd5e1" strokeWidth="2" /><circle className="tns-fade" cx="62" cy="37" r="5" fill="#0f172a" stroke="#cbd5e1" strokeWidth="2" />
+          <path className="tns-focus" d="M10 15V10h5M71 10h5v5M76 41v5h-5M15 46h-5v-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none" />
+          <rect className="tns-flash" x="3" y="3" width="80" height="50" rx="8" fill="#fff" />
+          <g className="tns-stamp tns-d3"><rect x="52" y="6" width="26" height="10" rx="5" fill="#ec4899" /><text x="65" y="13.2" textAnchor="middle" fontSize="5.6" fontWeight="800" fill="#fff" fontFamily={SANS}>360°</text></g>
+          <g className="tns-rise tns-d4"><rect x="14" y="43" width="22" height="7" rx="3.5" fill="rgba(255,255,255,.18)" /><text x="25" y="48.3" textAnchor="middle" fontSize="4.2" fontWeight="700" fill="#fff" fontFamily={MONO}>14:32:07</text></g>
+          <g className="tns-stamp tns-d4"><circle cx="70" cy="44" r="6.5" fill="#22c55e" stroke="#fff" strokeWidth="1.5" /><path d="m66.8 44.2 2.2 2.2 4-4.4" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>
+        </svg>
+      );
+    case "verified":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <g className="tns-pop"><rect x="3" y="4" width="80" height="48" rx="7" fill="#fff" /><rect x="3" y="4" width="80" height="10" rx="7" fill="#16a34a" /><rect x="3" y="9" width="80" height="5" fill="#16a34a" /><text x="9" y="11.6" fontSize="5" fontWeight="800" fill="#fff" fontFamily={SANS} letterSpacing=".5">CONVOYEUR LIGNEO</text></g>
+          <g className="tns-rise tns-d1"><circle cx="17" cy="27" r="7.5" fill="#dbeafe" /><circle cx="17" cy="24.5" r="3" fill="#2563eb" /><path d="M10.5 34c1-4 3.5-5.5 6.5-5.5s5.5 1.5 6.5 5.5" fill="#2563eb" /></g>
+          {[["Identité", 21], ["Formé", 28.5], ["Assuré", 36]].map(([t, y], i) => (
+            <g key={t as string}>
+              <text className={`tns-fade tns-r${i}`} x="31" y={(y as number) + 1.8} fontSize="5.2" fontWeight="700" fill="#334155" fontFamily={SANS}>{t}</text>
+              <g className={`tns-stamp tns-r${i}`}><circle cx="74" cy={y as number} r="4" fill="#22c55e" /><path d={`m72 ${y} 1.4 1.4 2.8-3`} stroke="#fff" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>
+            </g>
+          ))}
+          <g className="tns-stamp tns-d4"><rect x="8" y="42.500" width="72" height="8" rx="4" fill="#16a34a" /><text x="44" y="48.300" textAnchor="middle" fontSize="5" fontWeight="800" fill="#fff" fontFamily={SANS}>✓ VÉRIFIÉ</text></g>
+        </svg>
+      );
+    case "google":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <rect className="tns-pop" x="2" y="3" width="82" height="50" rx="10" fill="#fff" />
+          <g transform="translate(8 8) scale(.62)">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+            <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+            <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+          </g>
+          <text className="tns-score" x="62" y="25" textAnchor="middle" fontSize="16" fontWeight="800" fill="#0f172a" fontFamily={SANS}>4,8</text>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <g key={i} transform={`translate(${41 + i * 8.6} 40) scale(1.35)`}><path className={`tns-gstar tns-gstar--${i}`} d="m0-4.2 1.2 2.6 2.8.3-2.1 1.9.6 2.8L0 1.9-2.5 3.4l.6-2.8L-4-1.3l2.8-.3z" fill="#fbbc04" /></g>
+          ))}
+          <g className="tns-slam tns-d4"><rect x="8" y="45" width="30" height="6" rx="3" fill="#e8f0fe" /><text x="23" y="49.6" textAnchor="middle" fontSize="3.8" fontWeight="800" fill="#1a73e8" fontFamily={SANS}>Avis vérifiés</text></g>
+        </svg>
+      );
+    case "plate":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <g className="tns-pop">
+            <rect x="4" y="5" width="56" height="20" rx="4.5" fill="#fff" stroke="#cbd5e1" strokeWidth="1" />
+            <path d="M4 9.5a4.5 4.5 0 0 1 4.5-4.5H13v20H8.5A4.5 4.5 0 0 1 4 20.5z" fill="#1d4ed8" />
+            <text x="8.5" y="17.5" textAnchor="middle" fontSize="5" fontWeight="800" fill="#fde047" fontFamily={SANS}>F</text>
+          </g>
+          <g className="tns-type"><text x="36" y="19.5" textAnchor="middle" fontSize="9.5" fontWeight="800" fill="#0f172a" fontFamily={MONO} textLength="40" lengthAdjust="spacingAndGlyphs">AB-123-CD</text></g>
+          <g className="tns-lens"><circle cx="66" cy="14" r="6.5" fill="rgba(255,255,255,.2)" stroke="#fff" strokeWidth="2.5" /><path d="m71 19 6 6" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" /></g>
+          {[["Marque", "Renault", 33], ["Modèle", "Clio V", 40], ["Énergie", "Essence", 47]].map(([k, v, y], i) => (
+            <g key={k as string} className={`tns-rise tns-r${i}`} style={{ animationDelay: `${1.3 + i * 0.35}s` }}>
+              <rect x="4" y={(y as number) - 5} width="78" height="6.5" rx="3.25" fill="rgba(255,255,255,.14)" />
+              <text x="9" y={(y as number) - 0.6} fontSize="3.8" fontWeight="700" fill="#cfe0ff" fontFamily={SANS}>{k}</text>
+              <text x="78" y={(y as number) - 0.6} textAnchor="end" fontSize="4.2" fontWeight="800" fill="#fff" fontFamily={SANS}>{v}</text>
+              <circle cx="75" cy={(y as number) - 1.8} r="0" fill="#22c55e" />
+            </g>
+          ))}
+        </svg>
       );
     case "api":
       return (

@@ -12355,7 +12355,7 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   .tln-hd-glare { overflow: hidden; }
   .tln-hd-glare::after { content: ""; position: absolute; left: 0; right: 0; top: -40%; height: 40%; background: linear-gradient(180deg, transparent, rgba(255,255,255,.07), transparent); animation: tlnHdScan 3.6s linear infinite; }
   .tln-hd-glare { position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(115deg, rgba(255,255,255,.12), transparent 38%); pointer-events: none; }
-  .tln-hd-link { position: relative; z-index: 1; display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; height: 100%; text-decoration: none; color: inherit; }
+  .tln-hd-link { position: relative; z-index: 2; display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; height: 100%; text-decoration: none; color: inherit; }
   .tln-hd-ic { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--t1) 70%, #fff 10%), color-mix(in srgb, var(--t2) 70%, #000)); box-shadow: 0 0 22px -2px var(--t1), inset 0 1px 0 rgba(255,255,255,.45); animation: tlnHdBoot .7s cubic-bezier(.22,1,.36,1) both; }
   .tln-hd-ic svg { display: block; }
   .tln-hd-ic.is-raw { background: rgba(255,255,255,.07); box-shadow: 0 0 22px -6px var(--t1), inset 0 0 0 1px rgba(255,255,255,.14); }
@@ -12446,7 +12446,7 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   .tns-in { overflow: visible; }
   .tns-bubble { position: absolute; font: 800 8px/1 Poppins, sans-serif; color: #fff; background: #0a66c2; border: 1px solid #fff; border-radius: 99px; padding: 2px 5px; opacity: 0; animation: tnsBubble 1.5s ease-out both; }
   .tns-bubble--a { left: 16px; bottom: 22px; animation-delay: .5s; } .tns-bubble--b { left: 52px; bottom: 28px; background: #ef4444; animation-delay: 1.1s; } .tns-bubble--c { left: 34px; bottom: 30px; animation-delay: 1.6s; }
-  .tln-art-vroomy-hd { display: block; width: 184px; height: 184px; transform: scale(.4565); transform-origin: 0 0; margin: -19px 0 0 -19px; }
+  .tln-art-vroomy-hd { display: block; width: 184px; height: 184px; transform: scale(.25); transform-origin: 0 0; margin: 3px 0 0 3px; }
   .tln-hd-ic.is-vroomy .tln-art-vroomy-pop { overflow: visible; }
   @keyframes tnsPop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
   @keyframes tnsRise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
@@ -12464,4 +12464,39 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   @keyframes tnsRoadCar { from { left: -18px; } to { left: 92px; } }
   @keyframes tnsBubble { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 25% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-14px); } }
 }
+@media (min-width: 1900px) {
+  .tns-halo { animation: tnsHalo 1.8s ease-out .5s infinite; transform-box: fill-box; transform-origin: 50% 50%; opacity: 0; }
+  .tns-check { stroke-dasharray: 100; stroke-dashoffset: 100; animation: tnsRoute .6s ease-out .6s forwards; }
+  .tns-spark { animation: tnsSpark 1.2s ease-in-out .9s infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+  .tns-focus { animation: tnsFocus .9s cubic-bezier(.3,1.4,.5,1) .3s both; transform-box: fill-box; transform-origin: 50% 50%; }
+  .tns-flash { opacity: 0; animation: tnsFlash .45s ease-out 1.5s both; }
+  .tns-r0 { animation-delay: .6s; } .tns-r1 { animation-delay: 1s; } .tns-r2 { animation-delay: 1.4s; }
+  .tns-score { animation: tnsFade .4s ease .5s both; }
+  .tns-gstar { transform-box: fill-box; transform-origin: 50% 50%; animation: tnsStar .4s cubic-bezier(.3,1.8,.5,1) both; }
+  .tns-gstar--0 { animation-delay: .7s; } .tns-gstar--1 { animation-delay: 1s; } .tns-gstar--2 { animation-delay: 1.3s; } .tns-gstar--3 { animation-delay: 1.6s; } .tns-gstar--4 { animation-delay: 1.9s; }
+  @keyframes tnsHalo { from { opacity: .8; transform: scale(.8); } to { opacity: 0; transform: scale(1.5); } }
+  @keyframes tnsSpark { 0%,100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1.4); } }
+  @keyframes tnsFocus { from { opacity: 0; transform: scale(1.5); } to { opacity: 1; transform: none; } }
+  @keyframes tnsFlash { 0% { opacity: .9; } 100% { opacity: 0; } }
+  @keyframes tnsStar { from { opacity: 0; transform: scale(0) rotate(-90deg); } to { opacity: 1; transform: none; } }
+}
 @media (prefers-reduced-motion: reduce) { .tns *, .tns { animation: none !important; } .tns-route { stroke-dashoffset: 0; } .tns-type { clip-path: none; } }
+
+@media (min-width: 1900px) {
+  .tln-mq { display: block; overflow: hidden; white-space: nowrap; min-width: 0; text-overflow: clip; }
+  .tln-mq-in { display: inline-block; will-change: transform; }
+  .tln-hd-title .tln-mq-in, .tln-hd-title.tln-mq .tln-mq-in { animation: tlnTitleIn .7s cubic-bezier(.22,1,.36,1) both; }
+  .tln-hd-sub.tln-mq .tln-mq-in { animation: tlnSubIn .7s ease .15s both; }
+  .tln-mq-in.is-moving { animation: tlnMarq 2.6s ease-in-out .6s both !important; }
+  @keyframes tlnMarq { 0%, 12% { transform: none; opacity: 1; } 88%, 100% { transform: translateX(var(--mq)); opacity: 1; } }
+  @keyframes tlnTitleIn { from { clip-path: inset(0 100% 0 0); transform: translateX(-8px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+  @keyframes tlnSubIn { from { opacity: 0; transform: translateY(6px); letter-spacing: .08em; } to { opacity: 1; transform: none; letter-spacing: 0; } }
+}
+@media (min-width: 1900px) { .tns-lens { animation: tnsLens 1.1s ease-in-out .3s both; transform-box: fill-box; transform-origin: 50% 50%; } @keyframes tnsLens { 0% { transform: translate(-28px, 2px); } 60% { transform: translate(-6px, 0); } 100% { transform: none; } } }
+@media (min-width: 1900px) {
+  .tns-d1.tns-d1 { animation-delay: .6s; } .tns-d2.tns-d2 { animation-delay: .9s; } .tns-d3.tns-d3 { animation-delay: 1.3s; } .tns-d4.tns-d4 { animation-delay: 1.9s; }
+  .tns-r0.tns-r0 { animation-delay: .6s; } .tns-r1.tns-r1 { animation-delay: 1s; } .tns-r2.tns-r2 { animation-delay: 1.4s; }
+  .tln-hd-ic.is-vroomy { flex: 0 0 52px; min-width: 52px; width: 52px; height: 52px; }
+  .tln-hd-ic.is-vroomy .tln-art-vroomy-pop { width: 52px; height: 52px; overflow: visible; }
+  .tln-art-vroomy-hd { position: absolute; left: 0; top: 0; }
+}

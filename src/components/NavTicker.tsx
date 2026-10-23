@@ -20,7 +20,7 @@ type Msg = {
   action?: "vroomy";
 };
 
-const WIDE: ArtKind[] = ["plate", "code", "google", "card"];
+const WIDE: ArtKind[] = ["card"];
 const RAW: ArtKind[] = ["vroomy", "driver", "wheel", "plate", "code", "google", "card", "invoice"];
 
 // Repli : fiche Google Maps (le lien « laisser un avis » exact vient des Paramètres admin quand il est lisible)
@@ -28,9 +28,9 @@ const GOOGLE_FALLBACK = "https://www.google.com/maps/search/?api=1&query=Transpo
 
 const MESSAGES: Msg[] = [
   { art: "driver", theme: "green", kick: "Application", title: "Appli Convoyeur", sub: "En phase de test", cta: "play", to: "/devenir-convoyeur" },
-  { art: "gps", theme: "blue", kick: "Suivi", title: "Suivi GPS en direct", sub: "Votre véhicule, du départ à l'arrivée", cta: "Voir", to: "/comment-ca-marche" },
+  { art: "gps", theme: "blue", kick: "Suivi", title: "Suivi GPS en direct", sub: "Du départ à l'arrivée, en direct", cta: "Voir", to: "/comment-ca-marche" },
   { art: "shield", theme: "cyan", kick: "Sécurité", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "En savoir plus", to: "/comment-ca-marche" },
-  { art: "plate", theme: "blue", kick: "Astuce", title: "Saisissez la plaque", sub: "Le véhicule se remplit seul", cta: "Essayer", to: "/tarifs" },
+  { art: "plate", theme: "blue", kick: "Astuce", title: "Recherche par plaque", sub: "Infos véhicule remplies seules", cta: "Essayer", to: "/tarifs" },
   { art: "code", theme: "violet", kick: "Sécurité", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "Voir", to: "/comment-ca-marche" },
   { art: "quote", theme: "violet", kick: "Devis", title: "Devis en 2 minutes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
   { art: "photo", theme: "pink", kick: "État des lieux", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },
@@ -41,7 +41,7 @@ const MESSAGES: Msg[] = [
   { art: "verified", theme: "green", kick: "Confiance", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Voir", to: "/comment-ca-marche" },
   { art: "card", theme: "cyan", kick: "Paiement", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
   { art: "api", theme: "violet", kick: "Développeurs", title: "API Développeur", sub: "Connectez vos outils à Ligneo", cta: "Découvrir", to: "/developpeurs" },
-  { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes et grands comptes", cta: "Pour les pros", to: "/services" },
+  { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes & grands comptes", cta: "Voir", to: "/services" },
 ];
 
 function Art({ kind }: { kind: ArtKind }) {
@@ -166,6 +166,23 @@ function Art({ kind }: { kind: ArtKind }) {
 
 const INTERVAL = 3000;
 
+/** Texte entier toujours lisible : s'il dépasse, il défile doucement jusqu'à sa fin. */
+function Marq({ cls, text }: { cls: string; text: string }) {
+  const outer = useRef<HTMLSpanElement>(null);
+  const inner = useRef<HTMLSpanElement>(null);
+  const [shift, setShift] = useState(0);
+  useLayoutEffect(() => {
+    const o = outer.current, i = inner.current;
+    if (!o || !i) return;
+    setShift(Math.max(0, Math.ceil(i.scrollWidth - o.clientWidth)));
+  }, [text]);
+  return (
+    <span ref={outer} className={`${cls} tln-mq`}>
+      <span ref={inner} className={shift ? "tln-mq-in is-moving" : "tln-mq-in"} style={shift ? ({ ["--mq" as string]: `-${shift + 4}px` }) : undefined}>{text}</span>
+    </span>
+  );
+}
+
 const ARROW = (
   <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
     <path d="M2 6h8M6.5 2.5 10 6 6.5 9.5" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -253,8 +270,8 @@ export default function NavTicker() {
       <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}${m.art === "vroomy" ? " is-vroomy" : ""}${isScene(m.art) ? " is-scene" : ""}`}><Art kind={m.art} /></span>
       <span key={`t${pos}`} className="tln-hd-txt">
         <span className="tln-hd-kick"><i />{m.kick}</span>
-        <span className="tln-hd-title">{m.title}</span>
-        <span className="tln-hd-sub">{m.sub}</span>
+        <Marq cls="tln-hd-title" text={m.title} />
+        <Marq cls="tln-hd-sub" text={m.sub} />
       </span>
       <span className="tln-hd-count"><b>{String(cur + 1).padStart(2, "0")}</b> / {N}</span>
       {m.cta === "play" ? (
