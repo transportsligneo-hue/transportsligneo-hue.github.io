@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { VroomyAvatar } from "@/components/VroomyAvatar";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
 
 type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
@@ -19,7 +20,7 @@ type Msg = {
 };
 
 const WIDE: ArtKind[] = ["plate", "code", "google", "card"];
-const RAW: ArtKind[] = ["driver", "wheel", "plate", "code", "google", "card", "invoice"];
+const RAW: ArtKind[] = ["vroomy", "driver", "wheel", "plate", "code", "google", "card", "invoice"];
 
 // Repli : fiche Google Maps (le lien « laisser un avis » exact vient des Paramètres admin quand il est lisible)
 const GOOGLE_FALLBACK = "https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours";
@@ -42,6 +43,22 @@ const MESSAGES: Msg[] = [
 ];
 
 function Art({ kind }: { kind: ArtKind }) {
+  const p = { width: 46, height: 46, viewBox: "0 0 46 46", "aria-hidden": true } as const;
+  if (kind === "gps")
+    return (
+      <svg {...p}>
+        <path d="M0 33 L46 14 M0 8 L46 40 M20 0 L26 46" stroke="rgba(255,255,255,.25)" strokeWidth="2" fill="none" />
+        <path className="tln-art-route" d="M7 36 C16 36 14 20 24 22 S34 12 39 10" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="3 4" fill="none" />
+        <circle cx="7" cy="36" r="3.4" fill="#fff" />
+        <g className="tln-art-pin"><path d="M39 3c-4 0-7 3-7 7 0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="#ff5d73" /><circle cx="39" cy="10" r="2.6" fill="#fff" /></g>
+      </svg>
+    );
+  if (kind === "vroomy")
+    return (
+      <span className="tln-art-vroomy-pop" aria-hidden="true">
+        <VroomyAvatar size={84} />
+      </span>
+    );
   if (kind === "card")
     return (
       <svg width="66" height="46" viewBox="0 0 66 46" aria-hidden="true">
@@ -130,17 +147,15 @@ function Art({ kind }: { kind: ArtKind }) {
         <path d="M22 21h5.8v2c1-1.6 2.8-2.4 5-2.4 4.3 0 5.2 2.8 5.2 6.5V35h-6.2v-7.2c0-1.6-.3-2.8-1.9-2.8s-2.4 1.1-2.4 2.8V35H22z" fill="#fff" />
       </svg>
     );
-  const body: Record<Exclude<ArtKind, "linkedin" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">, React.ReactNode> = {
-    gps: <><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z" /><circle cx="12" cy="11" r="2.2" /></>,
+  const body: Record<Exclude<ArtKind, "linkedin" | "gps" | "vroomy" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">, React.ReactNode> = {
     shield: <><path d="M12 3l7 3v5c0 4.6-3 8.2-7 10-4-1.8-7-5.4-7-10V6z" /><path d="m9 12 2 2 4-4" /></>,
     quote: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></>,
     photo: <><path d="M4 8a2 2 0 0 1 2-2h2l1.5-2h5L16 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="3.5" /></>,
-    vroomy: <><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /><path d="M9 12h.01M12 12h.01M15 12h.01" strokeWidth="2.4" /></>,
     verified: <><circle cx="9" cy="8" r="3.5" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><path d="m16 11 2 2 4-4" /></>,
   };
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      {body[kind as Exclude<ArtKind, "linkedin" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">]}
+      {body[kind as Exclude<ArtKind, "linkedin" | "gps" | "vroomy" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">]}
     </svg>
   );
 }
@@ -231,7 +246,7 @@ export default function NavTicker() {
 
   const inner = (
     <>
-      <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}`}><Art kind={m.art} /></span>
+      <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}${m.art === "vroomy" ? " is-vroomy" : ""}`}><Art kind={m.art} /></span>
       <span key={`t${pos}`} className="tln-hd-txt">
         <span className="tln-hd-kick"><i />{m.kick}</span>
         <span className="tln-hd-title">{m.title}</span>

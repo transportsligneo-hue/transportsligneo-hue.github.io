@@ -12342,7 +12342,7 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   .tln-hd {
     --t1: #2f7bff; --t2: #5b3bff;
     position: relative; display: flex; align-items: center; flex: 0 0 auto; margin: 0 auto; min-width: 0;
-    width: 396px; height: 78px; padding: 6px 14px 16px 10px; border-radius: 20px; overflow: hidden;
+    width: 396px; height: 78px; padding: 6px 14px 16px 10px; border-radius: 20px; overflow: visible;
     background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--t1) 24%, #050a22) 0%, #04081c 55%), #04081c;
     box-shadow: 0 0 0 1px rgba(255,255,255,.07), 0 0 0 4px #070d2b, 0 0 0 5px color-mix(in srgb, var(--t1) 45%, transparent), 0 14px 40px -12px var(--t1);
     transition: box-shadow .5s ease;
@@ -12351,14 +12351,17 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   .tln-hd--blue { --t1: #2f7bff; --t2: #5b3bff; } .tln-hd--green { --t1: #12c98a; --t2: #0a8f7a; }
   .tln-hd--violet { --t1: #8b5cf6; --t2: #d946ef; } .tln-hd--cyan { --t1: #06b6d4; --t2: #2563eb; }
   .tln-hd--orange { --t1: #f59e0b; --t2: #ef4444; } .tln-hd--pink { --t1: #ec4899; --t2: #8b5cf6; }
-  .tln-hd::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); pointer-events: none; mix-blend-mode: screen; }
-  .tln-hd::after { content: ""; position: absolute; left: 0; right: 0; top: -40%; height: 40%; background: linear-gradient(180deg, transparent, rgba(255,255,255,.07), transparent); animation: tlnHdScan 3.6s linear infinite; pointer-events: none; }
+  .tln-hd::before { content: ""; position: absolute; inset: 0; border-radius: 20px; clip-path: inset(0 round 20px); background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); pointer-events: none; mix-blend-mode: screen; }
+  .tln-hd-glare { overflow: hidden; }
+  .tln-hd-glare::after { content: ""; position: absolute; left: 0; right: 0; top: -40%; height: 40%; background: linear-gradient(180deg, transparent, rgba(255,255,255,.07), transparent); animation: tlnHdScan 3.6s linear infinite; }
   .tln-hd-glare { position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(115deg, rgba(255,255,255,.12), transparent 38%); pointer-events: none; }
   .tln-hd-link { position: relative; z-index: 1; display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; height: 100%; text-decoration: none; color: inherit; }
   .tln-hd-ic { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--t1) 70%, #fff 10%), color-mix(in srgb, var(--t2) 70%, #000)); box-shadow: 0 0 22px -2px var(--t1), inset 0 1px 0 rgba(255,255,255,.45); animation: tlnHdBoot .7s cubic-bezier(.22,1,.36,1) both; }
   .tln-hd-ic svg { display: block; }
   .tln-hd-ic.is-raw { background: rgba(255,255,255,.07); box-shadow: 0 0 22px -6px var(--t1), inset 0 0 0 1px rgba(255,255,255,.14); }
   .tln-hd-ic.is-wide { flex-basis: 70px; width: 70px; }
+  .tln-hd-ic.is-vroomy { background: none; box-shadow: none; overflow: visible; position: relative; z-index: 6; }
+  .tln-hd-ic.is-vroomy .tln-art-vroomy-pop { display: block; width: 46px; height: 46px; position: relative; pointer-events: none; animation: tlnVroomyPop 3.2s cubic-bezier(.3,1.4,.5,1) both; transform-origin: 50% 50%; }
   .tln-hd-ic.is-logo { background: none; box-shadow: 0 0 18px -2px var(--t1), 0 6px 14px -6px rgba(0,0,0,.7); border-radius: 14px; }
   .tln-hd-ic .tln-art-driver { width: 100%; height: 100%; object-fit: contain; display: block; }
   .tln-hd-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; animation: tlnHdBootT .7s cubic-bezier(.22,1,.36,1) both; }
@@ -12392,4 +12395,4 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   @keyframes tlnHdTrail { from { width: 0; } to { width: calc(100% - 11px); } }
 }
 @media (min-width: 2000px) { .tln-hd { width: 440px; } }
-@media (prefers-reduced-motion: reduce) { .tln-hd::after, .tln-hd-ic, .tln-hd-txt, .tln-hd-kick i { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tln-hd-glare::after, .tln-hd-ic, .tln-hd-txt, .tln-hd-kick i { animation: none; } }
