@@ -629,7 +629,7 @@ export function DevisAcceptationStep({
                 onChange={(e) => handleDigit(i, e.target.value)}
                 onKeyDown={(e) => handleKey(i, e)}
                 onFocus={(e) => e.target.select()}
-                className="w-11 h-14 sm:w-12 sm:h-16 text-center font-heading text-2xl bg-white border border-[#e4e7ec] rounded-lg text-[#101828] focus:outline-none focus:border-[#2f5fff] focus:ring-2 focus:ring-[#2f5fff]/30"
+                className="devis-otp w-11 h-14 sm:w-12 sm:h-16 text-center font-heading text-2xl bg-white border border-[#e4e7ec] rounded-lg text-[#101828] focus:outline-none focus:border-[#2f5fff] focus:ring-2 focus:ring-[#2f5fff]/30"
               />
             ))}
           </div>

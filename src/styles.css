@@ -12331,3 +12331,7 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   }
 }
 @keyframes vrmTabIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* Texte toujours lisible : code de signature (6 chiffres) et plaque, même dans une fenêtre sombre */
+.devis-otp { color: #101828 !important; -webkit-text-fill-color: #101828 !important; caret-color: #101828; background: #fff !important; }
+.plate-text { color: #111 !important; -webkit-text-fill-color: #111 !important; caret-color: #111; }
