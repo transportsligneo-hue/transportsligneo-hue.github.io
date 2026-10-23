@@ -12335,3 +12335,61 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
 /* Texte toujours lisible : code de signature (6 chiffres) et plaque, même dans une fenêtre sombre */
 .devis-otp { color: #101828 !important; -webkit-text-fill-color: #101828 !important; caret-color: #101828; background: #fff !important; }
 .plate-text { color: #111 !important; -webkit-text-fill-color: #111 !important; caret-color: #111; }
+
+/* ===== Barre du haut : actualité en « écran HD » (remplace l'ancien bandeau « Annonce ») ===== */
+.tln-hd { display: none; }
+@media (min-width: 1900px) {
+  .tln-hd {
+    --t1: #2f7bff; --t2: #5b3bff;
+    position: relative; display: flex; align-items: center; flex: 0 0 auto; margin: 0 auto; min-width: 0;
+    width: 396px; height: 78px; padding: 6px 14px 16px 10px; border-radius: 20px; overflow: hidden;
+    background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--t1) 24%, #050a22) 0%, #04081c 55%), #04081c;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.07), 0 0 0 4px #070d2b, 0 0 0 5px color-mix(in srgb, var(--t1) 45%, transparent), 0 14px 40px -12px var(--t1);
+    transition: box-shadow .5s ease;
+    text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased;
+  }
+  .tln-hd--blue { --t1: #2f7bff; --t2: #5b3bff; } .tln-hd--green { --t1: #12c98a; --t2: #0a8f7a; }
+  .tln-hd--violet { --t1: #8b5cf6; --t2: #d946ef; } .tln-hd--cyan { --t1: #06b6d4; --t2: #2563eb; }
+  .tln-hd--orange { --t1: #f59e0b; --t2: #ef4444; } .tln-hd--pink { --t1: #ec4899; --t2: #8b5cf6; }
+  .tln-hd::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); pointer-events: none; mix-blend-mode: screen; }
+  .tln-hd::after { content: ""; position: absolute; left: 0; right: 0; top: -40%; height: 40%; background: linear-gradient(180deg, transparent, rgba(255,255,255,.07), transparent); animation: tlnHdScan 3.6s linear infinite; pointer-events: none; }
+  .tln-hd-glare { position: absolute; inset: 0; border-radius: 20px; background: linear-gradient(115deg, rgba(255,255,255,.12), transparent 38%); pointer-events: none; }
+  .tln-hd-link { position: relative; z-index: 1; display: flex; align-items: center; gap: 13px; flex: 1; min-width: 0; height: 100%; text-decoration: none; color: inherit; }
+  .tln-hd-ic { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--t1) 70%, #fff 10%), color-mix(in srgb, var(--t2) 70%, #000)); box-shadow: 0 0 22px -2px var(--t1), inset 0 1px 0 rgba(255,255,255,.45); animation: tlnHdBoot .7s cubic-bezier(.22,1,.36,1) both; }
+  .tln-hd-ic svg { display: block; }
+  .tln-hd-ic.is-raw { background: rgba(255,255,255,.07); box-shadow: 0 0 22px -6px var(--t1), inset 0 0 0 1px rgba(255,255,255,.14); }
+  .tln-hd-ic.is-wide { flex-basis: 70px; width: 70px; }
+  .tln-hd-ic.is-logo { background: none; box-shadow: 0 0 18px -2px var(--t1), 0 6px 14px -6px rgba(0,0,0,.7); border-radius: 14px; }
+  .tln-hd-ic .tln-art-driver { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .tln-hd-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; animation: tlnHdBootT .7s cubic-bezier(.22,1,.36,1) both; }
+  .tln-hd-kick { display: flex; align-items: center; gap: 6px; font-size: 8.5px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: color-mix(in srgb, var(--t1) 55%, #fff); }
+  .tln-hd-kick i { width: 6px; height: 6px; border-radius: 50%; background: #3dffa0; box-shadow: 0 0 8px #3dffa0; animation: tlnHdBlink 1.4s ease-in-out infinite; }
+  .tln-hd-title { font-size: 15px; font-weight: 800; color: #fff; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.005em; }
+  .tln-hd-sub { font-size: 11px; color: rgba(210,224,255,.75); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tln-hd-count { position: absolute; top: -1px; right: 2px; font-size: 9px; font-weight: 700; letter-spacing: .14em; color: rgba(200,215,255,.55); font-variant-numeric: tabular-nums; }
+  .tln-hd-count b { color: #fff; }
+  .tln-hd-go { flex: 0 0 auto; align-self: center; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 12px; font-size: 11px; font-weight: 800; color: #fff; white-space: nowrap; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(6px); box-shadow: inset 0 1px 0 rgba(255,255,255,.2); transition: background .2s, color .2s; }
+  .tln-hd-go svg { transition: transform .25s; }
+  .tln-hd:hover .tln-hd-go { background: #fff; color: #0b1a4d; }
+  .tln-hd:hover .tln-hd-go svg { transform: translateX(3px); }
+  .tln-hd-road { position: absolute; left: 14px; right: 14px; bottom: 5px; height: 10px; pointer-events: none; z-index: 1; }
+  .tln-hd-road::before { content: ""; position: absolute; left: 0; right: 0; top: 4px; border-top: 2px dashed rgba(255,255,255,.16); }
+  .tln-hd-trail { position: absolute; left: 0; top: 4px; height: 2px; width: 0; background: var(--t1); box-shadow: 0 0 8px var(--t1); animation: tlnHdTrail var(--d, 3s) linear both; }
+  .tln-hd-car { position: absolute; left: 0; top: -2px; width: 22px; height: 12px; text-decoration: none; animation: tlnHdDrive var(--d, 3s) linear both; }
+  .tln-hd-car svg { display: block; filter: drop-shadow(0 0 5px var(--t1)); }
+  .tln-hd-pin { position: absolute; right: -2px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: #3dffa0; box-shadow: 0 0 10px #3dffa0; }
+  .tln-hd[data-paused] .tln-hd-trail, .tln-hd[data-paused] .tln-hd-car { animation-play-state: paused; }
+  .tln-hd-nav { position: absolute; top: 50%; z-index: 3; width: 22px; height: 22px; margin-top: -11px; border-radius: 50%; border: 0; cursor: pointer; background: rgba(255,255,255,.92); color: #0b1a4d; font-size: 16px; font-weight: 800; line-height: 20px; padding: 0 0 2px; opacity: 0; transition: opacity .2s, transform .2s; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+  .tln-hd-nav--prev { left: 4px; } .tln-hd-nav--next { right: 4px; }
+  .tln-hd:hover .tln-hd-nav, .tln-hd-nav:focus-visible { opacity: 1; }
+  .tln-hd-nav:hover { transform: scale(1.12); }
+  .tln-hd-go--play svg { animation: tlnPlayPulse 1.8s ease-in-out infinite; }
+  @keyframes tlnHdScan { to { top: 140%; } }
+  @keyframes tlnHdBoot { from { opacity: 0; transform: scale(.7); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes tlnHdBootT { from { opacity: 0; transform: translateY(6px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+  @keyframes tlnHdBlink { 50% { opacity: .35; } }
+  @keyframes tlnHdDrive { from { left: 0; } to { left: calc(100% - 22px); } }
+  @keyframes tlnHdTrail { from { width: 0; } to { width: calc(100% - 11px); } }
+}
+@media (min-width: 2000px) { .tln-hd { width: 440px; } }
+@media (prefers-reduced-motion: reduce) { .tln-hd::after, .tln-hd-ic, .tln-hd-txt, .tln-hd-kick i { animation: none; } }

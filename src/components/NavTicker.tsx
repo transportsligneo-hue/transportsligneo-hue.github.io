@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import { Link } from "@tanstack/react-router";
-import { VroomyAvatar } from "@/components/VroomyAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
 
@@ -9,7 +8,7 @@ type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
 type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card";
 type Msg = {
   art: ArtKind;
-  tag?: string;
+  kick: string;
   theme: Theme;
   title: string;
   sub: string;
@@ -19,60 +18,69 @@ type Msg = {
   action?: "vroomy";
 };
 
-const WIDE: ArtKind[] = ["plate", "code", "google"];
+const WIDE: ArtKind[] = ["plate", "code", "google", "card"];
+const RAW: ArtKind[] = ["driver", "wheel", "plate", "code", "google", "card", "invoice"];
 
 // Repli : fiche Google Maps (le lien « laisser un avis » exact vient des Paramètres admin quand il est lisible)
 const GOOGLE_FALLBACK = "https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours";
 
 const MESSAGES: Msg[] = [
-  { art: "driver", theme: "green", title: "Appli Convoyeur", sub: "En phase de test", cta: "play", to: "/devenir-convoyeur" },
-  { art: "gps", theme: "blue", title: "Suivi GPS en direct", sub: "Votre véhicule, du départ à l'arrivée", cta: "Voir", to: "/comment-ca-marche" },
-  { art: "shield", theme: "cyan", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "", to: "/comment-ca-marche" },
-  { art: "plate", theme: "blue", title: "Saisissez la plaque", sub: "Le véhicule se remplit seul", cta: "Essayer", to: "/tarifs" },
-  { art: "code", theme: "violet", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "", to: "/comment-ca-marche" },
-  { art: "quote", theme: "violet", title: "Devis en 2 minutes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
-  { art: "photo", theme: "pink", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },
-  { art: "vroomy", theme: "pink", tag: "Nouveau", title: "Vroomy", sub: "Votre assistant, en direct", cta: "Essayer", to: "/comment-ca-marche", action: "vroomy" },
-  { art: "google", theme: "orange", title: "4,8/5 sur Google", sub: "Laissez-nous un avis", cta: "Mon avis", href: "GOOGLE_REVIEW" },
-  { art: "linkedin", theme: "blue", title: "Retrouvez-nous", sub: "Transports Ligneo sur LinkedIn", cta: "Suivre", href: "https://www.linkedin.com/company/transports-ligneo/" },
-  { art: "wheel", theme: "green", title: "Devenez convoyeur", sub: "Rejoignez notre réseau", cta: "Postuler", to: "/devenir-convoyeur" },
-  { art: "verified", theme: "green", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "", to: "/comment-ca-marche" },
-  { art: "card", theme: "cyan", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
-  { art: "invoice", theme: "orange", title: "Facture à 30 jours", sub: "Flottes et grands comptes", cta: "Pour les pros", to: "/services" },
+  { art: "driver", theme: "green", kick: "Application", title: "Appli Convoyeur", sub: "En phase de test", cta: "play", to: "/devenir-convoyeur" },
+  { art: "gps", theme: "blue", kick: "Suivi", title: "Suivi GPS en direct", sub: "Votre véhicule, du départ à l'arrivée", cta: "Voir", to: "/comment-ca-marche" },
+  { art: "shield", theme: "cyan", kick: "Sécurité", title: "Assurance incluse", sub: "Chaque trajet est couvert", cta: "En savoir plus", to: "/comment-ca-marche" },
+  { art: "plate", theme: "blue", kick: "Astuce", title: "Saisissez la plaque", sub: "Le véhicule se remplit seul", cta: "Essayer", to: "/tarifs" },
+  { art: "code", theme: "violet", kick: "Sécurité", title: "Livraison par code", sub: "Remise sécurisée du véhicule", cta: "Voir", to: "/comment-ca-marche" },
+  { art: "quote", theme: "violet", kick: "Devis", title: "Devis en 2 minutes", sub: "Péages et carburant inclus", cta: "Calculer", to: "/tarifs" },
+  { art: "photo", theme: "pink", kick: "État des lieux", title: "État des lieux photo", sub: "Photos horodatées, 360°", cta: "Voir", to: "/comment-ca-marche" },
+  { art: "vroomy", theme: "pink", kick: "Nouveau", title: "Vroomy", sub: "Votre assistant, en direct", cta: "Essayer", to: "/comment-ca-marche", action: "vroomy" },
+  { art: "google", theme: "orange", kick: "Avis", title: "4,8/5 sur Google", sub: "Laissez-nous un avis", cta: "Mon avis", href: "GOOGLE_REVIEW" },
+  { art: "linkedin", theme: "blue", kick: "Réseau", title: "Retrouvez-nous", sub: "Transports Ligneo sur LinkedIn", cta: "Suivre", href: "https://www.linkedin.com/company/transports-ligneo/" },
+  { art: "wheel", theme: "green", kick: "Recrutement", title: "Devenez convoyeur", sub: "Rejoignez notre réseau", cta: "Postuler", to: "/devenir-convoyeur" },
+  { art: "verified", theme: "green", kick: "Confiance", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Voir", to: "/comment-ca-marche" },
+  { art: "card", theme: "cyan", kick: "Paiement", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
+  { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes et grands comptes", cta: "Pour les pros", to: "/services" },
 ];
 
 function Art({ kind }: { kind: ArtKind }) {
-  const p = { width: 46, height: 46, viewBox: "0 0 46 46", "aria-hidden": true } as const;
-  if (kind === "driver")
+  if (kind === "card")
+    return (
+      <svg width="66" height="46" viewBox="0 0 66 46" aria-hidden="true">
+        <defs>
+          <linearGradient id="tlnCardBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#1e3a8a" /><stop offset=".55" stopColor="#2563eb" /><stop offset="1" stopColor="#7c3aed" /></linearGradient>
+        </defs>
+        <g className="tln-art-card">
+          <rect x="3" y="5" width="60" height="38" rx="6" fill="url(#tlnCardBg)" stroke="rgba(255,255,255,.55)" strokeWidth="1" />
+          <path d="M3 30c14-9 30-9 60-2v9a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6z" fill="rgba(255,255,255,.08)" />
+          <rect x="9" y="13" width="11" height="8.5" rx="2" fill="#fbbf24" />
+          <path d="M9 17.2h11M14.5 13v8.5" stroke="#b45309" strokeWidth=".7" />
+          <path d="M26 14.5a5 5 0 0 1 0 5M29 12.5a8 8 0 0 1 0 9" stroke="#fff" strokeOpacity=".85" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+          <text x="9" y="31" fontSize="5.6" fontWeight="700" fill="#fff" fontFamily="'IBM Plex Mono',monospace" letterSpacing=".6">4242 4242 4242</text>
+          <text x="9" y="38.5" fontSize="3.8" fontWeight="600" fill="#cfe0ff" fontFamily="Poppins,sans-serif" letterSpacing=".4">TRANSPORTS LIGNEO</text>
+          <circle cx="50" cy="36" r="5" fill="#ef4444" fillOpacity=".95" />
+          <circle cx="55.5" cy="36" r="5" fill="#f59e0b" fillOpacity=".95" />
+        </g>
+      </svg>
+    );
+  if (kind === "invoice")
+    return (
+      <svg width="46" height="50" viewBox="0 0 46 50" aria-hidden="true">
+        <path d="M7 3h28l6 6v38l-4-2.6-4 2.6-4-2.6-4 2.6-4-2.6-4 2.6-4-2.6-4 2.6z" fill="#fff" />
+        <path d="M35 3v6h6z" fill="#e2e8f0" />
+        <rect x="11" y="8" width="13" height="5" rx="1.4" fill="#0b1a4d" />
+        <text x="17.5" y="11.9" textAnchor="middle" fontSize="3.4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif" letterSpacing=".3">LIGNEO</text>
+        <text x="30" y="12" textAnchor="middle" fontSize="3.3" fontWeight="700" fill="#64748b" fontFamily="Poppins,sans-serif">FACTURE</text>
+        <rect x="11" y="17" width="24" height="1.8" rx=".9" fill="#cbd5e1" />
+        <rect x="11" y="21" width="24" height="1.8" rx=".9" fill="#e2e8f0" />
+        <rect x="11" y="25" width="17" height="1.8" rx=".9" fill="#e2e8f0" />
+        <rect x="11" y="30" width="24" height="7.5" rx="2" fill="#eff6ff" />
+        <text x="14" y="35.4" fontSize="4" fontWeight="700" fill="#475569" fontFamily="Poppins,sans-serif">TOTAL</text>
+        <text x="33" y="35.4" textAnchor="end" fontSize="4.6" fontWeight="800" fill="#0b1a4d" fontFamily="'IBM Plex Mono',monospace">144,00 €</text>
+        <circle cx="33" cy="40.5" r="5.4" fill="#22c55e" stroke="#fff" strokeWidth="1.4" />
+        <text x="33" y="42" textAnchor="middle" fontSize="4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">30j</text>
+      </svg>
+    );
+  if (kind === "driver" || kind === "wheel")
     return <img className="tln-art-driver" src={logoDriver.url} alt="" draggable={false} />;
-  if (kind === "gps")
-    return (
-      <svg {...p}>
-        <path d="M0 33 L46 14 M0 8 L46 40 M20 0 L26 46" stroke="rgba(255,255,255,.25)" strokeWidth="2" fill="none" />
-        <path className="tln-art-route" d="M7 36 C16 36 14 20 24 22 S34 12 39 10" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeDasharray="3 4" fill="none" />
-        <circle cx="7" cy="36" r="3.4" fill="#fff" />
-        <g className="tln-art-pin"><path d="M39 3c-4 0-7 3-7 7 0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="#ff5d73" /><circle cx="39" cy="10" r="2.6" fill="#fff" /></g>
-      </svg>
-    );
-  if (kind === "shield")
-    return (
-      <svg {...p}>
-        <path d="M23 5 38 10v11c0 9-6 16-15 20C14 37 8 30 8 21V10z" fill="#fff" fillOpacity=".95" />
-        <path d="M23 9 34 13v8c0 7-4 12-11 15" fill="none" stroke="#06b6d4" strokeOpacity=".25" strokeWidth="2" />
-        <path d="m15.5 22.5 5 5 10-11" stroke="#0891b2" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-    );
-  if (kind === "quote")
-    return (
-      <svg {...p}>
-        <rect x="9" y="5" width="28" height="36" rx="5" fill="#fff" />
-        <rect x="14" y="11" width="12" height="3" rx="1.5" fill="#8b5cf6" />
-        <rect x="14" y="18" width="18" height="2.5" rx="1.2" fill="#c4b5fd" />
-        <rect x="14" y="24" width="15" height="2.5" rx="1.2" fill="#c4b5fd" />
-        <rect x="14" y="31" width="18" height="6" rx="3" fill="#d946ef" />
-        <text x="23" y="36" textAnchor="middle" fontSize="5.4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">2 min</text>
-      </svg>
-    );
   if (kind === "plate")
     return (
       <svg width="66" height="46" viewBox="0 0 66 46" aria-hidden="true">
@@ -97,35 +105,6 @@ function Art({ kind }: { kind: ArtKind }) {
         <text x="46" y="39.4" textAnchor="middle" fontSize="5.4" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">OK</text>
       </svg>
     );
-  if (kind === "photo")
-    return (
-      <svg {...p}>
-        <path d="M15 12 17.5 8h11L31 12h6a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4z" fill="#fff" />
-        <circle cx="23" cy="25" r="8.5" fill="#ec4899" /><circle cx="23" cy="25" r="5" fill="#fbcfe8" /><circle cx="21" cy="23" r="1.6" fill="#fff" />
-        <circle className="tln-art-flash" cx="35" cy="17" r="2.2" fill="#fde047" />
-      </svg>
-    );
-  if (kind === "verified")
-    return (
-      <svg {...p}>
-        <rect x="8" y="7" width="30" height="33" rx="5" fill="#fff" />
-        <rect x="16" y="10" width="14" height="4" rx="2" fill="#a7f3d0" />
-        <circle cx="23" cy="23" r="5" fill="#10b981" /><path d="M14 36c1-5 4.5-7.5 9-7.5S31 31 32 36z" fill="#10b981" />
-        <circle className="tln-art-tick" cx="35" cy="34" r="7.5" fill="#22c55e" stroke="#fff" strokeWidth="2" />
-        <path d="m31.4 34 2.5 2.5 4.3-5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-    );
-  if (kind === "card")
-    return (
-      <svg {...p}>
-        <g className="tln-art-card">
-          <rect x="4" y="10" width="38" height="26" rx="5" fill="#fff" />
-          <rect x="4" y="16" width="38" height="6" fill="#0891b2" />
-          <rect x="9" y="27" width="10" height="3" rx="1.5" fill="#94a3b8" />
-          <rect x="30" y="26.5" width="7" height="5" rx="1.5" fill="#fbbf24" />
-        </g>
-      </svg>
-    );
   if (kind === "google")
     return (
       <svg width="66" height="46" viewBox="0 0 66 46" aria-hidden="true">
@@ -144,52 +123,52 @@ function Art({ kind }: { kind: ArtKind }) {
     );
   if (kind === "linkedin")
     return (
-      <svg {...p}>
+      <svg width="40" height="40" viewBox="0 0 46 46" aria-hidden="true">
         <rect x="5" y="5" width="36" height="36" rx="8" fill="#0a66c2" stroke="#fff" strokeWidth="2.2" />
         <circle cx="15.5" cy="15.5" r="3.2" fill="#fff" />
         <rect x="12.4" y="21" width="6.2" height="14" rx="1" fill="#fff" />
         <path d="M22 21h5.8v2c1-1.6 2.8-2.4 5-2.4 4.3 0 5.2 2.8 5.2 6.5V35h-6.2v-7.2c0-1.6-.3-2.8-1.9-2.8s-2.4 1.1-2.4 2.8V35H22z" fill="#fff" />
       </svg>
     );
-  if (kind === "wheel")
-    return (
-      <svg {...p}>
-        <g className="tln-art-wheel">
-          <circle cx="23" cy="23" r="16" fill="none" stroke="#fff" strokeWidth="5" />
-          <circle cx="23" cy="23" r="4.5" fill="#fff" />
-          <path d="M23 27.5V39M18.8 21.3 8 18.5M27.2 21.3 38 18.5" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
-        </g>
-      </svg>
-    );
-  if (kind === "vroomy")
-    return (
-      <span className="tln-art-vroomy-pop" aria-hidden="true">
-        <VroomyAvatar size={84} />
-      </span>
-    );
-  if (kind === "invoice")
-    return (
-      <svg {...p}>
-        <path d="M10 5h26v36l-4.3-3-4.3 3-4.4-3-4.4 3-4.3-3L10 41z" fill="#fff" />
-        <rect x="15" y="11" width="16" height="3" rx="1.5" fill="#f59e0b" />
-        <rect x="15" y="18" width="16" height="2.4" rx="1.2" fill="#fcd34d" />
-        <rect x="15" y="23" width="11" height="2.4" rx="1.2" fill="#fcd34d" />
-        <circle cx="31" cy="31" r="6.5" fill="#ef4444" /><text x="31" y="34" textAnchor="middle" fontSize="8.5" fontWeight="800" fill="#fff" fontFamily="Poppins,sans-serif">30j</text>
-      </svg>
-    );
+  const body: Record<Exclude<ArtKind, "linkedin" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">, React.ReactNode> = {
+    gps: <><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z" /><circle cx="12" cy="11" r="2.2" /></>,
+    shield: <><path d="M12 3l7 3v5c0 4.6-3 8.2-7 10-4-1.8-7-5.4-7-10V6z" /><path d="m9 12 2 2 4-4" /></>,
+    quote: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></>,
+    photo: <><path d="M4 8a2 2 0 0 1 2-2h2l1.5-2h5L16 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="3.5" /></>,
+    vroomy: <><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /><path d="M9 12h.01M12 12h.01M15 12h.01" strokeWidth="2.4" /></>,
+    verified: <><circle cx="9" cy="8" r="3.5" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><path d="m16 11 2 2 4-4" /></>,
+  };
   return (
-    <svg {...p}>
-      <circle cx="20" cy="20" r="11" fill="none" stroke="#fff" strokeWidth="4" />
-      <path d="m28.5 28.5 10 10" stroke="#fff" strokeWidth="5" strokeLinecap="round" />
-      <rect x="13.5" y="17" width="13" height="6.5" rx="2" fill="#fff" fillOpacity=".95" />
-      <text x="20" y="22" textAnchor="middle" fontSize="4.6" fontWeight="800" fill="#2563eb" fontFamily="Poppins,sans-serif">AB-123</text>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {body[kind as Exclude<ArtKind, "linkedin" | "plate" | "code" | "google" | "card" | "invoice" | "driver" | "wheel">]}
     </svg>
   );
 }
 
-const INTERVAL = 3200;
+const INTERVAL = 3000;
 
-/** Petit écran défilant de la barre du haut : met en avant les fonctionnalités, ordre mélangé. */
+const ARROW = (
+  <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+    <path d="M2 6h8M6.5 2.5 10 6 6.5 9.5" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const CAR = (
+  <svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true">
+    <path d="M2 8.5V6.2c0-.7.4-1.3 1-1.5l3-1.2C7 3 7.8 2 9 2h4c1.2 0 2 .6 2.7 1.5L18 5l2 .6c.6.2 1 .7 1 1.4v1.5c0 .5-.4 1-1 1H2.8c-.4 0-.8-.4-.8-.8z" fill="#fff" />
+    <circle cx="6" cy="9.4" r="1.9" fill="#0b1a4d" stroke="#fff" strokeWidth="1.2" />
+    <circle cx="16" cy="9.4" r="1.9" fill="#0b1a4d" stroke="#fff" strokeWidth="1.2" />
+  </svg>
+);
+const PLAY = (
+  <svg width="14" height="14" viewBox="0 0 30 30" aria-hidden="true">
+    <path d="M5 2.5v25l14-12.5z" fill="#00d3ff" />
+    <path d="M5 2.5 19 15l4.6-4.6L8.4 2C6.7 1.2 5 1.4 5 2.5z" fill="#34e07a" />
+    <path d="M5 27.5 19 15l4.6 4.6L8.4 28c-1.7.8-3.4.6-3.4-.5z" fill="#ff3a44" />
+    <path d="M23.6 10.4 28 13c1.3.8 1.3 2.2 0 3l-4.4 2.6L19 15z" fill="#ffd400" />
+  </svg>
+);
+
+/** Petit écran « HD » de la barre du haut : une actualité à la fois, une voiture qui roule le temps de l'affichage. */
 export default function NavTicker() {
   const [order, setOrder] = useState<number[]>(() => MESSAGES.map((_, i) => i));
   const [pos, setPos] = useState(0);
@@ -250,10 +229,31 @@ export default function NavTicker() {
   const go = (n: number) => setPos(((n % N) + N) % N);
   const stop = (e: React.SyntheticEvent) => { e.preventDefault(); e.stopPropagation(); };
 
+  const inner = (
+    <>
+      <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}`}><Art kind={m.art} /></span>
+      <span key={`t${pos}`} className="tln-hd-txt">
+        <span className="tln-hd-kick"><i />{m.kick}</span>
+        <span className="tln-hd-title">{m.title}</span>
+        <span className="tln-hd-sub">{m.sub}</span>
+      </span>
+      <span className="tln-hd-count"><b>{String(cur + 1).padStart(2, "0")}</b> / {N}</span>
+      {m.cta === "play" ? (
+        <span className="tln-hd-go tln-hd-go--play">{PLAY}Bientôt</span>
+      ) : m.cta ? (
+        <span className="tln-hd-go">{m.cta}{ARROW}</span>
+      ) : null}
+    </>
+  );
+
   return (
     <div
       ref={boxRef}
-      className={`tln-ticker tln-ticker--${m.theme}${m.art === "vroomy" ? " tln-ticker--pop" : ""}`}
+      className={`tln-hd tln-hd--${m.theme}`}
+      style={{ ["--d" as string]: `${INTERVAL}ms` }}
+      data-paused={paused ? "1" : undefined}
+      role="region"
+      aria-label="Actualité"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={(e) => { (e.currentTarget as HTMLElement).dataset.x = String(e.touches[0].clientX); }}
@@ -263,29 +263,13 @@ export default function NavTicker() {
         if (Math.abs(dx) > 30) go(cur + (dx < 0 ? 1 : -1));
       }}
     >
+      <span className="tln-hd-glare" aria-hidden="true" />
       {m.href ? (
-        <a href={m.href} target="_blank" rel="noopener noreferrer" className="tln-ticker-link">
-        <span key={`i${pos}`} className={`tln-ticker-ic tln-ticker-ic--${m.art}${WIDE.includes(m.art) ? " is-wide" : ""}`}>
-          <Art kind={m.art} />
-        </span>
-        <span key={pos} className="tln-ticker-txt">
-          <span className="tln-ticker-title">{m.tag && <em className="tln-ticker-tag">{m.tag}</em>}{m.title}</span>
-          <span className="tln-ticker-sub">{m.sub}</span>
-        </span>
-        {m.cta === "play" ? <span className="tln-ticker-cta tln-ticker-cta--play">
-            <svg width="20" height="20" viewBox="0 0 30 30" aria-hidden="true">
-              <path d="M5 2.5v25l14-12.5z" fill="#00d3ff" />
-              <path d="M5 2.5 19 15l4.6-4.6L8.4 2C6.7 1.2 5 1.4 5 2.5z" fill="#34e07a" />
-              <path d="M5 27.5 19 15l4.6 4.6L8.4 28c-1.7.8-3.4.6-3.4-.5z" fill="#ff3a44" />
-              <path d="M23.6 10.4 28 13c1.3.8 1.3 2.2 0 3l-4.4 2.6L19 15z" fill="#ffd400" />
-            </svg>
-            <span><small>Bientôt sur</small><b>Google Play</b></span>
-          </span> : m.cta ? <span className="tln-ticker-cta">{m.cta}</span> : null}
-        </a>
+        <a href={m.href} target="_blank" rel="noopener noreferrer" className="tln-hd-link">{inner}</a>
       ) : (
         <Link
           to={m.to ?? "/"}
-          className="tln-ticker-link"
+          className="tln-hd-link"
           aria-live="polite"
           onClick={(e) => {
             if (m.action === "vroomy") {
@@ -294,31 +278,16 @@ export default function NavTicker() {
             }
           }}
         >
-        <span key={`i${pos}`} className={`tln-ticker-ic tln-ticker-ic--${m.art}${WIDE.includes(m.art) ? " is-wide" : ""}`}>
-          <Art kind={m.art} />
-        </span>
-        <span key={pos} className="tln-ticker-txt">
-          <span className="tln-ticker-title">{m.tag && <em className="tln-ticker-tag">{m.tag}</em>}{m.title}</span>
-          <span className="tln-ticker-sub">{m.sub}</span>
-        </span>
-        {m.cta === "play" ? <span className="tln-ticker-cta tln-ticker-cta--play">
-            <svg width="20" height="20" viewBox="0 0 30 30" aria-hidden="true">
-              <path d="M5 2.5v25l14-12.5z" fill="#00d3ff" />
-              <path d="M5 2.5 19 15l4.6-4.6L8.4 2C6.7 1.2 5 1.4 5 2.5z" fill="#34e07a" />
-              <path d="M5 27.5 19 15l4.6 4.6L8.4 28c-1.7.8-3.4.6-3.4-.5z" fill="#ff3a44" />
-              <path d="M23.6 10.4 28 13c1.3.8 1.3 2.2 0 3l-4.4 2.6L19 15z" fill="#ffd400" />
-            </svg>
-            <span><small>Bientôt sur</small><b>Google Play</b></span>
-          </span> : m.cta ? <span className="tln-ticker-cta">{m.cta}</span> : null}
+          {inner}
         </Link>
       )}
-      <button type="button" className="tln-ticker-nav tln-ticker-nav--prev" aria-label="Pub précédente" onClick={(e) => { stop(e); go(cur - 1); }}>‹</button>
-      <button type="button" className="tln-ticker-nav tln-ticker-nav--next" aria-label="Pub suivante" onClick={(e) => { stop(e); go(cur + 1); }}>›</button>
-      <span className="tln-ticker-dots">
-        {MESSAGES.map((_, i) => (
-          <button key={i} type="button" aria-label={`Pub ${i + 1}`} className={i === cur ? "on" : ""} onClick={(e) => { stop(e); go(i); }} />
-        ))}
+      <span className="tln-hd-road" aria-hidden="true">
+        <i key={`r${pos}`} className="tln-hd-trail" />
+        <s key={`c${pos}`} className="tln-hd-car">{CAR}</s>
+        <b className="tln-hd-pin" />
       </span>
+      <button type="button" className="tln-hd-nav tln-hd-nav--prev" aria-label="Actualité précédente" onClick={(e) => { stop(e); go(cur - 1); }}>‹</button>
+      <button type="button" className="tln-hd-nav tln-hd-nav--next" aria-label="Actualité suivante" onClick={(e) => { stop(e); go(cur + 1); }}>›</button>
     </div>
   );
 }
