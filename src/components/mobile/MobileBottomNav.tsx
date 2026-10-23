@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { RouteAB } from "@/components/mobile/MobileIcons";
 import "@/styles/mobile-home-v2.css";
 import { useAuth } from "@/hooks/useAuth";
-import { scrollToDevis } from "@/lib/scroll-to-devis";
 
 /**
  * Dock de navigation publique (mobile).
@@ -47,8 +46,7 @@ export default function MobileBottomNav() {
   };
 
   const goEstimer = () => {
-    if (scrollToDevis()) return;
-    navigate({ to: "/", hash: "devis" });
+    navigate({ to: "/tarifs" });
   };
 
   const isHome = location.pathname === "/";
