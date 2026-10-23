@@ -3,6 +3,7 @@ import { ArrowRight, Check, ClipboardCheck, FileText, KeyRound, LockKeyhole, Rad
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LigneoLockup from "@/components/brand/LigneoLockup";
+import ApiReference from "@/components/developers/ApiReference";
 
 export const Route = createFileRoute("/developpeurs")({
   component: DeveloperPage,
@@ -36,7 +37,7 @@ function DeveloperPage() {
         <p>Devis, missions de convoyage, suivi et documents : intégrez le convoyage automobile dans votre DMS, votre ERP ou votre plateforme de gestion de flotte, sans changer vos habitudes.</p>
         <div className="developer-hero-actions">
           <Link className="developer-button developer-button-primary" to="/contact">Demander un accès API <ArrowRight size={17} /></Link>
-          <a className="developer-button developer-button-outline" href="#cas-usage">Voir un cas d'usage</a>
+          <a className="developer-button developer-button-outline" href="#documentation">Lire la documentation</a>
         </div>
       </section>
       <div className="developer-trust" aria-label="Caractéristiques de l'API">
@@ -54,9 +55,10 @@ function DeveloperPage() {
   "price_ttc": 342.00,
   "currency": "EUR"
 }`}</pre></div></div>
-        <p className="developer-note">Exemples illustratifs — la documentation technique complète et vos clés API sont disponibles dans votre espace professionnel.</p>
+        <p className="developer-note">Exemples illustratifs — la documentation complète est juste en dessous ; vos clés API se génèrent dans votre espace professionnel.</p>
       </section>
-      <section className="developer-gate"><LockKeyhole size={27} /><h2>La documentation complète est réservée à votre espace pro</h2><p>Référence détaillée des endpoints, codes de statut, gestion des webhooks et vos clés API personnelles — tout est disponible une fois connecté.</p><div><Link className="developer-button developer-button-light" to="/login"><KeyRound size={17} /> Accéder à mon espace pro</Link><Link className="developer-button developer-button-ghost" to="/inscription-pro"><Check size={17} /> Créer un compte professionnel</Link></div></section>
+      <ApiReference />
+      <section className="developer-gate"><LockKeyhole size={27} /><h2>Prêt à connecter vos outils ?</h2><p>Demandez un accès : nous activons votre espace professionnel, vous générez vos clés sandbox et production en un clic, et vous suivez vos appels dans votre journal.</p><div><Link className="developer-button developer-button-primary" to="/contact">Demander un accès API <ArrowRight size={17} /></Link></div></section>
     </main>
     <Footer />
   </>;

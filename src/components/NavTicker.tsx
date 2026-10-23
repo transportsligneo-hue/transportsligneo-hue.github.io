@@ -6,7 +6,7 @@ import { VroomyAvatar } from "@/components/VroomyAvatar";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
 
 type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
-type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card";
+type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card" | "api";
 type Msg = {
   art: ArtKind;
   kick: string;
@@ -14,7 +14,7 @@ type Msg = {
   title: string;
   sub: string;
   cta: string;
-  to?: "/comment-ca-marche" | "/tarifs" | "/services" | "/devenir-convoyeur";
+  to?: "/comment-ca-marche" | "/tarifs" | "/services" | "/devenir-convoyeur" | "/developpeurs";
   href?: string;
   action?: "vroomy";
 };
@@ -39,6 +39,7 @@ const MESSAGES: Msg[] = [
   { art: "wheel", theme: "green", kick: "Recrutement", title: "Devenez convoyeur", sub: "Rejoignez notre réseau", cta: "Postuler", to: "/devenir-convoyeur" },
   { art: "verified", theme: "green", kick: "Confiance", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Voir", to: "/comment-ca-marche" },
   { art: "card", theme: "cyan", kick: "Paiement", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
+  { art: "api", theme: "violet", kick: "Développeurs", title: "API Développeur", sub: "Connectez vos outils à Ligneo", cta: "Découvrir", to: "/developpeurs" },
   { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes et grands comptes", cta: "Pour les pros", to: "/services" },
 ];
 
@@ -151,6 +152,7 @@ function Art({ kind }: { kind: ArtKind }) {
     shield: <><path d="M12 3l7 3v5c0 4.6-3 8.2-7 10-4-1.8-7-5.4-7-10V6z" /><path d="m9 12 2 2 4-4" /></>,
     quote: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></>,
     photo: <><path d="M4 8a2 2 0 0 1 2-2h2l1.5-2h5L16 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="3.5" /></>,
+    api: <><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" /></>,
     verified: <><circle cx="9" cy="8" r="3.5" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><path d="m16 11 2 2 4-4" /></>,
   };
   return (

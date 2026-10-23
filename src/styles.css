@@ -12396,3 +12396,23 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
 }
 @media (min-width: 2000px) { .tln-hd { width: 440px; } }
 @media (prefers-reduced-motion: reduce) { .tln-hd-glare::after, .tln-hd-ic, .tln-hd-txt, .tln-hd-kick i { animation: none; } }
+
+/* ===== Documentation publique de l'API (/developpeurs) ===== */
+.devdoc { max-width: 1120px; margin: 0 auto; padding: 20px 24px 70px; }
+.devdoc-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.devdoc-small { color: var(--dev-muted); font-size: 13px; line-height: 1.7; margin: 8px 0 14px; } .devdoc-small code, .devdoc code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: #eef1fb; color: #1d3bb8; padding: 2px 7px; border-radius: 6px; }
+.devdoc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 50px; }
+.devdoc-card { padding: 24px; border: 1px solid var(--dev-line); border-radius: 14px; background: #f6f7fc; } .devdoc-card svg { color: var(--dev-blue); } .devdoc-card h3 { font-size: 16px; font-weight: 700; margin: 10px 0 6px; } .devdoc-card p { color: var(--dev-muted); font-size: 13.5px; line-height: 1.7; margin: 0; }
+.devdoc-h { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; margin: 44px 0 6px; }
+.devdoc-group h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--dev-blue); margin: 22px 0 10px; }
+.devdoc-ep { border: 1px solid var(--dev-line); border-radius: 14px; margin-bottom: 10px; background: #fff; overflow: hidden; transition: box-shadow .2s; } .devdoc-ep.is-open { box-shadow: 0 14px 34px -22px rgba(20, 40, 120, .45); }
+.devdoc-ep-head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 18px; border: 0; background: none; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.devdoc-ep-head code { font-size: 13.5px; font-weight: 600; background: none; color: var(--dev-ink); padding: 0; } .devdoc-ep-sum { color: var(--dev-muted); font-size: 13px; flex: 1; }
+.devdoc-method { font: 700 11px 'IBM Plex Mono', monospace; padding: 4px 9px; border-radius: 8px; min-width: 56px; text-align: center; } .devdoc-method--get { background: #e5f7ef; color: #0b7a50; } .devdoc-method--post { background: #e7edff; color: #2347d8; } .devdoc-method--delete { background: #fde8e8; color: #b42318; }
+.devdoc-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #f1e8ff; color: #6d28d9; } .devdoc-chev { font-size: 20px; color: var(--dev-muted); width: 18px; text-align: center; }
+.devdoc-ep-body { padding: 4px 18px 20px; border-top: 1px dashed var(--dev-line); } .devdoc-ep-body > p { color: var(--dev-muted); font-size: 14px; line-height: 1.7; }
+.devdoc-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 14px; } .devdoc-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--dev-muted); padding: 0 10px 8px; } .devdoc-table td { padding: 10px; border-top: 1px solid var(--dev-line); vertical-align: top; color: #2a2f45; } .devdoc-table em { font-style: normal; font-size: 10px; font-weight: 700; color: #b42318; margin-left: 8px; text-transform: uppercase; }
+.devdoc-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } .devdoc-cols h4 { font-size: 13px; margin: 6px 0 8px; }
+.devdoc pre { margin: 0; overflow-x: auto; white-space: pre; background: #0a1440; color: #cfe0ff; font: 12px/1.7 'IBM Plex Mono', monospace; padding: 16px; border-radius: 12px; }
+.devdoc-secure { display: flex; gap: 14px; align-items: flex-start; margin-top: 40px; padding: 20px 22px; border-radius: 16px; background: linear-gradient(120deg, #0a1440, #14307f); color: #fff; } .devdoc-secure svg { flex: 0 0 auto; color: #5fe3a8; margin-top: 2px; } .devdoc-secure b { display: block; margin-bottom: 4px; } .devdoc-secure span { color: #c8d6ff; font-size: 13.5px; line-height: 1.7; }
+@media (max-width: 760px) { .devdoc-grid, .devdoc-cols { grid-template-columns: 1fr; } .devdoc-ep-sum { display: none; } }

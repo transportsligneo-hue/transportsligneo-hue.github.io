@@ -17,6 +17,8 @@ export interface ApiCaller {
   organizationId: string;
   environment: "test" | "live";
   sandbox: boolean;
+  /** Quota de débit au moment de la requête (en-têtes X-RateLimit-*). */
+  rateLimit?: { limit: number; remaining: number; resetInSeconds: number };
 }
 
 export function hashApiKey(raw: string): string {
@@ -110,8 +112,14 @@ export async function authenticateApiRequest(
     .then(() => undefined);
 
   const environment = key.environment as "test" | "live";
+  const used = typeof count === "number" ? count : 1;
   return {
     caller: {
+      rateLimit: {
+        limit: API_RATE_LIMIT_PER_MIN,
+        remaining: Math.max(0, API_RATE_LIMIT_PER_MIN - used),
+        resetInSeconds: Math.max(1, 60 - Math.floor((Date.now() % 60000) / 1000)),
+      },
       keyId: key.id,
       organizationId: key.organization_id,
       environment,

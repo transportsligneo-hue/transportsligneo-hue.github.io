@@ -81,6 +81,10 @@ export const Route = createFileRoute("/api/public/v1/missions/")({
           );
         }
 
+        const { idempotencyBegin } = await import("@/lib/api/idempotency.server");
+        const idem = await idempotencyBegin(caller, request, body);
+        if (idem.response) return idem.response;
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { orgUserIds } = await import("@/lib/api/api-org.server");
         const { missionToApi } = await import("@/lib/api/api-mappers.server");

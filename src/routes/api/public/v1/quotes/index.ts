@@ -84,6 +84,10 @@ export const Route = createFileRoute("/api/public/v1/quotes/")({
           );
         }
 
+        const { idempotencyBegin } = await import("@/lib/api/idempotency.server");
+        const idem = await idempotencyBegin(caller, request, body);
+        if (idem.response) return idem.response;
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { orgContact } = await import("@/lib/api/api-org.server");
         const contact = await orgContact(caller.organizationId);

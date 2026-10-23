@@ -517,6 +517,78 @@ export type Database = {
           },
         ]
       }
+      api_request_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          duration_ms: number | null
+          environment: string
+          error_type: string | null
+          id: string
+          idempotency_key: string | null
+          method: string
+          organization_id: string
+          path: string
+          request_id: string | null
+          status_code: number
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          environment?: string
+          error_type?: string | null
+          id?: string
+          idempotency_key?: string | null
+          method: string
+          organization_id: string
+          path: string
+          request_id?: string | null
+          status_code: number
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          environment?: string
+          error_type?: string | null
+          id?: string
+          idempotency_key?: string | null
+          method?: string
+          organization_id?: string
+          path?: string
+          request_id?: string | null
+          status_code?: number
+        }
+        Relationships: []
+      }
+      api_idempotency_keys: {
+        Row: {
+          created_at: string
+          idem_key: string
+          organization_id: string
+          request_hash: string
+          response_body: Json | null
+          status_code: number | null
+        }
+        Insert: {
+          created_at?: string
+          idem_key: string
+          organization_id: string
+          request_hash: string
+          response_body?: Json | null
+          status_code?: number | null
+        }
+        Update: {
+          created_at?: string
+          idem_key?: string
+          organization_id?: string
+          request_hash?: string
+          response_body?: Json | null
+          status_code?: number | null
+        }
+        Relationships: []
+      }
       api_webhook_deliveries: {
         Row: {
           attempt: number
