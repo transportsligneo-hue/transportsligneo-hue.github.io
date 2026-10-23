@@ -440,9 +440,11 @@ export type Database = {
       }
       api_keys: {
         Row: {
+          allowed_ips: string[]
           created_at: string
           created_by: string | null
           environment: string
+          expires_at: string | null
           id: string
           key_hash: string
           key_last4: string
@@ -451,12 +453,15 @@ export type Database = {
           name: string
           organization_id: string
           revoked_at: string | null
+          scope: string
           updated_at: string
         }
         Insert: {
+          allowed_ips?: string[]
           created_at?: string
           created_by?: string | null
           environment: string
+          expires_at?: string | null
           id?: string
           key_hash: string
           key_last4: string
@@ -465,12 +470,15 @@ export type Database = {
           name?: string
           organization_id: string
           revoked_at?: string | null
+          scope?: string
           updated_at?: string
         }
         Update: {
+          allowed_ips?: string[]
           created_at?: string
           created_by?: string | null
           environment?: string
+          expires_at?: string | null
           id?: string
           key_hash?: string
           key_last4?: string
@@ -479,6 +487,7 @@ export type Database = {
           name?: string
           organization_id?: string
           revoked_at?: string | null
+          scope?: string
           updated_at?: string
         }
         Relationships: [

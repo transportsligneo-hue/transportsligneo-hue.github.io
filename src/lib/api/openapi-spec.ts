@@ -222,6 +222,7 @@ export const WEBHOOK_DOC = [
 export const ERROR_DOC = [
   { status: 400, type: "invalid_request_error", description: "Paramètre manquant ou invalide." },
   { status: 401, type: "authentication_error", description: "Clé absente, invalide ou révoquée." },
+  { status: 403, type: "permission_error", description: "Clé en lecture seule, ou adresse IP non autorisée pour cette clé." },
   { status: 404, type: "not_found", description: "Ressource introuvable pour votre organisation." },
   { status: 409, type: "invalid_request_error / idempotency_error", description: "Conflit : devis déjà converti, ou requête identique en cours." },
   { status: 422, type: "idempotency_error", description: "Idempotency-Key déjà utilisée avec des paramètres différents." },

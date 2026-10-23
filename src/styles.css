@@ -12416,3 +12416,52 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
 .devdoc pre { margin: 0; overflow-x: auto; white-space: pre; background: #0a1440; color: #cfe0ff; font: 12px/1.7 'IBM Plex Mono', monospace; padding: 16px; border-radius: 12px; }
 .devdoc-secure { display: flex; gap: 14px; align-items: flex-start; margin-top: 40px; padding: 20px 22px; border-radius: 16px; background: linear-gradient(120deg, #0a1440, #14307f); color: #fff; } .devdoc-secure svg { flex: 0 0 auto; color: #5fe3a8; margin-top: 2px; } .devdoc-secure b { display: block; margin-bottom: 4px; } .devdoc-secure span { color: #c8d6ff; font-size: 13.5px; line-height: 1.7; }
 @media (max-width: 760px) { .devdoc-grid, .devdoc-cols { grid-template-columns: 1fr; } .devdoc-ep-sum { display: none; } }
+
+/* ===== Mini-scènes animées de l'annonce (navbar) ===== */
+@media (min-width: 1900px) {
+  .tln-hd-ic.is-scene { flex-basis: 86px; width: 86px; height: 56px; border-radius: 14px; overflow: hidden; background: rgba(255,255,255,.06); box-shadow: 0 0 22px -6px var(--t1), inset 0 0 0 1px rgba(255,255,255,.14); }
+  .tln-hd-ic.is-logo.is-scene { background: rgba(255,255,255,.06); }
+  .tns { display: block; position: relative; width: 86px; height: 56px; }
+  .tns-html { display: grid; place-items: center; }
+  .tns-pop { animation: tnsPop .55s cubic-bezier(.3,1.5,.5,1) both; transform-box: fill-box; transform-origin: 50% 50%; }
+  .tns-rise { animation: tnsRise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: .5s; }
+  .tns-fade { animation: tnsFade .5s ease both; animation-delay: .5s; }
+  .tns-d1 { animation-delay: .6s; } .tns-d2 { animation-delay: .9s; } .tns-d3 { animation-delay: 1.3s; } .tns-d4 { animation-delay: 1.9s; }
+  .tns-stamp { animation: tnsStamp .5s cubic-bezier(.3,1.7,.5,1) both; transform-box: fill-box; transform-origin: 50% 50%; }
+  .tns-slam { animation: tnsSlam .45s cubic-bezier(.3,1.6,.5,1) both; transform-box: fill-box; transform-origin: 50% 50%; }
+  .tns-price { animation: tnsCount 1.4s steps(5, end) .9s both; }
+  .tns-type { animation: tnsFade .2s ease .4s both; clip-path: inset(0 100% 0 0); animation: tnsType .8s steps(12, end) .5s forwards; }
+  .tns-digit { animation: tnsDigit .35s ease both; }
+  .tns-digit--0 { animation-delay: .5s; } .tns-digit--1 { animation-delay: .9s; } .tns-digit--2 { animation-delay: 1.3s; } .tns-digit--3 { animation-delay: 1.7s; }
+  .tns-route { stroke-dasharray: 100; stroke-dashoffset: 100; animation: tnsRoute 2.4s ease-in-out .3s forwards; }
+  .tns-pin { animation: tnsPinDrop .5s cubic-bezier(.3,1.6,.5,1) both; transform-box: fill-box; transform-origin: 50% 100%; }
+  .tns-map { overflow: hidden; border-radius: 14px; }
+  .tns-map svg { position: absolute; inset: 0; }
+  .tns-drive { position: absolute; left: 0; top: 0; offset-path: path("M10 46 C22 46 20 30 36 30 S52 16 74 12"); offset-rotate: auto; offset-distance: 0%; animation: tnsDrive 2.4s ease-in-out .3s forwards; margin: -4px 0 0 -7px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+  .tns-logo { width: 38px; height: 38px; object-fit: contain; position: relative; z-index: 2; }
+  .tns-ring { position: absolute; width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); animation: tnsRing 1.6s ease-out infinite; }
+  .tns-chip { position: absolute; bottom: 3px; right: 3px; z-index: 3; font: 800 7px/1 Poppins, sans-serif; padding: 3px 6px; border-radius: 99px; animation: tnsChip .5s cubic-bezier(.3,1.5,.5,1) both; white-space: nowrap; }
+  .tns-chip--ok { background: #22c55e; color: #fff; } .tns-chip--plus { background: #fff; color: #0b6b3a; }
+  .tns-roadcar { position: absolute; bottom: 1px; left: -18px; animation: tnsRoadCar 2.6s linear .3s both; opacity: .95; }
+  .tns-in { overflow: visible; }
+  .tns-bubble { position: absolute; font: 800 8px/1 Poppins, sans-serif; color: #fff; background: #0a66c2; border: 1px solid #fff; border-radius: 99px; padding: 2px 5px; opacity: 0; animation: tnsBubble 1.5s ease-out both; }
+  .tns-bubble--a { left: 16px; bottom: 22px; animation-delay: .5s; } .tns-bubble--b { left: 52px; bottom: 28px; background: #ef4444; animation-delay: 1.1s; } .tns-bubble--c { left: 34px; bottom: 30px; animation-delay: 1.6s; }
+  .tln-art-vroomy-hd { display: block; width: 184px; height: 184px; transform: scale(.4565); transform-origin: 0 0; margin: -19px 0 0 -19px; }
+  .tln-hd-ic.is-vroomy .tln-art-vroomy-pop { overflow: visible; }
+  @keyframes tnsPop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+  @keyframes tnsRise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @keyframes tnsFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes tnsStamp { from { opacity: 0; transform: scale(2.2) rotate(-14deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+  @keyframes tnsSlam { from { opacity: 0; transform: scale(2.4) rotate(-12deg); } 60% { opacity: 1; transform: scale(.92) rotate(-6deg); } to { opacity: 1; transform: scale(1) rotate(-6deg); } }
+  @keyframes tnsCount { 0% { opacity: 0; } 20% { opacity: .4; } 100% { opacity: 1; } }
+  @keyframes tnsType { to { clip-path: inset(0 0 0 0); } }
+  @keyframes tnsDigit { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes tnsRoute { to { stroke-dashoffset: 0; } }
+  @keyframes tnsDrive { to { offset-distance: 100%; } }
+  @keyframes tnsPinDrop { from { opacity: 0; transform: translateY(-10px) scale(.6); } to { opacity: 1; transform: none; } }
+  @keyframes tnsRing { from { transform: scale(.7); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
+  @keyframes tnsChip { from { opacity: 0; transform: translateY(8px) scale(.7); } to { opacity: 1; transform: none; } }
+  @keyframes tnsRoadCar { from { left: -18px; } to { left: 92px; } }
+  @keyframes tnsBubble { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 25% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-14px); } }
+}
+@media (prefers-reduced-motion: reduce) { .tns *, .tns { animation: none !important; } .tns-route { stroke-dashoffset: 0; } .tns-type { clip-path: none; } }

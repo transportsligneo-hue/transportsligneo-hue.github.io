@@ -13,6 +13,7 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
+import TrackRecordLine from "@/components/devis/TrackRecordLine";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
@@ -1033,6 +1034,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                  <p className="font-heading text-xl text-neon-blue">{priceTTC} €</p>
                </div>
                {offHoursNotice && <div className="w-full mt-3 md:col-span-full">{offHoursNotice}</div>}
+               <div className="w-full md:col-span-full"><TrackRecordLine fromCity={extractCity(departure)} toCity={extractCity(arrival)} /></div>
 
               <div className="h-8 w-px bg-white/10 hidden md:block" />
               <div>
@@ -1513,6 +1515,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                          <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">{microRegime ? "Net à payer" : "Total TTC"}</em><strong className="block font-semibold text-xl text-neon-blue">{priceTTC} €</strong></div>
                        </div>
                      )}
+                     <TrackRecordLine fromCity={extractCity(departure)} toCity={extractCity(arrival)} />
                      {offHoursNotice && <div className="mt-3">{offHoursNotice}</div>}
                     <div className="pt-3 mt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px]">
                       <strong className="dg-benefit font-normal inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"><RouteIcon size={11} className="text-neon-blue" /> Péages inclus</strong>

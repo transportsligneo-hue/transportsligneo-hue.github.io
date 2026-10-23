@@ -3,6 +3,7 @@ import type React from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { VroomyAvatar } from "@/components/VroomyAvatar";
+import { Scene, isScene } from "@/components/NavScenes";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
 
 type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
@@ -44,6 +45,7 @@ const MESSAGES: Msg[] = [
 ];
 
 function Art({ kind }: { kind: ArtKind }) {
+  if (isScene(kind)) return <Scene kind={kind} />;
   const p = { width: 46, height: 46, viewBox: "0 0 46 46", "aria-hidden": true } as const;
   if (kind === "gps")
     return (
@@ -57,7 +59,7 @@ function Art({ kind }: { kind: ArtKind }) {
   if (kind === "vroomy")
     return (
       <span className="tln-art-vroomy-pop" aria-hidden="true">
-        <VroomyAvatar size={84} />
+        <span className="tln-art-vroomy-hd"><VroomyAvatar size={184} /></span>
       </span>
     );
   if (kind === "card")
@@ -248,7 +250,7 @@ export default function NavTicker() {
 
   const inner = (
     <>
-      <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}${m.art === "vroomy" ? " is-vroomy" : ""}`}><Art kind={m.art} /></span>
+      <span key={`i${pos}`} className={`tln-hd-ic${WIDE.includes(m.art) ? " is-wide" : ""}${RAW.includes(m.art) ? " is-raw" : ""}${m.art === "driver" || m.art === "wheel" ? " is-logo" : ""}${m.art === "vroomy" ? " is-vroomy" : ""}${isScene(m.art) ? " is-scene" : ""}`}><Art kind={m.art} /></span>
       <span key={`t${pos}`} className="tln-hd-txt">
         <span className="tln-hd-kick"><i />{m.kick}</span>
         <span className="tln-hd-title">{m.title}</span>

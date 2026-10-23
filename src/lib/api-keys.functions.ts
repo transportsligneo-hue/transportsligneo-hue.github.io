@@ -16,7 +16,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
     const [{ data: keys }, { data: hooks }, { data: deliveries }] = await Promise.all([
       supabaseAdmin
         .from("api_keys")
-        .select("id, name, environment, key_prefix, key_last4, created_at, last_used_at, revoked_at")
+        .select("id, name, environment, key_prefix, key_last4, created_at, last_used_at, revoked_at, scope, allowed_ips, expires_at")
         .eq("organization_id", data.organizationId)
         .order("created_at", { ascending: false }),
       supabaseAdmin
@@ -37,13 +37,16 @@ export const listApiKeys = createServerFn({ method: "POST" })
 
 export const createApiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { organizationId: string; name: string; environment: "test" | "live" }) => input)
+  .inputValidator((input: { organizationId: string; name: string; environment: "test" | "live"; scope?: "read" | "write"; allowedIps?: string[]; expiresInDays?: number | null }) => input)
   .handler(async ({ data, context }) => {
     const { assertOrgAccess, keyPreview } = await import("@/lib/api-keys.server");
     const { generateApiKey, hashApiKey } = await import("@/lib/api/api-auth.server");
     await assertOrgAccess(context.supabase, context.userId, data.organizationId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    const ips = (data.allowedIps ?? []).map((x) => x.trim()).filter(Boolean);
+    if (ips.length > 20 || ips.some((x) => !/^[0-9a-fA-F:.]+(\/\d{1,3})?$/.test(x))) throw new Error("Adresses IP invalides (ex. 203.0.113.4 ou 203.0.113.0/24).");
+    const days = data.expiresInDays && data.expiresInDays > 0 ? Math.min(data.expiresInDays, 3650) : null;
     const raw = generateApiKey(data.environment);
     const preview = keyPreview(raw);
     const { data: row, error } = await supabaseAdmin
@@ -56,6 +59,9 @@ export const createApiKey = createServerFn({ method: "POST" })
         key_hash: hashApiKey(raw),
         key_prefix: preview.key_prefix,
         key_last4: preview.key_last4,
+        scope: data.scope === "read" ? "read" : "write",
+        allowed_ips: ips,
+        expires_at: days ? new Date(Date.now() + days * 86400000).toISOString() : null,
       })
       .select("id, name, environment, key_prefix, key_last4, created_at")
       .single();

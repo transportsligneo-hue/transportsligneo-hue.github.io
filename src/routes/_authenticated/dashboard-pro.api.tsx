@@ -28,6 +28,7 @@ const EVENTS = [
 interface ApiKeyRow {
   id: string; name: string; environment: string; key_prefix: string; key_last4: string;
   created_at: string; last_used_at?: string | null; revoked_at?: string | null;
+  scope?: string; allowed_ips?: string[]; expires_at?: string | null;
 }
 interface HookRow {
   id: string; url: string; environment: string; events: string[]; active: boolean; created_at: string;
@@ -70,6 +71,9 @@ function ApiIntegrationsPage() {
   const [env, setEnv] = useState<"test" | "live">("test");
   const [usage, setUsage] = useState<Usage | null>(null);
   const [logFilter, setLogFilter] = useState<"all" | "errors">("all");
+  const [keyScope, setKeyScope] = useState<"read" | "write">("write");
+  const [keyIps, setKeyIps] = useState("");
+  const [keyDays, setKeyDays] = useState("");
   const [tab, setTab] = useState<"journal" | "webhooks">("journal");
 
   const refresh = useCallback(async () => {
@@ -126,16 +130,18 @@ function ApiIntegrationsPage() {
   };
 
   const handleCreate = async (environment: "test" | "live") => {
+    const ips = keyIps.split(/[\s,;]+/).filter(Boolean);
     if (!orgId) return;
     setBusy(environment);
     try {
       const res = await createKey({
-        data: { organizationId: orgId, name: environment === "live" ? "Clé production" : "Clé sandbox", environment },
+        data: { organizationId: orgId, name: environment === "live" ? "Clé production" : "Clé sandbox", environment,
+          scope: keyScope, allowedIps: ips, expiresInDays: keyDays ? Number(keyDays) : null },
       });
       setRevealed({ label: environment === "live" ? "Clé production" : "Clé sandbox", value: res.secret });
       await refresh();
-    } catch {
-      toast.error("Génération impossible.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Génération impossible.");
     } finally {
       setBusy(null);
     }
@@ -279,6 +285,27 @@ function ApiIntegrationsPage() {
           </div>
         </div>
 
+        <div className="mb-4 grid gap-3 rounded-xl bg-[#f8f9fc] p-4 sm:grid-cols-3">
+          <label className="text-xs font-semibold text-[#5b5d6b]">Permissions
+            <select value={keyScope} onChange={(e) => setKeyScope(e.target.value as "read" | "write")} className="mt-1 w-full rounded-lg border border-[#d5d6dc] bg-white px-2 py-2 text-sm font-normal text-[#0b1026]">
+              <option value="write">Lecture et écriture</option>
+              <option value="read">Lecture seule</option>
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-[#5b5d6b]">Expiration
+            <select value={keyDays} onChange={(e) => setKeyDays(e.target.value)} className="mt-1 w-full rounded-lg border border-[#d5d6dc] bg-white px-2 py-2 text-sm font-normal text-[#0b1026]">
+              <option value="">Jamais</option>
+              <option value="30">30 jours</option>
+              <option value="90">90 jours</option>
+              <option value="365">1 an</option>
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-[#5b5d6b]">IP autorisées (optionnel)
+            <input value={keyIps} onChange={(e) => setKeyIps(e.target.value)} placeholder="203.0.113.4, 198.51.100.0/24" className="mt-1 w-full rounded-lg border border-[#d5d6dc] bg-white px-2 py-2 font-mono text-xs font-normal text-[#0b1026]" />
+          </label>
+          <p className="text-[11px] text-[#8b8d99] sm:col-span-3">Ces réglages s'appliquent à la prochaine clé générée. Laissez les IP vides pour accepter toutes les adresses.</p>
+        </div>
+
         {keys.length === 0 ? (
           <p className="text-sm text-[#5b5d6b]">Aucune clé pour le moment. Commencez par une clé sandbox pour vos tests.</p>
         ) : (
@@ -291,6 +318,9 @@ function ApiIntegrationsPage() {
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${k.environment === "live" ? "bg-[#e8f5ec] text-[#16a34a]" : "bg-[#eef2ff] text-[#2f5fff]"}`}>
                       {k.environment === "live" ? "production" : "sandbox"}
                     </span>
+                    <span className="rounded-full bg-[#f1f2f7] px-2 py-0.5 text-[11px] font-semibold text-[#5b5d6b]">{k.scope === "read" ? "lecture seule" : "lecture + écriture"}</span>
+                    {k.allowed_ips && k.allowed_ips.length > 0 && <span className="rounded-full bg-[#f1e8ff] px-2 py-0.5 text-[11px] font-semibold text-[#6d28d9]">{k.allowed_ips.length} IP</span>}
+                    {k.expires_at && <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${new Date(k.expires_at) < new Date() ? "bg-[#fdeaea] text-[#dc2626]" : "bg-[#f1f2f7] text-[#5b5d6b]"}`}>{new Date(k.expires_at) < new Date() ? "expirée" : `expire le ${new Date(k.expires_at).toLocaleDateString("fr-FR")}`}</span>}
                     {k.revoked_at && <span className="rounded-full bg-[#fdeaea] px-2 py-0.5 text-[11px] font-semibold text-[#dc2626]">révoquée</span>}
                   </div>
                   <code className="mt-1 block font-mono text-xs text-[#5b5d6b]">
