@@ -318,6 +318,11 @@ export async function ensureFactureForMission(
         .join(" — "),
       reference_label: numeroMission ? "Mission" : trajet["commande_ref"] ? "N° de PO" : null,
       reference_client: numeroMission ?? trajet["commande_ref"] ?? null,
+      metadata: (() => {
+        const m = trajet["options_meta"] as Record<string, unknown> | null | undefined;
+        const r = typeof m?.reference_client === "string" ? m.reference_client.trim() : "";
+        return r ? { reference_interne: r } : {};
+      })(),
       prix_ht: prixHt,
       tva_taux: 20,
       prix_tva: prixTva,

@@ -31,6 +31,7 @@ const inputSchema = z.object({
   contactDepartNom: z.string().max(160).optional().default(""),
   contactDepartTel: z.string().max(40).optional().default(""),
   message: z.string().max(2000).optional().default(""),
+  referenceClient: z.string().max(60).optional().default(""),
   vehicles: z.array(vehicleSchema).min(1).max(50),
 });
 
@@ -154,6 +155,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       heure_souhaitee: heureText,
       message: [
         `[Mission groupée ${groupReference}]`,
+        data.referenceClient ? `Réf. interne : ${data.referenceClient}` : "",
         data.message,
         v.notes ? `Notes véhicule : ${v.notes}` : "",
         v.tripType === "aller-retour" && v.immatriculationRetour ? `Plaque retour : ${v.immatriculationRetour}` : "",
@@ -164,6 +166,7 @@ export const createGroupedMission = createServerFn({ method: "POST" })
       options: v.tripType,
       options_meta: {
         ...(v.optionsMeta ?? {}),
+        ...(data.referenceClient ? { reference_client: data.referenceClient } : {}),
         ...(v.tripType === "recharge" ? { recharge_seule: true } : {}),
       },
       statut: "nouvelle",

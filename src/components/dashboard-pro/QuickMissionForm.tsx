@@ -174,10 +174,6 @@ export default function QuickMissionForm({
   const [heureLivraison, setHeureLivraison] = useState("");
   const [message, setMessage] = useState("");
   const [refInterne, setRefInterne] = useState("");
-  // Mission récurrente : répète la même demande à intervalle régulier (navettes entre sites).
-  const [repeatOn, setRepeatOn] = useState(false);
-  const [repeatFreq, setRepeatFreq] = useState<"hebdo" | "bihebdo" | "mensuel">("hebdo");
-  const [repeatCount, setRepeatCount] = useState(4);
 
   // Brouillons (numéro de devis réservé à la création du brouillon)
   type Draft = { id: string; numero: string; form: Record<string, unknown> };
@@ -642,32 +638,6 @@ export default function QuickMissionForm({
 
       if (insErr) throw insErr;
 
-      // Série récurrente : on crée les occurrences suivantes (même trajet, mêmes contacts, mêmes options).
-      if (repeatOn && repeatCount > 1) {
-        const shift = (iso: string | null | undefined, i: number) => {
-          if (!iso) return iso ?? null;
-          const d = new Date(`${iso}T12:00:00`);
-          if (Number.isNaN(d.getTime())) return iso;
-          if (repeatFreq === "mensuel") d.setMonth(d.getMonth() + i);
-          else d.setDate(d.getDate() + i * (repeatFreq === "hebdo" ? 7 : 14));
-          return d.toISOString().slice(0, 10);
-        };
-        const base = payload as unknown as Record<string, unknown>;
-        const extra = Array.from({ length: repeatCount - 1 }, (_, k) => {
-          const i = k + 1;
-          const row: Record<string, unknown> = { ...base };
-          delete row.devis_id; delete row.devis_genere_at;
-          row.date_souhaitee = shift(base.date_souhaitee as string, i);
-          if (base.date_livraison) row.date_livraison = shift(base.date_livraison as string, i);
-          if (base.date_retour) row.date_retour = shift(base.date_retour as string, i);
-          row.message = [`[Mission récurrente ${i + 1}/${repeatCount}]`, base.message].filter(Boolean).join("\n");
-          return row;
-        });
-        const { error: serieErr } = await supabase.from("demandes_convoyage").insert(extra as never);
-        if (serieErr) toast.error("La première mission est créée, mais pas la série : " + serieErr.message);
-        else toast.success(`Série créée : ${repeatCount} missions (${repeatFreq === "hebdo" ? "chaque semaine" : repeatFreq === "bihebdo" ? "toutes les 2 semaines" : "chaque mois"})`);
-      }
-
       const demandeId = inserted?.id;
       const numero = devisNumero ?? (demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "");
       const clientLabel = profile.societe || `${profile.prenom} ${profile.nom}`.trim() || profile.email;
@@ -780,7 +750,7 @@ export default function QuickMissionForm({
           setDateRetour(""); setHeureRetour("");
           setSameRetourAddress(true); setSameRetourVehicle(false);
           setOptions({}); setJokeage(false); setJokeageServices({}); setAutreNote(""); setPvDigitalise("aucun");
-          setDate(""); setHeure(""); setMessage(""); setRefInterne(""); setRepeatOn(false); setRepeatCount(4);
+          setDate(""); setHeure(""); setMessage(""); setRefInterne("");
           setPricing(null);
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
@@ -1340,33 +1310,6 @@ export default function QuickMissionForm({
           </div>
         )}
 
-        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3.5">
-          <label className="flex cursor-pointer items-center gap-2.5 text-[13.5px] font-semibold text-slate-800">
-            <input type="checkbox" checked={repeatOn} onChange={(e) => setRepeatOn(e.target.checked)} className="h-4 w-4 accent-[#2f5fff]" />
-            Répéter cette mission (navette régulière)
-          </label>
-          {repeatOn && (
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className={lbl}>Fréquence</label>
-                <select className={inp} value={repeatFreq} onChange={(e) => setRepeatFreq(e.target.value as "hebdo" | "bihebdo" | "mensuel")}>
-                  <option value="hebdo">Chaque semaine</option>
-                  <option value="bihebdo">Toutes les 2 semaines</option>
-                  <option value="mensuel">Chaque mois</option>
-                </select>
-              </div>
-              <div>
-                <label className={lbl}>Nombre de missions au total</label>
-                <select className={inp} value={repeatCount} onChange={(e) => setRepeatCount(Number(e.target.value))}>
-                  {[2, 3, 4, 5, 6, 8, 10, 12].map((n) => <option key={n} value={n}>{n} missions</option>)}
-                </select>
-              </div>
-              <p className="text-[12px] text-slate-500 sm:col-span-2">
-                La première mission est créée à la date choisie ; les suivantes reprennent le même trajet, les mêmes contacts et options aux dates suivantes. Nous vous confirmons le tarif de chaque occurrence.
-              </p>
-            </div>
-          )}
-        </div>
         <div className="mt-3">
           <label className={lbl}>Référence interne <span className="font-normal text-slate-400">(n° de commande, centre de coût, dossier… facultatif)</span></label>
           <input className={inp} maxLength={60} value={refInterne} onChange={(e) => setRefInterne(e.target.value)} placeholder="Ex. BC-2026-0412 ou Agence Nantes" />

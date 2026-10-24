@@ -144,6 +144,7 @@ function GroupedMissionForm() {
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [message, setMessage] = useState("");
+  const [refInterne, setRefInterne] = useState("");
 
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [pricing, setPricing] = useState(false);
@@ -355,6 +356,7 @@ function GroupedMissionForm() {
           contactDepartNom: contactNom,
           contactDepartTel: contactTel,
           message,
+          referenceClient: refInterne.trim(),
           vehicles: filledRows.map((r) => ({
             vehicleId: null,
             immatriculation: r.immat.trim().toUpperCase(),
@@ -398,6 +400,7 @@ function GroupedMissionForm() {
     setRows([newRow(), newRow()]);
     setPrices({});
     setMessage("");
+    setRefInterne("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -763,6 +766,11 @@ function GroupedMissionForm() {
             <span className={labelCls}>Heure souhaitée *</span>
             <input type="time" required className={fieldCls} value={heure} onChange={(e) => setHeure(e.target.value)} />
           </div>
+        </div>
+        <div className="mt-3.5">
+          <span className={labelCls}>Référence interne <span className="font-normal text-slate-400">(n° de commande, centre de coût… facultatif)</span></span>
+          <input className={fieldCls} maxLength={60} value={refInterne} onChange={(e) => setRefInterne(e.target.value)} placeholder="Ex. BC-2026-0412 ou Agence Nantes" />
+          <p className="mt-1 text-[11.5px] text-slate-400">Reprise sur chaque facture pour faciliter le rapprochement comptable.</p>
         </div>
         <div className="mt-3.5">
           <span className={labelCls}>Informations complémentaires</span>

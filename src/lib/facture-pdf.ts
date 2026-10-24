@@ -192,6 +192,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   let selectedOptions = f.options;
   let vehicles = invoiceVehicles(f as unknown as Record<string, unknown>);
   let poNumber = invoicePoNumber(f.reference_client, f.reference_label);
+  let refInterneDb = "";
   if (!context?.demo) {
     try {
       // Read-only recovery for old invoices and callers omitting vehicle metadata.
@@ -201,6 +202,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
       const metadata = invoice?.metadata && typeof invoice.metadata === "object" && !Array.isArray(invoice.metadata)
         ? invoice.metadata as Record<string, unknown> : {};
       poNumber = invoicePoNumber(invoice?.reference_client, invoice?.reference_label) ?? poNumber;
+      if (typeof metadata.reference_interne === "string") refInterneDb = metadata.reference_interne;
       if (selectedOptions == null && Array.isArray(metadata.options)) selectedOptions = metadata.options.filter((v): v is string => typeof v === "string");
       if (!devisMessage && typeof metadata.devis_message === "string") devisMessage = metadata.devis_message;
       if (!vehicles.some((v) => v.immatriculation) && Array.isArray(metadata.vehicules)) vehicles = invoiceVehicles(metadata);
@@ -394,8 +396,10 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   if (f.client_tva) clientDetail.push(`N° TVA : ${f.client_tva}`);
   if (f.client_email) clientDetail.push(f.client_email);
   if (f.reference_client?.trim() && !poNumber) clientDetail.push(`${f.reference_label?.trim() || "Référence dossier"} : ${f.reference_client.trim()}`);
+  const refInterne = (refInterneDb || ((f as { metadata?: Record<string, unknown> | null }).metadata?.reference_interne as string | undefined) || "").trim();
+  if (refInterne) clientDetail.push(`Réf. client : ${refInterne}`);
   let cy2 = boxTop + 19;
-  for (const l of clientDetail.slice(0, 4)) {
+  for (const l of clientDetail.slice(0, 5)) {
     doc.text((doc.splitTextToSize(l, colW - 12) as string[])[0], cX + 6, cy2);
     cy2 += 4.6;
   }
