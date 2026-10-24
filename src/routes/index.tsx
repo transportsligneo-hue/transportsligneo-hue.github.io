@@ -3,9 +3,8 @@ import Navbar from "@/components/Navbar";
 import HomeDesktopV5 from "@/components/HomeDesktopV5";
 import Footer from "@/components/Footer";
 import MobileHomeScreen from "@/components/mobile/MobileHomeScreen";
-import ogHome from "@/assets/og-accueil-ligneo.jpg.asset.json";
 
-const OG_IMAGE = ogHome.url.startsWith("http") ? ogHome.url : `https://transportsligneo.fr${ogHome.url}`;
+const OG_IMAGE = "https://transportsligneo.fr/og-ligneo.jpg?v=2";
 
 export const Route = createFileRoute("/")({
   component: Index,
