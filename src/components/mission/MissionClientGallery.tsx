@@ -16,6 +16,7 @@ import { AnnotatedPhoto, parseAnnotations, type PhotoAnnotation } from "@/compon
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, FileText, CarFront, Download, Eye, X, ChevronDown } from "lucide-react";
+import { PhotoZipButton } from "@/components/mission/PhotoZipButton";
 
 interface Props {
   attributionId: string;
@@ -225,6 +226,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
         <>
           {photosDep.length > 0 && (
             <Section title={`Photos de prise en charge (${photosDep.length})`} icon={<Camera size={16} />}>
+              <div className="mb-3 flex justify-end"><PhotoZipButton photos={photosDep.map(p => ({ url: p.url, name: `depart_${vueLabel(p.vue_type)}` }))} zipName={`photos-depart-${attributionId.slice(0, 8)}`} /></div>
               <Grid items={photosDep.slice(0, visibleDep)} onOpen={setLightbox} />
               {photosDep.length > visibleDep && (
                 <LoadMore onClick={() => setVisibleDep(v => v + PAGE_SIZE)} remaining={photosDep.length - visibleDep} />
@@ -234,6 +236,7 @@ export function MissionClientGallery({ attributionId, trajetId, onProofsAvailabl
 
           {photosArr.length > 0 && (
             <Section title={`Photos de livraison (${photosArr.length})`} icon={<Camera size={16} />}>
+              <div className="mb-3 flex justify-end"><PhotoZipButton photos={photosArr.map(p => ({ url: p.url, name: `arrivee_${vueLabel(p.vue_type)}` }))} zipName={`photos-arrivee-${attributionId.slice(0, 8)}`} /></div>
               <Grid items={photosArr.slice(0, visibleArr)} onOpen={setLightbox} />
               {photosArr.length > visibleArr && (
                 <LoadMore onClick={() => setVisibleArr(v => v + PAGE_SIZE)} remaining={photosArr.length - visibleArr} />

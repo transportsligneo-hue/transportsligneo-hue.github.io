@@ -45,6 +45,9 @@ import {
   attributionStatutTone,
 } from "@/components/admin/AdminUI";
 import { RoleBadge } from "@/components/brand/LigneoBrand";
+import { PhotoZipButton } from "@/components/mission/PhotoZipButton";
+import { downloadOnePhoto } from "@/lib/photo-download";
+import { updateAdminMissionStatus } from "@/lib/adminMissionStatus";
 import { AdminLiveMissionMap } from "@/components/mission/AdminLiveMissionMap";
 import { MissionDocuments } from "@/components/MissionDocuments";
 import { MissionDocsOfficielsPanel } from "@/components/mission/MissionDocsOfficielsPanel";
@@ -201,6 +204,8 @@ const statutLabels: Record<string, string> = {
   accepte: "Accepté",
   refuse: "Refusé",
   en_cours: "En cours",
+  en_attente_validation: "En attente de validation",
+  validee: "Validée",
   termine: "Terminé",
   annule: "Annulé",
 };
@@ -588,8 +593,19 @@ function AdminMissionDetail() {
 
   const updateStatut = async (statut: string) => {
     if (!attribution) return;
-    await supabase.from("attributions").update({ statut }).eq("id", attribution.id);
-    setAttribution({ ...attribution, statut });
+    try {
+      // Même chemin que le panneau live : synchronise aussi la mission, l'historique et les notifications client.
+      await updateAdminMissionStatus({
+        attributionId: attribution.id,
+        trajetId: attribution.trajet_id,
+        statut,
+        note: statut === "termine" ? "Mission validée par l'admin" : undefined,
+      });
+      setAttribution({ ...attribution, statut });
+      toast.success(statut === "termine" ? "Mission validée : terminée" : `Statut : ${statutLabels[statut] ?? statut}`);
+    } catch (e) {
+      toast.error("Mise à jour impossible", { description: e instanceof Error ? e.message : undefined });
+    }
   };
 
   const saveAdminNote = async () => {
@@ -977,7 +993,9 @@ function AdminMissionDetail() {
   // Index timeline courant
   const currentStepIndex = useMemo(() => {
     if (!attribution) return 0;
-    if (attribution.statut === "termine") return TIMELINE_STEPS.length - 1;
+    if (attribution.statut === "termine" || attribution.statut === "validee") return TIMELINE_STEPS.length - 1;
+    // Livré par le convoyeur, en attente de validation admin : tout est allumé sauf « Terminée »
+    if (attribution.statut === "en_attente_validation") return 3;
     if (attribution.statut === "en_cours") {
       const hasInsp = inspections.length > 0;
       return hasInsp ? 3 : 2;
@@ -1330,6 +1348,15 @@ function AdminMissionDetail() {
 
             {/* --- Actions --- */}
             <div className="rounded-2xl border border-pro-border bg-pro-surface p-3 shadow-sm space-y-2">
+              {attribution.statut === "en_attente_validation" && (
+                <button
+                  type="button"
+                  onClick={() => updateStatut("termine")}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                >
+                  <CheckCircle2 size={15} /> Valider la mission (terminée)
+                </button>
+              )}
               <Select
                 value={attribution.statut}
                 onChange={(e) => updateStatut(e.target.value)}
@@ -1905,6 +1932,13 @@ function AdminMissionDetail() {
                     {insp.photos.length === 0 ? (
                       <p className="text-pro-muted text-xs">Aucune photo.</p>
                     ) : (
+                      <>
+                      <div className="mb-2 flex justify-end">
+                        <PhotoZipButton
+                          photos={insp.photos.filter((p) => !p.vue_type.startsWith("signature")).map((p) => ({ url: p.url_photo, name: `${insp.type}_${vueLabelFor(p.vue_type)}` }))}
+                          zipName={`photos-${insp.type}-${(attribution?.numero_mission ?? missionId).toString().slice(-12)}`}
+                        />
+                      </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {insp.photos
                           .filter((p) => !p.vue_type.startsWith("signature"))
@@ -1926,6 +1960,14 @@ function AdminMissionDetail() {
                                   {vueLabelFor(p.vue_type)}
                                 </p>
                               </a>
+                              <button
+                                type="button"
+                                onClick={() => downloadOnePhoto({ url: p.url_photo, name: `${insp.type}_${vueLabelFor(p.vue_type)}` }).catch(() => toast.error("Téléchargement impossible"))}
+                                title="Télécharger cette photo (taille réelle)"
+                                className="absolute top-1 left-1 p-1.5 rounded-md bg-emerald-600/90 text-white opacity-0 group-hover:opacity-100 hover:bg-emerald-700 transition shadow-sm"
+                              >
+                                <Download size={12} />
+                              </button>
                               <button
                                 type="button"
                                 onClick={async () => {
@@ -1952,6 +1994,7 @@ function AdminMissionDetail() {
                             </div>
                           ))}
                       </div>
+                      </>
                     )}
                   </div>
                 ))}

@@ -19,6 +19,7 @@ import { usePlateauPhotos } from "@/hooks/usePlateauPhotos";
 import {
   Camera, PenLine, FileImage, FileText, ZoomIn, Download, Loader2, X, Image as ImgIcon, ShieldCheck,
 } from "lucide-react";
+import { PhotoZipButton } from "@/components/mission/PhotoZipButton";
 import { AnnotatedPhoto, parseAnnotations, type PhotoAnnotation } from "@/components/inspection/PhotoAnnotations";
 
 interface Selfie { id: string; storage_path: string; taken_at: string; }
@@ -219,6 +220,13 @@ export function InspectionPreuvesBlock({
       <div className="flex items-center gap-2 mb-2 text-[11px] font-semibold text-blue-200/90">
         {icon}<span>{title}</span>
         <span className="ml-auto text-white/40 text-[10px]">{items.length}</span>
+        {items.filter(i => i.isImage && i.url && i.storagePath).length > 1 && (
+          <PhotoZipButton
+            photos={items.filter(i => i.isImage && i.url && i.storagePath).map(i => ({ url: i.url, name: i.label }))}
+            zipName={title}
+            label="Tout (ZIP)"
+          />
+        )}
       </div>
       {items.length === 0 ? (
         <p className="text-[11px] text-white/35 italic px-1">{empty}</p>
