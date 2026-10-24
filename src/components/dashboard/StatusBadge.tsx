@@ -1,29 +1,30 @@
 import { type ReactNode } from "react";
 
-type StatusKind =
-  | "neutral"
-  | "info"
-  | "electric"
-  | "success"
-  | "warning"
-  | "danger"
-  | "gold"
-  | "violet";
+import { LgBadge } from "@/components/ui/LgBadge";
 
-/**
- * Palette opérationnelle (suivi missions / véhicules) :
- * fond saturé + texte blanc pour lisibilité immédiate, identifiable d'un coup d'œil.
- * Conserve un fallback navy/doré pour les contextes premium hors métier.
- */
-const styles: Record<StatusKind, string> = {
-  neutral: "bg-slate-500/90 text-white border-slate-400/40",
-  info: "bg-[#00AEEF] text-white border-[#00AEEF]",
-  electric: "bg-[#00AEEF] text-white border-[#00AEEF]",
-  success: "bg-[#22C55E] text-white border-[#22C55E]",
-  warning: "bg-[#F59E0B] text-white border-[#F59E0B]",
-  danger: "bg-[#EF4444] text-white border-[#EF4444]",
-  violet: "bg-[#8B5CF6] text-white border-[#8B5CF6]",
-  gold: "bg-primary text-navy border-primary",
+type StatusKind =
+  | "neutral" | "info" | "electric" | "success" | "warning" | "danger" | "gold" | "violet"
+  | "pending" | "proposed" | "accepted" | "running" | "review" | "validated" | "done" | "cancelled" | "refused";
+
+/** Une couleur par statut (aucun doublon entre statuts de mission). */
+const COLORS: Record<StatusKind, string> = {
+  neutral: "#64748B",
+  info: "#00AEEF",
+  electric: "#2F5FFF",
+  success: "#22C55E",
+  warning: "#F59E0B",
+  danger: "#EF4444",
+  gold: "#D4A017",
+  violet: "#8B5CF6",
+  pending: "#F59E0B",
+  proposed: "#00AEEF",
+  accepted: "#2F5FFF",
+  running: "#8B5CF6",
+  review: "#EC4899",
+  validated: "#0EA5A4",
+  done: "#22C55E",
+  cancelled: "#EF4444",
+  refused: "#64748B",
 };
 
 interface Props {
@@ -34,36 +35,33 @@ interface Props {
 }
 
 export function StatusBadge({ kind = "neutral", children, size = "sm", className = "" }: Props) {
-  const sizeClass = size === "md" ? "px-3 py-1 text-xs" : "px-2 py-0.5 text-[10px]";
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded border font-semibold uppercase tracking-wider shadow-sm ${styles[kind]} ${sizeClass} ${className}`}
-    >
+    <LgBadge color={COLORS[kind]} size={size} className={className}>
       {children}
-    </span>
+    </LgBadge>
   );
 }
 
 /** Mapping métier · couleurs opérationnelles requises */
 export function missionStatusKind(statut: string): StatusKind {
   switch (statut) {
-    case "en_attente": return "warning";            // Orange
+    case "en_attente": return "pending";             // Orange
+    case "propose": return "proposed";               // Cyan
     case "confirmee":
     case "planifiee":
     case "attribuee":
-    case "propose":
     case "accepte":
-    case "acceptee": return "electric";              // Bleu électrique
-    case "en_cours": return "violet";                // Violet
-    case "en_attente_validation": return "info";    // Bleu (livré, en attente validation)
+    case "acceptee": return "accepted";              // Bleu électrique
+    case "en_cours": return "running";               // Violet
+    case "en_attente_validation": return "review";   // Rose
+    case "validee": return "validated";              // Turquoise
     case "livree":
-    case "validee":
     case "termine":
-    case "terminee": return "success";               // Vert
+    case "terminee": return "done";                  // Vert
     case "annulee":
-    case "annule":
+    case "annule": return "cancelled";               // Rouge
     case "refuse":
-    case "refusee": return "danger";                 // Rouge
+    case "refusee": return "refused";                // Gris
     case "urgente": return "danger";
     default: return "neutral";
   }
@@ -75,11 +73,11 @@ export function missionStatusLabel(statut: string): string {
     confirmee: "Planifiée",
     planifiee: "Planifiée",
     attribuee: "Planifiée",
-    propose: "Convoyeur attribué",
-    accepte: "Mission acceptée",
-    acceptee: "Mission acceptée",
+    propose: "Proposée",
+    accepte: "Acceptée",
+    acceptee: "Acceptée",
     en_cours: "En cours",
-    en_attente_validation: "Livré · validation en cours",
+    en_attente_validation: "En attente de validation",
     livree: "Livrée",
     validee: "Validée",
     termine: "Terminée",

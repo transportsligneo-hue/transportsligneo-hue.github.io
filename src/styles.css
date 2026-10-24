@@ -9012,13 +9012,7 @@ html.theme-light .r4-page .v5-hero .v4-accent {
 .dvx-ref { font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:13px; font-weight:600; color:#2f5fff; }
 .dvx-price { font-family:'Space Grotesk', ui-sans-serif, sans-serif; font-size:26px; font-weight:700; letter-spacing:-.02em; color:#14161c; line-height:1; }
 .dvx-price small { display:block; margin-top:3px; font-family:'Inter', sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#a3a4ac; }
-.dvx-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:10.5px; font-weight:700; border:1px solid transparent; }
-.dvx-badge.grey { background:#f2f4f9; color:#5d5f6a; border-color:#e4e6ee; }
-.dvx-badge.blue { background:#eef2ff; color:#2f5fff; border-color:#dce6fd; }
-.dvx-badge.green { background:#e9f7ee; color:#15803d; border-color:#cbecd6; }
-.dvx-badge.orange { background:#e8ecf8; color:#1c3fc4; border-color:#c3cff5; }
-.dvx-badge.red { background:#fdeef1; color:#be1b38; border-color:#f7d3da; }
-.dvx-badge.violet { background:#f2eeff; color:#6d4ce0; border-color:#e0d8fb; }
+/* .dvx-badge : voir le bloc « Badges de statut » en fin de fichier */
 .dvx-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13px; color:#1c3fc4; background:linear-gradient(135deg,#dce9ff,#eef2ff); border:1px solid #dce6fd; }
 .dvx-col-k { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#a3a4ac; margin-bottom:6px; }
@@ -10455,11 +10449,6 @@ html.theme-dark .admin-shell .dvx-group, html.theme-dark .admin-shell .dvx-tag {
 html.theme-dark .admin-shell :is(.dvx-title, .dvx-price, .dvx-stat-v) { color: #e8edfb !important; }
 html.theme-dark .admin-shell :is(.dvx-sub, .dvx-date, .dvx-check, .dvx-group-t) { color: #a9b4d6 !important; }
 html.theme-dark .admin-shell .dvx-ref { color: #7fa6ff; }
-html.theme-dark .admin-shell .dvx-badge.grey { background: #17224a; color: #b7c1e0; border-color: #24305c; }
-html.theme-dark .admin-shell .dvx-badge.blue, html.theme-dark .admin-shell .dvx-badge.orange { background: rgba(79,140,255,.14); color: #9dbaff; border-color: rgba(79,140,255,.3); }
-html.theme-dark .admin-shell .dvx-badge.green { background: rgba(24,179,130,.14); color: #5ee6a8; border-color: rgba(24,179,130,.3); }
-html.theme-dark .admin-shell .dvx-badge.red { background: rgba(224,51,79,.16); color: #ff8a9a; border-color: rgba(224,51,79,.3); }
-html.theme-dark .admin-shell .dvx-badge.violet { background: rgba(124,92,255,.16); color: #b9a6ff; border-color: rgba(124,92,255,.3); }
 html.theme-dark .admin-shell :is(.bg-\[\#eef2ff\]) { background-color: rgba(79,140,255,.14) !important; }
 html.theme-dark .admin-shell :is(.text-\[\#1c3fc4\]) { color: #9dbaff !important; }
 html.theme-dark .admin-shell :is(.border-\[\#c3cff5\]) { border-color: rgba(79,140,255,.3) !important; }
@@ -12520,3 +12509,26 @@ html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[da
 @media (prefers-reduced-motion:reduce){.animate-spin{animation:none!important}}
 .tns-bar { transform-box: fill-box; transform-origin: 0 50%; animation: tnsBarGrow 2.2s ease-in-out .9s both; }
 @keyframes tnsBarGrow { from { transform: scaleX(.12); } to { transform: scaleX(1); } }
+
+/* ===== Badges de statut · style unique (dégradé + reflet + pastille lumineuse) ===== */
+.lg-bdg{--c:#2f5fff;display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 10px;border-radius:8px;font:700 10.5px/1.15 Inter,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#fff;white-space:nowrap;vertical-align:middle;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 82%,#fff),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000));border:1px solid color-mix(in srgb,var(--c) 70%,#000);
+  box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 3px 10px -3px color-mix(in srgb,var(--c) 70%,transparent);text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.lg-bdg::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c)}
+.lg-bdg--md{padding:6px 15px 6px 12px;font-size:11.5px}
+.lg-bdg--sm{padding:3px 10px 3px 8px;font-size:9.5px;gap:6px}
+.lg-bdg--sm::before{width:6px;height:6px}
+.lg-bdg>span{overflow:hidden;text-overflow:ellipsis}
+/* Pastille « pp-st » (espace pro / démo) : même rendu, couleur unique par statut */
+.pp-st.pp-st-wait,.pp-st.pp-st-run,.pp-st.pp-st-done,.pp-st.pp-st-ko{--c:#2f5fff;display:inline-flex;align-items:center;gap:7px;padding:5px 13px 5px 10px;border-radius:8px;font:700 10.5px/1.15 Inter,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 82%,#fff),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000));border:1px solid color-mix(in srgb,var(--c) 70%,#000);
+  box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 3px 10px -3px color-mix(in srgb,var(--c) 70%,transparent);text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.pp-st.pp-st-wait::before,.pp-st.pp-st-run::before,.pp-st.pp-st-done::before,.pp-st.pp-st-ko::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c)}
+.pp-st.pp-b-pending{--c:#F59E0B}.pp-st.pp-b-accepted{--c:#2F5FFF}.pp-st.pp-b-run{--c:#8B5CF6}.pp-st.pp-b-done{--c:#22C55E}.pp-st.pp-b-cancel{--c:#EF4444}.pp-st.pp-b-refused{--c:#64748B}
+
+.dvx-badge{--c:#64748B;display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:8px;font:700 9.5px/1.15 Inter,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#fff;white-space:nowrap;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 82%,#fff),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000));border:1px solid color-mix(in srgb,var(--c) 70%,#000);
+  box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 3px 10px -3px color-mix(in srgb,var(--c) 70%,transparent);text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.dvx-badge::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c)}
+.dvx-badge.grey{--c:#64748B}.dvx-badge.blue{--c:#2F5FFF}.dvx-badge.green{--c:#22C55E}.dvx-badge.orange{--c:#F59E0B}.dvx-badge.red{--c:#EF4444}.dvx-badge.violet{--c:#8B5CF6}
+.dvx-badge.cyan{--c:#00AEEF}.dvx-badge.pink{--c:#EC4899}.dvx-badge.teal{--c:#0EA5A4}.dvx-badge.indigo{--c:#6366F1}

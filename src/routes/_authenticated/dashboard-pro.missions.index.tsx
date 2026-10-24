@@ -445,9 +445,9 @@ function ProMissionsIndex() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-xs text-pro-text-soft">{displayNumero(p.numero)}</span>
-                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide bg-pro-bg-soft text-pro-accent">
+                      <StatusBadge kind={p.source === "devis" ? "pending" : "proposed"} size="sm">
                         {p.source === "devis" ? "Devis en attente" : "Demande reçue"}
-                      </span>
+                      </StatusBadge>
                     </div>
                     <p className="text-sm text-pro-text mt-0.5 truncate">{p.depart} → {p.arrivee}</p>
                     <p className="text-xs text-pro-text-soft mt-0.5 flex flex-wrap gap-x-3">

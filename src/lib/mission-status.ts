@@ -20,22 +20,24 @@ export interface MissionStatusMeta {
   short: string;
   tone: "amber" | "emerald" | "red" | "blue" | "violet" | "slate" | "gold";
   pulse?: boolean;
+  /** Couleur unique du badge (pas de doublon entre statuts). */
+  color?: string;
   description?: string;
 }
 
 export const MISSION_STATUS: Record<MissionStatusKey, MissionStatusMeta> = {
-  propose: { label: "En attente de réponse du convoyeur", short: "Proposée", tone: "amber", pulse: true, description: "Le convoyeur doit accepter ou refuser." },
-  accepte: { label: "Acceptée par le convoyeur", short: "Acceptée", tone: "emerald" },
-  refusee: { label: "Refusée par le convoyeur", short: "Refusée", tone: "red", description: "À réattribuer ou publier au catalogue." },
-  en_cours: { label: "Mission en cours", short: "En cours", tone: "blue", pulse: true },
-  en_attente_validation: { label: "En attente de validation admin", short: "À valider", tone: "amber" },
-  validee: { label: "Mission validée par l'admin", short: "Validée", tone: "emerald" },
-  termine: { label: "Terminée", short: "Terminée", tone: "emerald" },
-  publie: { label: "Publiée au catalogue", short: "Au catalogue", tone: "blue", description: "Visible par les convoyeurs validés." },
-  brouillon: { label: "Brouillon", short: "Brouillon", tone: "slate" },
-  attribue: { label: "Mission planifiée", short: "Planifiée", tone: "emerald" },
-  expire: { label: "Proposition expirée", short: "Expirée", tone: "slate" },
-  annule: { label: "Annulée", short: "Annulée", tone: "red" },
+  propose: { label: "En attente de réponse du convoyeur", short: "Proposée", tone: "amber", pulse: true, description: "Le convoyeur doit accepter ou refuser.", color: "#00AEEF" },
+  accepte: { label: "Acceptée par le convoyeur", short: "Acceptée", tone: "emerald", color: "#2F5FFF" },
+  refusee: { label: "Refusée par le convoyeur", short: "Refusée", tone: "red", description: "À réattribuer ou publier au catalogue.", color: "#64748B" },
+  en_cours: { label: "Mission en cours", short: "En cours", tone: "blue", pulse: true, color: "#8B5CF6" },
+  en_attente_validation: { label: "En attente de validation admin", short: "À valider", tone: "amber", color: "#EC4899" },
+  validee: { label: "Mission validée par l'admin", short: "Validée", tone: "emerald", color: "#0EA5A4" },
+  termine: { label: "Terminée", short: "Terminée", tone: "emerald", color: "#22C55E" },
+  publie: { label: "Publiée au catalogue", short: "Au catalogue", tone: "blue", description: "Visible par les convoyeurs validés.", color: "#D946EF" },
+  brouillon: { label: "Brouillon", short: "Brouillon", tone: "slate", color: "#64748B" },
+  attribue: { label: "Mission planifiée", short: "Planifiée", tone: "emerald", color: "#6366F1" },
+  expire: { label: "Proposition expirée", short: "Expirée", tone: "slate", color: "#64748B" },
+  annule: { label: "Annulée", short: "Annulée", tone: "red", color: "#EF4444" },
 };
 
 export function getMissionStatus(key: string | null | undefined): MissionStatusMeta {

@@ -41,6 +41,8 @@ export interface MissionCardData {
   lot?: { ref: string | null; plaques: string[]; total: number } | null;
 }
 
+import { LgBadge } from "@/components/ui/LgBadge";
+
 interface Props {
   mission: MissionCardData;
   showTarif?: boolean;
@@ -51,15 +53,15 @@ interface Props {
 }
 
 type PillTone = "gold" | "blue" | "amber" | "green" | "red" | "muted";
-const STATUS_META: Record<string, { label: string; tone: PillTone; live?: boolean; Icon: ComponentType<{ size?: number; className?: string }> }> = {
-  propose:               { label: "Proposée",         tone: "amber", Icon: Clock },
-  accepte:               { label: "Acceptée",         tone: "blue",  Icon: ClipboardCheck },
-  en_cours:              { label: "En cours",         tone: "green", live: true, Icon: Truck },
-  en_attente_validation: { label: "Validation",       tone: "amber", Icon: Clock },
-  validee:               { label: "Validée",          tone: "green", Icon: Flag },
-  refusee:               { label: "Refusée",          tone: "red",   Icon: AlertCircle },
-  termine:               { label: "Terminée",         tone: "muted", Icon: Flag },
-  incident:              { label: "Incident",         tone: "red",   Icon: AlertCircle },
+const STATUS_META: Record<string, { label: string; color?: string; tone: PillTone; live?: boolean; Icon: ComponentType<{ size?: number; className?: string }> }> = {
+  propose:               { label: "Proposée",         tone: "amber", color: "#00AEEF", Icon: Clock },
+  accepte:               { label: "Acceptée",         tone: "blue", color: "#2F5FFF",  Icon: ClipboardCheck },
+  en_cours:              { label: "En cours",         tone: "green", color: "#8B5CF6", live: true, Icon: Truck },
+  en_attente_validation: { label: "Validation",       tone: "amber", color: "#EC4899", Icon: Clock },
+  validee:               { label: "Validée",          tone: "green", color: "#0EA5A4", Icon: Flag },
+  refusee:               { label: "Refusée",          tone: "red", color: "#64748B",   Icon: AlertCircle },
+  termine:               { label: "Terminée",         tone: "muted", color: "#22C55E", Icon: Flag },
+  incident:              { label: "Incident",         tone: "red", color: "#EF4444",   Icon: AlertCircle },
 };
 
 /** Ordre d'avancement : on affiche toujours l'état le plus avancé connu
@@ -97,10 +99,7 @@ export function MissionCard({ mission, showTarif, onOpen, onCall, onNavigate, is
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className={`brex-pill brex-pill--${meta.tone} ${meta.live ? "brex-pill--live" : ""}`}>
-            <span className="brex-pill-dot" />
-            {meta.label}
-          </span>
+          <LgBadge color={meta.color ?? "#64748B"}>{meta.label}</LgBadge>
           {mission.numero_mission && (
             <span
               title={displayNumero(mission.numero_mission)}

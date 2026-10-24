@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { LgBadge } from "@/components/ui/LgBadge";
 import { cn } from "@/lib/utils";
 
 /**
@@ -129,26 +130,12 @@ export function DrawerBadge({
   tone = "blue",
 }: {
   children: ReactNode;
-  tone?: "blue" | "green" | "amber" | "red" | "slate" | "purple";
+  tone?: "blue" | "green" | "amber" | "red" | "slate" | "purple" | "cyan" | "pink" | "teal" | "indigo";
 }) {
-  // Badges à contraste renforcé · lecture nette sur fond blanc, aspect professionnel.
-  const tones: Record<string, string> = {
-    blue:   "bg-blue-600 text-white border-blue-700 shadow-sm",
-    green:  "bg-emerald-600 text-white border-emerald-700 shadow-sm",
-    amber:  "bg-amber-500 text-white border-amber-600 shadow-sm",
-    red:    "bg-red-600 text-white border-red-700 shadow-sm",
-    slate:  "bg-slate-800 text-white border-slate-900 shadow-sm",
-    purple: "bg-violet-600 text-white border-violet-700 shadow-sm",
+  const colors: Record<string, string> = {
+    blue: "#2F5FFF", green: "#22C55E", amber: "#F59E0B", red: "#EF4444", slate: "#64748B",
+    purple: "#8B5CF6", cyan: "#00AEEF", pink: "#EC4899", teal: "#0EA5A4", indigo: "#6366F1",
   };
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
-        tones[tone],
-      )}
-    >
-      {children}
-    </span>
-  );
+  return <LgBadge color={colors[tone] ?? "#2F5FFF"} size="md">{children}</LgBadge>;
 }
 

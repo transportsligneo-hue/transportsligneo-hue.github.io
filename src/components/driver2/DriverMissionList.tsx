@@ -3,16 +3,17 @@ import { Ic, Plate } from "@/components/driver2/icons";
 import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { resolveMissionStatus, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { displayNumero } from "@/lib/mission-number";
+import { LgBadge } from "@/components/ui/LgBadge";
 
-const STATUS: Record<string, { label: string; tone: string }> = {
-  propose: { label: "Proposée", tone: "amber" },
-  accepte: { label: "Acceptée", tone: "blue" },
-  en_cours: { label: "En cours", tone: "green" },
-  en_attente_validation: { label: "En validation", tone: "amber" },
-  validee: { label: "Validée", tone: "green" },
-  refusee: { label: "Refusée", tone: "red" },
-  termine: { label: "Terminée", tone: "muted" },
-  incident: { label: "Incident", tone: "red" },
+const STATUS: Record<string, { label: string; tone: string; color?: string }> = {
+  propose: { label: "Proposée", tone: "amber", color: "#00AEEF" },
+  accepte: { label: "Acceptée", tone: "blue", color: "#2F5FFF" },
+  en_cours: { label: "En cours", tone: "green", color: "#8B5CF6" },
+  en_attente_validation: { label: "En validation", tone: "amber", color: "#EC4899" },
+  validee: { label: "Validée", tone: "green", color: "#0EA5A4" },
+  refusee: { label: "Refusée", tone: "red", color: "#64748B" },
+  termine: { label: "Terminée", tone: "muted", color: "#22C55E" },
+  incident: { label: "Incident", tone: "red", color: "#EF4444" },
 };
 
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -81,7 +82,7 @@ export function DriverMissionList({
                 >
                   <div className="dml-top">
                     <span className="dml-time"><Ic n="clock" s={13} sw={2.3} />{hhmm(t?.heure_trajet)}</span>
-                    <span className={`dml-pill dml-pill--${meta.tone}${live ? " is-live" : ""}`}>{live && <i />}{meta.label}</span>
+                    <LgBadge color={meta.color ?? "#64748B"}>{meta.label}</LgBadge>
                     <span className="dml-num">{num}</span>
                   </div>
 

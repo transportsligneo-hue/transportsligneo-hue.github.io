@@ -152,7 +152,7 @@ function DemoProPage({ societe }: { societe?: string | null }) {
         {selected && <DemoMissionDetail m={selected} onClose={() => setSelectedId(null)} />}
         <ul>
           {sorted.map((m) => {
-            const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait" };
+            const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait pp-b-pending" };
             return (
               <li key={m.id}>
                 <button type="button" className={`demo-pro-mission demo-pro-mission-btn ${selectedId === m.id ? "is-on" : ""}`} onClick={() => setSelectedId(m.id)}>

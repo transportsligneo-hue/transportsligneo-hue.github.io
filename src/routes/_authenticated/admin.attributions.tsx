@@ -127,6 +127,16 @@ const statutLabels: Record<string, string> = {
   annule: "Annulé",
 };
 
+// Une couleur par statut d'attribution (voir .dvx-badge dans styles.css)
+const ATTR_BADGE_TONE: Record<string, string> = {
+  propose: "cyan", accepte: "blue", en_cours: "violet", en_attente_validation: "pink",
+  validee: "teal", termine: "green", annule: "red", refuse: "grey", refusee: "grey",
+};
+const ATTR_DRAWER_TONE: Record<string, "blue" | "green" | "amber" | "red" | "slate" | "purple" | "cyan" | "pink" | "teal" | "indigo"> = {
+  propose: "cyan", accepte: "blue", en_cours: "purple", en_attente_validation: "pink",
+  validee: "teal", termine: "green", annule: "red", refuse: "slate", refusee: "slate",
+};
+
 const vueLabels: Record<string, string> = {
   // Parcours séquentiel — ordre métier 18 étapes
   trois_quart_avant_gauche:   "01. 3/4 avant gauche",
@@ -669,11 +679,7 @@ function AdminAttributions() {
   };
 
   const renderAttributionCard = (a: Attribution) => {
-    const dvxTone =
-      ["annule", "refusee"].includes(a.statut) ? "red"
-      : ["termine", "validee"].includes(a.statut) ? "green"
-      : ["accepte", "en_cours"].includes(a.statut) ? "blue"
-      : "orange";
+    const dvxTone = ATTR_BADGE_TONE[a.statut] ?? "grey";
     const isClosed = ["annule", "refusee"].includes(a.statut);
     return (
             <div key={a.id} className={`dvx-card ${isClosed ? "is-archived" : ""}`}>
@@ -1222,7 +1228,7 @@ function AdminAttributions() {
           title={attributionRef(selectedAttr, arBaseByGroup)}
           subtitle={selectedAttr.trajet ? `${selectedAttr.trajet.depart} → ${selectedAttr.trajet.arrivee}` : undefined}
           badge={
-            <DrawerBadge tone={selectedAttr.statut === "termine" || selectedAttr.statut === "validee" ? "green" : selectedAttr.statut === "en_cours" ? "blue" : "amber"}>
+            <DrawerBadge tone={ATTR_DRAWER_TONE[selectedAttr.statut] ?? "slate"}>
               {statutLabels[selectedAttr.statut] ?? selectedAttr.statut}
             </DrawerBadge>
           }

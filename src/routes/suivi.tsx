@@ -2,10 +2,11 @@ import { PlateInput } from "@/components/plate/PlateInput";
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, MapPin, Clock, PackageCheck, Loader2, ShieldCheck, CarFront, User } from "lucide-react";
+import { Search, MapPin, Clock, Loader2, ShieldCheck, CarFront, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { PlateBadge } from "@/components/plate/PlateBadge";
 import Footer from "@/components/Footer";
+import { LgBadge } from "@/components/ui/LgBadge";
 import MobileSuiviScreen from "@/components/mobile/MobileSuiviScreen";
 import { trackMissionPublic, type PublicTracking } from "@/lib/public-content.functions";
 
@@ -38,12 +39,12 @@ export const Route = createFileRoute("/suivi")({
 
 // Statuts publics : bleu en attente, violet en route, vert livré, rouge annulé.
 const STATUT_LABEL: Record<string, { label: string; color: string }> = {
-  en_attente: { label: "En attente de prise en charge", color: "#4f8cff" },
-  en_cours: { label: "En cours de convoyage", color: "#7c5cff" },
-  livree: { label: "Véhicule livré", color: "#22c55e" },
-  annulee: { label: "Mission annulée", color: "#ef4444" },
+  en_attente: { label: "En attente de prise en charge", color: "#F59E0B" },
+  en_cours: { label: "En cours de convoyage", color: "#8B5CF6" },
+  livree: { label: "Véhicule livré", color: "#22C55E" },
+  annulee: { label: "Mission annulée", color: "#EF4444" },
 };
-const STATUT_FALLBACK = { label: "Mission suivie", color: "#4f8cff" };
+const STATUT_FALLBACK = { label: "Mission suivie", color: "#2F5FFF" };
 
 function SuiviPage() {
   const [plaque, setPlaque] = useState("");
@@ -130,17 +131,7 @@ function SuiviPage() {
   const resultBlock = (result?.found && statut ? (
             <div className="rounded-2xl border border-[#7aa3ff]/20 bg-white/[0.03] p-6">
               <div className="mb-5 flex flex-wrap items-center gap-3">
-                <span
-                  className="suivi-badge inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12.5px] font-bold"
-                  style={{
-                    background: `${statut.color}1f`,
-                    color: statut.color,
-                    border: `1px solid ${statut.color}44`,
-                    boxShadow: `0 0 18px -6px ${statut.color}`,
-                  }}
-                >
-                  <PackageCheck size={14} /> {statut.label}
-                </span>
+                <LgBadge color={statut.color} size="md">{statut.label}</LgBadge>
                 <span className="text-[12.5px] text-[#9aa6c9]">Mission {result.numero}</span>
               </div>
 

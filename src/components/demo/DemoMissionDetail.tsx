@@ -18,7 +18,7 @@ export function DemoMissionDetail({ m, onClose }: { m: ProMission; onClose: () =
     finally { setDownloading(null); }
   }
   const done = m.statut === "livree" ? 6 : m.statut === "en_cours" ? 4 : 1;
-  const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait" };
+  const st = STATUS_META[m.statut] ?? { label: m.statut, cls: "pp-st-wait pp-b-pending" };
   return (
     <section className="dpm-card demo-detail" aria-label={`Mission ${m.numero}`}>
       <div className="demo-detail-head">

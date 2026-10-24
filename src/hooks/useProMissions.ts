@@ -107,13 +107,13 @@ export function computePilotage(missions: ProMission[], now = new Date()) {
 }
 
 export const STATUS_META: Record<string, { label: string; cls: string }> = {
-  en_attente: { label: "En attente", cls: "pp-st-wait" },
-  confirmee: { label: "Confirmée", cls: "pp-st-wait" },
-  en_cours: { label: "En cours", cls: "pp-st-run" },
-  livree: { label: "Livrée", cls: "pp-st-done" },
-  terminee: { label: "Livrée", cls: "pp-st-done" },
-  annulee: { label: "Annulée", cls: "pp-st-ko" },
-  refuse: { label: "Refusée", cls: "pp-st-ko" },
+  en_attente: { label: "En attente", cls: "pp-st-wait pp-b-pending" },
+  confirmee: { label: "Confirmée", cls: "pp-st-wait pp-b-accepted" },
+  en_cours: { label: "En cours", cls: "pp-st-run pp-b-run" },
+  livree: { label: "Livrée", cls: "pp-st-done pp-b-done" },
+  terminee: { label: "Livrée", cls: "pp-st-done pp-b-done" },
+  annulee: { label: "Annulée", cls: "pp-st-ko pp-b-cancel" },
+  refuse: { label: "Refusée", cls: "pp-st-ko pp-b-refused" },
 };
 
 export const euro = (n: number) =>

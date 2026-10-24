@@ -1,6 +1,7 @@
 import { type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type ButtonHTMLAttributes } from "react";
 import { Search, X } from "lucide-react";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
+import { LgBadge } from "@/components/ui/LgBadge";
 
 /* ============= PageHeader ============= */
 export function PageHeader({
@@ -114,22 +115,20 @@ export function Badge({
   tone?: BadgeTone;
   icon?: ReactNode;
 }) {
-  const styles: Record<BadgeTone, string> = {
-    neutral: "bg-slate-100 text-slate-700 border-slate-200",
-    success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border-amber-200",
-    danger: "bg-red-50 text-red-700 border-red-200",
-    info: "bg-blue-50 text-blue-700 border-blue-200",
-    primary: "bg-pro-accent/10 text-pro-accent border-pro-accent/20",
-    purple: "bg-purple-50 text-purple-700 border-purple-200",
+  const colors: Record<BadgeTone, string> = {
+    neutral: "#64748B",
+    success: "#22C55E",
+    warning: "#F59E0B",
+    danger: "#EF4444",
+    info: "#00AEEF",
+    primary: "#2F5FFF",
+    purple: "#8B5CF6",
   };
   return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${styles[tone]}`}
-    >
+    <LgBadge color={colors[tone]} size="xs">
       {icon}
       {children}
-    </span>
+    </LgBadge>
   );
 }
 
