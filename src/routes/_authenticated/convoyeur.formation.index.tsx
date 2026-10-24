@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -120,15 +121,20 @@ function FormationHome() {
           </p>
           <button
             type="button"
-            onClick={() =>
-              user &&
-              generateAttestationPdf({
-                fullName: `${identity.prenom} ${identity.nom}`.trim(),
-                userId: user.id,
-                completedAt: new Date(),
-                modulesCount: modules.length,
-              })
-            }
+            onClick={async () => {
+              if (!user) return;
+              try {
+                await generateAttestationPdf({
+                  fullName: `${identity.prenom} ${identity.nom}`.trim(),
+                  userId: user.id,
+                  completedAt: new Date(),
+                  modulesCount: modules.length,
+                });
+              } catch (e) {
+                toast.error("Impossible de générer l'attestation. Réessayez.");
+                console.error(e);
+              }
+            }}
             className="fm-cta"
             style={{ marginTop: 16 }}
           >
