@@ -31,7 +31,7 @@ export default function Tarifs() {
             <span className="text-2xl align-middle mr-2">à partir de</span>0,85 €<span className="text-2xl">/km</span>
           </p>
           <p className="text-cream/70 text-sm mt-2">
-            Hors département 37 et limitrophes · pour les trajets de plus de 200 km
+            Dès 1 000 km · 1,03 €/km de 200 à 499 km, puis dégressif jusqu'à 0,85 €/km · hors département 37 et limitrophes
           </p>
           <p className="text-primary text-sm mt-3 font-medium tracking-wide">
             Assurance tout risque avec péage et carburant inclus
@@ -57,11 +57,11 @@ export default function Tarifs() {
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">
                 <span className="text-cream/80 text-sm">Livraison simple</span>
-                <span className="font-heading text-primary text-lg">79 €</span>
+                <span className="font-heading text-primary text-lg">70 €</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-cream/80 text-sm">restitution et livraison</span>
-                <span className="font-heading text-primary text-lg">129 €</span>
+                <span className="font-heading text-primary text-lg">120 €</span>
               </div>
             </div>
             <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus · Tarifs TTC</p>
@@ -74,11 +74,11 @@ export default function Tarifs() {
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">
                 <span className="text-cream/80 text-sm">Livraison simple</span>
-                <span className="font-heading text-primary text-lg">99 €</span>
+                <span className="font-heading text-primary text-lg">90 €</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-cream/80 text-sm">restitution et livraison</span>
-                <span className="font-heading text-primary text-lg">129 €</span>
+                <span className="font-heading text-primary text-lg">130 €</span>
               </div>
             </div>
             <p className="text-cream/50 text-xs mt-4">Assurance tout risque avec péage et carburant inclus · Tarifs TTC</p>

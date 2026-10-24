@@ -13,12 +13,12 @@ const ROUTES = [
   { label: "Tours → Lyon", km: 440 },
 ];
 
-/** Estimation indicative de démonstration : 0,85 €/km au-delà de 200 km, forfaits 79 € / 129 € dans le 37. */
+/** Estimation indicative de démonstration : 1,03 €/km de 200 à 499 km, dégressif de 500 à 999 km, 0,85 €/km dès 1 000 km, forfaits 70 € / 120 € dans le 37. */
 export function estimateDemo(km: number, local: boolean, retour: boolean, recharge: boolean) {
   let base: number;
-  if (local) base = retour ? 129 : 79;
+  if (local) base = retour ? 120 : 70;
   else {
-    const one = km > 200 ? km * 0.85 : Math.max(79, km * 1.1);
+    const one = km >= 1000 ? km * 0.85 : km >= 500 ? km * (1.03 - 0.18 * ((km - 500) / 500)) : km > 200 ? km * 1.03 : Math.max(70, km * 1.1);
     base = retour ? one * 2 : one;
   }
   return Math.round(base + (recharge ? 25 : 0));

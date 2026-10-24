@@ -59,7 +59,7 @@ function TarifsPage() {
               <span className="dot" />Nos tarifs
             </div>
             <h2>À partir de <span className="v4-accent">0,85 €/km</span></h2>
-            <p><strong>Uniquement pour les trajets de plus de 200 km, hors Indre-et-Loire (37) et départements limitrophes.</strong> Pour Tours et le 37, ce sont les forfaits ci-dessous qui s'appliquent.</p>
+            <p><strong>0,85 €/km dès 1 000 km, 1,03 €/km de 200 à 499 km, dégressif de 500 à 999 km, hors Indre-et-Loire (37) et départements limitrophes.</strong> Pour Tours et le 37, ce sont les forfaits ci-dessous qui s'appliquent.</p>
             <p>Assurance tout risque, péage et carburant inclus. Tarifs TTC.</p>
           </div>
 

@@ -63,7 +63,7 @@ export default function MobileTarifsScreen() {
             { l: "Stockage véhicules", p: "Sur devis", small: true },
           ]}
         />
-        <p className="mh2-note">Hors département 37 et limitrophes, pour les trajets de plus de 200 km. Assurance tous risques incluse.</p>
+        <p className="mh2-note">Dès 1 000 km (1,03 €/km de 200 à 499 km, puis dégressif jusqu'à 0,85 €/km), hors département 37 et limitrophes. Assurance tous risques incluse.</p>
       </section>
 
       <section className="mh2-sec">
