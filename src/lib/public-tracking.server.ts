@@ -24,7 +24,24 @@ export type PublicTracking = {
   position?: { lat: number; lng: number } | null;
   points?: Array<{ latitude: number; longitude: number; recorded_at: string; accuracy: number | null }>;
   updated_at?: string | null;
+  /** Preuves de livraison (uniquement une fois le véhicule livré, après vérification du code). */
+  preuves?: {
+    depart: Array<{ label: string; url: string }>;
+    arrivee: Array<{ label: string; url: string }>;
+    km_depart?: number | null;
+    km_arrivee?: number | null;
+  } | null;
 };
+
+const VUE_LABELS: Record<string, string> = {
+  avant: "Avant", trois_quart_avant_gauche: "3/4 avant gauche", trois_quart_avant_droite: "3/4 avant droit",
+  trois_quart_arriere_gauche: "3/4 arrière gauche", trois_quart_arriere_droite: "3/4 arrière droit",
+  arriere: "Arrière", coffre_ouvert: "Coffre", siege_avant: "Sièges avant", siege_arriere: "Sièges arrière",
+  compteur: "Compteur", kit_securite: "Kit sécurité", roue_secours: "Roue de secours",
+  jante_avant_gauche: "Jante avant gauche", jante_avant_droite: "Jante avant droite",
+  jante_arriere_gauche: "Jante arrière gauche", jante_arriere_droite: "Jante arrière droite",
+};
+const vueLabel = (k: string) => VUE_LABELS[k] ?? VUE_LABELS[k.replace(/_\d{10,}$/, "")] ?? "Photo";
 
 const MAX_FAILED = 5;
 const WINDOW_MIN = 10;
@@ -162,6 +179,7 @@ export async function trackMission(input: {
   let position: { lat: number; lng: number } | null = null;
   let updated_at: string | null = mission.updated_at ?? null;
   let points: NonNullable<PublicTracking["points"]> = [];
+  let preuves: PublicTracking["preuves"] = null;
 
   const { data: trajets } = await supabaseAdmin
     .from("trajets")
@@ -186,6 +204,43 @@ export async function trackMission(input: {
 
     if (attribution) {
       etape = attribution.etape_courante ?? attribution.statut ?? null;
+      if (mapStatut(mission.statut) === "livree") {
+        try {
+          const { data: insp } = await supabaseAdmin
+            .from("inspections")
+            .select("id, type, kilometrage_depart, kilometrage_arrivee")
+            .eq("attribution_id", attribution.id);
+          const ids = (insp ?? []).map((i) => i.id);
+          if (ids.length) {
+            const { data: ph } = await supabaseAdmin
+              .from("inspection_photos")
+              .select("inspection_id, vue_type, url_photo, created_at")
+              .in("inspection_id", ids)
+              .order("created_at", { ascending: true });
+            const paths = Array.from(new Set((ph ?? []).filter((p) => !/^https?:\/\//.test(p.url_photo)).map((p) => p.url_photo)));
+            const signed = new Map<string, string>();
+            if (paths.length) {
+              const { data: sg } = await supabaseAdmin.storage.from("inspection-photos").createSignedUrls(paths, 3600);
+              (sg ?? []).forEach((x, i) => { if (x?.signedUrl) signed.set(paths[i], x.signedUrl); });
+            }
+            const typeById = new Map((insp ?? []).map((i) => [i.id, i.type]));
+            const build = (type: string) =>
+              (ph ?? [])
+                .filter((p) => typeById.get(p.inspection_id) === type)
+                .map((p) => ({ label: vueLabel(p.vue_type), url: /^https?:\/\//.test(p.url_photo) ? p.url_photo : signed.get(p.url_photo) ?? "" }))
+                .filter((p) => p.url);
+            const arr = (insp ?? []).find((i) => i.type === "arrivee");
+            const dep = (insp ?? []).find((i) => i.type === "depart");
+            preuves = {
+              depart: build("depart"),
+              arrivee: build("arrivee"),
+              km_depart: dep?.kilometrage_depart ?? arr?.kilometrage_depart ?? null,
+              km_arrivee: arr?.kilometrage_arrivee ?? null,
+            };
+            if (!preuves.depart.length && !preuves.arrivee.length) preuves = null;
+          }
+        } catch { /* preuves non bloquantes */ }
+      }
       if (["en_cours", "livree"].includes(mapStatut(mission.statut) ?? "")) {
         const { data: locations, error } = await supabaseAdmin
           .from("mission_locations")
@@ -221,5 +276,6 @@ export async function trackMission(input: {
     position,
     points,
     updated_at,
+    preuves,
   };
 }

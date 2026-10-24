@@ -209,6 +209,36 @@ function SuiviPage() {
                 </div>
               )}
 
+              {result.preuves && (
+                <div className="mt-6">
+                  <p className="mb-2 text-[12px] uppercase tracking-[0.1em] text-[#9aa6c9]">Preuves de livraison</p>
+                  {result.preuves.km_arrivee != null && (
+                    <p className="mb-3 text-[13px] text-[#c9d3ee]">
+                      Kilométrage à l'arrivée : <strong>{result.preuves.km_arrivee.toLocaleString("fr-FR")} km</strong>
+                      {result.preuves.km_depart != null && result.preuves.km_arrivee >= result.preuves.km_depart && (
+                        <span className="text-[#8fa0c4]"> · {(result.preuves.km_arrivee - result.preuves.km_depart).toLocaleString("fr-FR")} km parcourus</span>
+                      )}
+                    </p>
+                  )}
+                  {(["depart", "arrivee"] as const).map((k) =>
+                    result.preuves![k].length > 0 ? (
+                      <div key={k} className="mb-4">
+                        <p className="mb-2 text-[13px] font-semibold text-white">{k === "depart" ? "État des lieux au départ" : "État des lieux à l'arrivée"}</p>
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                          {result.preuves![k].map((p, i) => (
+                            <a key={i} href={p.url} target="_blank" rel="noopener noreferrer" className="group block overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]">
+                              <img src={p.url} alt={p.label} loading="lazy" className="aspect-[4/3] w-full object-cover transition group-hover:scale-105" />
+                              <span className="block px-1.5 py-1 text-[10.5px] text-[#9aa6c9]">{p.label}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null,
+                  )}
+                  <p className="text-[11.5px] text-[#7f8bb0]">Touchez une photo pour l'ouvrir en taille réelle. Liens valables 1 heure.</p>
+                </div>
+              )}
+
               <p className="mt-6 flex items-start gap-2 text-[12px] leading-relaxed text-[#7f8bb0]">
                 <ShieldCheck size={14} className="mt-0.5 shrink-0 text-[#4f8cff]" />
                 Par respect de la confidentialité, les coordonnées du client, du convoyeur et le montant
