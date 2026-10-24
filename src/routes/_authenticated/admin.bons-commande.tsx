@@ -136,7 +136,7 @@ function BonsCommandePage() {
               className={`dvx-btn ${active ? "solid" : "outline"}`}
             >
               <Icon size={14} /> {t.label}
-              <span className="dvx-badge grey">{counts[t.key]}</span>
+              <span className="dvx-count">{counts[t.key]}</span>
             </button>
           );
         })}

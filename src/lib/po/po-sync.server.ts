@@ -6,6 +6,7 @@ import { extractPoNumber, parsePoDocument, type ParsedPo } from "@/lib/po/parse-
 import { normalizeVin, vinLooseMatch } from "@/lib/vin";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_mail/gmail/v1";
+const GMAIL_DIRECT = "https://gmail.googleapis.com/gmail/v1";
 export const PO_LABEL_NAME = "Devis CAT FRANCE et PO K2";
 
 /** Statuts de devis considérés « en attente de réponse » pour le rapprochement. */
@@ -26,20 +27,48 @@ type GmailMessage = {
   payload?: GmailPart & { headers?: { name: string; value: string }[] };
 };
 
-function gmailHeaders() {
+/** Connexion directe à Google (Vercel) : GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET + GOOGLE_REFRESH_TOKEN. */
+let cachedToken: { value: string; exp: number } | null = null;
+function hasDirectGoogle() {
+  return !!(process.env["GOOGLE_CLIENT_ID"] && process.env["GOOGLE_CLIENT_SECRET"] && process.env["GOOGLE_REFRESH_TOKEN"]);
+}
+async function googleAccessToken(): Promise<string> {
+  if (cachedToken && cachedToken.exp > Date.now() + 60_000) return cachedToken.value;
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env["GOOGLE_CLIENT_ID"]!,
+      client_secret: process.env["GOOGLE_CLIENT_SECRET"]!,
+      refresh_token: process.env["GOOGLE_REFRESH_TOKEN"]!,
+      grant_type: "refresh_token",
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    console.error(`[PO] Google token refused [${res.status}]: ${body.slice(0, 300)}`);
+    throw new Error("Connexion Gmail refusée par Google : vérifiez GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN.");
+  }
+  const j = (await res.json()) as { access_token: string; expires_in?: number };
+  cachedToken = { value: j.access_token, exp: Date.now() + (j.expires_in ?? 3000) * 1000 };
+  return j.access_token;
+}
+
+async function gmailRequest(path: string): Promise<{ url: string; headers: Record<string, string> }> {
+  if (hasDirectGoogle()) {
+    return { url: `${GMAIL_DIRECT}${path}`, headers: { Authorization: `Bearer ${await googleAccessToken()}` } };
+  }
   const lovableKey = process.env["LOVABLE_API_KEY"];
   const connKey = process.env["GOOGLE_MAIL_API_KEY"];
   if (!lovableKey || !connKey) {
-    throw new Error("Connexion Gmail non configurée (LOVABLE_API_KEY / GOOGLE_MAIL_API_KEY manquants)");
+    throw new Error("Connexion Gmail non configurée : ajoutez GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET et GOOGLE_REFRESH_TOKEN dans Vercel.");
   }
-  return {
-    Authorization: `Bearer ${lovableKey}`,
-    "X-Connection-Api-Key": connKey,
-  };
+  return { url: `${GATEWAY}${path}`, headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": connKey } };
 }
 
 async function gmailGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${GATEWAY}${path}`, { headers: gmailHeaders() });
+  const { url, headers } = await gmailRequest(path);
+  const res = await fetch(url, { headers });
   if (!res.ok) {
     const body = await res.text();
     console.error(`[PO] Gmail request failed [${res.status}] ${path}: ${body.slice(0, 500)}`);

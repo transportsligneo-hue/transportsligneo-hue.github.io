@@ -12535,3 +12535,8 @@ html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[da
 .dvx-badge::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c)}
 .dvx-badge.grey{--c:#64748B}.dvx-badge.blue{--c:#2F5FFF}.dvx-badge.green{--c:#22C55E}.dvx-badge.orange{--c:#F59E0B}.dvx-badge.red{--c:#EF4444}.dvx-badge.violet{--c:#8B5CF6}
 .dvx-badge.cyan{--c:#00AEEF}.dvx-badge.pink{--c:#EC4899}.dvx-badge.teal{--c:#0EA5A4}.dvx-badge.indigo{--c:#6366F1}
+
+/* Pastille de comptage (onglets / filtres) : gros chiffre lisible, sans pastille lumineuse */
+.dvx-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 8px;margin-left:6px;border-radius:999px;font:800 13px/1 Inter,system-ui,sans-serif;letter-spacing:0;background:#e8eeff;color:#1d3fbf;border:1px solid #c9d6ff}
+.dvx-btn.solid .dvx-count{background:#fff;color:#1d3fbf;border-color:#fff}
+.dvx-btn.outline .dvx-count{background:#e8eeff;color:#1d3fbf}
