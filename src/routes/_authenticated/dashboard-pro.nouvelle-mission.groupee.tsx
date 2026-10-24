@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
 import { createGroupedMission } from "@/lib/grouped-mission.functions";
+import { GroupedCsvImport } from "@/components/devis-lots/GroupedCsvImport";
 import { calculateBasePrice } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
 import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurcharge, DEFAULT_DELIVERY_RECHARGE_SURCHARGE, type OptionKey } from "@/lib/client-pricing";
@@ -692,6 +693,16 @@ function GroupedMissionForm() {
         >
           <Plus className="h-4 w-4" /> Ajouter un véhicule
         </button>
+        <GroupedCsvImport
+          onImport={(list) => {
+            setRows((prev) => {
+              const kept = prev.filter((r) => r.immat || r.marque || r.modele || r.vin);
+              const added = list.map((v) => ({ ...newRow(), immat: v.immat, marque: v.marque, modele: v.modele, vin: v.vin, energie: v.energie, km: v.km, arrivee: v.arrivee, notes: v.notes }));
+              return [...kept, ...added];
+            });
+            if (list.some((v) => v.arrivee)) setSameDest(false);
+          }}
+        />
       </Card>
 
       {/* 3 — Options communes */}
