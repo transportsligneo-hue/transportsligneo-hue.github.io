@@ -8,7 +8,7 @@ import { Capacitor } from "@capacitor/core";
  * ce bandeau ne concerne que les nouvelles versions de l'application native.
  */
 export function AppUpdatePrompt() {
-  const [info, setInfo] = useState<{ storeUrl: string } | null>(null);
+  const [info, setInfo] = useState<{ storeUrl: string; build: number } | null>(null);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") return;
@@ -20,7 +20,9 @@ export function AppUpdatePrompt() {
         const res = await fetch(`/app-version.json?t=${Date.now()}`, { cache: "no-store" });
         if (!res.ok) return;
         const j = (await res.json()) as { latestBuild?: number; storeUrl?: string };
-        if (!off && j.latestBuild && cur && cur < j.latestBuild && j.storeUrl) setInfo({ storeUrl: j.storeUrl });
+        let dismissed = 0;
+        try { dismissed = Number(localStorage.getItem("ligneo:update-dismissed") || 0); } catch { /* */ }
+        if (!off && j.latestBuild && cur && cur < j.latestBuild && j.latestBuild > dismissed && j.storeUrl) setInfo({ storeUrl: j.storeUrl, build: j.latestBuild });
       } catch { /* silencieux */ }
     };
     void check();
@@ -36,7 +38,14 @@ export function AppUpdatePrompt() {
         <b style={{ display: "block", fontSize: 14 }}>Nouvelle version disponible</b>
         Mettez à jour l'application pour profiter des dernières améliorations.
       </div>
-      <a href={info.storeUrl} style={{ flex: "none", padding: "10px 14px", borderRadius: 12, background: "linear-gradient(135deg,#14B866,#34E68C)", color: "#04261a", fontWeight: 800, fontSize: 13, textDecoration: "none" }}>
+      <button
+        type="button"
+        onClick={() => { try { localStorage.setItem("ligneo:update-dismissed", String(info.build)); } catch { /* */ } setInfo(null); }}
+        style={{ flex: "none", padding: "10px 8px", background: "transparent", color: "#9fd8c0", fontWeight: 700, fontSize: 12 }}
+      >
+        Plus tard
+      </button>
+      <a href={info.storeUrl} onClick={() => setInfo(null)} style={{ flex: "none", padding: "10px 14px", borderRadius: 12, background: "linear-gradient(135deg,#14B866,#34E68C)", color: "#04261a", fontWeight: 800, fontSize: 13, textDecoration: "none" }}>
         Mettre à jour
       </a>
     </div>
