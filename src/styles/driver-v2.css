@@ -2622,3 +2622,38 @@ html.theme-dark .drv2.drv2.ldock-zone .ldock-fab{box-shadow:0 7px 16px rgba(20,1
 html.theme-dark .drv2.drv2.ldock-zone .ldock-item.is-raised.is-active .ldock-fab{box-shadow:0 7px 16px rgba(20,184,102,.5),0 0 0 4px #10293f!important}
 html.theme-dark .drv2.drv2.ldock-zone .ldock-handle{background:rgba(16,41,63,.95);border-color:rgba(79,232,160,.28);color:#8fb0c4}
 html.theme-dark .drv2.drv2.ldock-zone.is-collapsed .ldock-handle{color:#6effcd;border-color:rgba(79,232,160,.35);box-shadow:0 6px 16px -6px rgba(0,0,0,.7)}
+
+/* ===== Missions proposées (accueil convoyeur) ===== */
+.drv2 .pp2{display:flex;flex-direction:column;gap:10px}
+.drv2 .pp2-h{display:flex;align-items:center;gap:9px;padding:0 4px;font-size:13px;color:var(--ink)}
+.drv2 .pp2-h b{font-weight:800;letter-spacing:.01em}
+.drv2 .pp2-pulse{width:9px;height:9px;border-radius:50%;background:#14B866;box-shadow:0 0 0 4px rgba(20,184,102,.2),0 0 10px #34E68C}
+.drv2 .pp2-c{position:relative;overflow:hidden;background:linear-gradient(180deg,#f9fdfb,#eef7f2);border:1px solid rgba(20,184,102,.28);border-radius:20px;padding:14px 14px 14px 18px;box-shadow:var(--shadow)}
+.drv2 .pp2-c::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#34E68C,#14B866)}
+.drv2 .pp2-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.drv2 .pp2-eb{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0b7a43}
+.drv2 .pp2-left{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#8a5a00;background:#fff4d6;border:1px solid #f3dc9b;padding:4px 9px;border-radius:99px}
+.drv2 .pp2-mid{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.drv2 .pp2-mid .nmr{flex:1;min-width:0}
+.drv2 .pp2-price{flex:none;text-align:right;padding-bottom:2px}
+.drv2 .pp2-price small{display:block;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+.drv2 .pp2-price b{display:block;font-size:24px;font-weight:800;line-height:1.05;color:#0b7a43;margin-top:2px}
+.drv2 .pp2-tags{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px}
+.drv2 .pp2-act{display:grid;grid-template-columns:1fr 1.5fr;gap:9px;margin-top:13px}
+.drv2 .pp2-act button{height:44px;border-radius:13px;font-size:14px;font-weight:800;letter-spacing:.01em}
+.drv2 .pp2-act button:disabled{opacity:.6}
+.drv2 .pp2-no{background:#fff;color:#b4362c;border:1px solid rgba(180,54,44,.3)}
+.drv2 .pp2-ok{background:linear-gradient(135deg,#14B866,#34E68C);color:#04261a;border:0;box-shadow:0 8px 18px -8px rgba(20,184,102,.6)}
+.drv2 .pp2-all{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:12px;font-weight:700;color:var(--ink3);padding:0 4px}
+html.theme-dark .drv2 .pp2-c{background:linear-gradient(180deg,#17364f,#122e46);border-color:rgba(79,232,160,.3)}
+html.theme-dark .drv2 .pp2-h,html.theme-dark .drv2 .pp2-price b{color:#8ff5c4}
+html.theme-dark .drv2 .pp2-no{background:rgba(255,255,255,.05);color:#fca5a5}
+.drv2.drv2 .pp2-c .nmr{margin-top:10px}
+.drv2.drv2 .pp2-c .nmr-s{padding-bottom:11px}
+.drv2.drv2 .pp2-c .nmr-t b{font-size:13px;font-weight:700}
+.drv2.drv2 .pp2-c .nmr-t small{font-size:9.5px}
+.drv2 .pp2-price b{font-size:21px}
+.drv2 .pp2-c{padding:12px 12px 12px 17px;border-radius:18px}
+.drv2 .pp2-tags{margin-top:10px}
+.drv2 .pp2-act{margin-top:11px}
+.drv2 .pp2-act button{height:40px;font-size:13.5px;border-radius:12px}

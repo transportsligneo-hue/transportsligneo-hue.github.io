@@ -12540,3 +12540,8 @@ html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[da
 .dvx-count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 8px;margin-left:6px;border-radius:999px;font:800 13px/1 Inter,system-ui,sans-serif;letter-spacing:0;background:#e8eeff;color:#1d3fbf;border:1px solid #c9d6ff}
 .dvx-btn.solid .dvx-count{background:#fff;color:#1d3fbf;border-color:#fff}
 .dvx-btn.outline .dvx-count{background:#e8eeff;color:#1d3fbf}
+
+/* Œil « afficher le mot de passe » : visible aussi sur l'écran clair de l'app Driver */
+.auth-eye{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;color:rgba(255,255,255,.7)}
+.auth-eye:hover{color:#fff}
+html.ligneo-app .auth-eye,body.is-driver-app .auth-eye,.auth-driver-theme .auth-eye,[data-space="driver"] .auth-eye{color:#0b7a43}

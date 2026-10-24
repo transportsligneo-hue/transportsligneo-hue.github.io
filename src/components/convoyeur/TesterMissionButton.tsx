@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FlaskConical, Loader2 } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,11 +34,27 @@ export function TesterMissionButton({ onCreated }: { onCreated?: () => void }) {
     onCreated?.();
   };
 
+  const reset = async () => {
+    if (!window.confirm("Remettre à zéro : toutes vos missions de test seront supprimées. Continuer ?")) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("convoyeur_reset_test_missions" as never);
+    setBusy(false);
+    if (error) { toast.error("Impossible de remettre à zéro", { description: error.message }); return; }
+    toast.success("Missions de test remises à zéro.");
+    onCreated?.();
+  };
+
   return (
-    <button type="button" onClick={() => void create()} disabled={busy}
-      className="w-full flex items-center justify-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 active:scale-[.99] transition disabled:opacity-60">
-      {busy ? <Loader2 size={16} className="animate-spin" /> : <FlaskConical size={16} />}
-      Créer une mission test
-    </button>
+    <div className="space-y-2">
+      <button type="button" onClick={() => void create()} disabled={busy}
+        className="w-full flex items-center justify-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 active:scale-[.99] transition disabled:opacity-60">
+        {busy ? <span className="text-xs">…</span> : <FlaskConical size={16} />}
+        Créer une mission test
+      </button>
+      <button type="button" onClick={() => void reset()} disabled={busy}
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 disabled:opacity-60">
+        Remettre à zéro mes missions test
+      </button>
+    </div>
   );
 }

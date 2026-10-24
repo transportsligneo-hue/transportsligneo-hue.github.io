@@ -1,24 +1,39 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { CheckCircle2, XCircle, Clock, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
+import { Ic, Plate } from "@/components/driver2/icons";
 
-interface Proposal {
-  id: string;
-  trajet_id: string;
-  created_at: string;
-  trajet?: {
-    depart: string; arrivee: string; date_trajet: string | null;
-    prix_convoyeur_fixe: number | null; prix_convoyeur: number | null;
-    proposal_expires_at: string | null;
-  };
+interface Trajet {
+  depart: string | null; arrivee: string | null;
+  date_trajet: string | null; heure_trajet: string | null;
+  marque: string | null; modele: string | null; immatriculation: string | null;
+  prix_convoyeur_fixe: number | null; prix_convoyeur: number | null; tarif_convoyeur: number | null;
+  proposal_expires_at: string | null;
 }
+interface Proposal { id: string; trajet_id: string; created_at: string; trajet: Trajet | null }
+
+const whenLabel = (t: Trajet | null) => {
+  if (!t?.date_trajet) return "";
+  const d = new Date(t.date_trajet);
+  const day = d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+  return `${day}${t.heure_trajet ? ` · ${t.heure_trajet.slice(0, 5).replace(":", "h")}` : ""}`;
+};
+
+const deadlineLabel = (iso: string | null) => {
+  if (!iso) return "";
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "Délai dépassé";
+  const h = Math.floor(ms / 3600000);
+  if (h >= 48) return `Répondre sous ${Math.floor(h / 24)} j`;
+  if (h >= 1) return `Répondre sous ${h} h`;
+  return `Répondre sous ${Math.max(1, Math.floor(ms / 60000))} min`;
+};
 
 /**
- * Affiche les missions proposées au convoyeur en attente de sa réponse (mode direct).
- * À inclure sur le dashboard convoyeur.
+ * Missions proposées au convoyeur, en attente de sa réponse (mode direct).
+ * Une carte par mission : trajet, date, véhicule, rémunération, Accepter / Refuser.
  */
 export function PendingProposalsBanner() {
   const { user } = useAuth();
@@ -36,11 +51,21 @@ export function PendingProposalsBanner() {
     if (!convoyeurId) return;
     const { data } = await supabase
       .from("attributions")
-      .select("id,trajet_id,created_at, trajet:trajets(depart,arrivee,date_trajet,prix_convoyeur_fixe,prix_convoyeur,proposal_expires_at)")
+      .select("id,trajet_id,created_at")
       .eq("convoyeur_id", convoyeurId)
       .eq("statut", "propose")
       .order("created_at", { ascending: false });
-    setProposals((data ?? []) as unknown as Proposal[]);
+    const rows = (data ?? []) as unknown as Array<{ id: string; trajet_id: string; created_at: string }>;
+    // Les détails passent par la vue sécurisée (le convoyeur n'a pas accès direct à « trajets »).
+    const enriched = await Promise.all(rows.map(async (r) => {
+      const { data: t } = await supabase
+        .from("trajets_assigned_safe" as never)
+        .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation, prix_convoyeur_fixe, prix_convoyeur, tarif_convoyeur, proposal_expires_at")
+        .eq("id", r.trajet_id)
+        .maybeSingle();
+      return { ...r, trajet: (t as unknown as Trajet | null) ?? null } as Proposal;
+    }));
+    setProposals(enriched);
   };
 
   useEffect(() => { fetchData(); }, [convoyeurId]);
@@ -69,52 +94,47 @@ export function PendingProposalsBanner() {
   if (proposals.length === 0) return null;
 
   return (
-    <div className="mb-5 rounded-2xl border-2 border-pro-gold bg-gradient-to-br from-amber-50 to-white p-5 shadow-pro-elevated">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-pro-text flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping bg-amber-500" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
-          </span>
-          📌 {proposals.length} mission{proposals.length > 1 ? "s" : ""} proposée{proposals.length > 1 ? "s" : ""}
-        </h2>
+    <div className="pp2">
+      <div className="pp2-h">
+        <i className="pp2-pulse" />
+        <b>{proposals.length} mission{proposals.length > 1 ? "s" : ""} proposée{proposals.length > 1 ? "s" : ""}</b>
       </div>
-      <div className="space-y-2">
-        {proposals.map((p) => {
-          const price = p.trajet?.prix_convoyeur_fixe ?? p.trajet?.prix_convoyeur ?? 0;
-          const expiresAt = p.trajet?.proposal_expires_at ? new Date(p.trajet.proposal_expires_at) : null;
-          const hoursLeft = expiresAt ? Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 3600000)) : null;
-          return (
-            <div key={p.id} className="flex flex-wrap items-center gap-3 p-3 rounded-lg bg-white border border-pro-border">
-              <div className="flex-1 min-w-[200px]">
-                <div className="flex items-center gap-2 text-sm font-semibold text-pro-text">
-                  <MapPin size={14} className="text-emerald-600" />
-                  {p.trajet?.depart} → {p.trajet?.arrivee}
-                </div>
-                <div className="text-xs text-pro-text-soft mt-0.5 flex items-center gap-2">
-                  <span className="font-bold text-pro-text">{price.toFixed(0)} €</span>
-                  {hoursLeft !== null && (
-                    <span className="flex items-center gap-1"><Clock size={11} /> Répondre sous {hoursLeft}h</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button disabled={busy === p.id} onClick={() => respond(p.id, true)}
-                  className="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1">
-                  {busy === p.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Accepter
-                </button>
-                <button disabled={busy === p.id} onClick={() => respond(p.id, false)}
-                  className="px-3 py-2 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm font-semibold hover:bg-red-100 disabled:opacity-50 flex items-center gap-1">
-                  <XCircle size={14} /> Refuser
-                </button>
-              </div>
+      {proposals.map((p) => {
+        const t = p.trajet;
+        const price = t?.prix_convoyeur_fixe ?? t?.tarif_convoyeur ?? t?.prix_convoyeur ?? null;
+        const when = whenLabel(t);
+        const left = deadlineLabel(t?.proposal_expires_at ?? null);
+        const car = [t?.marque, t?.modele].filter(Boolean).join(" ");
+        return (
+          <div key={p.id} className="pp2-c">
+            <div className="pp2-top">
+              <span className="pp2-eb">Nouvelle mission</span>
+              {left && <span className="pp2-left"><Ic n="clock" s={12} /> {left}</span>}
             </div>
-          );
-        })}
-      </div>
-      <div className="mt-3 text-right">
-        <Link to="/convoyeur/missions" className="text-xs text-pro-muted hover:text-pro-text">Voir toutes mes missions →</Link>
-      </div>
+            <div className="pp2-mid">
+              <div className="nmr">
+                <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Enlèvement</small><b>{t?.depart || "À préciser"}</b></div></div>
+                <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Livraison</small><b>{t?.arrivee || "À préciser"}</b></div></div>
+              </div>
+              {price != null && (
+                <div className="pp2-price"><small>Rémunération</small><b>{Math.round(price)} €</b></div>
+              )}
+            </div>
+            <div className="pp2-tags">
+              {when && <span className="chipx"><Ic n="clock" s={12} /> {when}</span>}
+              {car && <span className="chipx"><Ic n="car" s={12} /> {car}</span>}
+              <Plate p={t?.immatriculation} />
+            </div>
+            <div className="pp2-act">
+              <button type="button" disabled={busy === p.id} onClick={() => respond(p.id, false)} className="pp2-no">Refuser</button>
+              <button type="button" disabled={busy === p.id} onClick={() => respond(p.id, true)} className="pp2-ok">
+                {busy === p.id ? "Envoi…" : "Accepter"}
+              </button>
+            </div>
+          </div>
+        );
+      })}
+      <Link to="/convoyeur/missions" className="pp2-all">Voir toutes mes missions <Ic n="arr" s={13} /></Link>
     </div>
   );
 }

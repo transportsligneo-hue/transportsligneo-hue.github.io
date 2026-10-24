@@ -1,3 +1,4 @@
+import { AppUpdatePrompt } from "@/components/convoyeur/AppUpdatePrompt";
 import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
@@ -108,6 +109,7 @@ function ConvoyeurLayout() {
         </div>
       )}
       <Outlet />
+      <AppUpdatePrompt />
       </UserMfaGate>
     </ConvoyeurSidebar>
   );

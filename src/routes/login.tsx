@@ -333,17 +333,17 @@ function LoginPage() {
                 required
                 autoComplete="current-password"
                 disabled={loading}
-                className="auth-input pr-11"
+                className="auth-input pr-12"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPwd((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                className="auth-eye absolute right-2 top-1/2 -translate-y-1/2 transition-colors"
                 aria-label={showPwd ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                 tabIndex={-1}
               >
-                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPwd ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
