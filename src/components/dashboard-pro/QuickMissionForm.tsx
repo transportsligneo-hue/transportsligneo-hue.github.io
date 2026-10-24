@@ -36,7 +36,6 @@ import { FleetDevisSuccess } from "@/components/flotte/FleetDevisSuccess";
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
 import type { ExtractedFields } from "@/lib/scanner/types";
 import { toast } from "sonner";
-import { useApprovalGate, sbAny } from "@/hooks/useApprovalGate";
 import { checkMinNotice } from "@/lib/min-notice";
 import { PV_PLATEFORMES, PvLogo, pvDef, type PvChoice } from "@/components/mission/pv-plateformes";
 import { guessElectricFromModel } from "@/lib/vehicule-electrique";
@@ -118,7 +117,6 @@ export default function QuickMissionForm({
   const isParticulier = variant === "particulier";
   const { user } = useAuth();
   const navigate = useNavigate();
-  const gate = useApprovalGate();
 
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -535,7 +533,7 @@ export default function QuickMissionForm({
       //    immédiatement son estimation par email et le retrouve dans son espace.
       let devisId: string | null = null;
       let devisNumero: string | null = null;
-      if (prixTtc && prixTtc > 0 && !gate.required) {
+      if (prixTtc && prixTtc > 0) {
         const { data: devisRow, error: devisErr } = await supabase
           .from("devis")
           .insert({
@@ -635,23 +633,6 @@ export default function QuickMissionForm({
             }
           : {}),
       } as never;
-
-      // Validation interne : un collaborateur soumet, un administrateur de l'organisation valide avant envoi.
-      if (gate.required && gate.orgId && user) {
-        const { error: reqErr } = await sbAny.from("org_approval_requests").insert({
-          organization_id: gate.orgId,
-          requested_by: user.id,
-          requester_label: `${profile.prenom} ${profile.nom}`.trim() || profile.email,
-          resume: `${depart} → ${arrivee} · ${date}${prixTtc ? ` · ${prixTtc.toFixed(0)} €` : ""}`,
-          payload,
-        });
-        if (reqErr) throw reqErr;
-        toast.success("Demande envoyée à votre administrateur pour validation");
-        setSuccess(true);
-        setSubmitting(false);
-        setTimeout(() => navigate({ to: successRedirect }), 1600);
-        return;
-      }
 
       const { data: inserted, error: insErr } = await supabase
         .from("demandes_convoyage")
