@@ -32,6 +32,7 @@ const PAGE_SIZE = 12;
 
 const vueLabel = (k: string) => {
   const map: Record<string, string> = {
+    avant: "Avant",
     trois_quart_avant_gauche: "3/4 avant gauche",
     trois_quart_avant_droite: "3/4 avant droit",
     trois_quart_arriere_gauche: "3/4 arrière gauche",

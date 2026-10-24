@@ -28,18 +28,18 @@ export function markDemoPdf(doc: jsPDF, context?: PdfRenderContext) {
       d.saveGraphicsState();
       d.setGState(new d.GState({ opacity: 0.10 }));
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(54);
+      doc.setFontSize(78);
       doc.setTextColor(...DOC_GOLD);
-      doc.text("DOCUMENT FICTIF", w / 2, h / 2, { align: "center", angle: 35 });
-      doc.setFontSize(22);
-      doc.text("DÉMONSTRATION", w / 2 + 6, h / 2 + 24, { align: "center", angle: 35 });
+      doc.text("SPÉCIMEN", w / 2, h / 2, { align: "center", angle: 35 });
+      doc.setFontSize(15);
+      doc.text("DOCUMENT FICTIF · DÉMONSTRATION", w / 2 + 6, h / 2 + 24, { align: "center", angle: 35 });
       d.restoreGraphicsState();
     } catch { /* filigrane non bloquant */ }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.setTextColor(...DOC_GOLD);
     const top = (6 * 72 / 25.4) / doc.internal.scaleFactor;
-    doc.text("DÉMONSTRATION — DOCUMENT FICTIF — DONNÉES FICTIVES — AUCUNE VALEUR CONTRACTUELLE", w / 2, top, { align: "center" });
+    doc.text("SPÉCIMEN — DOCUMENT FICTIF — DONNÉES FICTIVES — AUCUNE VALEUR CONTRACTUELLE", w / 2, top, { align: "center" });
     const bottom = h - (3 * 72 / 25.4) / doc.internal.scaleFactor;
     doc.text("Document généré dans l'espace de démonstration Transports Ligneo : il n'a aucune valeur comptable ni juridique.", w / 2, bottom, { align: "center" });
   }

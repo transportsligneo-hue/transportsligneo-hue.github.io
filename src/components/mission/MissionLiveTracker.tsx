@@ -110,6 +110,7 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
   useEffect(() => {
     if (!showMap) return;
     let cancelled = false;
+    let timer: ReturnType<typeof setInterval> | null = null;
     supabase
       .from("mission_locations")
       .select("latitude, longitude, recorded_at, accuracy, speed")
@@ -117,9 +118,24 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
       .order("recorded_at", { ascending: true })
       .then(async ({ data }) => {
         if (cancelled || !data) return;
-        // Compte démo : on recale la trace sur « maintenant » pour que le suivi paraisse toujours en direct.
+        // Compte démo : la mission « en cours » rejoue sa vraie trace GPS en boucle (la voiture avance sous les yeux du prospect).
         const { data: u } = await supabase.auth.getUser();
         const isDemo = u.user?.email?.toLowerCase() === "demo-flotte@transportsligneo.fr";
+        if (isDemo && data.length >= 20 && rt.statut === "en_cours") {
+          const total = data.length;
+          const CYCLE_MS = 6 * 60_000; // un trajet complet toutes les 6 minutes
+          const tick = () => {
+            const frac = (Date.now() % CYCLE_MS) / CYCLE_MS;
+            const upTo = Math.max(8, Math.min(total, Math.round(8 + frac * (total - 8))));
+            const slice = data.slice(0, upTo);
+            const shift = Date.now() - new Date(slice[slice.length - 1].recorded_at).getTime();
+            setAllPoints(slice.map((pt) => ({ ...pt, recorded_at: new Date(new Date(pt.recorded_at).getTime() + shift).toISOString() })));
+          };
+          tick();
+          timer = setInterval(tick, 4000);
+          return;
+        }
+        // Autres missions démo : on recale la trace sur « maintenant ».
         if (isDemo && data.length) {
           const shift = Date.now() - new Date(data[data.length - 1].recorded_at).getTime();
           if (shift > 0 && shift < 30 * 86_400_000) {
@@ -129,8 +145,8 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
         }
         setAllPoints(data);
       });
-    return () => { cancelled = true; };
-  }, [attributionId, showMap]);
+    return () => { cancelled = true; if (timer) clearInterval(timer); };
+  }, [attributionId, showMap, rt.statut]);
 
   useEffect(() => {
     if (rt.lastGps) {
@@ -265,12 +281,6 @@ export function MissionLiveTracker({ attributionId, showMap = true, mapOnly = fa
                 )}
               </div>
             )}
-            {lastRecordedAt && !gpsFresh && !isFinished && (
-              <div className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-xs font-medium text-amber-800">
-                <AlertTriangle size={14} /> Position GPS non actualisée · emplacement actuel inconnu
-              </div>
-            )}
-
             {isFinished && (
               <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2.5 text-emerald-700">
                 <CheckCircle2 size={16} />
