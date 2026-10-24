@@ -224,6 +224,17 @@ function LoginPage() {
   }, [loading]);
 
 
+  // App driver : session déjà ouverte → on n'affiche jamais la page de connexion (écran vert uniquement).
+  if (inNativeShell && isAuthenticated && homeRoute !== "/login") {
+    return (
+      <div aria-hidden className="lb-screen">
+        <div className="lb-mark"><i className="lb-halo" /><img src="/logo-ligneo.png" alt="" /></div>
+        <strong className="lb-brand">TRANSPORTS LIGNEO<em>DRIVER</em></strong>
+        <span className="lb-bar"><b /></span>
+      </div>
+    );
+  }
+
   return (
     <div className={`auth-shell flex items-center justify-center px-4 py-10 ${isMobileApp || tab === "pro" ? "auth-driver-theme" : ""}`}>
       <div className="w-full max-w-md auth-fade-in">

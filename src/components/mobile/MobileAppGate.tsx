@@ -35,14 +35,17 @@ export default function MobileAppGate() {
     const root = document.documentElement;
     if (!root.classList.contains("ligneo-app")) return;
     const release = () => root.classList.add("ligneo-ready");
-    if (isLoading) {
+    // Tant qu'une redirection est en cours (ex. /login → espace driver), on garde l'écran vert :
+    // sinon la page de connexion (bleu foncé + logo + ruban rose) apparaît une fraction de seconde.
+    const redirecting = isLoading || (isAuthenticated && homeRoute !== path && (path === "/login" || path === "/") );
+    if (redirecting) {
       const safety = window.setTimeout(release, 7000);
       return () => window.clearTimeout(safety);
     }
     const wait = Math.max(0, 1400 - Math.round(performance.now()));
     const t = window.setTimeout(release, wait);
     return () => window.clearTimeout(t);
-  }, [isLoading]);
+  }, [isLoading, isAuthenticated, homeRoute, path]);
 
   // Voile plein écran : empêche tout affichage du site vitrine dans l'app
   if (!offLimits) return null;
