@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { COMPANY_SIGNATURE_LAYOUT, loadCompanySignature } from "@/lib/pdf-company-signature";
 
 export type AttestationData = {
   fullName: string;
@@ -35,7 +36,7 @@ async function loadLogo(): Promise<string | null> {
 /** Génère l'attestation (PDF A4 paysage, sobre et institutionnelle) et renvoie le fichier + sa référence. */
 export async function buildAttestationPdf(data: AttestationData): Promise<{ blob: Blob; filename: string; ref: string }> {
   const ref = attestationReference(data.userId, data.completedAt);
-  const logo = await loadLogo();
+  const [logo, company] = await Promise.all([loadLogo(), loadCompanySignature().catch(() => null)]);
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const W = 297, H = 210, cx = W / 2;
 
@@ -105,10 +106,10 @@ export async function buildAttestationPdf(data: AttestationData): Promise<{ blob
   pillars.forEach((p, i) => {
     const x = x0 + i * (pw + gap);
     doc.setFillColor(243, 247, 245); doc.setDrawColor(215, 226, 220); doc.setLineWidth(0.2);
-    doc.roundedRect(x, 137, pw, 11, 2, 2, "FD");
-    doc.setFillColor(...GREEN); doc.circle(x + 6, 142.5, 1.7, "F");
+    doc.roundedRect(x, 133, pw, 11, 2, 2, "FD");
+    doc.setFillColor(...GREEN); doc.circle(x + 6, 138.5, 1.7, "F");
     doc.setFont("helvetica", "bold"); doc.setFontSize(8.8); doc.setTextColor(...NAVY);
-    doc.text(p, x + 11, 143.6);
+    doc.text(p, x + 11, 139.6);
   });
 
   // Pied : date / sceau / signature
@@ -116,10 +117,16 @@ export async function buildAttestationPdf(data: AttestationData): Promise<{ blob
   doc.line(42, 176, 100, 176); doc.line(W - 100, 176, W - 42, 176);
   doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...NAVY);
   doc.text(data.completedAt.toLocaleDateString("fr-FR"), 71, 172, { align: "center" });
-  doc.setFont("times", "italic"); doc.setFontSize(15); doc.text("Olivier Gourlaouen", W - 71, 172, { align: "center" });
+  if (company) {
+    // Même composition que le contrat convoyeur : tampon + grande signature par-dessus
+    const k = 1.15, lay = COMPANY_SIGNATURE_LAYOUT, sigH = 34, sigW = (sigH * 894) / 672;
+    const sx = W - 71 - (lay.stampWidth * k) / 2, sy2 = 158;
+    if (company.stampData) doc.addImage(company.stampData, "PNG", sx, sy2, lay.stampWidth * k, lay.stampHeight * k, "tampon-ligneo-attestation", "FAST", lay.rotation);
+    if (company.signatureData) doc.addImage(company.signatureData, "PNG", sx + 4, sy2 - 13, sigW, sigH, "signature-ligneo-attestation", "FAST");
+  }
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...GREY);
   doc.text("Date de validation", 71, 181, { align: "center" });
-  doc.text("Responsable d'exploitation · Transports Ligneo", W - 71, 181, { align: "center" });
+  doc.text("Olivier Gourlaouen · Responsable d'exploitation, Transports Ligneo", W - 71, 181, { align: "center" });
 
   // Sceau doré en relief + rubans
   const sy = 164;
