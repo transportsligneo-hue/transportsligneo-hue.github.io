@@ -12266,7 +12266,6 @@ body.is-driver-app .auth-driver-theme .auth-link-lg.is-gold{color:#0b7a43;backgr
 html.ligneo-app,html.ligneo-app body{background:#dcebe3}
 html.ligneo-app #lg-boot{display:flex;transition:opacity .35s ease,visibility .35s}
 html.ligneo-app.ligneo-ready #lg-boot{opacity:0;visibility:hidden;pointer-events:none}
-html.ligneo-app .animate-spin{animation:none!important;visibility:hidden}
 html.ligneo-app .nav-progress{height:3px}
 
 
@@ -12500,3 +12499,22 @@ body.is-driver-app .auth-driver-theme .ligneo-lockup-logo {
   .tln-hd-ic.is-vroomy .tln-art-vroomy-pop { width: 52px; height: 52px; overflow: visible; }
   .tln-art-vroomy-hd { position: absolute; left: 0; top: 0; }
 }
+
+
+/* ===== Plus aucun rond qui tourne : toute icône « animate-spin » devient une barre de chargement =====
+   Site : bleu électrique · Espace driver / app : vert. */
+@keyframes lg-spinbar{0%{background-position:-60% 0,0 0}100%{background-position:160% 0,0 0}}
+.animate-spin{
+  animation:lg-spinbar 1.1s ease-in-out infinite!important;
+  display:inline-block;flex:none;vertical-align:middle;
+  width:30px!important;height:4px!important;min-width:30px;
+  border:0!important;border-radius:9px;transform:none!important;
+  background-image:linear-gradient(90deg,transparent,var(--lg-bar,currentColor),transparent),linear-gradient(rgba(127,127,127,.28),rgba(127,127,127,.28));
+  background-size:55% 100%,100% 100%;background-repeat:no-repeat;
+}
+.animate-spin>*{display:none!important}
+:root{--lg-bar:#2f5fff}
+button .animate-spin,a .animate-spin,[class*="bg-primary"] .animate-spin,[class*="bg-[#"] .animate-spin{--lg-bar:currentColor}
+html.ligneo-app .animate-spin,body.is-driver-app .animate-spin,.auth-driver-theme .animate-spin,[data-space="driver"] .animate-spin{--lg-bar:#14B866}
+html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[data-space="driver"] button .animate-spin{--lg-bar:currentColor}
+@media (prefers-reduced-motion:reduce){.animate-spin{animation:none!important}}

@@ -191,6 +191,14 @@ function DriverAppBodyClass() {
     }
   }, [pathname]);
 
+  // Espace driver (web ou app) : barres de chargement vertes.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const isDriver = DRIVER_APP_ROUTES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    if (isDriver) document.documentElement.setAttribute("data-space", "driver");
+    else document.documentElement.removeAttribute("data-space");
+  }, [pathname]);
+
   return null;
 }
 
