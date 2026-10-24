@@ -12518,3 +12518,5 @@ button .animate-spin,a .animate-spin,[class*="bg-primary"] .animate-spin,[class*
 html.ligneo-app .animate-spin,body.is-driver-app .animate-spin,.auth-driver-theme .animate-spin,[data-space="driver"] .animate-spin{--lg-bar:#14B866}
 html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[data-space="driver"] button .animate-spin{--lg-bar:currentColor}
 @media (prefers-reduced-motion:reduce){.animate-spin{animation:none!important}}
+.tns-bar { transform-box: fill-box; transform-origin: 0 50%; animation: tnsBarGrow 2.2s ease-in-out .9s both; }
+@keyframes tnsBarGrow { from { transform: scaleX(.12); } to { transform: scaleX(1); } }

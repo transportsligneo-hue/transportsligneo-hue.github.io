@@ -5,7 +5,7 @@ import logoDriver from "@/assets/logo-driver.png.asset.json";
  * (devis, facture, appli convoyeur, carte de suivi, code de livraison, LinkedIn, API).
  * Chaque scène est relancée à chaque changement d'annonce (clé React côté parent).
  */
-export const SCENE_KINDS = ["quote", "invoice", "driver", "wheel", "gps", "code", "linkedin", "api", "shield", "photo", "verified", "google", "plate"] as const;
+export const SCENE_KINDS = ["quote", "invoice", "driver", "wheel", "gps", "code", "linkedin", "api", "shield", "photo", "verified", "google", "plate", "demo"] as const;
 export type SceneKind = (typeof SCENE_KINDS)[number];
 export const isScene = (k: string): k is SceneKind => (SCENE_KINDS as readonly string[]).includes(k);
 
@@ -215,6 +215,33 @@ export function Scene({ kind }: { kind: SceneKind }) {
               <circle cx="75" cy={(y as number) - 1.8} r="0" fill="#22c55e" />
             </g>
           ))}
+        </svg>
+      );
+    case "demo":
+      return (
+        <svg className="tns" viewBox="0 0 86 56" width="86" height="56" aria-hidden="true">
+          <g className="tns-pop">
+            <rect x="3" y="3" width="80" height="50" rx="7" fill="#0f1b4d" stroke="rgba(255,255,255,.28)" strokeWidth="1" />
+            <rect x="3" y="3" width="80" height="9" rx="7" fill="#1d3bbd" />
+            <rect x="3" y="8" width="80" height="4" fill="#1d3bbd" />
+            <text x="9" y="9.6" fontSize="4.4" fontWeight="800" fill="#fff" fontFamily={SANS} letterSpacing=".5">ESPACE PRO</text>
+          </g>
+          <g className="tns-rise tns-d1">
+            <rect x="8" y="16" width="70" height="14" rx="3.5" fill="rgba(255,255,255,.12)" />
+            <text x="12" y="22.4" fontSize="4.2" fontWeight="800" fill="#fff" fontFamily={SANS}>Tours → Bordeaux</text>
+            <rect x="12" y="25" width="46" height="2.4" rx="1.2" fill="rgba(255,255,255,.2)" />
+            <rect className="tns-bar" x="12" y="25" width="46" height="2.4" rx="1.2" fill="#34d399" />
+            <rect x="60" y="18.5" width="15" height="5.5" rx="2.75" fill="rgba(34,197,94,.25)" stroke="#34d399" strokeWidth=".6" />
+            <text x="67.5" y="22.5" textAnchor="middle" fontSize="3.4" fontWeight="800" fill="#34d399" fontFamily={SANS}>EN COURS</text>
+          </g>
+          <g className="tns-rise tns-d2">
+            <rect x="8" y="33" width="70" height="8" rx="3.5" fill="rgba(255,255,255,.08)" />
+            <text x="12" y="38.4" fontSize="3.8" fontWeight="700" fill="#cfe0ff" fontFamily={SANS}>Devis · Facture · PV</text>
+          </g>
+          <g className="tns-stamp tns-d4">
+            <rect x="10" y="43" width="66" height="8" rx="4" fill="#2f5fff" />
+            <text x="43" y="48.6" textAnchor="middle" fontSize="4.4" fontWeight="800" fill="#fff" fontFamily={SANS}>Demander une démo</text>
+          </g>
         </svg>
       );
     case "api":

@@ -7,7 +7,7 @@ import { Scene, isScene } from "@/components/NavScenes";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
 
 type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
-type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card" | "api";
+type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card" | "api" | "demo";
 type Msg = {
   art: ArtKind;
   kick: string;
@@ -21,7 +21,7 @@ type Msg = {
 };
 
 const WIDE: ArtKind[] = ["card"];
-const RAW: ArtKind[] = ["vroomy", "driver", "wheel", "plate", "code", "google", "card", "invoice"];
+const RAW: ArtKind[] = ["vroomy", "driver", "wheel", "plate", "code", "google", "card", "invoice", "demo"];
 
 // Repli : fiche Google Maps (le lien « laisser un avis » exact vient des Paramètres admin quand il est lisible)
 const GOOGLE_FALLBACK = "https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours";
@@ -41,6 +41,7 @@ const MESSAGES: Msg[] = [
   { art: "verified", theme: "green", kick: "Confiance", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Voir", to: "/comment-ca-marche" },
   { art: "card", theme: "cyan", kick: "Paiement", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
   { art: "api", theme: "violet", kick: "Développeurs", title: "API Développeur", sub: "Connectez vos outils à Ligneo", cta: "Découvrir", to: "/developpeurs" },
+  { art: "demo", theme: "blue", kick: "Entreprises", title: "Démo gratuite", sub: "Testez l'espace pro, sans engagement", cta: "Demander", to: "/demo" },
   { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes & grands comptes", cta: "Voir", to: "/services" },
 ];
 
