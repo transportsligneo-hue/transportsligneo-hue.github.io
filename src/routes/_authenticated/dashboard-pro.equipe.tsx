@@ -1,3 +1,4 @@
+import { ApprovalSection } from "@/components/flotte/ApprovalSection";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -105,6 +106,8 @@ function EquipePage() {
         <h1 className="text-2xl font-semibold">Équipe & alertes</h1>
         <p className="text-sm text-muted-foreground">Qui a accès à votre espace, et quelles alertes vous recevez.</p>
       </header>
+
+      <ApprovalSection />
 
       <section className="mission-surface p-5 space-y-4">
         <h2 className="flex items-center gap-2 font-semibold"><Users size={16} /> Membres <HelpTip text={ROLE_HELP} /></h2>
