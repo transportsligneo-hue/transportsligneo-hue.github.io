@@ -41,7 +41,7 @@ const MESSAGES: Msg[] = [
   { art: "verified", theme: "green", kick: "Confiance", title: "Convoyeurs vérifiés", sub: "Identifiés, formés et assurés", cta: "Voir", to: "/comment-ca-marche" },
   { art: "card", theme: "cyan", kick: "Paiement", title: "Paiement par carte", sub: "Simple, sécurisé, immédiat", cta: "Découvrir", to: "/tarifs" },
   { art: "api", theme: "violet", kick: "Développeurs", title: "API Développeur", sub: "Connectez vos outils à Ligneo", cta: "Découvrir", to: "/developpeurs" },
-  { art: "demo", theme: "blue", kick: "Entreprises", title: "Démo gratuite", sub: "Testez l'espace pro, sans engagement", cta: "Demander", to: "/demo" },
+  { art: "demo", theme: "blue", kick: "Professionnels · B2B", title: "Demandez votre démo", sub: "Flottes & entreprises : testez l'espace pro", cta: "Demander", to: "/demo" },
   { art: "invoice", theme: "orange", kick: "Pros", title: "Facture à 30 jours", sub: "Flottes & grands comptes", cta: "Voir", to: "/services" },
 ];
 
