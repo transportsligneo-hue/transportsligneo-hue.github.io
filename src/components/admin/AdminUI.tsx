@@ -105,7 +105,7 @@ export function KpiCard({
 }
 
 /* ============= Badge ============= */
-type BadgeTone = "neutral" | "success" | "warning" | "danger" | "info" | "primary" | "purple";
+type BadgeTone = "neutral" | "success" | "warning" | "danger" | "info" | "primary" | "purple" | "indigo" | "pink" | "teal";
 export function Badge({
   children,
   tone = "neutral",
@@ -123,6 +123,9 @@ export function Badge({
     info: "#00AEEF",
     primary: "#2F5FFF",
     purple: "#8B5CF6",
+    indigo: "#6366F1",
+    pink: "#EC4899",
+    teal: "#0EA5A4",
   };
   return (
     <LgBadge color={colors[tone]} size="xs">
@@ -137,14 +140,14 @@ export const demandeStatutTone: Record<string, BadgeTone> = {
   nouvelle: "info",
   a_traiter: "warning",
   convertie: "success",
-  attribuee: "purple",
+  attribuee: "indigo",
   terminee: "success",
   annulee: "danger",
 };
 export const trajetStatutTone: Record<string, BadgeTone> = {
   en_attente: "warning",
-  attribue: "info",
-  accepte: "info",
+  attribue: "indigo",
+  accepte: "primary",
   en_cours: "purple",
   termine: "success",
   annule: "danger",
@@ -156,13 +159,13 @@ export const convoyeurStatutTone: Record<string, BadgeTone> = {
   suspendu: "neutral",
 };
 export const attributionStatutTone: Record<string, BadgeTone> = {
-  propose: "warning",
-  accepte: "success",
+  propose: "info",
+  accepte: "primary",
   refuse: "danger",
   en_cours: "purple",
-  en_attente_validation: "warning",
-  validee: "success",
-  refusee: "danger",
+  en_attente_validation: "pink",
+  validee: "teal",
+  refusee: "neutral",
   termine: "success",
   annule: "neutral",
 };

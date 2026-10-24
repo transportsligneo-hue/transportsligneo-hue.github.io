@@ -3157,12 +3157,14 @@ body.is-driver-app .closed-link svg {
   }
 
   /* Status chips */
-  .v3-status { font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; display: inline-block; }
-  .v3-status.progress { background: var(--v3-blue-soft); color: var(--v3-blue-deep); }
-  .v3-status.done     { background: var(--v3-ok-soft);   color: var(--v3-ok); }
-  .v3-status.wait     { background: var(--v3-warn-soft); color: var(--v3-warn); }
-  .v3-status.danger   { background: var(--v3-danger-soft); color: var(--v3-danger); }
-  .v3-status.neutral  { background: var(--v3-surface-2); color: var(--v3-text-muted); border: 1px solid var(--v3-border); }
+  .v3-status { --c:#64748B; font-size: 10px; font-weight: 700; padding: 4px 11px 4px 9px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.09em; white-space: nowrap; display: inline-flex; align-items:center; gap:6px; background:linear-gradient(180deg,color-mix(in srgb,var(--c) 82%,#fff),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000));border:1px solid color-mix(in srgb,var(--c) 70%,#000);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 3px 10px -3px color-mix(in srgb,var(--c) 70%,transparent);text-shadow:0 1px 1px rgba(0,0,0,.25); }
+  .v3-status::before { content:"";flex:none;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c) }
+  .v3-status.progress, .v3-status.accepted { --c:#2F5FFF; }
+  .v3-status.run { --c:#8B5CF6; }
+  .v3-status.done { --c:#22C55E; }
+  .v3-status.wait { --c:#F59E0B; }
+  .v3-status.danger { --c:#EF4444; }
+  .v3-status.neutral { --c:#64748B; }
 
   /* Bar chart */
   .v3-bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding-top: 10px; }
@@ -4812,13 +4814,14 @@ html.theme-light .v5-section-transition {
 @keyframes a6FadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* --- Statuts unifiés --- */
-.a6-badge { font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-block; white-space: nowrap; }
-.a6-badge.new { background: var(--a6-blue-soft); color: var(--a6-blue-deep); }
-.a6-badge.attribuer { background: var(--a6-warn-soft); color: var(--a6-warn); }
-.a6-badge.attribuee { background: var(--a6-violet-soft); color: #5334d6; }
-.a6-badge.encours { background: var(--a6-gold-soft); color: var(--a6-gold); }
-.a6-badge.terminee { background: var(--a6-ok-soft); color: var(--a6-ok); }
-.a6-badge.annulee { background: var(--a6-red-soft); color: var(--a6-red); }
+.a6-badge { --c:#2F5FFF; font-size: 10px; font-weight: 700; padding: 3px 10px 3px 8px; border-radius: 8px; display: inline-flex; align-items:center; gap:6px; white-space: nowrap; letter-spacing:.09em; text-transform:uppercase; background:linear-gradient(180deg,color-mix(in srgb,var(--c) 82%,#fff),var(--c) 55%,color-mix(in srgb,var(--c) 82%,#000));border:1px solid color-mix(in srgb,var(--c) 70%,#000);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 3px 10px -3px color-mix(in srgb,var(--c) 70%,transparent);text-shadow:0 1px 1px rgba(0,0,0,.25); }
+.a6-badge::before { content:"";flex:none;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 2.5px rgba(255,255,255,.28),0 0 9px 1px #fff,0 0 14px var(--c) }
+.a6-badge.new { --c:#00AEEF; }
+.a6-badge.attribuer { --c:#F59E0B; }
+.a6-badge.attribuee { --c:#6366F1; }
+.a6-badge.encours { --c:#8B5CF6; }
+.a6-badge.terminee { --c:#22C55E; }
+.a6-badge.annulee { --c:#EF4444; }
 
 /* --- Chips filtres --- */
 .a6-chip { font-size: 11.5px; font-weight: 600; padding: 8px 13px; border-radius: 9px; border: 1px solid var(--a6-border); background: var(--a6-surface); color: var(--a6-muted); white-space: nowrap; }
@@ -10467,7 +10470,7 @@ html.theme-dark .dashboard-shell-light .fleet-stat-value:not([style*="#2f5fff"])
 html.theme-dark .dashboard-shell-light .v3-tabs { background: #111a3d; border-color: #24305c; }
 html.theme-dark .dashboard-shell-light .v3-kpi-trend { background: rgba(232,237,251,.08); color: #b7c1e0; }
 html.theme-dark .dashboard-shell-light aside [class*="from-violet-50"], html.theme-dark .dashboard-shell-light aside [class*="from-blue-50"] { background: #17224a !important; border-color: #3a2f7a !important; }
-html.theme-dark .dashboard-shell-light .v3-status.wait { color: #c9bbff; }
+
 
 /* ===== Page /suivi — champs bleu néon électrique, statuts différenciés ===== */
 .r4-page .suivi-field {

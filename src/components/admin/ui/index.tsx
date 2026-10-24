@@ -1,3 +1,4 @@
+import { LgBadge } from "@/components/ui/LgBadge";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -107,10 +108,13 @@ const TONE_BY_KEYWORD: Record<string, StatusTone> = {
   attribuee: "gold", attribuée: "gold", attribue: "gold", attribué: "gold",
 };
 
+const TONE_COLOR: Record<StatusTone, string> = { success: "#22C55E", warning: "#F59E0B", danger: "#EF4444", info: "#00AEEF", accent: "#2F5FFF", violet: "#8B5CF6", gold: "#6366F1", neutral: "#64748B" };
+const KEY_COLOR: Record<string, string> = { en_cours: "#8B5CF6", "en cours": "#8B5CF6", encours: "#8B5CF6", attribuee: "#6366F1", "attribuée": "#6366F1", attribue: "#6366F1", "attribué": "#6366F1", validee: "#0EA5A4", "validée": "#0EA5A4", en_attente_validation: "#EC4899", propose: "#00AEEF", "proposée": "#00AEEF", accepte: "#2F5FFF", acceptee: "#2F5FFF", "acceptée": "#2F5FFF" };
 export function AdminBadge({ label, tone }: { label: string; tone?: StatusTone }) {
   const key = label.toLowerCase().replace(/\s+/g, "_");
   const t: StatusTone = tone ?? TONE_BY_KEYWORD[key] ?? TONE_BY_KEYWORD[key.replace(/_/g, " ")] ?? "neutral";
-  return <span className={`admin-badge admin-badge--${t}`}>{label}</span>;
+  const color = (!tone && (KEY_COLOR[key] ?? KEY_COLOR[key.replace(/_/g, " ")])) || TONE_COLOR[t];
+  return <LgBadge color={color} size="sm">{label}</LgBadge>;
 }
 
 /* ============== Section ============== */

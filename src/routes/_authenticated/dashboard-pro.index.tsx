@@ -56,12 +56,12 @@ interface ActivityRow {
 
 const V3_STATUS: Record<string, { cls: string; label: string }> = {
   en_attente: { cls: "wait", label: "En attente" },
-  confirmee:  { cls: "progress", label: "Confirmée" },
-  en_cours:   { cls: "progress", label: "En route" },
+  confirmee:  { cls: "accepted", label: "Confirmée" },
+  en_cours:   { cls: "run", label: "En route" },
   livree:     { cls: "done", label: "Livrée" },
   terminee:   { cls: "done", label: "Terminée" },
   annulee:    { cls: "danger", label: "Annulée" },
-  refuse:     { cls: "danger", label: "Refusée" },
+  refuse:     { cls: "neutral", label: "Refusée" },
 };
 
 type TabKey = "all" | "cours" | "term" | "attribuer";

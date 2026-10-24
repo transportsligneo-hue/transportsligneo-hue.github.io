@@ -641,7 +641,8 @@ function AdminTrajets() {
               t.statut === "annule" ? "red"
               : t.statut === "termine" ? "green"
               : t.statut === "en_cours" ? "violet"
-              : t.statut === "attribue" || t.statut === "accepte" ? "blue"
+              : t.statut === "attribue" ? "indigo"
+              : t.statut === "accepte" ? "blue"
               : "orange";
             const initials = (t.client_nom || "—").slice(0, 2).toUpperCase();
             return (
