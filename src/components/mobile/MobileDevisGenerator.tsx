@@ -20,6 +20,7 @@ import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
 import { kmBasePrice, kmRateLabel } from "@/lib/km-tarif";
+import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // === Mêmes données que la version desktop ===
@@ -216,7 +217,27 @@ export default function MobileDevisGenerator() {
     }
     return weekend || offHour ? { weekend, offHour } : null;
   }, [date, heure]);
-  const displayPrice = pricing ? (offHours ? Math.round(pricing.finalPrice * 1.3) : pricing.finalPrice) : null;
+  // Règle de prix personnalisée du client (même source de vérité que l'estimateur desktop et le devis en base)
+  const resolveServerPrice = useServerFn(resolvePersonalizedPrice);
+  const [serverTtc, setServerTtc] = useState<number | null>(null);
+  useEffect(() => {
+    setServerTtc(null);
+    if (!departure || !arrival || !pricing) return;
+    const fallbackTtc = pricing.finalPrice;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      resolveServerPrice({ data: {
+        depart: departure, arrivee: arrival,
+        isAllerRetour: option === "aller-retour",
+        fallbackPrice: fallbackTtc,
+      }}).then((res) => {
+        if (!cancelled && res?.personalized) setServerTtc(Number(res.price));
+      }).catch(() => {});
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [departure, arrival, option, pricing, resolveServerPrice]);
+  const baseTtcMobile = serverTtc ?? pricing?.finalPrice ?? null;
+  const displayPrice = baseTtcMobile != null ? (offHours ? Math.round(baseTtcMobile * 1.3) : baseTtcMobile) : null;
 
   async function handleSivLookup() {
     setSivMsg(null);

@@ -14,6 +14,8 @@ import {
   type TripType,
 } from "@/lib/reservation-pricing";
 import { resolveDistanceKm } from "@/lib/resolve-distance";
+import { useServerFn } from "@tanstack/react-start";
+import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
 
 const STEPS = ["Trajet", "Options", "Véhicule", "Coordonnées", "Confirmation"];
 
@@ -88,10 +90,30 @@ export default function TunnelReservation({ onClose }: Props) {
     return () => { cancelled = true; };
   }, [form.ville_depart, form.ville_arrivee]);
 
-  const { base: basePrice, label: priceLabel } = useMemo(
+  const { base: stdBasePrice, label: stdPriceLabel } = useMemo(
     () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance),
     [form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance]
   );
+  // Règle de prix personnalisée du client (même source de vérité que le devis en base)
+  const resolveServerPrice = useServerFn(resolvePersonalizedPrice);
+  const [customBase, setCustomBase] = useState<number | null>(null);
+  useEffect(() => {
+    setCustomBase(null);
+    if (!form.ville_depart || !form.ville_arrivee || stdBasePrice <= 0) return;
+    let cancelled = false;
+    const t = setTimeout(() => {
+      resolveServerPrice({ data: {
+        depart: form.ville_depart, arrivee: form.ville_arrivee,
+        isAllerRetour: form.type_trajet === "aller_retour",
+        fallbackPrice: stdBasePrice,
+      }}).then((res) => {
+        if (!cancelled && res?.personalized) setCustomBase(Number(res.price));
+      }).catch(() => {});
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.ville_depart, form.ville_arrivee, form.type_trajet, stdBasePrice, resolveServerPrice]);
+  const basePrice = customBase ?? stdBasePrice;
+  const priceLabel = customBase != null ? "Tarif personnalisé" : stdPriceLabel;
   const optionsTotal = useMemo(() => calculateOptionsTotal(form.options), [form.options]);
   const total = basePrice + optionsTotal;
 
