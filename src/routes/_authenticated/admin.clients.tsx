@@ -1,3 +1,4 @@
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +44,7 @@ function AdminClients() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [testView, setTestView] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"tous" | "actifs" | "suspendus">("tous");
   const [selected, setSelected] = useState<ClientRow | null>(null);
   const [pricingClient, setPricingClient] = useState<ClientRow | null>(null);
@@ -185,7 +187,11 @@ function AdminClients() {
     await fetchClients();
   };
 
+  const isTestClient = (c: { email: string | null; nom: string; prenom: string; societe: string | null }) =>
+    isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom, societe: c.societe });
+  const testCount = clients.filter(isTestClient).length;
   const filtered = clients.filter((c) => {
+    if (isTestClient(c) !== testView) return false;
     if (statusFilter === "actifs" && !c.actif) return false;
     if (statusFilter === "suspendus" && c.actif) return false;
     if (!search) return true;
@@ -259,6 +265,14 @@ function AdminClients() {
             placeholder="Rechercher un client, un email, un téléphone…"
           />
         </div>
+        <button
+          type="button"
+          className={`dvx-btn ${testView ? "solid" : "outline"}`}
+          title="Comptes de test et de démonstration, rangés à part"
+          onClick={() => setTestView((v) => !v)}
+        >
+          Tests &amp; démo<span className="dvx-count">{testCount}</span>
+        </button>
         <div className="flex items-center gap-2">
           {([
             { key: "tous", label: "Tous" },

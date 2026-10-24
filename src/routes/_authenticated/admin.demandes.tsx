@@ -1,3 +1,4 @@
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -128,6 +129,7 @@ function AdminDemandes() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [testView, setTestView] = useState(false);
   const [converting, setConverting] = useState<string | null>(null);
   const [selected, setSelected] = useState<Demande | null>(null);
   const [refusing, setRefusing] = useState<Demande | null>(null);
@@ -217,6 +219,7 @@ function AdminDemandes() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return demandes.filter((d) => {
+      if (isDemoOrTestIdentity({ email: d.email, nom: d.nom, prenom: d.prenom }) !== testView) return false;
       if (filterStatut !== "all" && d.statut !== filterStatut) return false;
       if (!q) return true;
       return (
@@ -228,7 +231,8 @@ function AdminDemandes() {
         d.arrivee.toLowerCase().includes(q)
       );
     });
-  }, [demandes, search, filterStatut]);
+  }, [demandes, search, filterStatut, testView]);
+  const testCount = demandes.filter((d) => isDemoOrTestIdentity({ email: d.email, nom: d.nom, prenom: d.prenom })).length;
 
 
   return (
@@ -275,6 +279,15 @@ function AdminDemandes() {
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
+            <button
+              onClick={() => setTestView((v) => !v)}
+              title="Demandes de test et de démonstration, rangées à part"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                testView ? "bg-slate-700 text-white border-slate-700" : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-slate-500"
+              }`}
+            >
+              Tests &amp; démo · {testCount}
+            </button>
             <button
               onClick={() => setFilterStatut("all")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${

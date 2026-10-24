@@ -122,6 +122,7 @@ const emptyTrajet = {
 function AdminTrajets() {
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [filterStatut, setFilterStatut] = useState("all");
+  const [testView, setTestView] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Trajet | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -514,6 +515,7 @@ function AdminTrajets() {
   const isFormOpen = showCreate || (selected && editing);
 
   const filteredTrajets = trajets.filter((t) => {
+    if (!!t.is_test_data !== testView) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -526,9 +528,11 @@ function AdminTrajets() {
     );
   });
 
-  const enAttente = trajets.filter((t) => t.statut === "en_attente").length;
-  const enCours = trajets.filter((t) => t.statut === "en_cours" || t.statut === "accepte" || t.statut === "attribue").length;
-  const termines = trajets.filter((t) => t.statut === "termine").length;
+  const realTrajets = trajets.filter((t) => !t.is_test_data);
+  const testCount = trajets.length - realTrajets.length;
+  const enAttente = realTrajets.filter((t) => t.statut === "en_attente").length;
+  const enCours = realTrajets.filter((t) => t.statut === "en_cours" || t.statut === "accepte" || t.statut === "attribue").length;
+  const termines = realTrajets.filter((t) => t.statut === "termine").length;
 
   return (
     <div>
@@ -603,6 +607,14 @@ function AdminTrajets() {
             <option key={s} value={s}>{statutLabels[s]}</option>
           ))}
         </select>
+        <button
+          type="button"
+          className={`dvx-btn ${testView ? "solid" : "outline"}`}
+          title="Trajets de test et de démonstration, rangés à part"
+          onClick={() => setTestView((v) => !v)}
+        >
+          Tests &amp; démo<span className="dvx-count">{testCount}</span>
+        </button>
         <button type="button" className="dvx-export" onClick={fetchTrajets}>
           <RefreshCw size={14} />
           Actualiser
