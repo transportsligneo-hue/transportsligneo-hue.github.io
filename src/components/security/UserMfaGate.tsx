@@ -5,14 +5,16 @@ import { ShieldCheck, LogOut } from "lucide-react";
 import { getUserMfaStatus, requestLoginMfaCode, verifyLoginMfaCode } from "@/lib/user-mfa.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { LIGNEO_BRAND_LOGO } from "@/lib/brand-assets";
 
 /** Verrou SMS optionnel des espaces client, pro, flotte et convoyeur. */
-export function UserMfaGate({ children, label = "Votre espace" }: { children: ReactNode; label?: string }) {
+export function UserMfaGate({ children, label = "Votre espace", variant = "default" }: { children: ReactNode; label?: string; variant?: "default" | "driver" }) {
   const status = useServerFn(getUserMfaStatus);
   const request = useServerFn(requestLoginMfaCode);
   const verify = useServerFn(verifyLoginMfaCode);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const cacheKey = `ligneo:mfa-ok:${user?.id ?? "anon"}`;
   const [state, setState] = useState<"loading" | "locked" | "ok">("loading");
   const [masked, setMasked] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -29,10 +31,19 @@ export function UserMfaGate({ children, label = "Votre espace" }: { children: Re
 
   useEffect(() => {
     let alive = true;
+    // Appli Driver : si la session a déjà été vérifiée, on affiche l'espace tout de suite
+    // (pas d'écran de chargement au démarrage). La vérification serveur reste faite en arrière-plan.
+    if (variant === "driver" && user?.id) {
+      try { if (sessionStorage.getItem(cacheKey) === "1") setState("ok"); } catch { /* storage indisponible */ }
+    }
     status().then((s) => {
       if (!alive) return;
       setMasked(s.maskedPhone);
       setState(s.verified ? "ok" : "locked");
+      try {
+        if (s.verified) sessionStorage.setItem(cacheKey, "1");
+        else sessionStorage.removeItem(cacheKey);
+      } catch { /* storage indisponible */ }
       if (!s.verified) void send();
     }).catch(() => { if (alive) { setState("locked"); setError("Vérification de sécurité indisponible. Rechargez la page pour réessayer."); } });
     return () => { alive = false; };
@@ -48,6 +59,9 @@ export function UserMfaGate({ children, label = "Votre espace" }: { children: Re
   };
 
   if (state === "ok") return <>{children}</>;
+  if (state === "loading" && variant === "driver") {
+    return <DriverLoader full label="Un instant…" />;
+  }
   if (state === "loading") {
     return <div className="amfa-screen"><div className="amfa-loading flex flex-col items-center gap-4"><LogoLoader label="Vérification de sécurité…" /></div></div>;
   }

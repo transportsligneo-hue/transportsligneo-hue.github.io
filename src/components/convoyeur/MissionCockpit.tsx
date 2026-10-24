@@ -869,7 +869,11 @@ export function MissionCockpit({
           attributionId={attributionId}
           userId={userId}
           onCaptured={refreshAll}
-          onClose={() => setOpenSelfie(false)}
+          onClose={() => {
+            // Mémorise l'étape : sans ça, l'ouverture automatique rouvre le selfie aussitôt après la croix.
+            lastAutoOpenedKeyRef.current = currentKey;
+            setOpenSelfie(false);
+          }}
         />
       )}
 

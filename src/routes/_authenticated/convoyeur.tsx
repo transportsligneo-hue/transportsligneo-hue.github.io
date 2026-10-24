@@ -93,7 +93,7 @@ function ConvoyeurLayout() {
 
   return (
     <ConvoyeurSidebar items={navItems}>
-      <UserMfaGate label="Espace Driver">
+      <UserMfaGate label="Espace Driver" variant="driver">
       <DriverGpsTracker />
       <OfflineOutboxBadge />
       <ScreenCaptureGuard />
