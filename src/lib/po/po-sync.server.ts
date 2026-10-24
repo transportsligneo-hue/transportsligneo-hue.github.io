@@ -29,6 +29,7 @@ type GmailMessage = {
 
 /** Connexion directe à Google (Vercel) : GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET + GOOGLE_REFRESH_TOKEN. */
 let cachedToken: { value: string; exp: number } | null = null;
+const cleanEnv = (v?: string) => (v ?? "").trim().replace(/^["']|["']$/g, "").trim();
 function hasDirectGoogle() {
   return !!(process.env["GOOGLE_CLIENT_ID"] && process.env["GOOGLE_CLIENT_SECRET"] && process.env["GOOGLE_REFRESH_TOKEN"]);
 }
@@ -38,16 +39,22 @@ async function googleAccessToken(): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: process.env["GOOGLE_CLIENT_ID"]!,
-      client_secret: process.env["GOOGLE_CLIENT_SECRET"]!,
-      refresh_token: process.env["GOOGLE_REFRESH_TOKEN"]!,
+      client_id: cleanEnv(process.env["GOOGLE_CLIENT_ID"]),
+      client_secret: cleanEnv(process.env["GOOGLE_CLIENT_SECRET"]),
+      refresh_token: cleanEnv(process.env["GOOGLE_REFRESH_TOKEN"]),
       grant_type: "refresh_token",
     }),
   });
   if (!res.ok) {
     const body = await res.text();
     console.error(`[PO] Google token refused [${res.status}]: ${body.slice(0, 300)}`);
-    throw new Error("Connexion Gmail refusée par Google : vérifiez GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN.");
+    let code = "";
+    try { const e = JSON.parse(body) as { error?: string; error_description?: string }; code = `${e.error ?? ""}${e.error_description ? ` — ${e.error_description}` : ""}`; } catch { code = body.slice(0, 120); }
+    const id = cleanEnv(process.env["GOOGLE_CLIENT_ID"]);
+    const sec = cleanEnv(process.env["GOOGLE_CLIENT_SECRET"]);
+    const rt = cleanEnv(process.env["GOOGLE_REFRESH_TOKEN"]);
+    const diag = `ID client: ${id.endsWith(".apps.googleusercontent.com") ? "ok" : "format inattendu"} (${id.length} car.) · secret: ${sec.startsWith("GOCSPX-") ? "ok" : "format inattendu"} (${sec.length} car.) · jeton: ${rt.startsWith("1//") ? "ok" : "format inattendu"} (${rt.length} car.)`;
+    throw new Error(`Google refuse la connexion [${res.status}] ${code}. ${diag}`);
   }
   const j = (await res.json()) as { access_token: string; expires_in?: number };
   cachedToken = { value: j.access_token, exp: Date.now() + (j.expires_in ?? 3000) * 1000 };
