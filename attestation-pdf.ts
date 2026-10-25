@@ -154,17 +154,7 @@ export async function buildAttestationPdf(data: AttestationData): Promise<{ blob
 /** Télécharge / partage l'attestation (fonctionne dans l'appli Android comme sur le site). */
 export async function generateAttestationPdf(data: AttestationData) {
   const { blob, filename, ref } = await buildAttestationPdf(data);
-  // Dans l'appli Android : enregistrement direct dans Documents, sans fenêtre de partage.
-  const { downloadNativeFile, saveNativeFile } = await import("@/lib/native/bridge");
-  // 1) Vrai téléchargement (notification en haut, un appui ouvre le PDF) : appli récente.
-  if (await downloadNativeFile(blob, filename)) return ref;
-  // 2) Plan B pour une ancienne version de l'appli : dossier Documents.
-  const saved = await saveNativeFile(blob, filename);
-  if (saved) {
-    const { toast } = await import("sonner");
-    toast.success("Attestation enregistrée", { description: `Dans votre téléphone : ${saved}` });
-    return ref;
-  }
+  // Même téléchargement que les devis et les factures.
   const { downloadBlob } = await import("@/lib/documents-officiels");
   await downloadBlob(blob, filename);
   return ref;
