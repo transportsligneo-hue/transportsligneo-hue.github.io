@@ -1,5 +1,5 @@
 import { Clock, Award, Globe, GraduationCap, Shield, Eye } from "lucide-react";
-import MapLigneo from "@/components/MapLigneo";
+import { CarteEuropeSolo } from "@/components/ParcoursMetier";
 
 const engagements = [
   { icon: Shield, title: "Sécurité", text: "Assurance circulation incluse sur chaque mission, véhicule protégé de A à Z." },
@@ -39,7 +39,7 @@ export default function Engagements({ audience = "particuliers" }: { audience?: 
           </div>
 
           <div className="hx-map-card engag-map-card">
-            <MapLigneo size="big" />
+            <CarteEuropeSolo />
             <div className="hx-map-caption">
               <p className="engagements-location">Basé à Tours (37)</p>
               <span>Au cœur du réseau routier national</span>

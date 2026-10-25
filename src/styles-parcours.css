@@ -72,3 +72,8 @@
 .mx-card .mx-tx span{color:#a9b6d8}
 .mx-card{color:#eaf0ff!important}
 .mx-head{text-align:center}
+
+/* carte seule (pages Particuliers / Professionnels) */
+.mx-map--solo{background:radial-gradient(520px 340px at 60% 50%,rgba(44,95,255,.26),transparent 65%),linear-gradient(160deg,#0b1434,#060b1e 75%);border:1px solid rgba(122,163,255,.22);border-radius:24px;box-shadow:0 30px 70px -36px rgba(0,12,70,.8),inset 0 1px 0 rgba(255,255,255,.06)}
+.r4-page .engag-map-card .mx-map--solo{max-width:100%}
+.r4-page.services-engagements .engag-map-card{padding:0;overflow:visible}

@@ -26,7 +26,7 @@ const EU: Record<string, [number, number]> = {
 };
 const SEGS = [
   { key: "Particulier", d: "Faire transporter mon véhicule simplement et en toute sécurité.", Icon: User, to: "/services" as const,
-    cities: Object.keys(CITIES) },
+    cities: [...Object.keys(CITIES), ...Object.keys(EU)] },
   { key: "Concessionnaire", d: "Déplacez vos véhicules entre concessions, ateliers et clients.", Icon: KeyRound, to: "/concessionnaires" as const,
     cities: ["Paris", "Lille", "Lyon", "Strasbourg", "Rennes", "Nantes"] },
   { key: "Loueur", d: "Automatisez les rotations de véhicules entre agences.", Icon: Truck, to: "/loueurs" as const,
@@ -41,6 +41,79 @@ function curve(x: number, y: number, k: number) {
   return `M${HX},${HY} Q${(mx + (-dy / L) * c).toFixed(2)},${(my + (dx / L) * c).toFixed(2)} ${x},${y}`;
 }
 
+
+/** Carte France + Europe animée. `focus` = index du métier mis en avant (sinon toutes les routes). */
+export function CarteEurope({ focus }: { focus?: number }) {
+  const points = useMemo(
+    () => [
+      ...Object.entries(CITIES).map(([n, p]) => ({ n, p, eu: false })),
+      ...Object.entries(EU).map(([n, p]) => ({ n, p, eu: true })),
+    ].map((o, k) => ({ ...o, k, d: curve(o.p[0], o.p[1], k), segs: SEGS.map((sg, i) => (sg.cities.includes(o.n) ? i : -1)).filter((i) => i >= 0).join(" ") })),
+    [],
+  );
+  return (
+    <svg className="mx-svg" data-f={focus} viewBox="433 270 90 68.3" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Carte de France et d'Europe : Tours, base opérationnelle, relie les grandes villes françaises et les pays voisins">
+      <defs>
+        <pattern id="mxg" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="0.14" fill="rgba(140,175,255,.28)" /></pattern>
+        <radialGradient id="mxfade" cx="50%" cy="52%" r="62%"><stop offset="55%" stopColor="#fff" /><stop offset="100%" stopColor="#000" /></radialGradient>
+        <mask id="mxm"><rect x="433" y="270" width="90" height="68.3" fill="url(#mxfade)" /></mask>
+        <linearGradient id="mxscan" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stopColor="#4f8cff" stopOpacity="0" /><stop offset=".5" stopColor="#7aa3ff" stopOpacity=".16" /><stop offset="1" stopColor="#4f8cff" stopOpacity="0" /></linearGradient>
+      </defs>
+      <g mask="url(#mxm)">
+        <rect x="433" y="270" width="90" height="68.3" fill="url(#mxg)" />
+        <g>{EUROPE_PATHS.map((d, i) => <path key={i} d={d} className="mx-c" />)}</g>
+        <rect className="mx-scan" x="433" y="270" width="18" height="68.3" fill="url(#mxscan)" />
+      </g>
+      <image href={franceImg} x={IX} y={IY} width={IW} height={IW} className="mx-fr" style={{ filter: "drop-shadow(0 0 1.2px rgba(79,140,255,.65))" }} />
+      {points.map(({ n, d, eu, k, segs }) => (
+        <g key={`r-${n}`} className="mx-route" data-segs={segs}>
+          <path className={`mx-r ${eu ? "mx-eu-r" : "mx-fr-r"}`} d={d} />
+          <path className={`mx-flow${eu ? " mx-flow-eu" : ""}`} d={d} style={{ animationDelay: `-${((k * 0.37) % 3).toFixed(2)}s` }} />
+        </g>
+      ))}
+      {points.map(({ n, d, eu, k, segs }) => (
+        <g key={`t-${n}`} className="mx-trv" data-segs={segs}>
+          <circle r={eu ? 0.5 : 0.6} className={`mx-dot-trv${eu ? " eu" : ""}`}>
+            <animateMotion dur={`${(5.2 + ((k * 0.63) % 4.5)).toFixed(1)}s`} begin={`-${((k * 0.9) % 5).toFixed(1)}s`} repeatCount="indefinite"
+              calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1" path={d} />
+          </circle>
+        </g>
+      ))}
+      {points.map(({ n, p, eu, k, segs }) => (
+        <g key={`c-${n}`} className={`mx-city${eu ? " eu" : ""}`} data-segs={segs}>
+          <circle cx={p[0]} cy={p[1]} r="1.7" className="mx-halo" style={{ animationDelay: `${((k * 0.23) % 2).toFixed(2)}s` }} />
+          <circle cx={p[0]} cy={p[1]} r="0.62" className="mx-pt" />
+        </g>
+      ))}
+      <g>
+        <circle cx={HX} cy={HY} r="1" className="mx-ring" />
+        <circle cx={HX} cy={HY} r="1" className="mx-ring r2" />
+        <circle cx={HX} cy={HY} r="0.75" className="mx-hubdot" />
+      </g>
+      {points.map(({ n, p, eu, segs }) => {
+        const left = ["Rennes", "Nantes", "Espagne", "Bordeaux"].includes(n);
+        return (
+          <text key={`l-${n}`} x={p[0] + (left ? -0.95 : 0.95)} y={p[1] + 0.6} textAnchor={left ? "end" : "start"}
+            className={`mx-lbl${eu ? " eu" : ""}`} data-segs={segs}>{n}</text>
+        );
+      })}
+      <text x={HX} y={HY + 3.4} textAnchor="middle" className="mx-hubl">TOURS</text>
+    </svg>
+  );
+}
+
+/** Carte seule (pages Particuliers / Professionnels). */
+export function CarteEuropeSolo() {
+  return (
+    <div className="mx-map mx-map--solo">
+      <div className="mx-chip"><span className="live" /><b>Tours</b> · base opérationnelle</div>
+      <CarteEurope />
+      <div className="mx-legend"><span><i className="b" />France</span><span><i className="g" />Europe</span></div>
+    </div>
+  );
+}
+
 export default function ParcoursMetier() {
   const [cur, setCur] = useState(0);
   const [hover, setHover] = useState(false);
@@ -51,14 +124,6 @@ export default function ParcoursMetier() {
     timer.current = window.setInterval(() => setCur((c) => (c + 1) % SEGS.length), 5000);
     return () => { if (timer.current) window.clearInterval(timer.current); };
   }, [hover]);
-
-  const points = useMemo(
-    () => [
-      ...Object.entries(CITIES).map(([n, p]) => ({ n, p, eu: false })),
-      ...Object.entries(EU).map(([n, p]) => ({ n, p, eu: true })),
-    ].map((o, k) => ({ ...o, k, d: curve(o.p[0], o.p[1], k), segs: SEGS.map((s, i) => (s.cities.includes(o.n) ? i : -1)).filter((i) => i >= 0).join(" ") })),
-    [],
-  );
 
   return (
     <div className="mx-panel" data-hover={hover ? "1" : undefined}>
@@ -83,54 +148,7 @@ export default function ParcoursMetier() {
       <div className="mx-map">
         <div className="mx-chip"><span className="live" /><b>Tours</b> · base opérationnelle</div>
         <div className="mx-active">{SEGS[cur].key}</div>
-        <svg className="mx-svg" data-f={cur} viewBox="433 270 90 68.3" xmlns="http://www.w3.org/2000/svg" role="img"
-          aria-label="Carte de France et d'Europe : Tours, base opérationnelle, relie les grandes villes françaises et les pays voisins">
-          <defs>
-            <pattern id="mxg" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="0.14" fill="rgba(140,175,255,.28)" /></pattern>
-            <radialGradient id="mxfade" cx="50%" cy="52%" r="62%"><stop offset="55%" stopColor="#fff" /><stop offset="100%" stopColor="#000" /></radialGradient>
-            <mask id="mxm"><rect x="433" y="270" width="90" height="68.3" fill="url(#mxfade)" /></mask>
-            <linearGradient id="mxscan" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stopColor="#4f8cff" stopOpacity="0" /><stop offset=".5" stopColor="#7aa3ff" stopOpacity=".16" /><stop offset="1" stopColor="#4f8cff" stopOpacity="0" /></linearGradient>
-          </defs>
-          <g mask="url(#mxm)">
-            <rect x="433" y="270" width="90" height="68.3" fill="url(#mxg)" />
-            <g>{EUROPE_PATHS.map((d, i) => <path key={i} d={d} className="mx-c" />)}</g>
-            <rect className="mx-scan" x="433" y="270" width="18" height="68.3" fill="url(#mxscan)" />
-          </g>
-          <image href={franceImg} x={IX} y={IY} width={IW} height={IW} className="mx-fr" style={{ filter: "drop-shadow(0 0 1.2px rgba(79,140,255,.65))" }} />
-          {points.map(({ n, d, eu, k, segs }) => (
-            <g key={`r-${n}`} className="mx-route" data-segs={segs}>
-              <path className={`mx-r ${eu ? "mx-eu-r" : "mx-fr-r"}`} d={d} />
-              <path className={`mx-flow${eu ? " mx-flow-eu" : ""}`} d={d} style={{ animationDelay: `-${((k * 0.37) % 3).toFixed(2)}s` }} />
-            </g>
-          ))}
-          {points.map(({ n, d, eu, k, segs }) => (
-            <g key={`t-${n}`} className="mx-trv" data-segs={segs}>
-              <circle r={eu ? 0.5 : 0.6} className={`mx-dot-trv${eu ? " eu" : ""}`}>
-                <animateMotion dur={`${(5.2 + ((k * 0.63) % 4.5)).toFixed(1)}s`} begin={`-${((k * 0.9) % 5).toFixed(1)}s`} repeatCount="indefinite"
-                  calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1" path={d} />
-              </circle>
-            </g>
-          ))}
-          {points.map(({ n, p, eu, k, segs }) => (
-            <g key={`c-${n}`} className={`mx-city${eu ? " eu" : ""}`} data-segs={segs}>
-              <circle cx={p[0]} cy={p[1]} r="1.7" className="mx-halo" style={{ animationDelay: `${((k * 0.23) % 2).toFixed(2)}s` }} />
-              <circle cx={p[0]} cy={p[1]} r="0.62" className="mx-pt" />
-            </g>
-          ))}
-          <g>
-            <circle cx={HX} cy={HY} r="1" className="mx-ring" />
-            <circle cx={HX} cy={HY} r="1" className="mx-ring r2" />
-            <circle cx={HX} cy={HY} r="0.75" className="mx-hubdot" />
-          </g>
-          {points.map(({ n, p, eu, segs }) => {
-            const left = ["Rennes", "Nantes", "Espagne", "Bordeaux"].includes(n);
-            return (
-              <text key={`l-${n}`} x={p[0] + (left ? -0.95 : 0.95)} y={p[1] + 0.6} textAnchor={left ? "end" : "start"}
-                className={`mx-lbl${eu ? " eu" : ""}`} data-segs={segs}>{n}</text>
-            );
-          })}
-          <text x={HX} y={HY + 3.4} textAnchor="middle" className="mx-hubl">TOURS</text>
-        </svg>
+        <CarteEurope focus={cur} />
         <div className="mx-legend"><span><i className="b" />France</span><span><i className="g" />Europe</span></div>
       </div>
     </div>
