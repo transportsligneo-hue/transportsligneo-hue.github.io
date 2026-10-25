@@ -147,17 +147,42 @@ function VroomyCardView({ card }: { card: VroomyCard }) {
   );
 }
 
+const GREET_STEPS = [
+  "Bonjour ! Je suis Vroomy.",
+  "Je calcule votre prix en 30 secondes.",
+  "Suivi de véhicule, conseiller : demandez-moi !",
+];
+
 export default function AssistantIaWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   const [chatTab, setChatTab] = useState<"vroomy" | "conseiller">("vroomy");
   const [notif, setNotif] = useState(true);
   const [greet, setGreet] = useState(false);
+  const [greetOut, setGreetOut] = useState(false);
+  const [greetStep, setGreetStep] = useState(0);
+  // Message d'accueil (1re visite de la session) : attend la fin du bandeau cookies, reste 8 s, s'efface en douceur,
+  // puis (mobile) Vroomy se range sur le côté.
   useEffect(() => {
     if (sessionStorage.getItem("vroomy-greet")) return;
-    const t1 = setTimeout(() => { sessionStorage.setItem("vroomy-greet", "1"); setGreet(true); }, 3000);
-    const t2 = setTimeout(() => setGreet(false), 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t0 = Date.now();
+    let t1 = 0; let t1b = 0; let t2 = 0; let t3 = 0;
+    const iv = window.setInterval(() => {
+      if (Date.now() - t0 < 2500) return;
+      // on laisse le bandeau cookies tranquille, mais pas plus de 9 s (sinon Vroomy ne parlerait jamais)
+      if (Date.now() - t0 < 9000 && document.querySelector('[aria-label="Consentement aux cookies"]')) return;
+      window.clearInterval(iv);
+      sessionStorage.setItem("vroomy-greet", "1");
+      setGreetOut(false); setGreetStep(0); setGreet(true);
+      t1 = window.setTimeout(() => setGreetStep(1), 2400);
+      t1b = window.setTimeout(() => setGreetStep(2), 4800);
+      t2 = window.setTimeout(() => setGreetOut(true), 7600);
+      t3 = window.setTimeout(() => {
+        setGreet(false);
+        setDocked(true);
+      }, 8000);
+    }, 400);
+    return () => { window.clearInterval(iv); window.clearTimeout(t1); window.clearTimeout(t1b); window.clearTimeout(t2); window.clearTimeout(t3); };
   }, []);
   const [messages, setMessages] = useState<ChatMsg[]>([{ role: "assistant", content: WELCOME }]);
   const [input, setInput] = useState("");
@@ -193,6 +218,8 @@ export default function AssistantIaWidget() {
   useEffect(() => {
     setDocked(false);
     if (typeof window === "undefined" || !window.matchMedia("(max-width: 640px)").matches) return;
+    // 1re visite : c'est le message d'accueil qui range Vroomy une fois terminé
+    if (!sessionStorage.getItem("vroomy-greet")) return;
     const t = setTimeout(() => setDocked(true), 6500);
     return () => clearTimeout(t);
   }, [pathname]);
@@ -463,7 +490,11 @@ export default function AssistantIaWidget() {
         <span className="vroomy-badge" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="#2f5fff"/><g fill="#fff"><circle className="vroomy-dot" cx="8.5" cy="11" r="1.4"/><circle className="vroomy-dot" cx="12" cy="11" r="1.4"/><circle className="vroomy-dot" cx="15.5" cy="11" r="1.4"/></g></svg>
         </span>
-        {greet && !open && <span className="vroomy-greet" aria-hidden="true">Bonjour ! Je suis Vroomy.</span>}
+        {greet && !open && (
+          <span key={greetStep} className={`vroomy-greet${greetOut ? " is-out" : ""}`} aria-hidden="true">
+            {GREET_STEPS[greetStep]}
+          </span>
+        )}
 
       </Button>
 
