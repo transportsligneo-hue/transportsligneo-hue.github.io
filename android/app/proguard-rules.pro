@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# --- Optimisation R8 (obscurcissement) : règles de sécurité Capacitor / plugins ---
+-keepattributes SourceFile,LineNumberTable,*Annotation*,Signature,InnerClasses,EnclosingMethod
+-renamesourcefileattribute SourceFile
+-keep class com.getcapacitor.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keepclassmembers class * { @com.getcapacitor.PluginMethod public *; }
+-keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
+-keep class * extends com.getcapacitor.Plugin { *; }
+-keep class com.capacitorjs.** { *; }
+-keep class io.capawesome.** { *; }
+-dontwarn com.getcapacitor.**

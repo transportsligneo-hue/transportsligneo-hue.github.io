@@ -1,3 +1,4 @@
+import LigneoPickers from "@/components/ui/LigneoPickers";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
@@ -296,6 +297,7 @@ function RootComponent() {
 
 
               <PublicChrome />
+              <LigneoPickers />
               <NavigationProgress />
               <Outlet />
               <PublicMobileBottomNav />
