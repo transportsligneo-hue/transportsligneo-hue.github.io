@@ -12545,3 +12545,12 @@ html.ligneo-app button .animate-spin,body.is-driver-app button .animate-spin,[da
 .auth-eye{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;color:rgba(255,255,255,.7)}
 .auth-eye:hover{color:#fff}
 html.ligneo-app .auth-eye,body.is-driver-app .auth-eye,.auth-driver-theme .auth-eye,[data-space="driver"] .auth-eye{color:#0b7a43}
+
+/* ===== Appli Driver : écrans plein écran (selfie, EDL, signature, incident…) ===== */
+/* Sur Android l'appli s'affiche sous la barre d'état (heure, batterie) : la croix en haut à gauche
+   tombait dessous et ne répondait pas. On décale ces écrans sous la barre d'état. */
+body.is-driver-app .fixed.inset-0[class*="z-[7"],
+body.is-driver-app .fixed.inset-0[class*="z-[8"],
+body.is-driver-app .fixed.inset-0[class*="z-[9"] {
+  padding-top: max(env(safe-area-inset-top, 0px), 34px) !important;
+}

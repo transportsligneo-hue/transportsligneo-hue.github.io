@@ -57,13 +57,13 @@ function ConvoyeurLayout() {
 
   if (isLoading) {
     return (
-      <DriverLoader full />
+      <DriverLoader full label="" />
     );
   }
 
   if (!isAuthenticated || (role && role !== "convoyeur")) {
     return (
-      <DriverLoader full />
+      <DriverLoader full label="" />
     );
   }
 

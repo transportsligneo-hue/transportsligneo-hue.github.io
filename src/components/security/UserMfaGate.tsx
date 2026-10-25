@@ -60,7 +60,7 @@ export function UserMfaGate({ children, label = "Votre espace", variant = "defau
 
   if (state === "ok") return <>{children}</>;
   if (state === "loading" && variant === "driver") {
-    return <DriverLoader full label="Un instant…" />;
+    return <DriverLoader full label="" />;
   }
   if (state === "loading") {
     return <div className="amfa-screen"><div className="amfa-loading flex flex-col items-center gap-4"><LogoLoader label="Vérification de sécurité…" /></div></div>;

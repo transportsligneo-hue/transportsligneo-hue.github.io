@@ -385,16 +385,23 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
 
   return (
     <div className="driver-selfie-shell fixed inset-0 z-[80] flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden overscroll-none">
-      <div className="driver-selfie-header flex items-center justify-between px-4 py-3 text-white shrink-0">
-        <button onClick={() => {
-          setPendingDriverSelfie(attributionId, false);
-          onClose();
-        }} className="p-2 hover:bg-white/10 rounded-lg" aria-label="Fermer"><X size={20}/></button>
+      <div className="driver-selfie-header relative flex items-center justify-center px-16 pb-3 pt-2 shrink-0">
         <div className="text-center">
           <p className="driver-eyebrow opacity-80">Étape 1 · Identité</p>
-          <p className="text-sm font-semibold">Selfie convoyeur</p>
+          <p className="text-base font-semibold">Selfie convoyeur</p>
         </div>
-        <div className="w-9"/>
+        {/* Croix : grand bouton rond à droite, bien dégagé de la barre d'état */}
+        <button
+          type="button"
+          aria-label="Fermer"
+          onClick={() => {
+            setPendingDriverSelfie(attributionId, false);
+            onClose();
+          }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 grid h-12 w-12 place-items-center rounded-full border border-black/5 bg-white/95 text-[#0b1026] shadow-[0_8px_22px_rgba(15,23,42,.18)] transition active:scale-90 active:bg-slate-100"
+        >
+          <X size={24} strokeWidth={2.6} />
+        </button>
       </div>
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden px-4 py-3 pb-4">
@@ -487,14 +494,26 @@ export function DriverSelfieCapture({ attributionId, userId, onCaptured, onClose
             </button>
           </div>
         ) : !preview ? (
-          <button
-            onClick={openCamera}
-            disabled={cameraOpening || status === "uploading"}
-            className="driver-cta flex w-full items-center justify-center gap-2 py-4 text-base font-bold"
-          >
-            {cameraOpening ? <Loader2 className="animate-spin" size={20}/> : <Camera size={20}/>}
-            {cameraOpening ? "Ouverture de l'appareil photo…" : "Ouvrir l'appareil photo"}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={openCamera}
+              disabled={cameraOpening || status === "uploading"}
+              className="driver-cta flex w-full items-center justify-center gap-2 py-4 text-base font-bold"
+            >
+              <Camera size={20}/>
+              {cameraOpening ? "Ouverture de l'appareil photo…" : "Ouvrir l'appareil photo"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPendingDriverSelfie(attributionId, false);
+                onClose();
+              }}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-[15px] font-semibold text-slate-500 transition active:scale-[.98] active:bg-slate-100"
+            >
+              <X size={18} /> Annuler
+            </button>
+          </div>
         ) : status === "error" ? (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
             <button

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PendingProposalsBanner } from "@/components/convoyeur/PendingProposalsBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { Ic, Plate } from "@/components/driver2/icons";
 import { InfosLigneoBar } from "@/components/driver2/InfosLigneo";
 import { useDriverIdentity } from "@/hooks/useDriverIdentity";
@@ -144,7 +144,7 @@ function ConvoyeurDashboard() {
   }, [user]);
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#4EA8FF]" size={28} /></div>;
+    return <DriverLoader full label="" />;
   }
 
   const now = new Date();

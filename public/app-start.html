@@ -30,8 +30,11 @@
     try { var C = window.Capacitor; if (C && C.Plugins && C.Plugins.SplashScreen) C.Plugins.SplashScreen.hide({ fadeOutDuration: 150 }); } catch (e) {}
   }
   window.addEventListener("load", function () { hideSplash(); setTimeout(hideSplash, 300); });
-  // Reste affichée assez longtemps pour être vue, puis ouvre la connexion.
-  setTimeout(function () { window.location.replace("/login?app=1"); }, 1600);
+  // Ouvre la connexion tout de suite (l'écran de chargement suivant a le même aspect).
+  var go = function () { window.location.replace("/login?app=1"); };
+  if (document.readyState === "complete") setTimeout(go, 120);
+  else window.addEventListener("load", function () { setTimeout(go, 120); });
+  setTimeout(go, 1500);
   setTimeout(function () { document.getElementById("manual").style.display = "inline-block"; }, 6000);
 })();
 </script>
