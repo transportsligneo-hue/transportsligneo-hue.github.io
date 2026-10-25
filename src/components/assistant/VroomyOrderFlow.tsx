@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 import { ArrowLeft, CheckCircle2, Loader2, Pencil, Route as RouteIcon, X } from "lucide-react";
 import PlacesInput from "@/components/PlacesInput";
 import { supabase } from "@/integrations/supabase/client";
@@ -189,12 +190,12 @@ export default function VroomyOrderFlow({ initial, onExit, onFinished }: Props) 
             value={draft.depart}
             onChange={(v) => set({ depart: v })}
             onSelect={(v) => set({ depart: v })}
-            placeholder="Adresse ou ville de départ"
+            placeholder="Adresse de départ (numéro et rue)"
             className={inputCls}
             fallbackOptions={CITIES_FALLBACK}
             inputId="vrm-flow-depart"
           />
-          <button type="button" className="vrm-flow-next" disabled={!draft.depart.trim()} onClick={next}>
+          <button type="button" className="vrm-flow-next" disabled={!isPreciseAddress(draft.depart)} onClick={next}>
             Continuer
           </button>
         </div>
@@ -206,12 +207,12 @@ export default function VroomyOrderFlow({ initial, onExit, onFinished }: Props) 
             value={draft.arrivee}
             onChange={(v) => set({ arrivee: v })}
             onSelect={(v) => set({ arrivee: v })}
-            placeholder="Adresse ou ville d'arrivée"
+            placeholder="Adresse d'arrivée (numéro et rue)"
             className={inputCls}
             fallbackOptions={CITIES_FALLBACK}
             inputId="vrm-flow-arrivee"
           />
-          <button type="button" className="vrm-flow-next" disabled={!draft.arrivee.trim()} onClick={next}>
+          <button type="button" className="vrm-flow-next" disabled={!isPreciseAddress(draft.arrivee)} onClick={next}>
             Continuer
           </button>
         </div>

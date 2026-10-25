@@ -25,6 +25,7 @@ import { isValidVinFormat, normalizeVin } from "@/lib/vin";
 import { PlateInput } from "@/components/plate/PlateInput";
 import { lookupPlate } from "@/lib/plate.functions";
 import PlacesInput from "@/components/PlacesInput";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 import {
   ArrowLeft, Layers, Search, Loader2, Plus, X, Check, Zap, Fuel, Sparkle,
   Clock, Send, Star, ChevronDown, KeyRound,
@@ -333,11 +334,11 @@ function GroupedMissionForm() {
   );
 
   const canSubmit =
-    depart.trim().length >= 2 &&
+    isPreciseAddress(depart) &&
     !!date &&
     !!heure &&
     filledRows.length > 0 &&
-    rows.every((r) => (r.immat.trim() ? destFor(r).trim().length >= 2 : true)) &&
+    rows.every((r) => (r.immat.trim() ? isPreciseAddress(destFor(r)) : true)) &&
     // VIN obligatoire et valide pour chaque véhicule (rapprochement automatique des bons de commande)
     filledRows.every((r) => isValidVinFormat(r.vin)) &&
     !submitting;

@@ -96,6 +96,7 @@ interface Trajet {
   statut_publication?: string | null;
   attribution_mode?: string | null;
   client_nom?: string | null;
+  client_email?: string | null;
   marque?: string | null;
   modele?: string | null;
   prix_client?: number | null;
@@ -115,13 +116,18 @@ interface InspectionPhoto {
   created_at: string;
 }
 
+const DEMO_FLOTTE_EMAIL = "demo-flotte@transportsligneo.fr";
+/** Mission de test / démo : marquée en base OU appartenant au compte Démo Flotte. */
+const isTestTrajet = (t?: { is_test_data?: boolean | null; client_email?: string | null } | null) =>
+  !!t?.is_test_data || (t?.client_email ?? "").trim().toLowerCase() === DEMO_FLOTTE_EMAIL;
+
 const statutLabels: Record<string, string> = {
   propose: "Proposé",
   accepte: "Accepté",
   refuse: "Refusé",
   en_cours: "En cours",
   en_attente_validation: "En attente validation",
-  validee: "Validée",
+  validee: "Terminée",
   refusee: "Refusée",
   termine: "Terminé",
   annule: "Annulé",
@@ -196,7 +202,7 @@ function AdminAttributions() {
   const pvMap = useMissionPv(attributions.map((a) => a.id));
   const [trajetsDisponiblesAll, setTrajetsDisponibles] = useState<Trajet[]>([]);
   const trajetsDisponibles = useMemo(
-    () => trajetsDisponiblesAll.filter((t) => !!t.is_test_data === testView),
+    () => trajetsDisponiblesAll.filter((t) => isTestTrajet(t) === testView),
     [trajetsDisponiblesAll, testView],
   );
   const [showCreate, setShowCreate] = useState(false);
@@ -392,19 +398,19 @@ function AdminAttributions() {
     new Date(a.trajet?.date_trajet ?? a.created_at).getTime();
 
   const archivedCount = useMemo(
-    () => attributions.filter((a) => !!a.trajet?.archived_at && !a.trajet?.is_test_data).length,
+    () => attributions.filter((a) => !!a.trajet?.archived_at && !isTestTrajet(a.trajet)).length,
     [attributions],
   );
 
   const testCount = useMemo(
-    () => attributions.filter((a) => !!a.trajet?.is_test_data).length,
+    () => attributions.filter((a) => isTestTrajet(a.trajet)).length,
     [attributions],
   );
 
   const visibleAttributions = useMemo(() => {
     const list = attributions.filter((a) => {
       const archived = !!a.trajet?.archived_at;
-      if (!!a.trajet?.is_test_data !== testView) return false;
+      if (isTestTrajet(a.trajet) !== testView) return false;
       if (archivedView !== archived) return false;
       if (statutFilter === "encours") return !isClosedAttr(a);
       if (statutFilter === "terminees") return ["termine", "validee"].includes(a.statut) || a.trajet?.statut === "termine";
@@ -487,7 +493,7 @@ function AdminAttributions() {
     // Permet de surfacer immédiatement les demandes converties dans la page Attribution.
     const { data: trajets } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, marque, modele, prix_client, is_test_data, lot_id")
+      .select("id, depart, arrivee, date_trajet, statut, statut_publication, attribution_mode, client_nom, client_email, marque, modele, prix_client, is_test_data, lot_id")
       .in("statut", ["en_attente", "attribue"])
       .order("date_trajet", { ascending: true, nullsFirst: false });
     if (!trajets) return;

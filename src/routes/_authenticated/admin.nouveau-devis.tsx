@@ -142,7 +142,7 @@ function AddressField({
           ))}
         </select>
       )}
-      <PlacesInput
+      <PlacesInput allowCity
         inputId={inputId}
         value={value}
         onChange={onChange}

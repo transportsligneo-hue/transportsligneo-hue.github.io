@@ -15,6 +15,7 @@ import {
   getGoogleDistanceKm, isGoogleAvailable,
 } from "@/lib/google-places";
 import PlacesInput from "@/components/PlacesInput";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
 import { lookupPlate } from "@/lib/plate.functions";
@@ -642,7 +643,7 @@ export default function MobileDevisGenerator() {
                {/* CTA "Voir mon tarif" */}
               <button
                 type="button"
-                disabled={!pricing}
+                disabled={!pricing || !isPreciseAddress(departure) || !isPreciseAddress(arrival)}
                 onClick={() => setShowForm(true)}
                 className="mdev-cta mt-[18px] w-full flex items-center justify-center gap-2.5 rounded-full py-4 text-[14.5px] font-bold tracking-wide text-white disabled:opacity-55 disabled:cursor-not-allowed"
               >

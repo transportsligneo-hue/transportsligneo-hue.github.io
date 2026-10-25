@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { isPreciseAddress } from "@/lib/address-precision";
 import {
   calculateBasePrice,
   calculateOptionsTotal,
@@ -161,7 +162,7 @@ export default function TunnelReservation({ onClose }: Props) {
   };
 
   const canNext = (): boolean => {
-    if (step === 1) return !!(form.ville_depart && form.ville_arrivee && form.date_prise_en_charge && form.heure_prise_en_charge);
+    if (step === 1) return !!(isPreciseAddress(form.ville_depart) && isPreciseAddress(form.ville_arrivee) && form.date_prise_en_charge && form.heure_prise_en_charge);
     if (step === 2) return true;
     if (step === 3) return !!(form.marque && form.modele && form.immatriculation && form.carburant);
     if (step === 4) return !!(form.nom && form.prenom && form.email && form.cgv);
@@ -420,14 +421,14 @@ function Step1({ form, update }: { form: FormState; update: (n: string, v: any) 
       <div className="grid sm:grid-cols-2 gap-5">
         <AddressAutocomplete
           name="ville_depart"
-          label="Ville de départ"
+          label="Adresse de départ"
           value={form.ville_depart}
           onChange={update}
           required
         />
         <AddressAutocomplete
           name="ville_arrivee"
-          label="Ville d'arrivée"
+          label="Adresse d'arrivée"
           value={form.ville_arrivee}
           onChange={update}
           required

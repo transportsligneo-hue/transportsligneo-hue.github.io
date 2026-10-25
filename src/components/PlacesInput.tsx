@@ -6,6 +6,7 @@ import {
   resetPlacesSession,
   type PlaceSuggestion,
 } from "@/lib/google-places";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 
 interface PlacesInputProps {
   value: string;
@@ -18,6 +19,8 @@ interface PlacesInputProps {
   autoFocus?: boolean;
   required?: boolean;
   inputId?: string;
+  /** Admin / saisie libre : accepte une simple ville (par défaut, une adresse précise est exigée). */
+  allowCity?: boolean;
 }
 
 /**
@@ -38,6 +41,7 @@ export default function PlacesInput({
   autoFocus,
   required,
   inputId,
+  allowCity,
 }: PlacesInputProps) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -133,6 +137,11 @@ export default function PlacesInput({
             </button>
           ))}
         </div>
+      )}
+      {!allowCity && value.trim().length >= 3 && !(open && suggestions.length > 0) && !isPreciseAddress(value) && (
+        <p role="alert" className="places-precision-msg mt-1.5 text-[11.5px] leading-snug font-semibold text-red-500">
+          {ADDRESS_PRECISION_MESSAGE}
+        </p>
       )}
     </div>
   );

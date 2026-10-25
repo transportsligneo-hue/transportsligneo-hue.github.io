@@ -24,6 +24,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import PlacesInput from "@/components/PlacesInput";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { resolveClientPrice, computeOptionSupplements, fetchDeliveryRechargeSurcharge, DEFAULT_DELIVERY_RECHARGE_SURCHARGE, type OptionKey } from "@/lib/client-pricing";
@@ -497,6 +498,10 @@ export default function QuickMissionForm({
 
     if (!depart || !arrivee || !date || !heure) {
       setError("Merci de renseigner départ, arrivée, date et heure.");
+      return;
+    }
+    if (!isPreciseAddress(depart) || !isPreciseAddress(arrivee)) {
+      setError(ADDRESS_PRECISION_MESSAGE);
       return;
     }
     if (tripType === "aller-retour" && (!dateRetour || !heureRetour)) {
@@ -1373,7 +1378,7 @@ export default function QuickMissionForm({
         </button>
         <button
           type="submit"
-          disabled={submitting || !depart || !arrivee || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
+          disabled={submitting || !depart || !arrivee || !isPreciseAddress(depart) || !isPreciseAddress(arrivee) || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}

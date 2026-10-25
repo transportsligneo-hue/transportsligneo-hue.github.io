@@ -357,7 +357,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
           <section className="space-y-3 rounded-xl border border-pro-border p-3">
             <p className="text-[10px] font-medium uppercase tracking-wider text-pro-muted">Trajet</p>
             <Field label="Adresse de départ">
-              <PlacesInput
+              <PlacesInput allowCity
                 value={f.depart}
                 onChange={(v) => set('depart', v)}
                 onSelect={(v) => set('depart', v)}
@@ -366,7 +366,7 @@ export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
               />
             </Field>
             <Field label="Adresse d'arrivée">
-              <PlacesInput
+              <PlacesInput allowCity
                 value={f.arrivee}
                 onChange={(v) => set('arrivee', v)}
                 onSelect={(v) => set('arrivee', v)}

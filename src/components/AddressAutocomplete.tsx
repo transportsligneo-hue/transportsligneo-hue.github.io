@@ -14,6 +14,7 @@ interface Suggestion {
 }
 
 import { loadGoogle, isGoogleAvailable } from "@/lib/google-places";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 
 /** Google Places loader (singleton partagé, clé servie par le serveur) */
 function loadGooglePlaces(): Promise<any> {
@@ -145,6 +146,9 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
         className="w-full bg-navy/60 border border-primary/20 rounded px-4 py-3 text-cream text-sm focus:border-primary/60 focus:outline-none transition-colors"
         placeholder="Commencez à taper une adresse..."
       />
+      {value.trim().length >= 3 && !(showSuggestions && suggestions.length > 0) && !isPreciseAddress(value) && (
+        <p role="alert" className="mt-1.5 text-[11.5px] leading-snug font-semibold text-red-400">{ADDRESS_PRECISION_MESSAGE}</p>
+      )}
       {loading && (
         <div className="absolute right-3 top-[38px]">
           <div className="w-4 h-4 border-2 border-primary/40 border-t-primary rounded-full animate-spin" />

@@ -13,6 +13,7 @@ import { sendTransactionalEmail } from "@/lib/email/send";
 import { notifyAdmin } from "@/lib/admin-notifications";
 import { getRecaptchaToken } from "@/lib/recaptcha";
 import PlacesInput from "@/components/PlacesInput";
+import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 import TrackRecordLine from "@/components/devis/TrackRecordLine";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
@@ -470,6 +471,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     if (!pricing || distance == null) return;
     // Champs obligatoires : trajet + date/heure + coordonnées
     if (!departure || !arrival) { setAccountError("Merci d'indiquer le départ et l'arrivée."); setStep(1); return; }
+    if (!isPreciseAddress(departure) || !isPreciseAddress(arrival)) { setAccountError(ADDRESS_PRECISION_MESSAGE); toast.error(ADDRESS_PRECISION_MESSAGE); setStep(1); return; }
     if (!date || !heure) { setAccountError("La date et l'heure souhaitées sont obligatoires."); setStep(1); return; }
     { const noticeErr = checkMinNotice(date, heure); if (noticeErr) { setAccountError(noticeErr); toast.error(noticeErr); setStep(1); return; } }
     if (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim())) {
@@ -1543,7 +1545,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                   type="button"
                   onClick={() => setStep(s => Math.min(4, s + 1))}
                   disabled={
-                    (step === 1 && (!departure || !arrival || !date || !heure)) ||
+                    (step === 1 && (!departure || !arrival || !isPreciseAddress(departure) || !isPreciseAddress(arrival) || !date || !heure)) ||
                     (step === 2 && (!vehicleType || !marque.trim() || !modele.trim() || (!plaqueInconnue && !immatriculation.trim()))) ||
                     (step === 3 && (!nom.trim() || !prenom.trim() || !email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) || telephone.replace(/\D/g, "").length < 9 || (!hideAccountStep && password.length > 0 && password.length < 8) || (!hideAccountStep && !cguAccepted) || (isPro && !societe.trim())))
                   }
