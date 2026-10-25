@@ -16,6 +16,12 @@ export const Route = createFileRoute('/api/public/hooks/loyalty-daily')({
           return new Response('Unauthorized', { status: 401 })
         }
 
+        // Compte Kilomètres désactivé dans l'admin : aucune clôture, aucun avoir, aucun mail ni SMS.
+        const { isLoyaltyEnabled } = await import('@/lib/loyalty-flag.server')
+        if (!(await isLoyaltyEnabled())) {
+          return Response.json({ ok: true, skipped: 'compte_kilometres_desactive' })
+        }
+
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { notifyTierReached, notifyRewardCredited, notifyExpiryReminder } = await import(
           '@/lib/loyalty.server'

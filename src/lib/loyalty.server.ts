@@ -6,6 +6,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { sendTransactionalEmailServer } from '@/server/email-send'
 import { sendSms } from '@/lib/sms.server'
+import { isLoyaltyEnabled } from '@/lib/loyalty-flag.server'
 import { currentTier, formatEur, formatKm, formatDateFr, type LoyaltyTier } from '@/lib/loyalty'
 
 const SITE_URL = 'https://transportsligneo.fr'
@@ -58,6 +59,7 @@ export async function notifyTierReached(params: {
   km: number
   tiers: LoyaltyTier[]
 }) {
+  if (!(await isLoyaltyEnabled())) return
   const info = await getClientInfo(params.clientId, params.email)
   const tier = currentTier(params.km, params.tiers)
   if (!info.email) return
@@ -80,6 +82,7 @@ export async function notifyTierReached(params: {
 
 /** Avoir crédité à la clôture d'une période de 12 mois. */
 export async function notifyRewardCredited(rewardId: string) {
+  if (!(await isLoyaltyEnabled())) return
   const { data: reward } = await supabaseAdmin
     .from('loyalty_rewards_history')
     .select('id, loyalty_account_id, km_au_calcul, taux_applique, montant_avoir_genere, date_expiration_avoir')
@@ -122,6 +125,7 @@ export async function notifyRewardCredited(rewardId: string) {
 
 /** Rappel 30 jours avant l'expiration d'un avoir non utilisé. */
 export async function notifyExpiryReminder(rewardId: string) {
+  if (!(await isLoyaltyEnabled())) return
   const { data: reward } = await supabaseAdmin
     .from('loyalty_rewards_history')
     .select('id, loyalty_account_id, montant_avoir_genere, montant_utilise, date_expiration_avoir')

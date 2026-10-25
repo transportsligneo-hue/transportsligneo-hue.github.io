@@ -52,6 +52,8 @@ export const applyAvoirToDevis = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { isLoyaltyEnabled } = await import("@/lib/loyalty-flag.server");
+    if (!(await isLoyaltyEnabled())) throw new Error("Le Compte Kilomètres n'est pas disponible pour le moment");
 
     const { data: devis } = await supabaseAdmin
       .from("devis")
