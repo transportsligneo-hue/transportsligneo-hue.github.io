@@ -199,3 +199,13 @@ html body .mh2-root .mh2-est .zx .zx-foot>span::before{content:"✓";flex:none;w
 html body .mh2-root .mh2-est .zx .zx-foot .zx-tag{grid-column:1/-1}
 html body .mh2-root .mh2-est .zx .zx-foot>span{font:500 12px/1.35 Poppins,sans-serif;gap:7px;align-items:center}
 html body .mh2-root .mh2-est .zx .zx-foot>span::before{width:17px;height:17px;font-size:10px}
+
+/* Calendrier : « Aujourd'hui / Demain / Après-demain » bien rangés dans leurs cases */
+html body .mh2-est .zx .zx-qd{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px}
+html body .mh2-est .zx .zx-qd .zx-opt{min-height:46px;padding:0 4px!important;font-size:13.5px!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden}
+html body .mh2-est .zx .zx-cal-g .zx-opt[disabled]{opacity:.28!important;background:transparent!important;box-shadow:none!important}
+/* Types de véhicule : 6 grosses cases sur 2 colonnes */
+
+html body .mh2-est .zx .zx-qd .zx-opt{font-size:12.5px!important;padding:0 2px!important;letter-spacing:-.02em}
+/* Vroomy s'efface pendant qu'un menu de l'estimateur est ouvert */
+body:has(.mh2-est .zx-pill.open) .vrm-launcher,body:has(.mh2-est .zx-pill.open) .vrm-tab{opacity:0!important;pointer-events:none!important}
