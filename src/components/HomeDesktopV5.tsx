@@ -72,7 +72,7 @@ export default function HomeDesktopV5() {
           </div>
 
           <div id="devis" className="v5-hero-quote scroll-mt-32">
-            <DevisGenerator variant="flat-mini" />
+            <DevisGenerator variant="flat-mini" miniTitle={<>Estimez votre <b>trajet</b></>} />
           </div>
         </div>
       </section>
