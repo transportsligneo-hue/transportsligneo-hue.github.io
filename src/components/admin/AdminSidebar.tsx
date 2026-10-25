@@ -95,7 +95,8 @@ export function AdminSidebar({ items: allItems, children }: Props) {
     <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
       {groupOrder.map((g) => {
         const isOpen = mini || g === "_main" || !!openGroups[g];
-        const hasBadge = groups[g].some((it) => !!it.badge);
+        // Le « SA » du Super Admin est une simple étiquette fixe : il ne doit pas faire clignoter le point.
+        const hasBadge = g !== "Super Admin" && groups[g].some((it) => !!it.badge);
         return (
         <div key={g} className="space-y-1">
           {g !== "_main" && (
