@@ -33,6 +33,7 @@ import {
   FileCheck2,
   ScanLine,
   Wrench,
+  Calculator,
 
 
 } from "lucide-react";
@@ -226,6 +227,7 @@ function AdminLayout() {
     { to: "/admin/utilisateurs", label: "Utilisateurs", icon: Users, group: "Réglages & outils" },
     { to: "/admin/catalogue-vehicules", label: "Catalogue véhicules", icon: Gauge, group: "Réglages & outils" },
     { to: "/admin/contenu", label: "Contenu du site", icon: FileText, group: "Réglages & outils" },
+    { to: "/admin/grille-tarifaire", label: "Grille tarifaire & fiche équipe", icon: Calculator, group: "Réglages & outils" },
     { to: "/admin/historique", label: "Historique", icon: History, group: "Réglages & outils" },
     { to: "/admin/parametres", label: "Paramètres", icon: Shield, group: "Réglages & outils" },
     { to: "/admin/parametres-ia", label: "Paramètres IA", icon: Sparkles, group: "Réglages & outils" },

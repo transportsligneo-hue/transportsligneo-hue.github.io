@@ -88,6 +88,7 @@ import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
+import { Route as AuthenticatedAdminGrilleTarifaireRouteImport } from './routes/_authenticated/admin.grille-tarifaire'
 import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminFideliteRouteImport } from './routes/_authenticated/admin.fidelite'
@@ -645,6 +646,12 @@ const AuthenticatedAdminDocumentsRoute =
   AuthenticatedAdminDocumentsRouteImport.update({
     id: '/documents',
     path: '/documents',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminGrilleTarifaireRoute =
+  AuthenticatedAdminGrilleTarifaireRouteImport.update({
+    id: '/grille-tarifaire',
+    path: '/grille-tarifaire',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminExploitationRoute =
@@ -1560,6 +1567,7 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
@@ -1777,6 +1785,7 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
@@ -1999,6 +2008,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
+  '/_authenticated/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
@@ -2224,6 +2234,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/grille-tarifaire'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
@@ -2441,6 +2452,7 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
+    | '/admin/grille-tarifaire'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
@@ -2662,6 +2674,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
+    | '/_authenticated/admin/grille-tarifaire'
     | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/fidelite'
@@ -3460,6 +3473,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/admin/documents'
       preLoaderRoute: typeof AuthenticatedAdminDocumentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/grille-tarifaire': {
+      id: '/_authenticated/admin/grille-tarifaire'
+      path: '/grille-tarifaire'
+      fullPath: '/admin/grille-tarifaire'
+      preLoaderRoute: typeof AuthenticatedAdminGrilleTarifaireRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/exploitation': {
@@ -4544,6 +4564,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
+  AuthenticatedAdminGrilleTarifaireRoute: typeof AuthenticatedAdminGrilleTarifaireRoute
   AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminFideliteRoute: typeof AuthenticatedAdminFideliteRoute
@@ -4597,6 +4618,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRouteWithChildren,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
+  AuthenticatedAdminGrilleTarifaireRoute: AuthenticatedAdminGrilleTarifaireRoute,
   AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminFideliteRoute: AuthenticatedAdminFideliteRoute,
