@@ -432,6 +432,19 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   }, [departure, arrival, option, pricing, resolveServerPrice]);
 
   const isComplete = !!(departure && arrival && vehicleType && date && heure);
+  // Bouton « Continuer » : grisé tant que le trajet est incomplet ou à moins de 12 h, avec la raison affichée.
+  const noticeBlock = date && heure ? checkMinNotice(date, heure) : null;
+  const canGo = isComplete && !noticeBlock;
+  const missingParts = [
+    !departure && "l'adresse de départ", !arrival && "l'adresse d'arrivée", !vehicleType && "le type de véhicule",
+    !date && "la date", !heure && "l'heure",
+  ].filter(Boolean) as string[];
+  const blockReason = noticeBlock ?? (!isComplete ? `Pour continuer, indiquez ${missingParts.join(", ").replace(/, ([^,]*)$/, " et $1")}.` : "");
+  const blockNote = blockReason ? (
+    <p role="status" className="dg-block-note mt-3 text-[13px] leading-snug font-medium rounded-xl px-3 py-2.5 border border-[#1f4dff]/30 bg-[#eaf0ff] text-[#0b2a6b]">
+      <span aria-hidden="true">ⓘ </span>{blockReason}
+    </p>
+  ) : null;
 
   // Majoration hors horaires / week-end : +30 % si livraison avant 8h, après 19h, samedi ou dimanche
   const offHours = useMemo(() => {
@@ -697,8 +710,9 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             distance={distance}
             distanceLoading={distanceLoading}
             offHours={!!offHours}
-            canContinue={isComplete}
-            onContinue={() => setStep(1)}
+            canContinue={canGo}
+            blockReason={blockReason}
+            onContinue={() => { if (canGo) setStep(1); }}
           />
         ) : isFlat ? (
           // ============================================================
@@ -783,11 +797,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
-              disabled={!isComplete}
+              disabled={!canGo}
               className="dg-flat-cta mt-4"
             >
               <Send size={15} /> <span>Continuer vers mon devis</span>
             </Button>
+            {blockNote}
 
             {/* Bandeau de réassurance */}
             <div className="dg-flat-trust">
@@ -906,11 +921,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             <Button variant="ghost"
               type="button"
               onClick={() => setStep(1)}
-              disabled={!isComplete}
+              disabled={!canGo}
               className="mt-5 w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[12px] tracking-[0.24em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Send size={14} /> Continuer vers mon devis
             </Button>
+            {blockNote}
 
             {/* Choix de prestation · discret en bas */}
             <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-wrap items-center justify-center gap-2">
@@ -1045,11 +1061,12 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                <Button variant="ghost"
                 type="button"
                 onClick={() => setStep(1)}
-                disabled={!isComplete}
+                disabled={!canGo}
                 className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#3b82f6] bg-[length:200%_100%] hover:bg-[position:100%_0] text-white font-heading text-[11px] tracking-[0.22em] uppercase shadow-[0_15px_40px_-10px_rgba(59,130,246,0.7)] hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
               >
                 <Send size={14} /> Continuer vers mon devis
               </Button>
+              {blockNote && <div className="col-span-2 md:col-span-3">{blockNote}</div>}
             </div>
           </div>
         )}

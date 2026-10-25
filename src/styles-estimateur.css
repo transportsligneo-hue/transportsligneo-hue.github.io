@@ -590,3 +590,9 @@ html:root body .dg-journey .plate-search:disabled{opacity:.55}
 .zx-gr .zx-gr-st{width:72px;height:13px;flex:none}
 .zx-gr em{font:600 12px/1 Poppins,sans-serif;font-style:normal;color:#3a4a74!important;-webkit-text-fill-color:#3a4a74!important}
 .zx-foot{align-items:center}
+
+/* Fermeture des fenêtres (mobile) + message « pourquoi je ne peux pas continuer » */
+.zx-back,.zx-x{display:none}
+.zx-block{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:11px 14px;border-radius:14px;background:#eaf0ff;border:1px solid rgba(31,77,255,.3);color:#0b2a6b;font:600 13.5px/1.4 Poppins,Inter,sans-serif}
+.zx-block i{flex:0 0 22px;height:22px;border-radius:50%;background:#1f4dff;color:#fff;font:800 13px/22px Poppins,sans-serif;text-align:center;font-style:normal}
+.zx-go:disabled{cursor:not-allowed}

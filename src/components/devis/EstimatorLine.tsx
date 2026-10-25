@@ -31,6 +31,8 @@ export interface EstimatorLineProps {
   distanceLoading: boolean;
   offHours: boolean;
   canContinue: boolean;
+  /** Pourquoi « Continuer » est grisé (champ manquant, délai < 12 h…). */
+  blockReason?: string;
   onContinue: () => void;
 }
 
@@ -119,6 +121,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
 
   return (
     <div ref={rootRef} className={`zx${on ? " on" : ""}${on && p.offHours ? " off" : ""}`}>
+      {open && <div className="zx-back" aria-hidden="true" onClick={() => setOpen(null)} />}
       <div className="zx-top">
         <h2 className="zx-title"><span className="zx-eye"><i />Prix immédiat</span>{p.title ?? <>Calculez votre prix en <b>30 secondes</b></>}</h2>
         <div className="zx-seg">
@@ -157,6 +160,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
           <span>Véhicule</span>
           <b className={`zx-val${vehLabel ? "" : " ph"}`}>{vehLabel || "Choisir"}</b>
           <div className="zx-pop" onClick={stop} onKeyDown={stop}>
+            <button type="button" className="zx-x" aria-label="Fermer" onClick={() => setOpen(null)}>×</button>
             <h4>Type de véhicule</h4>
             <div className="zx-grid zx-vg">
               {p.vehicleTypes.map((v) => (
@@ -172,6 +176,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
           <span>Date de livraison</span>
           <b className={`zx-val${p.date ? "" : " ph"}`}>{fmtDate(p.date) || "Choisir"}</b>
           <div className="zx-pop" onClick={stop} onKeyDown={stop}>
+            <button type="button" className="zx-x" aria-label="Fermer" onClick={() => setOpen(null)}>×</button>
             <h4>Date de livraison souhaitée</h4>
             <div className="zx-qd">
               {([["Aujourd’hui", 0], ["Demain", 1], ["Après-demain", 2]] as const).map(([l, n]) => {
@@ -207,6 +212,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
           <span>Heure de livraison</span>
           <b className={`zx-val${p.heure ? "" : " ph"}`}>{fmtTime(p.heure) || "Choisir"}</b>
           <div className="zx-pop" onClick={stop} onKeyDown={stop}>
+            <button type="button" className="zx-x" aria-label="Fermer" onClick={() => setOpen(null)}>×</button>
             <h4>Heure de livraison souhaitée</h4>
             <div className="zx-grid zx-tg">
               {Array.from({ length: 27 }).map((_, i) => {
@@ -237,6 +243,8 @@ export default function EstimatorLine(p: EstimatorLineProps) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
         </button>
       </div>
+
+      {p.blockReason && <p className="zx-block" role="status"><i aria-hidden="true">i</i>{p.blockReason}</p>}
 
       <div className="zx-foot">
         <a className="zx-gr" href="https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours" target="_blank" rel="noopener noreferrer" aria-label={`Note Google : ${String(GOOGLE_RATING).replace(".", ",")} sur 5, voir les avis`}>

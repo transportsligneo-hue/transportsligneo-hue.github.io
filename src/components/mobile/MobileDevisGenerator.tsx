@@ -643,13 +643,16 @@ export default function MobileDevisGenerator() {
                {/* CTA "Voir mon tarif" */}
               <button
                 type="button"
-                disabled={!pricing || !isPreciseAddress(departure) || !isPreciseAddress(arrival)}
+                disabled={!pricing || !isPreciseAddress(departure) || !isPreciseAddress(arrival) || !!(date && heure && checkMinNotice(date, heure))}
                 onClick={() => setShowForm(true)}
                 className="mdev-cta mt-[18px] w-full flex items-center justify-center gap-2.5 rounded-full py-4 text-[14.5px] font-bold tracking-wide text-white disabled:opacity-55 disabled:cursor-not-allowed"
               >
                 <span className="relative z-[1]">Voir mon tarif</span>
                 <ChevronRight size={16} strokeWidth={2.4} className="relative z-[1]" />
               </button>
+              {date && heure && checkMinNotice(date, heure) && (
+                <p role="status" className="mt-3 rounded-xl border border-[#4f8cff]/50 bg-[#4f8cff]/10 px-3 py-2.5 text-[12.5px] font-medium leading-snug text-white">ⓘ {checkMinNotice(date, heure)}</p>
+              )}
               <p className="text-center text-[10.5px] text-[#9aa6c9] mt-2.5">
                 Réponse instantanée · sans engagement
               </p>

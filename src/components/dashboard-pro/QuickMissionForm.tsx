@@ -1366,6 +1366,18 @@ export default function QuickMissionForm({
         <p className="text-xs text-pro-text-soft flex items-center gap-1.5">
           <Info size={12} /> Votre demande sera traitée sous 24h par notre équipe. <MissionRequestHelp topic="send" />
         </p>
+        {(() => {
+          const missing = [
+            !depart && "l'adresse de départ", !arrivee && "l'adresse d'arrivée", !date && "la date", !heure && "l'heure",
+            tripType === "aller-retour" && (!dateRetour || !heureRetour) && "la date et l'heure de restitution",
+          ].filter(Boolean) as string[];
+          const reason = (date && heure ? checkMinNotice(date, heure) : null)
+            ?? (missing.length ? `Pour envoyer la demande, indiquez ${missing.join(", ").replace(/, ([^,]*)$/, " et $1")}.` : null)
+            ?? ((depart && !isPreciseAddress(depart)) || (arrivee && !isPreciseAddress(arrivee)) ? "Choisissez une adresse précise (numéro et rue) dans la liste proposée." : null);
+          return reason ? (
+            <p role="status" className="text-[13px] font-medium leading-snug rounded-xl px-3 py-2.5 border border-[#1f4dff]/30 bg-[#eaf0ff] text-[#0b2a6b]">ⓘ {reason}</p>
+          ) : null;
+        })()}
         <div className="flex flex-col sm:flex-row gap-2">
         <button
           type="button"
@@ -1378,7 +1390,7 @@ export default function QuickMissionForm({
         </button>
         <button
           type="submit"
-          disabled={submitting || !depart || !arrivee || !isPreciseAddress(depart) || !isPreciseAddress(arrivee) || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
+          disabled={submitting || !!(date && heure && checkMinNotice(date, heure)) || !depart || !arrivee || !isPreciseAddress(depart) || !isPreciseAddress(arrivee) || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
