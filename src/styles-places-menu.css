@@ -1,0 +1,35 @@
+/* ===== Suggestions d'adresses : liste claire, police du site, très lisible ===== */
+html body .tln-places-menu.places-suggestion-list{
+  background:#fff;border:1px solid rgba(47,95,255,.25);border-radius:20px;padding:6px;
+  box-shadow:0 30px 70px -22px rgba(4,14,52,.6),0 0 0 4px rgba(47,95,255,.08);
+  font-family:Poppins,sans-serif;max-height:min(340px,52vh);
+  scrollbar-width:thin;scrollbar-color:#9db4ec transparent;
+}
+html body .tln-places-menu .places-suggestion-item{
+  position:relative;display:block;width:100%;min-height:62px;margin:0;
+  padding:11px 14px 11px 62px;border:0;border-radius:14px;background:transparent;
+  text-align:left;transition:background .2s,transform .2s;
+}
+html body .tln-places-menu .places-suggestion-item + .places-suggestion-item{margin-top:2px}
+html body .tln-places-menu .places-suggestion-item::before{
+  content:"";position:absolute;left:12px;top:50%;width:38px;height:38px;margin-top:-19px;border-radius:12px;
+  background:#eaf1ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f5fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.6'/%3E%3C/svg%3E") center/22px no-repeat;
+  transition:background-color .2s;
+}
+html body .tln-places-menu .places-suggestion-primary{
+  display:block;font:700 16px/1.3 Poppins,sans-serif;color:#0a1638!important;-webkit-text-fill-color:#0a1638!important;
+  white-space:normal;overflow:visible;text-overflow:clip;
+}
+html body .tln-places-menu .places-suggestion-secondary{
+  display:block;margin-top:2px;font:500 13.5px/1.3 Poppins,sans-serif;color:#4a5a82!important;-webkit-text-fill-color:#4a5a82!important;
+}
+html body .tln-places-menu .places-suggestion-item:hover,
+html body .tln-places-menu .places-suggestion-item:focus-visible,
+html body .tln-places-menu .places-suggestion-item[aria-selected="true"]{
+  background:linear-gradient(90deg,rgba(47,95,255,.12),rgba(47,95,255,.04));outline:0;
+}
+html body .tln-places-menu .places-suggestion-item:hover::before,
+html body .tln-places-menu .places-suggestion-item:focus-visible::before{background-color:#d4e2ff}
+html body .tln-places-menu .places-suggestion-item:hover .places-suggestion-primary,
+html body .tln-places-menu .places-suggestion-item:focus-visible .places-suggestion-primary{color:#1c3fc4!important;-webkit-text-fill-color:#1c3fc4!important}
+html body .tln-places-menu .places-suggestion-item:active{transform:scale(.99)}

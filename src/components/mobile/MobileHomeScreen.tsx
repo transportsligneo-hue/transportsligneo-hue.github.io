@@ -6,8 +6,10 @@ import MobileFaq from "@/components/mobile/MobileFaq";
 import { GoogleG, RouteAB, SteeringWheel } from "@/components/mobile/MobileIcons";
 import DevisGenerator from "@/components/DevisGenerator";
 import { useAuth } from "@/hooks/useAuth";
-import heroBg from "@/assets/hero-ligneo-night.jpg";
+import heroDark from "@/assets/hero-ligneo-coucher.jpg";
+import heroLight from "@/assets/hero-ligneo-utilitaire.jpg";
 import "@/styles/mobile-home-v2.css";
+import "@/styles-estimateur-mobile.css";
 
 /**
  * MobileHomeScreen · v4
@@ -22,7 +24,8 @@ export default function MobileHomeScreen() {
     <div className="mh2-root md:hidden">
       {/* === HERO === */}
       <section className="mh2-hero">
-        <img src={heroBg} alt="Convoyeur Transports Ligneo" loading="eager" decoding="async" fetchPriority="high" />
+        <img className="mh2-hero-dark" src={heroDark} alt="Convoyeur Transports Ligneo" loading="eager" decoding="async" fetchPriority="high" />
+        <img className="mh2-hero-light" src={heroLight} alt="" aria-hidden="true" loading="eager" decoding="async" />
         <div className="mh2-hero-c">
           <div className="mh2-kick">
             <i />
@@ -45,12 +48,12 @@ export default function MobileHomeScreen() {
         <div>
           <span className="mh2-ti"><ShieldCheck size={15} /></span>
           <b>100 %</b>
-          Assuré
+          <span className="mh2-tl">Assuré</span>
         </div>
         <div>
           <span className="mh2-ti"><Clock size={15} /></span>
           <b>7j/7</b>
-          Disponible
+          <span className="mh2-tl">Disponible</span>
         </div>
       </div>
 

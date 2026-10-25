@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "@/styles-places-menu.css";
 import {
   getAutocompleteSuggestions,
   isGoogleAvailable,

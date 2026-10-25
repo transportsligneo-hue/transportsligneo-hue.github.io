@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PlacesInput from "@/components/PlacesInput";
+import { GoogleG } from "@/components/mobile/MobileIcons";
+import { GOOGLE_RATING } from "@/lib/google-reviews";
 
 /**
  * Estimateur « La ligne » (accueil, variante flat-mini).
@@ -235,6 +237,16 @@ export default function EstimatorLine(p: EstimatorLineProps) {
       </div>
 
       <div className="zx-foot">
+        <a className="zx-gr" href="https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours" target="_blank" rel="noopener noreferrer" aria-label={`Note Google : ${String(GOOGLE_RATING).replace(".", ",")} sur 5, voir les avis`}>
+          <GoogleG size={22} />
+          <b>{String(GOOGLE_RATING).replace(".", ",")}<small>/5</small></b>
+          <svg className="zx-gr-st" viewBox="0 0 90 16" aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <path key={i} transform={`translate(${i * 18} 0)`} fill="#FBBC04" d="M8 .8l2.2 4.7 5.1.6-3.8 3.5 1 5.1L8 12.2 3.5 14.7l1-5.1L.7 6.1l5.1-.6z" />
+            ))}
+          </svg>
+          <em>Avis Google</em>
+        </a>
         <span>Assurance, carburant &amp; péages inclus</span>
         <span>Disponible 7j/7</span>
         <span>Aucun frais caché</span>

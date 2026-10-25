@@ -1,0 +1,168 @@
+/* ===== Estimateur « La ligne » — version mobile (accueil app) ===== */
+.mh2-hero .mh2-hero-light{display:none}
+html.theme-light .mh2-hero .mh2-hero-light{display:block}
+html.theme-light .mh2-hero .mh2-hero-dark{display:none}
+.mh2-hero{height:430px}
+.mh2-hero .mh2-hero-dark{object-position:47% 0}
+.mh2-hero .mh2-hero-light{object-position:30% 0}
+
+html body .mh2-est{padding:22px 16px 18px}
+html body .mh2-est .zx{padding:0!important;font-family:Poppins,sans-serif}
+html body .mh2-est .zx-top{display:flex;flex-direction:column;align-items:stretch;gap:16px;margin:0 0 18px}
+html body .mh2-est .zx-title{display:block;margin:0;font:800 25px/1.18 Poppins,sans-serif;letter-spacing:-.015em;color:#fff!important;-webkit-text-fill-color:#fff!important}
+html body .mh2-est .zx-title b{color:#8db6ff!important;-webkit-text-fill-color:#8db6ff!important}
+html body .mh2-est .zx-eye{display:flex;margin:0 0 10px;font:700 12px Poppins,sans-serif;letter-spacing:.16em;color:#b4cbff!important;-webkit-text-fill-color:#b4cbff!important}
+html body .mh2-est .zx-seg{display:grid;grid-template-columns:1fr 1fr;width:100%;padding:4px;gap:4px}
+html body .mh2-est .zx-seg button{font:700 13px/1.2 Poppins,sans-serif;letter-spacing:0;text-transform:none;padding:13px 6px;white-space:normal;color:rgba(255,255,255,.82)!important;-webkit-text-fill-color:currentColor!important}
+html body .mh2-est .zx-seg button.on{color:#0b1a4d!important;-webkit-text-fill-color:#0b1a4d!important}
+
+/* adresses : un seul bloc verre, reliées par un fil pointillé */
+html body .mh2-est .zx-line{position:relative;display:block;margin:0 0 12px;padding:4px 16px;border-radius:22px;background:rgba(255,255,255,.07);border:1px solid rgba(160,190,255,.28)}
+html body .mh2-est .zx-route{display:none}
+html body .mh2-est .zx-line::before{content:"";position:absolute;left:22px;top:50px;bottom:50px;width:2px;background:repeating-linear-gradient(180deg,rgba(143,178,255,.6) 0 4px,transparent 4px 9px)}
+html body .mh2-est .zx-pt{display:block;padding:14px 0 14px 36px}
+html body .mh2-est .zx-pt::before{left:0;top:50%;bottom:auto;margin-top:-7px}
+html body .mh2-est .zx-pt.a::after{left:36px;right:0;bottom:0}
+html body .mh2-est .zx-pt.b::after{display:none}
+html body .mh2-est .zx-pt>span{margin-bottom:4px;font:700 12px Poppins,sans-serif;letter-spacing:.14em;color:#a9c3ff!important;-webkit-text-fill-color:#a9c3ff!important}
+html body .mh2-est .zx-pt input{height:32px;font:600 16px Poppins,sans-serif;letter-spacing:-.02em}
+
+/* pastilles véhicule / date / heure */
+html body .mh2-est .zx-bot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+html body .mh2-est .zx-sp{display:none}
+html body .mh2-est .zx-pill{position:relative;width:auto!important;padding:13px 16px;border-radius:18px;min-height:74px}
+html body .mh2-est .zx-pill.veh{grid-column:1/-1}
+html body .mh2-est .zx-pill>span{font:700 12px Poppins,sans-serif;letter-spacing:.12em;color:#a9c3ff!important;-webkit-text-fill-color:#a9c3ff!important}
+html body .mh2-est .zx-pill .zx-val{height:auto;line-height:1.3;font:700 17px Poppins,sans-serif;color:#fff!important;-webkit-text-fill-color:#fff!important;padding-right:18px}
+html body .mh2-est .zx-pill .zx-val.ph{color:rgba(255,255,255,.62)!important;-webkit-text-fill-color:currentColor!important;font-weight:600}
+html body .mh2-est .zx-pill::after{content:"▾";position:absolute;right:15px;bottom:13px;color:#a9c3ff;font-size:14px}
+html body .mh2-est .zx-pill.set{border-color:rgba(122,169,255,.6)}
+
+/* prix */
+html body .mh2-est .zx-price{grid-column:1/-1;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:12px;row-gap:2px;min-width:0;padding:16px 18px;border-radius:22px;text-align:left;background:linear-gradient(150deg,rgba(63,125,255,.22),rgba(255,255,255,.05));border:1px solid rgba(140,175,255,.4)}
+html body .mh2-est .zx-price>span{grid-column:1;grid-row:1;font:700 12px Poppins,sans-serif;letter-spacing:.12em;color:#b4cbff!important;-webkit-text-fill-color:#b4cbff!important}
+html body .mh2-est .zx-price>strong{grid-column:2;grid-row:1/3;margin:0;font:800 46px/1 Poppins,sans-serif}
+html body .mh2-est .zx-price>em{grid-column:1;grid-row:2;font:500 14px/1.35 Poppins,sans-serif;color:rgba(255,255,255,.78)!important;-webkit-text-fill-color:currentColor!important}
+html body .mh2-est .zx-price>em b{color:#fff}
+html body .mh2-est .zx-price>em.zx-incl{grid-column:1/-1;grid-row:3;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.14);font-size:13px!important;opacity:1}
+
+/* bouton continuer : pleine largeur, texte visible */
+html body .mh2-est .zx .zx-go{grid-column:1/-1;width:100%!important;height:64px!important;border-radius:20px!important;color:#fff!important;display:flex;align-items:center;justify-content:center;gap:12px}
+html body .mh2-est .zx-go::after{content:"Continuer";font:800 18px Poppins,sans-serif;letter-spacing:.01em}
+html body .mh2-est .zx-go svg{width:24px;height:24px;order:2}
+html body .mh2-est .zx-go::after{order:1}
+
+html body .mh2-est .zx-foot{display:grid!important;grid-template-columns:1fr 1fr;gap:10px 12px;margin-top:16px;padding-top:14px;font:500 13px/1.3 Poppins,sans-serif}
+html body .mh2-est .zx-tag{grid-column:1/-1}
+
+/* menus : feuille qui monte du bas, grands boutons */
+html body .mh2-est .zx-pill.open::before{content:"";position:fixed;inset:0;z-index:150;background:rgba(3,8,30,.6)}
+html body .mh2-est .zx .zx-pill .zx-pop{position:fixed;z-index:200;left:10px!important;right:10px;bottom:92px;top:auto;width:auto!important;max-width:none;max-height:min(68vh,540px);overflow:auto;padding:20px 16px 18px!important;border-radius:26px!important;background:linear-gradient(170deg,#fff,#eaf2fd)!important;border:1px solid #fff!important;box-shadow:0 -10px 60px -10px rgba(0,10,40,.7)!important;backdrop-filter:none}
+html body .mh2-est .zx .zx-pop h4{margin:0 0 14px;font:800 14px Poppins,sans-serif!important;letter-spacing:.06em;color:#0b2a6b!important;-webkit-text-fill-color:#0b2a6b!important}
+html body .mh2-est .zx .zx-pop .zx-opt{background:#fff!important;color:#0b2342!important;-webkit-text-fill-color:#0b2342!important;border:1.5px solid #cfdcf0!important;font:700 16px Poppins,sans-serif!important;min-height:50px;border-radius:14px!important;box-shadow:0 6px 14px -10px rgba(10,40,110,.5);white-space:normal}
+html body .mh2-est .zx .zx-pop .zx-opt.sel{background:linear-gradient(135deg,#2f6bff,#4f9dff)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:transparent!important}
+html body .mh2-est .zx .zx-pop .zx-opt.today{border-color:#2f6bff!important}
+html body .mh2-est .zx .zx-pop .zx-opt .pl{background:#ffe9b0!important;color:#5a3700!important;-webkit-text-fill-color:#5a3700!important;font-size:10px!important;top:-8px}
+html body .mh2-est .zx .zx-vg{width:100%!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+html body .mh2-est .zx .zx-tg{width:100%!important;grid-template-columns:repeat(4,1fr)!important;gap:10px!important}
+html body .mh2-est .zx .zx-cal{width:100%!important}
+html body .mh2-est .zx .zx-qd{flex-wrap:wrap}
+html body .mh2-est .zx .zx-qd .zx-opt{font-size:15px!important;min-width:0}
+html body .mh2-est .zx .zx-cal-g{gap:5px!important}
+html body .mh2-est .zx .zx-cal-g .zx-opt{min-height:42px!important;padding:0!important;font-size:16px!important;border-radius:11px!important}
+html body .mh2-est .zx .zx-cal-g i{color:#0b2a6b!important;-webkit-text-fill-color:#0b2a6b!important;font-size:12px!important}
+html body .mh2-est .zx .zx-cal-h,html body .mh2-est .zx .zx-cal-h span{color:#0b2342!important;-webkit-text-fill-color:#0b2342!important;font:800 18px Poppins,sans-serif!important}
+html body .mh2-est .zx .zx-cal-h button{width:40px;height:40px;background:#fff!important;color:#0b2a6b!important;-webkit-text-fill-color:#0b2a6b!important;border:1.5px solid #cfdcf0!important;font-size:18px}
+html body .mh2-est .zx .zx-pop .zx-note{margin-top:14px!important;font:600 14px/1.4 Poppins,sans-serif!important;color:#26385c!important;-webkit-text-fill-color:#26385c!important}
+html body .mh2-est .zx .zx-pop .zx-note b{color:#a35a00!important;-webkit-text-fill-color:#a35a00!important}
+
+html body .mh2-est .zx .zx-go:disabled{color:rgba(255,255,255,.75)!important}
+html body .mh2-est .zx-price>span{white-space:nowrap;letter-spacing:.08em}
+html body .mh2-est .zx .zx-cal-h span{letter-spacing:0!important}
+/* liste d'adresses : pleine largeur du bloc */
+html body .mh2-est .zx-pt .places-suggestion-list{left:-52px!important;right:-16px!important}
+html body .mh2-est .zx-pt input::placeholder{font-size:14.5px;letter-spacing:-.01em}
+html body .mh2-est .zx-pill .zx-val{white-space:normal;overflow:visible}
+
+/* ===================================================================
+   V2 MOBILE — bandeau de confiance discret + estimateur « appli native »
+   (mobile uniquement : tout est sous .mh2-root, masqué dès 768 px)
+   =================================================================== */
+
+/* Bandeau de confiance : une seule ligne fine, plus de gros carrés */
+html body .mh2-root .mh2-trust{gap:6px;margin:-12px 14px 0;justify-content:space-between}
+html body .mh2-root .mh2-trust>div{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;border-radius:999px;font:600 11.5px/1 Poppins,sans-serif;box-shadow:none;text-align:left;white-space:nowrap}
+html body .mh2-root .mh2-trust>div::before{display:none}
+html body .mh2-root .mh2-trust .mh2-ti{width:20px;height:20px;flex:none;margin:0}
+html body .mh2-root .mh2-trust .mh2-ti svg{width:11px;height:11px}
+html body .mh2-root .mh2-trust b{display:inline;font:800 13px/1 Poppins,sans-serif}
+html body .mh2-root .mh2-trust .mh2-gg{display:none}
+
+/* Palette de l'estimateur selon le thème */
+html body .mh2-root .mh2-est{
+  --e-bg:linear-gradient(180deg,#0f1c4b,#0a1336);--e-line:rgba(140,170,255,.24);--e-field:rgba(255,255,255,.07);
+  --e-ink:#fff;--e-mute:#a9bbe8;--e-accent:#8db6ff;--e-faint:rgba(255,255,255,.34);--e-ph:rgba(255,255,255,.55);
+  --e-seg-on:#fff;--e-seg-on-ink:#0b1a4d;--e-price-bg:linear-gradient(150deg,rgba(63,125,255,.26),rgba(255,255,255,.05));
+  --e-shadow:0 26px 50px -26px rgba(20,50,170,.8);--e-off-bg:rgba(255,255,255,.12);--e-off-ink:rgba(255,255,255,.75);
+}
+html.theme-light body .mh2-root .mh2-est{
+  --e-bg:#fff;--e-line:rgba(30,60,140,.14);--e-field:#f1f5ff;
+  --e-ink:#0a1638;--e-mute:#51618a;--e-accent:#2f5fff;--e-faint:rgba(10,22,56,.25);--e-ph:#7684aa;
+  --e-seg-on:#fff;--e-seg-on-ink:#0a1638;--e-price-bg:linear-gradient(150deg,#e9f0ff,#fff);
+  --e-shadow:0 22px 46px -24px rgba(30,60,160,.4);--e-off-bg:#e6ecfa;--e-off-ink:#6a79a2;
+}
+html body .mh2-root .mh2-est{padding:20px 14px 16px;border-radius:30px;background:var(--e-bg);border:1px solid var(--e-line);box-shadow:var(--e-shadow);color:var(--e-ink)}
+html body .mh2-root .mh2-est .zx .zx-title{color:var(--e-ink)!important;-webkit-text-fill-color:var(--e-ink)!important;font-size:23px}
+html body .mh2-root .mh2-est .zx .zx-title b{color:var(--e-accent)!important;-webkit-text-fill-color:var(--e-accent)!important}
+html body .mh2-root .mh2-est .zx .zx-eye{color:var(--e-accent)!important;-webkit-text-fill-color:var(--e-accent)!important}
+html body .mh2-root .mh2-est .zx .zx-eye i{background:var(--e-accent)}
+
+/* sélecteur type iOS */
+html body .mh2-root .mh2-est .zx .zx-seg{background:var(--e-field);border:1px solid var(--e-line);padding:3px}
+html body .mh2-root .mh2-est .zx .zx-seg button{color:var(--e-mute)!important;-webkit-text-fill-color:var(--e-mute)!important;font-weight:700}
+html body .mh2-root .mh2-est .zx .zx-seg button.on{background:var(--e-seg-on);color:var(--e-seg-on-ink)!important;-webkit-text-fill-color:var(--e-seg-on-ink)!important;box-shadow:0 4px 12px -4px rgba(10,30,100,.35)}
+
+/* adresses */
+html body .mh2-root .mh2-est .zx .zx-line{background:var(--e-field);border-color:var(--e-line)}
+html body .mh2-root .mh2-est .zx .zx-pt>span{color:var(--e-mute)!important;-webkit-text-fill-color:var(--e-mute)!important}
+html body .mh2-root .mh2-est .zx .zx-pt input{color:var(--e-ink)!important;-webkit-text-fill-color:var(--e-ink)!important;background:transparent!important}
+html body .mh2-root .mh2-est .zx .zx-pt input::placeholder{color:var(--e-ph)!important;-webkit-text-fill-color:var(--e-ph)!important}
+html body .mh2-root .mh2-est .zx .zx-pt::before{background:var(--e-bg-dot,transparent);border-color:#2f5fff}
+html.theme-light body .mh2-root .mh2-est .zx .zx-pt::before{box-shadow:0 0 0 4px rgba(47,95,255,.12)}
+html.theme-light body .mh2-root .mh2-est .zx .zx-pt.b::before{background:#2f5fff}
+html body .mh2-root .mh2-est .zx .zx-pt::after{background:var(--e-line)}
+html body .mh2-root .mh2-est .zx .zx-line::before{background:repeating-linear-gradient(180deg,var(--e-accent) 0 4px,transparent 4px 9px);opacity:.6}
+
+/* pastilles */
+html body .mh2-root .mh2-est .zx .zx-pill{background:var(--e-field)!important;border:1px solid var(--e-line)!important;padding:13px 16px!important}
+html body .mh2-root .mh2-est .zx .zx-pill>span{color:var(--e-mute)!important;-webkit-text-fill-color:var(--e-mute)!important}
+html body .mh2-root .mh2-est .zx .zx-pill .zx-val{color:var(--e-ink)!important;-webkit-text-fill-color:var(--e-ink)!important}
+html body .mh2-root .mh2-est .zx .zx-pill .zx-val.ph{color:var(--e-ph)!important;-webkit-text-fill-color:var(--e-ph)!important}
+html body .mh2-root .mh2-est .zx .zx-pill::after{color:var(--e-accent)}
+html body .mh2-root .mh2-est .zx .zx-pill.set{border-color:var(--e-accent)!important}
+
+/* prix */
+html body .mh2-root .mh2-est .zx .zx-price{background:var(--e-price-bg);border-color:var(--e-line)}
+html body .mh2-root .mh2-est .zx .zx-price>span{color:var(--e-mute)!important;-webkit-text-fill-color:var(--e-mute)!important}
+html body .mh2-root .mh2-est .zx .zx-price>strong{color:var(--e-faint)!important;-webkit-text-fill-color:var(--e-faint)!important;text-shadow:none!important}
+html body .mh2-root .mh2-est .zx.on .zx-price>strong{color:var(--e-ink)!important;-webkit-text-fill-color:var(--e-ink)!important}
+html body .mh2-root .mh2-est .zx .zx-price>em{color:var(--e-mute)!important;-webkit-text-fill-color:var(--e-mute)!important}
+html body .mh2-root .mh2-est .zx .zx-price>em b{color:var(--e-ink)!important;-webkit-text-fill-color:var(--e-ink)!important}
+html body .mh2-root .mh2-est .zx .zx-price>em.zx-incl{border-top-color:var(--e-line)}
+
+/* bouton : bleu plein, texte toujours lisible */
+html body .mh2-root .mh2-est .zx .zx-go{background:linear-gradient(135deg,#2f5fff,#5b95ff)!important;box-shadow:0 14px 28px -12px rgba(47,95,255,.9)!important;animation:none!important}
+html body .mh2-root .mh2-est .zx .zx-go:disabled{background:var(--e-off-bg)!important;box-shadow:none!important;filter:none;color:var(--e-off-ink)!important}
+
+/* rassurance : une ligne discrète */
+html body .mh2-root .mh2-est .zx .zx-foot{display:flex!important;flex-wrap:wrap;gap:6px 14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--e-line);font:500 12px/1.3 Poppins,sans-serif;color:var(--e-mute)!important;-webkit-text-fill-color:currentColor!important}
+html body .mh2-root .mh2-est .zx .zx-foot span{color:var(--e-mute)!important;-webkit-text-fill-color:currentColor!important}
+html body .mh2-root .mh2-est .zx .zx-foot span::before{color:#1fb673!important}
+html body .mh2-root .mh2-est .zx .zx-gr{width:100%;justify-content:center;margin-bottom:2px;background:var(--e-gr-bg,#fff);border-color:var(--e-line)}
+html.theme-light body .mh2-root .mh2-est{--e-gr-bg:#f6f8ff}
+html body .mh2-root .mh2-est .zx .zx-gr em{font-size:12.5px}
+html body .mh2-root .mh2-trust>div{gap:5px;padding:8px 4px;font-size:10.5px}
+html body .mh2-root .mh2-trust .mh2-ti{width:18px;height:18px}
+html body .mh2-root .mh2-trust b{font-size:12.5px;line-height:1}
+html body .mh2-root .mh2-trust .mh2-tl{font:600 10.5px/1 Poppins,sans-serif;color:#b9c6ee}
+html.theme-light body .mh2-root .mh2-trust .mh2-tl{color:#b9c6ee}

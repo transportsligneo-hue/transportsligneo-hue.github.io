@@ -581,3 +581,12 @@ html:root body .r4-page .v5-hero-quote .zx .zx-price em b{color:#fff!important}
 /* Bouton « Rechercher » de la plaque : garde sa hauteur dans la fenêtre */
 html:root body .dg-journey .plate-search{height:54px!important;min-height:54px!important;padding:0 22px!important;border-radius:14px!important;align-self:center;display:flex!important;align-items:center;gap:8px;background:linear-gradient(135deg,#2f5fff,#5b83ff)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font:600 15px Inter,sans-serif!important;border:0!important;box-shadow:0 10px 26px -10px rgba(47,95,255,.9)!important}
 html:root body .dg-journey .plate-search:disabled{opacity:.55}
+
+/* ===== Badge note Google (estimateur) ===== */
+.zx-gr{display:inline-flex;align-items:center;gap:9px;padding:6px 14px 6px 8px;border-radius:999px;background:#fff;border:1px solid rgba(10,22,56,.1);box-shadow:0 8px 20px -10px rgba(0,10,50,.55);text-decoration:none;white-space:nowrap;flex:none}
+.zx-gr:hover{transform:translateY(-1px);box-shadow:0 12px 24px -10px rgba(0,10,50,.6)}
+.zx-gr b{font:800 15px/1 Poppins,sans-serif;color:#0a1638!important;-webkit-text-fill-color:#0a1638!important;letter-spacing:-.01em}
+.zx-gr b small{font:600 11px Poppins,sans-serif;color:#51618a;-webkit-text-fill-color:#51618a;margin-left:1px}
+.zx-gr .zx-gr-st{width:72px;height:13px;flex:none}
+.zx-gr em{font:600 12px/1 Poppins,sans-serif;font-style:normal;color:#3a4a74!important;-webkit-text-fill-color:#3a4a74!important}
+.zx-foot{align-items:center}
