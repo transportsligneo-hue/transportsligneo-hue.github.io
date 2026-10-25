@@ -6,7 +6,7 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
   try {
     const { data: t } = await supabase
       .from("trajets")
-      .select("id, depart, arrivee, client_nom, client_email, mission_id")
+      .select("id, depart, arrivee, client_nom, client_email, mission_id, immatriculation")
       .eq("id", trajetId)
       .maybeSingle();
     if (!t?.client_email) return;
@@ -34,6 +34,7 @@ async function notifyMissionLifecycle(trajetId: string, statut: string) {
       prenom,
       numero: missionNumero || numero,
       trackingCode,
+      plaque: ((t as { immatriculation?: string | null }).immatriculation ?? "").toUpperCase(),
       depart: t.depart,
       arrivee: t.arrivee,
     };

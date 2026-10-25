@@ -6,6 +6,7 @@ interface Props {
   prenom?: string
   numero?: string
   trackingCode?: string
+  plaque?: string
   depart?: string
   arrivee?: string
   date?: string
@@ -16,14 +17,14 @@ interface Props {
   clientName?: string
 }
 
-const Email = ({ prenom, numero, trackingCode, depart, arrivee, date, prestation, prix, convoyeur, clientLogoUrl, clientName }: Props) => (
+const Email = ({ prenom, numero, trackingCode, plaque, depart, arrivee, date, prestation, prix, convoyeur, clientLogoUrl, clientName }: Props) => (
   <LigneoEmailShell
     preview={convoyeur ? `Votre convoyeur ${convoyeur} a été attribué.` : 'Votre convoyage est planifié.'}
     tagline="Mission confirmée"
     title="Votre convoyage est planifié"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
     intro="Bonne nouvelle : votre mission a été attribuée à l'un de nos convoyeurs validés."
-    primaryCta={{ label: 'Suivre ma mission en direct', href: 'https://transportsligneo.fr/suivi' }}
+    primaryCta={{ label: 'Suivre ma mission en direct', href: plaque ? `https://transportsligneo.fr/suivi?plaque=${encodeURIComponent(plaque)}` : 'https://transportsligneo.fr/suivi' }}
     clientLogoUrl={clientLogoUrl}
     clientName={clientName}
     footnote="Vous recevrez une notification dès le départ du convoyeur, puis à chaque étape clé de la mission."

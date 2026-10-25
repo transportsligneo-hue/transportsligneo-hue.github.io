@@ -2,15 +2,15 @@ import * as React from 'react'
 import type { TemplateEntry } from './registry'
 import { LigneoEmailShell, SimpleCard, RecapCard } from './_ligneo-header'
 
-interface Props { prenom?: string; numero?: string; trackingCode?: string; convoyeur?: string; heureDepart?: string; eta?: string; depart?: string; arrivee?: string }
+interface Props { prenom?: string; numero?: string; trackingCode?: string; plaque?: string; convoyeur?: string; heureDepart?: string; eta?: string; depart?: string; arrivee?: string }
 
-const Email = ({ prenom, numero, trackingCode, convoyeur, heureDepart, eta, depart, arrivee }: Props) => (
+const Email = ({ prenom, numero, trackingCode, plaque, convoyeur, heureDepart, eta, depart, arrivee }: Props) => (
   <LigneoEmailShell
     preview="Le convoyeur est en route."
     tagline="En cours"
     title="Votre véhicule est en route 🚗"
     greeting={prenom ? `Bonjour ${prenom},` : 'Bonjour,'}
-    primaryCta={{ label: 'Suivre en direct', href: 'https://transportsligneo.fr/suivi' }}
+    primaryCta={{ label: 'Suivre en direct', href: plaque ? `https://transportsligneo.fr/suivi?plaque=${encodeURIComponent(plaque)}` : 'https://transportsligneo.fr/suivi' }}
   >
     <SimpleCard
       title={depart && arrivee ? `${depart} → ${arrivee}` : numero}

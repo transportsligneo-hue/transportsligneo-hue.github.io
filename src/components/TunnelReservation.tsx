@@ -221,7 +221,7 @@ export default function TunnelReservation({ onClose }: Props) {
             recipientEmail: form.email,
             idempotencyKey: `mission-${data?.id}`,
             templateData: {
-              prenom: form.prenom, numero,
+              prenom: form.prenom, numero, plaque: (form.immatriculation ?? "").toUpperCase(),
               villeDepart: form.ville_depart, villeArrivee: form.ville_arrivee,
               date: dateFr, prixTotal: total, typeTrajet: trajetLabel,
             },
