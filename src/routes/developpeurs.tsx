@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import ApiReference from "@/components/developers/ApiReference";
+import ApiQuickstart from "@/components/developers/ApiQuickstart";
 
 export const Route = createFileRoute("/developpeurs")({
   component: DeveloperPage,
@@ -43,6 +44,7 @@ function DeveloperPage() {
       <div className="developer-trust" aria-label="Caractéristiques de l'API">
         {[["REST", "JSON · HTTPS"], ["HMAC", "WEBHOOKS SIGNÉS"], ["TEMPS RÉEL", "SUIVI DES MISSIONS"]].map(([value, label]) => <div key={label}><strong>{value}</strong><small>{label}</small></div>)}
       </div>
+      <ApiQuickstart />
       <section className="developer-section" id="cas-usage">
         <div className="developer-section-head"><span>Ce que vous pouvez faire</span><h2>Une API pensée pour votre quotidien</h2><p>Automatisez la création de devis et de missions, suivez vos convoyages en temps réel et récupérez vos documents — le tout depuis vos propres outils.</p></div>
         <div className="developer-grid">{capabilities.map(({ Icon, title, description, tag }) => <article className="developer-card" key={title}><div className="developer-card-icon"><Icon size={23} /></div><h3>{title}</h3><p>{description}</p><code>{tag}</code></article>)}</div>
