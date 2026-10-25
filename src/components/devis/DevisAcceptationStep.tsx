@@ -13,6 +13,8 @@ import { acceptDevis, getSignerNetworkInfo } from "@/lib/devis-acceptation.funct
 import { SignatureCanvas } from "@/components/inspection/SignatureCanvas";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { LigneoSlideConfirm } from "@/components/devis/LigneoSlideConfirm";
+import { PlateBadge } from "@/components/plate/PlateBadge";
 import { generateDevisPdf, type DevisData } from "@/lib/devis-pdf";
 import { sendTransactionalEmail } from "@/lib/email/send";
 
@@ -24,6 +26,7 @@ interface Props {
   arrivee: string;
   prixTtc: number;
   vehicule?: string | null;
+  plaque?: string | null;
   dateSouhaitee?: string | null;
   onAccepted: () => void;
   onCancel: () => void;
@@ -78,6 +81,7 @@ export function DevisAcceptationStep({
   arrivee,
   prixTtc,
   vehicule,
+  plaque,
   dateSouhaitee,
   onAccepted,
   onCancel,
@@ -489,10 +493,13 @@ export function DevisAcceptationStep({
               <p className="text-[#101828] font-medium">{new Date(dateSouhaitee).toLocaleDateString("fr-FR")}</p>
             </div>
           )}
-          {vehicule && (
-            <div className="sm:col-span-2">
-              <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Véhicule</p>
-              <p className="text-[#101828] font-medium">{vehicule}</p>
+          {(vehicule || plaque) && (
+            <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[9.5px] uppercase tracking-[0.06em] text-[#667085] font-bold">Véhicule</p>
+                {vehicule && <p className="text-[#101828] font-medium">{vehicule}</p>}
+              </div>
+              {plaque && <PlateBadge plate={plaque} size="md" />}
             </div>
           )}
         </div>
@@ -553,20 +560,9 @@ export function DevisAcceptationStep({
               <Smartphone size={14} />
               {sending && channel === "sms" ? "Envoi…" : "Code par SMS"}
             </button>
-            {!isFlotte && (
-              <button
-                onClick={() => checked && setPhase("sign")}
-                disabled={!checked}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-              >
-                <PenLine size={14} /> Signer maintenant
-              </button>
-            )}
           </div>
           <p className="text-[10px] text-[#667085]/80 leading-relaxed text-right">
-            {isFlotte
-              ? "Signature Flotte · validation par code de signature unique reçu par e-mail ou SMS, au choix (obligatoire)."
-              : "Signature manuscrite instantanée · aucun code à attendre."}
+            Validation par code de signature unique reçu par e-mail ou SMS, au choix (obligatoire).
           </p>
         </>
       )}
@@ -648,13 +644,13 @@ export function DevisAcceptationStep({
             <span className="text-[#667085]/70">Le code expire dans {secondsLeft}s</span>
           </div>
 
-          <button
-            onClick={submitCode}
+          <LigneoSlideConfirm
             disabled={digits.join("").length !== 6}
-            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#2f5fff] to-[#4f8cff] text-white font-heading text-xs tracking-[0.12em] uppercase rounded-lg font-bold shadow-[0_6px_20px_rgba(47,95,255,0.4)] transition-all hover:shadow-[0_8px_24px_rgba(47,95,255,0.5)] hover:from-[#284ee6] hover:to-[#4f8cff] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            <ShieldCheck size={14} /> Valider et signer le devis
-          </button>
+            hint="Saisissez le code à 6 chiffres pour débloquer le curseur"
+            label="GLISSEZ POUR ACCEPTER LE DEVIS"
+            doneLabel="DEVIS ACCEPTÉ"
+            onConfirm={submitCode}
+          />
 
           <p className="text-[10px] text-[#667085]/80 leading-relaxed flex items-start gap-1.5">
             <FileCheck2 size={12} className="text-[#2f5fff] shrink-0 mt-0.5" />

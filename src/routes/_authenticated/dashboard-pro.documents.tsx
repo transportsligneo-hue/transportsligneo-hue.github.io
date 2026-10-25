@@ -1001,6 +1001,7 @@ function ProDocuments() {
             <DevisAcceptationStep
               devisId={signingDevis.id}
               numero={signingDevis.numero}
+                plaque={signingDevis.immatriculation}
               depart={signingDevis.depart}
               arrivee={signingDevis.arrivee}
               prixTtc={Number(signingDevis.prix_estime)}

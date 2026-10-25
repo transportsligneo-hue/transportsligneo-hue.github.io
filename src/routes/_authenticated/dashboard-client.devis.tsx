@@ -538,6 +538,7 @@ function MesFacturesEtDevis() {
               <DevisAcceptationStep
                 devisId={active.id}
                 numero={active.numero}
+                plaque={active.immatriculation}
                 depart={active.depart}
                 arrivee={active.arrivee}
                 prixTtc={Number(active.prix_estime)}

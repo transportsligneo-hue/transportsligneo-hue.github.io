@@ -12554,3 +12554,33 @@ body.is-driver-app .fixed.inset-0[class*="z-[8"],
 body.is-driver-app .fixed.inset-0[class*="z-[9"] {
   padding-top: max(env(safe-area-inset-top, 0px), 34px) !important;
 }
+
+/* ===== Vérification Ligneo (maintenir pour vérifier) + badge Google masqué =====
+   Le badge reCAPTCHA est masqué ; la mention légale reste affichée sous les formulaires (RecaptchaNotice). */
+.grecaptcha-badge{visibility:hidden!important;}
+.lg-verify{border-radius:20px;padding:12px;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 34px -18px rgba(47,95,255,.8);color:#fff;}
+.lg-verify-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.lg-verify-head img{border-radius:9px;box-shadow:0 0 14px rgba(80,140,255,.8);}
+.lg-verify-head b{display:block;font-size:11px;letter-spacing:.22em;color:#fff;}
+.lg-verify-head span{font-size:11.5px;color:rgba(255,255,255,.65);}
+.lg-verify-head em{margin-left:auto;font-style:normal;font-size:10px;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:3px 8px;background:rgba(255,255,255,.08);}
+.lg-verify-btn{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:52px;border-radius:26px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);overflow:hidden;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+.lg-verify-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(47,95,255,.25),rgba(120,170,255,.55));border-right:2px solid #bcd4ff;box-shadow:4px 0 18px 2px #5b8dff,4px 0 4px #fff;}
+.lg-verify-txt{position:relative;font-size:12px;font-weight:800;letter-spacing:.18em;color:#fff;text-shadow:0 0 10px rgba(80,140,255,.8);}
+.lg-verify[data-done="1"] .lg-verify-btn{border-color:#8fb4ff;box-shadow:0 0 16px rgba(80,140,255,.7);cursor:default;}
+.lg-verify[data-done="1"] .lg-verify-fill{background:linear-gradient(90deg,rgba(47,95,255,.3),rgba(120,170,255,.6));}
+.lg-verify-legal{margin:8px 2px 0;font-size:10px;line-height:1.4;color:rgba(255,255,255,.55);text-align:center;}
+.lg-verify-legal a{color:rgba(255,255,255,.8);text-decoration:underline;}
+
+/* ===== Curseur de validation Ligneo (devis) ===== */
+.lg-slide{position:relative;height:58px;border-radius:29px;overflow:hidden;background:linear-gradient(160deg,#0f2257,#0a1a47);border:1px solid rgba(47,95,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 28px -14px #2f5fff;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:opacity .25s}
+.lg-slide.is-disabled{opacity:.45}
+.lg-slide-fill{position:absolute;left:-100%;top:0;bottom:0;width:100%;background:linear-gradient(90deg,rgba(47,95,255,.35),rgba(120,170,255,.7));border-right:2px solid #cfe0ff;box-shadow:4px 0 18px 2px #5b8dff,4px 0 4px #fff;will-change:transform;transform:translate3d(56px,0,0)}
+.lg-slide-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-left:46px;color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.16em;text-shadow:0 0 10px rgba(91,141,255,.7);pointer-events:none;text-align:center}
+.lg-slide-done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;letter-spacing:.16em;pointer-events:none}
+.lg-slide-knob{position:absolute;left:4px;top:4px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;will-change:transform;box-shadow:0 0 0 1px #fff,0 0 20px #5b8dff,0 6px 16px rgba(0,0,0,.35)}
+.lg-slide-knob:active{cursor:grabbing}
+.lg-slide-knob img{width:30px;height:30px;border-radius:8px;pointer-events:none}
+.lg-slide.is-disabled .lg-slide-knob{cursor:not-allowed}
+.lg-slide.is-done .lg-slide-knob{opacity:0;transition:opacity .2s}
+.lg-slide-hint{margin:6px 0 0;text-align:center;font-size:10.5px;color:#667085}
