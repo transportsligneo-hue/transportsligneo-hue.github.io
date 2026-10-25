@@ -1,0 +1,5 @@
+/* Logo de la navbar : sans rond, lueur néon bleue, légèrement penché.
+   Le logo affiché reste choisi par src/lib/seasonal-logo.ts (Octobre rose en octobre, officiel ensuite). */
+html:root body .tln-shell .ligneo-lockup-badge{border-radius:20px!important;overflow:visible!important;background:transparent!important;border:0!important;transform:rotate(-5deg);box-shadow:0 0 14px rgba(79,140,255,.85),0 0 34px rgba(47,95,255,.55)!important;transition:transform .35s,box-shadow .35s}
+html:root body .tln-shell .ligneo-lockup-badge .ligneo-lockup-logo{border-radius:20px!important;padding:0!important;object-fit:cover!important;filter:drop-shadow(0 0 5px rgba(79,140,255,.9))!important}
+html:root body .tln-brand:hover .ligneo-lockup-badge{transform:rotate(-2deg) scale(1.04);box-shadow:0 0 20px rgba(110,170,255,1),0 0 46px rgba(47,95,255,.7)!important}

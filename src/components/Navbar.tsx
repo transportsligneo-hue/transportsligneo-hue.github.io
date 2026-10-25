@@ -1,3 +1,4 @@
+import "@/styles-navbar-logo.css";
 import { useState } from "react";
 import { Menu, X, User, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
