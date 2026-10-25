@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   listFactureCandidates,
   ensureFacture,
+  ensureGroupedFacture,
   factureRowToPdfData,
   mergePdfBlobs,
   type FactureCandidate,
@@ -54,6 +55,9 @@ export function BulkFactureDialog({
   const [search, setSearch] = useState("");
   const [onlyUnbilled, setOnlyUnbilled] = useState(false);
   const [merge, setMerge] = useState(true);
+  const [oneInvoice, setOneInvoice] = useState(false);
+  const [refGlobale, setRefGlobale] = useState("");
+  const [echeance, setEcheance] = useState(30);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [po, setPo] = useState<Record<string, { ref: string; label: string }>>(
     {},
@@ -114,7 +118,39 @@ export function BulkFactureDialog({
     setChecked(next);
   };
 
+  const runGrouped = async () => {
+    const targets = rows.filter((r) => checked[r.trajetId]);
+    if (targets.length < 2) return toast.info("Sélectionnez au moins 2 missions");
+    if (new Set(targets.map((t) => t.clientEmail ?? t.clientLabel)).size > 1)
+      return toast.error("Une facture regroupée = un seul client", {
+        description: "Cochez uniquement les missions du même client.",
+      });
+    setBusy(true);
+    try {
+      const row = await ensureGroupedFacture(
+        targets.map((t) => ({
+          trajetId: t.trajetId,
+          attributionId: t.attributionId,
+          numeroMission: t.numeroMission,
+          po: po[t.trajetId]?.ref ?? null,
+        })),
+        { referenceGlobale: refGlobale, echeanceJours: echeance },
+      );
+      const blob = await generateFacturePdf(factureRowToPdfData(row));
+      downloadFacturePdf(blob, row.numero);
+      toast.success(`Facture ${row.numero} générée (${targets.length} missions)`);
+      setChecked({});
+    } catch (e) {
+      toast.error("Facture regroupée impossible", { description: (e as Error).message });
+    } finally {
+      setBusy(false);
+      onDone?.();
+      try { setRows(await listFactureCandidates()); } catch { /* ignore */ }
+    }
+  };
+
   const run = async () => {
+    if (oneInvoice) return runGrouped();
     const targets = rows.filter((r) => checked[r.trajetId]);
     if (!targets.length) return toast.info("Sélectionnez au moins une mission");
     setBusy(true);
@@ -236,6 +272,22 @@ export function BulkFactureDialog({
           >
             <X size={16} />
           </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 border-b border-black/5 bg-[#f4f7ff] px-4 py-3">
+          <span className="text-xs font-semibold text-[#0b1026]">Mode de facturation</span>
+          <div className="inline-flex rounded-xl border border-[#2F5FFF]/25 bg-white p-1">
+            <button type="button" onClick={() => setOneInvoice(false)} className={`rounded-lg px-3 py-1.5 text-[12px] font-semibold ${!oneInvoice ? "bg-[#2F5FFF] text-white" : "text-black/60"}`}>Une facture par mission</button>
+            <button type="button" onClick={() => setOneInvoice(true)} className={`rounded-lg px-3 py-1.5 text-[12px] font-semibold ${oneInvoice ? "bg-[#2F5FFF] text-white" : "text-black/60"}`}>Une seule facture regroupée</button>
+          </div>
+          {oneInvoice && (
+            <>
+              <input value={refGlobale} onChange={(e) => setRefGlobale(e.target.value)} placeholder="PO global (facultatif)" className="h-9 w-44 rounded-lg border border-black/10 bg-white px-2.5 text-[12px] text-[#0b1026]" />
+              <select value={echeance} onChange={(e) => setEcheance(Number(e.target.value))} className="h-9 rounded-lg border border-black/10 bg-white px-2 text-[12px] text-[#0b1026]">
+                <option value={0}>À réception</option><option value={30}>30 jours</option><option value={45}>45 jours</option>
+              </select>
+            </>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-b border-black/5 px-4 py-2.5">
@@ -401,7 +453,7 @@ export function BulkFactureDialog({
             ) : (
               <Download size={15} />
             )}
-            Générer les factures
+            {oneInvoice ? `Générer 1 facture regroupée (${selectedIds.length} missions)` : "Générer les factures"}
           </button>
         </div>
       </div>

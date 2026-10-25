@@ -137,6 +137,22 @@ export async function listFactureCandidates(): Promise<FactureCandidate[]> {
     if (missionIds.length)
       filters.push(`mission_id.in.(${missionIds.join(",")})`);
     const { data: fac } = await query.or(filters.join(","));
+    // Factures regroupées : une seule facture couvre plusieurs missions
+    const { data: grouped } = await supabase
+      .from("factures")
+      .select("id, numero, reference_client, reference_label, metadata")
+      .eq("metadata->>grouped", "true");
+    (grouped ?? []).forEach((g) => {
+      const md = (g.metadata ?? {}) as { grouped_attribution_ids?: string[] };
+      (md.grouped_attribution_ids ?? []).forEach((aid) =>
+        factures.set(`a:${aid}`, {
+          id: g.id as string,
+          numero: g.numero as string,
+          reference_client: (g.reference_client as string) ?? null,
+          reference_label: (g.reference_label as string) ?? null,
+        }),
+      );
+    });
     (fac ?? []).forEach((f) => {
       const rec = {
         id: f.id as string,
@@ -493,4 +509,116 @@ export async function mergePdfBlobs(blobs: Blob[]): Promise<Blob> {
   }
   const out = await merged.save();
   return new Blob([out as unknown as BlobPart], { type: "application/pdf" });
+}
+
+
+export interface GroupedTarget {
+  trajetId: string;
+  attributionId: string;
+  numeroMission: string | null;
+  po?: string | null;
+}
+
+/**
+ * Crée UNE facture regroupant plusieurs missions d'un même client (grands comptes).
+ * Une ligne par mission (itinéraire, plaque, PO). Aucune migration SQL : le détail
+ * des lignes est stocké dans factures.metadata.
+ */
+export async function ensureGroupedFacture(
+  targets: GroupedTarget[],
+  opts: { referenceGlobale?: string | null; echeanceJours?: number } = {},
+): Promise<FactureRow> {
+  if (targets.length < 2) throw new Error("Sélectionnez au moins 2 missions");
+  const { regime, vatRate } = await fetchActiveRegime();
+  const micro = regime !== "societe";
+
+  const lignes: Array<{ label: string; sub: string; ttc: number }> = [];
+  const attributionIds: string[] = [];
+  const missionRefs: string[] = [];
+  let totalTtc = 0;
+  let first: { client_email: string | null; client_nom: string | null; devis_id: string | null } | null = null;
+  const vehicules: Array<Record<string, unknown>> = [];
+  const pos: string[] = [];
+
+  for (const t of targets) {
+    const basis = await resolveGroupInvoiceBasis(t.trajetId);
+    if (basis.existing)
+      throw new Error(
+        `${t.numeroMission ?? "Mission"} est déjà facturée (${basis.existing.numero})`,
+      );
+    const { data: tr } = await supabase
+      .from("trajets")
+      .select("client_email, client_nom, date_trajet, devis_id, demande_id, marque, modele, immatriculation, vehicule_immatriculation, commande_ref")
+      .eq("id", basis.primaryTrajetId)
+      .maybeSingle();
+    if (!tr) throw new Error("Trajet introuvable");
+    if (!first) first = { client_email: tr.client_email, client_nom: tr.client_nom, devis_id: tr.devis_id };
+    const plaque = (tr.immatriculation ?? tr.vehicule_immatriculation ?? "") as string;
+    const po = (t.po ?? tr.commande_ref ?? "").trim();
+    if (po) pos.push(po);
+    const ttc = Number(basis.totalTtc ?? 0);
+    totalTtc += ttc;
+    attributionIds.push(...(basis.attributionIds.length ? basis.attributionIds : [t.attributionId]));
+    if (t.numeroMission) missionRefs.push(t.numeroMission);
+    vehicules.push({ marque: tr.marque, modele: tr.modele, immatriculation: plaque || null });
+    lignes.push({
+      label: `${t.numeroMission ? `${t.numeroMission} · ` : ""}${basis.itineraire ?? `${basis.depart ?? "—"} → ${basis.arrivee ?? "—"}`}`,
+      sub: [
+        [tr.marque, tr.modele].filter(Boolean).join(" "),
+        plaque ? `Plaque ${plaque}` : "",
+        po ? `PO ${po}` : "",
+        tr.date_trajet ? `le ${new Date(tr.date_trajet as string).toLocaleDateString("fr-FR")}` : "",
+      ].filter(Boolean).join(" · ") + ". Carburant, péages et assurance inclus.",
+      ttc: Math.round(ttc * 100) / 100,
+    });
+  }
+  totalTtc = Math.round(totalTtc * 100) / 100;
+
+  let clientEmail = (first?.client_email ?? "").trim();
+  let clientNom = first?.client_nom ?? "";
+  if (!clientEmail && first?.devis_id) {
+    const { data: dv } = await supabase.from("devis").select("email, nom, prenom").eq("id", first.devis_id).maybeSingle();
+    if (dv?.email) clientEmail = dv.email;
+    if (!clientNom && dv) clientNom = `${dv.prenom ?? ""} ${dv.nom ?? ""}`.trim();
+  }
+  if (!clientEmail) throw new Error("Email client introuvable — renseignez l'email sur la mission");
+
+  const ht = micro ? totalTtc : totalTtc / (1 + vatRate / 100);
+  const today = new Date();
+  const echeance = new Date(today.getTime() + (opts.echeanceJours ?? 30) * 86400000);
+  const ref = (opts.referenceGlobale ?? "").trim() || (pos.length ? [...new Set(pos)].join(" / ") : null);
+
+  const { data: inserted, error } = await supabase
+    .from("factures")
+    .insert({
+      numero: "AUTO",
+      type_facture: "b2b",
+      attribution_id: attributionIds[0] ?? targets[0].attributionId,
+      client_email: clientEmail,
+      client_nom: clientNom || "Client",
+      date_facture: today.toISOString().slice(0, 10),
+      date_echeance: echeance.toISOString().slice(0, 10),
+      mode_paiement: "Virement bancaire",
+      designation: `Prestations de convoyage automobile — ${targets.length} missions`,
+      depart: null,
+      arrivee: null,
+      prix_ht: +ht.toFixed(2),
+      prix_tva: +(totalTtc - ht).toFixed(2),
+      prix_ttc: totalTtc,
+      tva_taux: micro ? 0 : vatRate,
+      statut: "emise",
+      reference_client: ref,
+      reference_label: ref ? "N° de PO" : null,
+      metadata: {
+        grouped: true,
+        grouped_attribution_ids: attributionIds,
+        missions: missionRefs,
+        lignes,
+        vehicules,
+      } as unknown as import("@/integrations/supabase/types").Json,
+    })
+    .select("*")
+    .single();
+  if (error || !inserted) throw new Error(error?.message || "Insertion impossible");
+  return inserted as unknown as FactureRow;
 }

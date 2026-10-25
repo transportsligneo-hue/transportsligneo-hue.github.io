@@ -193,6 +193,8 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   let vehicles = invoiceVehicles(f as unknown as Record<string, unknown>);
   let poNumber = invoicePoNumber(f.reference_client, f.reference_label);
   let refInterneDb = "";
+  // Facture regroupée : une ligne par mission (metadata.lignes)
+  let lignesGroupees: Array<{ label: string; sub: string; ttc: number }> = [];
   if (!context?.demo) {
     try {
       // Read-only recovery for old invoices and callers omitting vehicle metadata.
@@ -203,6 +205,11 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
         ? invoice.metadata as Record<string, unknown> : {};
       poNumber = invoicePoNumber(invoice?.reference_client, invoice?.reference_label) ?? poNumber;
       if (typeof metadata.reference_interne === "string") refInterneDb = metadata.reference_interne;
+      if (Array.isArray(metadata.lignes)) {
+        lignesGroupees = (metadata.lignes as Array<Record<string, unknown>>)
+          .map((l) => ({ label: String(l.label ?? ""), sub: String(l.sub ?? ""), ttc: Number(l.ttc ?? 0) }))
+          .filter((l) => l.label);
+      }
       if (selectedOptions == null && Array.isArray(metadata.options)) selectedOptions = metadata.options.filter((v): v is string => typeof v === "string");
       if (!devisMessage && typeof metadata.devis_message === "string") devisMessage = metadata.devis_message;
       if (!vehicles.some((v) => v.immatriculation) && Array.isArray(metadata.vehicules)) vehicles = invoiceVehicles(metadata);
@@ -504,7 +511,7 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   // ---------- Prestation ----------
   let y = mTop + mH + 8;
   // Les factures détaillées (comme la 109) doivent rester sur une seule page A4.
-  const compactDetails = forceCompact || supplements.length + optionsList.length >= 4;
+  const compactDetails = forceCompact || supplements.length + optionsList.length >= 4 || lignesGroupees.length >= 4;
 
   smallLabel("PRESTATION", L, y);
   doc.setFont("helvetica", "bold");
@@ -548,9 +555,13 @@ export async function generateFacturePdf(fInput: FactureData, company?: CompanyI
   };
 
   // Détail strictement identique au devis : mêmes libellés, mêmes montants.
-  line(mainTitle, mainSub, eur(baseHt));
-  supplements.forEach((s) => line(s.label, "", eur(toHt(Number(s.montant)))));
-  optionsList.forEach((o) => line(`Option : ${o}`, "", "Inclus"));
+  if (lignesGroupees.length) {
+    lignesGroupees.forEach((l) => line(l.label, l.sub, eur(toHt(l.ttc))));
+  } else {
+    line(mainTitle, mainSub, eur(baseHt));
+    supplements.forEach((s) => line(s.label, "", eur(toHt(Number(s.montant)))));
+    optionsList.forEach((o) => line(`Option : ${o}`, "", "Inclus"));
+  }
   line(
     "État des lieux numérique et suivi de mission",
     "Photos horodatées et signature électronique au départ et à l'arrivée, suivi GPS et notifications client.",
