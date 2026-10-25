@@ -13,7 +13,7 @@ export interface CookieConsent {
   version: number;
 }
 
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2; // 2 = nouveau bandeau : tout le monde est re-sollicité une fois
 const COOKIE_NAME = "tlg_cookie_consent";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 395; // ~13 mois
 export const CONSENT_EVENT = "tlg:cookie-consent";

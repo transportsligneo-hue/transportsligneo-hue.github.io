@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Cookie, ShieldCheck } from "lucide-react";
+import logo from "@/assets/logo-transports-ligneo-officiel.png";
+import "@/styles-cookie.css";
 import {
   applyConsent,
   getConsent,
@@ -86,96 +87,44 @@ export default function CookieBanner() {
   };
 
   return (
-    <div
-      role="dialog"
-      aria-label="Consentement aux cookies"
-      className="cookie-banner-compact fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] left-3 right-3 z-[9998] mx-auto w-auto max-w-[430px] rounded-2xl border border-white/10 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:bottom-5 sm:left-auto sm:right-5 sm:p-5"
-      style={{ background: "linear-gradient(160deg,rgba(11,19,56,0.97),rgba(8,14,42,0.97))" }}
-    >
-      <div className="flex gap-3.5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F5FFF]/15 text-[#7aa3ff]">
-          <Cookie size={19} />
-        </div>
-        <div>
-          <p className="text-[14px] font-bold text-white">Nous respectons votre vie privée</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-[#9aa6c9]">
-            Nous utilisons des cookies pour assurer le fonctionnement du site, mesurer l'audience et,
-            avec votre accord, personnaliser votre expérience.{" "}
-            <a href="/confidentialite" className="text-[#7aa3ff] underline underline-offset-2">
-              En savoir plus
-            </a>
+    <div role="dialog" aria-label="Consentement aux cookies" className="ckb cookie-banner-compact">
+      <div className="ckb-main">
+        <div className="ckb-logo" aria-hidden="true"><img src={logo} alt="" /></div>
+        <div className="ckb-txt">
+          <p className="ckb-kick"><i />Votre vie privée</p>
+          <p className="ckb-title">Nous respectons vos données</p>
+          <p className="ckb-desc">
+            Cookies utiles au fonctionnement du site, à la mesure d'audience et, avec votre accord, à la personnalisation.{" "}
+            <a href="/confidentialite">En savoir plus</a>
           </p>
+        </div>
+        <div className="ckb-actions">
+          {showPrefs ? (
+            <button type="button" onClick={saveCustom} className="ckb-btn ckb-ghost">Enregistrer mes choix</button>
+          ) : (
+            <button type="button" onClick={() => setShowPrefs(true)} className="ckb-btn ckb-ghost">Personnaliser</button>
+          )}
+          <button type="button" onClick={refuseAll} className="ckb-btn ckb-ghost">Refuser</button>
+          <button type="button" onClick={acceptAll} className="ckb-btn ckb-main-btn">Tout accepter</button>
         </div>
       </div>
 
       {showPrefs && (
-        <div className="mt-4 space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-[12.5px] font-semibold text-white">Cookies essentiels</p>
-              <p className="text-[11px] text-[#9aa6c9]">Nécessaires au fonctionnement du site</p>
-            </div>
+        <div className="ckb-prefs">
+          <div className="ckb-row">
+            <div><b>Cookies essentiels</b><span>Nécessaires au fonctionnement du site</span></div>
             <Switch on disabled />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-[12.5px] font-semibold text-white">Mesure d'audience</p>
-              <p className="text-[11px] text-[#9aa6c9]">Statistiques de visite anonymisées</p>
-            </div>
+          <div className="ckb-row">
+            <div><b>Mesure d'audience</b><span>Statistiques de visite anonymisées</span></div>
             <Switch on={audience} onToggle={() => setAudience((v) => !v)} />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-[12.5px] font-semibold text-white">Personnalisation</p>
-              <p className="text-[11px] text-[#9aa6c9]">Contenu et suggestions adaptés</p>
-            </div>
+          <div className="ckb-row">
+            <div><b>Personnalisation</b><span>Contenu et suggestions adaptés</span></div>
             <Switch on={perso} onToggle={() => setPerso((v) => !v)} />
           </div>
         </div>
       )}
-
-      <div className="mt-4 flex flex-wrap gap-2.5">
-        {showPrefs ? (
-          <button
-            type="button"
-            onClick={saveCustom}
-            className="flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3 py-2.5 text-[12.5px] font-bold text-[#c8d2ec] transition hover:bg-white/[0.1]"
-          >
-            Enregistrer mes choix
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowPrefs(true)}
-            className="flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3 py-2.5 text-[12.5px] font-bold text-[#c8d2ec] transition hover:bg-white/[0.1]"
-          >
-            Personnaliser
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={refuseAll}
-          className="flex-1 rounded-xl border border-white/12 bg-white/[0.06] px-3 py-2.5 text-[12.5px] font-bold text-[#c8d2ec] transition hover:bg-white/[0.1]"
-        >
-          Refuser
-        </button>
-        <button
-          type="button"
-          onClick={acceptAll}
-          className="flex-1 rounded-xl px-3 py-2.5 text-[12.5px] font-bold text-white shadow-[0_8px_18px_rgba(47,95,255,0.35)]"
-          style={{ background: "linear-gradient(120deg,#2F5FFF,#4f8cff)" }}
-        >
-          Tout accepter
-        </button>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => openCookiePreferences()}
-        className="mx-auto mt-2.5 flex items-center gap-1.5 text-[11px] text-[#9aa6c9] underline"
-      >
-        <ShieldCheck size={12} /> Gérer mes cookies
-      </button>
     </div>
   );
 }
