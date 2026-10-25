@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import DevisGenerator from "@/components/DevisGenerator";
-import MapLigneo from "@/components/MapLigneo";
+import ParcoursMetier from "@/components/ParcoursMetier";
 import AvisSection from "@/components/public/AvisSection";
 import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
@@ -60,69 +60,32 @@ export default function HomeDesktopV5() {
       </section>
 
       {/* ============ BÉNÉFICES + PARCOURS + CARTE ============ */}
-      <section className="v4-section">
-        <div className="hx-split">
-          <div className="hx-split-left">
-            <div className="v4-section-head hx-split-head">
-              <h2>Un convoyage sans stress, <span className="hx-neon">du départ à l'arrivée</span></h2>
-            </div>
-            <div className="hx-benefits">
-              {[
-                { I: MapPin, t: "Suivi GPS", d: "Vous savez où est votre véhicule, à tout moment." },
-                { I: ShieldCheck, t: "Assurance incluse", d: "Votre véhicule est couvert pendant tout le trajet." },
-                { I: ScanLine, t: "État des lieux 360°", d: "Photos horodatées au départ et à l'arrivée." },
-                { I: PenLine, t: "Signature électronique", d: "Remise validée en un geste, sans papier." },
-                { I: FolderOpen, t: "Documents centralisés", d: "Devis, PV et factures réunis au même endroit." },
-              ].map(({ I, t, d }) => (
-                <div key={t} className="hx-benefit">
-                  <span className="hx-benefit-ic"><I size={20} /></span>
-                  <h3>{t}</h3>
-                  <p>{d}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="v4-section-head hx-split-head">
-              <div className="v4-hero-eyebrow"><span className="dot" />Vous êtes…</div>
-              <h2>Un parcours <span className="hx-neon">pensé pour votre métier</span></h2>
-            </div>
-            <div className="hx-segments">
-              <Link to="/services" search={{ audience: "particuliers" }} className="hx-seg">
-                <span className="hx-seg-ic"><User size={22} /></span>
-                <h3>Particulier</h3>
-                <p>Faire transporter mon véhicule simplement et en toute sécurité.</p>
-                <span className="hx-seg-more">Découvrir <ArrowRight size={14} /></span>
-              </Link>
-              <Link to="/concessionnaires" className="hx-seg">
-                <span className="hx-seg-ic"><KeyRound size={22} /></span>
-                <h3>Concessionnaire</h3>
-                <p>Déplacez vos véhicules entre concessions, ateliers et clients.</p>
-                <span className="hx-seg-more">Découvrir <ArrowRight size={14} /></span>
-              </Link>
-              <Link to="/loueurs" className="hx-seg">
-                <span className="hx-seg-ic"><Truck size={22} /></span>
-                <h3>Loueur</h3>
-                <p>Automatisez les rotations de véhicules entre agences.</p>
-                <span className="hx-seg-more">Découvrir <ArrowRight size={14} /></span>
-              </Link>
-              <Link to="/gestionnaires-flotte" className="hx-seg">
-                <span className="hx-seg-ic"><BarChart3 size={22} /></span>
-                <h3>Gestionnaire de flotte</h3>
-                <p>Une vision centralisée de tous vos mouvements de véhicules.</p>
-                <span className="hx-seg-more">Découvrir <ArrowRight size={14} /></span>
-              </Link>
-            </div>
+      <section className="v4-section mx-sec">
+        <div className="mx-wrap">
+          <div className="v4-section-head mx-benefits-head">
+            <h2>Un convoyage sans stress, <span className="hx-neon">du départ à l'arrivée</span></h2>
+          </div>
+          <div className="hx-benefits mx-benefits">
+            {[
+              { I: MapPin, t: "Suivi GPS", d: "Vous savez où est votre véhicule, à tout moment." },
+              { I: ShieldCheck, t: "Assurance incluse", d: "Votre véhicule est couvert pendant tout le trajet." },
+              { I: ScanLine, t: "État des lieux 360°", d: "Photos horodatées au départ et à l'arrivée." },
+              { I: PenLine, t: "Signature électronique", d: "Remise validée en un geste, sans papier." },
+              { I: FolderOpen, t: "Documents centralisés", d: "Devis, PV et factures réunis au même endroit." },
+            ].map(({ I, t, d }) => (
+              <div key={t} className="hx-benefit">
+                <span className="hx-benefit-ic"><I size={20} /></span>
+                <h3>{t}</h3>
+                <p>{d}</p>
+              </div>
+            ))}
           </div>
 
-          <aside className="hx-split-map">
-            <div className="hx-map-card">
-              <MapLigneo size="small" className="hx-map-flush" />
-              <div className="hx-map-caption">
-                <p>Basé à Tours (37)</p>
-                <span>France entière et toute l'Europe</span>
-              </div>
-            </div>
-          </aside>
+          <div className="v4-section-head mx-head">
+            <div className="v4-hero-eyebrow"><span className="dot" />Vous êtes…</div>
+            <h2>Un parcours <span className="hx-neon">pensé pour votre métier</span></h2>
+          </div>
+          <ParcoursMetier />
         </div>
       </section>
 
