@@ -59,6 +59,8 @@ import { Route as AuthEmailConfirmationRouteImport } from './routes/auth.email-c
 import { Route as B2bPartenariatFlotteRouteImport } from './routes/b2b.partenariat-flotte'
 import { Route as B2bTransportPonctuelRouteImport } from './routes/b2b.transport-ponctuel'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ConvoyageIndexRouteImport } from './routes/convoyage.index'
+import { Route as ConvoyageSlugRouteImport } from './routes/convoyage.$slug'
 import { Route as DevisTokenRouteImport } from './routes/devis.$token'
 import { Route as InvitationConvoyeurTokenRouteImport } from './routes/invitation-convoyeur.$token'
 import { Route as InvitationEquipeTokenRouteImport } from './routes/invitation-equipe.$token'
@@ -88,11 +90,11 @@ import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
-import { Route as AuthenticatedAdminGrilleTarifaireRouteImport } from './routes/_authenticated/admin.grille-tarifaire'
 import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminFideliteRouteImport } from './routes/_authenticated/admin.fidelite'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
+import { Route as AuthenticatedAdminGrilleTarifaireRouteImport } from './routes/_authenticated/admin.grille-tarifaire'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
@@ -214,11 +216,11 @@ import { Route as ApiPublicHooksGmailPoSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksGoogleReviewDispatchRouteImport } from './routes/api/public/hooks/google-review-dispatch'
 import { Route as ApiPublicHooksLoyaltyDailyRouteImport } from './routes/api/public/hooks/loyalty-daily'
 import { Route as ApiPublicHooksRappelMissionJ1RouteImport } from './routes/api/public/hooks/rappel-mission-j1'
-import { Route as ApiPublicHooksRetardMissionRouteImport } from './routes/api/public/hooks/retard-mission'
 import { Route as ApiPublicScanHandoffExtractRouteImport } from './routes/api/public/scan/handoff-extract'
 import { Route as ApiPublicScanHandoffSessionRouteImport } from './routes/api/public/scan/handoff-session'
 import { Route as ApiPublicSignHandoffRouteImport } from './routes/api/public/sign/handoff'
 import { Route as ApiPublicSignupFinalizeRouteImport } from './routes/api/public/signup/finalize'
+import { Route as ApiPublicV1OpenapiDotjsonRouteImport } from './routes/api/public/v1/openapi[.]json'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -485,6 +487,16 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const ConvoyageIndexRoute = ConvoyageIndexRouteImport.update({
+  id: '/convoyage/',
+  path: '/convoyage/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvoyageSlugRoute = ConvoyageSlugRouteImport.update({
+  id: '/convoyage/$slug',
+  path: '/convoyage/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevisTokenRoute = DevisTokenRouteImport.update({
   id: '/devis/$token',
   path: '/devis/$token',
@@ -648,12 +660,6 @@ const AuthenticatedAdminDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminGrilleTarifaireRoute =
-  AuthenticatedAdminGrilleTarifaireRouteImport.update({
-    id: '/grille-tarifaire',
-    path: '/grille-tarifaire',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminExploitationRoute =
   AuthenticatedAdminExploitationRouteImport.update({
     id: '/exploitation',
@@ -676,6 +682,12 @@ const AuthenticatedAdminFormationRoute =
   AuthenticatedAdminFormationRouteImport.update({
     id: '/formation',
     path: '/formation',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminGrilleTarifaireRoute =
+  AuthenticatedAdminGrilleTarifaireRouteImport.update({
+    id: '/grille-tarifaire',
+    path: '/grille-tarifaire',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminHistoriqueRoute =
@@ -1385,12 +1397,6 @@ const ApiPublicHooksRappelMissionJ1Route =
     path: '/api/public/hooks/rappel-mission-j1',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksRetardMissionRoute =
-  ApiPublicHooksRetardMissionRouteImport.update({
-    id: '/api/public/hooks/retard-mission',
-    path: '/api/public/hooks/retard-mission',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicScanHandoffExtractRoute =
   ApiPublicScanHandoffExtractRouteImport.update({
     id: '/api/public/scan/handoff-extract',
@@ -1413,6 +1419,12 @@ const ApiPublicSignupFinalizeRoute = ApiPublicSignupFinalizeRouteImport.update({
   path: '/api/public/signup/finalize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1OpenapiDotjsonRoute =
+  ApiPublicV1OpenapiDotjsonRouteImport.update({
+    id: '/api/public/v1/openapi.json',
+    path: '/api/public/v1/openapi.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -1538,6 +1550,7 @@ export interface FileRoutesByFullPath {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/convoyage/$slug': typeof ConvoyageSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
@@ -1547,6 +1560,7 @@ export interface FileRoutesByFullPath {
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/convoyage/': typeof ConvoyageIndexRoute
   '/scan/': typeof ScanIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1567,11 +1581,11 @@ export interface FileRoutesByFullPath {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
@@ -1689,11 +1703,11 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
-  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
+  '/api/public/v1/openapi.json': typeof ApiPublicV1OpenapiDotjsonRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -1756,6 +1770,7 @@ export interface FileRoutesByTo {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/convoyage/$slug': typeof ConvoyageSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
@@ -1765,6 +1780,7 @@ export interface FileRoutesByTo {
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites': typeof ActualitesIndexRoute
+  '/convoyage': typeof ConvoyageIndexRoute
   '/scan': typeof ScanIndexRoute
   '/signer': typeof SignerIndexRoute
   '/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -1785,11 +1801,11 @@ export interface FileRoutesByTo {
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
@@ -1904,11 +1920,11 @@ export interface FileRoutesByTo {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
-  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
+  '/api/public/v1/openapi.json': typeof ApiPublicV1OpenapiDotjsonRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -1979,6 +1995,7 @@ export interface FileRoutesById {
   '/b2b/partenariat-flotte': typeof B2bPartenariatFlotteRoute
   '/b2b/transport-ponctuel': typeof B2bTransportPonctuelRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
+  '/convoyage/$slug': typeof ConvoyageSlugRoute
   '/devis/$token': typeof DevisTokenRoute
   '/invitation-convoyeur/$token': typeof InvitationConvoyeurTokenRoute
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
@@ -1988,6 +2005,7 @@ export interface FileRoutesById {
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
   '/actualites/': typeof ActualitesIndexRoute
+  '/convoyage/': typeof ConvoyageIndexRoute
   '/scan/': typeof ScanIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/_authenticated/admin/acceptations': typeof AuthenticatedAdminAcceptationsRoute
@@ -2008,11 +2026,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
-  '/_authenticated/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/_authenticated/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
@@ -2130,11 +2148,11 @@ export interface FileRoutesById {
   '/api/public/hooks/google-review-dispatch': typeof ApiPublicHooksGoogleReviewDispatchRoute
   '/api/public/hooks/loyalty-daily': typeof ApiPublicHooksLoyaltyDailyRoute
   '/api/public/hooks/rappel-mission-j1': typeof ApiPublicHooksRappelMissionJ1Route
-  '/api/public/hooks/retard-mission': typeof ApiPublicHooksRetardMissionRoute
   '/api/public/scan/handoff-extract': typeof ApiPublicScanHandoffExtractRoute
   '/api/public/scan/handoff-session': typeof ApiPublicScanHandoffSessionRoute
   '/api/public/sign/handoff': typeof ApiPublicSignHandoffRoute
   '/api/public/signup/finalize': typeof ApiPublicSignupFinalizeRoute
+  '/api/public/v1/openapi.json': typeof ApiPublicV1OpenapiDotjsonRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -2205,6 +2223,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/convoyage/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/invitation-equipe/$token'
@@ -2214,6 +2233,7 @@ export interface FileRouteTypes {
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
+    | '/convoyage/'
     | '/scan/'
     | '/signer/'
     | '/admin/acceptations'
@@ -2234,11 +2254,11 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
-    | '/admin/grille-tarifaire'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
     | '/admin/formation'
+    | '/admin/grille-tarifaire'
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
@@ -2356,11 +2376,11 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
-    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
+    | '/api/public/v1/openapi.json'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -2423,6 +2443,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/convoyage/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/invitation-equipe/$token'
@@ -2432,6 +2453,7 @@ export interface FileRouteTypes {
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites'
+    | '/convoyage'
     | '/scan'
     | '/signer'
     | '/admin/acceptations'
@@ -2452,11 +2474,11 @@ export interface FileRouteTypes {
     | '/admin/demandes'
     | '/admin/devis'
     | '/admin/documents'
-    | '/admin/grille-tarifaire'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
     | '/admin/formation'
+    | '/admin/grille-tarifaire'
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
@@ -2571,11 +2593,11 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
-    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
+    | '/api/public/v1/openapi.json'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -2645,6 +2667,7 @@ export interface FileRouteTypes {
     | '/b2b/partenariat-flotte'
     | '/b2b/transport-ponctuel'
     | '/blog/$slug'
+    | '/convoyage/$slug'
     | '/devis/$token'
     | '/invitation-convoyeur/$token'
     | '/invitation-equipe/$token'
@@ -2654,6 +2677,7 @@ export interface FileRouteTypes {
     | '/signer/$token'
     | '/verify-certificat/$token'
     | '/actualites/'
+    | '/convoyage/'
     | '/scan/'
     | '/signer/'
     | '/_authenticated/admin/acceptations'
@@ -2674,11 +2698,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/demandes'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
-    | '/_authenticated/admin/grille-tarifaire'
     | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/fidelite'
     | '/_authenticated/admin/formation'
+    | '/_authenticated/admin/grille-tarifaire'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/informations-legales'
@@ -2796,11 +2820,11 @@ export interface FileRouteTypes {
     | '/api/public/hooks/google-review-dispatch'
     | '/api/public/hooks/loyalty-daily'
     | '/api/public/hooks/rappel-mission-j1'
-    | '/api/public/hooks/retard-mission'
     | '/api/public/scan/handoff-extract'
     | '/api/public/scan/handoff-session'
     | '/api/public/sign/handoff'
     | '/api/public/signup/finalize'
+    | '/api/public/v1/openapi.json'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -2861,6 +2885,7 @@ export interface RootRouteChildren {
   ACodeRoute: typeof ACodeRoute
   ActualitesSlugRoute: typeof ActualitesSlugRoute
   AuthEmailConfirmationRoute: typeof AuthEmailConfirmationRoute
+  ConvoyageSlugRoute: typeof ConvoyageSlugRoute
   DevisTokenRoute: typeof DevisTokenRoute
   InvitationConvoyeurTokenRoute: typeof InvitationConvoyeurTokenRoute
   InvitationEquipeTokenRoute: typeof InvitationEquipeTokenRoute
@@ -2870,6 +2895,7 @@ export interface RootRouteChildren {
   SignerTokenRoute: typeof SignerTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
   ActualitesIndexRoute: typeof ActualitesIndexRoute
+  ConvoyageIndexRoute: typeof ConvoyageIndexRoute
   ScanIndexRoute: typeof ScanIndexRoute
   SignerIndexRoute: typeof SignerIndexRoute
   ApiB2bCheckoutRoute: typeof ApiB2bCheckoutRoute
@@ -2901,11 +2927,11 @@ export interface RootRouteChildren {
   ApiPublicHooksGoogleReviewDispatchRoute: typeof ApiPublicHooksGoogleReviewDispatchRoute
   ApiPublicHooksLoyaltyDailyRoute: typeof ApiPublicHooksLoyaltyDailyRoute
   ApiPublicHooksRappelMissionJ1Route: typeof ApiPublicHooksRappelMissionJ1Route
-  ApiPublicHooksRetardMissionRoute: typeof ApiPublicHooksRetardMissionRoute
   ApiPublicScanHandoffExtractRoute: typeof ApiPublicScanHandoffExtractRoute
   ApiPublicScanHandoffSessionRoute: typeof ApiPublicScanHandoffSessionRoute
   ApiPublicSignHandoffRoute: typeof ApiPublicSignHandoffRoute
   ApiPublicSignupFinalizeRoute: typeof ApiPublicSignupFinalizeRoute
+  ApiPublicV1OpenapiDotjsonRoute: typeof ApiPublicV1OpenapiDotjsonRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -3272,6 +3298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/convoyage/': {
+      id: '/convoyage/'
+      path: '/convoyage'
+      fullPath: '/convoyage/'
+      preLoaderRoute: typeof ConvoyageIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convoyage/$slug': {
+      id: '/convoyage/$slug'
+      path: '/convoyage/$slug'
+      fullPath: '/convoyage/$slug'
+      preLoaderRoute: typeof ConvoyageSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/devis/$token': {
       id: '/devis/$token'
       path: '/devis/$token'
@@ -3475,13 +3515,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/grille-tarifaire': {
-      id: '/_authenticated/admin/grille-tarifaire'
-      path: '/grille-tarifaire'
-      fullPath: '/admin/grille-tarifaire'
-      preLoaderRoute: typeof AuthenticatedAdminGrilleTarifaireRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/exploitation': {
       id: '/_authenticated/admin/exploitation'
       path: '/exploitation'
@@ -3508,6 +3541,13 @@ declare module '@tanstack/react-router' {
       path: '/formation'
       fullPath: '/admin/formation'
       preLoaderRoute: typeof AuthenticatedAdminFormationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/grille-tarifaire': {
+      id: '/_authenticated/admin/grille-tarifaire'
+      path: '/grille-tarifaire'
+      fullPath: '/admin/grille-tarifaire'
+      preLoaderRoute: typeof AuthenticatedAdminGrilleTarifaireRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/historique': {
@@ -4357,13 +4397,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRappelMissionJ1RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/retard-mission': {
-      id: '/api/public/hooks/retard-mission'
-      path: '/api/public/hooks/retard-mission'
-      fullPath: '/api/public/hooks/retard-mission'
-      preLoaderRoute: typeof ApiPublicHooksRetardMissionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/scan/handoff-extract': {
       id: '/api/public/scan/handoff-extract'
       path: '/api/public/scan/handoff-extract'
@@ -4390,6 +4423,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/signup/finalize'
       fullPath: '/api/public/signup/finalize'
       preLoaderRoute: typeof ApiPublicSignupFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/openapi.json': {
+      id: '/api/public/v1/openapi.json'
+      path: '/api/public/v1/openapi.json'
+      fullPath: '/api/public/v1/openapi.json'
+      preLoaderRoute: typeof ApiPublicV1OpenapiDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/preview': {
@@ -4564,11 +4604,11 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
-  AuthenticatedAdminGrilleTarifaireRoute: typeof AuthenticatedAdminGrilleTarifaireRoute
   AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminFideliteRoute: typeof AuthenticatedAdminFideliteRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
+  AuthenticatedAdminGrilleTarifaireRoute: typeof AuthenticatedAdminGrilleTarifaireRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
@@ -4618,11 +4658,12 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRouteWithChildren,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
-  AuthenticatedAdminGrilleTarifaireRoute: AuthenticatedAdminGrilleTarifaireRoute,
   AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminFideliteRoute: AuthenticatedAdminFideliteRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
+  AuthenticatedAdminGrilleTarifaireRoute:
+    AuthenticatedAdminGrilleTarifaireRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
   AuthenticatedAdminIncidentsRoute: AuthenticatedAdminIncidentsRoute,
   AuthenticatedAdminInformationsLegalesRoute:
@@ -5031,6 +5072,7 @@ const rootRouteChildren: RootRouteChildren = {
   ACodeRoute: ACodeRoute,
   ActualitesSlugRoute: ActualitesSlugRoute,
   AuthEmailConfirmationRoute: AuthEmailConfirmationRoute,
+  ConvoyageSlugRoute: ConvoyageSlugRoute,
   DevisTokenRoute: DevisTokenRoute,
   InvitationConvoyeurTokenRoute: InvitationConvoyeurTokenRoute,
   InvitationEquipeTokenRoute: InvitationEquipeTokenRoute,
@@ -5040,6 +5082,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignerTokenRoute: SignerTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
   ActualitesIndexRoute: ActualitesIndexRoute,
+  ConvoyageIndexRoute: ConvoyageIndexRoute,
   ScanIndexRoute: ScanIndexRoute,
   SignerIndexRoute: SignerIndexRoute,
   ApiB2bCheckoutRoute: ApiB2bCheckoutRoute,
@@ -5073,11 +5116,11 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksGoogleReviewDispatchRoute,
   ApiPublicHooksLoyaltyDailyRoute: ApiPublicHooksLoyaltyDailyRoute,
   ApiPublicHooksRappelMissionJ1Route: ApiPublicHooksRappelMissionJ1Route,
-  ApiPublicHooksRetardMissionRoute: ApiPublicHooksRetardMissionRoute,
   ApiPublicScanHandoffExtractRoute: ApiPublicScanHandoffExtractRoute,
   ApiPublicScanHandoffSessionRoute: ApiPublicScanHandoffSessionRoute,
   ApiPublicSignHandoffRoute: ApiPublicSignHandoffRoute,
   ApiPublicSignupFinalizeRoute: ApiPublicSignupFinalizeRoute,
+  ApiPublicV1OpenapiDotjsonRoute: ApiPublicV1OpenapiDotjsonRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

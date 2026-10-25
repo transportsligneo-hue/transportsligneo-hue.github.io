@@ -111,6 +111,7 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
                       <div className="tln-dd-menu tln-dd-menu--part">
                         <Link to="/services" search={{ audience: "particuliers" }}>Nos services</Link>
                         <Link to="/tarifs">Tarifs & estimation</Link>
+                        <Link to="/convoyage">Trajets & prix</Link>
                         <Link to="/suivi">Suivre mon véhicule</Link>
                         <div className="tln-dd-brochures" aria-label="Brochure particuliers à télécharger">
                           <span className="tln-dd-brochures-label">Brochure PDF</span>

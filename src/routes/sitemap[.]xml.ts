@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { TRAJET_SLUGS } from "@/lib/trajets-seo";
 
 const BASE_URL = "https://transportsligneo.fr";
 
@@ -30,6 +31,8 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/inscription-pro", changefreq: "yearly", priority: "0.5" },
   { path: "/inscription-flotte", changefreq: "yearly", priority: "0.5" },
   { path: "/login", changefreq: "yearly", priority: "0.3" },
+  { path: "/convoyage", changefreq: "monthly", priority: "0.8" },
+  ...TRAJET_SLUGS.map((s): SitemapEntry => ({ path: `/convoyage/${s}`, changefreq: "monthly", priority: "0.7" })),
   { path: "/cgv", changefreq: "yearly", priority: "0.3" },
   { path: "/mentions-legales", changefreq: "yearly", priority: "0.3" },
   { path: "/confidentialite", changefreq: "yearly", priority: "0.3" },
