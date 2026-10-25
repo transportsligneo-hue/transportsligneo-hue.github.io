@@ -12,11 +12,22 @@ import DerniersArticles from "@/components/public/DerniersArticles";
 import FaqDynamique from "@/components/public/FaqDynamique";
 import { scrollToDevis } from "@/lib/scroll-to-devis";
 
-import heroBg from "@/assets/hero-ligneo-extended.jpg";
+import heroDark from "@/assets/hero-ligneo-coucher.jpg";
+import heroLight from "@/assets/hero-ligneo-utilitaire.jpg";
 import logoCat from "@/assets/cat-group-new.jpeg.asset.json";
 import logoTransak from "@/assets/transakauto-new.png.asset.json";
 
 const goDevis = () => { scrollToDevis(); };
+
+/** Petit éclat lumineux au clic sur les raccourcis du héros (la couleur vient de --hx-c). */
+const lit = (e: React.MouseEvent<HTMLElement>) => {
+  const el = (e.target as HTMLElement).closest<HTMLElement>(".hx-q");
+  if (!el) return;
+  el.classList.remove("hx-lit");
+  void el.offsetWidth;
+  el.classList.add("hx-lit");
+  window.setTimeout(() => el.classList.remove("hx-lit"), 900);
+};
 
 export default function HomeDesktopV5() {
   const { isAuthenticated, homeRoute } = useAuth();
@@ -24,7 +35,14 @@ export default function HomeDesktopV5() {
     <div className="r4-page">
       {/* ============ HERO ============ */}
       <section className="v5-hero v5-hero--bright">
-        <div className="v5-hero-photo" style={{ backgroundImage: `url(${heroBg})` }} />
+        <div
+          className="v5-hero-photo"
+          style={{
+            backgroundImage: `url(${heroDark})`,
+            ["--hero-dark" as string]: `url(${heroDark})`,
+            ["--hero-light" as string]: `url(${heroLight})`,
+          }}
+        />
         <div className="v5-hero-tint" />
         <div className="v5-hero-fade" />
 
@@ -39,7 +57,7 @@ export default function HomeDesktopV5() {
               Convoyage et logistique automobile France &amp; Europe · Assurance, carburant et péage inclus · Suivi GPS · État des lieux
             </p>
 
-            <div className="hx-quick">
+            <div className="hx-quick" onClickCapture={lit}>
               <Link to="/devenir-convoyeur" className="hx-q hx-q-conv">
                 <span className="hx-q-label">Je suis convoyeur</span>
               </Link>

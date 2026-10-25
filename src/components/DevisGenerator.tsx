@@ -1,4 +1,8 @@
 import { useState, useMemo, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
+import EstimatorLine from "@/components/devis/EstimatorLine";
+import { PlateBadge } from "@/components/plate/PlateBadge";
+import "@/styles-estimateur.css";
 import { normalizeVin } from "@/lib/vin";
 import { fetchActiveRegime } from "@/lib/pricing/fetch";
 import {
@@ -649,6 +653,13 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     downloadDevisPdf(blob, savedDevis.numero);
   }
 
+  // La fenêtre multi-étapes est montée sur <body> : la barre d'accueil est en verre dépoli
+  // (backdrop-filter), ce qui piégerait un élément `fixed` à l'intérieur.
+  const portalModal = (node: React.ReactElement) =>
+    typeof document === "undefined"
+      ? null
+      : createPortal(<div className="dg-estimator dg-estimator--portal">{node}</div>, document.body);
+
   // --- ESTIMATEUR : carte premium "chauffeur" ---
   const isMini = variant === "flat-mini";
   const isFlat = variant === "flat" || isMini;
@@ -662,7 +673,31 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           <div aria-hidden className="pointer-events-none absolute -inset-1 rounded-[28px] bg-gradient-to-r from-neon-blue/20 via-[#5fb6ff]/10 to-neon-blue-strong/20 blur-xl opacity-70" />
         )}
 
-        {isFlat ? (
+        {isMini ? (
+          // ============================================================
+          // VARIANTE FLAT-MINI (accueil) · estimateur « La ligne »
+          // Même état, mêmes setters, même prix (priceTTC) : seul l'affichage change.
+          // ============================================================
+          <EstimatorLine
+            inputId={inputId}
+            departure={departure} setDeparture={setDeparture}
+            arrival={arrival} setArrival={setArrival}
+            vehicleType={vehicleType} setVehicleType={setVehicleType}
+            vehicleTypes={VEHICLE_TYPES}
+            date={date} setDate={setDate}
+            heure={heure} setHeure={setHeure}
+            option={option} setOption={setOption}
+            priceTTC={priceTTC}
+            priceHT={priceHT}
+            microRegime={!!microRegime}
+            hasPrice={!!pricing && priceTTC > 0}
+            distance={distance}
+            distanceLoading={distanceLoading}
+            offHours={!!offHours}
+            canContinue={isComplete}
+            onContinue={() => setStep(1)}
+          />
+        ) : isFlat ? (
           // ============================================================
           // VARIANTE FLAT · champs posés directement sur le fond de page
           // ============================================================
@@ -1020,7 +1055,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
 
 
         {/* Détail prix EN LIVE · visible immédiatement, sans clic */}
-        {isComplete && pricing && distance !== null && (
+        {!isMini && isComplete && pricing && distance !== null && (
           <div className="dg-price-summary mt-5 rounded-lg border px-5 py-5 animate-fade-in">
             <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
               <div>
@@ -1071,17 +1106,17 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
             </p>
           </div>
         )}
-        {isComplete && distance === null && distanceLoading && (
+        {!isMini && isComplete && distance === null && distanceLoading && (
           <p className="mt-3 text-cream/60 text-xs text-center inline-flex items-center justify-center gap-2 w-full">
             <Loader2 size={12} className="animate-spin" /> Calcul de la distance en cours…
           </p>
         )}
-        {isComplete && distance === null && !distanceLoading && departure && arrival && (
+        {!isMini && isComplete && distance === null && !distanceLoading && departure && arrival && (
           <p className="mt-3 text-neon-blue text-xs text-center">
             Distance non calculable automatiquement. Vous pouvez continuer votre demande, nous confirmerons le tarif manuellement.
           </p>
         )}
-        {!isComplete && (
+        {!isMini && !isComplete && (
           <p className="dg-flat-hint mt-3 text-xs text-center tracking-wide">
             Renseignez votre trajet pour afficher votre tarif
           </p>
@@ -1097,7 +1132,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       </div>
 
       {/* === MODAL MULTI-ÉTAPES === */}
-      {step > 0 && !submitted && (
+      {step > 0 && !submitted && portalModal(
         <div className="dg-journey fixed inset-0 z-[100] flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 backdrop-blur-sm animate-fade-in">
           <div className="dg-journey-panel relative w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] overflow-y-auto rounded-lg border">
             {/* Stepper */}
@@ -1106,21 +1141,19 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                 <span className="inline-flex items-center gap-2 rounded-full border border-[#5fb6ff]/30 bg-[#5fb6ff]/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#5fb6ff]">
                   <Sparkles size={11} /> Demande de devis
                 </span>
+                {pricing && priceTTC > 0 && (
+                  <div className="zs-price"><small>Estimation TTC</small><b>{priceTTC} €</b><em>{priceHT} € HT</em></div>
+                )}
                 <Button variant="ghost" onClick={() => setStep(0)} className="dg-journey-close text-xs uppercase">Fermer</Button>
               </div>
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.08em]">
+              <div className="zs-steps">
                 {["Trajet", "Véhicule", "Coordonnées", "Récap"].map((label, i) => {
                   const idx = i + 1;
-                  const active = step === idx; const done = step > idx;
+                  const cls = step > idx ? "done" : step === idx ? "on" : "";
                   return (
-                    <div key={label} className="flex items-center gap-2 flex-1">
-                      <div className={`flex items-center gap-2 ${active ? "text-neon-blue" : done ? "text-[#5fb6ff]" : "text-cream/35"}`}>
-                        <span className={`h-6 w-6 rounded-full grid place-items-center text-[11px] font-heading border ${active ? "border-neon-blue bg-neon-blue/10" : done ? "border-[#5fb6ff] bg-[#5fb6ff]/10" : "border-white/15"}`}>
-                          {done ? "✓" : idx}
-                        </span>
-                        <span className="hidden sm:inline">{label}</span>
-                      </div>
-                      {i < 3 && <div className={`flex-1 h-px ${done ? "bg-[#5fb6ff]/40" : "bg-white/10"}`} />}
+                    <div key={label} className="contents">
+                      <div className={`zs-step ${cls}`}><b>{step > idx ? "✓" : idx}</b><span>{label}</span></div>
+                      {i < 3 && <div className={`zs-line${step > idx ? " done" : ""}`} />}
                     </div>
                   );
                 })}
@@ -1505,7 +1538,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Trajet</em><strong className="font-normal text-[13px] text-white/90">{departure || "—"} → {arrival || "—"}</strong></div>
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Distance</em><strong className="font-normal text-[13px] text-white/90">{distance != null ? `${distance} km${distance > 0 ? ` · ${estimateDuration(distance)}` : ""}` : "À confirmer"}</strong></div>
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Véhicule</em><strong className="font-normal text-[13px] text-white/90">{[marque, modele].filter(Boolean).join(" ") || vehicleType || "—"}</strong></div>
-                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation || "—")}</strong></div>
+                      <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Plaque</em><strong className="font-normal text-[13px] text-white/90">{plaqueInconnue ? "À confirmer" : (immatriculation ? <PlateBadge plate={immatriculation} size="md" /> : "—")}</strong></div>
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Date / Heure</em><strong className="font-normal text-[13px] text-white/90">{[date, heure].filter(Boolean).join(" · ") || "—"}</strong></div>
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Profil</em><strong className="font-normal text-[13px] text-white/90">{CLIENT_TYPES.find(c => c.id === clientType)?.label}{paiementImmediat ? " · paiement en ligne" : " · facturation différée"}</strong></div>
                       <div><em className="not-italic block text-xs uppercase tracking-[0.1em] text-cream/75">Contact</em><strong className="font-normal text-[13px] text-white/90">{[prenom, nom].filter(Boolean).join(" ") || "—"}</strong></div>
@@ -1572,7 +1605,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       )}
 
       {/* === Confirmation === */}
-      {submitted && (
+      {submitted && portalModal(
         <div className="dg-journey fixed inset-0 z-[100] flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 backdrop-blur-sm animate-fade-in">
           <div className="dg-journey-panel relative w-full max-w-xl rounded-lg border p-8 md:p-10 text-center">
             <div className="w-16 h-16 rounded-full border border-neon-blue/40 bg-neon-blue/10 flex items-center justify-center mx-auto mb-6">
