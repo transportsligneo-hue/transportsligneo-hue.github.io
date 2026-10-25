@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Menu, X, User, Sparkles, MapPin } from "lucide-react";
+import { Menu, X, User, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import LigneoLockup from "@/components/brand/LigneoLockup";
 import { useAuth } from "@/hooks/useAuth";
 import ThemePreference from "@/components/ThemePreference";
 import { DemoRequestButton } from "@/components/marketing/DemoRequestButton";
 import NavTicker from "@/components/NavTicker";
-import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Download } from "lucide-react";
 import { professionalBrochures, particulierBrochure } from "@/components/marketing/ProfessionalBrochures";
 
@@ -64,12 +63,7 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
           <div className="tln-bar-inner">
             <Link to="/" className="tln-brand tln-brand--col" aria-label="Accueil · Transports Ligneo">
               <LigneoLockup size="md" driverBadge={driverBadge} badgePx={84} wordPx={19} />
-              <span className="or-under-word">
-                <OctobreRoseBadge />
-              </span>
             </Link>
-
-            <span className="tln-sep" aria-hidden="true" />
 
             <ul className="tln-links">
               {navLinks.map((l) => {
@@ -128,17 +122,14 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
 
             <NavTicker />
 
-            <span className="tln-sep" aria-hidden="true" />
-
             <div className="tln-actions">
-              <Link to="/suivi" className="tln-track">
-                <MapPin size={13} /> Suivre mon véhicule
-              </Link>
-              <ThemePreference variant="compact" />
-              <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
-                <User size={13} />
-                {isAuthenticated ? "Mon espace" : "Connexion"}
-              </button>
+              <div className="flex flex-col items-end gap-1.5">
+                <button onClick={goToEspace} className="r4-btn-connect tln-connect" type="button">
+                  <User size={13} />
+                  {isAuthenticated ? "Mon espace" : "Connexion"}
+                </button>
+                <ThemePreference variant="compact" />
+              </div>
             </div>
           </div>
         </div>
