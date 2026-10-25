@@ -5,8 +5,6 @@
    ============================================================ */
 @media (max-width: 767px) {
   html body:has(.dash-main-mobile):not(.is-driver-app) {
-    overflow-x: hidden;
-    overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
   }
@@ -15,7 +13,7 @@
   }
 
   /* --- Contenu : rien ne dépasse de l'écran --- */
-  html body .dash-main-mobile { overflow-x: clip; }
+  /* (pas de overflow sur la page : ça peut bloquer le défilement dans l appli Android) */
   html body .dash-main-mobile img,
   html body .dash-main-mobile video,
   html body .dash-main-mobile canvas,
