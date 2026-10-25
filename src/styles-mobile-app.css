@@ -1,0 +1,140 @@
+/* ============================================================
+   MOBILE « APPLICATION NATIVE » — admin, espace client, espace flotte/pro
+   Uniquement sur téléphone (≤ 767px). Aucun effet sur PC. L'app chauffeur est exclue.
+   Portée : pages qui contiennent .dash-main-mobile (tableaux de bord).
+   ============================================================ */
+@media (max-width: 767px) {
+  html body:has(.dash-main-mobile):not(.is-driver-app) {
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  html body:has(.dash-main-mobile):not(.is-driver-app) :where(a, button, [role="button"], label, summary, select, input) {
+    touch-action: manipulation;
+  }
+
+  /* --- Contenu : rien ne dépasse de l'écran --- */
+  html body .dash-main-mobile { overflow-x: clip; }
+  html body .dash-main-mobile img,
+  html body .dash-main-mobile video,
+  html body .dash-main-mobile canvas,
+  html body .dash-main-mobile iframe { max-width: 100%; }
+  html body .dash-main-mobile h1,
+  html body .dash-main-mobile h2,
+  html body .dash-main-mobile h3 { overflow-wrap: anywhere; }
+  html body .dash-main-mobile p,
+  html body .dash-main-mobile td,
+  html body .dash-main-mobile li,
+  html body .dash-main-mobile dd { overflow-wrap: anywhere; }
+  html body .dash-main-mobile pre,
+  html body .dash-main-mobile code { max-width: 100%; overflow-x: auto; }
+  html body .dash-main-mobile .flex > :not(svg):not(button):not(img),
+  html body .dash-main-mobile .grid > :not(svg):not(button):not(img) { min-width: 0; }
+
+  /* Grilles fixes à 3+ colonnes → 2 colonnes lisibles */
+  html body .dash-main-mobile .grid.grid-cols-3,
+  html body .dash-main-mobile .grid.grid-cols-4,
+  html body .dash-main-mobile .grid.grid-cols-5,
+  html body .dash-main-mobile .grid.grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* --- Tableaux : défilent sur le côté avec le doigt, rien n'est coupé --- */
+  html body .dash-main-mobile table {
+    display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  html body .dash-main-mobile table::-webkit-scrollbar { display: none; }
+  html body .dash-main-mobile table th,
+  html body .dash-main-mobile table td { white-space: nowrap; padding: 12px 12px; }
+  html body .dash-main-mobile table td { overflow-wrap: normal; }
+  html body .dash-main-mobile .overflow-x-auto,
+  html body .dash-main-mobile .overflow-auto { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+
+  /* --- Onglets et filtres : une seule ligne qui défile --- */
+  html body .dash-main-mobile [role="tablist"] {
+    display: flex; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; height: auto;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: x proximity;
+  }
+  html body .dash-main-mobile [role="tablist"]::-webkit-scrollbar { display: none; }
+  html body .dash-main-mobile [role="tab"] { flex: 0 0 auto; min-height: 42px; scroll-snap-align: start; }
+
+  /* --- Gros doigts : zones tactiles ≥ 44 px, texte 16 px (pas de zoom iOS) --- */
+  html body .dash-main-mobile input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  html body .dash-main-mobile select,
+  html body .dash-main-mobile textarea { font-size: 16px !important; min-height: 46px; border-radius: 12px; }
+  html body .dash-main-mobile textarea { min-height: 96px; }
+  html body .dash-main-mobile button,
+  html body .dash-main-mobile [role="button"],
+  html body .dash-main-mobile a.btn,
+  html body .dash-main-mobile [role="menuitem"] { min-height: 44px; }
+  html body .dash-main-mobile button:active,
+  html body .dash-main-mobile [role="button"]:active { transform: scale(.98); }
+  html body .dash-main-mobile input[type="checkbox"],
+  html body .dash-main-mobile input[type="radio"] { width: 22px; height: 22px; }
+  html body .dash-main-mobile label { font-size: 14px; }
+
+  /* Boutons d'action en bas d'un formulaire : pleine largeur, faciles à toucher */
+  html body .dash-main-mobile form .flex.justify-end,
+  html body .dash-main-mobile form .flex.items-center.justify-end { flex-wrap: wrap; }
+  html body .dash-main-mobile form .flex.justify-end > button { flex: 1 1 140px; }
+
+  /* Cartes : respirent mieux et ne débordent pas */
+  html body .dash-main-mobile .card-premium,
+  html body .dash-main-mobile [class*="rounded"][class*="border"] { max-width: 100%; }
+  html body .dash-main-mobile .recharts-wrapper { max-width: 100%; }
+
+  /* --- Fenêtres (dialogues) : feuille qui monte du bas, comme une appli --- */
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state],
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="alertdialog"][data-state] {
+    left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+    width: 100% !important; max-width: 100% !important; margin: 0 !important;
+    transform: none !important;
+    max-height: 92dvh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch;
+    border-radius: 24px 24px 0 0 !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    animation: lgmUp .28s cubic-bezier(.2,.8,.2,1) both !important;
+  }
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state="closed"],
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="alertdialog"][data-state="closed"] { animation: none !important; }
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state]::before {
+    content: ""; display: block; width: 42px; height: 5px; border-radius: 9px; background: #cfd8ea; margin: -8px auto 12px;
+  }
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state] [class*="grid-cols-2"],
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state] [class*="grid-cols-3"] { grid-template-columns: minmax(0, 1fr); }
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state] button[type="button"],
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state] button[type="submit"] { min-height: 46px; }
+  /* Les panneaux latéraux (Sheet) prennent tout l'écran utile */
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state].inset-y-0 {
+    top: 0 !important; bottom: 0 !important; max-height: none !important; border-radius: 0 !important; width: 100% !important;
+  }
+  html body:has(.dash-main-mobile):not(.is-driver-app) [role="dialog"][data-state].inset-y-0::before { display: none; }
+
+  /* Menus déroulants et infobulles : ne sortent pas de l'écran */
+  html body [data-radix-popper-content-wrapper] { max-width: calc(100vw - 16px) !important; }
+  html body [role="menu"], html body [role="listbox"] { max-width: calc(100vw - 16px); max-height: 60dvh; overflow-y: auto; }
+  html body [role="option"], html body [role="menuitem"] { min-height: 44px; display: flex; align-items: center; }
+
+  /* Notifications (toasts) : au-dessus de la barre d'onglets */
+  html body:has(.dash-main-mobile) [data-sonner-toaster] { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
+
+
+  /* Textes coupés par « … » : on les laisse passer à la ligne pour qu'on lise tout (e-mails, adresses, noms) */
+  html body .dash-main-mobile :is(p, span, div, a, h1, h2, h3, h4, dd, li).truncate:not(table *):not([role="tab"]) {
+    white-space: normal; text-overflow: clip; overflow: visible; overflow-wrap: anywhere;
+  }
+  /* Rangées de boutons qui passent à la ligne : chaque bouton garde son texte entier */
+  html body .dash-main-mobile .flex-wrap > button,
+  html body .dash-main-mobile .flex-wrap > a { flex-shrink: 0; max-width: 100%; }
+  html body .dash-main-mobile select { max-width: 100%; min-width: min(100%, 180px); }
+  html body .dash-main-mobile [class*="foot"] > select { width: 100%; margin-left: 0; }
+  html body .dash-main-mobile .flex-wrap > select,
+  html body .dash-main-mobile .flex-col > select { width: 100%; }
+  /* Chat admin : liste des conversations au-dessus, conversation en dessous (au lieu de deux colonnes) */
+  html body .lgc-admin { grid-template-columns: minmax(0, 1fr) !important; }
+  html body .lgc-admin .lgc-admin-list { max-height: 300px; }
+  html body .lgc-admin .lgc-admin-main { min-width: 0; }
+
+  /* Bas de page : jamais caché par la barre d'onglets */
+  html body .dash-main-mobile { padding-bottom: env(safe-area-inset-bottom); }
+}
+@keyframes lgmUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }

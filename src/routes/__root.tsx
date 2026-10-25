@@ -1,4 +1,5 @@
 import LigneoPickers from "@/components/ui/LigneoPickers";
+import "@/styles-mobile-app.css";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
