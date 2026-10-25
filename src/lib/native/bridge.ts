@@ -117,6 +117,28 @@ export async function shareNativeFile(blob: Blob, filename: string, title = "Doc
   }
 }
 
+/**
+ * Enregistre directement un fichier dans le dossier Documents du téléphone (sous-dossier Ligneo),
+ * sans ouvrir la fenêtre de partage. Renvoie le chemin lisible, ou null si impossible
+ * (hors appli, ou refus du système) : l'appelant garde alors son comportement habituel.
+ */
+export async function saveNativeFile(blob: Blob, filename: string): Promise<string | null> {
+  if (!isNativeApp()) return null;
+  try {
+    const { Filesystem, Directory } = await import("@capacitor/filesystem");
+    const data = await blobToBase64(blob);
+    await Filesystem.writeFile({
+      path: `Ligneo/${filename}`,
+      data,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+    return `Documents / Ligneo / ${filename}`;
+  } catch {
+    return null;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Notifications push natives                                          */
 /* ------------------------------------------------------------------ */
