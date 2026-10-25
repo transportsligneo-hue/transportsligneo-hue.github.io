@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "@/styles-places-menu.css";
 import {
+  enrichWithPostcode,
   getAutocompleteSuggestions,
   isGoogleAvailable,
   loadGoogle,
@@ -62,6 +63,7 @@ export default function PlacesInput({
     return () => document.removeEventListener("mousedown", onClickOut);
   }, []);
 
+  const enrichSeq = useRef(0);
   const runSearch = (val: string) => {
     if (debRef.current) clearTimeout(debRef.current);
     debRef.current = setTimeout(async () => {
@@ -81,6 +83,13 @@ export default function PlacesInput({
           .map((label) => ({ label }));
       }
       setSuggestions(results);
+      // Code postal + ville : ajoutés dès que l'API Adresse répond (sans bloquer l'affichage)
+      if (isGoogleAvailable() && results.some((r) => !r.postcode)) {
+        const seq = ++enrichSeq.current;
+        enrichWithPostcode(results).then((enriched) => {
+          if (seq === enrichSeq.current) setSuggestions(enriched);
+        });
+      }
     }, 220);
   };
 
@@ -134,7 +143,11 @@ export default function PlacesInput({
               className="places-suggestion-item w-full text-left px-4 py-3 text-sm font-semibold text-[#4d8dff] hover:bg-[#4d8dff]/12 hover:text-[#7db1ff] border-b border-[#4d8dff]/15 last:border-0 transition-colors"
             >
               <p className="places-suggestion-primary truncate">{s.label}</p>
-              {s.secondary && <p className="places-suggestion-secondary text-[11px] font-normal text-[#4d8dff]/65 truncate">{s.secondary}</p>}
+              {(s.postcode || s.secondary) && (
+                <p className={`places-suggestion-secondary text-[11px] font-normal text-[#4d8dff]/65 truncate${s.postcode ? " has-cp" : ""}`}>
+                  {s.postcode ? `${s.postcode} ${s.city ?? ""}`.trim() : s.secondary?.replace(/,\s*France$/i, "")}
+                </p>
+              )}
             </button>
           ))}
         </div>

@@ -33,3 +33,9 @@ html body .tln-places-menu .places-suggestion-item:focus-visible::before{backgro
 html body .tln-places-menu .places-suggestion-item:hover .places-suggestion-primary,
 html body .tln-places-menu .places-suggestion-item:focus-visible .places-suggestion-primary{color:#1c3fc4!important;-webkit-text-fill-color:#1c3fc4!important}
 html body .tln-places-menu .places-suggestion-item:active{transform:scale(.99)}
+
+/* Ville + code postal : bleu néon électrique (l'adresse reste en bleu nuit) */
+html body .tln-places-menu .places-suggestion-secondary.has-cp{
+  color:#1f4dff!important;-webkit-text-fill-color:#1f4dff!important;font-weight:700;font-size:14px;letter-spacing:.01em;
+  text-shadow:0 0 12px rgba(31,77,255,.28);
+}

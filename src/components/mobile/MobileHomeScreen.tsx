@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Briefcase, ChevronRight, Clock, LogIn, Route as RouteIcon, ShieldCheck, Star, User } from "lucide-react";
+import { Briefcase, ChevronRight, Clock, LogIn, Route as RouteIcon, ShieldCheck, User } from "lucide-react";
 import MobileFooter from "@/components/mobile/MobileFooter";
 import MobileGoogleReviews from "@/components/mobile/MobileGoogleReviews";
 import MobileFaq from "@/components/mobile/MobileFaq";
@@ -41,30 +41,23 @@ export default function MobileHomeScreen() {
       {/* === Trio de confiance === */}
       <div className="mh2-trust">
         <div>
-          <span className="mh2-ti"><Star size={15} className="mh-i" /></span>
-          <b>4,8/5</b>
-          <span className="mh2-gg"><GoogleG size={14} />Avis Google</span>
+          <span className="mh2-ti mh2-ti-g"><GoogleG size={15} /></span>
+          <span className="mh2-tx"><b>4,8/5</b><span className="mh2-tl">Avis Google</span></span>
         </div>
         <div>
           <span className="mh2-ti"><ShieldCheck size={15} /></span>
-          <b>100 %</b>
-          <span className="mh2-tl">Assuré</span>
+          <span className="mh2-tx"><b>Convoyeur</b><span className="mh2-tl">vérifié</span></span>
         </div>
         <div>
           <span className="mh2-ti"><Clock size={15} /></span>
-          <b>7j/7</b>
-          <span className="mh2-tl">Disponible</span>
+          <span className="mh2-tx"><b>7j/7</b><span className="mh2-tl">Disponible</span></span>
         </div>
       </div>
 
       {/* === Estimateur (vrai simulateur) === */}
       <div id="mobile-devis" className="mh2-sec scroll-mt-20">
-        <div className="mh2-h2">Devis instantané</div>
-        <h2 className="mh2-t2">
-          Estimez votre <em>trajet</em>
-        </h2>
         <div className="mh2-est">
-          <DevisGenerator variant="flat-mini" />
+          <DevisGenerator variant="flat-mini" miniTitle={<>Estimez votre <b>trajet</b></>} />
         </div>
       </div>
 

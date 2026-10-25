@@ -42,6 +42,10 @@ export interface PlaceSuggestion {
   label: string;
   placeId?: string;
   secondary?: string;
+  /** Code postal (affiché avec la ville dans la liste). */
+  postcode?: string;
+  /** Ville (affichée avec le code postal dans la liste). */
+  city?: string;
 }
 
 async function fetchFromFrenchApi(input: string): Promise<PlaceSuggestion[]> {
@@ -54,6 +58,8 @@ async function fetchFromFrenchApi(input: string): Promise<PlaceSuggestion[]> {
     return (data.features ?? []).map((f: any) => ({
       label: f.properties.label,
       secondary: f.properties.context ?? "",
+      postcode: f.properties.postcode ?? undefined,
+      city: f.properties.city ?? undefined,
     }));
   } catch {
     return [];
@@ -113,13 +119,44 @@ async function fetchFromPhoton(input: string): Promise<PlaceSuggestion[]> {
       const label = [street || p.name, [p.postcode, p.city].filter(Boolean).join(" "), p.country]
         .filter(Boolean)
         .join(", ");
-      return { label, secondary: p.country ?? "" };
+      return { label, secondary: p.country ?? "", postcode: p.postcode ?? undefined, city: p.city ?? undefined };
     }).filter((s: PlaceSuggestion) => s.label);
   } catch {
     return [];
   }
 }
 
+
+const cpCache = new Map<string, { postcode?: string; city?: string }>();
+
+/**
+ * Ajoute code postal + ville aux suggestions qui n'en ont pas (Google ne les donne pas toujours).
+ * Source : API Adresse (gouv.fr), gratuite et sans clé. Silencieux en cas d'échec : la liste reste inchangée.
+ */
+export async function enrichWithPostcode(list: PlaceSuggestion[]): Promise<PlaceSuggestion[]> {
+  return Promise.all(
+    list.map(async (s) => {
+      if (s.postcode || !s.label) return s;
+      const key = s.label.toLowerCase();
+      let hit = cpCache.get(key);
+      if (!hit) {
+        try {
+          const res = await fetch(
+            `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(s.label)}&limit=1`,
+          );
+          const f = res.ok ? (await res.json())?.features?.[0] : null;
+          hit = f && (f.properties?.score ?? 0) > 0.55
+            ? { postcode: f.properties.postcode, city: f.properties.city }
+            : {};
+        } catch {
+          hit = {};
+        }
+        cpCache.set(key, hit);
+      }
+      return hit.postcode ? { ...s, postcode: hit.postcode, city: hit.city ?? s.city } : s;
+    }),
+  );
+}
 
 export function resetPlacesSession() {
   sessionToken = null;

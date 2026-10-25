@@ -136,9 +136,11 @@ export interface DevisGeneratorProps {
    * Only the step-0 visual changes · wizard, calculations and modal are identical.
    */
   variant?: "bar" | "hero-card" | "flat" | "flat-mini";
+  /** Titre de l'estimateur compact (variante flat-mini). */
+  miniTitle?: import("react").ReactNode;
 }
 
-export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar" }: DevisGeneratorProps = {}) {
+export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar", miniTitle }: DevisGeneratorProps = {}) {
   const inputId = useId();
 
   // --- régime de facturation (micro = franchise en base de TVA) ---
@@ -680,6 +682,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
           // ============================================================
           <EstimatorLine
             inputId={inputId}
+            title={miniTitle}
             departure={departure} setDeparture={setDeparture}
             arrival={arrival} setArrival={setArrival}
             vehicleType={vehicleType} setVehicleType={setVehicleType}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import PlacesInput from "@/components/PlacesInput";
 import { GoogleG } from "@/components/mobile/MobileIcons";
 import { GOOGLE_RATING } from "@/lib/google-reviews";
@@ -14,6 +14,8 @@ type Pop = "veh" | "dt" | "tm" | null;
 
 export interface EstimatorLineProps {
   inputId: string;
+  /** Titre (par défaut « Calculez votre prix en 30 secondes »). */
+  title?: ReactNode;
   departure: string; setDeparture: (v: string) => void;
   arrival: string; setArrival: (v: string) => void;
   vehicleType: string; setVehicleType: (v: string) => void;
@@ -118,7 +120,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
   return (
     <div ref={rootRef} className={`zx${on ? " on" : ""}${on && p.offHours ? " off" : ""}`}>
       <div className="zx-top">
-        <h2 className="zx-title"><span className="zx-eye"><i />Prix immédiat</span>Calculez votre prix en <b>30 secondes</b></h2>
+        <h2 className="zx-title"><span className="zx-eye"><i />Prix immédiat</span>{p.title ?? <>Calculez votre prix en <b>30 secondes</b></>}</h2>
         <div className="zx-seg">
           <button type="button" className={p.option !== "aller-retour" ? "on" : ""} onClick={() => p.setOption("aller-simple")}>Livraison simple</button>
           <button type="button" className={p.option === "aller-retour" ? "on" : ""} onClick={() => p.setOption("aller-retour")}>Restitution et livraison</button>
