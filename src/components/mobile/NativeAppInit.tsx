@@ -33,8 +33,11 @@ export default function NativeAppInit() {
       try {
         const { StatusBar, Style } = await import("@capacitor/status-bar");
         await StatusBar.setStyle({ style: Style.Dark });
+        // Android 15+ : affichage bord à bord obligatoire, la couleur de barre d'état n'est plus
+        // modifiable (API obsolète). On ne l'applique donc que sur les anciennes versions.
         if (nativePlatform() === "android") {
-          await StatusBar.setBackgroundColor({ color: "#0b1026" });
+          const sdk = Number((navigator.userAgent.match(/Android (\d+)/) || [])[1] || 0);
+          if (sdk && sdk < 15) await StatusBar.setBackgroundColor({ color: "#0b1026" });
         }
       } catch { /* noop */ }
 
