@@ -20,6 +20,7 @@ import { AiSettingsProvider } from "@/lib/ai/context";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import MediaProtection from "@/components/MediaProtection";
 import { isMobileAppShell } from "@/lib/app-mode";
 
 import appCss from "../styles.css?url";
@@ -291,6 +292,7 @@ function RootComponent() {
           <PricingProvider>
             <AiSettingsProvider>
               <CursorSpotlight />
+              <MediaProtection />
               <RecoveryLinkRedirect />
               <MobileAppGate />
               <DriverAppBodyClass />
