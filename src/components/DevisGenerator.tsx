@@ -23,6 +23,7 @@ import TrackRecordLine from "@/components/devis/TrackRecordLine";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
+import { useEstimationLog } from "@/lib/estimation-log";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
@@ -474,6 +475,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const priceTTC = offHours ? Math.round(baseTtc * 1.3) : baseTtc;
   const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
+  // Statistiques › Estimateur : chaque prix affiché (ville + département seulement)
+  const markEstimationSent = useEstimationLog({ departure, arrival, distance, vehicleType, option, price: pricing ? priceTTC : null });
 
 
 
@@ -659,6 +662,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       } catch (e) { console.warn("Email devis non envoyé", e); }
 
 
+      markEstimationSent(devisRow?.id ?? null);
       setSubmitted(true);
     } catch (err) {
       console.error(err);

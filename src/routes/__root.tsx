@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import MediaProtection from "@/components/MediaProtection";
 import MaintenanceGate from "@/components/maintenance/MaintenanceGate";
+import SiteAnalytics from "@/components/analytics/SiteAnalytics";
 import { isMobileAppShell } from "@/lib/app-mode";
 
 import appCss from "../styles.css?url";
@@ -304,6 +305,7 @@ function RootComponent() {
               <LigneoPickers />
               <NavigationProgress />
               <MaintenanceGate />
+              <SiteAnalytics />
               <PublicMobileBottomNav />
               <PwaProvider />
               <PwaSplash />
