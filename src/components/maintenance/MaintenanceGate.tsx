@@ -6,6 +6,21 @@ import { MaintenanceBanner, MaintenanceScreen } from "./MaintenanceViews";
 
 const DISMISS_KEY = "ligneo-maint-banner-closed";
 
+/** Barre de navigation visible en haut de l'écran (site PC, site mobile, appli Driver, espaces), ou null. */
+function findTopNav(): HTMLElement | null {
+  let best: HTMLElement | null = null;
+  let bestBottom = 0;
+  document.querySelectorAll<HTMLElement>(".tln-shell, header").forEach((el) => {
+    if (el.closest(".mtn-bn-wrap")) return;
+    const cs = getComputedStyle(el);
+    if (cs.display === "none" || cs.visibility === "hidden" || (cs.position !== "fixed" && cs.position !== "sticky")) return;
+    const r = el.getBoundingClientRect();
+    if (r.height <= 0 || r.top > 2 || r.width < window.innerWidth * 0.5) return;
+    if (r.bottom > bestBottom) { best = el; bestBottom = r.bottom; }
+  });
+  return best;
+}
+
 /** Si l'écran de maintenance ne peut pas s'afficher, on montre un message simple au lieu de faire planter l'appli. */
 class MaintenanceSafe extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -41,16 +56,38 @@ export default function MaintenanceGate({ children }: { children?: ReactNode }) 
     try { setClosed(sessionStorage.getItem(DISMISS_KEY) === `${s?.title}|${s?.reason}`); } catch { /* ignore */ }
   }, [s?.title, s?.reason]);
 
-  // Décale la barre de navigation sous le bandeau.
+  // Le bandeau se place juste SOUS la barre de navigation (site ou appli Driver) et suit sa position.
   useEffect(() => {
     const root = document.documentElement;
-    if (!banner || !bannerRef.current) { root.removeAttribute("data-maint-banner"); root.style.removeProperty("--mt-h"); return; }
+    if (!banner || !bannerRef.current) {
+      root.removeAttribute("data-maint-banner"); root.style.removeProperty("--mt-h"); root.style.removeProperty("--mt-top");
+      return;
+    }
     const el = bannerRef.current;
-    const set = () => { root.style.setProperty("--mt-h", `${el.offsetHeight}px`); root.setAttribute("data-maint-banner", "1"); };
+    let raf = 0;
+    const set = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const nav = findTopNav();
+        const bottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0;
+        root.style.setProperty("--mt-top", `${Math.round(bottom)}px`);
+        root.style.setProperty("--mt-h", `${el.offsetHeight}px`);
+        root.setAttribute("data-maint-banner", "1");
+      });
+    };
     set();
-    const ro = new ResizeObserver(set); ro.observe(el);
-    return () => { ro.disconnect(); root.removeAttribute("data-maint-banner"); root.style.removeProperty("--mt-h"); };
-  }, [banner]);
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    const nav = findTopNav();
+    if (nav) ro.observe(nav);
+    window.addEventListener("scroll", set, { passive: true });
+    window.addEventListener("resize", set);
+    return () => {
+      cancelAnimationFrame(raf); ro.disconnect();
+      window.removeEventListener("scroll", set); window.removeEventListener("resize", set);
+      root.removeAttribute("data-maint-banner"); root.style.removeProperty("--mt-h"); root.style.removeProperty("--mt-top");
+    };
+  }, [banner, pathname]);
 
   // Fin de la page de maintenance : rechargement complet pour repartir d'un état propre
   // (évite l'écran d'erreur quand les pages reviennent d'un coup).
