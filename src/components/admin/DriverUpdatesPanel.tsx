@@ -13,6 +13,19 @@ import driverLogo from "@/assets/driver-v2/logo.png";
 // Table et fonction créées par la migration 20261026000300 (types Supabase pas encore régénérés).
 const db = supabase as unknown as { from: (t: string) => any; rpc: (f: string, a: object) => Promise<{ error: unknown }> };
 
+/** Raison lisible de l'échec (table ou fonction absente de Supabase, droits admin…). */
+function explain(e: unknown) {
+  const m = String((e as { message?: string; code?: string })?.message ?? e ?? "");
+  const c = String((e as { code?: string })?.code ?? "");
+  if (c === "PGRST202" || c === "42883" || /could not find the function|does not exist/i.test(m))
+    return "La mise à jour Driver n'est pas encore installée dans Supabase : exécutez le fichier SQL driver_app_updates.";
+  if (c === "PGRST205" || c === "42P01" || /relation .* does not exist|could not find the table/i.test(m))
+    return "La table driver_app_updates n'existe pas encore dans Supabase : exécutez le fichier SQL driver_app_updates.";
+  if (/forbidden/i.test(m)) return "Ce compte n'a pas le rôle administrateur dans Supabase.";
+  if (/version/i.test(m) && /check/i.test(m)) return "Numéro de version invalide (ex : 1.3.35).";
+  return m || "Erreur inconnue";
+}
+
 interface Row { id: string; version: string; titre: string; message: string; store_url: string; active: boolean; created_at: string }
 
 function PlayIcon({ size = 30 }: { size?: number }) {
@@ -41,7 +54,7 @@ export default function DriverUpdatesPanel() {
 
   const load = useCallback(async () => {
     const { data, error } = await db.from("driver_app_updates").select("id, version, titre, message, store_url, active, created_at").order("created_at", { ascending: false }).limit(30);
-    if (error) toast.error("Chargement impossible");
+    if (error) toast.error("Chargement impossible", { description: explain(error) });
     setRows((data as Row[]) ?? []);
     setLoading(false);
   }, []);
@@ -56,7 +69,7 @@ export default function DriverUpdatesPanel() {
     setSaving(true);
     const { error } = await db.rpc("publish_driver_app_update", { p_version: f.version.trim(), p_titre: f.titre.trim(), p_message: f.message.trim(), p_store_url: url });
     setSaving(false);
-    if (error) { toast.error("Publication impossible"); return; }
+    if (error) { toast.error("Publication impossible", { description: explain(error) }); return; }
     toast.success("Mise à jour publiée aux convoyeurs");
     void load();
   }
