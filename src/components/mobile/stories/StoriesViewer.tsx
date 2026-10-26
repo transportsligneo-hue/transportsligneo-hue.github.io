@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { LIGNEO_BRAND_LOGO } from "@/lib/brand-assets";
 import { StoryArt, type StoryArtKind } from "./StoryArt";
+import gpsCar from "@/assets/ligneo-gps-car.png";
 import "@/styles/stories-art.css";
 import "@/styles/stories-mobile.css";
 
@@ -72,9 +73,7 @@ export default function StoriesButton() {
           setOpen(true);
         }}
       >
-        <i>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z" /><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" /></svg>
-        </i>
+        <i><img src={gpsCar} alt="" draggable={false} /></i>
         {left > 0 && <em>{left}</em>}
       </button>
       {open && typeof document !== "undefined" && createPortal(<Viewer start={start} onClose={() => setOpen(false)} />, document.body)}
