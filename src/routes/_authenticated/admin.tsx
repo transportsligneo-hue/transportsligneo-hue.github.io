@@ -23,6 +23,7 @@ import {
   Radar,
   GraduationCap,
   Megaphone,
+  Smartphone,
   Sparkles,
   Crown,
   ClipboardList,
@@ -200,6 +201,7 @@ function AdminLayout() {
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },
     { to: "/admin/infos-ligneo", label: "Infos Ligneo", icon: Megaphone, group: "Clients & convoyeurs" },
+    { to: "/admin/mises-a-jour-driver", label: "Mises à jour Driver", icon: Smartphone, group: "Clients & convoyeurs" },
     {
       to: "/admin/bons-commande",
       label: "Bons de commande",

@@ -103,6 +103,7 @@ import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminMessagerieRouteImport } from './routes/_authenticated/admin.messagerie'
 import { Route as AuthenticatedAdminMessagerieConseillerRouteImport } from './routes/_authenticated/admin.messagerie-conseiller'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
+import { Route as AuthenticatedAdminMisesAJourDriverRouteImport } from './routes/_authenticated/admin.mises-a-jour-driver'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminNouveauDevisRouteImport } from './routes/_authenticated/admin.nouveau-devis'
 import { Route as AuthenticatedAdminOrganisationsRouteImport } from './routes/_authenticated/admin.organisations'
@@ -736,6 +737,12 @@ const AuthenticatedAdminMessagesRoute =
   AuthenticatedAdminMessagesRouteImport.update({
     id: '/messages',
     path: '/messages',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminMisesAJourDriverRoute =
+  AuthenticatedAdminMisesAJourDriverRouteImport.update({
+    id: '/mises-a-jour-driver',
+    path: '/mises-a-jour-driver',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminNotificationsRoute =
@@ -1594,6 +1601,7 @@ export interface FileRoutesByFullPath {
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/mises-a-jour-driver': typeof AuthenticatedAdminMisesAJourDriverRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
@@ -1814,6 +1822,7 @@ export interface FileRoutesByTo {
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/mises-a-jour-driver': typeof AuthenticatedAdminMisesAJourDriverRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
@@ -2039,6 +2048,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/_authenticated/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/mises-a-jour-driver': typeof AuthenticatedAdminMisesAJourDriverRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/nouveau-devis': typeof AuthenticatedAdminNouveauDevisRoute
   '/_authenticated/admin/organisations': typeof AuthenticatedAdminOrganisationsRouteWithChildren
@@ -2267,6 +2277,7 @@ export interface FileRouteTypes {
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
     | '/admin/messages'
+    | '/admin/mises-a-jour-driver'
     | '/admin/notifications'
     | '/admin/nouveau-devis'
     | '/admin/organisations'
@@ -2487,6 +2498,7 @@ export interface FileRouteTypes {
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
     | '/admin/messages'
+    | '/admin/mises-a-jour-driver'
     | '/admin/notifications'
     | '/admin/nouveau-devis'
     | '/admin/organisations'
@@ -2711,6 +2723,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/messagerie'
     | '/_authenticated/admin/messagerie-conseiller'
     | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/mises-a-jour-driver'
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/nouveau-devis'
     | '/_authenticated/admin/organisations'
@@ -3604,6 +3617,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/admin/messages'
       preLoaderRoute: typeof AuthenticatedAdminMessagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/mises-a-jour-driver': {
+      id: '/_authenticated/admin/mises-a-jour-driver'
+      path: '/mises-a-jour-driver'
+      fullPath: '/admin/mises-a-jour-driver'
+      preLoaderRoute: typeof AuthenticatedAdminMisesAJourDriverRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/notifications': {
@@ -4617,6 +4637,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMessagerieRoute: typeof AuthenticatedAdminMessagerieRoute
   AuthenticatedAdminMessagerieConseillerRoute: typeof AuthenticatedAdminMessagerieConseillerRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminMisesAJourDriverRoute: typeof AuthenticatedAdminMisesAJourDriverRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminNouveauDevisRoute: typeof AuthenticatedAdminNouveauDevisRoute
   AuthenticatedAdminOrganisationsRoute: typeof AuthenticatedAdminOrganisationsRouteWithChildren
@@ -4674,6 +4695,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMessagerieConseillerRoute:
     AuthenticatedAdminMessagerieConseillerRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminMisesAJourDriverRoute:
+    AuthenticatedAdminMisesAJourDriverRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminNouveauDevisRoute: AuthenticatedAdminNouveauDevisRoute,
   AuthenticatedAdminOrganisationsRoute:
