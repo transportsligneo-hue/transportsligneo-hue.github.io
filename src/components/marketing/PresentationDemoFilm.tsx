@@ -21,6 +21,10 @@ export default function PresentationDemoFilm({ src, poster, label, className }: 
         src={src}
         poster={poster}
         controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        disableRemotePlayback
+        onContextMenu={(e) => e.preventDefault()}
         muted
         playsInline
         preload="metadata"

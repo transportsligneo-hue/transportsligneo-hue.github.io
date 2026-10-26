@@ -71,6 +71,10 @@ export function ProFilm() {
           src={presentationPro.url}
           poster={presentationProPoster.url}
           controls
+          controlsList="nodownload noremoteplayback"
+          disablePictureInPicture
+          disableRemotePlayback
+          onContextMenu={(e) => e.preventDefault()}
           muted
           playsInline
           preload="auto"
@@ -93,7 +97,7 @@ export function ProPresentations() {
       <div className="pro-presentations-grid">
         <div className="pro-presentation pro-presentation--business">
           <h3>Pour les professionnels</h3>
-          <video src={presentationPro.url} poster={presentationProPoster.url} controls playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
+          <video src={presentationPro.url} poster={presentationProPoster.url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture disableRemotePlayback onContextMenu={(e) => e.preventDefault()} playsInline preload="metadata" aria-label="Présentation Transports Ligneo pour les professionnels" />
           <img src={proLogo.url} alt="Transports Ligneo" className="pro-presentation-logo" loading="lazy" />
         </div>
         <div className="pro-presentation pro-presentation--demo">

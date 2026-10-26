@@ -29,7 +29,7 @@ export function RegistrationClosed({ kind }: RegistrationClosedProps) {
           </p>
           {kind === "convoyeur" && (
             <div className="dc-film">
-              <video src={driverPresentation.url} controls playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
+              <video src={driverPresentation.url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture disableRemotePlayback onContextMenu={(e) => e.preventDefault()} playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
             </div>
           )}
           <div className="text-white/50 text-xs space-y-1 pt-3 border-t border-white/10 closed-contact">

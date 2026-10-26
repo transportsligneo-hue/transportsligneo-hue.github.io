@@ -85,7 +85,7 @@ function DevenirConvoyeurPage() {
           </p>
 
           <div className="dc-film">
-            <video src={driverPresentation.url} controls playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
+            <video src={driverPresentation.url} controls controlsList="nodownload noremoteplayback" disablePictureInPicture disableRemotePlayback onContextMenu={(e) => e.preventDefault()} playsInline preload="metadata" aria-label="Présentation de l'application Ligneo Driver" />
           </div>
 
           <div className="dc-card">
