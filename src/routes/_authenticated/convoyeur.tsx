@@ -1,4 +1,5 @@
 import { DriverUpdateGate } from "@/components/convoyeur/DriverUpdateGate";
+import { DriverPresenceBeacon } from "@/components/convoyeur/DriverPresenceBeacon";
 import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
@@ -110,6 +111,7 @@ function ConvoyeurLayout() {
       )}
       <Outlet />
       <DriverUpdateGate />
+      <DriverPresenceBeacon />
       </UserMfaGate>
     </ConvoyeurSidebar>
   );

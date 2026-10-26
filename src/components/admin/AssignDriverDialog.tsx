@@ -46,9 +46,13 @@ interface Props {
   };
   existingAttributionId?: string;
   onAssigned?: (target: { type: "convoyeur" | "fleet"; id: string; label: string }) => void;
+  /** Convoyeur déjà choisi à l'ouverture (page Convoyeurs en ligne). */
+  preselectConvoyeurId?: string;
+  /** Mode choisi à l'ouverture (par défaut « direct »). */
+  defaultMode?: "direct" | "propose";
 }
 
-export function AssignDriverDialog({ open, onClose, trip, existingAttributionId, onAssigned }: Props) {
+export function AssignDriverDialog({ open, onClose, trip, existingAttributionId, onAssigned, preselectConvoyeurId, defaultMode }: Props) {
   const [tab, setTab] = useState<"convoyeur" | "flotte">("convoyeur");
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [fleets, setFleets] = useState<FleetOrg[]>([]);
@@ -61,9 +65,9 @@ export function AssignDriverDialog({ open, onClose, trip, existingAttributionId,
 
   useEffect(() => {
     if (!open) return;
-    setSelected("");
+    setSelected(preselectConvoyeurId ?? "");
     setSearch("");
-    setMode("direct");
+    setMode(defaultMode ?? "direct");
 
     // Charger tous les convoyeurs sauf refusés/suspendus
     supabase

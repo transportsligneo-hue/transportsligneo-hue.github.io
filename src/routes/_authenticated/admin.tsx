@@ -35,6 +35,9 @@ import {
   ScanLine,
   Wrench,
   Calculator,
+  BarChart3,
+  Search,
+  Wifi,
 
 
 } from "lucide-react";
@@ -178,6 +181,7 @@ function AdminLayout() {
 
     // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
+    { to: "/admin/convoyeurs-en-ligne", label: "Convoyeurs en ligne", icon: Wifi, group: "Opérations" },
     {
       to: "/admin/alertes",
       label: "Alertes opérationnelles",
@@ -193,6 +197,11 @@ function AdminLayout() {
     { to: "/admin/messagerie", label: "Chat des missions", icon: MessageSquare, group: "Opérations" },
     { to: "/admin/messagerie-conseiller", label: "Chat conseiller", icon: MessageSquare, group: "Opérations" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Opérations" },
+
+    // ===== Statistiques =====
+    { to: "/admin/statistiques-frequentation", label: "Fréquentation du site", icon: BarChart3, group: "Statistiques" },
+    { to: "/admin/statistiques-estimateur", label: "Estimateur", icon: Calculator, group: "Statistiques" },
+    { to: "/admin/statistiques-google", label: "Recherches Google", icon: Search, group: "Statistiques" },
 
     // Clients & convoyeurs
     { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Clients & convoyeurs" },
