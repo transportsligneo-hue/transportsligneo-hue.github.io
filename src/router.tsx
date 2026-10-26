@@ -1,9 +1,24 @@
+import { useEffect } from "react";
 import { createRouter, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 
+const AUTO_RELOAD_KEY = "ligneo-error-autoreload";
+
 function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
+
+  // Dans l'appli (ou n'importe où) : une erreur passagère se répare seule par un rechargement complet,
+  // une seule fois par minute pour ne jamais tourner en boucle.
+  useEffect(() => {
+    try {
+      const last = Number(sessionStorage.getItem(AUTO_RELOAD_KEY) || 0);
+      if (Date.now() - last > 60_000) {
+        sessionStorage.setItem(AUTO_RELOAD_KEY, String(Date.now()));
+        window.location.reload();
+      }
+    } catch { /* stockage indisponible : on laisse les boutons */ }
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -25,31 +40,32 @@ function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
           </svg>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Something went wrong
+          Un problème est survenu
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          An unexpected error occurred. Please try again.
+          La page n'a pas pu s'afficher. Réessayez dans un instant.
         </p>
-        {import.meta.env.DEV && error instanceof Error && error.message && (
-          <pre className="mt-4 max-h-40 overflow-auto rounded-md bg-muted p-3 text-left font-mono text-xs text-destructive">
-            {error instanceof Error ? error.message : null}
+        {/* Détail technique affiché aussi en production : permet de trouver la cause depuis une simple capture d'écran */}
+        {error != null && (
+          <pre className="mt-4 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted p-3 text-left font-mono text-xs text-destructive">
+            {error instanceof Error ? `${error.name}: ${error.message}\n${(error.stack ?? "").split("\n").slice(1, 4).join("\n")}` : String(error)}
           </pre>
         )}
         <div className="mt-6 flex items-center justify-center gap-3">
           <button
             onClick={() => {
-              router.invalidate();
-              reset();
+              // Rechargement complet : repart d'un état propre (comme « Accueil », sans changer de page)
+              try { window.location.reload(); } catch { router.invalidate(); reset(); }
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Réessayer
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Accueil
           </a>
         </div>
       </div>
