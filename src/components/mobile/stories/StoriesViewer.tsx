@@ -81,7 +81,7 @@ export default function StoriesButton() {
   );
 }
 
-function Viewer({ start, onClose }: { start: number; onClose: () => void }) {
+function Viewer({ start, onClose, panel = false }: { start: number; onClose: () => void; panel?: boolean }) {
   const navigate = useNavigate();
   const [idx, setIdx] = useState(start);
   const [paused, setPaused] = useState(false);
@@ -142,6 +142,15 @@ function Viewer({ start, onClose }: { start: number; onClose: () => void }) {
     setIdx(n);
   }, [finish]);
 
+  useEffect(() => {
+    const onArrow = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") go(idx + 1);
+      else if (e.key === "ArrowLeft") go(idx - 1);
+    };
+    document.addEventListener("keydown", onArrow);
+    return () => document.removeEventListener("keydown", onArrow);
+  }, [go, idx]);
+
   const act = () => {
     const url = s.href === "GOOGLE_REVIEW" ? reviewUrl : s.href;
     finish();
@@ -162,7 +171,7 @@ function Viewer({ start, onClose }: { start: number; onClose: () => void }) {
 
   return (
     <div
-      className={`stv th-${s.theme}`}
+      className={`stv${panel ? " stv-panelled" : ""} th-${s.theme}`}
       role="dialog"
       aria-modal="true"
       aria-label="Annonces Transports Ligneo"
@@ -211,5 +220,18 @@ function Viewer({ start, onClose }: { start: number; onClose: () => void }) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
       </button>
     </div>
+  );
+}
+
+/** Version PC : mêmes stories dans un panneau centré (ouvert depuis le carré d'annonces de la navbar). */
+export function StoriesModal({ open, start = 0, onClose }: { open: boolean; start?: number; onClose: () => void }) {
+  if (!open || typeof document === "undefined") return null;
+  return createPortal(
+    <div className="stv-modal" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="stv-panel">
+        <Viewer start={start} onClose={onClose} panel />
+      </div>
+    </div>,
+    document.body,
   );
 }

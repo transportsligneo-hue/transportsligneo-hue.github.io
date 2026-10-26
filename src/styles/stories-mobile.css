@@ -35,3 +35,15 @@
 @media (max-height:700px){.stv .art{min-height:190px;zoom:.82}.stv .t{font-size:26px}.stv .s{font-size:14.5px}}
 .th-blue{--ac:#3b8cff}.th-green{--ac:#16b883}.th-violet{--ac:#7c5cff}.th-cyan{--ac:#14b8d4}.th-orange{--ac:#f08a24}.th-pink{--ac:#e0479e}.th-coral{--ac:#ef5b5b}
 @media (prefers-reduced-motion:reduce){.stv *{animation-duration:.01ms!important;animation-iteration-count:1!important}.stv .prog div i.run{animation-duration:var(--dur)!important}}
+
+/* Version PC : panneau centré au format téléphone */
+.stv-modal{position:fixed;inset:0;z-index:2147483000;background:rgba(2,6,22,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;animation:stv-fade .25s ease both}
+@keyframes stv-fade{from{opacity:0}}
+.stv-panel{position:relative;width:min(430px,94vw);height:min(840px,94vh);border-radius:30px;overflow:hidden;box-shadow:0 0 0 1px rgba(110,161,255,.5),0 40px 100px rgba(0,0,0,.7),0 0 80px rgba(59,140,255,.25)}
+.stv.stv-panelled{position:absolute;inset:0;z-index:1;animation:none}
+.stv.stv-panelled .prog{padding-top:14px}
+.stv.stv-panelled .cta{margin-bottom:22px}
+.stv-modal .stv .zl,.stv-modal .stv .zr{cursor:pointer}
+
+.tln-hd-exp{position:absolute;top:-11px;right:-11px;z-index:6;width:30px;height:30px;border-radius:50%;border:2px solid #070d2b;background:linear-gradient(135deg,#3b8cff,#6a5cff);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 14px rgba(59,140,255,.8);transition:transform .2s;padding:0}
+.tln-hd-exp:hover{transform:scale(1.14)}

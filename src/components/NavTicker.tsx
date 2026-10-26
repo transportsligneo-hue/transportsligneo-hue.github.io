@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VroomyAvatar } from "@/components/VroomyAvatar";
 import { Scene, isScene } from "@/components/NavScenes";
 import logoDriver from "@/assets/logo-driver.png.asset.json";
+import { StoriesModal } from "@/components/mobile/stories/StoriesViewer";
 
 type Theme = "blue" | "green" | "violet" | "cyan" | "orange" | "pink";
 type ArtKind = "driver" | "gps" | "shield" | "quote" | "vroomy" | "invoice" | "plate" | "code" | "linkedin" | "wheel" | "google" | "photo" | "verified" | "card" | "api" | "demo";
@@ -167,6 +168,9 @@ function Art({ kind }: { kind: ArtKind }) {
 
 const INTERVAL = 3000;
 
+/** Position de l'annonce dans les stories (voir StoriesViewer) : le panneau s'ouvre sur l'annonce affichée. */
+const STORY_FOR_ART: Partial<Record<ArtKind, number>> = { driver: 0, gps: 1, shield: 2, plate: 3, code: 4, quote: 5, photo: 6, vroomy: 7, google: 8, linkedin: 9, wheel: 10, verified: 11, card: 12, api: 13, demo: 14, invoice: 15 };
+
 /** Texte entier toujours lisible : s'il dépasse, il défile doucement jusqu'à sa fin. */
 function Marq({ cls, text }: { cls: string; text: string }) {
   const outer = useRef<HTMLSpanElement>(null);
@@ -211,6 +215,8 @@ export default function NavTicker() {
   const [pos, setPos] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reviewUrl, setReviewUrl] = useState(GOOGLE_FALLBACK);
+  const [storiesOpen, setStoriesOpen] = useState(false);
+  const [storiesStart, setStoriesStart] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
 
   // Netteté : recale la pub sur un pixel entier (le centrage automatique peut tomber sur un demi-pixel => texte flou)
@@ -254,10 +260,10 @@ export default function NavTicker() {
   }, []);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || storiesOpen) return;
     const t = setInterval(() => setPos((p) => (p + 1) % MESSAGES.length), INTERVAL);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, storiesOpen]);
 
   const N = MESSAGES.length;
   const cur = ((pos % N) + N) % N;
@@ -284,6 +290,7 @@ export default function NavTicker() {
   );
 
   return (
+    <>
     <div
       ref={boxRef}
       className={`tln-hd tln-hd--${m.theme}`}
@@ -323,8 +330,13 @@ export default function NavTicker() {
         <s key={`c${pos}`} className="tln-hd-car">{CAR}</s>
         <b className="tln-hd-pin" />
       </span>
+      <button type="button" className="tln-hd-exp" aria-label="Agrandir : voir les annonces en stories" title="Voir en stories" onClick={(e) => { stop(e); setStoriesStart(STORY_FOR_ART[m.art] ?? 0); setStoriesOpen(true); }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" /></svg>
+      </button>
       <button type="button" className="tln-hd-nav tln-hd-nav--prev" aria-label="Actualité précédente" onClick={(e) => { stop(e); go(cur - 1); }}>‹</button>
       <button type="button" className="tln-hd-nav tln-hd-nav--next" aria-label="Actualité suivante" onClick={(e) => { stop(e); go(cur + 1); }}>›</button>
     </div>
+    <StoriesModal open={storiesOpen} start={storiesStart} onClose={() => setStoriesOpen(false)} />
+    </>
   );
 }
