@@ -1,3 +1,4 @@
+import { VehicleMetaRow } from "@/components/mission/VehicleMetaRow";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { confirmToast } from "@/lib/confirm-toast";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
@@ -356,6 +357,7 @@ function AdminMissionsUnified() {
         facture: t.mission_id ? factureByMission.get(t.mission_id) ?? null : null,
         vin: t.vin ?? t.vehicule_vin ?? null,
         energie: t.vehicule_energie ?? null,
+        type: t.vehicule_type ?? null,
         missionId: t.mission_id ?? null,
       });
     });
@@ -1059,29 +1061,23 @@ function AdminMissionsUnified() {
                           ) : (
                             <span className="text-[11px] text-[var(--a6-dim)]">—</span>
                           )}
-                          {meta.get(r.m.id)?.vin && (
-                            <p className="mt-0.5 a6-mono text-[10px] text-[var(--a6-dim)]">VIN {meta.get(r.m.id)?.vin}</p>
-                          )}
                         </td>
                       )}
 
                       {show("vehicule") && (
                         <td className="text-[11.5px] text-[var(--a6-muted)]">
-                          <span className="inline-flex items-center gap-1">
-                            {isElectric(meta.get(r.m.id)?.energie, r.m.marque, r.m.modele) ? (
-                              <Zap size={11} className="text-emerald-600" />
-                            ) : (
-                              <Fuel size={11} className="text-[var(--a6-dim)]" />
-                            )}
+                          <span className="font-semibold text-[#14161c]">
                             {[r.m.marque, r.m.modele].filter(Boolean).join(" ") || "—"}
-                            <ElectricBadge
-                              energie={meta.get(r.m.id)?.energie}
-                              marque={r.m.marque}
-                              modele={r.m.modele}
-                              variant="light"
-                              compact
-                            />
                           </span>
+                          <VehicleMetaRow
+                            energie={meta.get(r.m.id)?.energie}
+                            alt={[(r.m as { carburant?: string | null }).carburant]}
+                            marque={r.m.marque}
+                            modele={r.m.modele}
+                            type={meta.get(r.m.id)?.type}
+                            vin={meta.get(r.m.id)?.vin}
+                            showUnknown
+                          />
                         </td>
                       )}
 

@@ -28,6 +28,8 @@ export interface MissionMeta {
   facture: FactureLite | null;
   vin: string | null;
   energie: string | null;
+  /** Type de véhicule (SUV, berline…) */
+  type?: string | null;
   missionId: string | null;
   attributionId?: string | null;
 }

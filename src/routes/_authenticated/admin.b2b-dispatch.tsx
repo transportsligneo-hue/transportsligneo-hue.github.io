@@ -49,7 +49,7 @@ const STATUS_LABELS: Record<string, string> = {
   a_dispatcher: "À dispatcher",
   attribue: "Attribué",
   en_cours: "En cours",
-  termine: "Terminé",
+  termine: "Terminée",
   annule: "Annulé",
 };
 

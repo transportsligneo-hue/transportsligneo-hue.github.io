@@ -1,3 +1,4 @@
+import { VehicleMetaRow } from "@/components/mission/VehicleMetaRow";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,10 +76,10 @@ interface Attribution {
     mission_group_id?: string | null; leg_type?: string | null; leg_index?: number | null;
     archived_at?: string | null;
     marque?: string | null; modele?: string | null; immatriculation?: string | null;
-    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
+    vehicule_immatriculation?: string | null; vin?: string | null; vehicule_vin?: string | null; vehicule_energie?: string | null; vehicule_type?: string | null;
     options_meta?: unknown;
     devis_id?: string | null;
-    devis?: { vehicules?: DevisVehicule[] | null } | null;
+    devis?: { carburant?: string | null; type_vehicule?: string | null; vehicules?: DevisVehicule[] | null } | null;
     prix?: number | null;
     numero_mission?: string | null;
     commande_ref?: string | null;
@@ -129,18 +130,18 @@ const statutLabels: Record<string, string> = {
   en_attente_validation: "En attente validation",
   validee: "Terminée",
   refusee: "Refusée",
-  termine: "Terminé",
+  termine: "Terminée",
   annule: "Annulé",
 };
 
 // Une couleur par statut d'attribution (voir .dvx-badge dans styles.css)
 const ATTR_BADGE_TONE: Record<string, string> = {
   propose: "cyan", accepte: "blue", en_cours: "violet", en_attente_validation: "pink",
-  validee: "teal", termine: "green", annule: "red", refuse: "grey", refusee: "grey",
+  validee: "teal", termine: "teal", annule: "red", refuse: "grey", refusee: "grey",
 };
 const ATTR_DRAWER_TONE: Record<string, "blue" | "green" | "amber" | "red" | "slate" | "purple" | "cyan" | "pink" | "teal" | "indigo"> = {
   propose: "cyan", accepte: "blue", en_cours: "purple", en_attente_validation: "pink",
-  validee: "teal", termine: "green", annule: "red", refuse: "slate", refusee: "slate",
+  validee: "teal", termine: "teal", annule: "red", refuse: "slate", refusee: "slate",
 };
 
 const vueLabels: Record<string, string> = {
@@ -466,7 +467,7 @@ function AdminAttributions() {
   const fetchAttributions = useCallback(async () => {
     const { data, error } = await supabase
       .from("attributions")
-      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, archived_at, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, commande_ref, devis:devis(vehicules)), convoyeur:convoyeurs(nom, prenom)")
+      .select("id, trajet_id, convoyeur_id, statut, etape_courante, numero_mission, created_at, trajet:trajets(depart, arrivee, date_trajet, heure_trajet, statut, statut_publication, archived_at, client_nom, client_email, client_telephone, is_test_data, mission_group_id, leg_type, leg_index, marque, modele, immatriculation, vehicule_immatriculation, vin, vehicule_vin, vehicule_energie, vehicule_type, options_meta, devis_id, prix, numero_mission, commande_ref, devis:devis(vehicules, carburant, type_vehicule)), convoyeur:convoyeurs(nom, prenom)")
       .order("created_at", { ascending: false });
     if (error) {
       console.error("[admin.attributions] fetch error", error);
@@ -771,7 +772,7 @@ function AdminAttributions() {
                             immatriculation: ownPlate,
                             marque: a.trajet?.marque,
                             modele: a.trajet?.modele,
-                            vin: a.trajet?.vin,
+                            vin: a.trajet?.vin ?? a.trajet?.vehicule_vin,
                             energie: a.trajet?.vehicule_energie,
                             type: a.trajet?.vehicule_type,
                           }];
@@ -780,9 +781,9 @@ function AdminAttributions() {
                     return (
                       <div className="space-y-1.5">
                         {list.map((v, i) => {
-                          const e = (v.energie ?? "").toLowerCase();
                           return (
-                            <div key={`${v.immatriculation ?? i}-${i}`} className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <div key={`${v.immatriculation ?? i}-${i}`}>
+                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                               {v.immatriculation ? (
                                 <PlateBadge plate={v.immatriculation} size="sm" />
                               ) : (
@@ -795,13 +796,8 @@ function AdminAttributions() {
                                   {[v.marque, v.modele].filter(Boolean).join(" ")}
                                 </span>
                               )}
-                              {v.type && <span className="dvx-badge grey">{v.type}</span>}
-                              {(e.includes("lec") || e === "ev") && (
-                                <span className="dvx-badge green">Électrique</span>
-                              )}
-                              {v.vin && (
-                                <span className="dvx-vin" title="VIN">VIN {v.vin.slice(-8)}</span>
-                              )}
+                             </div>
+                             <VehicleMetaRow energie={v.energie} alt={[a.trajet?.devis?.carburant]} marque={v.marque} modele={v.modele} type={v.type ?? a.trajet?.devis?.type_vehicule} vin={v.vin} showUnknown />
                             </div>
                           );
                         })}

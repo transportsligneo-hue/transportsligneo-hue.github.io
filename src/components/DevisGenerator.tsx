@@ -1,3 +1,4 @@
+import { resolveMotorisation } from "@/lib/vehicle-meta";
 import { useState, useMemo, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import EstimatorLine from "@/components/devis/EstimatorLine";
@@ -237,7 +238,15 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
         if (d.puissance) setPuissance(d.puissance);
         if (d.finition) setFinition(d.finition);
         if (d.energie) {
-          setEnergy(ENERGY_TYPES.some(e => e.value === d.energie) ? d.energie : "essence");
+          const mk = resolveMotorisation([d.energie, d.carburant], d.marque, d.modele).kind;
+          setEnergy(
+            ENERGY_TYPES.some(e => e.value === d.energie) ? d.energie
+              : mk === "electrique" ? "electrique"
+              : mk === "hybride" || mk === "hybride_rechargeable" ? "hybride"
+              : "essence",
+          );
+        } else if (resolveMotorisation([d.carburant], d.marque, d.modele).kind === "electrique") {
+          setEnergy("electrique");
         } else if (d.carburant) {
           const c = d.carburant.toLowerCase();
           if (c.includes("diesel") || c.includes("go") || c.includes("gazole")) setEnergy("diesel");

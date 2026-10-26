@@ -206,7 +206,7 @@ const statutLabels: Record<string, string> = {
   en_cours: "En cours",
   en_attente_validation: "En attente de validation",
   validee: "Validée",
-  termine: "Terminé",
+  termine: "Terminée",
   annule: "Annulé",
 };
 

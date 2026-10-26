@@ -99,7 +99,7 @@ const statutLabels: Record<string, string> = {
   attribue: "Attribué",
   accepte: "Accepté",
   en_cours: "En cours",
-  termine: "Terminé",
+  termine: "Terminée",
   annule: "Annulé",
 };
 

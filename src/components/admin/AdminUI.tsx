@@ -166,7 +166,7 @@ export const attributionStatutTone: Record<string, BadgeTone> = {
   en_attente_validation: "pink",
   validee: "teal",
   refusee: "neutral",
-  termine: "success",
+  termine: "teal",
   annule: "neutral",
 };
 export const devisStatutTone: Record<string, BadgeTone> = {
