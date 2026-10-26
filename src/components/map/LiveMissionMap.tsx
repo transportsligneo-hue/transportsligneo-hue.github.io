@@ -1,4 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Maximize2, X, Radio } from "lucide-react";
 import type { LiveMissionMapProps } from "./types";
 
 export type { LiveGpsPoint, LiveMissionMapProps } from "./types";
@@ -25,17 +27,76 @@ function Skeleton({ className }: { className?: string }) {
  * Utilise Mapbox GL JS dès que VITE_MAPBOX_TOKEN est disponible,
  * sinon bascule automatiquement sur le rendu Leaflet/OSM historique.
  */
-export function LiveMissionMap(props: LiveMissionMapProps) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return <Skeleton className={props.className} />;
-
+function MapImpl(props: LiveMissionMapProps) {
   const Impl = hasMapbox ? MapboxImpl : LeafletImpl;
   return (
     <Suspense fallback={<Skeleton className={props.className} />}>
       <Impl {...props} />
     </Suspense>
+  );
+}
+
+/**
+ * Sur téléphone (espaces client, flotte, admin) : la carte est compacte et ne capte pas le défilement ;
+ * un appui ouvre une page plein écran avec le GPS en direct, façon application.
+ */
+export function LiveMissionMap(props: LiveMissionMapProps) {
+  const [mounted, setMounted] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [full, setFull] = useState(false);
+  const holder = useRef<HTMLDivElement>(null);
+  useEffect(() => setMounted(true), []);
+
+  const eligible = !props.hideOverlay && !props.fleet && !props.worldOverview;
+  useEffect(() => {
+    if (!mounted || !eligible) return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setCompact(mq.matches && !!holder.current?.closest(".dash-main-mobile"));
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [mounted, eligible]);
+
+  // Bouton « retour » du téléphone : ferme le plein écran
+  useEffect(() => {
+    if (!full) return;
+    history.pushState({ lgMap: 1 }, "");
+    const onPop = () => setFull(false);
+    window.addEventListener("popstate", onPop);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      document.body.style.overflow = prev;
+    };
+  }, [full]);
+  const closeFull = () => { if (history.state?.lgMap) history.back(); else setFull(false); };
+
+  if (!mounted) return <Skeleton className={props.className} />;
+  if (!compact) return <div ref={holder} className="contents"><MapImpl {...props} /></div>;
+
+  if (full) {
+    return createPortal(
+      <div className="lgmap-full" role="dialog" aria-modal="true" aria-label="Suivi GPS en direct">
+        <div className="lgmap-full-bar">
+          <button type="button" onClick={closeFull} aria-label="Fermer"><X size={22} /></button>
+          <div><b>{props.title || "Suivi GPS en direct"}</b><span><Radio size={12} /> Position en temps réel</span></div>
+        </div>
+        <div className="lgmap-full-map"><MapImpl {...props} className="absolute inset-0 !rounded-none" /></div>
+      </div>,
+      document.body,
+    );
+  }
+
+  return (
+    <div ref={holder} className="lgmap-compact">
+      <div className="lgmap-compact-map" aria-hidden="true">
+        <MapImpl {...props} hideOverlay className="absolute inset-0 !rounded-none" />
+      </div>
+      <button type="button" className="lgmap-compact-hit" onClick={() => setFull(true)} aria-label="Ouvrir le suivi GPS en plein écran">
+        <span className="lgmap-compact-cta"><Maximize2 size={16} /> Voir le GPS en direct</span>
+      </button>
+    </div>
   );
 }
 

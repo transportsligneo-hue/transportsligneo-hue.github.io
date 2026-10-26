@@ -136,3 +136,22 @@
   html body .dash-main-mobile { padding-bottom: env(safe-area-inset-bottom); }
 }
 @keyframes lgmUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ============================================================
+   CARTE GPS — mobile : carte compacte cliquable + page plein écran
+   ============================================================ */
+.lgmap-compact { position: relative; width: 100%; height: 230px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 28px -14px rgba(11,42,107,.45); border: 1px solid #dfe6fb; background: #eef2fb; }
+.lgmap-compact-map { position: absolute; inset: 0; pointer-events: none; }
+.lgmap-compact-hit { position: absolute; inset: 0; width: 100%; border: 0; background: linear-gradient(180deg, rgba(8,20,48,0) 55%, rgba(8,20,48,.55)); display: flex; align-items: flex-end; justify-content: center; padding: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.lgmap-compact-cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px; background: linear-gradient(135deg, #1f4dff, #4f9dff); color: #fff; font: 700 14.5px Poppins, sans-serif; box-shadow: 0 12px 24px -10px rgba(31,77,255,.9); }
+.lgmap-compact-hit:active .lgmap-compact-cta { transform: scale(.97); }
+
+.lgmap-full { position: fixed; inset: 0; z-index: 2147482000; display: flex; flex-direction: column; background: #fff; font-family: Poppins, sans-serif; animation: lgmapIn .26s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes lgmapIn { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.lgmap-full-bar { display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px; background: #fff; border-bottom: 1px solid #e3e9f7; }
+.lgmap-full-bar button { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid #cfdcf0; background: #fff; color: #0b2a6b; display: grid; place-items: center; }
+.lgmap-full-bar div { display: flex; flex-direction: column; min-width: 0; }
+.lgmap-full-bar b { font-size: 16px; font-weight: 800; color: #0b2342; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lgmap-full-bar span { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #1f4dff; }
+.lgmap-full-map { position: relative; flex: 1; min-height: 0; padding-bottom: env(safe-area-inset-bottom); }
+.lgmap-full-map .ligneo-mbx { height: 100%; }

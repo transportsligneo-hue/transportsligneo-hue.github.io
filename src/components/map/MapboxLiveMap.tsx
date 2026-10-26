@@ -760,7 +760,7 @@ export function MapboxLiveMap({
               >
                 <BadgeCheck size={18} style={{ color: "#2ee671", filter: "drop-shadow(0 0 5px rgba(46,230,113,.8))" }} />
               </span>
-              <div className="min-w-0">
+              <div className="min-w-[8.5rem] flex-1">
                 <p className="text-[13px] font-extrabold tracking-wide text-white" style={{ textShadow: "0 0 10px rgba(46,230,113,.45)" }}>
                   Mission terminée
                 </p>
