@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { checkMinNotice } from "@/lib/min-notice";
 import { kmBasePrice, kmRateLabel } from "@/lib/km-tarif";
 import { Button } from "@/components/ui/button";
+import { BlockHint } from "@/components/devis/BlockHint";
 
 type ClientType = "particulier" | "pro_ponctuel" | "pro_recurrent" | "flotte";
 
@@ -449,11 +450,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     !date && "la date", !heure && "l'heure",
   ].filter(Boolean) as string[];
   const blockReason = noticeBlock ?? (!isComplete ? `Pour continuer, indiquez ${missingParts.join(", ").replace(/, ([^,]*)$/, " et $1")}.` : "");
-  const blockNote = blockReason ? (
-    <p role="status" className="dg-block-note mt-3 text-[13px] leading-snug font-medium rounded-xl px-3 py-2.5 border border-[#1f4dff]/30 bg-[#eaf0ff] text-[#0b2a6b]">
-      <span aria-hidden="true">ⓘ </span>{blockReason}
-    </p>
-  ) : null;
+  const blockNote = blockReason ? <BlockHint text={blockReason} className="zx-q-inline" /> : null;
 
   // Majoration hors horaires / week-end : +30 % si livraison avant 8h, après 19h, samedi ou dimanche
   const offHours = useMemo(() => {

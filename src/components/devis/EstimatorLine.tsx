@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import PlacesInput from "@/components/PlacesInput";
 import { GoogleG } from "@/components/mobile/MobileIcons";
 import { GOOGLE_RATING } from "@/lib/google-reviews";
+import { BlockHint } from "@/components/devis/BlockHint";
 
 /**
  * Estimateur « La ligne » (accueil, variante flat-mini).
@@ -234,6 +235,7 @@ export default function EstimatorLine(p: EstimatorLineProps) {
         <div className="zx-sp" />
 
         <div className="zx-price" aria-live="polite">
+          {p.blockReason && !p.canContinue && <BlockHint text={p.blockReason} />}
           <span>Votre estimation</span>
           <strong><b style={{ font: "inherit" }}>{on ? shown : "—"}</b><small>€</small></strong>
           <em>{sub}</em>
@@ -243,8 +245,6 @@ export default function EstimatorLine(p: EstimatorLineProps) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
         </button>
       </div>
-
-      {p.blockReason && <p className="zx-block" role="status"><i aria-hidden="true">i</i>{p.blockReason}</p>}
 
       <div className="zx-foot">
         <a className="zx-gr" href="https://www.google.com/maps/search/?api=1&query=Transports%20Ligneo%20Tours" target="_blank" rel="noopener noreferrer" aria-label={`Note Google : ${String(GOOGLE_RATING).replace(".", ",")} sur 5, voir les avis`}>

@@ -7,6 +7,7 @@ import logoDriver from "@/assets/logo-driver.png.asset.json";
 import ThemePreference from "@/components/ThemePreference";
 import OctobreRoseBadge from "@/components/marketing/OctobreRoseBadge";
 import { Button } from "@/components/ui/button";
+import StoriesButton from "@/components/mobile/stories/StoriesViewer";
 import "@/styles/mobile-home-v2.css";
 
 type NavAccent = "b2b" | undefined;
@@ -63,6 +64,7 @@ export default function MobileNavbar() {
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-2">
+            <StoriesButton />
             <Link to="/contact" className="mh2-phone md:hidden" aria-label="Contacter Transports Ligneo">
               <Phone size={17} strokeWidth={2.3} />
             </Link>

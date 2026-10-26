@@ -593,8 +593,16 @@ html:root body .dg-journey .plate-search:disabled{opacity:.55}
 
 /* Fermeture des fenêtres (mobile) + message « pourquoi je ne peux pas continuer » */
 .zx-back,.zx-x{display:none}
-.zx-block{display:flex;gap:9px;align-items:center;margin:10px 0 0;padding:8px 12px;border-radius:12px;background:rgba(120,165,255,.10);border:1px solid rgba(120,165,255,.30);color:#cfe0ff;font:500 12.5px/1.35 Poppins,Inter,sans-serif;width:fit-content;max-width:100%}
-.zx-block i{flex:0 0 18px;height:18px;border-radius:50%;background:transparent;border:1.5px solid #6ea2ff;color:#6ea2ff;font:800 11px/15px Poppins,sans-serif;text-align:center;font-style:normal}
-html.theme-light .zx-block{background:#eef3ff;border-color:rgba(31,77,255,.28);color:#0b2a6b}
-html.theme-light .zx-block i{border-color:#1f4dff;color:#1f4dff}
+.zx-price{position:relative}
+.zx-q-wrap{position:relative;display:inline-flex}
+.zx-price>.zx-q-wrap{position:absolute;left:0;top:2px;z-index:5}
+.zx-q-wrap.zx-q-inline{margin-top:10px}
+.zx .zx-q,.zx-q{width:24px;height:24px;border-radius:50%;padding:0;display:grid;place-items:center;cursor:pointer;border:1.5px solid rgba(110,162,255,.7);background:rgba(110,162,255,.12);color:#9cc0ff;font:700 13px/1 Poppins,sans-serif;transition:background .2s,box-shadow .2s,color .2s!important}
+.zx .zx-q:hover,.zx .zx-q[aria-expanded="true"],.zx-q:hover,.zx-q[aria-expanded="true"]{background:#2f5fff;color:#fff;border-color:#6ea2ff;box-shadow:0 0 14px rgba(79,139,255,.7)}
+.zx-qpop{position:absolute;left:-4px;bottom:calc(100% + 10px);width:max-content;max-width:min(270px,72vw);padding:11px 14px;border-radius:13px;background:#0d1d4d;border:1px solid rgba(120,165,255,.5);color:#e4eeff;font:500 12.5px/1.4 Poppins,Inter,sans-serif;text-align:left;text-transform:none;letter-spacing:0;white-space:normal;box-shadow:0 14px 34px rgba(0,8,40,.55);z-index:60;animation:zxqin .18s ease}
+.zx-qpop:after{content:"";position:absolute;left:11px;top:100%;border:7px solid transparent;border-top-color:#0d1d4d}
+@keyframes zxqin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+html.theme-light .zx-q{background:#eef3ff;color:#1f4dff;border-color:rgba(31,77,255,.5)}
+html.theme-light .zx-qpop{background:#fff;color:#0b2a6b;border-color:rgba(31,77,255,.3)}
+html.theme-light .zx-qpop:after{border-top-color:#fff}
 .zx-go:disabled{cursor:not-allowed}
