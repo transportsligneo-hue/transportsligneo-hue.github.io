@@ -60,29 +60,39 @@ export function DriverUpdateGate() {
   const [native, setNative] = useState(false);
 
   const check = useCallback(async () => {
+    let row: DriverUpdate | null = null;
     try {
-      const { data } = await db.from("driver_app_updates").select("id, version, titre, message, store_url").eq("active", true).maybeSingle();
-      const row = data as DriverUpdate | null;
-      if (!row) { setUpd(null); return; }
-      if (Capacitor.isNativePlatform()) {
+      const { data, error } = await db.from("driver_app_updates").select("id, version, titre, message, store_url").eq("active", true).maybeSingle();
+      if (error) { console.warn("[mise à jour Driver] lecture impossible :", error); return; }
+      row = data as DriverUpdate | null;
+    } catch (e) { console.warn("[mise à jour Driver] réseau :", e); return; } // jamais de blocage sur une erreur réseau
+    if (!row) { setUpd(null); return; }
+
+    const isApp = Capacitor.isNativePlatform() || /LigneoDriverApp/i.test(navigator.userAgent);
+    if (isApp) {
+      // Version installée. Si le téléphone ne sait pas la donner (ancienne build), on la considère dépassée :
+      // la fenêtre s'affiche et le bouton envoie sur Google Play.
+      let cur = "";
+      try {
         const { App } = await import("@capacitor/app");
-        const cur = String((await App.getInfo()).version || "");
-        setNative(true);
-        setUpd(cur && compareVersions(cur, row.version) < 0 ? row : null);
-      } else {
-        let ack = "";
-        try { ack = localStorage.getItem(ACK_KEY) || ""; } catch { /* */ }
-        setNative(false);
-        setUpd(ack === row.id ? null : row);
-      }
-    } catch { /* silencieux : on ne bloque jamais sur une erreur réseau */ }
+        cur = String((await App.getInfo()).version || "");
+      } catch (e) { console.warn("[mise à jour Driver] version installée introuvable :", e); }
+      setNative(true);
+      setUpd(!cur || compareVersions(cur, row.version) < 0 ? row : null);
+    } else {
+      let ack = "";
+      try { ack = localStorage.getItem(ACK_KEY) || ""; } catch { /* */ }
+      setNative(false);
+      setUpd(ack === row.id ? null : row);
+    }
   }, []);
 
   useEffect(() => {
     void check();
     const onVis = () => { if (document.visibilityState === "visible") void check(); };
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+    const iv = window.setInterval(() => void check(), 5 * 60_000);
+    return () => { document.removeEventListener("visibilitychange", onVis); window.clearInterval(iv); };
   }, [check]);
 
   if (!upd) return null;

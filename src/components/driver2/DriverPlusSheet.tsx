@@ -39,11 +39,11 @@ export function DriverPlusSheet({ onClose }: { onClose: () => void }) {
     let alive = true;
     void (async () => {
       try {
-        if (!Capacitor.isNativePlatform()) { if (alive) setVersion("web"); return; }
+        if (!Capacitor.isNativePlatform() && !/LigneoDriverApp/i.test(navigator.userAgent)) { if (alive) setVersion("web"); return; }
         const { App } = await import("@capacitor/app");
         const info = await App.getInfo();
         if (alive) setVersion(String(info.version || ""));
-      } catch { if (alive) setVersion(null); }
+      } catch { if (alive) setVersion("?"); }
     })();
     return () => { alive = false; };
   }, []);
@@ -94,7 +94,7 @@ export function DriverPlusSheet({ onClose }: { onClose: () => void }) {
           </div>
 
           {version && (
-            <p className="pl-ver">Ligneo Driver · {version === "web" ? "version web" : `version ${version}`}</p>
+            <p className="pl-ver">Ligneo Driver · {version === "web" ? "version web" : version === "?" || !version ? "version non détectée" : `version ${version}`}</p>
           )}
         </div>
       </div>
