@@ -1,3 +1,4 @@
+import "./vroomy-small.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { Send, X, Phone, Calculator, MapPin, FileDown, BellOff, Bell, ClipboardList, MessageCircle } from "lucide-react";
@@ -155,6 +156,8 @@ const GREET_STEPS = [
 
 export default function AssistantIaWidget() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Accueil : Vroomy complet (messages, grosse entrée). Autres pages : petit, rangé vite sur le côté, sans message.
+  const isHome = pathname === "/";
   const [open, setOpen] = useState(false);
   const [chatTab, setChatTab] = useState<"vroomy" | "conseiller">("vroomy");
   const [notif, setNotif] = useState(true);
@@ -164,6 +167,7 @@ export default function AssistantIaWidget() {
   // Message d'accueil (1re visite de la session) : attend la fin du bandeau cookies, reste 8 s, s'efface en douceur,
   // puis (mobile) Vroomy se range sur le côté.
   useEffect(() => {
+    if (!isHome) { setGreet(false); return; }
     if (sessionStorage.getItem("vroomy-greet")) return;
     const t0 = Date.now();
     let t1 = 0; let t1b = 0; let t2 = 0; let t3 = 0;
@@ -183,7 +187,7 @@ export default function AssistantIaWidget() {
       }, 8000);
     }, 400);
     return () => { window.clearInterval(iv); window.clearTimeout(t1); window.clearTimeout(t1b); window.clearTimeout(t2); window.clearTimeout(t3); };
-  }, []);
+  }, [isHome]);
   const [messages, setMessages] = useState<ChatMsg[]>([{ role: "assistant", content: WELCOME }]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -208,21 +212,28 @@ export default function AssistantIaWidget() {
   const [intro, setIntro] = useState(false);
   useEffect(() => {
     setIntro(false);
+    if (!isHome) return;
     let r2 = 0;
     const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setIntro(true)); });
     return () => { cancelAnimationFrame(r1); if (r2) cancelAnimationFrame(r2); };
-  }, [pathname]);
+  }, [pathname, isHome]);
 
   // Mobile uniquement : après ~6 s, Vroomy se range sur le côté, il ne reste qu'une petite languette
   const [docked, setDocked] = useState(false);
   useEffect(() => {
     setDocked(false);
-    if (typeof window === "undefined" || !window.matchMedia("(max-width: 640px)").matches) return;
+    if (typeof window === "undefined") return;
+    // Pages autres que l'accueil (PC et mobile) : Vroomy se range sur le côté au bout de 3 s
+    if (!isHome) {
+      const t = setTimeout(() => setDocked(true), 3000);
+      return () => clearTimeout(t);
+    }
+    if (!window.matchMedia("(max-width: 640px)").matches) return;
     // 1re visite : c'est le message d'accueil qui range Vroomy une fois terminé
     if (!sessionStorage.getItem("vroomy-greet")) return;
     const t = setTimeout(() => setDocked(true), 6500);
     return () => clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, isHome]);
   useEffect(() => { if (open) setDocked(false); }, [open]);
 
   const hidden = HIDDEN_PREFIXES.some((p) => pathname.startsWith(p));
@@ -479,18 +490,18 @@ export default function AssistantIaWidget() {
       <Button variant="ghost"
         type="button"
         ref={launcherRef}
-        className={`vrm-launcher vrm-chat-launcher vrm-launcher-animated${intro ? " vrm-intro" : ""}${docked ? " vrm-docked" : ""}`}
+        className={`vrm-launcher vrm-chat-launcher vrm-launcher-animated${intro ? " vrm-intro" : ""}${docked ? " vrm-docked" : ""}${isHome ? "" : " vrm-small"}`}
         aria-label="Ouvrir Vroomy, l'assistant Transports Ligneo"
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => { setGreet(false); setOpen((o) => !o); }}
         style={{ display: open ? "none" : undefined }}
       >
-        <VroomyAvatar size={88} talking={typing} />
+        <VroomyAvatar size={isHome ? 88 : 62} talking={typing} />
         <span className="vroomy-badge" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9l-5 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" fill="#2f5fff"/><g fill="#fff"><circle className="vroomy-dot" cx="8.5" cy="11" r="1.4"/><circle className="vroomy-dot" cx="12" cy="11" r="1.4"/><circle className="vroomy-dot" cx="15.5" cy="11" r="1.4"/></g></svg>
         </span>
-        {greet && !open && (
+        {isHome && greet && !open && (
           <span key={greetStep} className={`vroomy-greet${greetOut ? " is-out" : ""}`} aria-hidden="true">
             {GREET_STEPS[greetStep]}
           </span>

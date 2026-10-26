@@ -1,0 +1,4 @@
+/* Vroomy sur les pages autres que l'accueil : plus petit (rangé sur le côté au bout de 3 s) */
+.vrm-launcher.vrm-chat-launcher.vrm-small { width: 62px; height: 62px; }
+.vrm-launcher.vrm-chat-launcher.vrm-small .vroomy-badge { transform: scale(.8); transform-origin: 100% 100%; }
+@media (max-width: 640px) { .vrm-launcher.vrm-chat-launcher.vrm-small { width: 58px; height: 58px; } }
