@@ -7337,10 +7337,11 @@ html.theme-light .theme-pref--compact .theme-pref-btn.is-active { color: #ffffff
 /* ============ SERVICES : onglets Particuliers / Professionnels ============ */
 /* Hauteur réservée sous la barre de navigation fixe (mobile / tablette par défaut) */
 .r4-page { --tln-nav-h: 122px; }
-@media (min-width: 1280px) { .r4-page { --tln-nav-h: 92px; } }
+/* PC : la barre flottante fait ~120 px de haut → on réserve 124 px + un vrai espace (les onglets ne la touchent plus) */
+@media (min-width: 1280px) { .r4-page { --tln-nav-h: 124px; } }
 .r4-page .v4-tabs {
   display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
-  padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 28px) 16px 0;
+  padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 36px) 16px 0;
 }
 
 .r4-page .v4-tab { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:999px;
