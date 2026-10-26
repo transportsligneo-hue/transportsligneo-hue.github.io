@@ -5,7 +5,10 @@
 @keyframes mtn-slide{0%{margin-left:-40%}100%{margin-left:100%}}
 @keyframes mtn-ring{0%{transform:scale(.96);opacity:1}100%{transform:scale(1.12);opacity:0}}
 
-.mtn-bn-wrap{position:sticky;top:0;z-index:70}
+/* Bandeau collé en haut de l'écran en permanence (le « sticky » décrochait au défilement et laissait la barre du site flotter au milieu) */
+.mtn-bn-wrap{position:fixed;top:0;left:0;right:0;z-index:1000}
+/* La page démarre sous le bandeau, la barre du site se place juste en dessous */
+html[data-maint-banner] body{padding-top:var(--mt-h,0)}
 html[data-maint-banner] .tln-shell{top:var(--mt-h,0)!important}
 html[data-maint-banner] header.safe-top{top:var(--mt-h,0)!important}
 
