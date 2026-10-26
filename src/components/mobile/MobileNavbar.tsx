@@ -17,6 +17,7 @@ const links: ReadonlyArray<{ to: string; label: string; accent?: NavAccent; sear
   { to: "/comment-ca-marche", label: "Comment ça marche" },
   { to: "/tarifs", label: "Tarifs" },
   { to: "/a-propos", label: "À propos" },
+  { to: "/remarketing", label: "Ligneo Remarketing" },
   { to: "/suivi", label: "Suivre mon véhicule" },
 ] as const;
 

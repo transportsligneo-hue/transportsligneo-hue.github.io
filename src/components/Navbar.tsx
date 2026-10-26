@@ -23,6 +23,7 @@ const proSubLinks: ReadonlyArray<{ to: string; label: string; demo?: boolean }> 
   { to: "/concessionnaires", label: "Concessions" },
   { to: "/loueurs", label: "Loueurs" },
   { to: "/gestionnaires-flotte", label: "Gestionnaires de flotte" },
+  { to: "/remarketing", label: "Ligneo Remarketing" },
   { to: "/developpeurs", label: "API" },
   { to: "/login", label: "Espace Pro" },
   { to: "/demo-pro", label: "Demander une démo", demo: true },
@@ -108,6 +109,7 @@ export default function Navbar({ driverBadge = false }: { driverBadge?: boolean 
                         <Link to="/tarifs">Tarifs & estimation</Link>
                         <Link to="/convoyage">Trajets & prix</Link>
                         <Link to="/suivi">Suivre mon véhicule</Link>
+                        <Link to="/remarketing">Ligneo Remarketing</Link>
                         <div className="tln-dd-brochures" aria-label="Brochure particuliers à télécharger">
                           <span className="tln-dd-brochures-label">Brochure PDF</span>
                           <a href={particulierBrochure.file.url} download={particulierBrochure.filename} type="application/pdf" aria-label="Télécharger la brochure Particuliers">

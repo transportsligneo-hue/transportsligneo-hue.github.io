@@ -36,6 +36,7 @@ import { Route as LoueursRouteImport } from './routes/loueurs'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as ProRouteImport } from './routes/pro'
+import { Route as RemarketingRouteImport } from './routes/remarketing'
 import { Route as ReserverRouteImport } from './routes/reserver'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -368,6 +369,11 @@ const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
 const ProRoute = ProRouteImport.update({
   id: '/pro',
   path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RemarketingRoute = RemarketingRouteImport.update({
+  id: '/remarketing',
+  path: '/remarketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReserverRoute = ReserverRouteImport.update({
@@ -1535,6 +1541,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
+  '/remarketing': typeof RemarketingRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
@@ -1762,6 +1769,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
+  '/remarketing': typeof RemarketingRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
@@ -1982,6 +1990,7 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/pro': typeof ProRoute
+  '/remarketing': typeof RemarketingRoute
   '/reserver': typeof ReserverRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
@@ -2211,6 +2220,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
+    | '/remarketing'
     | '/reserver'
     | '/reset-password'
     | '/services'
@@ -2438,6 +2448,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
+    | '/remarketing'
     | '/reserver'
     | '/reset-password'
     | '/services'
@@ -2657,6 +2668,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/mot-de-passe-oublie'
     | '/pro'
+    | '/remarketing'
     | '/reserver'
     | '/reset-password'
     | '/services'
@@ -2886,6 +2898,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   ProRoute: typeof ProRoute
+  RemarketingRoute: typeof RemarketingRoute
   ReserverRoute: typeof ReserverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
@@ -3148,6 +3161,13 @@ declare module '@tanstack/react-router' {
       path: '/pro'
       fullPath: '/pro'
       preLoaderRoute: typeof ProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/remarketing': {
+      id: '/remarketing'
+      path: '/remarketing'
+      fullPath: '/remarketing'
+      preLoaderRoute: typeof RemarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reserver': {
@@ -5083,6 +5103,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   ProRoute: ProRoute,
+  RemarketingRoute: RemarketingRoute,
   ReserverRoute: ReserverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
