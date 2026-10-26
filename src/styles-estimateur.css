@@ -593,6 +593,8 @@ html:root body .dg-journey .plate-search:disabled{opacity:.55}
 
 /* Fermeture des fenêtres (mobile) + message « pourquoi je ne peux pas continuer » */
 .zx-back,.zx-x{display:none}
-.zx-block{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:11px 14px;border-radius:14px;background:#eaf0ff;border:1px solid rgba(31,77,255,.3);color:#0b2a6b;font:600 13.5px/1.4 Poppins,Inter,sans-serif}
-.zx-block i{flex:0 0 22px;height:22px;border-radius:50%;background:#1f4dff;color:#fff;font:800 13px/22px Poppins,sans-serif;text-align:center;font-style:normal}
+.zx-block{display:flex;gap:9px;align-items:center;margin:10px 0 0;padding:8px 12px;border-radius:12px;background:rgba(120,165,255,.10);border:1px solid rgba(120,165,255,.30);color:#cfe0ff;font:500 12.5px/1.35 Poppins,Inter,sans-serif;width:fit-content;max-width:100%}
+.zx-block i{flex:0 0 18px;height:18px;border-radius:50%;background:transparent;border:1.5px solid #6ea2ff;color:#6ea2ff;font:800 11px/15px Poppins,sans-serif;text-align:center;font-style:normal}
+html.theme-light .zx-block{background:#eef3ff;border-color:rgba(31,77,255,.28);color:#0b2a6b}
+html.theme-light .zx-block i{border-color:#1f4dff;color:#1f4dff}
 .zx-go:disabled{cursor:not-allowed}
