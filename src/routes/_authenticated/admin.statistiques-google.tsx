@@ -48,18 +48,22 @@ function RecherchesGoogle() {
       {!res && !err && <div className="ast-loadbar"><i /></div>}
       {err && <p className="ast-note">Google n'a pas répondu : {err}</p>}
 
-      {res && !res.configured && (
+      {res && !res.configured && (<>
         <section className="ast-card">
-          <div className="ast-card-hd"><div><h2>Relier Google Search Console</h2><p>À faire une seule fois, environ 15 minutes</p></div></div>
-          <ol className="ast-steps">
-            <li>Sur <b>search.google.com/search-console</b>, ajoute la propriété <b>Domaine</b> <code>transportsligneo.fr</code>. Google donne un enregistrement TXT : ajoute-le dans la zone DNS de ton domaine chez IONOS, puis clique sur Valider.</li>
-            <li>Sur <b>console.cloud.google.com</b>, crée un projet, active l'API <b>Google Search Console API</b>, puis crée un <b>compte de service</b> et télécharge sa clé au format JSON.</li>
-            <li>Dans Search Console › Paramètres › Utilisateurs, ajoute l'adresse e-mail du compte de service avec l'accès <b>Restreint</b>.</li>
-            <li>Sur Vercel › ton projet › Settings › Environment Variables, ajoute <code>GSC_CLIENT_EMAIL</code> (l'e-mail du compte de service), <code>GSC_PRIVATE_KEY</code> (la valeur private_key du fichier JSON) et <code>GSC_SITE_URL</code> = <code>sc-domain:transportsligneo.fr</code>, puis redéploie.</li>
-          </ol>
-          <p className="ast-empty">Google garde 16 mois d'historique : dès que c'est relié, les chiffres des derniers mois apparaissent ici.</p>
+          <div className="ast-card-hd"><div><h2>Tes recherches Google</h2><p>Ton domaine est validé dans Google Search Console</p></div></div>
+          <p className="ast-empty" style={{ paddingTop: 0 }}>Les mots tapés sur Google, les clics et ta position sont dans Search Console. Ouvre-le avec le compte Google qui a validé le domaine.</p>
+          <a className="ast-btn pri" href="https://search.google.com/search-console/performance/search-analytics?resource_id=sc-domain%3Atransportsligneo.fr" target="_blank" rel="noopener noreferrer">Ouvrir Google Search Console</a>
         </section>
-      )}
+        <details className="ast-card">
+          <summary style={{ cursor: "pointer", font: "600 15px Poppins, sans-serif" }}>Facultatif : voir ces chiffres directement ici</summary>
+          <ol className="ast-steps" style={{ marginTop: 12 }}>
+            <li>Sur <b>console.cloud.google.com</b>, projet <b>Ligneo Stats</b> : active la <b>Google Search Console API</b> et crée un <b>compte de service</b>.</li>
+            <li>Si Google bloque la création de clé : sur l'organisation, donne-toi le rôle <b>Administrateur des règles d'administration</b>, puis désactive la règle <code>disableServiceAccountKeyCreation</code> pour le projet Ligneo Stats.</li>
+            <li>Crée une clé <b>JSON</b> pour le compte de service, et ajoute son adresse e-mail dans Search Console › Paramètres › Utilisateurs, accès <b>Restreint</b>.</li>
+            <li>Sur Vercel, ajoute <code>GSC_CLIENT_EMAIL</code>, <code>GSC_PRIVATE_KEY</code> et <code>GSC_SITE_URL</code> = <code>sc-domain:transportsligneo.fr</code>, puis redéploie.</li>
+          </ol>
+        </details>
+      </>)}
 
       {res && res.configured && (<>
         <div className="ast-ok"><b>Google Search Console relié</b><span>· du {dateFr(res.start)} au {dateFr(res.end)} (Google a 2 jours de retard)</span></div>
