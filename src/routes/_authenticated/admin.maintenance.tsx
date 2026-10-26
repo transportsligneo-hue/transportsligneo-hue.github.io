@@ -1,6 +1,7 @@
 /**
- * Admin · Mise à jour et maintenance : bandeau ou page de maintenance pour le site
- * et/ou l'application Ligneo Driver, avec la raison et l'heure de retour.
+ * Admin · Maintenance et mise à jour (Réglages & outils), deux onglets :
+ * - Maintenance : bandeau ou page de maintenance pour le site et/ou l'appli Ligneo Driver.
+ * - Mise à jour Driver : mise à jour obligatoire de l'appli Ligneo Driver, bouton Google Play.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -10,8 +11,11 @@ import { MaintenanceBanner, MaintenanceScreen } from "@/components/maintenance/M
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MAINTENANCE, MAINTENANCE_KEY, normalizeMaintenance, type MaintenanceSettings } from "@/lib/maintenance";
 import "@/components/maintenance/maintenance-admin.css";
+import DriverUpdatesPanel from "@/components/admin/DriverUpdatesPanel";
+import driverLogo from "@/assets/driver-v2/logo.png";
 
 export const Route = createFileRoute("/_authenticated/admin/maintenance")({
+  validateSearch: (s: Record<string, unknown>): { onglet?: "driver" } => (s.onglet === "driver" ? { onglet: "driver" } : {}),
   component: AdminMaintenance,
 });
 
@@ -36,6 +40,9 @@ function AdminMaintenance() {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<"site" | "driver">("site");
+  const { onglet } = Route.useSearch();
+  const [section, setSection] = useState<"maintenance" | "driver">(onglet === "driver" ? "driver" : "maintenance");
+  useEffect(() => { if (onglet === "driver") setSection("driver"); }, [onglet]);
 
   useEffect(() => {
     void (async () => {
@@ -71,11 +78,16 @@ function AdminMaintenance() {
     <div className="mtn-adm">
       <AdminSectionHeader
         breadcrumb="Réglages & outils"
-        eyebrow="Mise à jour et maintenance"
-        title="Prévenez vos visiteurs"
-        highlight="en un clic"
-        subtitle="Affichez un bandeau ou une page de maintenance sur le site et/ou l'application Driver, avec la raison de votre choix."
+        eyebrow="Maintenance et mise à jour"
+        title="Maintenance et"
+        highlight="mise à jour"
+        subtitle="Mettez le site en maintenance, ou obligez les convoyeurs à mettre à jour l'appli Ligneo Driver."
       />
+      <div className="mtn-adm-seg" role="tablist" aria-label="Maintenance ou mise à jour">
+        <button type="button" role="tab" aria-selected={section === "maintenance"} className={section === "maintenance" ? "on" : ""} onClick={() => setSection("maintenance")}>Maintenance</button>
+        <button type="button" role="tab" aria-selected={section === "driver"} className={`g${section === "driver" ? " on" : ""}`} onClick={() => setSection("driver")}><img src={driverLogo} alt="" />Mise à jour Driver</button>
+      </div>
+      {section === "driver" ? <DriverUpdatesPanel /> : (
       <div className="mtn-adm-panel">
         <div className="mtn-adm-hd">
           <div>
@@ -154,6 +166,7 @@ function AdminMaintenance() {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

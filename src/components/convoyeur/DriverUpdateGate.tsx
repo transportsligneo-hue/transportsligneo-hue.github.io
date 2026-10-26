@@ -7,6 +7,9 @@ import "@/styles/driver-update.css";
 // Table créée par la migration 20261026000300 (types Supabase pas encore régénérés).
 const db = supabase as unknown as { from: (t: string) => any };
 
+/** Page Google Play officielle de l'appli Ligneo Driver */
+export const DRIVER_PLAY_URL = "https://play.google.com/store/apps/details?id=com.transportsligneo.driver";
+
 export type DriverUpdate = { id: string; version: string; titre: string; message: string; store_url: string };
 
 const ACK_KEY = "ligneo:driver-update-ack";
@@ -24,7 +27,7 @@ export function compareVersions(a: string, b: string): number {
 
 /** Fenêtre de mise à jour OBLIGATOIRE (aucun bouton pour la fermer). Aussi utilisée en aperçu dans l'admin. */
 export function DriverUpdateCard({ update, native, preview = false }: { update: Omit<DriverUpdate, "id"> & { id?: string }; native: boolean; preview?: boolean }) {
-  const label = native ? "Mettre à jour maintenant" : "Recharger maintenant";
+  const label = native ? "Mettre à jour sur Google Play" : "Recharger maintenant";
   const onWeb = () => {
     try { if (update.id) localStorage.setItem(ACK_KEY, update.id); } catch { /* */ }
     window.location.reload();
@@ -37,7 +40,7 @@ export function DriverUpdateCard({ update, native, preview = false }: { update: 
         {update.message && <p>{update.message}</p>}
         <div className="dux-v">Version {update.version || "—"} requise</div>
         {native ? (
-          <a className="dux-go" href={update.store_url} target="_blank" rel="noopener noreferrer">{label}</a>
+          <a className="dux-go" href={update.store_url || DRIVER_PLAY_URL} target="_blank" rel="noopener noreferrer">{label}</a>
         ) : (
           <button type="button" className="dux-go" onClick={preview ? undefined : onWeb}>{label}</button>
         )}

@@ -24,7 +24,6 @@ import {
   Radar,
   GraduationCap,
   Megaphone,
-  Smartphone,
   Sparkles,
   Crown,
   ClipboardList,
@@ -203,7 +202,6 @@ function AdminLayout() {
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },
     { to: "/admin/infos-ligneo", label: "Infos Ligneo", icon: Megaphone, group: "Clients & convoyeurs" },
-    { to: "/admin/mises-a-jour-driver", label: "Mises à jour Driver", icon: Smartphone, group: "Clients & convoyeurs" },
     {
       to: "/admin/bons-commande",
       label: "Bons de commande",
@@ -238,7 +236,7 @@ function AdminLayout() {
     { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Réglages & outils" },
     { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Réglages & outils" },
     { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Réglages & outils" },
-    { to: "/admin/maintenance", label: "Mise à jour et maintenance", icon: Wrench, group: "Réglages & outils" },
+    { to: "/admin/maintenance", label: "Maintenance et mise à jour", icon: Wrench, group: "Réglages & outils" },
 
   ];
 
