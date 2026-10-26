@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getDemandesSeenAt, onDemandesSeen } from "@/lib/admin/demandes-seen";
 import {
   LayoutDashboard,
+  Car,
   FileText,
   Route as RouteIcon,
   IdCard,
@@ -187,6 +188,7 @@ function AdminLayout() {
         ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white">{alertCount > 99 ? "99+" : alertCount}</span>
         : undefined,
     },
+    { to: "/admin/remarketing", label: "Remarketing", icon: Car, group: "Opérations" },
     { to: "/admin/incidents", label: "Registre des incidents", icon: AlertTriangle, group: "Opérations" },
     { to: "/admin/candidatures", label: "Marketplace Missions", icon: Handshake, group: "Opérations" },
     { to: "/admin/messagerie", label: "Chat des missions", icon: MessageSquare, group: "Opérations" },
