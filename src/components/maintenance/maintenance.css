@@ -1,0 +1,88 @@
+/* Mode maintenance : bandeau + écrans (site = bleu électrique, Driver = vert). */
+@keyframes mtn-shine{0%{left:-200px}60%,100%{left:110%}}
+@keyframes mtn-ping{70%{box-shadow:0 0 0 9px rgba(159,196,255,0)}100%{box-shadow:0 0 0 0 rgba(159,196,255,0)}}
+@keyframes mtn-ping-g{70%{box-shadow:0 0 0 9px rgba(93,255,196,0)}100%{box-shadow:0 0 0 0 rgba(93,255,196,0)}}
+@keyframes mtn-slide{0%{margin-left:-40%}100%{margin-left:100%}}
+@keyframes mtn-ring{0%{transform:scale(.96);opacity:1}100%{transform:scale(1.12);opacity:0}}
+
+.mtn-bn-wrap{position:sticky;top:0;z-index:70}
+html[data-maint-banner] .tln-shell{top:var(--mt-h,0)!important}
+html[data-maint-banner] header.safe-top{top:var(--mt-h,0)!important}
+
+.mtn-bn{position:relative;display:flex;align-items:center;gap:16px;padding:16px 24px;color:#fff;overflow:hidden;font-family:Poppins,system-ui,sans-serif;background:linear-gradient(100deg,#0a2a9c 0%,#1f55e8 45%,#3b8cff 100%);box-shadow:0 10px 34px -8px rgba(31,85,232,.75);border-bottom:1px solid rgba(255,255,255,.28)}
+.mtn-bn:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 2px,transparent 2px 26px),radial-gradient(60% 160% at 85% -30%,rgba(122,208,255,.55),transparent)}
+.mtn-bn:after{content:"";position:absolute;top:0;bottom:0;width:140px;left:-200px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);animation:mtn-shine 4.2s ease-in-out infinite}
+.mtn-bn>*{position:relative;z-index:1}
+.mtn-bn-logo{flex:none;width:52px;height:52px;border-radius:15px;padding:3px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(6px);box-shadow:0 8px 22px -6px rgba(0,0,0,.45),0 0 0 5px rgba(255,255,255,.12)}
+.mtn-bn-logo img{width:100%;height:100%;border-radius:12px;display:block}
+.mtn-bn-tx{flex:1;min-width:0}
+.mtn-tag{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:4px 11px;border-radius:99px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4)}
+.mtn-tag i{width:8px;height:8px;border-radius:50%;background:#9fc4ff;box-shadow:0 0 8px #9fc4ff;animation:mtn-ping 1.8s infinite}
+.mtn-bn h4{font-size:17px;font-weight:800;letter-spacing:-.01em;margin:6px 0 2px;line-height:1.2;color:#fff}
+.mtn-bn p{font-size:14px;line-height:1.45;color:rgba(255,255,255,.92);margin:0}
+.mtn-bn-ret{flex:none;display:flex;align-items:center;gap:10px;padding:9px 16px 9px 12px;border-radius:16px;background:rgba(5,14,60,.38);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);white-space:nowrap}
+.mtn-bn-ret small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:700}
+.mtn-bn-ret b{font-size:14.5px;font-weight:800}
+.mtn-bn-x{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;cursor:pointer;font-size:17px;line-height:1}
+.mtn-bn-ld{position:absolute!important;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.2)}
+.mtn-bn-ld span{display:block;height:100%;width:35%;background:linear-gradient(90deg,#6ea1ff,#e3efff);box-shadow:0 0 12px #9fc4ff;animation:mtn-slide 2.4s ease-in-out infinite}
+@media(max-width:620px){.mtn-bn{flex-wrap:wrap;padding:14px 16px;gap:12px}.mtn-bn-tx{flex-basis:55%}.mtn-bn-ret{order:5;width:100%;justify-content:center}.mtn-bn-logo{width:44px;height:44px}}
+
+/* Bandeau Driver : vert */
+.mtn-bn--driver{padding:13px 16px;gap:12px;background:linear-gradient(100deg,#0a7a4f 0%,#16b883 55%,#34d9a0 100%);box-shadow:0 10px 26px -8px rgba(22,184,131,.8)}
+.mtn-bn--driver .mtn-bn-logo{width:42px;height:42px;border-radius:12px}
+.mtn-bn--driver .mtn-bn-logo img{border-radius:9px}
+.mtn-bn--driver h4{font-size:14.5px;margin:5px 0 1px}.mtn-bn--driver p{font-size:12.5px;line-height:1.35}
+.mtn-bn--driver .mtn-tag{font-size:9.5px;padding:3px 9px}.mtn-bn--driver .mtn-tag i{background:#fff;box-shadow:none;animation-name:mtn-ping-g}
+.mtn-bn--driver .mtn-bn-ld span{background:#fff;box-shadow:none}
+
+/* Page de maintenance : site */
+.mtn-fl{position:relative;min-height:100vh;display:grid;place-items:center;padding:30px 18px;color:#fff;overflow:hidden;font-family:Poppins,system-ui,sans-serif;background:linear-gradient(135deg,#0a2a9c 0%,#1f55e8 50%,#3b8cff 100%)}
+.mtn-fl.is-preview{min-height:0}
+.mtn-fl:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 2px,transparent 2px 26px),radial-gradient(60% 70% at 85% -10%,rgba(122,208,255,.55),transparent)}
+.mtn-fl:after{content:"";position:absolute;top:0;bottom:0;width:220px;left:-260px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-18deg);animation:mtn-shine 5.5s ease-in-out infinite}
+.mtn-fl-card{position:relative;z-index:1;width:min(640px,100%);text-align:center;padding:42px 30px 34px;border-radius:30px;background:rgba(2,8,40,.78);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(14px);box-shadow:0 30px 70px -20px rgba(0,10,60,.7)}
+.mtn-fl-logo{width:92px;height:92px;border-radius:24px;padding:4px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);box-shadow:0 14px 34px -10px rgba(0,0,0,.5),0 0 0 7px rgba(255,255,255,.12);margin:0 auto}
+.mtn-fl-kick{display:inline-flex;gap:9px;align-items:center;margin:22px 0 10px;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;padding:6px 14px;border-radius:99px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4)}
+.mtn-fl-kick i{width:8px;height:8px;border-radius:50%;background:#9fc4ff;box-shadow:0 0 8px #9fc4ff;animation:mtn-ping 1.8s infinite}
+.mtn-fl h1{font-size:clamp(26px,5vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.15;color:#fff;margin:0}
+.mtn-fl h1 b{color:#6ea1ff;text-shadow:0 0 18px rgba(91,143,255,.8),0 0 40px rgba(91,143,255,.5)}
+.mtn-fl-why{margin:16px auto 0;max-width:480px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);font-size:14.5px;color:rgba(255,255,255,.94);line-height:1.55}
+.mtn-fl-why small,.mtn-dv-why small{display:block;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:#bfe0ff;margin-bottom:4px}
+.mtn-fl-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.25);margin:24px auto 0;max-width:340px;overflow:hidden}
+.mtn-fl-bar span{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,#6ea1ff,#e3efff);box-shadow:0 0 12px #9fc4ff;animation:mtn-slide 2.2s ease-in-out infinite}
+.mtn-fl-ret{margin:14px 0 0;font-size:13.5px;color:rgba(255,255,255,.85)}
+.mtn-fl-ret b{color:#6ea1ff;text-shadow:0 0 14px rgba(91,143,255,.7)}
+.mtn-fl-chat{position:relative;display:inline-flex;align-items:center;gap:10px;margin-top:18px;font:800 14.5px Poppins,sans-serif;color:#1f55e8;background:#fff;border:0;border-radius:99px;padding:14px 26px;cursor:pointer;box-shadow:0 14px 30px -10px rgba(0,0,0,.5)}
+.mtn-fl-chat:after{content:"";position:absolute;inset:-5px;border-radius:99px;border:2px solid rgba(255,255,255,.5);animation:mtn-ring 2.2s infinite}
+.mtn-fl-note{font-size:12px;color:rgba(255,255,255,.75);margin:8px 0 0}
+.mtn-fl-ct{margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mtn-fl-ct a{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#6ea1ff;text-decoration:none;padding:10px 16px;border-radius:12px;border:1px solid rgba(110,161,255,.6);background:rgba(91,143,255,.1);text-shadow:0 0 12px rgba(91,143,255,.7);box-shadow:0 0 18px -6px rgba(91,143,255,.7)}
+
+/* Écran de maintenance : Driver (vert/blanc en clair · bleu foncé + vert en sombre) */
+.mtn-dv{position:relative;min-height:100vh;display:grid;place-items:center;padding:20px;overflow:hidden;font-family:Poppins,system-ui,sans-serif;background:linear-gradient(160deg,#0a7a4f,#16b883 55%,#34d9a0)}
+.mtn-dv.is-preview{min-height:0}
+html.theme-dark .mtn-dv{background:radial-gradient(90% 60% at 50% 0%,rgba(22,184,131,.35),transparent 70%),linear-gradient(180deg,#0a1640,#050b1f)}
+.mtn-dv:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 2px,transparent 2px 26px)}
+.mtn-dv-card{position:relative;width:min(420px,100%);text-align:center;padding:26px 18px 22px;border-radius:26px;background:#fff;color:#0c2a1f;box-shadow:0 24px 50px -16px rgba(0,40,20,.55)}
+html.theme-dark .mtn-dv-card{background:rgba(14,32,92,.55);color:#e8f7f0;border:1px solid rgba(52,217,160,.4);backdrop-filter:blur(12px);box-shadow:0 0 50px rgba(22,184,131,.25)}
+.mtn-dv-card:before{content:"";position:absolute;inset:0 0 auto;height:3px;border-radius:26px 26px 0 0;background:linear-gradient(90deg,transparent,#16b883,#34d9a0,transparent)}
+.mtn-dv-card>img{width:74px;height:74px;border-radius:20px;margin:0 auto;box-shadow:0 0 0 5px rgba(22,184,131,.25),0 12px 26px -8px rgba(0,0,0,.4)}
+.mtn-dv-kk{display:inline-flex;gap:8px;align-items:center;margin:16px 0 8px;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#0a7a4f;padding:5px 12px;border-radius:99px;background:rgba(22,184,131,.14);border:1px solid rgba(22,184,131,.4)}
+html.theme-dark .mtn-dv-kk{color:#5dffc4}
+.mtn-dv-kk i{width:7px;height:7px;border-radius:50%;background:#16b883;animation:mtn-ping-g 1.8s infinite}
+.mtn-dv h1{font-size:24px;font-weight:800;line-height:1.15;margin:0}.mtn-dv h1 b{color:#16b883}
+.mtn-dv-why{margin-top:12px;padding:11px 13px;border-radius:14px;background:rgba(22,184,131,.1);border:1px solid rgba(22,184,131,.3);font-size:13px;line-height:1.5}
+.mtn-dv-why small{font-size:9.5px;color:#0a7a4f}html.theme-dark .mtn-dv-why small{color:#5dffc4}
+.mtn-dv-br{height:6px;border-radius:99px;background:rgba(22,184,131,.2);margin:18px auto 0;overflow:hidden}
+.mtn-dv-br span{display:block;height:100%;width:40%;border-radius:99px;background:linear-gradient(90deg,#0a7a4f,#34d9a0);animation:mtn-slide 2.2s ease-in-out infinite}
+.mtn-dv-rt{margin:12px 0 0;font-size:12.5px;opacity:.85}
+.mtn-dv-btn{display:inline-flex;align-items:center;gap:9px;margin-top:16px;font:800 13.5px Poppins,sans-serif;color:#fff;text-decoration:none;background:linear-gradient(135deg,#0a7a4f,#16b883);border-radius:99px;padding:13px 22px;box-shadow:0 12px 26px -8px rgba(22,184,131,.8)}
+
+/* Driver : accents vert néon (équivalent du bleu néon du site) */
+.mtn-dv{--gn:#0fb878;--gnglow:rgba(22,184,131,.55)}
+html.theme-dark .mtn-dv{--gn:#4dffb8;--gnglow:rgba(77,255,184,.7)}
+.mtn-dv h1 b,.mtn-dv-rt b{color:var(--gn);text-shadow:0 0 16px var(--gnglow)}
+.mtn-dv-rt{opacity:1}
+.mtn-bn--driver p b,.mtn-bn--driver .mtn-gn{color:#eafff6;text-shadow:0 0 12px rgba(255,255,255,.8)}
+.mtn-dv-card>img{border-radius:22px}

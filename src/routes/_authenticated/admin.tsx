@@ -236,6 +236,7 @@ function AdminLayout() {
     { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Réglages & outils" },
     { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Réglages & outils" },
     { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Réglages & outils" },
+    { to: "/admin/maintenance", label: "Mise à jour et maintenance", icon: Wrench, group: "Réglages & outils" },
 
   ];
 
