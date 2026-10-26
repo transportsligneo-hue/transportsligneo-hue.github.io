@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Capacitor } from "@capacitor/core";
 import { Ic } from "@/components/driver2/icons";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -30,6 +32,21 @@ export function DriverPlusSheet({ onClose }: { onClose: () => void }) {
   const { theme, setTheme } = useTheme();
   const me = useDriverIdentity();
   const dark = theme === "dark";
+  const [version, setVersion] = useState<string | null>(null);
+
+  // Version installée sur le téléphone (celle que compare la mise à jour obligatoire)
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        if (!Capacitor.isNativePlatform()) { if (alive) setVersion("web"); return; }
+        const { App } = await import("@capacitor/app");
+        const info = await App.getInfo();
+        if (alive) setVersion(String(info.version || ""));
+      } catch { if (alive) setVersion(null); }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const row = (e: Entry) => (
     <Link key={e.to} to={e.to} className="pl-it" onClick={onClose}>
@@ -75,6 +92,10 @@ export function DriverPlusSheet({ onClose }: { onClose: () => void }) {
               <div className="sp"><b>Se déconnecter</b><small>Fermer la session</small></div>
             </a>
           </div>
+
+          {version && (
+            <p className="pl-ver">Ligneo Driver · {version === "web" ? "version web" : `version ${version}`}</p>
+          )}
         </div>
       </div>
     </div>

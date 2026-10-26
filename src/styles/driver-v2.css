@@ -2671,3 +2671,5 @@ html.theme-dark .drv2 .pp2-no{background:rgba(255,255,255,.05);color:#fca5a5}
 .drv2 .dl.dl-boot .dl-brand{margin-top:0}
 .drv2 .dl.dl-boot .dl-prog{margin:0}
 @media (prefers-reduced-motion:reduce){.drv2 .dl-prog i{animation:none}}
+/* Menu Plus : numéro de version installée */
+.drv2 .pl-ver{margin:14px 0 4px;text-align:center;font:600 12px "IBM Plex Mono",ui-monospace,monospace;color:#6b7f76;opacity:.85}
