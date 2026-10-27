@@ -7337,11 +7337,10 @@ html.theme-light .theme-pref--compact .theme-pref-btn.is-active { color: #ffffff
 /* ============ SERVICES : onglets Particuliers / Professionnels ============ */
 /* Hauteur réservée sous la barre de navigation fixe (mobile / tablette par défaut) */
 .r4-page { --tln-nav-h: 122px; }
-/* PC : la barre flottante fait ~120 px de haut → on réserve 124 px + un vrai espace (les onglets ne la touchent plus) */
-@media (min-width: 1280px) { .r4-page { --tln-nav-h: 124px; } }
+@media (min-width: 1280px) { .r4-page { --tln-nav-h: 92px; } }
 .r4-page .v4-tabs {
   display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
-  padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 36px) 16px 0;
+  padding: calc(var(--tln-nav-h) + env(safe-area-inset-top, 0px) + 28px) 16px 0;
 }
 
 .r4-page .v4-tab { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:999px;
@@ -12612,3 +12611,43 @@ body.is-driver-app .fixed.inset-0[class*="z-[9"] {
 .dc-chip.is-on{background:#2F5FFF;border-color:#2F5FFF;color:#fff}
 .dc-chip.is-on .dc-n{background:rgba(255,255,255,.25);color:#fff}
 #dc-root[data-view="flotte"] .dc-admin{display:none!important}
+
+/* ===== Page "Devenir convoyeur" : thème clair (défaut) ===== */
+html.theme-light .dc-page {
+  color: #0f1526;
+  background:
+    radial-gradient(700px 500px at 90% -5%, rgba(47,95,255,0.12), transparent 60%),
+    radial-gradient(600px 460px at -10% 25%, rgba(15,138,99,0.10), transparent 60%),
+    linear-gradient(180deg,#f5f7fc 0%, #eef2fb 55%, #f5f7fc 100%);
+}
+html.theme-light .dc-wrap h1 { color: #0f1526; }
+html.theme-light .dc-wrap h1 .accent { color: #0f8a63; text-shadow: none; }
+html.theme-light .dc-eyebrow { color: #0f8a63; }
+html.theme-light .dc-eyebrow .dot { background: #12a574; box-shadow: 0 0 8px rgba(18,165,116,.6); }
+html.theme-light .dc-lead { color: #47506e; }
+html.theme-light .dc-card { background: #ffffff; border-color: rgba(15,21,38,0.10); box-shadow: 0 24px 50px -28px rgba(15,21,38,0.28); backdrop-filter: none; }
+html.theme-light .dc-card-title,
+html.theme-light .dc-help,
+html.theme-light .dc-waitlist-label { color: #5b6485; }
+html.theme-light .dc-cond span { color: #0f1526; }
+html.theme-light .dc-divider { background: rgba(15,21,38,0.10); }
+html.theme-light .dc-waitlist-input { background: #f5f7fc; color: #0f1526; border-color: rgba(15,21,38,0.14); }
+html.theme-light .dc-waitlist-input::placeholder { color: #8a93b0; }
+html.theme-light .dc-waitlist-input:focus { background: #fff; border-color: #12a574; box-shadow: 0 0 0 3px rgba(18,165,116,0.16); }
+html.theme-light .dc-waitlist-input-icon { color: #0f8a63; }
+html.theme-light .dc-waitlist-disclaimer { color: #6b7493; }
+html.theme-light .dc-waitlist-error { background: #fdecec; border-color: rgba(220,38,38,.35); color: #b42318; }
+html.theme-light .dc-btn-primary { color: #fff; box-shadow: 0 14px 28px -12px rgba(15,138,99,0.6); }
+html.theme-light .dc-waitlist-success-title { color: #0f1526; }
+html.theme-light .dc-waitlist-success-text { color: #47506e; }
+html.theme-light .dc-waitlist-success-icon,
+html.theme-light .dc-login-ic { background: rgba(18,165,116,0.12); border-color: rgba(18,165,116,0.4); }
+html.theme-light .dc-login-ic svg,
+html.theme-light .dc-check svg { color: #0f8a63; }
+html.theme-light .dc-login-card { background: #ffffff; border-color: rgba(18,165,116,0.35); box-shadow: 0 18px 40px -26px rgba(15,21,38,0.28); backdrop-filter: none; }
+html.theme-light .dc-login-card::before { background: radial-gradient(ellipse, rgba(18,165,116,0.12), transparent 70%); }
+html.theme-light .dc-login-text { color: #5b6485; }
+html.theme-light .dc-login-text b { color: #0f1526; }
+html.theme-light .dc-btn-login { background: linear-gradient(120deg,#0f8a63,#25c08a); box-shadow: 0 8px 18px -8px rgba(15,138,99,0.6); }
+html.theme-light .dc-page img[alt="Transports Ligneo Driver"] { filter: drop-shadow(0 12px 22px rgba(15,138,99,0.28)) !important; }
+.dc-theme { position: absolute; top: 92px; right: 18px; z-index: 5; }

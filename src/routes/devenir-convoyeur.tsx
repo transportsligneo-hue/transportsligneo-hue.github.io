@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Mail, CheckCircle, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 import { subscribeNewsletter } from "@/lib/public-content.functions";
 import { useRegistrationGate } from "@/hooks/useRegistrationGate";
 import driverPresentation from "@/assets/presentation-driver-browser.webm.asset.json";
@@ -65,6 +66,7 @@ function DevenirConvoyeurPage() {
     <>
       <Navbar driverBadge />
       <main className="dc-page relative">
+        <div className="dc-theme"><ThemeToggle /></div>
         <img
           src={logoDriver.url}
           alt="Transports Ligneo Driver"
