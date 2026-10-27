@@ -22,7 +22,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import MediaProtection from "@/components/MediaProtection";
 import MaintenanceGate from "@/components/maintenance/MaintenanceGate";
-import SiteAnalytics from "@/components/analytics/SiteAnalytics";
 import { isMobileAppShell } from "@/lib/app-mode";
 
 import appCss from "../styles.css?url";
@@ -161,7 +160,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {/* Écran de démarrage de l'app (visible uniquement dans la coquille Android) : aucun blanc avant l'hydratation */}
         <div id="lg-boot" className="lb-screen" aria-hidden="true" suppressHydrationWarning>
-          <div className="lb-mark"><i className="lb-halo" /><img src="/logo-ligneo.png" alt="" /></div>
+          <div className="lb-mark"><i className="lb-halo" /><img src="/icons/logo-driver-app.png" alt="" /></div>
           <strong className="lb-brand">TRANSPORTS LIGNEO<em>DRIVER</em></strong>
           <span className="lb-bar"><b /></span>
         </div>
@@ -305,7 +304,6 @@ function RootComponent() {
               <LigneoPickers />
               <NavigationProgress />
               <MaintenanceGate />
-              <SiteAnalytics />
               <PublicMobileBottomNav />
               <PwaProvider />
               <PwaSplash />
