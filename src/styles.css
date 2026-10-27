@@ -12651,3 +12651,17 @@ html.theme-light .dc-login-text b { color: #0f1526; }
 html.theme-light .dc-btn-login { background: linear-gradient(120deg,#0f8a63,#25c08a); box-shadow: 0 8px 18px -8px rgba(15,138,99,0.6); }
 html.theme-light .dc-page img[alt="Transports Ligneo Driver"] { filter: drop-shadow(0 12px 22px rgba(15,138,99,0.28)) !important; }
 .dc-theme { position: absolute; top: 92px; right: 18px; z-index: 5; }
+
+/* ===== /suivi : code confidentiel en 6 cases arrondies (comme dans l'appli) ===== */
+.sv-otp { position: relative; display: grid; grid-template-columns: repeat(6, 44px); gap: 8px; cursor: text; }
+.sv-otp i {
+  height: 56px; border-radius: 14px; display: grid; place-items: center; font-style: normal;
+  font: 700 22px 'Poppins', sans-serif; color: #67b6ff;
+  background: rgba(255,255,255,0.06); border: 1.5px solid rgba(140,175,255,0.34);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.sv-otp i.f { border-color: #6ea1ff; box-shadow: 0 0 0 3px rgba(91,143,255,.25), 0 0 16px rgba(91,143,255,.45); }
+.sv-otp input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: text; }
+html.theme-light .sv-otp i { color: #1c3fc4; background: #ffffff; border-color: rgba(47,95,255,0.32); box-shadow: 0 8px 18px -14px rgba(15,21,38,0.35); }
+html.theme-light .sv-otp i.f { border-color: #2f5fff; box-shadow: 0 0 0 3px rgba(47,95,255,0.16); }
+@media (max-width: 640px) { .sv-otp { grid-template-columns: repeat(6, 1fr); width: 100%; } }

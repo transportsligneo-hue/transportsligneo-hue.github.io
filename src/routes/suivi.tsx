@@ -281,15 +281,21 @@ function SuiviPage() {
               <label htmlFor="code-confidentiel" className="sr-only">
                 Code confidentiel
               </label>
-              <input
-                id="code-confidentiel"
-                value={code}
-                maxLength={16}
-                autoComplete="off"
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Code ex. A7K9P2"
-                className="suivi-field suivi-input w-full px-4 py-3.5 text-[15px] tracking-[0.18em] focus:outline-none sm:w-[190px]"
-              />
+              <div className="sv-otp" onClick={() => document.getElementById("code-confidentiel")?.focus()}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <i key={i} className={i === Math.min(code.length, 5) && code.length < 6 ? "f" : ""}>{code[i] ?? ""}</i>
+                ))}
+                <input
+                  id="code-confidentiel"
+                  value={code}
+                  maxLength={6}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  aria-label="Code confidentiel à 6 caractères"
+                  onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))}
+                />
+              </div>
               <button type="submit" className="v4-btn-primary justify-center" disabled={loading}>
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                 <span className="ml-2">Suivre</span>
