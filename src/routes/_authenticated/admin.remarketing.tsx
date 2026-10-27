@@ -11,22 +11,25 @@ import {
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { ChantierLive, DemoBadge } from "@/components/remarketing/RemarketingV2";
 import { DevisBlock, Hero, Ico, Kpi, Overlay, Prog, StatusPill, Tabs, Timeline, VehicleTile } from "@/components/remarketing/RemarketingUI";
+import { ChantiersTab, ClientsTab, DevisTab, OverviewTab, PrestaFiche, type AdminDevis } from "@/components/remarketing/AdminV3";
 import { NewDossierModal } from "@/components/remarketing/RemarketingModals";
 
 export const Route = createFileRoute("/_authenticated/admin/remarketing")({ component: AdminRemarketing });
 
-type Tab = "dos" | "plan" | "pre" | "parc" | "eco" | "fac" | "ale" | "jou" | "set";
+type Tab = "ov" | "dev" | "chan" | "cli" | "dos" | "plan" | "pre" | "parc" | "eco" | "fac" | "ale" | "jou" | "set";
 const errMsg = (e: unknown) => (e instanceof Error ? e.message : (e as { message?: string })?.message ?? "Erreur");
 const orgName = (d: Dossier) => d.organizations?.commercial_name || d.organizations?.legal_name || "—";
 /** Dossier d'un compte de démonstration (démo flotte, comptes de test) : rangé à part, jamais mêlé aux vrais clients. */
 const isDemoDossier = (d: Dossier) => isDemoOrTestIdentity({ societe: d.organizations?.legal_name }) || isDemoOrTestIdentity({ societe: d.organizations?.commercial_name });
 
 function AdminRemarketing() {
-  const [tab, setTab] = useState<Tab>("dos");
+  const [tab, setTab] = useState<Tab>("ov");
   const [allRows, setRows] = useState<Dossier[]>([]);
   const [pres, setPres] = useState<Prestataire[]>([]);
   const [parcs, setParcs] = useState<Parc[]>([]);
   const [events, setEvents] = useState<RmkEvent[]>([]);
+  const [allDevis, setAllDevis] = useState<AdminDevis[]>([]);
+  const [fiche, setFiche] = useState<Prestataire | null>(null);
   const [orgs, setOrgs] = useState<Array<{ id: string; label: string }>>([]);
   const [settings, setSettings] = useState<RmkSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -37,16 +40,18 @@ function AdminRemarketing() {
   const rows = useMemo(() => allRows.filter((d) => (scope === "demo" ? isDemoDossier(d) : !isDemoDossier(d))), [allRows, scope]);
 
   const load = useCallback(async () => {
-    const [d, p, pa, ev, og, st] = await Promise.all([
+    const [d, p, pa, ev, og, st, dv] = await Promise.all([
       rdb.from("remarketing_dossiers").select("*, organizations(legal_name, commercial_name)").order("created_at", { ascending: false }),
       rdb.from("remarketing_prestataires").select("*").order("nom"),
       rdb.from("remarketing_parcs").select("*").order("nom"),
       rdb.from("remarketing_events").select("*, remarketing_dossiers(ref, modele, immatriculation)").order("created_at", { ascending: false }).limit(200),
       supabase.from("organizations").select("id, legal_name, commercial_name").order("legal_name"),
       supabase.from("app_settings").select("value").eq("key", "remarketing_settings").maybeSingle(),
+      rdb.from("remarketing_devis").select("id, dossier_id, prestataire_id, statut, total_ht, total_ttc, delai_jours, garantie_mois, date_limite, repondu_le, created_at"),
     ]);
+    setAllDevis((dv.data ?? []) as AdminDevis[]);
     const list = (d.data ?? []) as Dossier[];
-    setRows(list); setPres((p.data ?? []) as Prestataire[]); setParcs((pa.data ?? []) as Parc[]); setEvents((ev.data ?? []) as RmkEvent[]);
+    setRows(list); setPres((p.data ?? []) as Prestataire[]); setFiche((f) => (f ? ((p.data ?? []) as Prestataire[]).find((x) => x.id === f.id) ?? null : f)); setParcs((pa.data ?? []) as Parc[]); setEvents((ev.data ?? []) as RmkEvent[]);
     setOrgs(((og.data ?? []) as Array<{ id: string; legal_name: string; commercial_name: string | null }>).map((o) => ({ id: o.id, label: o.commercial_name || o.legal_name })));
     if (st.data?.value) setSettings({ ...DEFAULT_SETTINGS, ...(st.data.value as object) });
     setSel((s) => (s ? list.find((x) => x.id === s.id) ?? null : s));
@@ -54,6 +59,8 @@ function AdminRemarketing() {
   }, []);
   useEffect(() => { void load(); }, [load]);
 
+  const devis = useMemo(() => allDevis.filter((q) => rows.some((d) => d.id === q.dossier_id)), [allDevis, rows]);
+  const presScope = useMemo(() => pres.filter((p) => !!p.is_demo === (scope === "demo")), [pres, scope]);
   const evs = useMemo(() => events.filter((e) => !e.dossier_id || rows.some((r) => r.id === e.dossier_id)), [events, rows]);
   const demoCount = allRows.filter(isDemoDossier).length;
   const active = rows.filter((d) => d.statut === "en_cours");
@@ -111,7 +118,7 @@ function AdminRemarketing() {
         <button type="button" className="btn" onClick={() => setOpenNew(true)}><Ico.Plus />Nouveau dossier</button>
       </Hero>
 
-      <div className="kpis" style={{ margin: 0 }}>
+      <div className="kpis" style={{ margin: 0, display: tab === "ov" ? "none" : undefined }}>
         <Kpi icon={<Ico.Folder />} label="Dossiers en cours" value={active.length} sub={`${rows.length} au total`} />
         <Kpi icon={<Ico.FileText />} label="Devis en attente" value={waiting.length} sub="validation client" tone="warn" />
         <Kpi icon={<Ico.ParkingSquare />} label="Véhicules en parc" value={inParc.length} sub={`${parcs.reduce((x, p) => x + p.occupees, 0)} places occupées`} />
@@ -119,11 +126,19 @@ function AdminRemarketing() {
         <Kpi icon={<Ico.Clock />} label="Délai moyen" value={avgDays != null ? `${avgDays} j` : "—"} sub="confié → livré" />
       </div>
 
-      <Tabs<Tab> value={tab} onChange={setTab} items={[["dos", "Dossiers", active.length], ["plan", "Planning"], ["pre", "Prestataires"], ["parc", "Parcs"], ["eco", "Économies"], ["fac", "Facturation"], ["ale", "Alertes", alerts.length], ["jou", "Journal"], ["set", "Réglages"]]} />
+      <Tabs<Tab> value={tab} onChange={setTab} items={[["ov", "Vue d'ensemble"], ["dos", "Dossiers", active.length], ["dev", "Devis", devis.filter((q) => q.statut === "demande").length], ["chan", "Planning chantiers"], ["plan", "Agenda"], ["pre", "Prestataires"], ["cli", "Clients"], ["parc", "Parcs"], ["eco", "Économies"], ["fac", "Facturation"], ["ale", "Alertes", alerts.length], ["jou", "Journal"], ["set", "Réglages"]]} />
 
+      <div className="seg" style={{ marginBottom: -4, display: tab === "dos" || tab === "ov" || tab === "dev" || tab === "chan" || tab === "cli" ? undefined : "none" }}>
+        <button type="button" className={scope === "reel" ? "on" : ""} onClick={() => setScope("reel")}>Clients réels</button>
+        <button type="button" className={scope === "demo" ? "on" : ""} onClick={() => setScope("demo")}>Démo ({demoCount})</button>
+      </div>
+      {tab === "ov" && <OverviewTab rows={rows} pres={presScope} devis={devis} parcs={parcs} settings={settings} onOpen={setSel} goTab={(t) => setTab(t as Tab)} />}
+      {tab === "dev" && <DevisTab rows={rows} pres={pres} devis={devis} onOpen={setSel} reload={load} />}
+      {tab === "chan" && <ChantiersTab rows={rows} pres={pres} devis={devis} onOpen={setSel} />}
+      {tab === "cli" && <ClientsTab rows={rows} onOpen={setSel} />}
       {tab === "dos" && (
         <>
-          <div className="seg" style={{ marginBottom: -4 }}>
+          <div className="seg" style={{ display: "none" }}>
             <button type="button" className={scope === "reel" ? "on" : ""} onClick={() => setScope("reel")}>Clients réels</button>
             <button type="button" className={scope === "demo" ? "on" : ""} onClick={() => setScope("demo")}>Démo ({demoCount})</button>
           </div>
@@ -159,7 +174,7 @@ function AdminRemarketing() {
       )}
 
       {tab === "plan" && <PlanningTab events={evs} rows={rows} onChange={load} />}
-      {tab === "pre" && <PrestatairesTab list={pres} onChange={load} />}
+      {tab === "pre" && <PrestatairesTab list={pres} onChange={load} onFiche={setFiche} />}
       {tab === "parc" && <ParcsTab list={parcs} onChange={load} fill={parcFill} />}
 
       {tab === "eco" && (
@@ -221,6 +236,10 @@ function AdminRemarketing() {
       {tab === "set" && <SettingsTab value={settings} onSaved={(s) => setSettings(s)} />}
 
       <NewDossierModal admin open={openNew} onClose={() => setOpenNew(false)} orgs={orgs} onDone={() => void load()} />
+
+      <Overlay open={!!fiche} onClose={() => setFiche(null)} kind="drawer">
+        {fiche && <PrestaFiche p={fiche} rows={allRows} devis={allDevis} onOpen={(d) => { setFiche(null); setSel(d); }} onClose={() => setFiche(null)} reload={load} />}
+      </Overlay>
 
       <Overlay open={!!sel} onClose={() => setSel(null)} kind="drawer">
         {sel && <DossierDrawer d={sel} pres={pres} parcs={parcs} events={events.filter((e) => e.dossier_id === sel.id)} settings={settings} onClose={() => setSel(null)} act={act} patch={patch} advance={advance} />}
@@ -397,7 +416,7 @@ function PlanningTab({ events, rows, onChange }: { events: RmkEvent[]; rows: Dos
   );
 }
 
-function PrestatairesTab({ list, onChange }: { list: Prestataire[]; onChange: () => Promise<void> }) {
+function PrestatairesTab({ list, onChange, onFiche }: { list: Prestataire[]; onChange: () => Promise<void>; onFiche: (p: Prestataire) => void }) {
   const empty = { nom: "", specialite: "", ville: "", delai_moyen_jours: "", contact_email: "", contact_tel: "" };
   const [f, setF] = useState(empty); const [open, setOpen] = useState(false);
   const [demo, setDemo] = useState(false);
@@ -430,7 +449,7 @@ function PrestatairesTab({ list, onChange }: { list: Prestataire[]; onChange: ()
               <div className="f" style={{ marginTop: 10 }}><label>E-mail du compte portail</label>
                 <div style={{ display: "flex", gap: 6 }}><input value={mail[p.id] ?? ""} placeholder={p.user_id ? "Compte déjà relié" : "prestataire@garage.fr"} onChange={(e) => setMail({ ...mail, [p.id]: e.target.value })} /><button type="button" className="btn o s" onClick={() => void link(p)}>{mail[p.id] ? "Relier" : "Détacher"}</button></div></div>
             )}
-            <div className="act"><button type="button" className="btn o s" onClick={() => void toggle(p)}>{p.actif ? "Désactiver" : "Activer"}</button><button type="button" className="btn r s" onClick={() => void del(p)}>Supprimer</button></div>
+            <div className="act"><button type="button" className="btn s" onClick={() => onFiche(p)}>Ouvrir la fiche</button><button type="button" className="btn o s" onClick={() => void toggle(p)}>{p.actif ? "Désactiver" : "Activer"}</button><button type="button" className="btn r s" onClick={() => void del(p)}>Supprimer</button></div>
           </div>
         ))}
         {list.filter((p) => !!p.is_demo === demo).length === 0 && <div className="card" style={{ color: "var(--ink3)" }}>Aucun prestataire.</div>}

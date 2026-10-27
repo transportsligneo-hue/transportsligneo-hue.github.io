@@ -7,8 +7,8 @@ export const STEPS = ["Dossier confié", "Prise en charge", "Bilan et devis", "T
 export const SHORT = ["Confié", "Pris en charge", "Bilan / devis", "Trajets", "Réparations", "Contrôle", "Parc", "Livraison"] as const;
 export const MOTIFS: Record<string, string> = { fin_leasing: "Fin de leasing", nouveau_collaborateur: "Nouveau collaborateur", remise_vente: "Remise en vente" };
 
-export interface Prestataire { id: string; nom: string; specialite: string | null; ville: string | null; delai_moyen_jours: number | null; note: number | null; contact_email: string | null; contact_tel: string | null; actif: boolean; user_id?: string | null; rayon_km?: number; garantie_mois?: number; tarifs?: Record<string, number>; is_demo?: boolean }
-export interface Parc { id: string; nom: string; ville: string | null; capacite: number; occupees: number; cameras: boolean; actif: boolean; is_demo?: boolean }
+export interface Prestataire { id: string; nom: string; specialite: string | null; ville: string | null; delai_moyen_jours: number | null; note: number | null; contact_email: string | null; contact_tel: string | null; actif: boolean; user_id?: string | null; rayon_km?: number; garantie_mois?: number; tarifs?: Record<string, number>; is_demo?: boolean; notes_admin?: string | null }
+export interface Parc { id: string; nom: string; ville: string | null; capacite: number; occupees: number; cameras: boolean; actif: boolean; is_demo?: boolean; notes_admin?: string | null }
 export interface Facture { ref: string; emetteur: string; objet: string; statut: "a_regler" | "payee" | "offert"; ttc: number }
 export interface LigneHT { label: string; type: string; qte: number; prix_ht: number }
 export interface DevisRecu {
