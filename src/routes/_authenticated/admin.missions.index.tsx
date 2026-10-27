@@ -1,3 +1,4 @@
+import { isDemoMission } from "@/lib/demo-detect";
 import { VehicleMetaRow } from "@/components/mission/VehicleMetaRow";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -410,7 +411,7 @@ function AdminMissionsUnified() {
         legType: t.leg_type,
         groupId: t.mission_group_id,
         legIndex: t.leg_index,
-        isTest: !!t.is_test_data,
+        isTest: isDemoMission({ isTestData: t.is_test_data, email: t.client_email, nom: t.client_nom, plate: t.immatriculation ?? t.vehicule_immatriculation }),
         commandeRef: t.commande_ref ?? null,
         createdAt: t.created_at,
         pricingMode: t.pricing_mode,
@@ -449,7 +450,7 @@ function AdminMissionsUnified() {
         statutPublication: null,
         isRoundTrip: Boolean(d.date_retour || d.depart_retour),
         legType: null,
-        isTest: false,
+        isTest: isDemoMission({ email: d.email, nom: `${d.prenom ?? ""} ${d.nom ?? ""}`.trim(), plate: d.immatriculation }),
         createdAt: d.created_at,
       }));
 
@@ -770,7 +771,7 @@ function AdminMissionsUnified() {
           title="Missions de test et de démonstration, rangées à part"
           onClick={() => { setTestView((v) => !v); setArchivedView(false); setFilter("all"); }}
         >
-          Tests &amp; démo · {counts.tests ?? 0}
+          Démo · {counts.tests ?? 0}
         </button>
         <button
           className={`a6-chip ${archivedView ? "active" : ""}`}
@@ -1034,7 +1035,7 @@ function AdminMissionsUnified() {
                           ) : (
                             !r.m.rechargeSeule && <span className="dvx-badge blue">Livraison simple</span>
                           )}
-                          {r.m.isTest && <span className="dvx-badge red">Test</span>}
+                          {r.m.isTest && <span className="dvx-badge red">Démo</span>}
                         </div>
                         {!r.inGroup && hasLegSuffix(r.m.ref) && (
                           <p className="mt-1 text-[10.5px] text-[#4f46e5]">Ancien duo restitution et livraison</p>

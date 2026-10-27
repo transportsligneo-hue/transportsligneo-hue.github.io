@@ -17,3 +17,20 @@ export function isDemoOrTestIdentity(p: {
   const startsDemo = (v: string | null | undefined) => /^(demo|test)\b/.test(norm(v));
   return startsDemo(p.nom) || startsDemo(p.prenom) || startsDemo(p.societe);
 }
+
+const DEMO_FLOTTE_EMAIL = "demo-flotte@transportsligneo.fr";
+const FAKE_PLATES = new Set(["AA-123-BB", "BB-456-CC", "CC-789-DD"]);
+
+/** Mission / demande de démonstration : case « test » en base, compte Démo Flotte, identité démo ou plaque factice. */
+export function isDemoMission(p: {
+  isTestData?: boolean | null;
+  email?: string | null;
+  nom?: string | null;
+  plate?: string | null;
+}): boolean {
+  if (p.isTestData) return true;
+  if (norm(p.email) === DEMO_FLOTTE_EMAIL) return true;
+  if (isDemoOrTestIdentity({ email: p.email, nom: p.nom })) return true;
+  const plate = (p.plate ?? "").toUpperCase().replace(/\s+/g, "-");
+  return FAKE_PLATES.has(plate);
+}
