@@ -1,3 +1,4 @@
+import { isDemoRow } from "@/hooks/useMissionAlerts";
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { getDemandesSeenAt, onDemandesSeen } from "@/lib/admin/demandes-seen";
@@ -24,6 +25,7 @@ import {
   Radar,
   GraduationCap,
   Megaphone,
+  Smartphone,
   Sparkles,
   Crown,
   ClipboardList,
@@ -35,9 +37,6 @@ import {
   ScanLine,
   Wrench,
   Calculator,
-  BarChart3,
-  Search,
-  Wifi,
 
 
 } from "lucide-react";
@@ -113,11 +112,12 @@ function AdminLayout() {
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
     const fetchAlerts = async () => {
-      const { count } = await supabase
+      const { data } = await supabase
         .from("mission_alerts" as never)
-        .select("id", { count: "exact", head: true })
+        .select("id, attributions!inner(trajets(is_test_data, client_email, client_nom, immatriculation, vehicule_immatriculation))" as never)
         .in("status" as never, ["open", "acknowledged"] as never);
-      setAlertCount(count ?? 0);
+      // Les alertes de missions démo / test ne comptent pas.
+      setAlertCount(((data as unknown as any[]) ?? []).filter((r) => !isDemoRow(r)).length);
     };
     fetchAlerts();
     const channel = supabase
@@ -181,7 +181,6 @@ function AdminLayout() {
 
     // Opérations
     { to: "/admin/exploitation", label: "Exploitation (live)", icon: Radar, group: "Opérations" },
-    { to: "/admin/convoyeurs-en-ligne", label: "Convoyeurs en ligne", icon: Wifi, group: "Opérations" },
     {
       to: "/admin/alertes",
       label: "Alertes opérationnelles",
@@ -198,11 +197,6 @@ function AdminLayout() {
     { to: "/admin/messagerie-conseiller", label: "Chat conseiller", icon: MessageSquare, group: "Opérations" },
     { to: "/admin/messages", label: "Messages", icon: MessageSquare, group: "Opérations" },
 
-    // ===== Statistiques =====
-    { to: "/admin/statistiques-frequentation", label: "Fréquentation du site", icon: BarChart3, group: "Statistiques" },
-    { to: "/admin/statistiques-estimateur", label: "Estimateur", icon: Calculator, group: "Statistiques" },
-    { to: "/admin/statistiques-google", label: "Recherches Google", icon: Search, group: "Statistiques" },
-
     // Clients & convoyeurs
     { to: "/admin/clients", label: "Clients", icon: UserRound, group: "Clients & convoyeurs" },
     { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Clients & convoyeurs" },
@@ -211,6 +205,7 @@ function AdminLayout() {
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },
     { to: "/admin/infos-ligneo", label: "Infos Ligneo", icon: Megaphone, group: "Clients & convoyeurs" },
+    { to: "/admin/mises-a-jour-driver", label: "Mises à jour Driver", icon: Smartphone, group: "Clients & convoyeurs" },
     {
       to: "/admin/bons-commande",
       label: "Bons de commande",
@@ -245,7 +240,7 @@ function AdminLayout() {
     { to: "/admin/assistant-ia", label: "Assistant IA", icon: MessageSquare, group: "Réglages & outils" },
     { to: "/admin/scan-document", label: "Scanner un document", icon: ScanLine, group: "Réglages & outils" },
     { to: "/admin/outils-externes", label: "Outils externes client", icon: Wrench, group: "Réglages & outils" },
-    { to: "/admin/maintenance", label: "Maintenance et mise à jour", icon: Wrench, group: "Réglages & outils" },
+    { to: "/admin/maintenance", label: "Mise à jour et maintenance", icon: Wrench, group: "Réglages & outils" },
 
   ];
 

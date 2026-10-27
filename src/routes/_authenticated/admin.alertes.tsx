@@ -111,6 +111,17 @@ function AlertsList({
   onChanged: () => void;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
+  const [okFor, setOkFor] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+
+  const validate = async (id: string) => {
+    setBusy(id);
+    const { error } = await supabase.rpc("resolve_mission_alert_note" as never, { _alert_id: id, _note: note.trim() || null } as never);
+    setBusy(null);
+    if (error) { toast.error("Action impossible", { description: error.message }); return; }
+    toast.success("Alerte validée : tout est en ordre");
+    setOkFor(null); setNote(""); onChanged();
+  };
 
   const act = async (id: string, rpc: "acknowledge_mission_alert" | "resolve_mission_alert") => {
     setBusy(id);
@@ -210,6 +221,15 @@ function AlertsList({
                   )}
                   {!readOnly && (
                     <button
+                      onClick={() => { setOkFor(okFor === a.id ? null : a.id); setNote(""); }}
+                      disabled={busy === a.id}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-[11.5px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                    >
+                      <ShieldCheck size={12} /> Tout est en ordre
+                    </button>
+                  )}
+                  {!readOnly && (
+                    <button
                       onClick={() => act(a.id, "resolve_mission_alert")}
                       disabled={busy === a.id}
                       className="inline-flex items-center gap-1 rounded-lg border border-[#eaeaee] bg-white px-3 py-1.5 text-[11.5px] font-semibold text-[var(--a6-muted)] hover:text-[var(--a6-text)] disabled:opacity-60"
@@ -219,6 +239,18 @@ function AlertsList({
                   )}
                 </div>
               </div>
+              {okFor === a.id && !readOnly && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                  <input
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Note (ex. j'ai eu le convoyeur au téléphone, tout est ok)"
+                    className="min-w-[220px] flex-1 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-[12.5px]"
+                  />
+                  <button onClick={() => validate(a.id)} disabled={busy === a.id} className="rounded-lg bg-emerald-600 px-3 py-2 text-[12px] font-semibold text-white disabled:opacity-60">Valider</button>
+                </div>
+              )}
+              {a.resolution_note && <p className="mt-2 text-[12px] text-[var(--a6-dim)]">Note : {a.resolution_note}</p>}
             </div>
           </li>
         );

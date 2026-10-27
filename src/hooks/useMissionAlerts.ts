@@ -3,6 +3,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isDemoMission } from "@/lib/demo-detect";
 import { SEVERITY_META, type AlertSeverity, type MissionAlertRow } from "@/lib/mission-alerts";
 
 export interface MissionAlert extends MissionAlertRow {
@@ -26,13 +27,20 @@ export interface MissionAlert extends MissionAlertRow {
 
 const SELECT = `
   id, attribution_id, alert_type, severity, base_severity, status, titre, message, details,
-  triggered_at, escalated_at, acknowledged_at, resolved_at,
+  triggered_at, escalated_at, acknowledged_at, resolved_at, resolution_note,
   attributions!inner (
     id, trajet_id, numero_mission, etape_courante, statut,
     convoyeurs ( nom, prenom, telephone ),
-    trajets ( depart, arrivee, client_nom, client_telephone, date_trajet, heure_trajet )
+    trajets ( depart, arrivee, client_nom, client_telephone, date_trajet, heure_trajet, is_test_data, client_email, immatriculation, vehicule_immatriculation )
   )
 `;
+
+export function isDemoRow(row: any): boolean {
+  const a = row?.attributions;
+  const t = Array.isArray(a?.trajets) ? a?.trajets[0] : a?.trajets;
+  if (!t) return false;
+  return isDemoMission({ isTestData: t.is_test_data, email: t.client_email, nom: t.client_nom, plate: t.immatriculation ?? t.vehicule_immatriculation });
+}
 
 function normalize(row: any): MissionAlert {
   const a = row.attributions ?? null;
@@ -59,17 +67,23 @@ export function useMissionAlerts(scope: "active" | "history" = "active", limit =
   const [loading, setLoading] = useState(true);
 
   const fetchAlerts = useCallback(async () => {
-    let q = supabase
-      .from("mission_alerts" as never)
-      .select(SELECT as never)
-      .order("triggered_at", { ascending: false })
-      .limit(limit);
-    q =
-      scope === "active"
-        ? q.in("status" as never, ["open", "acknowledged"] as never)
-        : q.eq("status" as never, "resolved" as never);
-    const { data } = await q;
-    setAlerts(((data as unknown as any[]) ?? []).map(normalize));
+    const run = async (sel: string) => {
+      let q = supabase
+        .from("mission_alerts" as never)
+        .select(sel as never)
+        .order("triggered_at", { ascending: false })
+        .limit(limit);
+      q =
+        scope === "active"
+          ? q.in("status" as never, ["open", "acknowledged"] as never)
+          : q.eq("status" as never, "resolved" as never);
+      return q;
+    };
+    let { data, error } = await run(SELECT);
+    // Colonne « resolution_note » pas encore créée en base : on recharge sans elle.
+    if (error) ({ data } = await run(SELECT.replace(" resolution_note,", "")));
+    // Les missions de démonstration / de test n'ont rien à faire dans les alertes opérationnelles.
+    setAlerts(((data as unknown as any[]) ?? []).filter((r) => !isDemoRow(r)).map(normalize));
     setLoading(false);
   }, [scope, limit]);
 

@@ -28,6 +28,7 @@ export interface MissionAlertRow {
   escalated_at: string | null;
   acknowledged_at: string | null;
   resolved_at: string | null;
+  resolution_note?: string | null;
 }
 
 export const ALERT_TYPES: Record<
