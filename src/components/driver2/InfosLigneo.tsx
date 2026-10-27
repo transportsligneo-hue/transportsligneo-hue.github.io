@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Ic } from "@/components/driver2/icons";
 import { useInfosLigneo, type InfoKind, type InfoLigneo } from "@/hooks/useInfosLigneo";
 import { VroomyAvatar } from "@/components/VroomyAvatar";
-import logo from "@/assets/driver-v2/logo.png";
+const logo = "/icons/logo-driver-app.png";
 
 // Teintes sourdes et sobres : un simple point de couleur identifie le type, pas de pictogramme.
 const KIND: Record<InfoKind, { label: string; tone: string }> = {

@@ -2657,19 +2657,4 @@ html.theme-dark .drv2 .pp2-no{background:rgba(255,255,255,.05);color:#fca5a5}
 .drv2 .pp2-tags{margin-top:10px}
 .drv2 .pp2-act{margin-top:11px}
 .drv2 .pp2-act button{height:40px;font-size:13.5px;border-radius:12px}
-
-/* ===== Chargement Driver : barre verte toujours visible (classe propre, sans conflit avec .dl-bar du devis) ===== */
-.drv2 .dl-prog{display:block;width:140px;height:5px;border-radius:9px;background:rgba(20,184,102,.18);overflow:hidden;margin:6px auto 0}
-.drv2 .dl-prog i{display:block;width:40%;height:100%;border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd);animation:dlbar 1.2s ease-in-out infinite}
-.drv2 .dl-brand{font-size:14px;letter-spacing:.16em}
-.drv2 .dl-brand em{color:#12a35f;letter-spacing:.34em;margin-top:3px}
-/* Dans la page : centré dans l'écran visible, pas poussé vers le bas */
-.drv2 .dl.dl-full{min-height:calc(100dvh - 190px)}
-/* Premier chargement : même écran que le démarrage (fond, logo, texte, barre au même endroit), au-dessus de tout */
-.drv2 .dl.dl-boot{position:fixed;inset:0;z-index:2147480000;min-height:0;margin:0;gap:16px;animation:none;
-  background:radial-gradient(520px 320px at 0% 0%,rgba(52,230,140,.25),transparent 70%),linear-gradient(180deg,#e6f3ec,#cfe2d8)}
-.drv2 .dl.dl-boot .dl-brand{margin-top:0}
-.drv2 .dl.dl-boot .dl-prog{margin:0}
-@media (prefers-reduced-motion:reduce){.drv2 .dl-prog i{animation:none}}
-/* Menu Plus : numéro de version installée */
-.drv2 .pl-ver{margin:14px 0 4px;text-align:center;font:600 12px "IBM Plex Mono",ui-monospace,monospace;color:#6b7f76;opacity:.85}
+.drv2 .dl-ring{display:none}

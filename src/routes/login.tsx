@@ -228,7 +228,7 @@ function LoginPage() {
   if (inNativeShell && isAuthenticated && homeRoute !== "/login") {
     return (
       <div aria-hidden className="lb-screen">
-        <div className="lb-mark"><i className="lb-halo" /><img src="/logo-ligneo.png" alt="" /></div>
+        <div className="lb-mark"><i className="lb-halo" /><img src="/icons/logo-driver-app.png" alt="" /></div>
         <strong className="lb-brand">TRANSPORTS LIGNEO<em>DRIVER</em></strong>
         <span className="lb-bar"><b /></span>
       </div>
