@@ -54,7 +54,7 @@ export function Tabs<T extends string>({ items, value, onChange }: { items: Arra
 }
 
 /** Tiroir latéral et fenêtre : rendus dans <body> pour éviter tout décalage du tableau de bord. */
-export function Overlay({ open, onClose, children, kind }: { open: boolean; onClose: () => void; children: ReactNode; kind: "drawer" | "modal" }) {
+export function Overlay({ open, onClose, children, kind, wide }: { open: boolean; onClose: () => void; children: ReactNode; kind: "drawer" | "modal"; wide?: boolean }) {
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -65,7 +65,7 @@ export function Overlay({ open, onClose, children, kind }: { open: boolean; onCl
   return createPortal(
     <div className="rmkx">
       <div className={`ov${open ? " on" : ""}`} onClick={onClose} />
-      {kind === "drawer" ? <aside className={`dr${open ? " on" : ""}`}>{open ? children : null}</aside> : <div className={`mod${open ? " on" : ""}`}>{open ? children : null}</div>}
+      {kind === "drawer" ? <aside className={`dr${wide ? " wide" : ""}${open ? " on" : ""}`}>{open ? children : null}</aside> : <div className={`mod${open ? " on" : ""}`}>{open ? children : null}</div>}
     </div>,
     document.body,
   );

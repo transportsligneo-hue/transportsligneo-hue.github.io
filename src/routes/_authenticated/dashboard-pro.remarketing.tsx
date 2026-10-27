@@ -7,12 +7,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import {
-  DEFAULT_SETTINGS, MOTIFS, SHORT, STEPS, dateFr, devisEnAttente, downloadDoc, eur, isDone, rdb, saving,
+  CHANTIER, DEFAULT_SETTINGS, MOTIFS, SHORT, STEPS, dateFr, devisEnAttente, downloadDoc, eur, isDone, rdb, saving,
   type Dossier, type RmkEvent, type RmkSettings,
 } from "@/lib/remarketing";
 import { supabase } from "@/integrations/supabase/client";
-import { DevisBlock, Hero, Ico, Kpi, Overlay, StatusPill, StepBars, Tabs, Timeline, VehicleTile } from "@/components/remarketing/RemarketingUI";
+import { DevisBlock, Hero, Ico, Kpi, Overlay, Pill, StatusPill, StepBars, Tabs, Timeline, VehicleTile } from "@/components/remarketing/RemarketingUI";
 import { DevisModal, LivraisonModal, NewDossierModal } from "@/components/remarketing/RemarketingModals";
+import { ChantierLive, DevisCompareDrawer, DossierFinalDrawer } from "@/components/remarketing/RemarketingV2";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/remarketing")({
   component: FlotteRemarketing,
@@ -32,12 +33,30 @@ function FlotteRemarketing() {
   const [liv, setLiv] = useState<Dossier | null>(null);
   const [follow, setFollow] = useState<Dossier | null>(null);
   const [events, setEvents] = useState<RmkEvent[]>([]);
+  const [cmp, setCmp] = useState<Dossier | null>(null);
+  const [fin, setFin] = useState<Dossier | null>(null);
+  const [finEvents, setFinEvents] = useState<RmkEvent[]>([]);
+  const [nDevis, setNDevis] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
-    const { data } = await rdb.from("remarketing_dossiers").select("*").order("created_at", { ascending: false });
+    const [{ data }, { data: dv }] = await Promise.all([
+      rdb.from("remarketing_dossiers").select("*").order("created_at", { ascending: false }),
+      rdb.from("remarketing_devis").select("dossier_id, statut").eq("statut", "recu"),
+    ]);
     setRows((data ?? []) as Dossier[]);
+    const c: Record<string, number> = {};
+    ((dv ?? []) as Array<{ dossier_id: string }>).forEach((x) => { c[x.dossier_id] = (c[x.dossier_id] ?? 0) + 1; });
+    setNDevis(c);
     setLoading(false);
   }, []);
+  useEffect(() => {
+    if (!fin) { setFinEvents([]); return; }
+    void (async () => {
+      const { data } = await rdb.from("remarketing_events").select("*").eq("dossier_id", fin.id).order("created_at", { ascending: true });
+      setFinEvents((data ?? []) as RmkEvent[]);
+    })();
+  }, [fin]);
+  const openDevis = (d: Dossier) => ((nDevis[d.id] ?? 0) > 0 ? setCmp(d) : setDevis(d));
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
     void (async () => {
@@ -84,8 +103,8 @@ function FlotteRemarketing() {
 
       {waiting.map((d) => (
         <div className="al" key={d.id}>
-          <span>Le devis du <b>{d.modele}</b> ({d.immatriculation}) attend votre validation. Vous économisez {eur(saving(d))}.</span>
-          <button type="button" className="btn s" onClick={() => setDevis(d)}>Voir le devis</button>
+          <span>Le devis du <b>{d.modele}</b> ({d.immatriculation}) attend votre validation.{d.devis_ligneo ? ` Vous économisez ${eur(saving(d))}.` : ` ${nDevis[d.id] ?? 0} devis à comparer.`}</span>
+          <button type="button" className="btn s" onClick={() => openDevis(d)}>{(nDevis[d.id] ?? 0) > 1 ? `Comparer ${nDevis[d.id]} devis` : "Voir le devis"}</button>
         </div>
       ))}
 
@@ -143,8 +162,15 @@ function FlotteRemarketing() {
                 <StatusPill d={d} />
               </div>
               <StepBars d={d} />
+              {d.chantier_step != null && d.etape >= 4 && d.etape <= 6 && !isDone(d) && (
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", fontSize: 13 }}>
+                  <span className="live">Chantier en direct</span><b>{CHANTIER[d.chantier_step]}</b>
+                  {d.chantier_prevu && <span style={{ color: "var(--ink3)" }}>· livraison prévue {dateFr(d.chantier_prevu)}</span>}
+                </div>
+              )}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                {devisEnAttente(d) && <button type="button" className="btn s" onClick={() => setDevis(d)}>Voir et valider le devis</button>}
+                {devisEnAttente(d) && <button type="button" className="btn s" onClick={() => openDevis(d)}>{(nDevis[d.id] ?? 0) > 1 ? `Comparer ${nDevis[d.id]} devis` : "Voir et valider le devis"}</button>}
+                {isDone(d) && <button type="button" className="btn g s" onClick={() => setFin(d)}>Dossier final</button>}
                 {d.etape === 7 && !isDone(d) && settings.livraison_sur_demande && <button type="button" className="btn g s" onClick={() => setLiv(d)}>Demander une livraison</button>}
                 <button type="button" className="btn o s" onClick={() => setFollow(d)}>Suivre le dossier</button>
                 {d.devis_statut === "valide" && <span style={{ color: "var(--ok)", fontWeight: 700, fontSize: 13, marginLeft: "auto" }}>Économie {eur(saving(d))}</span>}
@@ -157,6 +183,8 @@ function FlotteRemarketing() {
 
       <NewDossierModal open={openNew} onClose={() => setOpenNew(false)} organizationId={orgId} onDone={() => void load()} />
       <DevisModal d={devis} onClose={() => setDevis(null)} onDone={() => void load()} />
+      <DevisCompareDrawer d={cmp} open={!!cmp} onClose={() => setCmp(null)} onDone={() => void load()} settings={settings} />
+      <DossierFinalDrawer d={fin} events={finEvents} open={!!fin} onClose={() => setFin(null)} />
       <LivraisonModal d={liv} tarif={settings.tarif_livraison} onClose={() => setLiv(null)} onDone={() => void load()} />
 
       <Overlay open={!!follow} onClose={() => setFollow(null)} kind="drawer">
@@ -168,13 +196,17 @@ function FlotteRemarketing() {
               <div className="card"><h3>Avancement</h3>
                 <Timeline d={follow} sub={(i) => ["Dossier ouvert", "Collecte par un chauffeur Ligneo, photos datées", "Bilan des dégâts et devis chiffré avec vous", "Allers-retours entre prestataires : à notre charge", "Réparations chez nos prestataires partenaires", "Contrôle final, lavage, préparation", "Stockage en parc partenaire sécurisé", follow.livraison ? `Demande pour ${follow.livraison.collaborateur}` : "Sur demande · service payant"][i]} />
               </div>
-              <DevisBlock d={follow} actions={devisEnAttente(follow) ? <div className="act"><button type="button" className="btn g s" onClick={() => { setDevis(follow); setFollow(null); }}>Valider le devis</button></div> : undefined} />
+              <ChantierLive d={follow} events={events} />
+              {follow.devis_ligneo ? <DevisBlock d={follow} actions={devisEnAttente(follow) ? <div className="act"><button type="button" className="btn g s" onClick={() => { openDevis(follow); setFollow(null); }}>{(nDevis[follow.id] ?? 0) > 1 ? "Comparer les devis" : "Valider le devis"}</button></div> : undefined} /> : devisEnAttente(follow) ? (
+                <div className="card"><h3>Devis reçus <Pill tone="w">À comparer</Pill></h3><p style={{ color: "var(--ink2)", fontSize: 13 }}>{nDevis[follow.id] ?? 0} prestataire{(nDevis[follow.id] ?? 0) > 1 ? "s ont" : " a"} chiffré votre véhicule. Comparez-les et validez ligne par ligne.</p>
+                  <div className="act"><button type="button" className="btn g s" onClick={() => { openDevis(follow); setFollow(null); }}>Comparer les devis</button></div></div>
+              ) : null}
               {follow.dommages.length > 0 && <div className="card"><h3>Dégâts constatés</h3><div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{follow.dommages.map((x) => <span key={x} className="pill n">{x}</span>)}</div></div>}
               <div className="card"><h3>Historique</h3>
                 {events.length === 0 && <p style={{ color: "var(--ink3)" }}>Aucun évènement pour le moment.</p>}
                 {events.map((e) => <div className="mini" key={e.id}><span className="pill n">{dateFr(e.created_at)}</span><div><b>{e.message}</b><small>{e.acteur}</small></div></div>)}
               </div>
-              <div className="act"><button type="button" className="btn o s" onClick={() => void refreshFollow()}>Fermer</button></div>
+              <div className="act"><button type="button" className="btn s" onClick={() => { setFin(follow); setFollow(null); }}>Voir le dossier complet</button><button type="button" className="btn o s" onClick={() => void refreshFollow()}>Fermer</button></div>
             </div>
           </>
         )}

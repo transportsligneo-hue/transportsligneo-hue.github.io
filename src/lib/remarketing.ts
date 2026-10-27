@@ -7,8 +7,43 @@ export const STEPS = ["Dossier confié", "Prise en charge", "Bilan et devis", "T
 export const SHORT = ["Confié", "Pris en charge", "Bilan / devis", "Trajets", "Réparations", "Contrôle", "Parc", "Livraison"] as const;
 export const MOTIFS: Record<string, string> = { fin_leasing: "Fin de leasing", nouveau_collaborateur: "Nouveau collaborateur", remise_vente: "Remise en vente" };
 
-export interface Prestataire { id: string; nom: string; specialite: string | null; ville: string | null; delai_moyen_jours: number | null; note: number | null; contact_email: string | null; contact_tel: string | null; actif: boolean }
-export interface Parc { id: string; nom: string; ville: string | null; capacite: number; occupees: number; cameras: boolean; actif: boolean }
+export interface Prestataire { id: string; nom: string; specialite: string | null; ville: string | null; delai_moyen_jours: number | null; note: number | null; contact_email: string | null; contact_tel: string | null; actif: boolean; user_id?: string | null; rayon_km?: number; garantie_mois?: number; tarifs?: Record<string, number>; is_demo?: boolean }
+export interface Parc { id: string; nom: string; ville: string | null; capacite: number; occupees: number; cameras: boolean; actif: boolean; is_demo?: boolean }
+export interface Facture { ref: string; emetteur: string; objet: string; statut: "a_regler" | "payee" | "offert"; ttc: number }
+export interface LigneHT { label: string; type: string; qte: number; prix_ht: number }
+export interface DevisRecu {
+  id: string; statut: "recu" | "retenu" | "refuse"; lignes: LigneHT[]; total_ht: number; total_ttc: number; delai_jours: number | null; debut_possible: string | null;
+  validite_jours: number; garantie_mois: number | null; peinture_cabine: boolean; courtoisie: boolean; commentaire: string | null; repondu_le: string | null;
+  prestataire: { id: string; nom: string; ville: string | null; specialite: string | null; note: number | null; delai_moyen_jours: number | null; chantiers: number };
+}
+export interface PrestaDemande {
+  devis_id: string; statut: "demande" | "recu"; date_limite: string | null; dossier_id: string; modele: string; immatriculation: string; motif: string; dommages: string[];
+  remarques: string | null; kilometrage: number | null; lieu: string | null; lignes: LigneHT[]; total_ttc: number | null; delai_jours: number | null; garantie_mois: number | null;
+  validite_jours: number | null; peinture_cabine: boolean; courtoisie: boolean; commentaire: string | null; debut_possible: string | null;
+}
+export interface PrestaChantier {
+  dossier_id: string; ref: string; modele: string; immatriculation: string; etape: number; chantier_step: number; chantier_note: string | null; chantier_maj: string | null;
+  chantier_prevu: string | null; montant: number | null; lignes: DevisLigne[] | null; dommages: string[]; created_at: string; events: Array<{ at: string; message: string; acteur: string | null }>;
+}
+export interface PrestaOverview {
+  prestataire: { id: string; nom: string; specialite: string | null; ville: string | null; rayon_km: number; garantie_mois: number; tarifs: Record<string, number>; delai_moyen_jours: number | null; note: number | null };
+  demandes: PrestaDemande[]; chantiers: PrestaChantier[]; devis_envoyes_30j: number; devis_acceptes_30j: number;
+}
+/** Étapes du chantier, mises à jour par le prestataire. */
+export const CHANTIER = ["Reçu", "Diagnostic", "Pièces", "Réparation", "Peinture", "Contrôle", "Prêt"] as const;
+export const TVA = 0.2;
+export const lineTtc = (l: LigneHT) => Math.round(Number(l.qte || 1) * Number(l.prix_ht || 0) * (1 + TVA) * 100) / 100;
+export const eur2 = (n: number | null | undefined) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", minimumFractionDigits: 2 }).format(Number(n ?? 0));
+/** Score Ligneo (sur 100) : 40 % qualité (note), 35 % prix, 25 % délai, relatifs aux devis comparés. */
+export function scoreDevis(q: DevisRecu, all: DevisRecu[]) {
+  const minP = Math.min(...all.map((x) => Number(x.total_ttc) || Infinity));
+  const dels = all.map((x) => x.delai_jours).filter((x): x is number => !!x);
+  const minD = dels.length ? Math.min(...dels) : null;
+  const quality = ((q.prestataire.note ?? 4) / 5) * 40;
+  const price = (minP / Math.max(1, Number(q.total_ttc))) * 35;
+  const delai = minD && q.delai_jours ? (minD / q.delai_jours) * 25 : 15;
+  return Math.max(0, Math.min(100, Math.round(quality + price + delai)));
+}
 export interface DevisLigne { label: string; montant: number }
 export interface Dossier {
   id: string; ref: string; organization_id: string; immatriculation: string; modele: string; motif: keyof typeof MOTIFS | string;
@@ -16,11 +51,12 @@ export interface Dossier {
   dommages: string[]; devis_statut: "en_attente" | "valide" | "refuse" | null; devis_classique: number | null; devis_ligneo: number | null; devis_lignes: DevisLigne[];
   prestataire_id: string | null; parc_id: string | null; livraison: Record<string, string> | null; facture_ref: string | null; facture_statut: "a_regler" | "payee" | null;
   notes_internes: string | null; livre_le: string | null; created_at: string; updated_at: string;
+  chantier_step: number | null; chantier_note: string | null; chantier_maj: string | null; chantier_prevu: string | null; factures: Facture[]; kilometrage: number | null; devis_retenu_id: string | null;
   organizations?: { legal_name: string; commercial_name: string | null } | null;
 }
 export interface RmkEvent { id: string; dossier_id: string | null; kind: string; message: string; acteur: string | null; visible_client: boolean; planifie_le: string | null; lieu: string | null; created_at: string; remarketing_dossiers?: { ref: string; modele: string; immatriculation: string } | null }
-export interface RmkSettings { trajets_charge_ligneo: boolean; devis_obligatoire: boolean; livraison_sur_demande: boolean; relance_devis: boolean; notif_etapes: boolean; tarif_livraison: string; delai_relance_h: number }
-export const DEFAULT_SETTINGS: RmkSettings = { trajets_charge_ligneo: true, devis_obligatoire: true, livraison_sur_demande: true, relance_devis: true, notif_etapes: false, tarif_livraison: "49 €", delai_relance_h: 48 };
+export interface RmkSettings { trajets_charge_ligneo: boolean; devis_obligatoire: boolean; livraison_sur_demande: boolean; relance_devis: boolean; notif_etapes: boolean; tarif_livraison: string; delai_relance_h: number; seuil_auto_eur: number }
+export const DEFAULT_SETTINGS: RmkSettings = { trajets_charge_ligneo: true, devis_obligatoire: true, livraison_sur_demande: true, relance_devis: true, notif_etapes: false, tarif_livraison: "49 €", delai_relance_h: 48, seuil_auto_eur: 300 };
 
 export const eur = (n: number | null | undefined) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Number(n ?? 0));
 export const dateFr = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—");
@@ -28,6 +64,7 @@ export const dateTimeFr = (iso: string | null | undefined) => (iso ? new Date(is
 export const saving = (d: Dossier) => Math.max(0, Number(d.devis_classique ?? 0) - Number(d.devis_ligneo ?? 0));
 export const devisEnAttente = (d: Dossier) => d.devis_statut === "en_attente" && d.etape === 3 && d.statut === "en_cours";
 export const isDone = (d: Dossier) => d.statut === "livre";
+export const errText = (e: unknown) => (e instanceof Error ? e.message : (e as { message?: string })?.message ?? "Erreur");
 
 export function statusOf(d: Dossier): { tone: "b" | "w" | "k" | "x" | "n"; label: string } {
   if (d.statut === "livre") return { tone: "k", label: "Livré" };

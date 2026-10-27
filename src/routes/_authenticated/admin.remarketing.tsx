@@ -6,8 +6,10 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   DEFAULT_SETTINGS, MOTIFS, SHORT, STEPS, dateFr, dateTimeFr, devisEnAttente, downloadDoc, eur, isDone, logEvent, rdb, saving,
-  type Dossier, type DevisLigne, type Parc, type Prestataire, type RmkEvent, type RmkSettings,
+  type Dossier, type DevisLigne, type Facture, type Parc, type Prestataire, type RmkEvent, type RmkSettings,
 } from "@/lib/remarketing";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { ChantierLive, DemoBadge } from "@/components/remarketing/RemarketingV2";
 import { DevisBlock, Hero, Ico, Kpi, Overlay, Prog, StatusPill, Tabs, Timeline, VehicleTile } from "@/components/remarketing/RemarketingUI";
 import { NewDossierModal } from "@/components/remarketing/RemarketingModals";
 
@@ -16,19 +18,23 @@ export const Route = createFileRoute("/_authenticated/admin/remarketing")({ comp
 type Tab = "dos" | "plan" | "pre" | "parc" | "eco" | "fac" | "ale" | "jou" | "set";
 const errMsg = (e: unknown) => (e instanceof Error ? e.message : (e as { message?: string })?.message ?? "Erreur");
 const orgName = (d: Dossier) => d.organizations?.commercial_name || d.organizations?.legal_name || "—";
+/** Dossier d'un compte de démonstration (démo flotte, comptes de test) : rangé à part, jamais mêlé aux vrais clients. */
+const isDemoDossier = (d: Dossier) => isDemoOrTestIdentity({ societe: d.organizations?.legal_name }) || isDemoOrTestIdentity({ societe: d.organizations?.commercial_name });
 
 function AdminRemarketing() {
   const [tab, setTab] = useState<Tab>("dos");
-  const [rows, setRows] = useState<Dossier[]>([]);
+  const [allRows, setRows] = useState<Dossier[]>([]);
   const [pres, setPres] = useState<Prestataire[]>([]);
   const [parcs, setParcs] = useState<Parc[]>([]);
   const [events, setEvents] = useState<RmkEvent[]>([]);
   const [orgs, setOrgs] = useState<Array<{ id: string; label: string }>>([]);
   const [settings, setSettings] = useState<RmkSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [scope, setScope] = useState<"reel" | "demo">("reel");
   const [q, setQ] = useState(""); const [fMotif, setFMotif] = useState(""); const [fEtape, setFEtape] = useState("");
   const [openNew, setOpenNew] = useState(false);
   const [sel, setSel] = useState<Dossier | null>(null);
+  const rows = useMemo(() => allRows.filter((d) => (scope === "demo" ? isDemoDossier(d) : !isDemoDossier(d))), [allRows, scope]);
 
   const load = useCallback(async () => {
     const [d, p, pa, ev, og, st] = await Promise.all([
@@ -48,6 +54,8 @@ function AdminRemarketing() {
   }, []);
   useEffect(() => { void load(); }, [load]);
 
+  const evs = useMemo(() => events.filter((e) => !e.dossier_id || rows.some((r) => r.id === e.dossier_id)), [events, rows]);
+  const demoCount = allRows.filter(isDemoDossier).length;
   const active = rows.filter((d) => d.statut === "en_cours");
   const waiting = rows.filter(devisEnAttente);
   const inParc = rows.filter((d) => d.etape === 7 && d.statut === "en_cours");
@@ -115,6 +123,10 @@ function AdminRemarketing() {
 
       {tab === "dos" && (
         <>
+          <div className="seg" style={{ marginBottom: -4 }}>
+            <button type="button" className={scope === "reel" ? "on" : ""} onClick={() => setScope("reel")}>Clients réels</button>
+            <button type="button" className={scope === "demo" ? "on" : ""} onClick={() => setScope("demo")}>Démo ({demoCount})</button>
+          </div>
           <div className="pipe">
             {STEPS.map((s, i) => (
               <button type="button" key={s} className={fEtape === String(i + 1) ? "on" : ""} onClick={() => setFEtape(fEtape === String(i + 1) ? "" : String(i + 1))}>
@@ -146,7 +158,7 @@ function AdminRemarketing() {
         </>
       )}
 
-      {tab === "plan" && <PlanningTab events={events} rows={rows} onChange={load} />}
+      {tab === "plan" && <PlanningTab events={evs} rows={rows} onChange={load} />}
       {tab === "pre" && <PrestatairesTab list={pres} onChange={load} />}
       {tab === "parc" && <ParcsTab list={parcs} onChange={load} fill={parcFill} />}
 
@@ -198,8 +210,8 @@ function AdminRemarketing() {
 
       {tab === "jou" && (
         <div className="card">
-          {events.length === 0 && <p style={{ color: "var(--ink3)" }}>Le journal est vide.</p>}
-          {events.map((e) => (
+          {evs.length === 0 && <p style={{ color: "var(--ink3)" }}>Le journal est vide.</p>}
+          {evs.map((e) => (
             <div className="mini" key={e.id}><span className="pill n">{dateTimeFr(e.created_at)}</span>
               <div><b>{e.message}</b><small>{e.remarketing_dossiers ? `${e.remarketing_dossiers.ref} · ${e.remarketing_dossiers.modele} · ` : ""}{e.acteur}</small></div></div>
           ))}
@@ -237,6 +249,29 @@ function DossierDrawer({ d, pres, parcs, events, settings, onClose, act, patch, 
     await logEvent(d.id, "Devis validé par l'admin pour le client", { kind: "devis" });
   }, "Devis validé");
   const last = d.etape >= 8;
+  const [offers, setOffers] = useState<Array<{ id: string; statut: string; total_ttc: number | null; delai_jours: number | null; date_limite: string | null; remarketing_prestataires: { nom: string } | null }>>([]);
+  const [pick, setPick] = useState<Set<string>>(new Set());
+  const [limite, setLimite] = useState("");
+  const [facs, setFacs] = useState<Facture[]>(d.factures ?? []);
+  const demoD = isDemoDossier(d);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await rdb.from("remarketing_devis").select("id, statut, total_ttc, delai_jours, date_limite, remarketing_prestataires(nom)").eq("dossier_id", d.id).order("created_at");
+      setOffers((data ?? []) as typeof offers);
+    })();
+  }, [d.id, d.updated_at]);
+  const canTender = d.statut === "en_cours" && !d.devis_retenu_id && d.etape <= 3;
+  const launch = () => act(async () => {
+    if (pick.size === 0) throw new Error("Choisis au moins un prestataire.");
+    const { error } = await rdb.rpc("remarketing_lancer_appel_offres", { p_dossier: d.id, p_prestataires: Array.from(pick), p_limite: limite ? new Date(limite).toISOString() : null });
+    if (error) throw error;
+    setPick(new Set());
+  }, "Appel d'offres envoyé");
+  const retain = (qid: string) => act(async () => {
+    const { error } = await rdb.rpc("remarketing_choisir_devis", { p_devis: qid, p_lignes_off: [] });
+    if (error) throw error;
+  }, "Devis retenu au nom du client");
+  const saveFacs = () => act(async () => { await patch(d, { factures: facs.filter((f) => f.ref.trim()) }, "Factures mises à jour"); }, "Factures enregistrées");
 
   return (
     <>
@@ -271,6 +306,30 @@ function DossierDrawer({ d, pres, parcs, events, settings, onClose, act, patch, 
         )}
         <DevisBlock d={d} actions={devisEnAttente(d) ? <div className="act"><button type="button" className="btn g s" onClick={() => void validateFor()}>Valider pour le client</button></div> : undefined} />
 
+        {canTender && (
+          <div className="card"><h3>Appel d'offres</h3>
+            <p style={{ color: "var(--ink3)", fontSize: 12.5, marginBottom: 10 }}>Les prestataires choisis reçoivent la demande dans leur portail et répondent avec un devis détaillé. Le client compare ensuite les devis.</p>
+            <div className="chk">
+              {pres.filter((p) => p.actif && !!p.is_demo === demoD && !offers.some((o) => o.remarketing_prestataires?.nom === p.nom)).map((p) => (
+                <label key={p.id}><input type="checkbox" checked={pick.has(p.id)} onChange={(e) => setPick((o) => { const n = new Set(o); if (e.target.checked) n.add(p.id); else n.delete(p.id); return n; })} />{p.nom}{p.ville ? ` · ${p.ville}` : ""}{!p.user_id ? " (sans compte portail)" : ""}</label>
+              ))}
+            </div>
+            <div className="f" style={{ marginTop: 10 }}><div><label>Réponse attendue avant le</label><input type="datetime-local" value={limite} onChange={(e) => setLimite(e.target.value)} /></div></div>
+            <div className="act"><button type="button" className="btn" onClick={() => void launch()}>Lancer l'appel d'offres</button></div>
+          </div>
+        )}
+        {offers.length > 0 && (
+          <div className="card"><h3>Devis des prestataires</h3>
+            {offers.map((o) => (
+              <div className="mini" key={o.id}>
+                <span className={`pill ${o.statut === "recu" ? "w" : o.statut === "retenu" ? "k" : o.statut === "refuse" ? "x" : "n"}`}>{({ demande: "Attendu", recu: "Reçu", retenu: "Retenu", refuse: "Écarté", expire: "Expiré" } as Record<string, string>)[o.statut] ?? o.statut}</span>
+                <div><b>{o.remarketing_prestataires?.nom ?? "Prestataire"}</b><small>{o.total_ttc ? `${eur(o.total_ttc)} TTC${o.delai_jours ? ` · ${o.delai_jours} j` : ""}` : o.date_limite ? `Réponse avant le ${dateTimeFr(o.date_limite)}` : "En attente de réponse"}</small></div>
+                {o.statut === "recu" && !d.devis_retenu_id && <button type="button" className="btn o s" onClick={() => void retain(o.id)}>Retenir pour le client</button>}
+              </div>
+            ))}
+          </div>
+        )}
+        <ChantierLive d={d} events={events} presta={pres.find((p) => p.id === d.prestataire_id)?.nom} />
         <div className="card"><h3>Affectation</h3>
           <div className="f">
             <div><label>Prestataire</label>
@@ -281,6 +340,21 @@ function DossierDrawer({ d, pres, parcs, events, settings, onClose, act, patch, 
         </div>
 
         {d.livraison && <div className="card"><h3>Livraison demandée</h3><div className="kv">{Object.entries(d.livraison).map(([k, v]) => <div key={k}><small>{k}</small><b>{String(v)}</b></div>)}</div></div>}
+
+        <div className="card"><h3>Factures du dossier</h3>
+          <div className="f">
+            {facs.map((f, i) => (
+              <div className="r2" key={i} style={{ gridTemplateColumns: "1fr 1fr .8fr .8fr" }}>
+                <input value={f.ref} placeholder="N° facture" onChange={(e) => setFacs(facs.map((x, j) => (j === i ? { ...x, ref: e.target.value } : x)))} />
+                <input value={f.emetteur} placeholder="Émetteur" onChange={(e) => setFacs(facs.map((x, j) => (j === i ? { ...x, emetteur: e.target.value } : x)))} />
+                <select value={f.statut} onChange={(e) => setFacs(facs.map((x, j) => (j === i ? { ...x, statut: e.target.value as Facture["statut"] } : x)))}><option value="a_regler">À régler</option><option value="payee">Payée</option><option value="offert">Offert</option></select>
+                <input type="number" value={f.ttc} placeholder="TTC" onChange={(e) => setFacs(facs.map((x, j) => (j === i ? { ...x, ttc: Number(e.target.value) } : x)))} />
+              </div>
+            ))}
+            <button type="button" className="btn o s" style={{ justifySelf: "start" }} onClick={() => setFacs([...facs, { ref: "", emetteur: "Transports Ligneo", objet: "Remise en état", statut: "a_regler", ttc: 0 }])}>+ Ajouter une facture</button>
+          </div>
+          <div className="act"><button type="button" className="btn o s" onClick={() => void saveFacs()}>Enregistrer les factures</button></div>
+        </div>
 
         <div className="card"><h3>Notes internes</h3>
           <div className="f"><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Visible uniquement par l'équipe" /></div>
@@ -326,6 +400,13 @@ function PlanningTab({ events, rows, onChange }: { events: RmkEvent[]; rows: Dos
 function PrestatairesTab({ list, onChange }: { list: Prestataire[]; onChange: () => Promise<void> }) {
   const empty = { nom: "", specialite: "", ville: "", delai_moyen_jours: "", contact_email: "", contact_tel: "" };
   const [f, setF] = useState(empty); const [open, setOpen] = useState(false);
+  const [demo, setDemo] = useState(false);
+  const [mail, setMail] = useState<Record<string, string>>({});
+  const link = async (p: Prestataire) => {
+    const { error } = await rdb.rpc("remarketing_lier_prestataire", { p_id: p.id, p_email: mail[p.id] ?? "" });
+    if (error) { toast.error("Liaison impossible", { description: errMsg(error) }); return; }
+    toast.success(mail[p.id] ? "Compte relié : le prestataire accède au portail sur /prestataire" : "Compte détaché"); await onChange();
+  };
   const save = async () => {
     if (!f.nom.trim()) { toast.error("Nom obligatoire."); return; }
     const { error } = await rdb.from("remarketing_prestataires").insert({ nom: f.nom.trim(), specialite: f.specialite || null, ville: f.ville || null, delai_moyen_jours: f.delai_moyen_jours ? Number(f.delai_moyen_jours) : null, contact_email: f.contact_email || null, contact_tel: f.contact_tel || null });
@@ -336,16 +417,23 @@ function PrestatairesTab({ list, onChange }: { list: Prestataire[]; onChange: ()
   const del = async (p: Prestataire) => { if (!confirm(`Supprimer ${p.nom} ?`)) return; const { error } = await rdb.from("remarketing_prestataires").delete().eq("id", p.id); if (error) toast.error("Suppression impossible", { description: errMsg(error) }); await onChange(); };
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "flex-end" }}><button type="button" className="btn s" onClick={() => setOpen(true)}><Ico.Plus />Ajouter un prestataire</button></div>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+        <div className="seg"><button type="button" className={!demo ? "on" : ""} onClick={() => setDemo(false)}>Prestataires réels</button><button type="button" className={demo ? "on" : ""} onClick={() => setDemo(true)}>Démo ({list.filter((p) => p.is_demo).length})</button></div>
+        <button type="button" className="btn s" onClick={() => setOpen(true)}><Ico.Plus />Ajouter un prestataire</button>
+      </div>
       <div className="grid">
-        {list.map((p) => (
+        {list.filter((p) => !!p.is_demo === demo).map((p) => (
           <div className="card" key={p.id} style={{ opacity: p.actif ? 1 : 0.55 }}>
-            <h3>{p.nom} {!p.actif && <span className="pill n">Inactif</span>}</h3>
+            <h3>{p.nom} {p.is_demo && <DemoBadge />} {!p.actif && <span className="pill n">Inactif</span>} {p.user_id && <span className="pill k">Portail relié</span>}</h3>
             <div className="kv"><div><small>Spécialité</small><b>{p.specialite || "—"}</b></div><div><small>Ville</small><b>{p.ville || "—"}</b></div><div><small>Délai moyen</small><b>{p.delai_moyen_jours ? `${p.delai_moyen_jours} j` : "—"}</b></div><div><small>Contact</small><b>{p.contact_tel || p.contact_email || "—"}</b></div></div>
+            {!p.is_demo && (
+              <div className="f" style={{ marginTop: 10 }}><label>E-mail du compte portail</label>
+                <div style={{ display: "flex", gap: 6 }}><input value={mail[p.id] ?? ""} placeholder={p.user_id ? "Compte déjà relié" : "prestataire@garage.fr"} onChange={(e) => setMail({ ...mail, [p.id]: e.target.value })} /><button type="button" className="btn o s" onClick={() => void link(p)}>{mail[p.id] ? "Relier" : "Détacher"}</button></div></div>
+            )}
             <div className="act"><button type="button" className="btn o s" onClick={() => void toggle(p)}>{p.actif ? "Désactiver" : "Activer"}</button><button type="button" className="btn r s" onClick={() => void del(p)}>Supprimer</button></div>
           </div>
         ))}
-        {list.length === 0 && <div className="card" style={{ color: "var(--ink3)" }}>Aucun prestataire.</div>}
+        {list.filter((p) => !!p.is_demo === demo).length === 0 && <div className="card" style={{ color: "var(--ink3)" }}>Aucun prestataire.</div>}
       </div>
       <Overlay open={open} onClose={() => setOpen(false)} kind="modal">
         <h2>Nouveau prestataire</h2>
@@ -422,6 +510,7 @@ function SettingsTab({ value, onSaved }: { value: RmkSettings; onSaved: (s: RmkS
       <div className="f" style={{ marginTop: 14 }}>
         <div className="r2"><div><label>Tarif de livraison</label><input value={s.tarif_livraison} onChange={(e) => setS({ ...s, tarif_livraison: e.target.value })} /></div>
           <div><label>Délai de relance (heures)</label><input type="number" value={s.delai_relance_h} onChange={(e) => setS({ ...s, delai_relance_h: Number(e.target.value) || 48 })} /></div></div>
+        <div><label>Seuil d'acceptation directe des devis (€)</label><input type="number" value={s.seuil_auto_eur} onChange={(e) => setS({ ...s, seuil_auto_eur: Number(e.target.value) || 0 })} /></div>
       </div>
       <div className="act"><button type="button" className="btn" onClick={() => void save()}>Enregistrer</button></div>
     </div>

@@ -53,6 +53,7 @@ import { Route as AuthenticatedDashboardProRouteImport } from './routes/_authent
 import { Route as AuthenticatedEntrepriseRouteImport } from './routes/_authenticated/entreprise'
 import { Route as AuthenticatedFlotteRouteImport } from './routes/_authenticated/flotte'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedPrestataireRouteImport } from './routes/_authenticated/prestataire'
 import { Route as ACodeRouteImport } from './routes/a.$code'
 import { Route as ActualitesIndexRouteImport } from './routes/actualites.index'
 import { Route as ActualitesSlugRouteImport } from './routes/actualites.$slug'
@@ -101,6 +102,7 @@ import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
 import { Route as AuthenticatedAdminInfosLigneoRouteImport } from './routes/_authenticated/admin.infos-ligneo'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
+import { Route as AuthenticatedAdminMaintenanceRouteImport } from './routes/_authenticated/admin.maintenance'
 import { Route as AuthenticatedAdminMessagerieRouteImport } from './routes/_authenticated/admin.messagerie'
 import { Route as AuthenticatedAdminMessagerieConseillerRouteImport } from './routes/_authenticated/admin.messagerie-conseiller'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
@@ -113,6 +115,7 @@ import { Route as AuthenticatedAdminPaiementsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminPaiementsConvoyeursRouteImport } from './routes/_authenticated/admin.paiements-convoyeurs'
 import { Route as AuthenticatedAdminParametresRouteImport } from './routes/_authenticated/admin.parametres'
 import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_authenticated/admin.parametres-ia'
+import { Route as AuthenticatedAdminRemarketingRouteImport } from './routes/_authenticated/admin.remarketing'
 import { Route as AuthenticatedAdminScanDocumentRouteImport } from './routes/_authenticated/admin.scan-document'
 import { Route as AuthenticatedAdminSignaturesRouteImport } from './routes/_authenticated/admin.signatures'
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
@@ -156,6 +159,7 @@ import { Route as AuthenticatedDashboardProMissionsRouteImport } from './routes/
 import { Route as AuthenticatedDashboardProNouvelleDemandeRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-demande'
 import { Route as AuthenticatedDashboardProNouvelleMissionRouteImport } from './routes/_authenticated/dashboard-pro.nouvelle-mission'
 import { Route as AuthenticatedDashboardProRapportsRouteImport } from './routes/_authenticated/dashboard-pro.rapports'
+import { Route as AuthenticatedDashboardProRemarketingRouteImport } from './routes/_authenticated/dashboard-pro.remarketing'
 import { Route as AuthenticatedDashboardProSitesRouteImport } from './routes/_authenticated/dashboard-pro.sites'
 import { Route as AuthenticatedDashboardProSocieteRouteImport } from './routes/_authenticated/dashboard-pro.societe'
 import { Route as AuthenticatedDashboardProTcoRouteImport } from './routes/_authenticated/dashboard-pro.tco'
@@ -459,6 +463,12 @@ const AuthenticatedNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedPrestataireRoute =
+  AuthenticatedPrestataireRouteImport.update({
+    id: '/prestataire',
+    path: '/prestataire',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ACodeRoute = ACodeRouteImport.update({
   id: '/a/$code',
   path: '/a/$code',
@@ -727,6 +737,12 @@ const AuthenticatedAdminInscriptionsRoute =
     path: '/inscriptions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminMaintenanceRoute =
+  AuthenticatedAdminMaintenanceRouteImport.update({
+    id: '/maintenance',
+    path: '/maintenance',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMessagerieRoute =
   AuthenticatedAdminMessagerieRouteImport.update({
     id: '/messagerie',
@@ -797,6 +813,12 @@ const AuthenticatedAdminParametresIaRoute =
   AuthenticatedAdminParametresIaRouteImport.update({
     id: '/parametres-ia',
     path: '/parametres-ia',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRemarketingRoute =
+  AuthenticatedAdminRemarketingRouteImport.update({
+    id: '/remarketing',
+    path: '/remarketing',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminScanDocumentRoute =
@@ -1055,6 +1077,12 @@ const AuthenticatedDashboardProRapportsRoute =
   AuthenticatedDashboardProRapportsRouteImport.update({
     id: '/rapports',
     path: '/rapports',
+    getParentRoute: () => AuthenticatedDashboardProRoute,
+  } as any)
+const AuthenticatedDashboardProRemarketingRoute =
+  AuthenticatedDashboardProRemarketingRouteImport.update({
+    id: '/remarketing',
+    path: '/remarketing',
     getParentRoute: () => AuthenticatedDashboardProRoute,
   } as any)
 const AuthenticatedDashboardProSitesRoute =
@@ -1558,6 +1586,7 @@ export interface FileRoutesByFullPath {
   '/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/prestataire': typeof AuthenticatedPrestataireRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
@@ -1605,6 +1634,7 @@ export interface FileRoutesByFullPath {
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1617,6 +1647,7 @@ export interface FileRoutesByFullPath {
   '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -1657,6 +1688,7 @@ export interface FileRoutesByFullPath {
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/dashboard-pro/remarketing': typeof AuthenticatedDashboardProRemarketingRoute
   '/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
@@ -1780,6 +1812,7 @@ export interface FileRoutesByTo {
   '/test-sms': typeof TestSmsRoute
   '/verifier-signature': typeof VerifierSignatureRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/prestataire': typeof AuthenticatedPrestataireRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
@@ -1827,6 +1860,7 @@ export interface FileRoutesByTo {
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1839,6 +1873,7 @@ export interface FileRoutesByTo {
   '/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -1876,6 +1911,7 @@ export interface FileRoutesByTo {
   '/dashboard-pro/flotte': typeof AuthenticatedDashboardProFlotteRoute
   '/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/dashboard-pro/remarketing': typeof AuthenticatedDashboardProRemarketingRoute
   '/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
@@ -2007,6 +2043,7 @@ export interface FileRoutesById {
   '/_authenticated/entreprise': typeof AuthenticatedEntrepriseRouteWithChildren
   '/_authenticated/flotte': typeof AuthenticatedFlotteRouteWithChildren
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/prestataire': typeof AuthenticatedPrestataireRoute
   '/a/$code': typeof ACodeRoute
   '/actualites/$slug': typeof ActualitesSlugRoute
   '/auth/email-confirmation': typeof AuthEmailConfirmationRoute
@@ -2054,6 +2091,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/_authenticated/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/_authenticated/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/_authenticated/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/_authenticated/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -2066,6 +2104,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/paiements-convoyeurs': typeof AuthenticatedAdminPaiementsConvoyeursRoute
   '/_authenticated/admin/parametres': typeof AuthenticatedAdminParametresRoute
   '/_authenticated/admin/parametres-ia': typeof AuthenticatedAdminParametresIaRoute
+  '/_authenticated/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/_authenticated/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/_authenticated/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
@@ -2106,6 +2145,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard-pro/nouvelle-demande': typeof AuthenticatedDashboardProNouvelleDemandeRoute
   '/_authenticated/dashboard-pro/nouvelle-mission': typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   '/_authenticated/dashboard-pro/rapports': typeof AuthenticatedDashboardProRapportsRoute
+  '/_authenticated/dashboard-pro/remarketing': typeof AuthenticatedDashboardProRemarketingRoute
   '/_authenticated/dashboard-pro/sites': typeof AuthenticatedDashboardProSitesRoute
   '/_authenticated/dashboard-pro/societe': typeof AuthenticatedDashboardProSocieteRoute
   '/_authenticated/dashboard-pro/tco': typeof AuthenticatedDashboardProTcoRoute
@@ -2237,6 +2277,7 @@ export interface FileRouteTypes {
     | '/entreprise'
     | '/flotte'
     | '/notifications'
+    | '/prestataire'
     | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
@@ -2284,6 +2325,7 @@ export interface FileRouteTypes {
     | '/admin/informations-legales'
     | '/admin/infos-ligneo'
     | '/admin/inscriptions'
+    | '/admin/maintenance'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
     | '/admin/messages'
@@ -2296,6 +2338,7 @@ export interface FileRouteTypes {
     | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/remarketing'
     | '/admin/scan-document'
     | '/admin/signatures'
     | '/admin/super-admin'
@@ -2336,6 +2379,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/nouvelle-mission'
     | '/dashboard-pro/rapports'
+    | '/dashboard-pro/remarketing'
     | '/dashboard-pro/sites'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
@@ -2459,6 +2503,7 @@ export interface FileRouteTypes {
     | '/test-sms'
     | '/verifier-signature'
     | '/notifications'
+    | '/prestataire'
     | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
@@ -2506,6 +2551,7 @@ export interface FileRouteTypes {
     | '/admin/informations-legales'
     | '/admin/infos-ligneo'
     | '/admin/inscriptions'
+    | '/admin/maintenance'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
     | '/admin/messages'
@@ -2518,6 +2564,7 @@ export interface FileRouteTypes {
     | '/admin/paiements-convoyeurs'
     | '/admin/parametres'
     | '/admin/parametres-ia'
+    | '/admin/remarketing'
     | '/admin/scan-document'
     | '/admin/signatures'
     | '/admin/super-admin'
@@ -2555,6 +2602,7 @@ export interface FileRouteTypes {
     | '/dashboard-pro/flotte'
     | '/dashboard-pro/nouvelle-demande'
     | '/dashboard-pro/rapports'
+    | '/dashboard-pro/remarketing'
     | '/dashboard-pro/sites'
     | '/dashboard-pro/societe'
     | '/dashboard-pro/tco'
@@ -2685,6 +2733,7 @@ export interface FileRouteTypes {
     | '/_authenticated/entreprise'
     | '/_authenticated/flotte'
     | '/_authenticated/notifications'
+    | '/_authenticated/prestataire'
     | '/a/$code'
     | '/actualites/$slug'
     | '/auth/email-confirmation'
@@ -2732,6 +2781,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/informations-legales'
     | '/_authenticated/admin/infos-ligneo'
     | '/_authenticated/admin/inscriptions'
+    | '/_authenticated/admin/maintenance'
     | '/_authenticated/admin/messagerie'
     | '/_authenticated/admin/messagerie-conseiller'
     | '/_authenticated/admin/messages'
@@ -2744,6 +2794,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/paiements-convoyeurs'
     | '/_authenticated/admin/parametres'
     | '/_authenticated/admin/parametres-ia'
+    | '/_authenticated/admin/remarketing'
     | '/_authenticated/admin/scan-document'
     | '/_authenticated/admin/signatures'
     | '/_authenticated/admin/super-admin'
@@ -2784,6 +2835,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard-pro/nouvelle-demande'
     | '/_authenticated/dashboard-pro/nouvelle-mission'
     | '/_authenticated/dashboard-pro/rapports'
+    | '/_authenticated/dashboard-pro/remarketing'
     | '/_authenticated/dashboard-pro/sites'
     | '/_authenticated/dashboard-pro/societe'
     | '/_authenticated/dashboard-pro/tco'
@@ -3282,6 +3334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/prestataire': {
+      id: '/_authenticated/prestataire'
+      path: '/prestataire'
+      fullPath: '/prestataire'
+      preLoaderRoute: typeof AuthenticatedPrestataireRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/a/$code': {
       id: '/a/$code'
       path: '/a/$code'
@@ -3618,6 +3677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInscriptionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/maintenance': {
+      id: '/_authenticated/admin/maintenance'
+      path: '/maintenance'
+      fullPath: '/admin/maintenance'
+      preLoaderRoute: typeof AuthenticatedAdminMaintenanceRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/messagerie': {
       id: '/_authenticated/admin/messagerie'
       path: '/messagerie'
@@ -3700,6 +3766,13 @@ declare module '@tanstack/react-router' {
       path: '/parametres-ia'
       fullPath: '/admin/parametres-ia'
       preLoaderRoute: typeof AuthenticatedAdminParametresIaRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/remarketing': {
+      id: '/_authenticated/admin/remarketing'
+      path: '/remarketing'
+      fullPath: '/admin/remarketing'
+      preLoaderRoute: typeof AuthenticatedAdminRemarketingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/scan-document': {
@@ -4001,6 +4074,13 @@ declare module '@tanstack/react-router' {
       path: '/rapports'
       fullPath: '/dashboard-pro/rapports'
       preLoaderRoute: typeof AuthenticatedDashboardProRapportsRouteImport
+      parentRoute: typeof AuthenticatedDashboardProRoute
+    }
+    '/_authenticated/dashboard-pro/remarketing': {
+      id: '/_authenticated/dashboard-pro/remarketing'
+      path: '/remarketing'
+      fullPath: '/dashboard-pro/remarketing'
+      preLoaderRoute: typeof AuthenticatedDashboardProRemarketingRouteImport
       parentRoute: typeof AuthenticatedDashboardProRoute
     }
     '/_authenticated/dashboard-pro/sites': {
@@ -4654,6 +4734,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
   AuthenticatedAdminInfosLigneoRoute: typeof AuthenticatedAdminInfosLigneoRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
+  AuthenticatedAdminMaintenanceRoute: typeof AuthenticatedAdminMaintenanceRoute
   AuthenticatedAdminMessagerieRoute: typeof AuthenticatedAdminMessagerieRoute
   AuthenticatedAdminMessagerieConseillerRoute: typeof AuthenticatedAdminMessagerieConseillerRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
@@ -4666,6 +4747,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPaiementsConvoyeursRoute: typeof AuthenticatedAdminPaiementsConvoyeursRoute
   AuthenticatedAdminParametresRoute: typeof AuthenticatedAdminParametresRoute
   AuthenticatedAdminParametresIaRoute: typeof AuthenticatedAdminParametresIaRoute
+  AuthenticatedAdminRemarketingRoute: typeof AuthenticatedAdminRemarketingRoute
   AuthenticatedAdminScanDocumentRoute: typeof AuthenticatedAdminScanDocumentRoute
   AuthenticatedAdminSignaturesRoute: typeof AuthenticatedAdminSignaturesRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
@@ -4711,6 +4793,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminInformationsLegalesRoute,
   AuthenticatedAdminInfosLigneoRoute: AuthenticatedAdminInfosLigneoRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
+  AuthenticatedAdminMaintenanceRoute: AuthenticatedAdminMaintenanceRoute,
   AuthenticatedAdminMessagerieRoute: AuthenticatedAdminMessagerieRoute,
   AuthenticatedAdminMessagerieConseillerRoute:
     AuthenticatedAdminMessagerieConseillerRoute,
@@ -4727,6 +4810,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminPaiementsConvoyeursRoute,
   AuthenticatedAdminParametresRoute: AuthenticatedAdminParametresRoute,
   AuthenticatedAdminParametresIaRoute: AuthenticatedAdminParametresIaRoute,
+  AuthenticatedAdminRemarketingRoute: AuthenticatedAdminRemarketingRoute,
   AuthenticatedAdminScanDocumentRoute: AuthenticatedAdminScanDocumentRoute,
   AuthenticatedAdminSignaturesRoute: AuthenticatedAdminSignaturesRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
@@ -4910,6 +4994,7 @@ interface AuthenticatedDashboardProRouteChildren {
   AuthenticatedDashboardProNouvelleDemandeRoute: typeof AuthenticatedDashboardProNouvelleDemandeRoute
   AuthenticatedDashboardProNouvelleMissionRoute: typeof AuthenticatedDashboardProNouvelleMissionRouteWithChildren
   AuthenticatedDashboardProRapportsRoute: typeof AuthenticatedDashboardProRapportsRoute
+  AuthenticatedDashboardProRemarketingRoute: typeof AuthenticatedDashboardProRemarketingRoute
   AuthenticatedDashboardProSitesRoute: typeof AuthenticatedDashboardProSitesRoute
   AuthenticatedDashboardProSocieteRoute: typeof AuthenticatedDashboardProSocieteRoute
   AuthenticatedDashboardProTcoRoute: typeof AuthenticatedDashboardProTcoRoute
@@ -4945,6 +5030,8 @@ const AuthenticatedDashboardProRouteChildren: AuthenticatedDashboardProRouteChil
       AuthenticatedDashboardProNouvelleMissionRouteWithChildren,
     AuthenticatedDashboardProRapportsRoute:
       AuthenticatedDashboardProRapportsRoute,
+    AuthenticatedDashboardProRemarketingRoute:
+      AuthenticatedDashboardProRemarketingRoute,
     AuthenticatedDashboardProSitesRoute: AuthenticatedDashboardProSitesRoute,
     AuthenticatedDashboardProSocieteRoute:
       AuthenticatedDashboardProSocieteRoute,
@@ -5025,6 +5112,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEntrepriseRoute: typeof AuthenticatedEntrepriseRouteWithChildren
   AuthenticatedFlotteRoute: typeof AuthenticatedFlotteRouteWithChildren
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedPrestataireRoute: typeof AuthenticatedPrestataireRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -5036,6 +5124,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEntrepriseRoute: AuthenticatedEntrepriseRouteWithChildren,
   AuthenticatedFlotteRoute: AuthenticatedFlotteRouteWithChildren,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedPrestataireRoute: AuthenticatedPrestataireRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
