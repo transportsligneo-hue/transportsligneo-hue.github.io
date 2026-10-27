@@ -69,7 +69,7 @@ export default function Tarifs() {
 
           <div className="card-premium p-8 rounded">
             <h4 className="font-heading text-primary tracking-[0.1em] uppercase text-sm mb-6">
-              Hors agglomération (37)
+              Plus de 60 km en Indre-et-Loire
             </h4>
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-primary/10 pb-3">

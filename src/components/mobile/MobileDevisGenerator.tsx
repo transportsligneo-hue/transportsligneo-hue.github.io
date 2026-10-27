@@ -40,7 +40,7 @@ const FIXED_TARIFFS: Record<string, [number, number]> = {
 };
 const DEPARTMENT_LABELS: Record<string, string> = {
   "37-intra": "Forfait Tours intra",
-  "37-hors": "Forfait hors agglomération (37)",
+  "37-hors": "Forfait Indre-et-Loire, plus de 60 km",
 };
 
 const CITIES = [

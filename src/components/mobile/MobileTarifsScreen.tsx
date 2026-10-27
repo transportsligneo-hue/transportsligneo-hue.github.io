@@ -45,7 +45,7 @@ export default function MobileTarifsScreen() {
         />
         <PriceCard
           icon={<RouteIcon size={16} />}
-          title="Hors agglomération (37)"
+          title="Plus de 60 km en Indre-et-Loire"
           lines={[
             { l: "Livraison simple", p: "90 €" },
             { l: "Restitution et livraison", p: "130 €" },

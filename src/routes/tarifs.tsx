@@ -78,7 +78,7 @@ function TarifsPage() {
             </div>
 
             <div className="v4-svc-card">
-              <h3>Hors agglomération (37)</h3>
+              <h3>Plus de 60 km en Indre-et-Loire</h3>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--v4-border)" }}>
                 <span style={{ color: "var(--v4-text-muted)", fontSize: 13 }}>Livraison simple</span>
                 <span style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#6ea1ff" }}>90 €</span>

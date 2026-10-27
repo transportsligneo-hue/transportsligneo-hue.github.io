@@ -23,7 +23,6 @@ import TrackRecordLine from "@/components/devis/TrackRecordLine";
 import { getGoogleDistanceKm, isGoogleAvailable } from "@/lib/google-places";
 import { resolveLocalDeptTariff } from "@/lib/pricing-departments";
 import { geocodeDistanceKm, normalizeAddress } from "@/lib/distance-fallback";
-import { useEstimationLog } from "@/lib/estimation-log";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
@@ -55,7 +54,7 @@ const CITY_DISTANCES: Record<string, Record<string, number>> = {
 };
 const CITY_DEPARTMENTS: Record<string, string> = { "Tours": "37-intra", "Châteauroux": "37-hors" };
 const FIXED_TARIFFS: Record<string, [number, number]> = { "37-intra": [70, 120], "37-hors": [90, 130] };
-const DEPARTMENT_LABELS: Record<string, string> = { "37-intra": "Forfait Tours intra", "37-hors": "Forfait hors agglomération (37)" };
+const DEPARTMENT_LABELS: Record<string, string> = { "37-intra": "Forfait Tours intra", "37-hors": "Forfait Indre-et-Loire, plus de 60 km" };
 const CITIES = ["Tours","Paris","Lyon","Marseille","Bordeaux","Nantes","Lille","Strasbourg","Toulouse","Nice","Montpellier","Rennes","Orléans","Poitiers","Limoges","Clermont-Ferrand","Angers","Le Mans","Blois","Chartres","Rouen","Caen","Dijon","Reims","Metz","Nancy","Brest","La Rochelle","Perpignan","Grenoble","Saint-Étienne","Amiens","Bourges","Châteauroux"].sort();
 const VEHICLE_TYPES = [{value:"citadine",label:"Citadine"},{value:"berline",label:"Berline"},{value:"break",label:"Break"},{value:"suv",label:"SUV"},{value:"monospace",label:"Monospace"},{value:"coupe",label:"Coupé"},{value:"cabriolet",label:"Cabriolet"},{value:"luxe",label:"Luxe / Supercar"},{value:"utilitaire",label:"Utilitaire"},{value:"autre",label:"Autre"}];
 const ENERGY_TYPES = [{value:"diesel",label:"Diesel"},{value:"essence",label:"Essence"},{value:"electrique",label:"Électrique"},{value:"hybride",label:"Hybride"}];
@@ -475,8 +474,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const priceTTC = offHours ? Math.round(baseTtc * 1.3) : baseTtc;
   const priceHT = microRegime ? priceTTC : Math.round((priceTTC / 1.2) * 100) / 100;
   const tva = Math.max(0, Math.round((priceTTC - priceHT) * 100) / 100);
-  // Statistiques › Estimateur : chaque prix affiché (ville + département seulement)
-  const markEstimationSent = useEstimationLog({ departure, arrival, distance, vehicleType, option, price: pricing ? priceTTC : null });
 
 
 
@@ -662,7 +659,6 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       } catch (e) { console.warn("Email devis non envoyé", e); }
 
 
-      markEstimationSent(devisRow?.id ?? null);
       setSubmitted(true);
     } catch (err) {
       console.error(err);

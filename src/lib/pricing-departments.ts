@@ -490,7 +490,7 @@ export function resolveLocalDeptTariff(
 
   const label = bothAgglo
     ? `Forfait ${entry.city} (agglomération)`
-    : `Forfait département ${zDep.dept} — hors agglomération`;
+    : isDept37 ? "Forfait Indre-et-Loire, plus de 60 km" : `Forfait département ${zDep.dept} — hors agglomération`;
 
   if (option === "aller-retour") {
     return { price: simple, label, finalPrice: retour, multiplierLabel: "restitution et livraison", hasExtra: true };
