@@ -7,15 +7,16 @@
 <title>Ligneo Driver</title>
 <style>
   html,body{margin:0;height:100%;background:#dcebe3;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .wrap,.wrap *{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   .wrap{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(520px 320px at 0% 0%,rgba(52,230,140,.25),transparent 70%),linear-gradient(180deg,#e6f3ec,#cfe2d8)}
   .m{position:relative;width:104px;height:104px;display:grid;place-items:center}
-  .m img{width:68px;height:68px;border-radius:18px;box-shadow:0 10px 26px rgba(20,184,102,.4);animation:b 1.8s ease-in-out infinite;object-fit:contain}
-  .m i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(52,230,140,.5),transparent 68%);animation:b 1.8s ease-in-out infinite}
+  .m img{width:68px;height:68px;border-radius:18px;box-shadow:0 10px 26px rgba(20,184,102,.4);object-fit:contain}
+  .m i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(52,230,140,.45),transparent 68%)}
   @keyframes b{50%{transform:scale(1.08);opacity:.85}}
-  strong{margin:0;font-size:14px;letter-spacing:.16em;color:#0b2a1f;font-weight:800;text-align:center}
-  strong em{display:block;font-style:normal;color:#12a35f;letter-spacing:.34em;font-size:11px;margin-top:3px}
+  strong{margin:0;line-height:1.3;font-size:14px;letter-spacing:.16em;color:#0b2a1f;font-weight:800;text-align:center}
+  strong em{display:block;font-style:normal;color:#12a35f;letter-spacing:.34em;font-size:11px;margin-top:3px;line-height:1.3}
   .bar{width:140px;height:5px;border-radius:9px;background:rgba(20,184,102,.18);overflow:hidden}
-  .bar b{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd);animation:l 1.2s ease-in-out infinite}
+  .bar b{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#14B866,#6effcd);animation:l 1.2s ease-in-out infinite;animation-delay:var(--lbd,0ms)}
   @keyframes l{0%{margin-left:-40%}100%{margin-left:100%}}
   a{display:none;position:fixed;bottom:48px;left:50%;transform:translateX(-50%);background:#14B866;color:#04261a;font:700 16px system-ui,sans-serif;padding:14px 22px;border-radius:12px;text-decoration:none}
 </style>
@@ -24,6 +25,7 @@
 <div class="wrap"><div class="m"><i></i><img src="/icons/logo-driver-app.png" alt=""></div><strong>TRANSPORTS LIGNEO<em>DRIVER</em></strong><span class="bar"><b></b></span></div>
 <a id="manual" href="/login?app=1">Ouvrir la connexion</a>
 <script>
+document.documentElement.style.setProperty("--lbd",-(Date.now()%1200)+"ms");
 (function () {
   // Cache l'écran d'ouverture Android dès que cette page est dessinée (identique : aucune coupure visible).
   function hideSplash() {

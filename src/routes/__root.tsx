@@ -152,7 +152,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
           // Applique le thème mémorisé avant l'affichage (clair par défaut, pas de flash sombre).
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('ligneo-theme-v2');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}try{if(/LigneoDriverApp/.test(navigator.userAgent)){document.documentElement.classList.add('ligneo-app');}}catch(e){}",
+              "try{document.documentElement.style.setProperty('--lbd',-(Date.now()%1200)+'ms')}catch(e){}try{var t=localStorage.getItem('ligneo-theme-v2');if(t==='dark'){var r=document.documentElement;r.classList.remove('theme-light');r.classList.add('theme-dark');r.style.colorScheme='dark';}}catch(e){}try{if(/LigneoDriverApp/.test(navigator.userAgent)){document.documentElement.classList.add('ligneo-app');}}catch(e){}",
           }}
         />
         <HeadContent />
