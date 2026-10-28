@@ -314,6 +314,13 @@ function SignaturePage() {
             className="w-full h-44 sm:h-52 rounded-xl border-2 border-dashed border-[#9db6ff] bg-white touch-none" />
         </div>
         {errBox}
+        {(() => {
+          const m: string[] = [];
+          if (!consent) m.push("cochez la case de consentement");
+          if (!hasInk) m.push("signez dans le cadre");
+          if (typedName.trim().length < 2) m.push("saisissez votre nom");
+          return <p className={"text-xs text-center font-medium " + (m.length ? "text-amber-700" : "text-emerald-700")}>{m.length ? `Pour activer le bouton : ${m.join(", ")}.` : "Tout est prêt : vous pouvez signer."}</p>;
+        })()}
         <button className={btn} disabled={busy || !consent || !hasInk || typedName.trim().length < 2} onClick={submit}>
           {busy ? <><Loader2 className="animate-spin" size={18} /> Signature en cours…</> : <><PenLine size={18} /> Signer le document</>}
         </button>

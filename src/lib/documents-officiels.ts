@@ -796,124 +796,20 @@ export function buildContratPreambule(d: ContratConvoyeurData, c?: CompanyInfo |
 }
 
 /** Nombre de pages du dernier contrat généré (utile pour placer le champ de signature). */
-let lastContratPageCount = 1;
+/** Le contrat de partenariat utilise le modèle unique « contrat-convoyeur-pdf » (même texte, même design partout). */
+export async function getLastContratPageCountAsync(): Promise<number> {
+  return (await import("@/lib/contrat-convoyeur-pdf")).getLastContratPageCount();
+}
 export function getLastContratPageCount() {
-  return lastContratPageCount;
+  return 1;
 }
 
 export async function generateContratConvoyeurPdf(
   d: ContratConvoyeurData,
   company?: CompanyInfo | null,
 ): Promise<Blob> {
-  const { doc, pageW, pageH, company: c } = await newDoc(
-    "Contrat de partenariat",
-    undefined,
-    "Convoyeur indépendant",
-    company,
-  );
-  const w = pageW - 28;
-  let y = 56;
-
-  const ensure = (need: number) => {
-    if (y + need > pageH - 26) {
-      doc.addPage();
-      drawDocHeader(doc, { pageW, title: "Contrat de partenariat", subtitle: "Convoyeur indépendant", company: c, height: 26 });
-      y = 36;
-    }
-  };
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text("ENTRE LES SOUSSIGNÉS :", 14, y);
-  y += 6;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...DOC_TEXT);
-  buildContratPreambule(d, c).forEach((p) => {
-    const lines = doc.splitTextToSize(p, w);
-    ensure(lines.length * 4 + 6);
-    doc.text(lines, 14, y);
-    y += lines.length * 4 + 5;
-  });
-
-  buildContratArticles(c).forEach((a) => {
-    ensure(16);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
-    doc.setTextColor(...DOC_NAVY);
-    doc.text(a.titre.toUpperCase(), 14, y);
-    y += 5;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...DOC_TEXT);
-    a.paragraphes.forEach((p) => {
-      const lines = doc.splitTextToSize(p, w);
-      ensure(lines.length * 4 + 3);
-      doc.text(lines, 14, y);
-      y += lines.length * 4 + 2;
-    });
-    (a.puces ?? []).forEach((b) => {
-      const lines = doc.splitTextToSize(b, w - 6);
-      ensure(lines.length * 4 + 2);
-      doc.setTextColor(...DOC_GOLD);
-      doc.text("•", 16, y);
-      doc.setTextColor(...DOC_TEXT);
-      doc.text(lines, 20, y);
-      y += lines.length * 4 + 1;
-    });
-    y += 3;
-  });
-
-  ensure(46);
-  y += 4;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(...DOC_MUTED);
-  doc.text(
-    `Fait à ${c?.adresse_ville || "—"}, le ${dateFmt(d.signed_at || new Date().toISOString())}.`,
-    14,
-    y,
-  );
-  y += 5;
-
-  doc.setFillColor(...DOC_CREAM);
-  doc.setDrawColor(...DOC_LINE);
-  doc.rect(14, y, w, 32, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...DOC_NAVY);
-  doc.text(`Pour ${c?.raison_sociale || "Transports Ligneo"}`, 18, y + 6);
-  doc.text("Le Convoyeur", pageW / 2 + 4, y + 6);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...DOC_TEXT);
-  doc.setFontSize(7.5);
-  doc.text(`${c?.signataire_nom || "—"} — ${c?.signataire_fonction || "—"}`, 18, y + 12);
-  drawCompanySignature(doc, await loadCompanySignature(), 40, y + 15);
-  doc.text(d.nom_complet, pageW / 2 + 4, y + 12);
-
-  if (d.signed_at) {
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...DOC_NAVY);
-    doc.text("Signé électroniquement — lu et approuvé", pageW / 2 + 4, y + 19);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...DOC_MUTED);
-    doc.setFontSize(6.8);
-    doc.text(`Nom saisi : ${d.signature_nom || d.nom_complet}`, pageW / 2 + 4, y + 24);
-    doc.text(
-      `Horodatage : ${new Date(d.signed_at).toLocaleString("fr-FR")}${d.signature_ip ? ` — IP ${d.signature_ip}` : ""}`,
-      pageW / 2 + 4,
-      y + 28,
-    );
-  } else {
-    doc.setTextColor(...DOC_MUTED);
-    doc.setFontSize(7);
-    doc.text("Signature précédée de la mention « Lu et approuvé »", pageW / 2 + 4, y + 24);
-  }
-
-  finalizeDoc(doc, c);
-  lastContratPageCount = doc.getNumberOfPages();
-  return doc.output("blob");
+  const m = await import("@/lib/contrat-convoyeur-pdf");
+  return m.generateContratConvoyeurPdf(d, company);
 }
 
 /* ------------------------------------------------------------------ */

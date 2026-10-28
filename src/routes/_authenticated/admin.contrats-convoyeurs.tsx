@@ -6,7 +6,9 @@ import { ChevronDown, Download, ExternalLink, FileSignature, Loader2, Search, Sh
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/admin/AdminUI";
 import ContratYousignCard from "@/components/admin/ContratYousignCard";
-import { esignDownloadUrls, esignList } from "@/lib/esign.functions";
+import { esignConvoyeurKbisInfo, esignDownloadUrls, esignList } from "@/lib/esign.functions";
+import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
+import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 
 export const Route = createFileRoute("/_authenticated/admin/contrats-convoyeurs")({
@@ -40,6 +42,8 @@ function etatOf(r?: Req): Etat {
 function ContratsConvoyeursPage() {
   const list = useServerFn(esignList);
   const dl = useServerFn(esignDownloadUrls);
+  const kbis = useServerFn(esignConvoyeurKbisInfo);
+  const { data: company } = useCompanyInfo();
   const [convs, setConvs] = useState<Conv[]>([]);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +86,32 @@ function ContratsConvoyeursPage() {
     const s = q.trim().toLowerCase();
     return !s || r.nom.toLowerCase().includes(s) || (r.c.email ?? "").toLowerCase().includes(s);
   });
+
+  /** Aperçu du contrat, rempli avec les infos du convoyeur (fiche, sinon Kbis), sans rien envoyer. */
+  const apercu = async (c: Conv, nom: string) => {
+    const w = window.open("", "_blank");
+    setBusy("apercu" + c.id);
+    try {
+      let siret = c.siret ?? "";
+      let adresse = c.adresse ?? "";
+      if (!siret || !adresse) {
+        const k = await kbis({ data: { convoyeurId: c.id } }).catch(() => null);
+        siret = siret || k?.siret || "";
+        adresse = adresse || k?.adresse || "";
+        if (siret || adresse) {
+          await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null }).eq("id", c.id);
+        }
+      }
+      const blob = await generateContratConvoyeurPdf(
+        { nom_complet: nom, siret: siret || null, adresse: adresse || null, permis_numero: c.permis_numero ?? c.permis ?? null },
+        company,
+      );
+      const url = URL.createObjectURL(blob);
+      if (w) w.location.href = url; else window.open(url, "_blank");
+      void load();
+    } catch (e) { w?.close(); toast.error(e instanceof Error ? e.message : "Aperçu impossible"); }
+    setBusy(null);
+  };
 
   const download = async (id: string, which: "signed" | "dossier") => {
     setBusy(id + which);
@@ -156,6 +186,9 @@ function ContratsConvoyeursPage() {
                     <button onClick={() => void download(req.id, "dossier")} disabled={busy === req.id + "dossier"} className="btn-mini"><ShieldCheck size={14} /> Preuve</button>
                   </>
                 )}
+                <button onClick={() => void apercu(c, nom)} disabled={busy === "apercu" + c.id} className="btn-mini">
+                  {busy === "apercu" + c.id ? <Loader2 size={14} className="animate-spin" /> : <FileSignature size={14} />} Aperçu du contrat
+                </button>
                 <Link to="/admin/convoyeurs/$convoyeurId" params={{ convoyeurId: c.id }} className="btn-mini"><ExternalLink size={14} /> Fiche</Link>
                 <button onClick={() => setOpen(open === c.id ? null : c.id)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F5FFF] text-white text-sm font-medium">

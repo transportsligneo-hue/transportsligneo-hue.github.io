@@ -8,6 +8,7 @@
  * empreinte SHA-256, journal horodaté chaîné et scellement HMAC.
  */
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { CONTRAT_BOX_X_RIGHT_MM, CONTRAT_BOX_Y_MM } from "@/lib/contrat-signature-field";
 import { supabaseAdmin as typedAdmin } from "@/integrations/supabase/client.server";
 
 // Les tables esign_* ne figurent pas encore dans les types générés.
@@ -135,11 +136,31 @@ export async function buildSignedPdf(opts: {
   signaturePng: Uint8Array;
   req: { id: string; title: string; signer_name: string; signer_email: string; signer_company?: string | null; doc_sha256: string; consent_version: string };
   signedAt: string; ip: string | null; method: string;
+  /** "contrat_convoyeur" : la signature est aussi apposée dans l'encadré « Pour le prestataire » de la dernière page du contrat. */
+  kind?: string;
 }): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(opts.original);
-  const page = pdf.addPage([595, 842]);
   const f = await pdf.embedFont(StandardFonts.Helvetica);
   const b = await pdf.embedFont(StandardFonts.HelveticaBold);
+  if (opts.kind === "contrat_convoyeur") {
+    try {
+      const pages = pdf.getPages();
+      const sp = pages[pages.length - 1]!;
+      const k = 72 / 25.4;
+      const H = sp.getHeight();
+      const bx = CONTRAT_BOX_X_RIGHT_MM, by0 = CONTRAT_BOX_Y_MM; // mêmes repères que le PDF du contrat (mm, depuis le haut)
+      const img0 = await pdf.embedPng(opts.signaturePng);
+      const maxW = 68 * k, maxH = 19 * k;
+      const sc = Math.min(maxW / img0.width, maxH / img0.height);
+      const iw = img0.width * sc, ih = img0.height * sc;
+      sp.drawImage(img0, { x: (bx + 5) * k, y: H - (by0 + 17) * k - ih, width: iw, height: ih });
+      const nav = rgb(0.18, 0.37, 1), mut = rgb(0.5, 0.52, 0.58);
+      sp.drawText("Signe electroniquement - lu et approuve", { x: (bx + 5) * k, y: H - (by0 + 36) * k, size: 7.8, font: b, color: nav });
+      sp.drawText(win(`Nom : ${opts.req.signer_name}`), { x: (bx + 5) * k, y: H - (by0 + 40.5) * k, size: 6.8, font: f, color: mut });
+      sp.drawText(win(`Horodatage : ${paris(opts.signedAt)}${opts.ip ? ` - IP ${opts.ip}` : ""}`), { x: (bx + 5) * k, y: H - (by0 + 44.5) * k, size: 6.8, font: f, color: mut, maxWidth: 70 * k });
+    } catch (e) { console.error("[esign] apposition signature sur le contrat", e); }
+  }
+  const page = pdf.addPage([595, 842]);
   const blue = rgb(0.18, 0.37, 1), ink = rgb(0.08, 0.11, 0.2), mute = rgb(0.4, 0.44, 0.52);
   let y = 790;
   page.drawRectangle({ x: 0, y: 800, width: 595, height: 42, color: blue });
