@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Search, Building2, Plus, Trash2, UserCircle2, Mail, Phone } from "lucide-react";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { EmptyState } from "@/components/admin/AdminUI";
 import { LogoLoader } from "@/components/brand/LogoLoader";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 
 export const Route = createFileRoute("/_authenticated/admin/organisations")({
   component: AdminOrganisations,
@@ -47,6 +48,8 @@ type Row = {
   account_type?: "b2b_standard" | "flotte" | null;
   // For profile rows
   profileUserId?: string;
+  /** Compte de démonstration / test : rangé dans l'onglet Démo. */
+  demo?: boolean;
 };
 
 const roleBadgeTone: Record<string, string> = {
@@ -79,9 +82,11 @@ const scoreBadgeTone: Record<string, string> = {
 };
 
 function AdminOrganisations() {
+  const location = useLocation();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [onglet, setOnglet] = useState<"reel" | "demo">("reel");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [createOpen, setCreateOpen] = useState(false);
@@ -174,7 +179,13 @@ function AdminOrganisations() {
           };
         });
 
-      setRows([...orgRows, ...profileRows]);
+      const marque = (r: Row): Row => ({
+        ...r,
+        demo:
+          isDemoOrTestIdentity({ email: r.primary_contact_email, societe: r.legal_name }) ||
+          isDemoOrTestIdentity({ societe: r.commercial_name }),
+      });
+      setRows([...orgRows, ...profileRows].map(marque));
     } finally {
       setLoading(false);
     }
@@ -183,6 +194,7 @@ function AdminOrganisations() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return rows.filter((o) => {
+      if (!!o.demo !== (onglet === "demo")) return false;
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
       if (roleFilter !== "all" && !o.roles.includes(roleFilter)) return false;
       if (!q) return true;
@@ -193,7 +205,7 @@ function AdminOrganisations() {
         (o.primary_contact_email ?? "").toLowerCase().includes(q)
       );
     });
-  }, [rows, search, roleFilter, statusFilter]);
+  }, [rows, search, roleFilter, statusFilter, onglet]);
 
   async function handleDelete() {
     if (!toDelete) return;
@@ -224,9 +236,17 @@ function AdminOrganisations() {
     }
   }
 
-  const orgsCount = rows.filter((r) => r.kind === "org").length;
-  const flottesCount = rows.filter((r) => r.roles.includes("flotte_partenaire")).length;
-  const hotCount = rows.filter((r) => r.score_category === "hot").length;
+  // Sur la fiche d'une organisation (/admin/organisations/xxx), on affiche la fiche, pas la liste.
+  if (location.pathname.replace(/\/$/, "") !== "/admin/organisations") {
+    return <Outlet />;
+  }
+
+  // Les compteurs ne comptent jamais les comptes démo.
+  const reels = rows.filter((r) => !r.demo);
+  const demoCount = rows.length - reels.length;
+  const orgsCount = reels.filter((r) => r.kind === "org").length;
+  const flottesCount = reels.filter((r) => r.roles.includes("flotte_partenaire")).length;
+  const hotCount = reels.filter((r) => r.score_category === "hot").length;
 
   return (
     <div>
@@ -234,9 +254,6 @@ function AdminOrganisations() {
       <div className="dvx-head">
         <div className="min-w-0">
           <h1 className="dvx-title">Organisations & clients</h1>
-          <p className="dvx-sub">
-            Entreprises B2B, flottes partenaires, sous-traitants et comptes clients pro.
-          </p>
         </div>
         <button type="button" className="dvx-cta" onClick={() => setCreateOpen(true)}>
           <Plus size={16} />
@@ -249,7 +266,7 @@ function AdminOrganisations() {
         <div className="dvx-stat">
           <span className="dvx-stat-ic blue"><Building2 size={17} /></span>
           <p className="dvx-stat-k">Total</p>
-          <p className="dvx-stat-v">{rows.length}</p>
+          <p className="dvx-stat-v">{reels.length}</p>
           <p className="dvx-stat-t dim">Organisations & clients pro</p>
         </div>
         <div className="dvx-stat">
@@ -270,6 +287,23 @@ function AdminOrganisations() {
           <p className="dvx-stat-v">{hotCount}</p>
           <p className={`dvx-stat-t ${hotCount > 0 ? "up" : "dim"}`}>{hotCount > 0 ? "À relancer en priorité" : "Aucun compte chaud"}</p>
         </div>
+      </div>
+
+      {/* ===== Onglets : vrais clients / démo ===== */}
+      <div className="mb-3 flex gap-2">
+        {([["reel", "Clients", reels.length], ["demo", "Démo", demoCount]] as const).map(([k, l, n]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setOnglet(k)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold ${
+              onglet === k ? "border-[#2F5FFF] bg-[#2F5FFF] text-white" : "border-slate-200 bg-white text-slate-700"
+            }`}
+          >
+            {l}
+            <span className={`rounded-full px-2 text-[11px] ${onglet === k ? "bg-white/25" : "bg-slate-100"}`}>{n}</span>
+          </button>
+        ))}
       </div>
 
       {/* ===== Barre de filtres unifiée ===== */}
