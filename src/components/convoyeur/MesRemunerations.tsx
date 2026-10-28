@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { downloadAutofacture } from "@/lib/autofacture-convoyeur";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, Loader2, Wallet, Clock3, CheckCircle2 } from "lucide-react";
 import {
@@ -141,7 +142,10 @@ export function MesRemunerations({ userId }: { userId: string | undefined }) {
                   {p.numero ?? "Virement"} · {dateFr(p.date_execution ?? p.created_at)} ·{" "}
                   {PAIEMENT_STATUT_LABEL[p.statut]}
                 </span>
-                <span className="font-semibold">{eur(p.montant_total)}</span>
+                <span className="flex items-center gap-3">
+                  <button className="underline font-medium" onClick={() => void downloadAutofacture(p.id)}>Ma facture</button>
+                  <span className="font-semibold">{eur(p.montant_total)}</span>
+                </span>
               </div>
             ))}
           </div>

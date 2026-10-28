@@ -1,3 +1,4 @@
+import { downloadAutofacture } from "@/lib/autofacture-convoyeur";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, FileDown, Wallet, TrendingUp, Gavel } from "lucide-react";
@@ -232,6 +233,7 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
               <TH>Missions</TH>
               <TH>Montant</TH>
               <TH>Statut</TH>
+              <TH>Facture</TH>
             </THead>
             <tbody>
               {paiements.map((p) => (
@@ -242,6 +244,9 @@ export function ConvoyeurFinancesPanel({ convoyeurId, nom }: { convoyeurId: stri
                   <TD>{eur(p.montant_total)}</TD>
                   <TD>
                     <Badge tone={PAIEMENT_STATUT_TONE[p.statut]}>{PAIEMENT_STATUT_LABEL[p.statut]}</Badge>
+                  </TD>
+                  <TD>
+                    <button className="text-xs font-medium text-[#2F5FFF] underline" onClick={() => void downloadAutofacture(p.id)}>Auto-facture</button>
                   </TD>
                 </TR>
               ))}

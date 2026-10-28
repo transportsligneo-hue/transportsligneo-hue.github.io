@@ -5,6 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, CheckCircle2, FileSignature } from "lucide-react";
 import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
@@ -77,10 +78,14 @@ export default function ContratYousignCard(props: Props) {
           refId={props.convoyeurId}
           title="Envoyer le contrat pour signature"
           defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "", company: denomination }}
-          getPdf={() => generateContratConvoyeurPdf(
+          getPdf={async () => {
+            // conserve SIRET / adresse sur la fiche : ils servent ensuite à l'auto-facture
+            try { await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null }).eq("id", props.convoyeurId); } catch { /* non bloquant */ }
+            return generateContratConvoyeurPdf(
             { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null },
             company,
-          )}
+          );
+          }}
         />
       </div>
     </div>

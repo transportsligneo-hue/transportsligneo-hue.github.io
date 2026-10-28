@@ -399,6 +399,26 @@ export const esignPublicSign = createServerFn({ method: "POST" })
         templateData: { signataire: r.signer_name, titre: r.title, type: r.kind },
       });
     } catch (e) { console.error("[esign] emails", e); }
+    // contrat convoyeur : notification dans son espace + alerte admin (jamais bloquant)
+    try {
+      if (r.kind === "contrat_convoyeur" && r.ref_type === "convoyeur" && r.ref_id) {
+        const { data: cv } = await supabaseAdmin.from("convoyeurs").select("user_id").eq("id", r.ref_id).maybeSingle();
+        if (cv?.user_id) {
+          await supabaseAdmin.from("user_notifications").insert({
+            user_id: cv.user_id, type: "contrat_signe", titre: "Contrat signé",
+            message: "Votre contrat de partenariat est signé. Vous le retrouvez dans vos documents.", link: "/convoyeur/documents",
+          });
+          const { sendPushToUser } = await import("@/lib/push/send.server");
+          await sendPushToUser(cv.user_id, { title: "Contrat signé", body: "Retrouvez-le dans vos documents.", url: "/convoyeur/documents", tag: `contrat-${r.id}` });
+        }
+        await supabaseAdmin.from("admin_notifications").insert({
+          type: "contrat_signe", titre: "Contrat convoyeur signé", message: `${r.signer_name} a signé son contrat de partenariat.`,
+          link: `/admin/contrats-convoyeurs`, entity_type: "convoyeur", entity_id: r.ref_id,
+        });
+        const { pushAdmins } = await import("@/lib/admin-alert.server");
+        await pushAdmins("Contrat convoyeur signé", `${r.signer_name} a signé son contrat.`, "/admin/contrats-convoyeurs", `contrat-${r.id}`);
+      }
+    } catch (e) { console.error("[esign] notifications contrat", e); }
     return { ok: true, alreadySigned: false };
   });
 
@@ -469,6 +489,23 @@ export const esignMyContrat = createServerFn({ method: "POST" })
     const missing = row.status === "signed" ? [] : await S.missingConvoyeurDocs(cid);
     const expired = row.status === "expired" || (row.status !== "signed" && new Date(row.expires_at) < new Date());
     return { exists: true as const, id: row.id as string, status: (expired ? "expired" : row.status) as string, title: row.title as string, signedAt: (row.signed_at ?? null) as string | null, missing };
+  });
+
+/** Convoyeur : liens de téléchargement (5 min) de SON contrat signé et de son dossier de preuve. */
+export const esignMyContratFiles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const S = await import("@/lib/esign.server");
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const cid = await myConvoyeurId(context);
+    if (!cid) throw new Error("Fiche convoyeur introuvable.");
+    const { data: r } = await supabaseAdmin.from("esign_requests")
+      .select("signed_doc_path, dossier_path").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
+      .eq("status", "signed").order("signed_at", { ascending: false }).limit(1).maybeSingle();
+    if (!r) throw new Error("Aucun contrat signé.");
+    const sign = async (p: string | null) =>
+      p ? (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(p, 300)).data?.signedUrl ?? null : null;
+    return { signed: await sign(r.signed_doc_path), dossier: await sign(r.dossier_path) };
   });
 
 /** Nouveau lien de signature pour le convoyeur connecté (remplace l'ancien). */

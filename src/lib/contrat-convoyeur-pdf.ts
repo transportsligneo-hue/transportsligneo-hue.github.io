@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
-import { LIGNEO_BRAND_LOGO as logoLigneo } from "@/lib/brand-assets";
-import { dateFmt, fetchCompanyInfo, loadImageAsDataUrl, type CompanyInfo } from "@/lib/doc-branding";
+import { drawDriverDocHeader, loadDriverLogo } from "@/lib/driver-pdf-header";
+import { dateFmt, fetchCompanyInfo, type CompanyInfo } from "@/lib/doc-branding";
 import { applyLigneoFonts } from "@/lib/pdf-fonts";
 import { COMPANY_SIGNATURE_LAYOUT, loadCompanySignature } from "@/lib/pdf-company-signature";
 import {
@@ -26,7 +26,9 @@ export interface ContratConvoyeurData {
 
 type RGB = [number, number, number];
 const NAVY: RGB = [6, 18, 56];
-const BLUE: RGB = [52, 84, 140];
+const BLUE: RGB = [47, 95, 255]; // bleu électrique du site
+const NEON: RGB = [0, 170, 255]; // reflet néon
+const BLUE_SOFT: RGB = [226, 236, 255];
 const INK: RGB = [17, 24, 44];
 const TEXT: RGB = [50, 60, 82];
 const MUTED: RGB = [128, 134, 148];
@@ -52,7 +54,7 @@ export async function generateContratConvoyeurPdf(
   const c = company ?? (await fetchCompanyInfo());
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   applyLigneoFonts(doc);
-  const logo = await loadImageAsDataUrl(logoLigneo);
+  const logo = await loadDriverLogo();
   const sig = await loadCompanySignature();
   const pageH = doc.internal.pageSize.getHeight();
   let y = 0;
@@ -65,12 +67,14 @@ export async function generateContratConvoyeurPdf(
 
   const miniHeader = () => {
     if (logo) {
-      try { doc.addImage(logo, "PNG", L, 10, 7, 7, "logo-ligneo-contrat", "FAST"); } catch { /* logo optionnel */ }
+      try { doc.addImage(logo, "PNG", L, 8.5, 9, 9, "logo-driver-doc", "FAST"); } catch { /* logo optionnel */ }
     }
     set(7.2, true, MUTED);
     doc.text("CONTRAT-CADRE DE CONVOYAGE", R, 15, { align: "right", charSpace: 0.4 });
-    doc.setFillColor(...NAVY);
-    doc.rect(L, 19.2, W, 0.8, "F");
+    doc.setFillColor(...BLUE);
+    doc.rect(L, 19.2, W * 0.35, 0.9, "F");
+    doc.setFillColor(...NEON);
+    doc.rect(L + W * 0.35, 19.2, W * 0.65, 0.9, "F");
     y = 30;
   };
   const newPage = () => { doc.addPage(); miniHeader(); };
@@ -131,13 +135,17 @@ export async function generateContratConvoyeurPdf(
   const sectionTitle = (letter: string, title: string) => {
     ensure(34);
     y += 9;
-    doc.setFillColor(...NAVY);
+    doc.setFillColor(...BLUE_SOFT);
+    doc.roundedRect(L - 1, y - 8, W + 2, 12, 2.4, 2.4, "F");
+    doc.setFillColor(...BLUE);
     doc.roundedRect(L, y - 7, 10, 10, 2, 2, "F");
+    doc.setFillColor(...NEON);
+    doc.rect(L + 10, y - 7, 1.1, 10, "F");
     set(12, true, [255, 255, 255]);
     doc.text(letter, L + 5, y - 0.2, { align: "center" });
-    set(12.5, true, INK);
-    doc.text(title, L + 15, y);
-    y += 10;
+    set(12.5, true, BLUE);
+    doc.text(title, L + 16, y);
+    y += 11;
   };
 
   const blocs = (list: ContratBloc[]) => {
@@ -149,29 +157,23 @@ export async function generateContratConvoyeurPdf(
   };
 
   /* ---------------- Page 1 ---------------- */
-  doc.setFillColor(...NAVY);
-  doc.rect(0, 0, 210, 64, "F");
-  doc.setFillColor(...BLUE);
-  doc.rect(0, 64, 210, 1.6, "F");
-  if (logo) {
-    try { doc.addImage(logo, "PNG", L, 16, 24, 24, "logo-ligneo-contrat", "FAST"); } catch { /* logo optionnel */ }
-  }
-  set(19, true, [255, 255, 255]);
-  doc.text(CONTRAT_NOM, L + 32, 27);
-  set(8.4, false, [190, 202, 226]);
-  doc.text("Convoyage et logistique automobile", L + 32, 33.5);
-  doc.text("Particuliers et professionnels · Tours (37)", L + 32, 38.5);
+  drawDriverDocHeader(doc, {
+    logo, raisonSociale: c?.raison_sociale || "Transports Ligneo", sousTitre: "Driver · Convoyeurs partenaires · Tours (37)",
+    titre: "CONTRAT", ligne: "Partenariat de convoyage", L, R,
+  });
 
   set(7.4, true, BLUE);
-  doc.text("DOCUMENT CONTRACTUEL", L, 82, { charSpace: 0.7 });
+  doc.text("DOCUMENT CONTRACTUEL", L, 62, { charSpace: 0.7 });
   set(23, true, INK);
-  ["CONTRAT-CADRE", "DE CONVOYAGE PROFESSIONNEL"].forEach((t, i) => doc.text(t, L, 94 + i * 10));
+  ["CONTRAT-CADRE", "DE CONVOYAGE PROFESSIONNEL"].forEach((t, i) => { set(23, true, i ? BLUE : INK); doc.text(t, L, 74 + i * 10); });
   set(10, false, MUTED);
-  doc.text("Conducteur indépendant · Mission à la demande", L, 117);
-  doc.setFillColor(...NAVY);
-  doc.rect(L, 121, 18, 1.2, "F");
+  doc.text("Conducteur indépendant · Mission à la demande", L, 97);
+  doc.setFillColor(...BLUE);
+  doc.rect(L, 101, 18, 1.2, "F");
+  doc.setFillColor(...NEON);
+  doc.rect(L + 18, 101, 10, 1.2, "F");
 
-  y = 134;
+  y = 116;
   set(7.8, true, BLUE);
   doc.text("ENTRE LES SOUSSIGNÉS", L, y, { charSpace: 0.5 });
   y += 6;
@@ -235,13 +237,17 @@ export async function generateContratConvoyeurPdf(
   newPage();
   const sg = buildContratSignatureSection();
   y = 29;
-  doc.setFillColor(...NAVY);
+  doc.setFillColor(...BLUE_SOFT);
+  doc.roundedRect(L - 1, y - 8, W + 2, 12, 2.4, 2.4, "F");
+  doc.setFillColor(...BLUE);
   doc.roundedRect(L, y - 7, 10, 10, 2, 2, "F");
+  doc.setFillColor(...NEON);
+  doc.rect(L + 10, y - 7, 1.1, 10, "F");
   set(12, true, [255, 255, 255]);
   doc.text("S", L + 5, y - 0.2, { align: "center" });
-  set(12.5, true, INK);
-  doc.text(sg.title, L + 15, y);
-  y += 12;
+  set(12.5, true, BLUE);
+  doc.text(sg.title, L + 16, y);
+  y += 13;
   sg.paragraphes.forEach((t) => para(t, L, W, 3.4));
   y += 2;
   set(BODY);
@@ -290,7 +296,7 @@ export async function generateContratConvoyeurPdf(
   set(10.2, true, INK);
   doc.text(vierge ? dots.slice(0, 22) : d.nom_complet, rx, by0 + 14.5, { maxWidth: bw - 10 });
   if (d.signed_at) {
-    set(7.8, true, NAVY);
+    set(7.8, true, BLUE);
     doc.text("Signé électroniquement — lu et approuvé", rx, by0 + 36);
     set(6.8, false, MUTED);
     doc.text(`Nom saisi : ${d.signature_nom || d.nom_complet}`, rx, by0 + 40.5);
@@ -303,6 +309,10 @@ export async function generateContratConvoyeurPdf(
     doc.setPage(p);
     doc.setFillColor(...NAVY);
     doc.rect(0, 287, 210, 10, "F");
+    doc.setFillColor(...NEON);
+    doc.rect(0, 286.4, 210, 0.8, "F");
+    doc.setFillColor(...BLUE);
+    doc.rect(0, 286.4, 70, 0.8, "F");
     set(7.4, true, [255, 255, 255]);
     doc.text("TRANSPORTS LIGNEO", L, 293);
     set(7.4, false, [190, 202, 226]);

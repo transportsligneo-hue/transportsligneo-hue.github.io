@@ -49,7 +49,8 @@ export function buildContratPreambule(c?: CompanyInfo | null): { entre: string; 
       `Elle agit par l'intermédiaire de Monsieur ${signataire}, ${fonction},`,
     rappel: [
       `${CONTRAT_NOM} propose un service de convoyage et de logistique automobile à une clientèle de particuliers et d'entreprises. ` +
-        `Pour réaliser ces missions, elle fait appel à des conducteurs professionnels indépendants, dans le cadre du présent contrat-cadre de convoyage (ci-après le « Contrat »).`,
+        `Pour réaliser ces missions, elle fait appel à des conducteurs professionnels indépendants, dans le cadre du présent contrat-cadre de prestation de services de convoyage (ci-après le « Contrat »).`,
+      `Le PRESTATAIRE intervient en qualité de travailleur indépendant (entrepreneur individuel, micro-entrepreneur ou dirigeant de société), immatriculé sous son propre numéro SIRET, à ses risques, avec ses propres moyens, et sans aucun lien de subordination avec ${CONTRAT_NOM}. Le Contrat est un contrat de prestation de services entre professionnels : il n'est ni un contrat de travail, ni un contrat d'agent commercial ou de mandat.`,
       `Par application de l'article L. 7341-1 du Code du travail, ${CONTRAT_NOM} garantit au PRESTATAIRE les droits suivants :`,
     ],
     droits: [
@@ -71,16 +72,18 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
       id: "A",
       title: "CONDITIONS PRÉALABLES",
       blocs: [
-        { p: "Avant toute mission, le PRESTATAIRE doit réunir l'ensemble des conditions ci-dessous. À défaut, le Contrat est réputé nul :" },
+        { p: "Avant toute mission, le PRESTATAIRE doit réunir l'ensemble des conditions ci-dessous. À défaut, le Contrat ne peut pas prendre effet :" },
         {
           ul: [
-            "détenir un permis de catégorie B valide, obtenu dans un État de l'Union européenne depuis au moins cinq (5) ans, et s'assurer qu'il en va de même pour tout préposé qu'il affecterait aux missions ;",
-            "n'avoir fait l'objet d'aucun retrait ni d'aucune suspension de permis, et contrôler qu'aucun de ses préposés n'est dans ce cas ;",
-            `réaliser les modules de formation de l'application ${N} Driver (vidéos, supports et quiz) et y faire participer ses éventuels préposés. L'accès à ces modules est gratuit.`,
+            "être immatriculé comme travailleur indépendant (numéro SIRET actif, Kbis ou avis de situation INSEE à l'appui) et le rester pendant toute la durée du Contrat ;",
+            "remettre, à la signature puis tous les six (6) mois, l'attestation de vigilance de l'URSSAF (articles L. 8222-1 et D. 8222-5 du Code du travail) ;",
+            "détenir un permis de catégorie B valide, obtenu dans un État de l'Union européenne depuis au moins cinq (5) ans, et s'assurer qu'il en va de même pour tout conducteur qu'il se substituerait dans les conditions de la section K ;",
+            "n'avoir fait l'objet d'aucun retrait ni d'aucune suspension de permis, et contrôler qu'aucun de ses éventuels remplaçants n'est dans ce cas ;",
+            `prendre connaissance des modules d'information de l'application ${N} Driver (vidéos, supports et quiz) sur les règles de sécurité et les procédures d'état des lieux, et les transmettre à ses éventuels remplaçants. L'accès à ces modules est gratuit et n'emporte aucune obligation de suivre des horaires ou des méthodes de travail.`,
           ],
         },
         { p: `${N} remet au PRESTATAIRE une attestation de formation, comme le prévoit l'article L. 6353-1 du Code du travail.` },
-        { p: "Le PRESTATAIRE certifie par ailleurs, toujours sous peine de nullité, que lui-même et ses préposés éventuels :" },
+        { p: "Le PRESTATAIRE certifie par ailleurs, toujours sous peine de nullité, que lui-même et ses éventuels remplaçants :" },
         {
           ul: [
             "conservent au minimum six (6) points sur leur permis ;",
@@ -100,8 +103,8 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
         { p: "Suivant ce qu'indique la fiche de chaque mission, le PRESTATAIRE est amené à :" },
         {
           ul: [
-            `rejoindre le lieu d'enlèvement fixé par ${N}, y retirer les clés et les papiers du véhicule ;`,
-            `appliquer la procédure de prise en charge de ${N} et dresser l'état des lieux du véhicule ;`,
+            `rejoindre le lieu d'enlèvement indiqué sur la fiche de mission, y retirer les clés et les papiers du véhicule ;`,
+            `dresser l'état des lieux du véhicule selon la procédure de preuve exigée par le client et l'assureur ;`,
             "conduire le véhicule du point A au point B, soit par la route, soit par camion porte-voitures ; dans cette seconde hypothèse, il doit justifier d'une assurance « véhicules transportés » à hauteur de la valeur des véhicules qui lui sont confiés ;",
             `si la mission le prévoit, reprendre un véhicule au point B pour le déposer sur un parc ou à tout autre endroit désigné par ${N} ;`,
             "si la mission le prévoit, effectuer en plus un nettoyage, un plein de carburant ou une recharge, une mise en main, etc. ;",
@@ -117,16 +120,17 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
             { t: "les prestations complémentaires éventuelles (liste non exhaustive), par exemple :", sub: ["le lavage du véhicule,", "le plein de carburant ou la recharge,", "la mise en main au client ;"] },
             "les formations exigées pour accomplir la mission ;",
             "la date et l'heure butoirs pour se positionner ou accepter la mission ;",
-            `la rémunération que ${N} propose pour la prestation.`,
+            `le prix de la prestation : un prix affiché, que le PRESTATAIRE accepte ou refuse sans le modifier ; ou, lorsque la mission est proposée par enchères, un prix que le PRESTATAIRE peut proposer lui-même dans les conditions indiquées sur l'annonce.`,
           ],
         },
+        { p: `Le PRESTATAIRE est libre d'accepter ou de refuser chaque mission, sans avoir à se justifier, sans pénalité et sans conséquence sur les missions qui pourraient lui être proposées ensuite. ${N} ne lui garantit aucun volume de missions, ne lui impose ni minimum de missions, ni disponibilité, ni horaires, ni exclusivité.` },
         { h3: "Réalisation des missions", ref: "B 3." },
-        { p: `Le PRESTATAIRE exécute chaque mission avec tout le soin attendu d'un professionnel et suit les consignes que ${N} lui transmet par téléphone, e-mail, SMS ou via la fiche de mission de l'application.` },
+        { p: `Le PRESTATAIRE exécute chaque mission qu'il a acceptée avec tout le soin attendu d'un professionnel. Il organise librement son travail : itinéraire, heure de départ à l'intérieur du créneau, pauses et moyens de transport. ${N} ne contrôle que le résultat, c'est-à-dire la conformité de la prestation à la fiche de mission et aux demandes du client, et non la manière dont le PRESTATAIRE s'organise.` },
         { p: `Avant le démarrage de chaque mission, ${N} met à sa disposition une fiche détaillée indiquant :` },
-        { ul: ["les coordonnées du client et les caractéristiques du véhicule ;", "les prestations complémentaires commandées ;", "la rémunération et les règles de remboursement des frais."] },
-        { p: "Du début à la fin de la mission, le véhicule est placé sous la garde du PRESTATAIRE, qui en supporte tous les risques." },
-        { p: `Le PRESTATAIRE se présente en tenue propre et soignée, adaptée à un métier de service, de façon à préserver la réputation de ${N} auprès de sa clientèle.` },
-        { p: "Le PRESTATAIRE veille à ce que le conducteur de la mission ait toujours avec lui :" },
+        { ul: ["les coordonnées du client et les caractéristiques du véhicule ;", "les prestations complémentaires commandées ;", "le prix et les règles de remboursement des frais."] },
+        { p: "Du début à la fin de la mission, le véhicule est placé sous la garde du PRESTATAIRE, qui répond de sa conservation dans les conditions des sections D et E." },
+        { p: `${N} n'impose au PRESTATAIRE ni uniforme, ni logo, ni signe distinctif. Toutefois, comme il est en contact direct avec les clients, le PRESTATAIRE se présente en tenue correcte et propre, conforme aux usages d'un métier de service : les survêtements, tenues de sport, tenues déchirées ou sales sont à proscrire. Il adopte également un comportement courtois et professionnel.` },
+        { p: "Le conducteur de la mission doit toujours avoir avec lui :" },
         {
           ul: [
             "sa pièce d'identité et son permis de conduire en cours de validité ;",
@@ -134,11 +138,11 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
           ],
         },
         { h3: "Obligations et interdits", ref: "B 4." },
-        { p: "Le PRESTATAIRE admet les règles suivantes :" },
+        { p: "Dans l'intérêt du client, de la sécurité et de la conformité de la prestation, le PRESTATAIRE s'engage sur les points suivants :" },
         {
           ul: [
             { t: "le véhicule sert uniquement à la mission de convoyage ou de conciergerie. Sont donc exclus :", sub: ["le transport de personnes ou de biens, gratuit ou payant ;", "tout usage personnel ;", "toute activité professionnelle sans rapport direct avec la mission ;"] },
-            "personne d'autre que le PRESTATAIRE ne peut conduire le véhicule.",
+            "seuls le PRESTATAIRE, ou le remplaçant qu'il s'est substitué conformément à la section K, conduisent le véhicule.",
           ],
         },
         { p: "Il est formellement interdit de conduire après avoir consommé de l'alcool, des stupéfiants ou des substances psychotropes." },
@@ -146,24 +150,24 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
         { p: "Il est interdit de fumer dans le véhicule, et les animaux n'y sont pas acceptés." },
         { p: "À la livraison, le véhicule doit se trouver dans l'état exact constaté lors de l'enlèvement : aucun dommage, aucun élément manquant." },
         { p: "La propreté, à l'intérieur comme à l'extérieur, doit également être identique à celle de l'enlèvement ; si un nettoyage a été commandé, le véhicule doit être rendu parfaitement propre." },
-        { p: `Si ces règles ne sont pas respectées, ${N} explique au PRESTATAIRE ce qu'il encourt et les recours dont il dispose.` },
-        { p: "Les infractions commises par le PRESTATAIRE ou ses préposés, routières ou autres, restent à sa seule charge, avec toutes leurs conséquences." },
+        { p: `Si l'un de ces engagements n'est pas respecté, ${N} en informe le PRESTATAIRE par écrit, lui permet de présenter ses observations, puis applique la section G.` },
+        { p: "Les infractions commises par le PRESTATAIRE ou ses remplaçants, routières ou autres, restent à sa seule charge, avec toutes leurs conséquences." },
         { p: `Dès qu'il reçoit un avis d'infraction, le PRESTATAIRE en informe aussitôt ${N}. Lorsque ${N} avance des sommes à ce titre, le PRESTATAIRE les lui rembourse sans attendre.` },
         { p: "Le PRESTATAIRE n'a le droit ni de céder ou sous-louer le véhicule, ni d'y concéder ou laisser naître un droit au profit d'un tiers." },
-        { p: `Pendant la mission, le PRESTATAIRE rend compte de son avancement à ${N} par téléphone, SMS, e-mail ou outil numérique, et garde la géolocalisation de ${N} activée en continu.` },
-        { p: `Au plus tard douze (12) heures après la remise du véhicule, le PRESTATAIRE adresse à ${N}, par voie électronique, tous les documents de la mission : états des lieux, procès-verbal de livraison et procès-verbal de restitution.` },
+        { p: `Le PRESTATAIRE informe sans délai ${N} et le client de tout retard ou incident. Pour la preuve de la prestation et le suivi demandé par le client, la position du véhicule est partagée avec ${N} pendant la seule durée de la mission, de l'enlèvement à la livraison. Aucune géolocalisation n'est exercée en dehors des missions.` },
+        { p: `Dans les douze (12) heures qui suivent la remise du véhicule, le PRESTATAIRE adresse à ${N}, par voie électronique, tous les documents de la mission : états des lieux, procès-verbal de livraison et procès-verbal de restitution.` },
       ],
     },
     {
       id: "C",
-      title: "RÉMUNÉRATION ET FRAIS",
+      title: "PRIX, FACTURATION ET FRAIS",
       blocs: [
-        { p: `Pour les prestations réalisées selon les instructions de ${N}, le PRESTATAIRE reçoit la rémunération décrite ci-dessous.` },
-        { h3: "Versement de la rémunération", ref: "C.1." },
-        { p: "La rémunération est versée une fois la mission accomplie, à condition d'avoir remis :" },
+        { p: `Le prix de chaque prestation est celui convenu avec le PRESTATAIRE avant son acceptation de la mission. Par le présent Contrat, le PRESTATAIRE donne mandat à ${N} d'établir ses factures en son nom et pour son compte (auto-facturation, article 289, I-2 du Code général des impôts). ${N} génère automatiquement, pour chaque règlement, une auto-facture numérotée qui détaille chaque mission et chaque montant, et la met à disposition du PRESTATAIRE dans son espace. Le PRESTATAIRE n'a aucune facture à envoyer. Il dispose de sept (7) jours pour contester une auto-facture par écrit ; à défaut, elle est réputée acceptée. Il peut mettre fin à ce mandat à tout moment en résiliant le Contrat. Il reste seul responsable de ses déclarations et de ses cotisations fiscales et sociales (URSSAF, TVA le cas échéant).` },
+        { h3: "Paiement du prix", ref: "C.1." },
+        { p: "Le prix est payé une fois la mission accomplie, à condition d'avoir remis :" },
         { ul: ["l'état des lieux numérique ;", "le procès-verbal de livraison ou de restitution, si la mission l'exige."] },
         { h3: "Prise en charge des frais", ref: "C.2." },
-        { p: "La rémunération couvre la prestation dans son ensemble, frais compris." },
+        { p: "Le prix couvre la prestation dans son ensemble, frais compris (le PRESTATAIRE supporte ses propres frais de déplacement et de retour)." },
         { p: "Parmi ces frais, seul le carburant peut être remboursé, si la mission porte la mention « carburant remboursé » et que le PRESTATAIRE joint les justificatifs :" },
         {
           ul: [
@@ -206,18 +210,19 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
       id: "F",
       title: "ANNULATION D'UNE MISSION",
       blocs: [
+        { p: "Les indemnités ci-dessous sont forfaitaires et réciproques. Elles constituent une clause pénale que le juge peut modérer (article 1231-5 du Code civil). Une annulation n'entraîne aucune autre sanction, ni réduction des missions proposées ensuite." },
         { h3: "Si le PRESTATAIRE annule :", ref: "F.1." },
         {
           ul: [
-            `plus de 48 h avant : ${M.annulationPrestataireParticulier} pour un véhicule de tourisme, ${M.annulationPrestataireUtilitaire} pour un utilitaire, sauf cas de force majeure (maladie, accident) attesté par certificat médical ;`,
-            `la veille : pénalité de ${M.penaliteVeille}, sauf force majeure (maladie, accident) attestée par certificat médical ;`,
-            `le jour même : pénalité de ${M.penaliteJourJ}, sauf force majeure (maladie, accident) attestée par certificat médical.`,
+            `plus de 48 h avant : indemnité forfaitaire de ${M.annulationPrestataireParticulier} pour un véhicule de tourisme, ${M.annulationPrestataireUtilitaire} pour un utilitaire, sauf cas de force majeure (maladie, accident) attesté par certificat médical ;`,
+            `la veille : indemnité forfaitaire de ${M.penaliteVeille} du prix de la prestation, sauf force majeure (maladie, accident) attestée par certificat médical ;`,
+            `le jour même : indemnité forfaitaire de ${M.penaliteJourJ} du prix de la prestation, sauf force majeure (maladie, accident) attestée par certificat médical.`,
           ],
         },
         { h3: `Si ${N} annule :`, ref: "F.2." },
         {
           ul: [
-            "plus de 48 h avant : aucune pénalité ;",
+            "plus de 48 h avant : aucune indemnité ;",
             `la veille : le PRESTATAIRE reçoit une indemnité égale à ${M.indemniteLigneoVeille} du prix de la prestation ;`,
             `le jour même : le PRESTATAIRE reçoit une indemnité égale à ${M.indemniteLigneoJourJ} du prix de la prestation.`,
           ],
@@ -226,27 +231,32 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
     },
     {
       id: "G",
-      title: "SANCTIONS",
-      blocs: [{ p: "En cas de manquement aux obligations du Contrat, les sanctions appliquées au PRESTATAIRE sont graduées selon la gravité des faits constatés." }],
+      title: "INEXÉCUTION ET RESPONSABILITÉ",
+      blocs: [
+        { p: "En cas d'inexécution ou de mauvaise exécution d'une mission, chaque Partie engage sa responsabilité contractuelle de droit commun." },
+        { p: `${N} notifie le manquement par écrit et laisse au PRESTATAIRE sept (7) jours pour présenter ses observations ou y remédier. À défaut, elle peut réduire ou refuser le paiement de la seule mission non conforme, à proportion du préjudice justifié, ou mettre fin au Contrat selon la section I.` },
+        { p: "Le Contrat ne prévoit aucune sanction disciplinaire, aucune retenue forfaitaire et aucun barème de sanctions : seuls les dommages réellement subis et justifiés peuvent être réclamés." },
+      ],
     },
     {
       id: "H",
       title: "DURÉE ET SUSPENSION",
       blocs: [
         { h3: "Durée", ref: "H.1." },
-        { p: "Le Contrat est conclu sans limite de durée, avec un minimum d'un (1) mois." },
-        { p: "Il commence à produire ses effets à la signature ou, faute de signature (mission urgente notamment), le jour de la première prestation de convoyage." },
+        { p: "Le Contrat est un contrat-cadre conclu sans limite de durée. Il ne garantit aucun volume de missions : chaque mission acceptée par le PRESTATAIRE forme une prestation distincte." },
+        { p: "Il prend effet à la signature par les deux Parties. Aucune mission n'est confiée avant cette signature." },
         { h3: "Suspension", ref: "H.2." },
-        { p: `En cas de faute grave du PRESTATAIRE, ${N} peut suspendre son accès à la plateforme, après :` },
-        { ul: ["un avertissement écrit ;", "un délai de sept (7) jours pour corriger la situation ;", "une décision motivée, contestable devant un médiateur indépendant."] },
+        { p: `En cas de faute grave du PRESTATAIRE, ${N} peut cesser temporairement de lui proposer des missions, après :` },
+        { ul: ["une mise en demeure écrite ;", "un délai de sept (7) jours pour corriger la situation ;", "une décision écrite et motivée, contestable devant un médiateur indépendant."] },
       ],
     },
     {
       id: "I",
       title: "FIN DU CONTRAT",
       blocs: [
-        { p: "Chaque Partie peut mettre fin au Contrat à tout moment, sans avoir à se justifier, par e-mail ou par lettre recommandée avec accusé de réception, en indiquant dans les deux cas le grief qu'elle formule à l'encontre de l'autre." },
+        { p: "Chaque Partie peut mettre fin au Contrat à tout moment, sans avoir à se justifier, par e-mail ou par lettre recommandée avec accusé de réception." },
         { ul: ["avec un préavis de quinze (15) jours lorsque le Contrat court depuis moins de six (6) mois ;", "avec un préavis d'un (1) mois lorsqu'il court depuis plus de six (6) mois."] },
+        { p: "En cas de manquement grave, la Partie lésée peut résilier le Contrat sans préavis, après une mise en demeure restée sans effet pendant sept (7) jours." },
         { p: "La fin du Contrat ne fait pas obstacle à une demande de dommages et intérêts." },
       ],
     },
@@ -262,7 +272,7 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
     {
       id: "K",
       title: "SOUS-TRAITANCE",
-      blocs: [{ p: `Le PRESTATAIRE ne peut pas sous-traiter, sauf accord écrit de ${N} en cas de force majeure (maladie, accident), et à condition que le sous-traitant proposé satisfasse aux mêmes critères d'agrément.` }],
+      blocs: [{ p: `Le PRESTATAIRE peut se faire remplacer, ou sous-traiter tout ou partie d'une mission, par un autre professionnel indépendant ou par un salarié de sa propre entreprise, à condition que ce remplaçant remplisse les conditions de la section A. Il en informe ${N} par écrit avant la mission ; ${N} ne peut s'y opposer que si ces conditions ne sont pas remplies. Le PRESTATAIRE reste responsable de l'exécution de la mission et de son remplaçant.` }],
     },
     {
       id: "L",
@@ -296,7 +306,9 @@ export function buildContratSections(c?: CompanyInfo | null): ContratSection[] {
             "Les Parties reconnaissent être et rester des partenaires professionnels indépendants, chacune assumant les risques de sa propre activité.",
             "Quelle que soit la stipulation du Contrat, aucune Partie ne peut engager l'autre, ni la lier par les accords qu'elle passerait avec des tiers. Rien dans le Contrat n'autorise une Partie à agir au nom ou pour le compte de l'autre, ni ne crée entre elles un mandat ou une association d'intérêts. Le Contrat ne donne naissance ni à une filiale ni à une entreprise commune.",
             "Chaque Partie supporte donc seule les suites de sa propre activité et des opérations pour lesquelles elle a sollicité l'aide de l'autre ; elle ne peut ni reporter ses pertes sur l'autre, ni être tenue de lui céder une part de ses gains.",
-            `Dans le respect du Contrat, le PRESTATAIRE organise librement son activité, sans lien de subordination ni de représentation sous quelque forme que ce soit. Il peut travailler pour d'autres entreprises que ${N}, tant qu'il honore ses engagements au titre du Contrat.`,
+            `Dans le respect du Contrat, le PRESTATAIRE organise librement son activité, sans lien de subordination ni de représentation sous quelque forme que ce soit. Il peut travailler pour d'autres entreprises que ${N}, y compris concurrentes, tant qu'il honore les missions qu'il a acceptées. Aucune exclusivité ne lui est demandée.`,
+            `Le PRESTATAIRE est immatriculé à son propre compte, utilise ses propres moyens (téléphone, équipement, titres de transport, assurances), fixe librement ses jours et ses horaires de travail, supporte ses propres frais et déclare lui-même ses revenus. Il est seul redevable de ses cotisations fiscales et sociales.`,
+            `${N} n'exerce à l'égard du PRESTATAIRE aucun pouvoir de direction, de contrôle de l'organisation de son travail ni de sanction disciplinaire. Elle ne verse ni salaire, ni congés payés, ni prime, et ne lui fournit aucun outil de travail autre que l'accès à l'application de mise en relation. Les Parties reconnaissent que la présomption de non-salariat de l'article L. 8221-6 du Code du travail s'applique au PRESTATAIRE.`,
           ],
         },
       ],
@@ -344,9 +356,9 @@ export function buildContratSignatureSection(): { title: string; paragraphes: st
     title: "SIGNATURE",
     paragraphes: [
       "Le PRESTATAIRE choisit de signer le Contrat sur papier ou par voie électronique. La signature électronique respecte les articles 1366 et 1367 du Code civil : elle s'effectue avec l'outil mis à disposition par " +
-        `${N}, qui identifie le signataire puis le valide grâce à un code à usage unique envoyé par SMS au numéro déclaré par le PRESTATAIRE.`,
+        `${N}, qui identifie le signataire puis le valide grâce à un code à usage unique envoyé par SMS ou par e-mail aux coordonnées déclarées par le PRESTATAIRE.`,
       "Dans le cas d'une signature électronique, chaque Partie reconnaît avoir été informée des conditions d'usage de ce procédé et l'employer en toute connaissance. Elle s'interdit en conséquence de contester la fiabilité de la signature, ou sa volonté de conclure le Contrat, au seul motif du procédé utilisé.",
-      `Toujours en cas de signature électronique, et en application de l'article 1375 du Code civil, il n'est pas nécessaire de remettre un original papier à chaque Partie pour établir les engagements pris. L'exemplaire électronique conservé par ${N} et accessible au PRESTATAIRE fait foi.`,
+      `Toujours en cas de signature électronique, et en application de l'article 1375 du Code civil, il n'est pas nécessaire de remettre un original papier à chaque Partie pour établir les engagements pris. L'exemplaire électronique conservé par ${N} et accessible au PRESTATAIRE fait foi. Un dossier de preuve (horodatage, adresse IP, consentement, empreinte numérique du document) est conservé et remis au PRESTATAIRE sur simple demande.`,
     ],
   };
 }
