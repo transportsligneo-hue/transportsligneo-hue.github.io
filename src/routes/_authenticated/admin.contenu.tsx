@@ -49,7 +49,7 @@ function AdminContenu() {
       supabase.from("faq").select("*").order("ordre"),
       supabase.from("avis_clients").select("*").order("date_avis", { ascending: false }),
       supabase.from("articles").select("*").order("created_at", { ascending: false }),
-      supabase.from("newsletter_abonnes").select("id, email, source, created_at, unsubscribed_at").order("created_at", { ascending: false }),
+      supabase.from("newsletter_abonnes").select("id, email, source, created_at, unsubscribed_at").or("source.is.null,source.neq.convoyeur-waitlist").order("created_at", { ascending: false }),
       supabase.from("app_settings").select("value").eq("key", "store_links").maybeSingle(),
     ]);
     setFaq((f.data ?? []) as Faq[]);

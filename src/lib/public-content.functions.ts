@@ -42,25 +42,28 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
     if (isWaitlist && (!data.nom || !data.telephone || !data.ville || !data.adresse)) {
       throw new Error("Merci de renseigner nom, téléphone, ville et adresse.");
     }
-    const { error } = await supabaseAdmin
-      .from("newsletter_abonnes")
-      .upsert(
-        { email, source: data.source ?? "footer", unsubscribed_at: null },
+    if (isWaitlist) {
+      // Candidat convoyeur : uniquement dans la liste d'attente, jamais dans la newsletter.
+      const { error: wlErr } = await (supabaseAdmin as any).from("convoyeur_waitlist").upsert(
+        { email, nom: data.nom, telephone: data.telephone, ville: data.ville, adresse: data.adresse, updated_at: new Date().toISOString() },
         { onConflict: "email" },
       );
-    if (error) throw new Error("Inscription impossible pour le moment.");
+      if (wlErr) {
+        console.error("[waitlist] table insert failed", wlErr);
+        throw new Error("Inscription impossible pour le moment.");
+      }
+    } else {
+      const { error } = await supabaseAdmin
+        .from("newsletter_abonnes")
+        .upsert(
+          { email, source: data.source ?? "footer", unsubscribed_at: null },
+          { onConflict: "email" },
+        );
+      if (error) throw new Error("Inscription impossible pour le moment.");
+    }
 
     // Liste d'attente convoyeur : accusé de réception candidat + alerte admin
     if (isWaitlist) {
-      // Fiche complète pour la page admin « Liste d'attente » (échec non bloquant).
-      try {
-        await (supabaseAdmin as any).from("convoyeur_waitlist").upsert(
-          { email, nom: data.nom, telephone: data.telephone, ville: data.ville, adresse: data.adresse, updated_at: new Date().toISOString() },
-          { onConflict: "email" },
-        );
-      } catch (e) {
-        console.error("[waitlist] table insert failed", e);
-      }
       const dateFr = new Intl.DateTimeFormat("fr-FR", {
         dateStyle: "short",
         timeStyle: "short",
@@ -77,8 +80,8 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
         type: "convoyeur_waitlist",
         titre: "Nouvelle inscription liste d'attente convoyeur",
         message: `${data.nom} · ${data.telephone} · ${data.ville} — ${data.adresse} (${email})`,
-        link: "/admin/contenu",
-        entity_type: "newsletter_abonne",
+        link: "/admin/liste-attente",
+        entity_type: "convoyeur_waitlist",
         metadata: details,
       });
       if (notifErr) console.error("[waitlist] admin bell failed", notifErr);
