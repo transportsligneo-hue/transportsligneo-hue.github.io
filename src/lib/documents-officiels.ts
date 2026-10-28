@@ -810,7 +810,15 @@ export async function generateContratConvoyeurPdf(
   d: ContratConvoyeurData,
   company?: CompanyInfo | null,
 ): Promise<Blob> {
-  const m = await import("@/lib/contrat-convoyeur-pdf");
+  // Après une mise en ligne, un onglet resté ouvert pointe vers d'anciens fichiers : on recharge la page une fois.
+  const m = await import("@/lib/contrat-convoyeur-pdf").catch((e) => {
+    if (typeof window !== "undefined" && !sessionStorage.getItem("ligneo-reload-chunk")) {
+      sessionStorage.setItem("ligneo-reload-chunk", "1");
+      window.location.reload();
+    }
+    throw new Error("Nouvelle version du site disponible : la page se recharge, recliquez ensuite sur Aperçu.");
+  });
+  try { sessionStorage.removeItem("ligneo-reload-chunk"); } catch { /* ignoré */ }
   return m.generateContratConvoyeurPdf(d, company);
 }
 

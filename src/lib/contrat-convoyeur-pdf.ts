@@ -199,7 +199,7 @@ export async function generateContratConvoyeurPdf(
   const presta =
     `M / Mme ${d.nom_complet}${d.date_naissance ? `, né(e) le ${fmtNaiss(d.date_naissance)}${d.lieu_naissance ? " à " + d.lieu_naissance : ""}` : ""}, entrepreneur individuel ou gérant, inscrit au répertoire SIRENE ou société immatriculée au Registre du Commerce et des Sociétés sous le numéro ${d.siret || dots}, ` +
     `domicilié(e) ${d.adresse ? "à " + d.adresse : "à " + dots}` +
-    `${d.permis_numero ? `, titulaire du permis de conduire de catégorie B n° ${d.permis_numero}${d.permis_date ? ` (délivré le ${d.permis_date})` : ""}` : ""}.`;
+    `${d.permis_numero ? `, titulaire du permis de conduire de catégorie B n° ${d.permis_numero}${d.permis_date ? ` (obtenu le ${d.permis_date})` : ""}` : ""}.`;
   set(BODY);
   const pl = doc.splitTextToSize(presta, W - 12) as string[];
   const boxH = 6 + pl.length * LH + 12;

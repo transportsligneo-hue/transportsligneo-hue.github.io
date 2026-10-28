@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { composeAdresse, splitAdresse } from "@/lib/adresse";
 import { SiretBadge } from "@/components/SiretBadge";
 import type { SiretCheck } from "@/lib/siret.functions";
 import { finalizeSignup, validateUploadFile, formatFileSize, MAX_UPLOAD_FILES } from "@/lib/signup-finalize";
@@ -56,7 +57,7 @@ function InscriptionConvoyeur() {
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
     permis_numero: "", annees_experience: "", type_convoyeur: "independant",
-    permis_date_obtention: "", siret: "", adresse: "", date_naissance: "", lieu_naissance: "",
+    permis_date_obtention: "", siret: "", adresse_rue: "", code_postal: "", date_naissance: "", lieu_naissance: "",
   });
   const [siretCheck, setSiretCheck] = useState<SiretCheck | null>(null);
   const [permisFile, setPermisFile] = useState<File | null>(null);
@@ -168,7 +169,7 @@ function InscriptionConvoyeur() {
         if (siretCheck?.status === "invalide") return "Numéro SIRET invalide : vérifiez les chiffres.";
         if (siretCheck?.status === "inconnu") return "SIRET introuvable dans la base officielle : vérifiez le numéro.";
         if (siretCheck?.status === "ok" && !siretCheck.actif) return "Cette entreprise est radiée ou fermée : un SIRET actif est nécessaire.";
-        if (form.adresse.trim().length < 8) return "Saisissez votre adresse complète (rue, code postal, ville).";
+        if (form.adresse_rue.trim().length < 4 || !/^\d{5}$/.test(form.code_postal) || form.ville.trim().length < 2) return "Saisissez votre adresse complète : rue, code postal (5 chiffres) et ville.";
       }
       if (!photoProfilFile) return "Ajoutez une photo de profil.";
       if (Object.keys(fileErrors).length > 0) return "Corrigez les documents refusés avant de continuer.";
@@ -214,7 +215,7 @@ function InscriptionConvoyeur() {
             annees_experience: form.annees_experience,
             type_convoyeur: form.type_convoyeur,
             permis_date_obtention: form.permis_date_obtention,
-            siret: form.siret.replace(/\D/g, ""), adresse: form.adresse.trim(),
+            siret: form.siret.replace(/\D/g, ""), adresse: composeAdresse({ rue: form.adresse_rue, cp: form.code_postal, ville: form.ville }),
             date_naissance: form.date_naissance, lieu_naissance: form.lieu_naissance.trim(),
           },
         },
@@ -265,7 +266,7 @@ function InscriptionConvoyeur() {
         kbis: kbisFile,
         assurance: rcProFile,
         photo_profil: photoProfilFile,
-      }, setUploadProgress, { siret: form.siret.replace(/\D/g, ""), adresse: form.adresse.trim(), date_naissance: form.date_naissance, lieu_naissance: form.lieu_naissance.trim() });
+      }, setUploadProgress, { siret: form.siret.replace(/\D/g, ""), adresse: composeAdresse({ rue: form.adresse_rue, cp: form.code_postal, ville: form.ville }), adresse_rue: form.adresse_rue.trim(), code_postal: form.code_postal, date_naissance: form.date_naissance, lieu_naissance: form.lieu_naissance.trim() });
       setUploadProgress(100);
 
       // Rattachement automatique à l'organisation Flotte invitante
@@ -604,12 +605,22 @@ function InscriptionConvoyeur() {
                     <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={update("siret")} className={inputClass} placeholder="000 000 000 00000" />
                     <SiretBadge dark siret={form.siret} onResult={(r) => {
                       setSiretCheck(r);
-                      if (r?.status === "ok" && r.actif && r.adresse) setForm((f) => (f.adresse.trim() ? f : { ...f, adresse: r.adresse }));
+                      if (r?.status === "ok" && r.actif && r.adresse) setForm((f) => { if (f.adresse_rue.trim()) return f; const a = splitAdresse(r.adresse); return { ...f, adresse_rue: a.rue, code_postal: a.cp, ville: f.ville || a.ville }; });
                     }} />
                   </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse actuelle / de l'entreprise *</label>
-                    <input type="text" value={form.adresse} onChange={update("adresse")} className={inputClass} placeholder="Rue, code postal, ville" />
+                  <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3">
+                    <div className="sm:col-span-3">
+                      <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse * (rue et numéro)</label>
+                      <input type="text" value={form.adresse_rue} onChange={update("adresse_rue")} className={inputClass} placeholder="12 rue des Lilas" />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Code postal *</label>
+                      <input type="text" inputMode="numeric" maxLength={5} value={form.code_postal} onChange={(e) => setForm((f) => ({ ...f, code_postal: e.target.value.replace(/\D/g, "") }))} className={inputClass} placeholder="37000" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Ville *</label>
+                      <input type="text" value={form.ville} onChange={update("ville")} className={inputClass} placeholder="Tours" />
+                    </div>
                   </div>
                 </div>
               )}
@@ -652,7 +663,7 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Né(e) le" value={form.date_naissance ? `${form.date_naissance.split("-").reverse().join("/")} à ${form.lieu_naissance}` : " · "} />
                 <RecapRow label="Ville" value={form.ville || " · "} />
                 {form.type_convoyeur === "independant" && <RecapRow label="SIRET" value={form.siret || " · "} />}
-                {form.type_convoyeur === "independant" && <RecapRow label="Adresse" value={form.adresse || " · "} />}
+                {form.type_convoyeur === "independant" && <RecapRow label="Adresse" value={composeAdresse({ rue: form.adresse_rue, cp: form.code_postal, ville: form.ville }) || " · "} />}
                 <RecapRow label="Statut" value="Indépendant" />
                 <RecapRow label="Disponibilité" value={form.disponibilite || " · "} />
                 <RecapRow label="N° permis" value={form.permis_numero} />

@@ -9,6 +9,7 @@ import ContratYousignCard from "@/components/admin/ContratYousignCard";
 import { esignConvoyeurPermisInfo, esignConvoyeurKbisInfo, esignDownloadUrls, esignList } from "@/lib/esign.functions";
 import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
+import { adresseDe, composeAdresse, splitAdresse } from "@/lib/adresse";
 import { SiretBadge } from "@/components/SiretBadge";
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 
@@ -104,6 +105,7 @@ function ContratsConvoyeursPage() {
       if (k?.ok || pi?.ok) {
         await (supabase as any).from("convoyeurs").update({
           siret: c.siret || k?.siret || null, adresse: c.adresse || k?.adresse || null,
+          ...(!(c as any).adresse_rue && !c.adresse && k?.adresse ? (() => { const a = splitAdresse(k.adresse); return { adresse_rue: a.rue || null, code_postal: a.cp || null, ...(!(c as any).ville && a.ville ? { ville: a.ville } : {}) }; })() : {}),
           ...(pi?.ok && pi.numero ? { permis_numero: pi.numero } : {}),
         }).eq("id", c.id);
         ok++;
@@ -119,7 +121,7 @@ function ContratsConvoyeursPage() {
     setBusy("apercu" + c.id);
     try {
       let siret = c.siret ?? "";
-      let adresse = c.adresse ?? "";
+      let adresse = composeAdresse(adresseDe(c as any)) || c.adresse || "";
       if (!siret || !adresse) {
         const k = await kbis({ data: { convoyeurId: c.id } }).catch(() => null);
         siret = siret || k?.siret || "";
@@ -129,7 +131,7 @@ function ContratsConvoyeursPage() {
         }
       }
       let permisNum: string | null = c.permis_numero ?? null;
-      let permisDate: string | null = null;
+      let permisDate: string | null = (c as any).permis_date_obtention ? String((c as any).permis_date_obtention).split("-").reverse().join("/") : null;
       if (!permisNum) {
         const pi = await permisFn({ data: { convoyeurId: c.id } }).catch(() => null);
         if (pi?.ok && pi.numero) {
@@ -242,9 +244,10 @@ function ContratsConvoyeursPage() {
                     email={c.email}
                     telephone={c.telephone}
                     permisNumero={c.permis_numero ?? null}
+                    permisDate={(c as any).permis_date_obtention ?? null}
                     dateNaissance={(c as any).date_naissance} lieuNaissance={(c as any).lieu_naissance}
                     siret={c.siret}
-                    adresse={c.adresse}
+                    adresse={composeAdresse(adresseDe(c as any)) || c.adresse}
                   />
                 </div>
               )}

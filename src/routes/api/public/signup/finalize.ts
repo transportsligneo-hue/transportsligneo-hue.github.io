@@ -130,6 +130,8 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
           // SIRET + adresse saisis à l'inscription (colonnes ajoutées par convoyeurs-siret-adresse.sql)
           const extraSiret = String(form.get("extra_siret") ?? "").replace(/\D/g, "").slice(0, 14);
           const extraAdresse = String(form.get("extra_adresse") ?? "").trim().slice(0, 300);
+          const extraRue = String(form.get("extra_adresse_rue") ?? "").trim().slice(0, 200);
+          const extraCp = String(form.get("extra_code_postal") ?? "").replace(/\D/g, "").slice(0, 5);
           const extraNaiss = String(form.get("extra_date_naissance") ?? "").match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? "";
           const extraLieu = String(form.get("extra_lieu_naissance") ?? "").trim().slice(0, 120);
           if ((extraNaiss || extraLieu) && convoyeur?.id) {
@@ -139,7 +141,7 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
           }
           if ((extraSiret || extraAdresse) && convoyeur?.id) {
             const { error: extraErr } = await (supabaseAdmin as any).from("convoyeurs")
-              .update({ ...(extraSiret ? { siret: extraSiret } : {}), ...(extraAdresse ? { adresse: extraAdresse } : {}) }).eq("id", convoyeur.id);
+              .update({ ...(extraSiret ? { siret: extraSiret } : {}), ...(extraAdresse ? { adresse: extraAdresse } : {}), ...(extraRue ? { adresse_rue: extraRue } : {}), ...(extraCp ? { code_postal: extraCp } : {}) }).eq("id", convoyeur.id);
             if (extraErr) console.warn(`[signup/finalize] siret/adresse non enregistrés user=${userId} code=${extraErr.message}`);
           }
 

@@ -21,6 +21,7 @@ interface Props {
   siret?: string | null;
   adresse?: string | null;
   permisNumero?: string | null;
+  permisDate?: string | null;
   dateNaissance?: string | null;
   lieuNaissance?: string | null;
 }
@@ -34,7 +35,7 @@ export default function ContratYousignCard(props: Props) {
   const [permis, setPermis] = useState(props.permisNumero ?? "");
   const kbisInfo = useServerFn(esignConvoyeurKbisInfo);
   const permisInfo = useServerFn(esignConvoyeurPermisInfo);
-  const [permisDate, setPermisDate] = useState("");
+  const [permisDate, setPermisDate] = useState(props.permisDate ? props.permisDate.split("-").reverse().join("/") : "");
   const [kbisState, setKbisState] = useState<"idle" | "loading" | "done" | "none">("idle");
   const [denomination, setDenomination] = useState("");
 
@@ -62,7 +63,7 @@ export default function ContratYousignCard(props: Props) {
     void permisInfo({ data: { convoyeurId: props.convoyeurId } }).then((r) => {
       if (dead || !r.ok) return;
       if (r.numero) setPermis((v) => v || r.numero!);
-      if (r.delivre) setPermisDate(r.delivre);
+      if (r.delivre) setPermisDate((v) => v || r.delivre!);
     }).catch(() => undefined);
     return () => { dead = true; };
   }, [permisInfo, props.convoyeurId, props.permisNumero]);

@@ -5,8 +5,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, type FormEvent } from "react";
 import {
-  User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle, Trophy,
+  User, Building2, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle, Trophy,
 } from "lucide-react";
+import { adresseDe, composeAdresse } from "@/lib/adresse";
 import { SiretBadge } from "@/components/SiretBadge";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { computeNiveauProgress, niveauLabel } from "@/lib/convoyeur-niveau";
@@ -15,6 +16,18 @@ export const Route = createFileRoute("/_authenticated/convoyeur/profil")({
   head: () => ({ meta: [{ title: "Mon profil convoyeur | Transports Ligneo" }, { name: "description", content: "Informations professionnelles et sécurité SMS de votre compte convoyeur." }, { property: "og:title", content: "Mon profil convoyeur | Transports Ligneo" }, { property: "og:description", content: "Informations professionnelles et sécurité SMS de votre compte convoyeur." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ConvoyeurProfil,
 });
+
+function Bloc({ icon: Icon, titre, children }: { icon: React.ComponentType<{ size?: number; className?: string }>; titre: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-xl border border-pro-border bg-pro-bg-soft/40 p-4 space-y-4">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-pro-text">
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-50 text-emerald-700"><Icon size={15} /></span>
+        {titre}
+      </h3>
+      {children}
+    </section>
+  );
+}
 
 function ConvoyeurProfil() {
   const { user } = useAuth();
@@ -30,7 +43,7 @@ function ConvoyeurProfil() {
   });
 
   const [form, setForm] = useState({
-    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "", date_naissance: "", lieu_naissance: "", adresse: "", siret: "",
+    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "", date_naissance: "", lieu_naissance: "", adresse_rue: "", code_postal: "", siret: "", permis_numero: "", permis_date_obtention: "",
   });
 
   const [pwd, setPwd] = useState({ next: "", confirm: "" });
@@ -59,7 +72,8 @@ function ConvoyeurProfil() {
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
           annees_experience: data.annees_experience != null ? String(data.annees_experience) : "",
-          date_naissance: (data as any).date_naissance ?? "", lieu_naissance: (data as any).lieu_naissance ?? "", adresse: (data as any).adresse ?? "", siret: (data as any).siret ?? "",
+          date_naissance: (data as any).date_naissance ?? "", lieu_naissance: (data as any).lieu_naissance ?? "", adresse_rue: adresseDe(data as any).rue, code_postal: adresseDe(data as any).cp, siret: (data as any).siret ?? "",
+          permis_numero: (data as any).permis_numero ?? "", permis_date_obtention: (data as any).permis_date_obtention ?? "",
         });
       }
 
@@ -79,7 +93,9 @@ function ConvoyeurProfil() {
         prenom: form.prenom, nom: form.nom, telephone: form.telephone,
         ville: form.ville, permis: form.permis,
         annees_experience: form.annees_experience ? parseInt(form.annees_experience, 10) : null,
-        date_naissance: form.date_naissance || null, lieu_naissance: form.lieu_naissance.trim() || null, adresse: form.adresse.trim() || null, siret: form.siret.replace(/\D/g, "") || null,
+        date_naissance: form.date_naissance || null, lieu_naissance: form.lieu_naissance.trim() || null, adresse_rue: form.adresse_rue.trim() || null, code_postal: form.code_postal.trim() || null,
+        adresse: composeAdresse({ rue: form.adresse_rue, cp: form.code_postal, ville: form.ville }) || null,
+        permis_numero: form.permis_numero.trim().toUpperCase() || null, permis_date_obtention: form.permis_date_obtention || null, siret: form.siret.replace(/\D/g, "") || null,
       } as any)
       .eq("id", convoyeurId);
     setSaving(false);
@@ -200,68 +216,88 @@ function ConvoyeurProfil() {
           <User size={16} className="text-emerald-600" /> Informations personnelles
         </h2>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1">Prénom</label>
-            <input type="text" value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} className={inputClass} required />
+        <Bloc icon={User} titre="Identité">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Prénom</label>
+              <input type="text" value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} className={inputClass} required />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Nom</label>
+              <input type="text" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} className={inputClass} required />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1"><Calendar size={11} className="inline mr-1" />Date de naissance</label>
+              <input type="date" value={form.date_naissance} onChange={(e) => setForm({ ...form, date_naissance: e.target.value })} className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Lieu de naissance (ville)</label>
+              <input type="text" value={form.lieu_naissance} onChange={(e) => setForm({ ...form, lieu_naissance: e.target.value })} className={inputClass} />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1">Nom</label>
-            <input type="text" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} className={inputClass} required />
-          </div>
-        </div>
+          {(!form.date_naissance || !form.lieu_naissance) && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">À compléter : nécessaire pour votre contrat de partenariat.</p>}
+        </Bloc>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1"><Mail size={11} className="inline mr-1" />Email</label>
-            <input type="email" value={form.email} className={inputClass + " bg-pro-bg-soft"} disabled />
-            <p className="text-pro-muted text-xs mt-1">L'email ne peut pas être modifié.</p>
+        <Bloc icon={Phone} titre="Contact">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1"><Mail size={11} className="inline mr-1" />Email</label>
+              <input type="email" value={form.email} className={inputClass + " bg-pro-bg-soft"} disabled />
+              <p className="text-pro-muted text-xs mt-1">L'email ne peut pas être modifié.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1"><Phone size={11} className="inline mr-1" />Téléphone</label>
+              <input type="tel" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} className={inputClass} />
+            </div>
           </div>
+        </Bloc>
+
+        <Bloc icon={MapPin} titre="Adresse actuelle">
           <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1"><Phone size={11} className="inline mr-1" />Téléphone</label>
-            <input type="tel" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} className={inputClass} />
+            <label className="block text-xs font-medium text-pro-text-soft mb-1">Rue et numéro</label>
+            <input type="text" value={form.adresse_rue} onChange={(e) => setForm({ ...form, adresse_rue: e.target.value })} placeholder="12 rue des Lilas" className={inputClass} />
           </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Ville</label>
-          <input type="text" value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} className={inputClass} />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-pro-text-soft mb-1"><IdCard size={11} className="inline mr-1" />N° SIRET</label>
-          <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="000 000 000 00000" className={inputClass} />
-          <SiretBadge siret={form.siret} />
-        </div>
-
-        <div className={"rounded-xl p-3 " + (!form.adresse.trim() ? "bg-amber-50 border border-amber-200" : "")}>
-          <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Adresse actuelle (rue, code postal, ville)</label>
-          <input type="text" value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} placeholder="12 rue des Lilas, 37000 Tours" className={inputClass} />
-          {!form.adresse.trim() && <p className="mt-1 text-xs text-amber-800">À compléter : elle figure sur votre contrat de partenariat et vos factures.</p>}
-        </div>
-
-        <div className={"grid sm:grid-cols-2 gap-4 rounded-xl p-3 " + (!form.date_naissance || !form.lieu_naissance ? "bg-amber-50 border border-amber-200" : "")}>
-          <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1"><Calendar size={11} className="inline mr-1" />Date de naissance</label>
-            <input type="date" value={form.date_naissance} onChange={(e) => setForm({ ...form, date_naissance: e.target.value })} className={inputClass} />
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Code postal</label>
+              <input type="text" inputMode="numeric" maxLength={5} value={form.code_postal} onChange={(e) => setForm({ ...form, code_postal: e.target.value.replace(/\D/g, "") })} placeholder="37000" className={inputClass} />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Ville</label>
+              <input type="text" value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} className={inputClass} />
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Lieu de naissance (ville)</label>
-            <input type="text" value={form.lieu_naissance} onChange={(e) => setForm({ ...form, lieu_naissance: e.target.value })} className={inputClass} />
-          </div>
-          {(!form.date_naissance || !form.lieu_naissance) && <p className="sm:col-span-2 text-xs text-amber-800">À compléter : ces informations sont nécessaires pour votre contrat de partenariat.</p>}
-        </div>
+          {(!form.adresse_rue.trim() || !form.code_postal.trim()) && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">À compléter : elle figure sur votre contrat de partenariat et vos factures.</p>}
+        </Bloc>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <Bloc icon={Building2} titre="Mon entreprise">
           <div>
-            <label className="block text-xs font-medium text-pro-text-soft mb-1"><IdCard size={11} className="inline mr-1" />Permis</label>
-            <input type="text" value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="Catégorie / numéro" className={inputClass} />
+            <label className="block text-xs font-medium text-pro-text-soft mb-1">N° SIRET</label>
+            <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="000 000 000 00000" className={inputClass} />
+            <SiretBadge siret={form.siret} />
           </div>
-          <div>
+        </Bloc>
+
+        <Bloc icon={IdCard} titre="Permis de conduire">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Catégories</label>
+              <input type="text" value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C…" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">N° du permis</label>
+              <input type="text" value={form.permis_numero} onChange={(e) => setForm({ ...form, permis_numero: e.target.value })} placeholder="12AB34567890" className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-pro-text-soft mb-1">Date d'obtention</label>
+              <input type="date" value={form.permis_date_obtention} onChange={(e) => setForm({ ...form, permis_date_obtention: e.target.value })} className={inputClass} />
+            </div>
+          </div>
+          <div className="max-w-xs">
             <label className="block text-xs font-medium text-pro-text-soft mb-1"><Calendar size={11} className="inline mr-1" />Années d'expérience</label>
             <input type="number" min="0" value={form.annees_experience} onChange={(e) => setForm({ ...form, annees_experience: e.target.value })} className={inputClass} />
           </div>
-        </div>
+        </Bloc>
 
         <div className="flex items-center justify-between pt-3 border-t border-pro-border">
           {savedMsg && (

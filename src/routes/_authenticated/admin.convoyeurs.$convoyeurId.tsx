@@ -1,3 +1,5 @@
+import { SiretBadge } from "@/components/SiretBadge";
+import { adresseDe, composeAdresse } from "@/lib/adresse";
 import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -25,7 +27,19 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
+  MapPin,
+  Building2,
+  IdCard,
 } from "lucide-react";
+
+function BlocTitre({ icon: Icon, titre }: { icon: React.ComponentType<{ size?: number; className?: string }>; titre: string }) {
+  return (
+    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#eaf0ff] text-[#2F5FFF]"><Icon size={15} /></span>
+      {titre}
+    </div>
+  );
+}
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MessageSquare } from "lucide-react";
 import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
@@ -108,10 +122,18 @@ type Editable = {
   disponibilite: string;
   permis: string;
   message: string;
+  date_naissance: string;
+  lieu_naissance: string;
+  adresse_rue: string;
+  code_postal: string;
+  siret: string;
+  permis_numero: string;
+  permis_date_obtention: string;
 };
 
 const EMPTY: Editable = {
   prenom: "", nom: "", telephone: "", ville: "", disponibilite: "", permis: "", message: "",
+  date_naissance: "", lieu_naissance: "", adresse_rue: "", code_postal: "", siret: "", permis_numero: "", permis_date_obtention: "",
 };
 
 const statutLabels: Record<string, string> = {
@@ -157,7 +179,15 @@ function AdminConvoyeurDetail() {
         disponibilite: cv.disponibilite ?? "",
         permis: cv.permis ?? "",
         message: cv.message ?? "",
+        date_naissance: (cv as any).date_naissance ?? "",
+        lieu_naissance: (cv as any).lieu_naissance ?? "",
+        adresse_rue: adresseDe(cv as any).rue,
+        code_postal: adresseDe(cv as any).cp,
+        siret: (cv as any).siret ?? "",
+        permis_numero: (cv as any).permis_numero ?? "",
+        permis_date_obtention: (cv as any).permis_date_obtention ?? "",
       };
+      if (!init.ville) init.ville = adresseDe(cv as any).ville;
       setForm(init);
       setOriginal(init);
 
@@ -305,8 +335,16 @@ function AdminConvoyeurDetail() {
       disponibilite: form.disponibilite.trim() || null,
       permis: form.permis.trim() || null,
       message: form.message.trim() || null,
+      date_naissance: form.date_naissance || null,
+      lieu_naissance: form.lieu_naissance.trim() || null,
+      adresse_rue: form.adresse_rue.trim() || null,
+      code_postal: form.code_postal.trim() || null,
+      adresse: composeAdresse({ rue: form.adresse_rue, cp: form.code_postal, ville: form.ville }) || null,
+      siret: form.siret.replace(/\D/g, "") || null,
+      permis_numero: form.permis_numero.trim().toUpperCase() || null,
+      permis_date_obtention: form.permis_date_obtention || null,
     };
-    const { error } = await supabase.from("convoyeurs").update(payload).eq("id", conv.id);
+    const { error } = await supabase.from("convoyeurs").update(payload as any).eq("id", conv.id);
     // also sync profile name/phone for unified account view
     if (!error && conv.user_id) {
       await invokeAdminUserAction({
@@ -570,53 +608,101 @@ function AdminConvoyeurDetail() {
         <TabsContent value="overview" className="mt-6">
           <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
             <div className="space-y-4">
-            <AdminField label="Photo de profil">
-              <AdminAvatarUploader
-                ownerUserId={conv.user_id ?? null}
-                convoyeurId={conv.id}
-                value={avatarUrl}
-                onChange={setAvatarUrl}
-              />
-            </AdminField>
-
-            <div className="grid grid-cols-2 gap-3">
-              <AdminField label="Prénom">
-                <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={User} titre="Identité" />
+              <AdminField label="Photo de profil">
+                <AdminAvatarUploader
+                  ownerUserId={conv.user_id ?? null}
+                  convoyeurId={conv.id}
+                  value={avatarUrl}
+                  onChange={setAvatarUrl}
+                />
               </AdminField>
-              <AdminField label="Nom">
-                <input className={inp} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <AdminField label="Prénom">
+                  <input className={inp} value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} />
+                </AdminField>
+                <AdminField label="Nom">
+                  <input className={inp} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+                </AdminField>
+                <AdminField label="Date de naissance">
+                  <input type="date" className={inp} value={form.date_naissance} onChange={(e) => setForm({ ...form, date_naissance: e.target.value })} />
+                  {!form.date_naissance && <p className="mt-1 text-[11px] text-amber-700">Non renseignée</p>}
+                </AdminField>
+                <AdminField label="Lieu de naissance">
+                  <input className={inp} value={form.lieu_naissance} onChange={(e) => setForm({ ...form, lieu_naissance: e.target.value })} placeholder="Ville" />
+                  {!form.lieu_naissance && <p className="mt-1 text-[11px] text-amber-700">Non renseigné</p>}
+                </AdminField>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={AtSign} titre="Contact" />
+              <AdminField label="Email (connexion)">
+                <div className="flex items-center gap-2">
+                  <input className={`${inp} bg-slate-50`} value={conv.email ?? ""} readOnly />
+                  <button
+                    onClick={changeEmail}
+                    disabled={busy === "email" || !conv.user_id}
+                    className="admin-btn-ghost inline-flex items-center gap-1.5 whitespace-nowrap"
+                    title="Modifier l'email"
+                  >
+                    {busy === "email" ? <Loader2 className="animate-spin" size={14} /> : <AtSign size={14} />}
+                    Modifier
+                  </button>
+                </div>
+              </AdminField>
+              <div className="mt-3">
+                <AdminField label="Téléphone">
+                  <input className={inp} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
+                </AdminField>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={MapPin} titre="Adresse actuelle" />
+              <AdminField label="Rue et numéro">
+                <input className={inp} value={form.adresse_rue} onChange={(e) => setForm({ ...form, adresse_rue: e.target.value })} placeholder="12 rue des Lilas" />
+              </AdminField>
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                <AdminField label="Code postal">
+                  <input className={inp} inputMode="numeric" maxLength={5} value={form.code_postal} onChange={(e) => setForm({ ...form, code_postal: e.target.value.replace(/\D/g, "") })} placeholder="37000" />
+                </AdminField>
+                <div className="col-span-2">
+                  <AdminField label="Ville">
+                    <input className={inp} value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} />
+                  </AdminField>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={Building2} titre="Entreprise" />
+              <AdminField label="N° SIRET">
+                <input className={inp} inputMode="numeric" maxLength={17} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="000 000 000 00000" />
+                <SiretBadge admin siret={form.siret} />
               </AdminField>
             </div>
 
-            <AdminField label="Email (connexion)">
-              <div className="flex items-center gap-2">
-                <input className={`${inp} bg-slate-50`} value={conv.email ?? ""} readOnly />
-                <button
-                  onClick={changeEmail}
-                  disabled={busy === "email" || !conv.user_id}
-                  className="admin-btn-ghost inline-flex items-center gap-1.5 whitespace-nowrap"
-                  title="Modifier l'email"
-                >
-                  {busy === "email" ? <Loader2 className="animate-spin" size={14} /> : <AtSign size={14} />}
-                  Modifier
-                </button>
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={IdCard} titre="Permis de conduire" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <AdminField label="Catégories">
+                  <input className={inp} value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C, EC..." />
+                </AdminField>
+                <AdminField label="N° du permis">
+                  <input className={inp} value={form.permis_numero} onChange={(e) => setForm({ ...form, permis_numero: e.target.value })} placeholder="12AB34567890" />
+                </AdminField>
+                <AdminField label="Date d'obtention">
+                  <input type="date" className={inp} value={form.permis_date_obtention} onChange={(e) => setForm({ ...form, permis_date_obtention: e.target.value })} />
+                </AdminField>
               </div>
-            </AdminField>
+            </div>
 
-            <AdminField label="Téléphone">
-              <input className={inp} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
-            </AdminField>
-
-            <AdminField label="Ville">
-              <input className={inp} value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} />
-            </AdminField>
-
-            <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+              <BlocTitre icon={CalendarDays} titre="Disponibilité" />
               <AdminField label="Disponibilité">
                 <input className={inp} value={form.disponibilite} onChange={(e) => setForm({ ...form, disponibilite: e.target.value })} />
-              </AdminField>
-              <AdminField label="Permis">
-                <input className={inp} value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C, EC..." />
               </AdminField>
             </div>
 
@@ -738,9 +824,10 @@ function AdminConvoyeurDetail() {
               email={conv.email}
               telephone={conv.telephone}
               permisNumero={(conv as any).permis_numero ?? null}
+              permisDate={(conv as any).permis_date_obtention ?? null}
               dateNaissance={(conv as any).date_naissance} lieuNaissance={(conv as any).lieu_naissance}
               siret={(conv as any).siret}
-              adresse={(conv as any).adresse}
+              adresse={composeAdresse(adresseDe(conv as any)) || (conv as any).adresse}
             />
           </div>
         </TabsContent>
