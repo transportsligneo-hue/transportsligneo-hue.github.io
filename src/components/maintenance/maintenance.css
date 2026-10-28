@@ -89,3 +89,6 @@ html.theme-dark .mtn-dv{--gn:#4dffb8;--gnglow:rgba(77,255,184,.7)}
 .mtn-dv-rt{opacity:1}
 .mtn-bn--driver p b,.mtn-bn--driver .mtn-gn{color:#eafff6;text-shadow:0 0 12px rgba(255,255,255,.8)}
 .mtn-dv-card>img{border-radius:22px}
+
+/* Page Services : l'onglet Particuliers / Professionnels doit toujours se placer SOUS la barre de navigation (≈120 px de haut sur PC). */
+@media (min-width:1280px){html .r4-page{--tln-nav-h:128px}}
