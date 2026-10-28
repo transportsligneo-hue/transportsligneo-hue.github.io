@@ -192,7 +192,7 @@ function AdminPaiements() {
   return (
     <div>
       {/* ===== En-tête ===== */}
-      <div className="dvx-head">
+      <div className="dvx-head" data-ghost="Paiements & facturation">
         <div className="min-w-0">
           <h1 className="dvx-title">Paiements & facturation</h1>
           <p className="dvx-sub">Cockpit financier — Stripe, B2B, factures émises</p>

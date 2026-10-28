@@ -39,6 +39,7 @@ export const createApiKey = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { organizationId: string; name: string; environment: "test" | "live"; scope?: "read" | "write"; allowedIps?: string[]; expiresInDays?: number | null }) => input)
   .handler(async ({ data, context }) => {
+    ;(await import("@/lib/demo-block.server")).assertNotDemo((context as { claims?: unknown }).claims)
     const { assertOrgAccess, keyPreview } = await import("@/lib/api-keys.server");
     const { generateApiKey, hashApiKey } = await import("@/lib/api/api-auth.server");
     await assertOrgAccess(context.supabase, context.userId, data.organizationId);

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Upload, Trash2, Plus, Car } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { type CatalogEntry, catalogPhotoUrl, loadCatalog } from "@/lib/vehicle-catalog";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 
 export const Route = createFileRoute("/_authenticated/admin/catalogue-vehicules")({
   head: () => ({ meta: [{ title: "Catalogue véhicules — Admin Ligneo" }, { name: "description", content: "Photos officielles des modèles affichées dans les espaces flotte." }] }),
@@ -64,11 +65,7 @@ function CataloguePage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Catalogue véhicules</h1>
-          <p className="text-muted-foreground">Ajoutez les modèles et leur photo. Elle s'affiche automatiquement dans « Ajouter un véhicule » dès que la marque et le modèle correspondent. {withPhoto}/{rows.length} avec photo.</p>
-        </div>
-        <button onClick={() => void addAll()} className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted">Ajouter les modèles de leasing courants</button>
+        <AdminSectionHeader breadcrumb="Catalogue véhicules" eyebrow="Référentiel" title="Catalogue véhicules" actions={<button onClick={() => void addAll()} className="rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20">Ajouter les modèles de leasing courants</button>} />
       </div>
       <div className="flex flex-wrap gap-2 rounded-xl border p-4">
         <input className="h-10 rounded-md border bg-background px-3" placeholder="Marque" value={f.marque} onChange={(e) => setF({ ...f, marque: e.target.value })} />

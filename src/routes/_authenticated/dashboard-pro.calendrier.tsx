@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { daysUntil, dueTone, nextRevision } from "@/lib/vehicle-schedule";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { STATUS_META, isCancelled, useProMissions } from "@/hooks/useProMissions";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/calendrier")({
   head: () => ({
@@ -116,11 +117,8 @@ function CalendrierPage() {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-pro-accent font-semibold">Planification</p>
-          <h1 className="text-2xl font-semibold text-foreground">Calendrier des convoyages</h1>
-        </div>
+      <FleetPageHeader breadcrumb="Calendrier des convoyages" eyebrow="Planification" title="Calendrier des" highlight="convoyages" />
+      <header className="flex flex-wrap items-center justify-end gap-3">
         <div className="flex items-center gap-2">
           <div className="pp-seg">
             <button className={view === "mois" ? "on" : ""} onClick={() => setView("mois")}>Mois</button>

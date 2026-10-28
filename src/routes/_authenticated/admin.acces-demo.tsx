@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendDemoAccess } from "@/lib/demo-access.functions";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 
 export const Route = createFileRoute("/_authenticated/admin/acces-demo")({
   head: () => ({ meta: [{ title: "Accès démo — Admin Ligneo" }] }),
@@ -52,10 +53,7 @@ function AccesDemoPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Accès démo</h1>
-        <p className="text-sm text-muted-foreground">Envoyez un lien privé (valable 7 jours) vers la démonstration de l'espace professionnel.</p>
-      </div>
+      <AdminSectionHeader breadcrumb="Accès démo" eyebrow="Démonstration" title="Accès démo" />
 
       <form
         className="grid gap-2 rounded-xl border p-4 md:grid-cols-4"

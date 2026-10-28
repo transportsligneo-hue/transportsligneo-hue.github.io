@@ -358,7 +358,7 @@ export async function ensureModernParaphe(requestId: string, meta: { ip?: string
   if (!r || r.status !== "signed" || !r.signed_doc_path || !r.signature_path) return false;
   const { data: evs } = await supabaseAdmin.from("esign_events").select("type, ip_address, payload").eq("request_id", requestId).order("seq");
   const events = (evs ?? []) as Array<{ type: string; ip_address: string | null; payload: any }>;
-  if (!events.some((e) => e.type === "initials_applied") || events.some((e) => e.type === "paraphe_restyled")) return false;
+  if (events.some((e) => e.type === "paraphe_restyled")) return false;
 
   const dl = async (p: string) => {
     const x = await supabaseAdmin.storage.from(BUCKET).download(p);
@@ -366,8 +366,9 @@ export async function ensureModernParaphe(requestId: string, meta: { ip?: string
   };
   const [original, oldSigned, sig] = await Promise.all([dl(r.doc_path), dl(r.signed_doc_path), dl(r.signature_path)]);
   if (!original || !oldSigned || !sig) return false;
-  const initials = (await dl(`${requestId}/paraphe.png`)) ?? (await extractInitialsFromSigned(oldSigned));
-  if (!initials) return false;
+  // Paraphe dessiné à la main s'il existe ; sinon (anciens contrats aux initiales automatiques en cadre blanc),
+  // on reprend l'encre de la signature du signataire : rendu naturel, jamais de cadre.
+  const initials = (await dl(`${requestId}/paraphe.png`)) ?? sig;
 
   const signedEv = events.find((e) => e.type === "signed");
   const method = signedEv?.payload?.auth === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";

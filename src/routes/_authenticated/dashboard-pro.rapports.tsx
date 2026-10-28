@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 import {
   STATUS_META, deliveredOnTime, downloadCsv, euro, isCancelled, isDone, useProMissions,
 } from "@/hooks/useProMissions";
@@ -71,11 +72,8 @@ function RapportsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-pro-accent font-semibold">Analyse</p>
-          <h1 className="text-2xl font-semibold text-foreground">Rapports & statistiques</h1>
-        </div>
+      <FleetPageHeader breadcrumb="Rapports & statistiques" eyebrow="Analyse" title="Rapports &" highlight="statistiques" />
+      <header className="flex flex-wrap items-end justify-end gap-3">
         <div className="flex flex-wrap items-end gap-2">
           <label className="pp-field">Du<input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
           <label className="pp-field">Au<input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></label>

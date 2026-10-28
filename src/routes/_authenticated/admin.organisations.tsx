@@ -251,7 +251,7 @@ function AdminOrganisations() {
   return (
     <div>
       {/* ===== En-tête ===== */}
-      <div className="dvx-head">
+      <div className="dvx-head" data-ghost="Organisations & clients">
         <div className="min-w-0">
           <h1 className="dvx-title">Organisations & clients</h1>
         </div>

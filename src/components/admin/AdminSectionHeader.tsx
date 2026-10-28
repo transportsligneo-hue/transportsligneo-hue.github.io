@@ -16,6 +16,12 @@ type Props = {
   highlight?: string;
   subtitle?: ReactNode;
   badge?: string | null;
+  /** "violet" = espace flotte / pro ; "blue" = admin (défaut) */
+  variant?: "blue" | "violet";
+  /** Racine du fil d'ariane (défaut « Ligneo ») */
+  space?: string;
+  logoUrl?: string | null;
+  logoAlt?: string;
   actions?: ReactNode;
   stats?: AdminHeaderStat[];
 };
@@ -31,11 +37,15 @@ export default function AdminSectionHeader({
   highlight,
   subtitle,
   badge,
+  variant = "blue",
+  space = "Ligneo",
+  logoUrl,
+  logoAlt,
   actions,
   stats,
 }: Props) {
   return (
-    <header className="adm-hero relative mb-5 overflow-hidden rounded-[22px] px-5 py-6 sm:px-[30px] sm:py-7">
+    <header className={`adm-hero ${variant === "violet" ? "adm-hero--violet" : ""} relative mb-5 overflow-hidden rounded-[22px] px-5 py-6 sm:px-[30px] sm:py-7`}>
       <span aria-hidden className="adm-hero-ghost">{breadcrumb}</span>
       <div className="relative z-[1] flex flex-wrap items-center justify-between gap-5">
         <div className="flex min-w-0 items-center gap-4">
@@ -44,14 +54,14 @@ export default function AdminSectionHeader({
           </span>
           <div className="min-w-0">
             <div className="adm-hero-crumb">
-              <span>Ligneo</span>
+              <span>{space}</span>
               <span className="opacity-60">›</span>
               <span>{eyebrow}</span>
             </div>
             <h1 className="adm-hero-title">
               {title}
               {highlight ? <> <span className="adm-hero-hl">{highlight}</span></> : null}
-              {badge ? <span className="fleet-header-badge">{badge}</span> : null}
+              {logoUrl ? <img src={logoUrl} alt={logoAlt ?? "Logo"} className="ml-3 inline-block h-8 w-auto max-w-[120px] rounded-md bg-white/90 p-1 align-middle object-contain" loading="lazy" /> : badge ? <span className="fleet-header-badge">{badge}</span> : null}
             </h1>
           </div>
         </div>
@@ -69,7 +79,7 @@ export default function AdminSectionHeader({
               <small>{s.label}</small>
               <b
                 className="font-grotesk"
-                style={{ color: s.tone === "warn" ? "#ffd27a" : s.tone === "accent" ? "#37e6ff" : "#fff" }}
+                style={{ color: s.tone === "warn" ? "#ffd27a" : s.tone === "accent" ? (variant === "violet" ? "#d4b8ff" : "#37e6ff") : "#fff" }}
               >
                 {s.value}
               </b>

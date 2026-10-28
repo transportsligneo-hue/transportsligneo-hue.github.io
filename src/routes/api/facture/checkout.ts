@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe-server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requestIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
+import { requestIsDemo, docIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -58,6 +58,9 @@ export const Route = createFileRoute("/api/facture/checkout")({
         }
         if (facture.paid_at || facture.statut === "payee") {
           return Response.json({ error: "Facture déjà payée" }, { status: 409 });
+        }
+        if (docIsDemo(facture.client_email, env)) {
+          return Response.json({ error: DEMO_BLOCK_MESSAGE }, { status: 403 });
         }
         if (!["emise", "en_retard"].includes(String(facture.statut))) {
           return Response.json({ error: "Facture non payable" }, { status: 409 });

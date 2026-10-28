@@ -213,7 +213,7 @@ function AdminClients() {
   return (
     <div>
       {/* ===== En-tête ===== */}
-      <div className="dvx-head">
+      <div className="dvx-head" data-ghost="Clients">
         <div className="min-w-0">
           <h1 className="dvx-title">Clients</h1>
           <p className="dvx-sub">

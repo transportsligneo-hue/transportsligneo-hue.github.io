@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe-server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requestIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
+import { requestIsDemo, docIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -62,6 +62,12 @@ export const Route = createFileRoute("/api/b2b/checkout")({
         }
         if (req2.payment_status === "paid") {
           return Response.json({ error: "Demande déjà payée" }, { status: 409 });
+        }
+        if (req2.company_id) {
+          const { data: cpy } = await supabaseAdmin.from("companies").select("contact_email").eq("id", req2.company_id).maybeSingle();
+          if (docIsDemo(cpy?.contact_email, env)) {
+            return Response.json({ error: DEMO_BLOCK_MESSAGE }, { status: 403 });
+          }
         }
         const ttc = Number(req2.estimated_price_ttc);
         if (!ttc || ttc < 1) {

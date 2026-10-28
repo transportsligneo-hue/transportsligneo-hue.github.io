@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Building2, MapPin, Plus, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/sites")({
   head: () => ({
@@ -65,10 +66,7 @@ function SitesPage() {
   const input = "w-full rounded-lg border border-pro-border bg-transparent px-3 py-2 text-sm";
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-2">
-      <div>
-        <h1 className="text-2xl font-bold">Sites <span className="text-pro-accent">& agences</span></h1>
-        <p className="text-sm opacity-70">Vos agences, dépôts et établissements. Rattachez ensuite vos véhicules et missions à un site depuis le parc.</p>
-      </div>
+      <FleetPageHeader breadcrumb="Sites & agences" eyebrow="Organisation" title="Sites" highlight="& agences" />
 
       <div className="rounded-2xl border border-pro-border p-5">
         <h2 className="mb-3 flex items-center gap-2 font-semibold"><Plus size={16} /> Ajouter un site</h2>

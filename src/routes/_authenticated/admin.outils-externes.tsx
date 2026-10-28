@@ -7,6 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, Plus, Trash2, Upload, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import {
   BUCKET_OUTILS_LOGOS,
   DEFAULT_OUTIL_LOGO,
@@ -131,15 +132,7 @@ function OutilsExternesPage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-6">
-      <header className="flex items-center gap-3">
-        <Wrench className="text-pro-accent" size={20} />
-        <div>
-          <h1 className="text-lg font-bold text-pro-text">Outils externes client</h1>
-          <p className="text-[12px] text-pro-muted">
-            Associez un donneur d'ordre à son outil d'état des lieux. Le convoyeur n'a rien à choisir : la détection est automatique.
-          </p>
-        </div>
-      </header>
+      <AdminSectionHeader breadcrumb="Outils externes client" eyebrow="Intégrations" title="Outils externes client" />
 
       <section className="rounded-2xl border border-pro-border bg-pro-card p-4 space-y-4">
         <h2 className="text-sm font-semibold text-pro-text">{form.id ? "Modifier l'outil" : "Nouvel outil"}</h2>

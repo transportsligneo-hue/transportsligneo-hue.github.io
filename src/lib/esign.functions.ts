@@ -241,6 +241,9 @@ export const esignPublicGet = createServerFn({ method: "POST" })
     out.maskedEmail = S.maskEmail(r.signer_email);
     out.maskedPhone = r.signer_phone && r.signer_phone.replace(/\D/g, "").length >= 10 ? S.maskPhone(r.signer_phone) : undefined;
     let docUrl: string | null = null;
+    if (r.status === "signed") {
+      try { await S.ensureModernParaphe(r.id, reqMeta()); } catch (e) { console.error("[esign] rendu du paraphe", e); }
+    }
     const path = r.status === "signed" && r.signed_doc_path ? r.signed_doc_path : r.doc_path;
     if (["opened", "signed"].includes(r.status)) {
       docUrl = (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(path, 3600)).data?.signedUrl ?? null;

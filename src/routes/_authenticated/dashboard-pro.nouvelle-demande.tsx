@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import QuickMissionForm from "@/components/dashboard-pro/QuickMissionForm";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/nouvelle-demande")({
   head: () => ({
@@ -26,10 +27,7 @@ function ProNouvelleDemande() {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Retour au choix
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-pro-text">Mission simple</h1>
-        <p className="text-pro-text-soft text-sm mt-0.5">
-          Créez une nouvelle demande de convoyage en quelques secondes.
-        </p>
+        <FleetPageHeader breadcrumb="Mission simple" eyebrow="Nouvelle demande" title="Mission simple" />
       </div>
       <QuickMissionForm successRedirect="/dashboard-pro/missions" />
     </div>

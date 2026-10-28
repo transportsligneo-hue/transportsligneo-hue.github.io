@@ -12,6 +12,7 @@ import {
   getApiUsage, replayWebhookDelivery, sendTestWebhook,
 } from "@/lib/api-keys.functions";
 import { API_BASE_URL, ENDPOINTS, curlExample } from "@/lib/api/openapi-spec";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/api")({
   component: ApiIntegrationsPage,
@@ -205,25 +206,11 @@ function ApiIntegrationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8 space-y-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-[#2f5fff]">
-            <Code2 size={18} />
-            <span className="text-xs font-semibold uppercase tracking-[0.18em]">Intégration</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-semibold text-[#0b1026]">API &amp; Intégrations</h1>
-          <p className="mt-1 max-w-2xl text-sm text-[#5b5d6b]">
-            Créez devis et missions directement depuis votre DMS, ERP ou plateforme de gestion de flotte.
-            Les clés sont hashées : la valeur en clair n'est affichée qu'une seule fois.
-          </p>
-        </div>
-        <Link
-          to="/developpeurs"
-          className="inline-flex items-center gap-2 rounded-xl border border-[#2f5fff] px-4 py-2 text-sm font-semibold text-[#2f5fff] hover:bg-[#2f5fff] hover:text-white transition"
-        >
-          <BookOpen size={16} /> Documentation
-        </Link>
-      </header>
+      <FleetPageHeader breadcrumb="API & Intégrations" eyebrow="Intégration" title="API &" highlight="Intégrations" actions={
+          <Link to="/developpeurs" className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+            <BookOpen size={16} /> Documentation
+          </Link>
+        } />
 
       {revealed && (
         <div className="rounded-2xl border border-[#2f5fff]/30 bg-[#f2f6ff] p-5">

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCurrentOrgAccountType } from "@/hooks/useCurrentOrgAccountType";
 import { inviteTeamMember } from "@/lib/team.functions";
 import { HelpTip } from "@/components/dashboard-pro/HelpTip";
+import FleetPageHeader from "@/components/flotte/FleetPageHeader";
 
 export const Route = createFileRoute("/_authenticated/dashboard-pro/equipe")({
   head: () => ({
@@ -102,10 +103,7 @@ function EquipePage() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <header>
-        <h1 className="text-2xl font-semibold">Équipe & alertes</h1>
-        <p className="text-sm text-muted-foreground">Qui a accès à votre espace, et quelles alertes vous recevez.</p>
-      </header>
+      <FleetPageHeader breadcrumb="Équipe & alertes" eyebrow="Accès" title="Équipe & alertes" />
 
       <ApprovalSection />
 

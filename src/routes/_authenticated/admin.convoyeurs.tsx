@@ -538,7 +538,7 @@ function AdminConvoyeurs() {
   return (
     <div>
       {/* ===== En-tête ===== */}
-      <div className="dvx-head">
+      <div className="dvx-head" data-ghost="Convoyeurs">
         <div className="min-w-0">
           <h1 className="dvx-title">Convoyeurs</h1>
           <p className="dvx-sub">

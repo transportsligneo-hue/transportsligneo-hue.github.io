@@ -10,7 +10,7 @@ const Email = ({ nom, societe, lien }: Props) => (
     tagline="Accès démonstration"
     title="Votre démo privée est prête"
     greeting={nom ? `Bonjour ${nom},` : 'Bonjour,'}
-    intro={`Olivier Gourlaouen vous a ouvert un accès privilégié à la plateforme de pilotage Transports Ligneo${societe ? ` pour ${societe}` : ''}. Aucun mot de passe : cliquez simplement sur le bouton ci-dessous.`}
+    intro={`L'équipe Transports Ligneo vous donne accès à un espace de démonstration de sa plateforme de pilotage${societe ? `, préparé pour ${societe}` : ''}. Aucun mot de passe n'est nécessaire : il vous suffit de cliquer sur le bouton ci-dessous.`}
     primaryCta={{ label: 'Découvrir mon espace démo', href: lien }}
     footnote="Ce lien personnel est valable 7 jours. Pensez à vérifier vos spams si vous ne trouvez pas nos messages."
   >

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe-server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requestIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
+import { requestIsDemo, docIsDemo, DEMO_BLOCK_MESSAGE } from "@/lib/demo-block.server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -66,6 +66,9 @@ export const Route = createFileRoute("/api/devis/checkout")({
 
         if (error || !devis) {
           return Response.json({ error: "Devis introuvable" }, { status: 404 });
+        }
+        if (docIsDemo((devis as { email?: string | null }).email, env)) {
+          return Response.json({ error: DEMO_BLOCK_MESSAGE }, { status: 403 });
         }
         if ((devis as { paiement_immediat?: boolean | null }).paiement_immediat === false) {
           return Response.json({ error: "Paiement en ligne désactivé pour ce devis (facturation différée)" }, { status: 409 });

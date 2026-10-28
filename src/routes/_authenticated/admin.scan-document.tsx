@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminScanDocumentPanel } from "@/components/admin/AdminScanDocumentPanel";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 
 export const Route = createFileRoute("/_authenticated/admin/scan-document")({
   head: () => ({
@@ -15,13 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/scan-document")({
 function ScanDocumentPage() {
   return (
     <div className="p-4 sm:p-6 space-y-4">
-      <header>
-        <h1 className="text-xl sm:text-2xl font-bold">Scanner un document</h1>
-        <p className="text-sm opacity-70">
-          Photographiez ou importez un document (devis signé, PV, carte grise, facture…) et classez-le
-          dans la mission du client. Rien n'est classé sans votre confirmation.
-        </p>
-      </header>
+      <AdminSectionHeader breadcrumb="Scanner un document" eyebrow="Documents" title="Scanner un document" />
       <AdminScanDocumentPanel />
     </div>
   );

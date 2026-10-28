@@ -239,7 +239,7 @@ function IncidentsRegistryPage() {
   return (
     <div>
       {/* ===== En-tête ===== */}
-      <div className="dvx-head">
+      <div className="dvx-head" data-ghost="Registre des incidents">
         <div className="min-w-0">
           <h1 className="dvx-title">Registre des incidents</h1>
           <p className="dvx-sub">

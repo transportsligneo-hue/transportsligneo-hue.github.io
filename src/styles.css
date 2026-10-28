@@ -12874,3 +12874,23 @@ html.theme-light .sv-otp i.f { border-color: #2f5fff; box-shadow: 0 0 0 3px rgba
 .wl-bar.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 .wl-bar .n{font-weight:800;font-size:22px;color:#37e6ff}.wl-bar small{display:block;font-size:11px;color:#a9c0f5}
 .wl-bar .wl-b.g{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+
+/* === En-têtes unifiés : variante violette (espace flotte / pro) et .dvx-head en bandeau === */
+.adm-hero--violet{background:radial-gradient(700px 320px at 80% -30%,rgba(170,110,255,.65),transparent 62%),radial-gradient(520px 260px at 6% 130%,rgba(214,120,255,.28),transparent 60%),radial-gradient(400px 200px at 50% 0%,rgba(90,70,255,.25),transparent 70%),linear-gradient(135deg,#150a36,#3a1a86 58%,#6a35e0);box-shadow:0 18px 40px -20px rgba(106,53,224,.6),inset 0 1px 0 rgba(255,255,255,.12)}
+.adm-hero--violet::after{background:linear-gradient(90deg,transparent,#a77bff,#e0c4ff,transparent);filter:drop-shadow(0 0 6px #a77bff)}
+.adm-hero--violet .adm-hero-ghost{-webkit-text-stroke-color:rgba(214,190,255,.16)}
+.adm-hero--violet .adm-hero-icon{background:linear-gradient(145deg,#9a63ff,#5a22c8);box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 0 0 6px rgba(160,110,255,.2),0 0 30px rgba(150,100,255,.7)}
+.adm-hero--violet .adm-hero-crumb{color:#cdb4ff}
+.adm-hero--violet .adm-hero-title{background:linear-gradient(180deg,#fff,#e2d2ff);-webkit-background-clip:text;background-clip:text}
+.adm-hero--violet .adm-hero-hl{color:#d4b8ff;-webkit-text-fill-color:#d4b8ff}
+.adm-hero--violet .adm-hero-stat{border-color:rgba(205,180,255,.25)}
+.adm-hero--violet .adm-hero-stat small{color:#d8c4ff}
+.dvx-head{position:relative;overflow:hidden;align-items:center;padding:26px 30px;border-radius:22px;color:#fff;background:radial-gradient(700px 320px at 80% -30%,rgba(70,140,255,.7),transparent 62%),radial-gradient(520px 260px at 6% 130%,rgba(0,220,255,.3),transparent 60%),linear-gradient(135deg,#070d34,#0e2080 58%,#1a45e0);box-shadow:0 18px 40px -20px rgba(28,63,196,.6),inset 0 1px 0 rgba(255,255,255,.12)}
+.dvx-head::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);pointer-events:none}
+.dvx-head::after{content:attr(data-ghost);position:absolute;right:-8px;bottom:-30px;font:800 110px/1 'Inter',sans-serif;letter-spacing:-.04em;text-transform:uppercase;white-space:nowrap;color:transparent;-webkit-text-stroke:1.5px rgba(150,200,255,.15);pointer-events:none;max-width:100%;overflow:hidden}
+.dvx-head>*{position:relative;z-index:1}
+html .admin-shell .dvx-head .dvx-title,.dvx-head .dvx-title{font-family:'Poppins',ui-sans-serif,sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-.03em;background:linear-gradient(180deg,#fff,#bcd6ff);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent}
+.dvx-head .dvx-sub{display:none}
+.dvx-head .dvx-btn.outline{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#fff}
+.dvx-head .dvx-btn.outline:hover{background:rgba(255,255,255,.2)}
+@media(max-width:900px){.dvx-head::after{display:none}.dvx-head{padding:20px}}
