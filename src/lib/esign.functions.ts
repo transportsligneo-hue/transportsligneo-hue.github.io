@@ -214,6 +214,7 @@ export const esignDownloadUrls = createServerFn({ method: "POST" })
     const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const { data: r } = await supabaseAdmin.from("esign_requests").select("doc_path, signed_doc_path, dossier_path").eq("id", data.id).single();
     if (!r) throw new Error("Introuvable");
+    try { await S.ensureModernParaphe(data.id, reqMeta()); } catch (e) { console.error("[esign] rendu du paraphe", e); }
     const sign = async (p: string | null) =>
       p ? (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(p, 300)).data?.signedUrl ?? null : null;
     return { original: await sign(r.doc_path), signed: await sign(r.signed_doc_path), dossier: await sign(r.dossier_path) };
@@ -366,6 +367,7 @@ export const esignPublicSign = createServerFn({ method: "POST" })
     const p1 = `${r.id}/signe.pdf`, p2 = `${r.id}/signature.png`;
     const u1 = await supabaseAdmin.storage.from(S.BUCKET).upload(p1, signed, { contentType: "application/pdf", upsert: true });
     const u2 = await supabaseAdmin.storage.from(S.BUCKET).upload(p2, sigBytes, { contentType: "image/png", upsert: true });
+    if (initialsBytes) await supabaseAdmin.storage.from(S.BUCKET).upload(`${r.id}/paraphe.png`, initialsBytes, { contentType: "image/png", upsert: true });
     if (u1.error || u2.error) throw new Error("Enregistrement du document signé impossible.");
 
     await supabaseAdmin.from("esign_requests").update({
@@ -510,12 +512,13 @@ export const esignMyContratFiles = createServerFn({ method: "POST" })
     const cid = await myConvoyeurId(context);
     if (!cid) throw new Error("Fiche convoyeur introuvable.");
     const { data: r } = await supabaseAdmin.from("esign_requests")
-      .select("signed_doc_path, dossier_path").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
+      .select("id, signed_doc_path, dossier_path").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
       .eq("status", "signed").order("signed_at", { ascending: false }).limit(1).maybeSingle();
     if (!r) throw new Error("Aucun contrat signé.");
-    const sign = async (p: string | null) =>
-      p ? (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(p, 300)).data?.signedUrl ?? null : null;
-    return { signed: await sign(r.signed_doc_path), dossier: await sign(r.dossier_path) };
+    try { await S.ensureModernParaphe(r.id, reqMeta()); } catch (e) { console.error("[esign] rendu du paraphe", e); }
+    const sign = async (p: string | null, name: string) =>
+      p ? (await supabaseAdmin.storage.from(S.BUCKET).createSignedUrl(p, 300, { download: name })).data?.signedUrl ?? null : null;
+    return { signed: await sign(r.signed_doc_path, "Contrat-de-partenariat-signe.pdf"), dossier: await sign(r.dossier_path, "Preuve-de-signature.pdf") };
   });
 
 /** Nouveau lien de signature pour le convoyeur connecté (remplace l'ancien). */

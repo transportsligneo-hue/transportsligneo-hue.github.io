@@ -3,10 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useRef, useCallback } from "react";
-import {
-  Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye, RotateCcw,
-  User as UserIcon, Camera,
-} from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { notifyDocumentDepose } from "@/lib/admin-alert.functions";
 import {
@@ -16,6 +13,7 @@ import {
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
 import MonContratCard from "@/components/convoyeur/MonContratCard";
+import { ProgressHero, ProfileCardView, DocCardView, SectionTitle, type DocStatus } from "@/components/convoyeur/DocumentsUI";
 import { DocScanButton } from "@/components/scanner/DocScanButton";
 
 /** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
@@ -41,12 +39,6 @@ interface DocRow {
   statut_validation: string;
   motif_refus: string | null;
   created_at: string;
-}
-
-function statutBadge(s: string) {
-  if (isConvoyeurDocApproved(s)) return { label: "Approuvé", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle };
-  if (s === "refuse") return { label: "Refusé", cls: "bg-red-50 text-red-700 border-red-200", icon: AlertCircle };
-  return { label: "En attente", cls: "bg-sky-50 text-sky-700 border-sky-200", icon: Loader2 };
 }
 
 function ConvoyeurDocuments() {
@@ -182,174 +174,112 @@ function ConvoyeurDocuments() {
   const requiredCount = visibleDocs.filter(d => d.required).length;
   const validatedCount = visibleDocs.filter(d => d.required && isConvoyeurDocApproved(docs[d.key]?.statut_validation)).length;
 
+  const renderDoc = (spec: (typeof visibleDocs)[number]) => {
+    const d = docs[spec.key];
+    const status: DocStatus = !d ? "none" : isConvoyeurDocApproved(d.statut_validation) ? "approved" : d.statut_validation === "refuse" ? "refused" : "pending";
+    const rn = d ? getDocRenewal(spec, d.created_at) : null;
+    const renewal = rn
+      ? {
+          tone: (rn.expired ? "expired" : rn.soon ? "soon" : "ok") as "expired" | "soon" | "ok",
+          text: rn.expired ? `Expirée depuis le ${rn.expiresAt.toLocaleDateString("fr-FR")} : renouvelez-la`
+            : rn.soon ? `À renouveler avant le ${rn.expiresAt.toLocaleDateString("fr-FR")} (${rn.daysLeft} j)`
+            : `Valable jusqu'au ${rn.expiresAt.toLocaleDateString("fr-FR")}`,
+        }
+      : null;
+    const scanClass = "inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#d7dff0] bg-[#ffffff] px-3 text-sm font-semibold text-[#1c2c58] active:scale-[.98]";
+    return (
+      <DocCardView
+        key={spec.key}
+        label={spec.label}
+        required={spec.required}
+        hint={spec.hint}
+        status={status}
+        fileName={d?.nom_fichier}
+        dateLabel={d ? new Date(d.created_at).toLocaleDateString("fr-FR") : undefined}
+        refusMotif={d?.motif_refus}
+        renewal={renewal}
+        uploading={uploadingKey === spec.key}
+        onPreview={d ? () => void openPreview(d) : undefined}
+        scanClass={scanClass}
+        uploadInput={
+          <input
+            ref={(el) => { fileRefs.current[spec.key] = el; }}
+            type="file"
+            accept="image/*,application/pdf"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(spec, f); }}
+          />
+        }
+        scanButton={
+          <DocScanButton
+            label="Scanner"
+            maxPages={6}
+            mergeToPdf
+            filenameBase={spec.key}
+            className={scanClass}
+            onFiles={(files) => { if (files[0]) handleUpload(spec, files[0]); }}
+          />
+        }
+      />
+    );
+  };
+  const requiredDocs = visibleDocs.filter((d) => d.required);
+  const otherDocs = visibleDocs.filter((d) => !d.required);
+
   return (
-    <div className="space-y-5 pb-6">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-semibold text-pro-text">Mes documents</h1>
-        <p className="text-pro-text-soft text-xs mt-0.5">
-          Téléversez et tenez à jour vos pièces officielles.
-        </p>
+    <div className="space-y-4 pb-6">
+      <div className="px-1">
+        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-[#0a1638]">Mes documents</h1>
+        <p className="mt-0.5 text-sm text-[#5a6788]">Vos pièces officielles et votre contrat, au même endroit.</p>
       </div>
 
       {!convoyeurId && (
-        <div className="p-4 rounded-xl border bg-sky-50 border-sky-200 flex items-start gap-2">
-          <AlertCircle size={16} className="text-sky-600 mt-0.5 shrink-0" />
-          <p className="text-sm text-pro-text">
+        <div className="flex items-start gap-2 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-sky-600" />
+          <p className="text-sm text-[#0a1638]">
             Votre fiche convoyeur n'est pas encore créée : l'envoi de documents est indisponible.
             Contactez l'équipe Transports Ligneo pour finaliser votre inscription.
           </p>
         </div>
       )}
 
-
-
-      {/* Photo de profil */}
-      <div className="bg-white rounded-2xl border border-pro-border p-4 sm:p-5 flex items-center gap-4 shadow-sm">
-        <div className="w-16 h-16 rounded-full overflow-hidden bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center shrink-0">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-          ) : (
-            <UserIcon size={26} className="text-emerald-600" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-pro-text">Photo de profil</p>
-          <p className="text-xs text-pro-text-soft">JPG ou PNG. Visible par l'admin et les clients.</p>
-        </div>
-        <label className="inline-flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white text-xs rounded-lg cursor-pointer hover:bg-emerald-700 font-medium shrink-0">
-          {uploadingKey === "__avatar" ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
-          Modifier
-          <input
-            ref={avatarRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleAvatar(f);
-            }}
-          />
-        </label>
-      </div>
-
-      {/* Avancement */}
-      <div className={`p-4 rounded-xl border ${
-        validatedCount === requiredCount
-          ? "bg-emerald-50 border-emerald-200"
-          : "bg-sky-50 border-sky-200"
-      }`}>
-        <div className="flex items-center gap-2">
-          {validatedCount === requiredCount
-            ? <CheckCircle size={16} className="text-emerald-600" />
-            : <AlertCircle size={16} className="text-sky-600" />}
-          <p className="text-sm font-medium text-pro-text">
-            {validatedCount}/{requiredCount} documents requis validés
-          </p>
-        </div>
-      </div>
+      <ProgressHero done={validatedCount} total={requiredCount} />
 
       <MonContratCard />
 
-      {/* Liste fixe */}
-      <div className="space-y-3">
-        {visibleDocs.map((spec) => {
-          const d = docs[spec.key];
-          const badge = d ? statutBadge(d.statut_validation) : null;
-          const Icon = badge?.icon ?? FileText;
-          const isUploading = uploadingKey === spec.key;
-          return (
-            <div key={spec.key} className="bg-white rounded-xl border border-pro-border p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                  d ? badge!.cls : "bg-pro-bg-soft text-pro-muted border-pro-border"
-                } border`}>
-                  <Icon size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-pro-text">{spec.label}</p>
-                    {spec.required && <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Requis</span>}
-                  </div>
-                  {spec.hint && <p className="text-xs text-pro-muted mt-0.5">{spec.hint}</p>}
-                  {d && (
-                    <p className="text-xs text-pro-text-soft mt-1 truncate">
-                      {d.nom_fichier} · {new Date(d.created_at).toLocaleDateString("fr-FR")}
-                    </p>
-                  )}
-                  {d && (() => {
-                    const rn = getDocRenewal(spec, d.created_at);
-                    if (!rn) return null;
-                    const cls = rn.expired ? "bg-red-50 text-red-700 border-red-200" : rn.soon ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200";
-                    const txt = rn.expired ? `Expirée depuis le ${rn.expiresAt.toLocaleDateString("fr-FR")} : renouvelez-la`
-                      : rn.soon ? `À renouveler avant le ${rn.expiresAt.toLocaleDateString("fr-FR")} (${rn.daysLeft} j)`
-                      : `Valable jusqu'au ${rn.expiresAt.toLocaleDateString("fr-FR")}`;
-                    return <span className={`inline-flex items-center gap-1 mt-2 mr-2 text-[11px] px-2 py-0.5 rounded-full border ${cls}`}>{txt}</span>;
-                  })()}
-                  {d && badge && (
-                    <span className={`inline-flex items-center gap-1 mt-2 text-[11px] px-2 py-0.5 rounded-full border ${badge.cls}`}>
-                      <Icon size={11} /> {badge.label}
-                    </span>
-                  )}
-                  {d?.statut_validation === "refuse" && d.motif_refus && (
-                    <p className="text-xs text-red-700 mt-1">Motif : {d.motif_refus}</p>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1.5 shrink-0">
-                  {d && (
-                    <button
-                      onClick={() => openPreview(d)}
-                      className="p-2 hover:bg-pro-bg-soft rounded-lg text-pro-text-soft border border-pro-border"
-                      title="Aperçu"
-                    >
-                      <Eye size={14} />
-                    </button>
-                  )}
-                  <label className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg cursor-pointer font-medium ${
-                    d ? "bg-white border border-pro-border text-pro-text hover:bg-pro-bg-soft" : "bg-emerald-600 text-white hover:bg-emerald-700"
-                  }`}>
-                    {isUploading ? <Loader2 size={13} className="animate-spin" /> : (d ? <RotateCcw size={13} /> : <Upload size={13} />)}
-                    {d ? "Remplacer" : "Envoyer"}
-                    <input
-                      ref={(el) => { fileRefs.current[spec.key] = el; }}
-                      type="file"
-                      accept="image/*,application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUpload(spec, f);
-                      }}
-                    />
-                  </label>
-                  <DocScanButton
-                    label="Scanner"
-                    maxPages={6}
-                    mergeToPdf
-                    filenameBase={spec.key}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg font-medium bg-white border border-pro-border text-pro-text hover:bg-pro-bg-soft"
-                    onFiles={(files) => { if (files[0]) handleUpload(spec, files[0]); }}
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <ProfileCardView avatarUrl={avatarUrl} uploading={uploadingKey === "__avatar"}>
+        <input
+          ref={avatarRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); }}
+        />
+      </ProfileCardView>
 
-      {/* Preview modal */}
+      <SectionTitle>Pièces obligatoires</SectionTitle>
+      <div className="space-y-3">{requiredDocs.map(renderDoc)}</div>
+
+      {otherDocs.length > 0 && (<>
+        <SectionTitle>Autres documents</SectionTitle>
+        <div className="space-y-3">{otherDocs.map(renderDoc)}</div>
+      </>)}
+
+      {/* Aperçu */}
       {previewUrl && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setPreviewUrl(null)}
         >
-          <div className="max-w-3xl max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[90vh] max-w-3xl overflow-auto" onClick={(e) => e.stopPropagation()}>
             {/\.pdf(\?|$)/i.test(previewUrl) ? (
-              <iframe src={previewUrl} className="w-[90vw] h-[80vh] rounded-lg bg-white" title="Aperçu PDF" />
+              <iframe src={previewUrl} className="h-[80vh] w-[90vw] rounded-lg bg-white" title="Aperçu PDF" />
             ) : (
-              <img src={previewUrl} alt="Aperçu" className="rounded-lg max-w-full" />
+              <img src={previewUrl} alt="Aperçu" className="max-w-full rounded-lg" />
             )}
             <button
               onClick={() => setPreviewUrl(null)}
-              className="mt-3 w-full py-2.5 bg-white text-pro-text rounded-xl text-sm font-medium"
+              className="mt-3 w-full rounded-2xl bg-white py-3 text-sm font-semibold text-[#0a1638]"
             >
               Fermer
             </button>

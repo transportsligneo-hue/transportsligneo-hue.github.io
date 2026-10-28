@@ -7,7 +7,7 @@
  * lien unique, code à usage unique (SMS/e-mail), consentement explicite,
  * empreinte SHA-256, journal horodaté chaîné et scellement HMAC.
  */
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import { CONTRAT_BOX_X_RIGHT_MM, CONTRAT_BOX_Y_MM } from "@/lib/contrat-signature-field";
 import { supabaseAdmin as typedAdmin } from "@/integrations/supabase/client.server";
 
@@ -152,8 +152,11 @@ export async function buildSignedPdf(opts: {
       const sc = Math.min(maxW / ini.width, maxH / ini.height);
       const iw = ini.width * sc, ih = ini.height * sc;
       // paraphe « au stylo » : encre seule (fond transparent), en bas à droite, juste au-dessus du pied de page
-      all.forEach((pg) => {
-        pg.drawImage(ini, { x: pg.getWidth() - iw - 52, y: 38, width: iw, height: ih });
+      // légère variation d'une page à l'autre, comme un vrai paraphe fait à la main
+      const tilt = [-2.5, 1.2, -1, 2];
+      const dy = [0, 2, -1, 1];
+      all.forEach((pg, i) => {
+        pg.drawImage(ini, { x: pg.getWidth() - iw - 52 + (i % 3), y: 38 + dy[i % 4]!, width: iw, height: ih, rotate: degrees(tilt[i % 4]!) });
       });
     } catch (e) { console.error("[esign] apposition des paraphes", e); }
   }
@@ -286,4 +289,104 @@ export async function missingConvoyeurDocs(convoyeurId: string): Promise<string[
       .map((d: any) => normalizeConvoyeurDocType(d.type_document)),
   );
   return getRequiredConvoyeurDocTypes(conv?.type_convoyeur).filter((d) => !have.has(d.key)).map((d) => d.label);
+}
+
+/* ======================================================================== */
+/*  Rétroactivité : re-rendu du paraphe « au stylo » sur les documents déjà signés */
+/* ======================================================================== */
+import zlib from "node:zlib";
+
+function crc32(buf: Uint8Array): number {
+  let c, crc = 0xffffffff;
+  for (let n = 0; n < buf.length; n++) {
+    c = (crc ^ buf[n]!) & 0xff;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    crc = (crc >>> 8) ^ c;
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+function encodePngRgba(w: number, h: number, rgba: Uint8Array): Uint8Array {
+  const raw = Buffer.alloc((w * 4 + 1) * h);
+  for (let y = 0; y < h; y++) { raw[y * (w * 4 + 1)] = 0; Buffer.from(rgba.buffer, rgba.byteOffset + y * w * 4, w * 4).copy(raw, y * (w * 4 + 1) + 1); }
+  const chunk = (type: string, data: Uint8Array) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const td = Buffer.concat([Buffer.from(type), Buffer.from(data)]);
+    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td));
+    return Buffer.concat([len, td, crc]);
+  };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+  return new Uint8Array(Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", zlib.deflateSync(raw)), chunk("IEND", new Uint8Array())]));
+}
+
+/** Retrouve l'image du paraphe dans un PDF signé (première image de la page 1). */
+export async function extractInitialsFromSigned(signed: Uint8Array): Promise<Uint8Array | null> {
+  const { PDFName, PDFDict, PDFRef, PDFRawStream, PDFNumber } = await import("pdf-lib");
+  const pdf = await PDFDocument.load(signed);
+  const res = pdf.getPage(0).node.Resources();
+  const xo = res?.lookup(PDFName.of("XObject"));
+  if (!(xo instanceof PDFDict)) return null;
+  for (const [, ref] of xo.entries()) {
+    if (!(ref instanceof PDFRef)) continue;
+    const st = pdf.context.lookup(ref);
+    if (!(st instanceof PDFRawStream)) continue;
+    const d = st.dict;
+    if (d.get(PDFName.of("Subtype")) !== PDFName.of("Image")) continue;
+    const w = (d.lookup(PDFName.of("Width")) as any as typeof PDFNumber.prototype).asNumber();
+    const h = (d.lookup(PDFName.of("Height")) as any as typeof PDFNumber.prototype).asNumber();
+    const rgb3 = zlib.inflateSync(st.contents);
+    if (rgb3.length !== w * h * 3) continue;
+    const sm = d.get(PDFName.of("SMask"));
+    const smStream = sm instanceof PDFRef ? pdf.context.lookup(sm) : null;
+    const alpha = smStream instanceof PDFRawStream ? zlib.inflateSync(smStream.contents) : null;
+    const rgba = new Uint8Array(w * h * 4);
+    for (let i = 0; i < w * h; i++) {
+      rgba[i * 4] = rgb3[i * 3]!; rgba[i * 4 + 1] = rgb3[i * 3 + 1]!; rgba[i * 4 + 2] = rgb3[i * 3 + 2]!;
+      rgba[i * 4 + 3] = alpha && alpha.length === w * h ? alpha[i]! : 255;
+    }
+    return encodePngRgba(w, h, rgba);
+  }
+  return null;
+}
+
+/**
+ * Document déjà signé avec l'ancien rendu du paraphe (cadre blanc + texte) : le reconstruit une fois,
+ * à partir du document d'origine, de la signature et du paraphe retrouvés, puis re-scelle le dossier de preuve.
+ * Sans effet si le document est déjà au nouveau rendu ou n'a pas de paraphe.
+ */
+export async function ensureModernParaphe(requestId: string, meta: { ip?: string | null; ua?: string | null } = {}): Promise<boolean> {
+  const { data: r } = await supabaseAdmin.from("esign_requests").select("*").eq("id", requestId).maybeSingle();
+  if (!r || r.status !== "signed" || !r.signed_doc_path || !r.signature_path) return false;
+  const { data: evs } = await supabaseAdmin.from("esign_events").select("type, ip_address, payload").eq("request_id", requestId).order("seq");
+  const events = (evs ?? []) as Array<{ type: string; ip_address: string | null; payload: any }>;
+  if (!events.some((e) => e.type === "initials_applied") || events.some((e) => e.type === "paraphe_restyled")) return false;
+
+  const dl = async (p: string) => {
+    const x = await supabaseAdmin.storage.from(BUCKET).download(p);
+    return x.error || !x.data ? null : new Uint8Array(await x.data.arrayBuffer());
+  };
+  const [original, oldSigned, sig] = await Promise.all([dl(r.doc_path), dl(r.signed_doc_path), dl(r.signature_path)]);
+  if (!original || !oldSigned || !sig) return false;
+  const initials = (await dl(`${requestId}/paraphe.png`)) ?? (await extractInitialsFromSigned(oldSigned));
+  if (!initials) return false;
+
+  const signedEv = events.find((e) => e.type === "signed");
+  const method = signedEv?.payload?.auth === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";
+  const rebuilt = await buildSignedPdf({ original, signaturePng: sig, initialsPng: initials, req: r, signedAt: r.signed_at, ip: signedEv?.ip_address ?? null, method, kind: r.kind });
+  const newHash = await sha256Bytes(rebuilt);
+  await supabaseAdmin.storage.from(BUCKET).upload(`${requestId}/paraphe.png`, initials, { contentType: "image/png", upsert: true });
+  const up = await supabaseAdmin.storage.from(BUCKET).upload(r.signed_doc_path, rebuilt, { contentType: "application/pdf", upsert: true });
+  if (up.error) return false;
+  await supabaseAdmin.from("esign_requests").update({ signed_doc_sha256: newHash }).eq("id", requestId);
+  await logEvent(requestId, "paraphe_restyled", { previous_signed_doc_sha256: r.signed_doc_sha256, signed_doc_sha256: newHash, note: "Nouveau rendu du paraphe (encre seule, bas de page)" }, meta);
+  const { data: head } = await supabaseAdmin.from("esign_events").select("hash").eq("request_id", requestId).order("seq", { ascending: false }).limit(1).single();
+  const seal = await hmacSeal(`${requestId}|${newHash}|${head?.hash}|${r.signed_at}`);
+  await supabaseAdmin.from("esign_requests").update({ seal }).eq("id", requestId);
+  await logEvent(requestId, "sealed", { chain_head: head?.hash, seal }, meta);
+  const { data: fresh } = await supabaseAdmin.from("esign_requests").select("*").eq("id", requestId).single();
+  const { data: allEv } = await supabaseAdmin.from("esign_events").select("*").eq("request_id", requestId).order("seq");
+  const dossier = await buildDossierPdf({ req: fresh, events: allEv ?? [], chainOk: await chainOk(requestId) });
+  const dp = r.dossier_path ?? `${requestId}/dossier-preuve.pdf`;
+  await supabaseAdmin.storage.from(BUCKET).upload(dp, dossier, { contentType: "application/pdf", upsert: true });
+  await supabaseAdmin.from("esign_requests").update({ dossier_path: dp, dossier_sha256: await sha256Bytes(dossier) }).eq("id", requestId);
+  return true;
 }
