@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PagedInitials } from "@/components/signature/PagedInitials";
 import { useServerFn } from "@tanstack/react-start";
 import QRCode from "qrcode";
-import { CheckCircle2, Download, QrCode, FileText, Loader2, Mail, PenLine, ShieldCheck, Smartphone, XCircle, Eraser, ExternalLink } from "lucide-react";
+import { ArrowRight, CheckCircle2, Download, QrCode, FileText, Loader2, Mail, PenLine, ShieldCheck, Smartphone, XCircle, Eraser, ExternalLink } from "lucide-react";
 import {
   esignPublicGet, esignPublicSendOtp, esignPublicVerifyOtp, esignPublicSign, esignPublicDecline,
   esignHandoffStart, esignHandoffPoll,
@@ -58,6 +58,7 @@ function SignaturePage() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [initialsPng, setInitialsPng] = useState<string>("");
+  const [sigPng, setSigPng] = useState<string>("");
   const [consent, setConsent] = useState(false);
   const [approved, setApproved] = useState(false);
   const [typedName, setTypedName] = useState("");
@@ -145,18 +146,21 @@ function SignaturePage() {
     const r = await sendOtp({ data: { token, channel: info?.kind === "contrat_convoyeur" && info?.maskedPhone ? "sms" : channel } });
     setSentTo(r.to); setStep("code"); setCode("");
   });
+  /* dernière étape : code reçu → vérification puis signature enregistrée */
   const checkCode = () => run(async () => {
     await verifyOtp({ data: { token, code } });
-    setStep("initials");
+    await sign({ data: { token, signaturePng: sigPng, consent, typedName, initialsPng: initialsPng || undefined } });
+    await load(); setStep("done");
   });
-  const submit = () => run(async () => {
+  /* étape signature : on garde le dessin, puis on envoie le code (qui sera la toute dernière étape) */
+  const goCode = () => {
     if (!cvs.current) return;
     const out = document.createElement("canvas");
     out.width = cvs.current.width; out.height = cvs.current.height;
     out.getContext("2d")!.drawImage(cvs.current, 0, 0);
-    await sign({ data: { token, signaturePng: out.toDataURL("image/png"), consent, typedName, initialsPng: initialsPng || undefined } });
-    await load(); setStep("done");
-  });
+    setSigPng(out.toDataURL("image/png"));
+    void askCode();
+  };
   const refuse = () => run(async () => { await decline({ data: { token, reason } }); setStep("declined"); setShowDecline(false); });
 
   /* ---- rendu ---- */
@@ -228,9 +232,9 @@ function SignaturePage() {
   const errBox = err && <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-3">{err}</div>;
   const stepper = (
     <ol className="flex items-center gap-2 text-xs text-[#6b7aa3]">
-      {(["read", "code", "initials", "sign"] as Step[]).map((s, i) => (
-        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "code", "initials", "sign"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
-          {i + 1}. {s === "read" ? "Lire" : s === "code" ? "Vérifier" : s === "initials" ? "Parapher" : "Signer"}
+      {(["read", "initials", "sign", "code"] as Step[]).map((s, i) => (
+        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "initials", "sign", "code"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
+          {i + 1}. {s === "read" ? "Lire" : s === "initials" ? "Parapher" : s === "sign" ? "Signer" : "Valider"}
         </li>
       ))}
     </ol>
@@ -249,36 +253,23 @@ function SignaturePage() {
         <p className="text-xs text-[#6b7aa3] break-all">Empreinte numérique (SHA-256) : {info.docHash}</p>
       </div>
       <div className={card + " space-y-3"}>
-        <div className="font-medium">Recevoir mon code de vérification</div>
-        {smsOnly ? (
-          <div className="rounded-xl border border-[#2f5fff] bg-[#eef3ff] p-3">
-            <Smartphone size={18} className="text-[#2f5fff]" />
-            <div className="text-sm font-medium mt-1">Par SMS</div>
-            <div className="text-xs text-[#6b7aa3]">{info.maskedPhone} · par sécurité, le code est envoyé uniquement par SMS.</div>
-          </div>
-        ) : (
-        <div className="grid grid-cols-2 gap-2">
-          <button onClick={() => setChannel("email")} className={"rounded-xl border p-3 text-left " + (channel === "email" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Mail size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par e-mail</div><div className="text-xs text-[#6b7aa3] break-all">{info.maskedEmail}</div></button>
-          <button disabled={!info.maskedPhone} onClick={() => setChannel("sms")} className={"rounded-xl border p-3 text-left disabled:opacity-40 " + (channel === "sms" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Smartphone size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par SMS</div><div className="text-xs text-[#6b7aa3]">{info.maskedPhone ?? "Numéro non renseigné"}</div></button>
-        </div>
-        )}
         <label className="flex gap-3 items-start text-sm rounded-xl bg-[#f5f8ff] border border-[#dfe6fb] p-3">
           <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={approved} onChange={(e) => setApproved(e.target.checked)} />
           <span className="text-[#33415f]">J'ai lu l'intégralité du document et je l'approuve.</span>
         </label>
-        {errBox}
-        <button className={btn} disabled={busy || !approved} onClick={askCode}>{busy ? <Loader2 className="animate-spin" size={18} /> : null} J'ai lu le document · Envoyer le code</button>
+        <button className={btn} disabled={!approved} onClick={() => setStep("initials")}><ArrowRight size={18} /> J'ai lu le document · Commencer</button>
       </div>
     </>}
     {step === "code" && (
       <div className={card + " space-y-3"}>
-        <div className="font-medium">2. Saisissez votre code</div>
+        <div className="font-medium">4. Confirmez avec votre code</div>
         <p className="text-sm text-[#5a6788]">Code à 6 chiffres envoyé à {sentTo}. Valable 10 minutes.</p>
         <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
           className="w-full text-center text-3xl tracking-[.5em] font-semibold rounded-xl border border-[#cfd9f7] py-3 focus:outline-none focus:ring-2 focus:ring-[#2f5fff]" placeholder="••••••" />
         {errBox}
-        <button className={btn} disabled={busy || code.length !== 6} onClick={checkCode}>{busy ? <Loader2 className="animate-spin" size={18} /> : null} Valider le code</button>
+        <button className={btn} disabled={busy || code.length !== 6} onClick={checkCode}>{busy ? <Loader2 className="animate-spin" size={18} /> : null} Valider et signer le document</button>
         <button className="w-full text-sm text-[#2f5fff] underline" disabled={busy} onClick={askCode}>Renvoyer un code</button>
+        <button className="w-full text-sm text-[#6b7aa3] underline" disabled={busy} onClick={() => { setHasInk(false); setFromPhone(false); setStep("sign"); }}>Modifier ma signature</button>
       </div>
     )}
     {step === "initials" && (
@@ -287,7 +278,7 @@ function SignaturePage() {
     )}
     {step === "sign" && (
       <div className={card + " space-y-4"}>
-        <div className="font-medium">4. Signez</div>
+        <div className="font-medium">3. Signez</div>
         <label className="flex gap-3 items-start text-sm rounded-xl bg-[#f5f8ff] border border-[#dfe6fb] p-3">
           <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
           <span className="text-[#33415f]">{info.consentText}</span>
@@ -320,15 +311,30 @@ function SignaturePage() {
             className="w-full h-44 sm:h-52 rounded-xl border-2 border-dashed border-[#9db6ff] bg-white touch-none" />
         </div>
         {errBox}
+        <div className="space-y-3">
+        <div className="font-medium text-sm">Code de confirmation (dernière étape)</div>
+        {smsOnly ? (
+          <div className="rounded-xl border border-[#2f5fff] bg-[#eef3ff] p-3">
+            <Smartphone size={18} className="text-[#2f5fff]" />
+            <div className="text-sm font-medium mt-1">Par SMS</div>
+            <div className="text-xs text-[#6b7aa3]">{info.maskedPhone} · par sécurité, le code est envoyé uniquement par SMS.</div>
+          </div>
+        ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={() => setChannel("email")} className={"rounded-xl border p-3 text-left " + (channel === "email" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Mail size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par e-mail</div><div className="text-xs text-[#6b7aa3] break-all">{info.maskedEmail}</div></button>
+          <button disabled={!info.maskedPhone} onClick={() => setChannel("sms")} className={"rounded-xl border p-3 text-left disabled:opacity-40 " + (channel === "sms" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Smartphone size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par SMS</div><div className="text-xs text-[#6b7aa3]">{info.maskedPhone ?? "Numéro non renseigné"}</div></button>
+        </div>
+        )}
+        </div>
         {(() => {
           const m: string[] = [];
           if (!consent) m.push("cochez la case de consentement");
           if (!hasInk) m.push("signez dans le cadre");
           if (typedName.trim().length < 2) m.push("saisissez votre nom");
-          return <p className={"text-xs text-center font-medium " + (m.length ? "text-amber-700" : "text-emerald-700")}>{m.length ? `Pour activer le bouton : ${m.join(", ")}.` : "Tout est prêt : vous pouvez signer."}</p>;
+          return <p className={"text-xs text-center font-medium " + (m.length ? "text-amber-700" : "text-emerald-700")}>{m.length ? `Pour continuer : ${m.join(", ")}.` : "Tout est prêt : vous pouvez signer."}</p>;
         })()}
-        <button className={btn} disabled={busy || !consent || !hasInk || typedName.trim().length < 2} onClick={submit}>
-          {busy ? <><Loader2 className="animate-spin" size={18} /> Signature en cours…</> : <><PenLine size={18} /> Signer le document</>}
+        <button className={btn} disabled={busy || !consent || !hasInk || typedName.trim().length < 2} onClick={goCode}>
+          {busy ? <><Loader2 className="animate-spin" size={18} /> Envoi du code…</> : <><PenLine size={18} /> Continuer · recevoir mon code</>}
         </button>
         <p className="text-xs text-[#6b7aa3] text-center">Votre adresse IP et l'heure de signature sont enregistrées à titre de preuve.</p>
       </div>

@@ -114,7 +114,7 @@ export function PagedInitials({ docUrl, signerName, btn, btn2, card, onDone }: P
   if (failed) {
     return (
       <div className={card + " space-y-3"}>
-        <div className="font-medium">3. Paraphez le document</div>
+        <div className="font-medium">2. Paraphez le document</div>
         <p className="text-sm text-[#5a6788]">L'affichage page par page n'est pas disponible sur cet appareil. Ouvrez le document, lisez-le, puis créez votre paraphe : il sera apposé automatiquement sur chaque page.</p>
         {docUrl && <a className={btn2 + " w-full"} href={docUrl} target="_blank" rel="noreferrer">Ouvrir le document</a>}
         {phase === "make" ? (
@@ -132,7 +132,7 @@ export function PagedInitials({ docUrl, signerName, btn, btn2, card, onDone }: P
   if (phase === "make") {
     return (
       <div className={card + " space-y-4"}>
-        <div className="font-medium">3. Créez votre paraphe</div>
+        <div className="font-medium">2. Créez votre paraphe</div>
         <p className="text-sm text-[#5a6788]">Votre paraphe (vos initiales) sera apposé sur chacune des {n} pages du document. Vous pouvez garder celui proposé ou le redessiner.</p>
         <ParapheMaker cvsRef={pCvs} onDown={onDown} onMove={onMove} onUp={onUp} redraw={redraw} generate={generate} />
         <button className={btn} onClick={validateParaphe}><ArrowRight size={18} /> Utiliser ce paraphe et commencer</button>
@@ -150,7 +150,7 @@ export function PagedInitials({ docUrl, signerName, btn, btn2, card, onDone }: P
   return (
     <div className={card + " space-y-3"}>
       <div className="flex items-center justify-between">
-        <div className="font-medium">3. Parapher · page {page} sur {n}</div>
+        <div className="font-medium">2. Parapher · page {page} sur {n}</div>
         <div className="text-xs text-[#6b7aa3]">{done.size}/{n} paraphées</div>
       </div>
       <div className="flex gap-1">
