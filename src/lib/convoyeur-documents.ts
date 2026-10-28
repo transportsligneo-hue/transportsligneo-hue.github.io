@@ -10,20 +10,20 @@ export interface ConvoyeurDocSpec {
 
 export const CONVOYEUR_DOC_TYPES: ConvoyeurDocSpec[] = [
   { key: "permis", label: "Permis de conduire", required: true },
-  { key: "identite", label: "Pièce d'identité", required: true },
+  { key: "identite", label: "Pièce d'identité (CNI recto)", required: true },
+  { key: "identite_verso", label: "Pièce d'identité (CNI verso)", required: true },
   { key: "rib", label: "RIB", required: true },
   { key: "assurance", label: "Assurance RC Pro", required: true },
-  { key: "kbis", label: "KBIS", required: true, independantOnly: true },
+  { key: "kbis", label: "KBIS", required: true, independantOnly: true, hint: "Extrait Kbis de moins de 3 mois (ou avis de situation Sirene)." },
   { key: "vigilance", label: "Attestation de vigilance URSSAF", required: true, independantOnly: true, renewMonths: 6, hint: "À renouveler tous les 6 mois, gratuit sur urssaf.fr (espace Mon compte > Mes attestations)." },
-  { key: "autre", label: "Autres documents", required: false },
+  { key: "autre", label: "Autres documents", required: false, hint: "Ajoutez autant de documents que vous voulez." },
 ];
 
 const DOC_ALIASES: Record<string, string> = {
   cni: "identite",
   cni_recto: "identite",
-  cni_verso: "identite",
+  cni_verso: "identite_verso",
   identite_recto: "identite",
-  identite_verso: "identite",
   carte_identite: "identite",
   permis_recto: "permis",
   permis_verso: "permis",
@@ -47,8 +47,14 @@ export function getConvoyeurDocLabel(type: string | null | undefined): string {
   return CONVOYEUR_DOC_TYPES.find((doc) => doc.key === normalized)?.label ?? type ?? "Document";
 }
 
+/** Tous les types sont affichés ; KBIS et attestation de vigilance ne sont « requis » que pour les indépendants. */
 export function getVisibleConvoyeurDocTypes(typeConvoyeur: string | null | undefined): ConvoyeurDocSpec[] {
-  return CONVOYEUR_DOC_TYPES.filter((doc) => !doc.independantOnly || typeConvoyeur === "independant");
+  const indep = typeConvoyeur === "independant";
+  return CONVOYEUR_DOC_TYPES.map((doc) =>
+    doc.independantOnly && !indep
+      ? { ...doc, required: false, hint: [doc.hint, "Pour les convoyeurs indépendants."].filter(Boolean).join(" ") }
+      : doc,
+  );
 }
 
 export function getRequiredConvoyeurDocTypes(typeConvoyeur: string | null | undefined): ConvoyeurDocSpec[] {

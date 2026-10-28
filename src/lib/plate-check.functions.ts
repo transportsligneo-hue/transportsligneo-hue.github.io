@@ -103,7 +103,7 @@ export const verifyMissionPlate = createServerFn({ method: "POST" })
         return { ok: false, error: "Service de lecture indisponible" };
       }
 
-      void (await import("@/lib/api-usage.server")).logServerUsage("plaque_ocr", null);
+      await (await import("@/lib/api-usage.server")).logServerUsage("plaque_ocr", null);
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
         console.error("[PLATE-CHECK] api error", res.status, txt.slice(0, 300));

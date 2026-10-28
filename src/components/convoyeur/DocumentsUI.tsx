@@ -4,14 +4,14 @@
  */
 import type { ReactNode } from "react";
 import {
-  AlertCircle, Camera, CheckCircle2, Clock, Download, Eye, FileSignature, FileText, Loader2,
+  Plus, Trash2, AlertCircle, Camera, CheckCircle2, Clock, Download, Eye, FileSignature, FileText, Loader2,
   RotateCcw, ShieldCheck, Upload, User as UserIcon, PenLine, BadgeCheck, XCircle,
 } from "lucide-react";
 
 const NAVY = "#0a1638";
 
 /* ------------------------------ Avancement ------------------------------ */
-export function ProgressHero({ done, total }: { done: number; total: number }) {
+export function ProgressHero({ done, total, items = [] }: { done: number; total: number; items?: Array<{ label: string; status: "approved" | "pending" | "refused" | "none"; required: boolean }> }) {
   const complete = total > 0 && done >= total;
   return (
     <div className="relative overflow-hidden rounded-3xl p-5 text-white shadow-[0_18px_40px_-20px_rgba(4,27,82,.8)]"
@@ -32,6 +32,22 @@ export function ProgressHero({ done, total }: { done: number; total: number }) {
           <span key={i} className={"h-2 flex-1 rounded-full " + (i < done ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,230,140,.7)]" : "bg-white/15")} />
         ))}
       </div>
+      {items.length > 0 && (
+        <div className="relative mt-4 flex flex-wrap gap-1.5">
+          {items.map((it) => {
+            const cls = it.status === "approved" ? "bg-emerald-400/20 text-emerald-100 ring-emerald-300/40"
+              : it.status === "pending" ? "bg-sky-400/20 text-sky-100 ring-sky-300/40"
+              : it.status === "refused" ? "bg-red-400/25 text-red-100 ring-red-300/40"
+              : "bg-white/8 text-white/55 ring-white/15";
+            return (
+              <span key={it.label} className={"inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 " + cls}>
+                {it.status === "approved" ? <CheckCircle2 size={11} /> : it.status === "pending" ? <Clock size={11} /> : it.status === "refused" ? <XCircle size={11} /> : <span className="h-2.5 w-2.5 rounded-full border border-current opacity-70" />}
+                {it.label}{!it.required && it.status === "none" ? " (facultatif)" : ""}
+              </span>
+            );
+          })}
+        </div>
+      )}
       <p className="relative mt-3 text-xs text-white/70">
         {complete ? "Votre dossier est complet. Vous pouvez recevoir des missions." : `Il vous reste ${total - done} document${total - done > 1 ? "s" : ""} à faire valider.`}
       </p>
@@ -114,6 +130,8 @@ export function DocCardView(p: {
   renewal?: { tone: "ok" | "soon" | "expired"; text: string } | null;
   uploading: boolean;
   onPreview?: () => void;
+  onDelete?: () => void;
+  uploadLabels?: { add: string; replace: string };
   uploadInput: ReactNode;      // <input type="file" …> (à l'intérieur du label)
   scanButton: ReactNode;       // <DocScanButton className=… />
   scanClass: string;
@@ -149,6 +167,9 @@ export function DocCardView(p: {
           {!has && <p className="mt-1.5 text-[13px] text-[#8793b0]">Aucun fichier envoyé</p>}
         </div>
       </div>
+      {p.onDelete && (
+        <button type="button" onClick={p.onDelete} className="mt-3 text-xs font-semibold text-red-600 underline underline-offset-2">Supprimer ce document</button>
+      )}
       <div className={"mt-4 grid gap-2 " + (p.onPreview ? "grid-cols-[auto_1fr_1fr]" : "grid-cols-2")}>
         {p.onPreview && (
           <button type="button" onClick={p.onPreview} aria-label="Voir le document"
@@ -156,7 +177,7 @@ export function DocCardView(p: {
         )}
         <label className={"inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold active:scale-[.98] " + (has ? "border border-[#d7dff0] bg-[#ffffff] text-[#1c2c58]" : "bg-emerald-600 text-white shadow-[0_10px_22px_-12px_rgba(5,150,105,.9)]")}>
           {p.uploading ? <Loader2 size={16} className="animate-spin" /> : has ? <RotateCcw size={16} /> : <Upload size={16} />}
-          {has ? "Remplacer" : "Envoyer"}
+          {has ? (p.uploadLabels?.replace ?? "Remplacer") : (p.uploadLabels?.add ?? "Envoyer")}
           {p.uploadInput}
         </label>
         <span className="contents">{p.scanButton}</span>
@@ -167,4 +188,50 @@ export function DocCardView(p: {
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return <h2 className="px-1 pt-1 text-[11px] font-bold uppercase tracking-[.2em] text-[#5a6788]">{children}</h2>;
+}
+
+/* ------------------------------ Autres documents (plusieurs fichiers) ------------------------------ */
+export function OtherDocsView(p: {
+  items: Array<{ id: string; name: string; dateLabel: string; status: DocStatus; onPreview: () => void; onDelete: () => void }>;
+  uploading: boolean;
+  hint?: string;
+  addInput: ReactNode;      // <input type="file" multiple …> dans le label
+  scanButton: ReactNode;
+}) {
+  const badge = (st: DocStatus) =>
+    st === "approved" ? "bg-emerald-50 text-emerald-700 ring-emerald-200" : st === "refused" ? "bg-red-50 text-red-700 ring-red-200" : "bg-sky-50 text-sky-700 ring-sky-200";
+  const lab = (st: DocStatus) => (st === "approved" ? "Approuvé" : st === "refused" ? "Refusé" : "En attente");
+  return (
+    <div className="rounded-3xl border border-[#e3e8f2] bg-[#ffffff] p-4 shadow-[0_10px_30px_-22px_rgba(10,22,56,.45)]">
+      <div className="flex items-start gap-3.5">
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#eef3ff] text-[#2f5fff] ring-1 ring-[#d6e0ff]"><FileText size={22} /></span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[15.5px] font-semibold leading-tight" style={{ color: NAVY }}>Autres documents</h3>
+          <p className="mt-1 text-xs leading-snug text-[#6b7aa3]">{p.hint ?? "Ajoutez autant de documents que vous voulez : diplômes, attestations, contrats…"}</p>
+        </div>
+      </div>
+      {p.items.length > 0 && (
+        <ul className="mt-3 space-y-2">
+          {p.items.map((it) => (
+            <li key={it.id} className="flex items-center gap-2 rounded-2xl border border-[#e3e8f2] bg-[#f8faff] p-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-[#1c2c58]">{it.name}</p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[11.5px] text-[#6b7aa3]">{it.dateLabel}
+                  <span className={"rounded-full px-2 py-0.5 text-[10.5px] font-semibold ring-1 " + badge(it.status)}>{lab(it.status)}</span></p>
+              </div>
+              <button type="button" onClick={it.onPreview} aria-label="Voir" className="grid h-10 w-10 place-items-center rounded-xl border border-[#d7dff0] bg-[#ffffff] text-[#2a3a66]"><Eye size={16} /></button>
+              <button type="button" onClick={it.onDelete} aria-label="Supprimer" className="grid h-10 w-10 place-items-center rounded-xl border border-red-200 bg-[#ffffff] text-red-600"><Trash2 size={16} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <label className="inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-3 text-sm font-semibold text-white shadow-[0_10px_22px_-12px_rgba(5,150,105,.9)] active:scale-[.98]">
+          {p.uploading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Ajouter
+          {p.addInput}
+        </label>
+        {p.scanButton}
+      </div>
+    </div>
+  );
 }

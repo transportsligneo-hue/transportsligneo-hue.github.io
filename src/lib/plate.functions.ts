@@ -224,7 +224,7 @@ export const lookupPlate = createServerFn({ method: "POST" })
       }
 
       console.log("[SIV] status", res.status);
-      void (await import("@/lib/api-usage.server")).logServerUsage("plaque_siv", res);
+      await (await import("@/lib/api-usage.server")).logServerUsage("plaque_siv", res);
 
       if (!res.ok) {
         let bodyTxt = "";

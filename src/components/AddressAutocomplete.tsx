@@ -14,6 +14,7 @@ interface Suggestion {
 }
 
 import { loadGoogle, isGoogleAvailable } from "@/lib/google-places";
+import { logApiUsage } from "@/lib/api-usage-client";
 import { isPreciseAddress, ADDRESS_PRECISION_MESSAGE } from "@/lib/address-precision";
 
 /** Google Places loader (singleton partagé, clé servie par le serveur) */
@@ -59,6 +60,7 @@ export default function AddressAutocomplete({ name, label, value, onChange, requ
     const google = await loadGooglePlaces();
     if (!sessionTokenRef.current) {
       sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
+      logApiUsage("places_session");
     }
     const service = new google.maps.places.AutocompleteService();
     return await new Promise((resolve) => {
