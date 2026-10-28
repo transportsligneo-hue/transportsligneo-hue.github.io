@@ -158,8 +158,8 @@ function AdminUtilisateurs() {
       confirmLabel: "Supprimer", variant: "danger",
     });
     if (!ok) return;
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", { body: { action: "delete", user_id: u.user_id } });
-    if (error || (data as any)?.error) return toast.error((data as any)?.error ?? error?.message ?? "Suppression impossible");
+    const { error } = await (supabase as any).rpc("supprimer_compte_admin", { _user: u.user_id });
+    if (error) return toast.error(`Suppression impossible : ${error.message}`);
     toast.success("Compte supprimé");
     void loadUsers();
   }
@@ -216,7 +216,7 @@ function AdminUtilisateurs() {
         title="Utilisateurs"
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" onClick={() => setFusion({})}>Fusionner des comptes</Button>
+            <Button onClick={() => setFusion({})} className="border border-white/70 bg-white font-semibold text-[#0b1230] hover:bg-white/90">Fusionner des comptes</Button>
             <CreateAccountDialog onCreated={() => void loadUsers()} />
           </div>
         }

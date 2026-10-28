@@ -59,8 +59,8 @@ export function FusionComptesDialog({
       confirmLabel: "Supprimer", cancelLabel: "Garder archivé", variant: "danger",
     });
     if (supprimer) {
-      const r = await supabase.functions.invoke("admin-user-actions", { body: { action: "delete", user_id: source } });
-      if (r.error || (r.data as any)?.error) toast.error((r.data as any)?.error ?? r.error?.message ?? "Suppression impossible");
+      const r = await (supabase as any).rpc("supprimer_compte_admin", { _user: source });
+      if (r.error) toast.error(`Suppression impossible : ${r.error.message}`);
       else toast.success("Ancien compte supprimé");
     }
     onDone();
