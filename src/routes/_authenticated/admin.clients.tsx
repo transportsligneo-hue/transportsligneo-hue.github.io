@@ -1,3 +1,4 @@
+import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
@@ -416,9 +417,7 @@ function AdminClients() {
                 onClick={async () => {
                   const next = window.prompt("Nouvel email du client :", selected.email ?? "");
                   if (!next || next === selected.email) return;
-                  const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-                    body: { action: "change_email", user_id: selected.user_id, email: next.trim() },
-                  });
+                  const { data, error } = await invokeAdminUserAction({ action: "change_email", user_id: selected.user_id, email: next.trim() } as any);
                   if (error || (data as any)?.error) {
                     toast.error(`Échec : ${(data as any)?.error ?? error?.message ?? "erreur inconnue"}`);
                     return;

@@ -1,3 +1,4 @@
+import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -221,9 +222,7 @@ function AdminClientDetail() {
 
     // Status auth
     try {
-      const { data: s } = await supabase.functions.invoke("admin-user-actions", {
-        body: { action: "get_account_status", user_id: clientId },
-      });
+      const { data: s } = await invokeAdminUserAction({ action: "get_account_status", user_id: clientId } as any);
       if (s && !s.error) {
         setStatus({
           email_confirmed_at: s.email_confirmed_at ?? null,
@@ -275,9 +274,7 @@ function AdminClientDetail() {
 
   const saveProfile = async () => {
     setSaving(true);
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "update_profile", user_id: clientId, profile: form },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "update_profile", user_id: clientId, profile: form } as any);
     setSaving(false);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur lors de la sauvegarde");
@@ -296,9 +293,7 @@ function AdminClientDetail() {
     if (!newEmail || newEmail === profile?.email) return;
     if (!(await confirmToast(`Changer l'email pour ${newEmail} ?\nLe client devra utiliser cet email pour se connecter.`))) return;
     setBusy("email");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "change_email", user_id: clientId, email: newEmail },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "change_email", user_id: clientId, email: newEmail } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -311,14 +306,12 @@ function AdminClientDetail() {
   const sendInvite = async () => {
     if (!profile?.email) return;
     setBusy("invite");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: {
+    const { data, error } = await invokeAdminUserAction({
         action: "invite_account",
         user_id: clientId,
         email: profile.email,
         redirect_to: `${window.location.origin}/dashboard-client`,
-      },
-    });
+      } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -330,13 +323,11 @@ function AdminClientDetail() {
 
   const sendReset = async () => {
     setBusy("reset");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: {
+    const { data, error } = await invokeAdminUserAction({
         action: "reset_password",
         user_id: clientId,
         redirect_to: `${window.location.origin}/reset-password`,
-      },
-    });
+      } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -511,9 +502,7 @@ function AdminClientDetail() {
                 ownerUserId={clientId}
                 value={profile.logo_url}
                 onChange={async (url) => {
-                  await supabase.functions.invoke("admin-user-actions", {
-                    body: { action: "update_profile", user_id: clientId, profile: { logo_url: url } },
-                  });
+                  await invokeAdminUserAction({ action: "update_profile", user_id: clientId, profile: { logo_url: url } } as any);
                   setProfile({ ...profile, logo_url: url });
                 }}
                 variant="light"

@@ -1,3 +1,4 @@
+import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
@@ -227,9 +228,7 @@ function AdminConvoyeurDetail() {
           .maybeSingle();
         setAvatarUrl((prof as { avatar_url: string | null } | null)?.avatar_url ?? null);
         try {
-          const { data: s } = await supabase.functions.invoke("admin-user-actions", {
-            body: { action: "get_account_status", user_id: cv.user_id },
-          });
+          const { data: s } = await invokeAdminUserAction({ action: "get_account_status", user_id: cv.user_id } as any);
           if (s && !s.error) {
             setStatus({
               email_confirmed_at: s.email_confirmed_at ?? null,
@@ -310,13 +309,11 @@ function AdminConvoyeurDetail() {
     const { error } = await supabase.from("convoyeurs").update(payload).eq("id", conv.id);
     // also sync profile name/phone for unified account view
     if (!error && conv.user_id) {
-      await supabase.functions.invoke("admin-user-actions", {
-        body: {
+      await invokeAdminUserAction({
           action: "update_profile",
           user_id: conv.user_id,
           profile: { prenom: payload.prenom, nom: payload.nom, telephone: payload.telephone },
-        },
-      });
+        } as any);
     }
     setSaving(false);
     if (error) {
@@ -337,9 +334,7 @@ function AdminConvoyeurDetail() {
     if (!newEmail || newEmail === conv.email) return;
     if (!(await confirmToast(`Changer l'email pour ${newEmail} ?\nLe convoyeur devra utiliser cet email pour se connecter.`))) return;
     setBusy("email");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "change_email", user_id: conv.user_id, email: newEmail },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "change_email", user_id: conv.user_id, email: newEmail } as any);
     if (!error && !data?.error) {
       await supabase.from("convoyeurs").update({ email: newEmail.toLowerCase().trim() }).eq("id", conv.id);
     }
@@ -355,13 +350,11 @@ function AdminConvoyeurDetail() {
   const sendReset = async () => {
     if (!conv?.user_id) return;
     setBusy("reset");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: {
+    const { data, error } = await invokeAdminUserAction({
         action: "reset_password",
         user_id: conv.user_id,
         redirect_to: `${window.location.origin}/reset-password`,
-      },
-    });
+      } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -373,14 +366,12 @@ function AdminConvoyeurDetail() {
   const sendInvite = async () => {
     if (!conv?.user_id || !conv.email) return;
     setBusy("invite");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: {
+    const { data, error } = await invokeAdminUserAction({
         action: "invite_account",
         user_id: conv.user_id,
         email: conv.email,
           redirect_to: `${window.location.origin}/reset-password`,
-      },
-    });
+      } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -394,9 +385,7 @@ function AdminConvoyeurDetail() {
     if (!conv?.user_id) return;
     if (!(await confirmToast("Suspendre ce convoyeur ? Il ne pourra plus se connecter."))) return;
     setBusy("suspend");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "suspend", user_id: conv.user_id },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "suspend", user_id: conv.user_id } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");
@@ -410,9 +399,7 @@ function AdminConvoyeurDetail() {
   const reactivateAccount = async () => {
     if (!conv?.user_id) return;
     setBusy("reactivate");
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "reactivate", user_id: conv.user_id },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "reactivate", user_id: conv.user_id } as any);
     setBusy(null);
     if (error || data?.error) {
       toast.error(data?.error ?? "Erreur");

@@ -1,3 +1,4 @@
+import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
@@ -239,9 +240,7 @@ function AdminConvoyeurs() {
     }
 
     if (statut === "valide" && previous.user_id) {
-      await supabase.functions.invoke("admin-user-actions", {
-        body: { action: "activate_role", user_id: previous.user_id, role: "convoyeur" },
-      });
+      await invokeAdminUserAction({ action: "activate_role", user_id: previous.user_id, role: "convoyeur" } as any);
     }
 
     // Emails + notif in-app
@@ -288,9 +287,7 @@ function AdminConvoyeurs() {
     if (!c.user_id) return toast.error("Aucun compte associé");
     if (!(await confirmToast(`Suspendre ${c.prenom} ${c.nom} ? Il ne pourra plus se connecter.`))) return;
     setBusy(c.id);
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "suspend", user_id: c.user_id },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "suspend", user_id: c.user_id } as any);
     if (error || data?.error) {
       setBusy(null);
       return toast.error(data?.error ?? "Erreur");
@@ -339,9 +336,7 @@ function AdminConvoyeurs() {
       if (!(await confirmToast(`Supprimer définitivement ${c.prenom} ${c.nom} (${c.email}) ? Son compte et ses documents seront effacés. Action irréversible.${warn}`))) return;
 
       if (c.user_id) {
-        const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-          body: { action: "delete", user_id: c.user_id },
-        });
+        const { data, error } = await invokeAdminUserAction({ action: "delete", user_id: c.user_id } as any);
         if (error || data?.error) {
           toast.error(data?.error ?? "Suppression du compte impossible");
           return;
@@ -364,9 +359,7 @@ function AdminConvoyeurs() {
   const reactivateConvoyeur = async (c: Convoyeur) => {
     if (!c.user_id) return toast.error("Aucun compte associé");
     setBusy(c.id);
-    const { data, error } = await supabase.functions.invoke("admin-user-actions", {
-      body: { action: "reactivate", user_id: c.user_id },
-    });
+    const { data, error } = await invokeAdminUserAction({ action: "reactivate", user_id: c.user_id } as any);
     if (error || data?.error) {
       setBusy(null);
       return toast.error(data?.error ?? "Erreur");

@@ -1,3 +1,4 @@
+import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute } from "@tanstack/react-router";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useEffect, useMemo, useState } from "react";
@@ -147,7 +148,7 @@ function AdminUtilisateurs() {
     [users],
   );
   const doublons = useMemo(
-    () => trouverDoublons(users.filter((u) => !demoIds.has(u.user_id)).map((u) => ({ id: u.user_id, email: u.email, telephone: u.telephone, nom: u.nom, prenom: u.prenom }))),
+    () => trouverDoublons(users.filter((u) => !demoIds.has(u.user_id) && u.role !== "admin" && u.role !== "super_admin").map((u) => ({ id: u.user_id, email: u.email, telephone: u.telephone, nom: u.nom, prenom: u.prenom }))),
     [users, demoIds],
   );
 
@@ -691,7 +692,7 @@ function UserDetailDrawer({
   async function callAction(payload: Record<string, unknown>) {
     setBusy(true);
     try {
-      const { data, error } = await supabase.functions.invoke("admin-user-actions", { body: payload });
+      const { data, error } = await invokeAdminUserAction(payload as any);
       if (error || (data as any)?.error) {
         toast.error((data as any)?.error ?? error?.message ?? "Action échouée");
       } else {
