@@ -235,7 +235,8 @@ export function DocumentsValidationCenter({
         } as never);
       }
     } catch { /* ignore */ }
-    if (statut !== "approuve") {
+    {
+      // E-mail pour tout changement : validation, refus ou document à renvoyer.
       try {
         await sendTransactionalEmail({
           templateName: "convoyeur-document-status",
