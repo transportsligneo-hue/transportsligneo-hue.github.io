@@ -565,6 +565,17 @@ function UserDetailDrawer({
           ? `${emailCol}.ilike.${emailLower},user_id.eq.${uid}`
           : `user_id.eq.${uid}`;
 
+      // Missions d'un convoyeur : celles qui lui sont attribuées (pas seulement des demandes clients).
+      const { data: convRow } = await supabase.from("convoyeurs").select("id").eq("user_id", uid).maybeSingle();
+      const { data: attribs } = convRow
+        ? await supabase
+            .from("attributions")
+            .select("id, statut, created_at, trajets(depart, arrivee, prix_convoyeur)")
+            .eq("convoyeur_id", convRow.id)
+            .order("created_at", { ascending: false })
+            .limit(100)
+        : { data: [] as any[] };
+
       const [{ data: d }, { data: f }, { data: m }, { data: b2b }] = await Promise.all([
         supabase
           .from("devis")
@@ -623,7 +634,17 @@ function UserDetailDrawer({
         created_at: r.created_at,
         source: "B2B",
       }));
-      setMissions([...(m ?? []), ...b2bAsMissions]);
+      const convMissions = (attribs ?? []).map((r: any) => ({
+        id: r.id,
+        depart: r.trajets?.depart ?? "—",
+        arrivee: r.trajets?.arrivee ?? "—",
+        statut: r.statut,
+        prix_estime: r.trajets?.prix_convoyeur ?? null,
+        paid_at: null,
+        created_at: r.created_at,
+        source: "Convoyeur",
+      }));
+      setMissions([...convMissions, ...(m ?? []), ...b2bAsMissions]);
 
       // Paiements multi-source
       const paiementsList: any[] = [];
