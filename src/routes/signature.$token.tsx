@@ -86,6 +86,35 @@ function SignaturePage() {
     finally { setBusy(false); }
   };
 
+  /* ---- paraphe (initiales) ---- */
+  const [hasPInk, setHasPInk] = useState(false);
+  const pcv = useRef<HTMLCanvasElement | null>(null);
+  const pDrawing = useRef(false);
+  const pLast = useRef<{ x: number; y: number } | null>(null);
+  const initialsOf = (name: string) => name.split(/[\s-]+/).filter(Boolean).slice(0, 3).map((w) => w[0]!.toUpperCase()).join("") || "—";
+  const pGenerate = useCallback(() => {
+    const c = pcv.current; if (!c || !info) return;
+    const ctx = c.getContext("2d")!; ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "#0a1638"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = "italic 600 120px 'Segoe Script','Brush Script MT','Snell Roundhand',cursive,Georgia,serif";
+    ctx.fillText(initialsOf(info.signerName), c.width / 2, c.height / 2 + 6);
+    setHasPInk(true);
+  }, [info]);
+  useEffect(() => { if (step === "sign") { const t = setTimeout(pGenerate, 0); return () => clearTimeout(t); } }, [step, pGenerate]);
+  const pPos = (e: React.PointerEvent) => {
+    const r = pcv.current!.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * pcv.current!.width, y: ((e.clientY - r.top) / r.height) * pcv.current!.height };
+  };
+  const pDown = (e: React.PointerEvent) => { if (!pcv.current) return; pcv.current.setPointerCapture(e.pointerId); pDrawing.current = true; pLast.current = pPos(e); setHasPInk(true); };
+  const pMove = (e: React.PointerEvent) => {
+    if (!pDrawing.current || !pcv.current || !pLast.current) return;
+    const ctx = pcv.current.getContext("2d")!; const p = pPos(e);
+    ctx.strokeStyle = "#0a1638"; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath(); ctx.moveTo(pLast.current.x, pLast.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); pLast.current = p;
+  };
+  const pUp = () => { pDrawing.current = false; pLast.current = null; };
+  const pClear = () => { const c = pcv.current; if (c) c.getContext("2d")!.clearRect(0, 0, c.width, c.height); setHasPInk(false); };
+
   /* ---- canvas ---- */
   const cvs = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false);
@@ -131,7 +160,19 @@ function SignaturePage() {
             ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
             setHasInk(true); setFromPhone(true); setQr(null);
           };
-          img.src = r.png; return;
+          img.src = r.png;
+          if ((r as any).initialsPng) {
+            const im2 = new Image();
+            im2.onload = () => {
+              const c = pcv.current; if (!c) return;
+              const ctx = c.getContext("2d")!; ctx.clearRect(0, 0, c.width, c.height);
+              const k = Math.min(c.width / im2.width, c.height / im2.height);
+              ctx.drawImage(im2, (c.width - im2.width * k) / 2, (c.height - im2.height * k) / 2, im2.width * k, im2.height * k);
+              setHasPInk(true);
+            };
+            im2.src = (r as any).initialsPng;
+          }
+          return;
         }
       } catch { /* on réessaie */ }
       setTimeout(tick, 2000);
@@ -152,14 +193,16 @@ function SignaturePage() {
     await sign({ data: { token, signaturePng: sigPng, consent, typedName, initialsPng: initialsPng || undefined } });
     await load(); setStep("done");
   });
-  /* étape signature : on garde le dessin, puis on envoie le code (qui sera la toute dernière étape) */
-  const goCode = () => {
-    if (!cvs.current) return;
+  /* étape « paraphe + signature » : on garde les deux dessins, puis on passe au paraphe des pages ;
+     la signature n'est appliquée qu'à la toute fin, après le code. */
+  const goPages = () => {
+    if (!cvs.current || !pcv.current) return;
     const out = document.createElement("canvas");
     out.width = cvs.current.width; out.height = cvs.current.height;
     out.getContext("2d")!.drawImage(cvs.current, 0, 0);
     setSigPng(out.toDataURL("image/png"));
-    void askCode();
+    setInitialsPng(pcv.current.toDataURL("image/png"));
+    setStep("initials");
   };
   const refuse = () => run(async () => { await decline({ data: { token, reason } }); setStep("declined"); setShowDecline(false); });
 
@@ -232,9 +275,9 @@ function SignaturePage() {
   const errBox = err && <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-3">{err}</div>;
   const stepper = (
     <ol className="flex items-center gap-2 text-xs text-[#6b7aa3]">
-      {(["read", "initials", "sign", "code"] as Step[]).map((s, i) => (
-        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "initials", "sign", "code"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
-          {i + 1}. {s === "read" ? "Lire" : s === "initials" ? "Parapher" : s === "sign" ? "Signer" : "Valider"}
+      {(["read", "sign", "initials", "code"] as Step[]).map((s, i) => (
+        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "sign", "initials", "code"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
+          {i + 1}. {s === "read" ? "Lire" : s === "sign" ? "Signer" : s === "initials" ? "Parapher" : "Valider"}
         </li>
       ))}
     </ol>
@@ -257,7 +300,7 @@ function SignaturePage() {
           <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={approved} onChange={(e) => setApproved(e.target.checked)} />
           <span className="text-[#33415f]">J'ai lu l'intégralité du document et je l'approuve.</span>
         </label>
-        <button className={btn} disabled={!approved} onClick={() => setStep("initials")}><ArrowRight size={18} /> J'ai lu le document · Commencer</button>
+        <button className={btn} disabled={!approved} onClick={() => setStep("sign")}><ArrowRight size={18} /> J'ai lu le document · Commencer</button>
       </div>
     </>}
     {step === "code" && (
@@ -273,12 +316,13 @@ function SignaturePage() {
       </div>
     )}
     {step === "initials" && (
-      <PagedInitials docUrl={docUrl} signerName={info.signerName} btn={btn} btn2={btn2} card={card}
-        onDone={(png) => { setInitialsPng(png); setStep("sign"); }} />
+      <PagedInitials docUrl={docUrl} initialsPng={initialsPng} btn={btn} btn2={btn2} card={card}
+        onDone={() => void askCode()} onBack={() => { setHasInk(false); setFromPhone(false); setStep("sign"); }} />
     )}
     {step === "sign" && (
       <div className={card + " space-y-4"}>
-        <div className="font-medium">3. Signez</div>
+        <div className="font-medium">2. Votre paraphe et votre signature</div>
+        <p className="text-xs text-[#6b7aa3]">Créez-les maintenant, en une fois. Le paraphe sera apposé page par page à l'étape suivante ; la signature, elle, n'est appliquée qu'à la toute fin, après votre code.</p>
         <label className="flex gap-3 items-start text-sm rounded-xl bg-[#f5f8ff] border border-[#dfe6fb] p-3">
           <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
           <span className="text-[#33415f]">{info.consentText}</span>
@@ -289,7 +333,7 @@ function SignaturePage() {
         </div>
         <div className="rounded-xl border border-[#dfe6fb] bg-[#f5f8ff] p-3">
           {!qr ? (
-            <button type="button" className={btn2 + " w-full"} disabled={busy} onClick={openQr}><QrCode size={18} /> Signer avec mon téléphone (QR code)</button>
+            <button type="button" className={btn2 + " w-full"} disabled={busy} onClick={openQr}><QrCode size={18} /> Paraphe et signature avec mon téléphone (QR code)</button>
           ) : (
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <img src={qr.img} alt="QR code" className="h-40 w-40 rounded-lg bg-white p-1" />
@@ -303,6 +347,12 @@ function SignaturePage() {
             </div>
           )}
           {fromPhone && !qr && <p className="mt-2 text-xs text-emerald-700 flex items-center gap-1"><CheckCircle2 size={14} /> Signature reçue depuis votre téléphone.</p>}
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Votre paraphe (initiales)</span>
+            <span className="flex gap-3 text-sm text-[#2f5fff]"><button className="inline-flex items-center gap-1" onClick={pClear}><Eraser size={14} /> Effacer</button><button className="underline" onClick={pGenerate}>Mes initiales</button></span></div>
+          <canvas ref={pcv} width={500} height={220} onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp}
+            className="w-full h-28 rounded-xl border-2 border-dashed border-[#9db6ff] bg-white touch-none" />
         </div>
         <div>
           <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Ou signez ici avec le doigt / la souris</span>
@@ -329,12 +379,13 @@ function SignaturePage() {
         {(() => {
           const m: string[] = [];
           if (!consent) m.push("cochez la case de consentement");
+          if (!hasPInk) m.push("créez votre paraphe");
           if (!hasInk) m.push("signez dans le cadre");
           if (typedName.trim().length < 2) m.push("saisissez votre nom");
           return <p className={"text-xs text-center font-medium " + (m.length ? "text-amber-700" : "text-emerald-700")}>{m.length ? `Pour continuer : ${m.join(", ")}.` : "Tout est prêt : vous pouvez signer."}</p>;
         })()}
-        <button className={btn} disabled={busy || !consent || !hasInk || typedName.trim().length < 2} onClick={goCode}>
-          {busy ? <><Loader2 className="animate-spin" size={18} /> Envoi du code…</> : <><PenLine size={18} /> Continuer · recevoir mon code</>}
+        <button className={btn} disabled={busy || !consent || !hasInk || !hasPInk || typedName.trim().length < 2} onClick={goPages}>
+          <><PenLine size={18} /> Continuer · parapher le document</>
         </button>
         <p className="text-xs text-[#6b7aa3] text-center">Votre adresse IP et l'heure de signature sont enregistrées à titre de preuve.</p>
       </div>

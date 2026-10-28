@@ -730,7 +730,7 @@ async function handoffCheck(ht: string) {
   return { S, supabaseAdmin, r };
 }
 
-/** PC : crée le lien du QR code (après validation du code reçu). */
+/** PC : crée le lien du QR code (paraphe ou signature dessinés sur le téléphone). */
 export const esignHandoffStart = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string }) => d)
   .handler(async ({ data }) => {
@@ -738,11 +738,8 @@ export const esignHandoffStart = createServerFn({ method: "POST" })
     const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     const r = await S.findByToken(data.token);
     if (!r || !["sent", "opened"].includes(r.status)) throw new Error("Ce lien n'est plus valide.");
-    const since = new Date(Date.now() - S.OTP_VERIFIED_VALID_MIN * 60_000).toISOString();
-    const { data: otp } = await supabaseAdmin.from("esign_otps").select("id").eq("request_id", r.id)
-      .not("verified_at", "is", null).gte("verified_at", since).limit(1).maybeSingle();
-    if (!otp) throw new Error("Validez d'abord le code reçu.");
-    await supabaseAdmin.storage.from(S.BUCKET).remove([handoffPath(r.id)]);
+    // le code SMS/e-mail est demandé en toute dernière étape : le QR code (paraphe ou signature) ne le requiert plus
+    await supabaseAdmin.storage.from(S.BUCKET).remove([handoffPath(r.id), handoffPath(r.id).replace(/\.png$/, "-p.png")]);
     return { ht: await handoffMake(r.id), ttlSeconds: HANDOFF_TTL_MS / 1000 };
   });
 
@@ -756,9 +753,10 @@ export const esignHandoffResolve = createServerFn({ method: "POST" })
 
 /** Téléphone : dépose le dessin de la signature. */
 export const esignHandoffSubmit = createServerFn({ method: "POST" })
-  .inputValidator((d: { ht: string; signaturePng: string }) => {
+  .inputValidator((d: { ht: string; signaturePng: string; initialsPng?: string }) => {
     if (!d.signaturePng?.startsWith("data:image/png;base64,")) throw new Error("Signature invalide.");
     if (d.signaturePng.length > 1_500_000) throw new Error("Signature trop volumineuse.");
+    if (d.initialsPng && (!d.initialsPng.startsWith("data:image/png;base64,") || d.initialsPng.length > 400_000)) throw new Error("Paraphe invalide.");
     return d;
   })
   .handler(async ({ data }) => {
@@ -766,6 +764,9 @@ export const esignHandoffSubmit = createServerFn({ method: "POST" })
     const bytes = S.b64ToBytes(data.signaturePng.split(",")[1]);
     const up = await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id), bytes, { contentType: "image/png", upsert: true });
     if (up.error) throw new Error("Envoi impossible, réessayez.");
+    if (data.initialsPng) {
+      await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id).replace(/\.png$/, "-p.png"), S.b64ToBytes(data.initialsPng.split(",")[1]), { contentType: "image/png", upsert: true });
+    }
     try { await S.logEvent(r.id, "signature_drawn_on_phone", {}, reqMeta()); } catch { /* journal facultatif */ }
     return { ok: true };
   });
@@ -781,5 +782,12 @@ export const esignHandoffPoll = createServerFn({ method: "POST" })
     if (dl.error || !dl.data) return { ready: false as const };
     const buf = Buffer.from(await dl.data.arrayBuffer());
     await supabaseAdmin.storage.from(S.BUCKET).remove([handoffPath(r.id)]);
-    return { ready: true as const, png: `data:image/png;base64,${buf.toString("base64")}` };
+    let initialsPng: string | undefined;
+    const pp = handoffPath(r.id).replace(/\.png$/, "-p.png");
+    const dl2 = await supabaseAdmin.storage.from(S.BUCKET).download(pp);
+    if (!dl2.error && dl2.data) {
+      initialsPng = `data:image/png;base64,${Buffer.from(await dl2.data.arrayBuffer()).toString("base64")}`;
+      await supabaseAdmin.storage.from(S.BUCKET).remove([pp]);
+    }
+    return { ready: true as const, png: `data:image/png;base64,${buf.toString("base64")}`, initialsPng };
   });
