@@ -6,9 +6,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, Download, FileText, Loader2, Mail, PenLine, ShieldCheck, Smartphone, XCircle, Eraser, ExternalLink } from "lucide-react";
+import QRCode from "qrcode";
+import { CheckCircle2, Download, QrCode, FileText, Loader2, Mail, PenLine, ShieldCheck, Smartphone, XCircle, Eraser, ExternalLink } from "lucide-react";
 import {
   esignPublicGet, esignPublicSendOtp, esignPublicVerifyOtp, esignPublicSign, esignPublicDecline,
+  esignHandoffStart, esignHandoffPoll,
 } from "@/lib/esign.functions";
 
 export const Route = createFileRoute("/signature/$token")({
@@ -39,6 +41,10 @@ function SignaturePage() {
   const verifyOtp = useServerFn(esignPublicVerifyOtp);
   const sign = useServerFn(esignPublicSign);
   const decline = useServerFn(esignPublicDecline);
+  const handoffStart = useServerFn(esignHandoffStart);
+  const handoffPoll = useServerFn(esignHandoffPoll);
+  const [qr, setQr] = useState<{ img: string; ht: string; exp: number } | null>(null);
+  const [fromPhone, setFromPhone] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<Info | null>(null);
@@ -51,6 +57,7 @@ function SignaturePage() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [consent, setConsent] = useState(false);
+  const [approved, setApproved] = useState(false);
   const [typedName, setTypedName] = useState("");
   const [hasInk, setHasInk] = useState(false);
   const [showDecline, setShowDecline] = useState(false);
@@ -98,11 +105,42 @@ function SignaturePage() {
     ctx.beginPath(); ctx.moveTo(last.current.x, last.current.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last.current = p; setHasInk(true);
   };
   const onUp = () => { drawing.current = false; last.current = null; };
+  const openQr = () => run(async () => {
+    const r = await handoffStart({ data: { token } });
+    const url = `${window.location.origin}/signature-mobile/${r.ht}`;
+    setQr({ img: await QRCode.toDataURL(url, { width: 320, margin: 1, color: { dark: "#0a1638", light: "#ffffff" } }), ht: r.ht, exp: Date.now() + r.ttlSeconds * 1000 });
+  });
+  useEffect(() => {
+    if (!qr) return;
+    let stop = false;
+    const tick = async () => {
+      if (stop) return;
+      if (Date.now() > qr.exp) { setQr(null); return; }
+      try {
+        const r = await handoffPoll({ data: { token, ht: qr.ht } });
+        if (r.ready && !stop) {
+          const img = new Image();
+          img.onload = () => {
+            const c = cvs.current; if (!c) return;
+            const ctx = c.getContext("2d")!; ctx.clearRect(0, 0, c.width, c.height);
+            const k = Math.min(c.width / img.width, c.height / img.height);
+            const w = img.width * k, h = img.height * k;
+            ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
+            setHasInk(true); setFromPhone(true); setQr(null);
+          };
+          img.src = r.png; return;
+        }
+      } catch { /* on réessaie */ }
+      setTimeout(tick, 2000);
+    };
+    const t = setTimeout(tick, 2000);
+    return () => { stop = true; clearTimeout(t); };
+  }, [qr, token, handoffPoll]);
   const clear = () => { const c = cvs.current; if (c) c.getContext("2d")!.clearRect(0, 0, c.width, c.height); setHasInk(false); };
 
   /* ---- actions ---- */
   const askCode = () => run(async () => {
-    const r = await sendOtp({ data: { token, channel } });
+    const r = await sendOtp({ data: { token, channel: info?.kind === "contrat_convoyeur" && info?.maskedPhone ? "sms" : channel } });
     setSentTo(r.to); setStep("code"); setCode("");
   });
   const checkCode = () => run(async () => {
@@ -132,6 +170,7 @@ function SignaturePage() {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-4 pb-24">{children}</main>
     </div>
   );
+  const smsOnly = info?.kind === "contrat_convoyeur" && !!info?.maskedPhone;
   const card = "rounded-2xl bg-white border border-[#dfe6fb] shadow-[0_6px_24px_-12px_rgba(47,95,255,.25)] p-5";
   const btn = "w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#3b6bff] to-[#2450e6] text-white font-semibold py-3.5 px-5 shadow-[0_8px_20px_-8px_rgba(47,95,255,.7)] disabled:opacity-50 disabled:shadow-none active:scale-[.99] transition";
   const btn2 = "inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-[#cfd9f7] text-[#1f3a8a] font-medium py-2.5 px-4";
@@ -209,12 +248,24 @@ function SignaturePage() {
       </div>
       <div className={card + " space-y-3"}>
         <div className="font-medium">Recevoir mon code de vérification</div>
+        {smsOnly ? (
+          <div className="rounded-xl border border-[#2f5fff] bg-[#eef3ff] p-3">
+            <Smartphone size={18} className="text-[#2f5fff]" />
+            <div className="text-sm font-medium mt-1">Par SMS</div>
+            <div className="text-xs text-[#6b7aa3]">{info.maskedPhone} · par sécurité, le code est envoyé uniquement par SMS.</div>
+          </div>
+        ) : (
         <div className="grid grid-cols-2 gap-2">
           <button onClick={() => setChannel("email")} className={"rounded-xl border p-3 text-left " + (channel === "email" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Mail size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par e-mail</div><div className="text-xs text-[#6b7aa3] break-all">{info.maskedEmail}</div></button>
           <button disabled={!info.maskedPhone} onClick={() => setChannel("sms")} className={"rounded-xl border p-3 text-left disabled:opacity-40 " + (channel === "sms" ? "border-[#2f5fff] bg-[#eef3ff]" : "border-[#dfe6fb]")}><Smartphone size={18} className="text-[#2f5fff]" /><div className="text-sm font-medium mt-1">Par SMS</div><div className="text-xs text-[#6b7aa3]">{info.maskedPhone ?? "Numéro non renseigné"}</div></button>
         </div>
+        )}
+        <label className="flex gap-3 items-start text-sm rounded-xl bg-[#f5f8ff] border border-[#dfe6fb] p-3">
+          <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={approved} onChange={(e) => setApproved(e.target.checked)} />
+          <span className="text-[#33415f]">J'ai lu l'intégralité du document et je l'approuve.</span>
+        </label>
         {errBox}
-        <button className={btn} disabled={busy} onClick={askCode}>{busy ? <Loader2 className="animate-spin" size={18} /> : null} J'ai lu le document · Envoyer le code</button>
+        <button className={btn} disabled={busy || !approved} onClick={askCode}>{busy ? <Loader2 className="animate-spin" size={18} /> : null} J'ai lu le document · Envoyer le code</button>
       </div>
     </>}
     {step === "code" && (
@@ -239,8 +290,25 @@ function SignaturePage() {
           <div className="text-sm text-[#5a6788] mb-1">Saisissez votre nom complet</div>
           <input value={typedName} onChange={(e) => setTypedName(e.target.value)} placeholder={info.signerName} className="w-full rounded-xl border border-[#cfd9f7] px-3 py-3 text-base text-[#0a1638] bg-white focus:outline-none focus:ring-2 focus:ring-[#2f5fff]" />
         </div>
+        <div className="rounded-xl border border-[#dfe6fb] bg-[#f5f8ff] p-3">
+          {!qr ? (
+            <button type="button" className={btn2 + " w-full"} disabled={busy} onClick={openQr}><QrCode size={18} /> Signer avec mon téléphone (QR code)</button>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <img src={qr.img} alt="QR code" className="h-40 w-40 rounded-lg bg-white p-1" />
+              <div className="text-sm text-[#33415f] space-y-1">
+                <div className="font-medium flex items-center gap-2"><Loader2 className="animate-spin text-[#2f5fff]" size={16} /> En attente de votre signature…</div>
+                <p>1. Scannez ce QR code avec l'appareil photo de votre téléphone.</p>
+                <p>2. Signez avec le doigt, puis touchez « Envoyer ».</p>
+                <p>3. Votre signature apparaît ici automatiquement.</p>
+                <button type="button" className="text-[#2f5fff] underline" onClick={() => setQr(null)}>Annuler</button>
+              </div>
+            </div>
+          )}
+          {fromPhone && !qr && <p className="mt-2 text-xs text-emerald-700 flex items-center gap-1"><CheckCircle2 size={14} /> Signature reçue depuis votre téléphone.</p>}
+        </div>
         <div>
-          <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Signez avec le doigt dans le cadre</span>
+          <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Ou signez ici avec le doigt / la souris</span>
             <button className="text-sm text-[#2f5fff] inline-flex items-center gap-1" onClick={clear}><Eraser size={14} /> Effacer</button></div>
           <canvas ref={cvs} width={900} height={360} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
             className="w-full h-44 sm:h-52 rounded-xl border-2 border-dashed border-[#9db6ff] bg-white touch-none" />

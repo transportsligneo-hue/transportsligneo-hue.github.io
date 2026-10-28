@@ -261,6 +261,8 @@ export const esignPublicSendOtp = createServerFn({ method: "POST" })
     if ((count ?? 0) >= S.OTP_SEND_LIMIT) throw new Error("Trop de codes demandés. Réessayez dans 10 minutes.");
 
     const phone = (r.signer_phone ?? "").trim();
+    // Contrat convoyeur : SMS obligatoire quand un numéro valide existe (plus robuste).
+    if (r.kind === "contrat_convoyeur" && phone.replace(/\D/g, "").length >= 10) data.channel = "sms";
     if (data.channel === "sms" && phone.replace(/\D/g, "").length < 10) throw new Error("Aucun numéro de téléphone valide. Choisissez l'e-mail.");
 
     const code = S.newOtp();
@@ -354,7 +356,7 @@ export const esignPublicSign = createServerFn({ method: "POST" })
     const sigBytes = S.b64ToBytes(data.signaturePng);
     const signedAt = new Date().toISOString();
     const method = otp.channel === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";
-    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, req: r as any, signedAt, ip: meta.ip, method });
+    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, req: r as any, signedAt, ip: meta.ip, method, kind: r.kind });
     const signedHash = await S.sha256Bytes(signed);
     const sigHash = await S.sha256Bytes(sigBytes);
 
@@ -611,4 +613,84 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
     } catch {
       return { ...none, error: "Lecture du Kbis impossible." };
     }
+  });
+
+/* ======================================================================== */
+/*  RELAIS TÉLÉPHONE : signer sur le mobile, la signature revient sur le PC   */
+/*  Sans table : lien signé (HMAC, 15 min) + fichier temporaire dans le       */
+/*  stockage privé. Le consentement et le nom restent validés sur le PC.      */
+/* ======================================================================== */
+const HANDOFF_TTL_MS = 15 * 60_000;
+const handoffPath = (id: string) => `handoff/${id}.png`;
+
+async function handoffMake(requestId: string) {
+  const S = await import("@/lib/esign.server");
+  const exp = Date.now() + HANDOFF_TTL_MS;
+  const sig = await S.hmacSeal(`handoff|${requestId}|${exp}`);
+  return `${requestId}.${exp}.${sig}`;
+}
+async function handoffCheck(ht: string) {
+  const S = await import("@/lib/esign.server");
+  const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+  const [id, exp, sig] = String(ht ?? "").split(".");
+  if (!id || !exp || !sig) throw new Error("Lien invalide.");
+  if (Number(exp) < Date.now()) throw new Error("Ce QR code a expiré. Générez-en un nouveau sur l'ordinateur.");
+  if ((await S.hmacSeal(`handoff|${id}|${exp}`)) !== sig) throw new Error("Lien invalide.");
+  const { data: r } = await supabaseAdmin.from("esign_requests").select("*").eq("id", id).maybeSingle();
+  if (!r || !["sent", "opened"].includes(r.status)) throw new Error("Ce document ne peut plus être signé.");
+  return { S, supabaseAdmin, r };
+}
+
+/** PC : crée le lien du QR code (après validation du code reçu). */
+export const esignHandoffStart = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string }) => d)
+  .handler(async ({ data }) => {
+    const S = await import("@/lib/esign.server");
+    const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+    const r = await S.findByToken(data.token);
+    if (!r || !["sent", "opened"].includes(r.status)) throw new Error("Ce lien n'est plus valide.");
+    const since = new Date(Date.now() - S.OTP_VERIFIED_VALID_MIN * 60_000).toISOString();
+    const { data: otp } = await supabaseAdmin.from("esign_otps").select("id").eq("request_id", r.id)
+      .not("verified_at", "is", null).gte("verified_at", since).limit(1).maybeSingle();
+    if (!otp) throw new Error("Validez d'abord le code reçu.");
+    await supabaseAdmin.storage.from(S.BUCKET).remove([handoffPath(r.id)]);
+    return { ht: await handoffMake(r.id), ttlSeconds: HANDOFF_TTL_MS / 1000 };
+  });
+
+/** Téléphone : infos minimales à afficher. */
+export const esignHandoffResolve = createServerFn({ method: "POST" })
+  .inputValidator((d: { ht: string }) => d)
+  .handler(async ({ data }) => {
+    const { r } = await handoffCheck(data.ht);
+    return { title: r.title as string, signerName: r.signer_name as string };
+  });
+
+/** Téléphone : dépose le dessin de la signature. */
+export const esignHandoffSubmit = createServerFn({ method: "POST" })
+  .inputValidator((d: { ht: string; signaturePng: string }) => {
+    if (!d.signaturePng?.startsWith("data:image/png;base64,")) throw new Error("Signature invalide.");
+    if (d.signaturePng.length > 1_500_000) throw new Error("Signature trop volumineuse.");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const { S, supabaseAdmin, r } = await handoffCheck(data.ht);
+    const bytes = S.b64ToBytes(data.signaturePng.split(",")[1]);
+    const up = await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id), bytes, { contentType: "image/png", upsert: true });
+    if (up.error) throw new Error("Envoi impossible, réessayez.");
+    try { await S.logEvent(r.id, "signature_drawn_on_phone", {}, reqMeta()); } catch { /* journal facultatif */ }
+    return { ok: true };
+  });
+
+/** PC : attend (poll) la signature dessinée sur le téléphone. */
+export const esignHandoffPoll = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; ht: string }) => d)
+  .handler(async ({ data }) => {
+    const { S, supabaseAdmin, r } = await handoffCheck(data.ht);
+    const own = await S.findByToken(data.token);
+    if (!own || own.id !== r.id) throw new Error("Lien invalide.");
+    const dl = await supabaseAdmin.storage.from(S.BUCKET).download(handoffPath(r.id));
+    if (dl.error || !dl.data) return { ready: false as const };
+    const buf = Buffer.from(await dl.data.arrayBuffer());
+    await supabaseAdmin.storage.from(S.BUCKET).remove([handoffPath(r.id)]);
+    return { ready: true as const, png: `data:image/png;base64,${buf.toString("base64")}` };
   });
