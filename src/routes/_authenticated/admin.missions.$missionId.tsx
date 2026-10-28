@@ -1052,9 +1052,9 @@ function AdminMissionDetail() {
             className="mt-4"
             variant="secondary"
             icon={<ArrowLeft size={14} />}
-            onClick={() => navigate({ to: "/admin/attributions", search: { trajet: undefined } })}
+            onClick={() => navigate({ to: "/admin/missions" })}
           >
-            Retour aux attributions
+            Retour aux missions
           </Button>
         </div>
       </Card>
@@ -1095,8 +1095,7 @@ function AdminMissionDetail() {
       {/* === Back === */}
       <div className="flex items-center justify-between gap-2">
         <Link
-          to="/admin/attributions"
-          search={{ trajet: undefined }}
+          to="/admin/missions"
           className="inline-flex items-center gap-1.5 text-sm text-pro-text-soft hover:text-pro-accent transition-colors"
         >
           <ArrowLeft size={14} />
@@ -1267,6 +1266,7 @@ function AdminMissionDetail() {
                 className="h-full min-h-full w-full !rounded-none"
                 completed={["termine", "terminee", "validee", "livree", "en_attente_validation"].includes(String(attribution.statut)) || ["termine", "terminee", "livree"].includes(String((trajet as { statut?: string }).statut))}
                 completedPlaque={plaquePrincipale || null}
+                plate={plaquePrincipale || trajet.immatriculation || null}
               />
             </div>
             </div>
@@ -1276,6 +1276,40 @@ function AdminMissionDetail() {
 
 
           <div className="w-full lg:w-[380px] shrink-0 flex flex-col items-stretch gap-3">
+            {/* --- Devis & facture de la mission --- */}
+            <div className="rounded-2xl border border-pro-border bg-pro-surface-2/60 p-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-pro-muted mb-3">
+                Devis &amp; facture
+              </p>
+              <div className="space-y-2">
+                {trajet.devis_id ? (
+                  <Link
+                    to="/admin/devis/$devisId"
+                    params={{ devisId: trajet.devis_id }}
+                    className="flex items-center gap-3 rounded-xl border border-pro-border bg-white px-3 py-2.5 text-sm font-semibold text-pro-text transition hover:border-pro-accent hover:shadow-md"
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-pro-accent/10 text-pro-accent"><FileText size={15} /></span>
+                    <span className="flex-1">Voir le devis</span>
+                    <ArrowLeft size={13} className="rotate-180 text-pro-muted" />
+                  </Link>
+                ) : (
+                  <p className="rounded-xl border border-dashed border-pro-border px-3 py-2.5 text-xs text-pro-muted">Aucun devis lié à cette mission.</p>
+                )}
+                {linkedFactureId ? (
+                  <Link
+                    to="/admin/factures"
+                    className="flex items-center gap-3 rounded-xl border border-pro-border bg-white px-3 py-2.5 text-sm font-semibold text-pro-text transition hover:border-pro-accent hover:shadow-md"
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-50 text-emerald-600"><Receipt size={15} /></span>
+                    <span className="flex-1">Facture {linkedFactureNumero ?? ""}</span>
+                    <ArrowLeft size={13} className="rotate-180 text-pro-muted" />
+                  </Link>
+                ) : (
+                  <p className="rounded-xl border border-dashed border-pro-border px-3 py-2.5 text-xs text-pro-muted">Pas encore de facture pour cette mission.</p>
+                )}
+              </div>
+            </div>
+
             {/* --- Infos principales --- */}
             <div className="rounded-2xl border border-pro-border bg-pro-surface-2/60 p-4 shadow-sm">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-pro-muted mb-3">

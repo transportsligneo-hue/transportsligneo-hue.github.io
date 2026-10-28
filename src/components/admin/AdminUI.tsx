@@ -267,10 +267,10 @@ export function Button({
 }: BtnProps) {
   const variants: Record<BtnVariant, string> = {
     primary: "admin-btn-blue text-white",
-    secondary: "bg-white text-pro-text border border-pro-border hover:bg-pro-bg-soft",
-    ghost: "text-pro-text-soft hover:bg-pro-bg-soft hover:text-pro-text",
-    danger: "bg-red-600 text-white hover:bg-red-700",
-    success: "bg-emerald-600 text-white hover:bg-emerald-700",
+    secondary: "adm-btn-secondary",
+    ghost: "adm-btn-ghost",
+    danger: "adm-btn-danger",
+    success: "adm-btn-success",
   };
   const sizes: Record<BtnSize, string> = {
     sm: "px-2.5 py-1.5 text-xs",
@@ -279,7 +279,7 @@ export function Button({
   return (
     <button
       {...rest}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`adm-btn inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {icon}
       {children}

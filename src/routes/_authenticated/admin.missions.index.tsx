@@ -42,6 +42,7 @@ import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META } from "@/lib/mission-alerts";
 import { ClientBrand, clientBrandOf, useClientBrands } from "@/components/admin/ClientBrand";
 import { RechargeBadge, isRechargeSeule } from "@/components/admin/RechargeBadge";
+import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { notifyDriver } from "@/lib/push/driver-notify";
 import { useMissionPv, pvOf } from "@/components/admin/MissionPvBadges";
 import { ElectricBadge, resolveMotorisationKind } from "@/components/mission/ElectricBadge";
@@ -214,6 +215,7 @@ function AdminMissionsUnified() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<UnifiedMission | null>(null);
+  const [assignFor, setAssignFor] = useState<UnifiedMission | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [lotBusy, setLotBusy] = useState(false);
   const [prixLot, setPrixLot] = useState<{ ids: string[]; ref: string } | null>(null);
@@ -735,13 +737,6 @@ function AdminMissionsUnified() {
           <>
             <MissionViewSwitcher view={view} onChange={setView} />
             <ColumnsMenu hidden={hidden} onToggle={toggleColumn} />
-            <Link
-              to="/admin/attributions"
-              search={{} as never}
-              className="h-9 px-3 rounded-lg border border-[#eaeaee] bg-white flex items-center gap-1.5 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
-            >
-              <ClipboardList size={15} /> Attributions
-            </Link>
             <button
               onClick={() => setBulkFactures(true)}
               className="h-9 px-3 rounded-lg border border-[#eaeaee] bg-white flex items-center gap-1.5 text-[13px] font-medium text-[#2f5fff] hover:bg-[#f4f7ff]"
@@ -1101,6 +1096,7 @@ function AdminMissionsUnified() {
                               convoyeurs={convoyeurs}
                               locked={r.m.status === "terminee" || r.m.status === "annulee"}
                               onAssign={(cid) => assignConvoyeur(r.m.id, cid)}
+                              onOpenAssign={() => setAssignFor(r.m)}
                             />
                           ) : (
                             <span className="text-[11px] text-[var(--a6-dim)]">Demande</span>
@@ -1189,6 +1185,19 @@ function AdminMissionsUnified() {
           </div>
         )}
       </div>
+      )}
+
+      {assignFor && (
+        <AssignDriverDialog
+          open
+          onClose={() => setAssignFor(null)}
+          trip={{ id: assignFor.id, depart: assignFor.depart, arrivee: assignFor.arrivee, date: assignFor.date, source: "trajet" }}
+          onAssigned={(t) => {
+            toast.success(`Mission attribuée à ${t.label}`);
+            setAssignFor(null);
+            fetchAll();
+          }}
+        />
       )}
 
       {selected && (

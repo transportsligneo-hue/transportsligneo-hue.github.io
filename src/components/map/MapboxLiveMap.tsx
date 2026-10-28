@@ -18,6 +18,7 @@ import {
   formatMinutesShort,
   formatDelta,
 } from "@/lib/mission-live-metrics";
+import { AdminEtaStrip } from "./AdminEtaStrip";
 import { computeNextMilestone, type NextMilestone } from "@/lib/mission-next-step";
 export { MAPBOX_TOKEN };
 
@@ -215,8 +216,11 @@ export function MapboxLiveMap({
   etaDeltaMin = null,
   completed = false,
   completedPlaque = null,
+  plate = null,
+  etaStrip = false,
 }: LiveMissionMapProps) {
   const isAdmin = role === "admin";
+  const useStrip = isAdmin && etaStrip;
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const readyRef = useRef(false);
@@ -742,8 +746,28 @@ export function MapboxLiveMap({
         </div>
       )}
 
+      {/* Admin : bandeau ETA unique (nouveau design) */}
+      {useStrip && !hideOverlay && (
+        <AdminEtaStrip
+          metrics={metrics}
+          etaDeltaMin={etaDeltaMin}
+          plate={plate ?? completedPlaque}
+          origin={typeof origin === "string" ? origin : origin && "label" in origin ? origin.label : null}
+          destination={typeof destination === "string" ? destination : destination && "label" in destination ? destination.label : null}
+          departTime={
+            doneStats?.departTime ??
+            (points.length ? new Date(points[0].recorded_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : null)
+          }
+          completed={completed}
+          done={doneStats}
+          distanceKm={distanceKm}
+          signalLost={signalLost}
+          milestone={milestone}
+          waiting={!completed && !metrics}
+        />
+      )}
       {/* Synthèse mission terminée */}
-      {!hideOverlay && completed && (
+      {!useStrip && !hideOverlay && completed && (
         <div className="ligneo-mbx-done absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:w-[320px]">
           <div
             className="rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl"
@@ -813,7 +837,7 @@ export function MapboxLiveMap({
           </div>
         </div>
       )}
-      {!hideOverlay && metrics && !signalLost && (
+      {!useStrip && !hideOverlay && metrics && !signalLost && (
         <div className="absolute bottom-3 left-3 right-3 z-[400] sm:right-auto sm:w-[320px]">
           <div className="rounded-2xl border border-white/70 bg-white/92 p-3.5 shadow-2xl ring-1 ring-slate-900/5 backdrop-blur-xl">
             <div className="flex items-end justify-between gap-3">

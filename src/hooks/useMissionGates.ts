@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { hasLocalSelfieDone } from "@/components/mission/DriverSelfieCapture";
 
 export type SignatureKind = "driver_start" | "client_start" | "driver_end" | "client_end";
-export type StepKey = "selfie" | "driver_start" | "client_start" | "driver_end" | "client_end" | "edl_depart" | "edl_arrivee" | "pv_livraison" | "carte_grise" | string;
+export type StepKey = "selfie" | "driver_start" | "client_start" | "driver_end" | "client_end" | "edl_depart" | "edl_arrivee" | "pv_livraison" | "carte_grise" | "geo_depart" | "geo_arrivee" | string;
 export type OverrideMode = "skip" | "force" | "disable";
 
 interface Selfie { id: string; storage_path: string; taken_at: string }

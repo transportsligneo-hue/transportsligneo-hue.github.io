@@ -38,6 +38,10 @@ export interface LiveMissionMapProps {
   completed?: boolean;
   /** Plaque affichée sur la carte de synthèse (mission terminée). */
   completedPlaque?: string | null;
+  /** Plaque affichée dans le bandeau ETA admin (toute la durée de la mission). */
+  plate?: string | null;
+  /** Admin : remplace les cartes d'info par le bandeau ETA (fiche mission uniquement). */
+  etaStrip?: boolean;
 }
 
 /** Instantané des métriques calculées par la carte (source unique de vérité). */

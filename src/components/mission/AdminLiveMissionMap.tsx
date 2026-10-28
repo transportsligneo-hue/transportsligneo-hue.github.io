@@ -15,6 +15,7 @@ export function AdminLiveMissionMap({
   className,
   completed = false,
   completedPlaque = null,
+  plate = null,
 }: {
   attributionId: string;
   points: LiveGpsPoint[];
@@ -25,6 +26,7 @@ export function AdminLiveMissionMap({
   /** Mission terminée : carte de synthèse à la place des alertes de signal. */
   completed?: boolean;
   completedPlaque?: string | null;
+  plate?: string | null;
 }) {
   const { onMetrics, delayMinutes } = useMissionLiveMetrics(attributionId);
   return (
@@ -39,6 +41,8 @@ export function AdminLiveMissionMap({
       className={className}
       completed={completed}
       completedPlaque={completedPlaque}
+      plate={plate}
+      etaStrip
     />
   );
 }

@@ -14,7 +14,7 @@
 import { useEffect, useState } from "react";
 import {
   Shield, ShieldOff, Loader2, RotateCcw, SkipForward, CheckCircle2, Camera,
-  PenLine, ClipboardCheck,
+  PenLine, ClipboardCheck, MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,12 +35,14 @@ interface Override {
 type StepDef = { key: string; label: string; group: string; icon: typeof Camera };
 
 const STEPS: StepDef[] = [
+  { key: "geo_depart", label: "Blocage « vous êtes à X km » (position)", group: "Départ", icon: MapPin },
   { key: "selfie", label: "Selfie identité", group: "Départ", icon: Camera },
   { key: "driver_start", label: "Signature convoyeur", group: "Départ", icon: PenLine },
   { key: "client_start", label: "Signature client", group: "Départ", icon: PenLine },
   { key: "edl_depart", label: "État des lieux", group: "Départ", icon: ClipboardCheck },
   { key: "driver_end", label: "Signature convoyeur", group: "Arrivée", icon: PenLine },
   { key: "client_end", label: "Signature client", group: "Arrivée", icon: PenLine },
+  { key: "geo_arrivee", label: "Blocage « vous êtes à X km » (position)", group: "Arrivée", icon: MapPin },
   { key: "edl_arrivee", label: "État des lieux", group: "Arrivée", icon: ClipboardCheck },
 ];
 

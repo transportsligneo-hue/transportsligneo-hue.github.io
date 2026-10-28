@@ -147,6 +147,7 @@ export function ConvoyeurCell({
   disabled,
   locked,
   onAssign,
+  onOpenAssign,
 }: {
   meta: MissionMeta | undefined;
   convoyeurs: ConvoyeurOption[];
@@ -154,6 +155,8 @@ export function ConvoyeurCell({
   /** Mission terminée ou annulée : convoyeur conservé mais non modifiable */
   locked?: boolean;
   onAssign: (convoyeurId: string) => void;
+  /** Ouvre la fenêtre d'attribution (suggestions) — affiche le bouton « À attribuer » */
+  onOpenAssign?: () => void;
 }) {
   const [pending, setPending] = useState<{ id: string; nom: string } | null>(null);
   const current = meta?.convoyeurId ?? "";
@@ -171,6 +174,17 @@ export function ConvoyeurCell({
         >
           Verrouillé
         </span>
+      </div>
+    );
+  }
+
+  if (!current && onOpenAssign) {
+    return (
+      <div onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={onOpenAssign} className="adm-asg">
+          <span className="adm-asg-dot" />
+          À attribuer
+        </button>
       </div>
     );
   }

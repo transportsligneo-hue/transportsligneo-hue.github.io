@@ -167,7 +167,6 @@ function AdminLayout() {
         : undefined,
     },
     { to: "/admin/missions", label: "Missions", icon: RouteIcon },
-    { to: "/admin/attributions", label: "Attributions", icon: ClipboardList },
     { to: "/admin/devis", label: "Devis", icon: Receipt },
     { to: "/admin/factures", label: "Factures", icon: Receipt },
     {

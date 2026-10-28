@@ -346,7 +346,9 @@ export function MissionCockpit({
   }
 
   /** Le convoyeur doit être à moins de 2 km du lieu pour valider l'arrivée / lancer l'état des lieux. */
-  async function ensureNear(adresse: string | null | undefined, ville: string | null | undefined, lieu: string): Promise<boolean> {
+  async function ensureNear(adresse: string | null | undefined, ville: string | null | undefined, lieu: string, gateKey: "geo_depart" | "geo_arrivee"): Promise<boolean> {
+    // Bypass admin : le contrôle de position est levé pour cette mission
+    if (gates.isDisabled(gateKey)) return true;
     const cible = adresse || ville;
     if (!cible) return true; // aucune adresse connue : on ne bloque pas
     const tid = toast.loading("Vérification de votre position…");
@@ -384,11 +386,11 @@ export function MissionCockpit({
           setOpenSelfie(true);
           break;
         case "edl_depart":
-          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement"))) break;
+          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement", "geo_depart"))) break;
           onStartInspection("depart");
           break;
         case "edl_arrivee":
-          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison"))) break;
+          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison", "geo_arrivee"))) break;
           onStartInspection("arrivee");
           break;
         case "demarrer":
@@ -405,7 +407,7 @@ export function MissionCockpit({
           await Promise.resolve(onUpdated());
           break;
         case "arrive_depart":
-          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement"))) break;
+          if (!(await ensureNear(departAdresse, departVille, "lieu d'enlèvement", "geo_depart"))) break;
           await persistEtape("sur_place");
           await Promise.resolve(onUpdated());
           // Ouverture auto du selfie convoyeur (étape obligatoire suivante)
@@ -422,7 +424,7 @@ export function MissionCockpit({
           if (arriveeAdresse || arriveeVille) setOpenNavChoice(true);
           break;
         case "arrive_livraison":
-          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison"))) break;
+          if (!(await ensureNear(arriveeAdresse, arriveeVille, "lieu de livraison", "geo_arrivee"))) break;
           await persistEtape("arrive_destination");
           await Promise.resolve(onUpdated());
           // Pas d'ouverture automatique : le conducteur déclenche l'EDL d'arrivée

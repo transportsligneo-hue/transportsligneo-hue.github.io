@@ -1,3 +1,4 @@
+import { AssignDriverDialog } from "@/components/admin/AssignDriverDialog";
 import { SendTrackingCodeButton } from "@/components/mission/SendTrackingCodeButton";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,6 +72,7 @@ export function MissionUnifiedPanel({
   const [attributionId, setAttributionId] = useState<string | null>(null);
   const [prixSuggere, setPrixSuggere] = useState(mission.prixSuggere?.toString() ?? "");
   const [busy, setBusy] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
   const convertDemande = useServerFn(convertDemandeToMissions);
 
   const isTrajet = mission.kind === "trajet";
@@ -192,6 +194,18 @@ export function MissionUnifiedPanel({
   /* ---------- render ---------- */
   return (
     <>
+      {assignOpen && isTrajet && (
+        <AssignDriverDialog
+          open
+          onClose={() => setAssignOpen(false)}
+          trip={{ id: mission.id, depart: mission.depart, arrivee: mission.arrivee, date: mission.date, source: "trajet" }}
+          onAssigned={(t) => {
+            toast.success(`Mission attribuée à ${t.label}`);
+            setAssignOpen(false);
+            onChanged();
+          }}
+        />
+      )}
       <div className="a6-overlay" onClick={onClose} />
       <aside className="a6-panel adm6" role="dialog" aria-label="Détail mission">
         <header className="a6-panel-head">
@@ -214,13 +228,9 @@ export function MissionUnifiedPanel({
 
           {isTrajet && (
             <div className="flex flex-wrap gap-2 mt-3">
-              <Link
-                to="/admin/attributions"
-                search={{ trajet: mission.id }}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]"
-              >
+              <button type="button" onClick={() => setAssignOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]">
                 <UserPlus size={13} /> Attribution
-              </Link>
+              </button>
               {attributionId && (
                 <Link
                   to="/admin/missions/$missionId"
@@ -413,13 +423,9 @@ export function MissionUnifiedPanel({
               {!attributionId ? (
                 <div className="a6-card p-4">
                   <RadarEmptyV6 title="Aucun convoyeur attribué" subtitle="Le suivi GPS et l'état des lieux apparaîtront après attribution." />
-                  <Link
-                    to="/admin/attributions"
-                    search={{ trajet: mission.id }}
-                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]"
-                  >
+                  <button type="button" onClick={() => setAssignOpen(true)} className="mt-4 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold text-white bg-[var(--a6-blue,#2F5FFF)]">
                     <UserPlus size={14} /> Attribuer cette mission
-                  </Link>
+                  </button>
                 </div>
 
               ) : (
@@ -432,13 +438,9 @@ export function MissionUnifiedPanel({
                     >
                       <ExternalLink size={14} /> Ouvrir la fiche mission complète
                     </Link>
-                    <Link
-                      to="/admin/attributions"
-                      search={{ trajet: mission.id }}
-                      className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--a6-border)] bg-white"
-                    >
+                    <button type="button" onClick={() => setAssignOpen(true)} className="flex-1 min-w-[160px] inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[12.5px] font-bold border border-[var(--a6-border)] bg-white">
                       <UserPlus size={14} /> Gérer l'attribution
-                    </Link>
+                    </button>
                   </div>
                   <div className="rounded-2xl bg-[#0b1026] p-4">
                     <InspectionPreuvesBlock attributionId={attributionId} />

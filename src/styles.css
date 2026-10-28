@@ -12686,3 +12686,66 @@ html.theme-light .sv-otp i.f { border-color: #2f5fff; box-shadow: 0 0 0 3px rgba
 .pa-chiplist{display:flex;flex-wrap:wrap;gap:7px}
 .pa-chiplist span{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 11px;border-radius:99px;font-size:12.5px;font-weight:700;color:#fff;background:var(--c)}
 .pa-chiplist button{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.3);color:#fff;font-size:14px;line-height:1;border:0}
+
+
+/* ===== Admin : bandeau de page (toutes les sections) ===== */
+.adm-hero{color:#fff;background:radial-gradient(700px 320px at 80% -30%,rgba(70,140,255,.7),transparent 62%),radial-gradient(520px 260px at 6% 130%,rgba(0,220,255,.3),transparent 60%),radial-gradient(400px 200px at 50% 0%,rgba(120,80,255,.22),transparent 70%),linear-gradient(135deg,#070d34,#0e2080 58%,#1a45e0);box-shadow:0 18px 40px -20px rgba(28,63,196,.6),inset 0 1px 0 rgba(255,255,255,.12);animation:fleetHeaderIn .5s cubic-bezier(.2,.8,.3,1)}
+.adm-hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:34px 34px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);pointer-events:none}
+.adm-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#5aa0ff,#7fe3ff,transparent);filter:drop-shadow(0 0 6px #4da3ff)}
+.adm-hero-ghost{position:absolute;right:-8px;bottom:-30px;font:800 110px/1 'Inter',sans-serif;letter-spacing:-.04em;text-transform:uppercase;white-space:nowrap;color:transparent;-webkit-text-stroke:1.5px rgba(150,200,255,.15);pointer-events:none;z-index:0;max-width:100%;overflow:hidden}
+.adm-hero-icon{flex:none;width:60px;height:60px;border-radius:19px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#2f7dff,#1530c8);box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 0 0 6px rgba(80,150,255,.18),0 0 30px rgba(60,150,255,.7)}
+.adm-hero-crumb{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:600;letter-spacing:.04em;color:#8fb5ff;margin-bottom:2px}
+.adm-hero-title{margin:0;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.08;letter-spacing:-.03em;background:linear-gradient(180deg,#fff,#bcd6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.adm-hero-hl{color:#37e6ff;-webkit-text-fill-color:#37e6ff}
+.adm-hero-stat{min-width:116px;padding:9px 14px 8px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(160,200,255,.22);backdrop-filter:blur(10px)}
+.adm-hero-stat small{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9fc4ff;font-weight:600}
+.adm-hero-stat b{font-size:21px;font-weight:700}
+@media(max-width:900px){.adm-hero-ghost{display:none}.adm-hero-icon{width:48px;height:48px;border-radius:15px}}
+
+/* ===== Admin : boutons modernes (partout) ===== */
+.admin-btn-blue{background:linear-gradient(180deg,#4f86ff,#2f5fff 55%,#2347d9)!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 8px 20px -8px rgba(47,95,255,.7)!important;animation:none!important;letter-spacing:.005em}
+.admin-btn-blue:hover{transform:translateY(-1px);filter:brightness(1.07);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 12px 26px -8px rgba(47,95,255,.85),0 0 22px rgba(60,160,255,.45)!important}
+.admin-btn-blue:active{transform:translateY(0) scale(.985)}
+.adm-btn{border-radius:11px!important;font-weight:600;transition:transform .16s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease}
+.adm-btn:hover:not(:disabled){transform:translateY(-1px)}
+.adm-btn:active:not(:disabled){transform:translateY(0) scale(.985)}
+.adm-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(47,95,255,.35)}
+.adm-btn-secondary{background:#fff;color:#14234d;border:1px solid #d7e0f5;box-shadow:0 1px 2px rgba(20,35,77,.06)}
+.adm-btn-secondary:hover:not(:disabled){border-color:#2f5fff;color:#2347d9;background:#f4f7ff;box-shadow:0 8px 18px -10px rgba(47,95,255,.5)}
+.adm-btn-ghost{color:#4a5a86}.adm-btn-ghost:hover:not(:disabled){background:#eef3ff;color:#2347d9}
+.adm-btn-danger{background:#fff1f1;color:#c81e1e;border:1px solid #ffd0d0}.adm-btn-danger:hover:not(:disabled){background:#e03131;color:#fff;border-color:#e03131;box-shadow:0 10px 22px -10px rgba(224,49,49,.7)}
+.adm-btn-success{background:linear-gradient(180deg,#22c58b,#0ea371);color:#fff;border:1px solid rgba(255,255,255,.18);box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 8px 18px -8px rgba(14,163,113,.7)}
+
+/* ===== Admin : bandeau ETA du suivi GPS (au-dessus de la carte Mapbox) ===== */
+.ets{position:absolute;left:12px;right:12px;bottom:12px;z-index:400;border-radius:16px;padding:10px 12px;color:#fff;background:linear-gradient(135deg,rgba(8,16,64,.94),rgba(20,50,170,.92));border:1px solid rgba(120,170,255,.4);box-shadow:0 18px 40px -14px rgba(8,16,64,.7),0 0 24px rgba(47,95,255,.3);backdrop-filter:blur(14px)}
+.ets::before{content:"";position:absolute;left:16px;right:16px;top:0;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#7cc4ff,#6ea1ff,transparent)}
+.ets small{display:block;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#9fb5f2;font-weight:600}
+.ets-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-right:34px}
+.ets-id{display:flex;align-items:center;gap:8px;flex:none}
+.ets-chip{display:inline-flex;gap:6px;align-items:center;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(110,161,255,.2);color:#bcd2ff;white-space:nowrap}
+.ets-chip i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.ets-chip.ok{background:rgba(52,211,153,.18);color:#6ee7b7}.ets-chip.warn{background:rgba(251,191,36,.2);color:#fcd34d}
+.ets-road{flex:1;min-width:180px}
+.ets-kpis{display:flex;gap:6px;flex:none}
+.ets-kpis>div{padding:3px 9px;border-radius:12px;background:rgba(8,20,80,.5);border:1px solid rgba(60,200,255,.55);box-shadow:0 0 14px rgba(40,150,255,.35),inset 0 0 12px rgba(40,150,255,.18)}
+.ets .neon{display:block;font-size:17px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:#37e6ff;text-shadow:0 0 6px rgba(55,230,255,.9),0 0 18px rgba(30,150,255,.95),0 0 34px rgba(30,120,255,.7)}
+.ets .neon u{text-decoration:none;font-size:11px;margin-left:3px;opacity:.85}
+.ets-tg{position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;transition:transform .2s}.ets.open .ets-tg{transform:rotate(180deg)}
+.ets-sg-b{display:flex;gap:3px;align-items:center;height:28px}
+.ets-sg-b u{flex:1;height:10px;border-radius:3px;background:rgba(150,190,255,.18);text-decoration:none}
+.ets-sg-b u.on{height:18px;background:linear-gradient(180deg,#8be9ff,#2f8bff);box-shadow:0 0 8px rgba(60,170,255,.75);animation:etsWv 2.4s ease-in-out infinite;animation-delay:calc(var(--d)*-60ms)}
+.ets-sg-b u.hd{height:28px;width:5px;flex:none;background:#fff;box-shadow:0 0 0 2px rgba(80,170,255,.5),0 0 18px #5ec8ff;animation:etsHd 1.4s ease-in-out infinite}
+@keyframes etsWv{50%{height:21px;filter:brightness(1.25)}}@keyframes etsHd{50%{box-shadow:0 0 0 5px rgba(80,170,255,.15),0 0 26px #8be9ff;opacity:.8}}
+.ets-sg-l{display:none;justify-content:space-between;margin-top:4px;font-size:11px;color:#a9c0f5;font-weight:600}.ets.open .ets-sg-l{display:flex}
+.ets-sg-l .m{color:#5ec8ff}.ets-sg-l .sd{color:#37e6ff}.ets-sg-l .sa{color:#c7a2ff}
+.ets-sg-l .sd::before,.ets-sg-l .sa::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:currentColor;box-shadow:0 0 8px currentColor}
+.ets-b{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:10px}
+.ets-tile{padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);min-width:0}
+.ets-tile small{display:flex;gap:5px;align-items:center;white-space:nowrap;overflow:hidden}.ets-tile b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ets-tile.warn{border-color:rgba(251,191,36,.6);color:#fcd34d}
+@media(max-width:720px){.ets-b{grid-template-columns:repeat(2,minmax(0,1fr))}.ets-road{order:3;flex-basis:100%}.ets-kpis{margin-left:auto}}
+
+/* Bouton « À attribuer » (liste Missions) — orange doux, pas rouge */
+.adm-asg{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:11px;font-size:12px;font-weight:700;color:#b45309;background:linear-gradient(180deg,#fff7ea,#ffeed3);border:1px solid #f9d9a8;box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 6px 14px -8px rgba(217,119,6,.6);transition:transform .16s,box-shadow .2s}
+.adm-asg:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 10px 20px -8px rgba(217,119,6,.75)}
+.adm-asg-dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2)}
