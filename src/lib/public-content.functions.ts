@@ -52,6 +52,15 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
 
     // Liste d'attente convoyeur : accusé de réception candidat + alerte admin
     if (isWaitlist) {
+      // Fiche complète pour la page admin « Liste d'attente » (échec non bloquant).
+      try {
+        await (supabaseAdmin as any).from("convoyeur_waitlist").upsert(
+          { email, nom: data.nom, telephone: data.telephone, ville: data.ville, adresse: data.adresse, updated_at: new Date().toISOString() },
+          { onConflict: "email" },
+        );
+      } catch (e) {
+        console.error("[waitlist] table insert failed", e);
+      }
       const dateFr = new Intl.DateTimeFormat("fr-FR", {
         dateStyle: "short",
         timeStyle: "short",
