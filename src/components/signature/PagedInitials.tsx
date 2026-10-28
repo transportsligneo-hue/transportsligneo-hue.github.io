@@ -106,10 +106,7 @@ export function PagedInitials({ docUrl, initialsPng, btn, btn2, card, onDone, on
           <canvas ref={pageCvs} className="block max-w-full" />
           {rendering && <div className="absolute inset-0 grid place-items-center bg-white/70"><Loader2 className="animate-spin text-[#2f5fff]" /></div>}
           {here && initialsPng && (
-            <div className="absolute bottom-2 right-2 rounded-md border border-emerald-300 bg-white/90 px-1.5 py-0.5 flex items-center gap-1">
-              <img src={initialsPng} alt="Paraphe" className="h-7 w-auto" />
-              <CheckCircle2 size={14} className="text-emerald-600" />
-            </div>
+            <img src={initialsPng} alt="Paraphe" className="absolute right-[8%] bottom-[5.5%] h-[5%] min-h-8 w-auto pointer-events-none" />
           )}
         </div>
       </div>

@@ -148,14 +148,12 @@ export async function buildSignedPdf(opts: {
     try {
       const ini = await pdf.embedPng(opts.initialsPng);
       const all = pdf.getPages();
-      const maxW = 62, maxH = 26;
+      const maxW = 78, maxH = 34;
       const sc = Math.min(maxW / ini.width, maxH / ini.height);
       const iw = ini.width * sc, ih = ini.height * sc;
-      all.forEach((pg, i) => {
-        const x = pg.getWidth() - iw - 26;
-        pg.drawRectangle({ x: x - 4, y: 10, width: iw + 8, height: ih + 14, color: rgb(1, 1, 1), opacity: 0.85, borderColor: rgb(0.8, 0.84, 0.94), borderWidth: 0.5 });
-        pg.drawImage(ini, { x, y: 20, width: iw, height: ih });
-        pg.drawText(win(`Paraphe p. ${i + 1}/${all.length}`), { x: x - 1, y: 13, size: 5.5, font: f, color: rgb(0.5, 0.52, 0.58) });
+      // paraphe « au stylo » : encre seule (fond transparent), en bas à droite, juste au-dessus du pied de page
+      all.forEach((pg) => {
+        pg.drawImage(ini, { x: pg.getWidth() - iw - 52, y: 38, width: iw, height: ih });
       });
     } catch (e) { console.error("[esign] apposition des paraphes", e); }
   }
