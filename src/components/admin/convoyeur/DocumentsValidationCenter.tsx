@@ -28,6 +28,7 @@ import {
   X,
   Upload,
   ShieldCheck,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,6 +66,7 @@ interface Props {
 }
 
 type Statut = "approuve" | "refuse" | "a_renvoyer" | "en_attente";
+type Filtre = "all" | Statut;
 
 function statutMeta(s: string | null | undefined): { label: string; tone: string; Icon: typeof CheckCircle2 } {
   switch (s) {
@@ -99,6 +101,11 @@ export function DocumentsValidationCenter({
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<{ url: string; name: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [filtre, setFiltre] = useState<Filtre>("all");
+  const [motifDlg, setMotifDlg] = useState<{ docs: DocRow[]; statut: "refuse" | "a_renvoyer" } | null>(null);
+  const [motifTxt, setMotifTxt] = useState("");
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -162,8 +169,8 @@ export function DocumentsValidationCenter({
     return { total, approuves, refuses, manquants };
   }, [requiredTypes, byType]);
 
-  const updateStatut = async (doc: DocRow, statut: Statut, motif?: string) => {
-    setBusyId(doc.id);
+  /** Écrit le statut en base + trace d'activité (par document). */
+  const persistStatut = async (doc: DocRow, statut: Statut, motif?: string): Promise<boolean> => {
     const { data: u } = await supabase.auth.getUser();
     const payload: Record<string, unknown> = {
       statut_validation: statut,
@@ -171,18 +178,13 @@ export function DocumentsValidationCenter({
       valide_par: u.user?.id ?? null,
       valide_le: new Date().toISOString(),
     };
-    // Optimistic
+    // Optimiste
     setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, ...(payload as Partial<DocRow>) } : d)));
     const { error } = await supabase.from("documents_convoyeurs").update(payload as never).eq("id", doc.id);
-    setBusyId(null);
     if (error) {
       toast.error("Échec de la mise à jour", { description: error.message });
-      await load();
-      return;
+      return false;
     }
-
-    // Trace + email best-effort (non bloquant).
-    const typeLabel = getConvoyeurDocLabel(doc.type_document);
     try {
       await supabase.rpc("log_activity" as never, {
         _action:
@@ -196,7 +198,14 @@ export function DocumentsValidationCenter({
         _metadata: { type_document: doc.type_document, motif: motif ?? null, convoyeur_id: convoyeurId } as never,
       } as never);
     } catch { /* ignore */ }
+    return true;
+  };
 
+  /** Prévient le convoyeur UNE seule fois (push, in-app, e-mail) même pour plusieurs documents. */
+  const notifyConvoyeur = async (docsDone: DocRow[], statut: Statut, motif?: string) => {
+    if (!docsDone.length) return;
+    const labels = docsDone.map((d) => getConvoyeurDocLabel(d.type_document));
+    const typeLabel = labels.join(", ");
     notifyDriver({
       convoyeurId,
       event: statut === "approuve" ? "document_valide" : "document_refuse",
@@ -205,25 +214,20 @@ export function DocumentsValidationCenter({
           ? typeLabel
           : `${typeLabel}${motif ? ` — ${motif}` : ""}${statut === "a_renvoyer" ? " (à renvoyer)" : ""}`,
     });
-
-    // Notification in-app (RPC SECURITY DEFINER).
     try {
-      const { data: c } = await supabase
-        .from("convoyeurs")
-        .select("user_id")
-        .eq("id", convoyeurId)
-        .maybeSingle();
+      const { data: c } = await supabase.from("convoyeurs").select("user_id").eq("id", convoyeurId).maybeSingle();
       const userId = (c as { user_id?: string } | null)?.user_id;
       if (userId) {
+        const plur = docsDone.length > 1;
         await supabase.rpc("create_user_notification" as never, {
           _user_id: userId,
           _type: "document",
           _titre:
             statut === "approuve"
-              ? `Document approuvé : ${typeLabel}`
+              ? `${plur ? "Documents approuvés" : "Document approuvé"} : ${typeLabel}`
               : statut === "refuse"
-                ? `Document refusé : ${typeLabel}`
-                : `Document à renvoyer : ${typeLabel}`,
+                ? `${plur ? "Documents refusés" : "Document refusé"} : ${typeLabel}`
+                : `${plur ? "Documents à renvoyer" : "Document à renvoyer"} : ${typeLabel}`,
           _message: motif || null,
           _link: "/convoyeur/documents",
           _category: "document",
@@ -231,13 +235,12 @@ export function DocumentsValidationCenter({
         } as never);
       }
     } catch { /* ignore */ }
-
     if (statut !== "approuve") {
       try {
         await sendTransactionalEmail({
           templateName: "convoyeur-document-status",
           recipientEmail: convoyeurEmail,
-          idempotencyKey: `doc-${doc.id}-${statut}-${Date.now()}`,
+          idempotencyKey: `doc-${docsDone.map((d) => d.id).join("-")}-${statut}-${Date.now()}`,
           templateData: {
             prenom: convoyeurPrenom,
             nom: convoyeurNom,
@@ -248,28 +251,69 @@ export function DocumentsValidationCenter({
         });
       } catch { /* template optionnel — ne bloque pas */ }
     }
+  };
 
+  const updateStatut = async (doc: DocRow, statut: Statut, motif?: string) => {
+    setBusyId(doc.id);
+    const ok = await persistStatut(doc, statut, motif);
+    setBusyId(null);
+    if (!ok) {
+      await load();
+      return;
+    }
+    await notifyConvoyeur([doc], statut, motif);
+    setSelected((prev) => {
+      const n = new Set(prev);
+      n.delete(doc.id);
+      return n;
+    });
     toast.success(
-      statut === "approuve"
-        ? "Document approuvé"
-        : statut === "refuse"
-          ? "Document refusé"
-          : "Demande de nouveau document envoyée",
+      statut === "approuve" ? "Document approuvé" : statut === "refuse" ? "Document refusé" : "Demande de nouveau document envoyée",
     );
     onChanged?.();
   };
 
-  const askMotifAndUpdate = async (doc: DocRow, statut: "refuse" | "a_renvoyer") => {
-    const promptTxt =
-      statut === "refuse"
-        ? "Motif du refus (visible par le convoyeur) :"
-        : "Précisez ce que vous attendez pour ce nouveau document :";
-    const motif = window.prompt(promptTxt) ?? "";
-    if (statut === "a_renvoyer" && !motif.trim()) {
+  /** Traitement en lot : une écriture par document, mais une seule notification. */
+  const bulkUpdate = async (targets: DocRow[], statut: Statut, motif?: string) => {
+    if (!targets.length) return;
+    setBulkBusy(true);
+    const done: DocRow[] = [];
+    for (const d of targets) {
+      if (await persistStatut(d, statut, motif)) done.push(d);
+    }
+    if (done.length) await notifyConvoyeur(done, statut, motif);
+    setBulkBusy(false);
+    setSelected(new Set());
+    if (done.length !== targets.length) {
+      toast.error(`${targets.length - done.length} document(s) n'ont pas pu être mis à jour`);
+      await load();
+    }
+    if (done.length) {
+      toast.success(
+        `${done.length} document${done.length > 1 ? "s" : ""} ${
+          statut === "approuve" ? "approuvé" : statut === "refuse" ? "refusé" : "à renvoyer"
+        }${done.length > 1 ? "s" : ""}`,
+      );
+    }
+    onChanged?.();
+  };
+
+  const askMotif = (targets: DocRow[], statut: "refuse" | "a_renvoyer") => {
+    setMotifTxt("");
+    setMotifDlg({ docs: targets, statut });
+  };
+
+  const confirmMotif = async () => {
+    if (!motifDlg) return;
+    const motif = motifTxt.trim();
+    if (motifDlg.statut === "a_renvoyer" && !motif) {
       toast.error("Un message est requis pour une demande de nouveau document.");
       return;
     }
-    await updateStatut(doc, statut, motif.trim() || undefined);
+    const { docs: targets, statut } = motifDlg;
+    setMotifDlg(null);
+    if (targets.length === 1) await updateStatut(targets[0], statut, motif || undefined);
+    else await bulkUpdate(targets, statut, motif || undefined);
   };
 
   const download = async (doc: DocRow) => {
@@ -286,163 +330,145 @@ export function DocumentsValidationCenter({
     setPreview({ url, name: doc.nom_fichier });
   };
 
+  // Documents visibles selon le filtre ; sélectionnables = déposés et pas encore approuvés.
+  const visible = requiredTypes
+    .map((t) => ({ t, doc: byType[t.key] }))
+    .filter(({ doc }) => filtre === "all" || (doc && (doc.statut_validation ?? "en_attente") === filtre));
+  const selectable = visible.filter(({ doc }) => doc && !isConvoyeurDocApproved(doc.statut_validation)).map(({ doc }) => doc as DocRow);
+  const allSelected = selectable.length > 0 && selectable.every((d) => selected.has(d.id));
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(selectable.map((d) => d.id)));
+  const selectedDocs = docs.filter((d) => selected.has(d.id));
+  const countBy = (s: Statut) => requiredTypes.filter((t) => (byType[t.key]?.statut_validation ?? (byType[t.key] ? "en_attente" : "")) === s).length;
+  const attente = countBy("en_attente");
+  const totalDeposes = requiredTypes.filter((t) => byType[t.key]).length;
+  const approuvesAll = requiredTypes.filter((t) => isConvoyeurDocApproved(byType[t.key]?.statut_validation)).length;
+  const pct = requiredTypes.length ? Math.round((approuvesAll / requiredTypes.length) * 100) : 0;
+  const initiales = `${convoyeurPrenom?.[0] ?? ""}${convoyeurNom?.[0] ?? ""}`.toUpperCase();
+
   return (
-    <div className="space-y-4">
-      {/* Compteurs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {[
-          { label: "Requis", value: stats.total, tone: "bg-slate-50 text-slate-700 ring-slate-200" },
-          { label: "Approuvés", value: stats.approuves, tone: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-          { label: "Refusés", value: stats.refuses, tone: "bg-red-50 text-red-700 ring-red-200" },
-          { label: "Manquants", value: stats.manquants, tone: "bg-amber-50 text-amber-700 ring-amber-200" },
-        ].map((c) => (
-          <div key={c.label} className={`rounded-lg ring-1 ring-inset px-3 py-2 ${c.tone}`}>
-            <p className="text-[10px] uppercase tracking-wide opacity-70">{c.label}</p>
-            <p className="text-lg font-semibold leading-tight">{c.value}</p>
+    <div className="dvc space-y-4">
+      {/* Bandeau */}
+      <div className="dvc-hero">
+        <div className="dvc-hl">
+          <span className="dvc-av">{initiales || "?"}</span>
+          <div className="min-w-0">
+            <small>Convoyeurs › Documents</small>
+            <h2>{convoyeurPrenom} {convoyeurNom}</h2>
+            <span className="dvc-sub">{typeConvoyeur === "independant" || typeConvoyeur === "indépendant" ? "Indépendant" : typeConvoyeur}</span>
           </div>
-        ))}
+        </div>
+        <div className="dvc-hr">
+          <div className="dvc-kp"><small>À traiter</small><b>{attente}</b></div>
+          <div className="dvc-kp"><small>Manquants</small><b>{stats.manquants}</b></div>
+          <div className="dvc-ring" style={{ ["--p" as string]: pct }}>
+            <i><span>{approuvesAll}/{requiredTypes.length}</span><small>validés</small></i>
+          </div>
+        </div>
+      </div>
+
+      {/* Barre d'outils : tout sélectionner + filtres */}
+      <div className="dvc-tool">
+        <button type="button" className="dvc-all" onClick={toggleAll} disabled={selectable.length === 0}>
+          <span className={`dvc-chk ${allSelected ? "on" : ""}`}><Check size={13} strokeWidth={3} /></span>
+          {allSelected ? "Tout désélectionner" : "Tout sélectionner (à traiter)"}
+        </button>
+        <div className="dvc-chips">
+          {([
+            ["all", "Tous", requiredTypes.length],
+            ["en_attente", "En attente", countBy("en_attente")],
+            ["approuve", "Approuvés", countBy("approuve")],
+            ["refuse", "Refusés", countBy("refuse")],
+            ["a_renvoyer", "À renvoyer", countBy("a_renvoyer")],
+          ] as [Filtre, string, number][]).map(([k, l, n]) => (
+            <button key={k} type="button" className={`dvc-chip ${filtre === k ? "act" : ""}`} onClick={() => setFiltre(k)}>
+              {l}<b>{n}</b>
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
-        <div className="rounded-lg border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-          Chargement des documents…
-        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">Chargement des documents…</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {requiredTypes.map((t) => {
-            const doc = byType[t.key];
+        <div className="dvc-grid">
+          {visible.map(({ t, doc }) => {
             const meta = statutMeta(doc?.statut_validation);
             const url = doc ? signedUrls[doc.id] : undefined;
             const showThumb = doc && url && isImage(doc.nom_fichier);
             const showPdf = doc && url && isPdf(doc.nom_fichier);
-
+            const approved = doc ? isConvoyeurDocApproved(doc.statut_validation) : false;
+            const on = !!doc && selected.has(doc.id);
+            const tone = approved ? "ok" : doc?.statut_validation === "refuse" ? "ko" : doc?.statut_validation === "a_renvoyer" ? "or" : doc ? "wa" : "mi";
             return (
-              <div
-                key={t.key}
-                className="rounded-xl border border-slate-200 bg-white overflow-hidden flex flex-col"
-              >
-                {/* Header */}
-                <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2">
-                  <FileText size={14} className="text-slate-400" />
-                  <span className="text-sm font-medium text-slate-800">{t.label}</span>
-                  {doc ? (
-                    <span
-                      className={`ml-auto inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${meta.tone}`}
-                    >
-                      <meta.Icon size={11} />
-                      {meta.label}
-                    </span>
-                  ) : (
-                    <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-500 px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ring-slate-200">
-                      <Upload size={11} /> Manquant
-                    </span>
-                  )}
+              <div key={t.key} className={`dvc-card ${on ? "on" : ""} ${!doc ? "miss" : ""}`}>
+                {doc && !approved && (
+                  <button type="button" className="dvc-sel" onClick={() => toggle(doc.id)} aria-label={`Sélectionner ${t.label}`}>
+                    <span className={`dvc-chk ${on ? "on" : ""}`}><Check size={13} strokeWidth={3} /></span>
+                  </button>
+                )}
+                <div className={`dvc-ct ${doc && !approved ? "" : "nosel"}`}>
+                  <h3>{t.label}</h3>
+                  <span className={`dvc-st ${tone}`}>
+                    <i />
+                    {doc ? meta.label : "Manquant"}
+                  </span>
                 </div>
 
-                {/* Aperçu */}
-                <div className="relative bg-slate-50 min-h-[140px] flex items-center justify-center">
+                <div className="dvc-pv" onClick={() => doc && url && openPreview(doc)}>
                   {showThumb ? (
-                    <img
-                      src={url}
-                      alt={t.label}
-                      loading="lazy"
-                      className="max-h-40 w-auto object-contain cursor-zoom-in"
-                      onClick={() => doc && openPreview(doc)}
-                    />
+                    <img src={url} alt={t.label} loading="lazy" className="max-h-36 w-auto object-contain" />
                   ) : showPdf ? (
-                    <div className="flex flex-col items-center gap-2 py-6 text-slate-500">
-                      <FileText size={28} className="text-red-500" />
-                      <span className="text-xs">Fichier PDF</span>
-                      <button
-                        onClick={() => doc && openPreview(doc)}
-                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                      >
-                        <Eye size={12} /> Prévisualiser
-                      </button>
-                    </div>
+                    <div className="dvc-pg"><i /><i /><i /><i /><i /><i /><i /><i /></div>
                   ) : doc ? (
-                    <div className="text-xs text-slate-400 py-6">Aperçu indisponible</div>
+                    <span className="dvc-mis">Aperçu indisponible</span>
                   ) : (
-                    <div className="text-xs text-slate-400 py-6">Aucun fichier déposé</div>
+                    <span className="dvc-mis"><Upload size={22} className="mx-auto mb-1" />Aucun fichier déposé</span>
                   )}
-                  {doc && url && (
-                    <button
-                      onClick={() => openPreview(doc)}
-                      title="Plein écran"
-                      className="absolute top-1.5 right-1.5 rounded-md bg-white/90 backdrop-blur px-1.5 py-1 text-slate-600 shadow-sm hover:bg-white"
-                    >
-                      <Maximize2 size={12} />
-                    </button>
-                  )}
+                  {doc && url && <span className="dvc-ex"><Maximize2 size={13} /></span>}
                 </div>
 
-                {/* Infos + actions */}
-                <div className="px-3 py-2 space-y-1.5 text-[11px] text-slate-500">
+                <div className="dvc-info">
                   {doc ? (
                     <>
-                      <p className="truncate text-slate-700" title={doc.nom_fichier}>{doc.nom_fichier}</p>
-                      <p>
-                        Envoyé le {new Date(doc.created_at).toLocaleDateString("fr-FR")} à{" "}
-                        {new Date(doc.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      <b title={doc.nom_fichier}>{doc.nom_fichier}</b>
+                      Envoyé le {new Date(doc.created_at).toLocaleDateString("fr-FR")} à{" "}
+                      {new Date(doc.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                       {doc.valide_le && (
-                        <p>
-                          {isConvoyeurDocApproved(doc.statut_validation) ? "Validé" : "Traité"} le{" "}
-                          {new Date(doc.valide_le).toLocaleDateString("fr-FR")}
-                        </p>
+                        <><br />{approved ? "Validé" : "Traité"} le {new Date(doc.valide_le).toLocaleDateString("fr-FR")}</>
                       )}
                       {doc.motif_refus && (
-                        <p className="flex items-start gap-1 text-red-600">
-                          <MessageSquare size={11} className="mt-0.5 shrink-0" />
-                          <span className="italic">{doc.motif_refus}</span>
-                        </p>
+                        <span className="dvc-motif"><MessageSquare size={11} /> {doc.motif_refus}</span>
                       )}
                     </>
                   ) : (
-                    <p className="italic">Le convoyeur n'a pas encore transmis ce document.</p>
+                    <i>Le convoyeur n'a pas encore transmis ce document.</i>
                   )}
                 </div>
 
                 {doc && (
-                  <div className="flex flex-wrap gap-1.5 px-3 pb-3 pt-1 border-t border-slate-100 mt-auto">
-                    <button
-                      onClick={() => openPreview(doc)}
-                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                    >
-                      <Eye size={12} /> Ouvrir
-                    </button>
-                    <button
-                      onClick={() => download(doc)}
-                      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                    >
-                      <Download size={12} /> Télécharger
-                    </button>
-                    <button
-                      disabled={busyId === doc.id || isConvoyeurDocApproved(doc.statut_validation)}
-                      onClick={() => updateStatut(doc, "approuve")}
-                      className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-40"
-                    >
-                      <CheckCircle2 size={12} /> Approuver
-                    </button>
-                    <button
-                      disabled={busyId === doc.id || doc.statut_validation === "refuse"}
-                      onClick={() => askMotifAndUpdate(doc, "refuse")}
-                      className="inline-flex items-center gap-1 rounded-md bg-red-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-red-700 disabled:opacity-40"
-                    >
-                      <XCircle size={12} /> Refuser
-                    </button>
-                    <button
-                      disabled={busyId === doc.id}
-                      onClick={() => askMotifAndUpdate(doc, "a_renvoyer")}
-                      className="inline-flex items-center gap-1 rounded-md border border-orange-200 bg-orange-50 px-2 py-1 text-[11px] font-medium text-orange-700 hover:bg-orange-100 disabled:opacity-40"
-                    >
-                      <RotateCcw size={12} /> Nouveau doc
-                    </button>
+                  <div className="dvc-act">
+                    <button type="button" className="dvc-b g" onClick={() => openPreview(doc)}><Eye size={14} />Ouvrir</button>
+                    <button type="button" className="dvc-b g" onClick={() => download(doc)}><Download size={14} />Télécharger</button>
+                    <button type="button" className="dvc-b ok" disabled={busyId === doc.id || approved} onClick={() => updateStatut(doc, "approuve")}><CheckCircle2 size={14} />Approuver</button>
+                    <button type="button" className="dvc-b ko" disabled={busyId === doc.id || doc.statut_validation === "refuse"} onClick={() => askMotif([doc], "refuse")}><XCircle size={14} />Refuser</button>
+                    <button type="button" className="dvc-b or" disabled={busyId === doc.id} onClick={() => askMotif([doc], "a_renvoyer")}><RotateCcw size={14} />Nouveau doc</button>
                   </div>
                 )}
               </div>
             );
           })}
+          {visible.length === 0 && (
+            <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+              Aucun document dans ce filtre.
+            </div>
+          )}
         </div>
       )}
 
@@ -454,6 +480,50 @@ export function DocumentsValidationCenter({
           onChanged?.();
         }}
       />
+
+      {/* Barre d'actions en lot */}
+      <div className={`dvc-bar ${selectedDocs.length > 0 ? "show" : ""}`} role="toolbar" aria-label="Actions sur la sélection">
+        <div>
+          <span className="n">{selectedDocs.length}</span>
+          <small>sélectionné{selectedDocs.length > 1 ? "s" : ""}</small>
+        </div>
+        <button type="button" className="dvc-b ok" disabled={bulkBusy} onClick={() => bulkUpdate(selectedDocs, "approuve")}>
+          <CheckCircle2 size={14} />{bulkBusy ? "Validation…" : "Valider la sélection"}
+        </button>
+        <button type="button" className="dvc-b ko" disabled={bulkBusy} onClick={() => askMotif(selectedDocs, "refuse")}>Refuser</button>
+        <button type="button" className="dvc-b g" disabled={bulkBusy} onClick={() => askMotif(selectedDocs, "a_renvoyer")}>Demander un nouveau doc</button>
+        <button type="button" className="dvc-b g" disabled={bulkBusy} onClick={() => setSelected(new Set())}>Annuler</button>
+      </div>
+
+      {/* Motif (un seul pour toute la sélection) */}
+      {motifDlg && (
+        <div className="fixed inset-0 z-[110] grid place-items-center bg-slate-950/60 p-4" onClick={() => setMotifDlg(null)}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h4 className="text-[17px] font-bold text-slate-900">
+              {motifDlg.statut === "refuse" ? "Refuser" : "Demander un nouveau document"}
+              {motifDlg.docs.length > 1 ? ` (${motifDlg.docs.length} documents)` : ""}
+            </h4>
+            <p className="mt-1 text-[12.5px] text-slate-500">
+              {motifDlg.docs.length > 1
+                ? "Un seul motif pour toute la sélection, un seul message au convoyeur."
+                : motifDlg.statut === "refuse"
+                  ? "Motif du refus (visible par le convoyeur)."
+                  : "Précisez ce que vous attendez pour ce nouveau document."}
+            </p>
+            <textarea
+              autoFocus
+              value={motifTxt}
+              onChange={(e) => setMotifTxt(e.target.value)}
+              placeholder="Message visible par le convoyeur…"
+              className="mt-3 h-24 w-full resize-none rounded-xl border border-slate-200 p-3 text-[13px] outline-none focus:border-[#2f5fff]"
+            />
+            <div className="mt-3 flex justify-end gap-2">
+              <button type="button" className="dvc-b g" onClick={() => setMotifDlg(null)}>Annuler</button>
+              <button type="button" className="dvc-b pr" onClick={confirmMotif}>Envoyer</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modale plein écran */}
       {preview && (
@@ -474,12 +544,7 @@ export function DocumentsValidationCenter({
           >
             <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200 text-sm text-slate-700">
               <span className="truncate">{preview.name}</span>
-              <a
-                href={preview.url}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs"
-              >
+              <a href={preview.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:underline text-xs">
                 <Download size={12} /> Télécharger
               </a>
             </div>

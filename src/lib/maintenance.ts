@@ -70,7 +70,13 @@ export function useMaintenance(): MaintenanceSettings | null {
     const load = async () => {
       try {
         const { data, error } = await (supabase as unknown as { rpc: (n: string) => Promise<{ data: unknown; error: unknown }> }).rpc("get_maintenance_status");
-        if (!alive || error) return;
+        if (!alive) return;
+        if (error) {
+          // Fonction SQL absente : repli sur la lecture directe (fonctionne pour un admin connecté).
+          const { data: row } = await supabase.from("app_settings").select("value").eq("key", MAINTENANCE_KEY).maybeSingle();
+          if (alive && row) setState(normalizeMaintenance((row as { value: unknown }).value));
+          return;
+        }
         setState(normalizeMaintenance(data));
       } catch { /* silencieux : sans réponse, le site reste ouvert */ }
     };
