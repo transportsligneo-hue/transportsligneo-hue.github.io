@@ -5,6 +5,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PagedInitials } from "@/components/signature/PagedInitials";
 import { useServerFn } from "@tanstack/react-start";
 import QRCode from "qrcode";
 import { CheckCircle2, Download, QrCode, FileText, Loader2, Mail, PenLine, ShieldCheck, Smartphone, XCircle, Eraser, ExternalLink } from "lucide-react";
@@ -30,7 +31,7 @@ type Info = {
   expiresAt: string; signedAt: string | null; declinedAt: string | null; docHash: string; consentText: string;
   maskedEmail?: string; maskedPhone?: string;
 };
-type Step = "read" | "code" | "sign" | "done" | "declined";
+type Step = "read" | "code" | "initials" | "sign" | "done" | "declined";
 
 const fmt = (iso: string) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
 
@@ -56,6 +57,7 @@ function SignaturePage() {
   const [channel, setChannel] = useState<"email" | "sms">("email");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [code, setCode] = useState("");
+  const [initialsPng, setInitialsPng] = useState<string>("");
   const [consent, setConsent] = useState(false);
   const [approved, setApproved] = useState(false);
   const [typedName, setTypedName] = useState("");
@@ -145,14 +147,14 @@ function SignaturePage() {
   });
   const checkCode = () => run(async () => {
     await verifyOtp({ data: { token, code } });
-    setStep("sign");
+    setStep("initials");
   });
   const submit = () => run(async () => {
     if (!cvs.current) return;
     const out = document.createElement("canvas");
     out.width = cvs.current.width; out.height = cvs.current.height;
     out.getContext("2d")!.drawImage(cvs.current, 0, 0);
-    await sign({ data: { token, signaturePng: out.toDataURL("image/png"), consent, typedName } });
+    await sign({ data: { token, signaturePng: out.toDataURL("image/png"), consent, typedName, initialsPng: initialsPng || undefined } });
     await load(); setStep("done");
   });
   const refuse = () => run(async () => { await decline({ data: { token, reason } }); setStep("declined"); setShowDecline(false); });
@@ -226,9 +228,9 @@ function SignaturePage() {
   const errBox = err && <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-3">{err}</div>;
   const stepper = (
     <ol className="flex items-center gap-2 text-xs text-[#6b7aa3]">
-      {(["read", "code", "sign"] as Step[]).map((s, i) => (
-        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "code", "sign"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
-          {i + 1}. {s === "read" ? "Lire" : s === "code" ? "Vérifier" : "Signer"}
+      {(["read", "code", "initials", "sign"] as Step[]).map((s, i) => (
+        <li key={s} className={"flex-1 rounded-full px-3 py-1.5 text-center " + (step === s ? "bg-[#2f5fff] text-white font-medium" : (["read", "code", "initials", "sign"].indexOf(step) > i ? "bg-[#dfe9ff] text-[#2f5fff]" : "bg-white border border-[#dfe6fb]"))}>
+          {i + 1}. {s === "read" ? "Lire" : s === "code" ? "Vérifier" : s === "initials" ? "Parapher" : "Signer"}
         </li>
       ))}
     </ol>
@@ -279,9 +281,13 @@ function SignaturePage() {
         <button className="w-full text-sm text-[#2f5fff] underline" disabled={busy} onClick={askCode}>Renvoyer un code</button>
       </div>
     )}
+    {step === "initials" && (
+      <PagedInitials docUrl={docUrl} signerName={info.signerName} btn={btn} btn2={btn2} card={card}
+        onDone={(png) => { setInitialsPng(png); setStep("sign"); }} />
+    )}
     {step === "sign" && (
       <div className={card + " space-y-4"}>
-        <div className="font-medium">3. Signez</div>
+        <div className="font-medium">4. Signez</div>
         <label className="flex gap-3 items-start text-sm rounded-xl bg-[#f5f8ff] border border-[#dfe6fb] p-3">
           <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-[#2f5fff]" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
           <span className="text-[#33415f]">{info.consentText}</span>

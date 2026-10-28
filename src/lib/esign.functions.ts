@@ -316,11 +316,12 @@ export const esignPublicVerifyOtp = createServerFn({ method: "POST" })
   });
 
 export const esignPublicSign = createServerFn({ method: "POST" })
-  .inputValidator((d: { token: string; signaturePng: string; consent: boolean; typedName: string }) => {
+  .inputValidator((d: { token: string; signaturePng: string; consent: boolean; typedName: string; initialsPng?: string }) => {
     if (!d.consent) throw new Error("Le consentement est obligatoire.");
     if (!d.signaturePng?.startsWith("data:image/png")) throw new Error("Signature invalide.");
     if (d.signaturePng.length > 1_500_000) throw new Error("Signature trop volumineuse.");
     if (!d.typedName?.trim()) throw new Error("Saisissez votre nom.");
+    if (d.initialsPng && (!d.initialsPng.startsWith("data:image/png") || d.initialsPng.length > 400_000)) throw new Error("Paraphe invalide.");
     return d;
   })
   .handler(async ({ data }) => {
@@ -351,12 +352,14 @@ export const esignPublicSign = createServerFn({ method: "POST" })
       throw new Error("Le document a été altéré : signature bloquée.");
     }
 
+    if (data.initialsPng) await S.logEvent(r.id, "initials_applied", { initials_sha256: await S.sha256Bytes(S.b64ToBytes(data.initialsPng)) }, meta);
     await S.logEvent(r.id, "consent_given", { consent_version: r.consent_version, typed_name: data.typedName.trim().slice(0, 120) }, meta);
 
     const sigBytes = S.b64ToBytes(data.signaturePng);
     const signedAt = new Date().toISOString();
     const method = otp.channel === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";
-    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, req: r as any, signedAt, ip: meta.ip, method, kind: r.kind });
+    const initialsBytes = data.initialsPng ? S.b64ToBytes(data.initialsPng) : undefined;
+    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, initialsPng: initialsBytes, req: r as any, signedAt, ip: meta.ip, method, kind: r.kind });
     const signedHash = await S.sha256Bytes(signed);
     const sigHash = await S.sha256Bytes(sigBytes);
 

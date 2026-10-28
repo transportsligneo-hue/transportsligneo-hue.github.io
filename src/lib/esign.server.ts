@@ -134,6 +134,8 @@ const paris = (iso: string) =>
 export async function buildSignedPdf(opts: {
   original: Uint8Array;
   signaturePng: Uint8Array;
+  /** Paraphe (initiales) apposé en bas à droite de chaque page du document d'origine. */
+  initialsPng?: Uint8Array;
   req: { id: string; title: string; signer_name: string; signer_email: string; signer_company?: string | null; doc_sha256: string; consent_version: string };
   signedAt: string; ip: string | null; method: string;
   /** "contrat_convoyeur" : la signature est aussi apposée dans l'encadré « Pour le prestataire » de la dernière page du contrat. */
@@ -142,6 +144,21 @@ export async function buildSignedPdf(opts: {
   const pdf = await PDFDocument.load(opts.original);
   const f = await pdf.embedFont(StandardFonts.Helvetica);
   const b = await pdf.embedFont(StandardFonts.HelveticaBold);
+  if (opts.initialsPng) {
+    try {
+      const ini = await pdf.embedPng(opts.initialsPng);
+      const all = pdf.getPages();
+      const maxW = 62, maxH = 26;
+      const sc = Math.min(maxW / ini.width, maxH / ini.height);
+      const iw = ini.width * sc, ih = ini.height * sc;
+      all.forEach((pg, i) => {
+        const x = pg.getWidth() - iw - 26;
+        pg.drawRectangle({ x: x - 4, y: 10, width: iw + 8, height: ih + 14, color: rgb(1, 1, 1), opacity: 0.85, borderColor: rgb(0.8, 0.84, 0.94), borderWidth: 0.5 });
+        pg.drawImage(ini, { x, y: 20, width: iw, height: ih });
+        pg.drawText(win(`Paraphe p. ${i + 1}/${all.length}`), { x: x - 1, y: 13, size: 5.5, font: f, color: rgb(0.5, 0.52, 0.58) });
+      });
+    } catch (e) { console.error("[esign] apposition des paraphes", e); }
+  }
   if (opts.kind === "contrat_convoyeur") {
     try {
       const pages = pdf.getPages();
