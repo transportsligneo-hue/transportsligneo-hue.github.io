@@ -11,7 +11,7 @@ import { AlertCircle, CheckCircle2, FileSignature } from "lucide-react";
 import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import EsignPanel from "@/components/admin/EsignPanel";
-import { esignConvoyeurDocsStatus, esignConvoyeurKbisInfo } from "@/lib/esign.functions";
+import { esignConvoyeurDocsStatus, esignConvoyeurKbisInfo, esignConvoyeurPermisInfo } from "@/lib/esign.functions";
 
 interface Props {
   convoyeurId: string;
@@ -33,6 +33,8 @@ export default function ContratYousignCard(props: Props) {
   const [adresse, setAdresse] = useState(props.adresse ?? "");
   const [permis, setPermis] = useState(props.permisNumero ?? "");
   const kbisInfo = useServerFn(esignConvoyeurKbisInfo);
+  const permisInfo = useServerFn(esignConvoyeurPermisInfo);
+  const [permisDate, setPermisDate] = useState("");
   const [kbisState, setKbisState] = useState<"idle" | "loading" | "done" | "none">("idle");
   const [denomination, setDenomination] = useState("");
 
@@ -53,6 +55,18 @@ export default function ContratYousignCard(props: Props) {
     return () => { dead = true; };
   }, [kbisInfo, props.convoyeurId, props.siret, props.adresse]);
 
+  // N° de permis + date de délivrance lus sur le permis déposé (si la fiche n'a pas déjà le numéro).
+  useEffect(() => {
+    if (props.permisNumero) return;
+    let dead = false;
+    void permisInfo({ data: { convoyeurId: props.convoyeurId } }).then((r) => {
+      if (dead || !r.ok) return;
+      if (r.numero) setPermis((v) => v || r.numero!);
+      if (r.delivre) setPermisDate(r.delivre);
+    }).catch(() => undefined);
+    return () => { dead = true; };
+  }, [permisInfo, props.convoyeurId, props.permisNumero]);
+
   useEffect(() => {
     void docsStatus({ data: { convoyeurId: props.convoyeurId } }).then((r) => setMissing(r.missing)).catch(() => setMissing(null));
   }, [docsStatus, props.convoyeurId]);
@@ -70,7 +84,7 @@ export default function ContratYousignCard(props: Props) {
       {kbisState === "done" && <p className="mt-3 text-xs text-emerald-700">SIRET et adresse repris automatiquement du Kbis{denomination ? ` (${denomination})` : ""}. Vous pouvez les corriger.</p>}
       {kbisState === "none" && !siret && <p className="mt-3 text-xs text-pro-text-soft">Kbis non lisible : saisissez le SIRET et l'adresse à la main.</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs text-pro-text-soft">SIRET<input value={siret} onChange={(e) => setSiret(e.target.value)} className={input} placeholder="000 000 000 00000" /><SiretBadge siret={siret} /></label>
+        <label className="text-xs text-pro-text-soft">SIRET<input value={siret} onChange={(e) => setSiret(e.target.value)} className={input} placeholder="000 000 000 00000" /><SiretBadge admin siret={siret} /></label>
         <label className="text-xs text-pro-text-soft">Adresse<input value={adresse} onChange={(e) => setAdresse(e.target.value)} className={input} placeholder="Adresse complète" /></label>
         <label className="text-xs text-pro-text-soft">N° de permis<input value={permis} onChange={(e) => setPermis(e.target.value)} className={input} placeholder="12AB34567" /></label>
       </div>
@@ -83,9 +97,9 @@ export default function ContratYousignCard(props: Props) {
           defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "", company: denomination }}
           getPdf={async () => {
             // conserve SIRET / adresse sur la fiche : ils servent ensuite à l'auto-facture
-            try { await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null }).eq("id", props.convoyeurId); } catch { /* non bloquant */ }
+            try { await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null, ...(permis ? { permis_numero: permis } : {}) }).eq("id", props.convoyeurId); } catch { /* non bloquant */ }
             return generateContratConvoyeurPdf(
-            { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null, date_naissance: props.dateNaissance ?? null, lieu_naissance: props.lieuNaissance ?? null },
+            { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null, permis_date: permisDate || null, date_naissance: props.dateNaissance ?? null, lieu_naissance: props.lieuNaissance ?? null },
             company,
           );
           }}

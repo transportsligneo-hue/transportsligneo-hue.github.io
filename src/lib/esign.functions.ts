@@ -644,6 +644,58 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
     }
   });
 
+/**
+ * Admin : lit le permis déposé par le convoyeur (recto) et en extrait le numéro et la date de délivrance,
+ * pour le contrat de partenariat.
+ */
+export const esignConvoyeurPermisInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { convoyeurId: string }) => d)
+  .handler(async ({ data, context }): Promise<{ ok: boolean; numero: string | null; delivre: string | null; error?: string }> => {
+    await assertAdmin(context);
+    const none = { ok: false, numero: null, delivre: null };
+    try {
+      const db = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
+      const { normalizeConvoyeurDocType } = await import("@/lib/convoyeur-documents");
+      const { data: docs } = await db.from("documents_convoyeurs")
+        .select("type_document, url_fichier, nom_fichier, statut_validation, created_at")
+        .eq("convoyeur_id", data.convoyeurId).order("created_at", { ascending: false });
+      const list = (docs ?? []).filter((d: any) => normalizeConvoyeurDocType(d.type_document) === "permis" && d.statut_validation !== "refuse");
+      const doc = list.find((d: any) => String(d.type_document).toLowerCase() === "permis") ?? list[0];
+      if (!doc) return { ...none, error: "Aucun permis déposé." };
+      const { data: blob, error } = await db.storage.from("convoyeur-documents").download(doc.url_fichier);
+      if (error || !blob) return { ...none, error: "Permis illisible." };
+      if (blob.size > 9_000_000) return { ...none, error: "Fichier trop volumineux." };
+      const ext = String(doc.nom_fichier ?? doc.url_fichier).toLowerCase().split(".").pop() ?? "";
+      const mime = blob.type && blob.type !== "application/octet-stream" ? blob.type : ext === "pdf" ? "application/pdf" : ext === "png" ? "image/png" : "image/jpeg";
+      const b64 = Buffer.from(await blob.arrayBuffer()).toString("base64");
+      const apiKey = process.env.GEMINI_API_KEY ?? process.env.LOVABLE_API_KEY;
+      if (!apiKey) return { ...none, error: "Service IA non configuré." };
+      const { callVisionTool, pickModel, getServerAiSettings } = await import("@/lib/ai/gateway.server");
+      const settings = await getServerAiSettings();
+      if (settings && !settings.ai_enabled) return { ...none, error: "IA désactivée." };
+      const res = await callVisionTool<{ numero?: string; delivre?: string }>({
+        apiKey,
+        model: pickModel("ocr_documents", settings?.model_overrides),
+        systemPrompt:
+          "Tu lis le recto d'un permis de conduire français/européen. Renvoie uniquement ce qui est écrit : " +
+          "le numéro du permis (rubrique 5, souvent 12 chiffres/lettres) et la date de délivrance (rubrique 4a, format JJ/MM/AAAA). " +
+          "Si illisible, laisse vide. N'invente rien.",
+        userText: "Extrais le numéro du permis (rubrique 5) et la date de délivrance (rubrique 4a).",
+        imageUrls: [`data:${mime};base64,${b64}`],
+        tool: { name: "report_permis", description: "Informations du permis.", parameters: { type: "object", properties: { numero: { type: "string" }, delivre: { type: "string" } }, required: [] } },
+        timeoutMs: 25_000,
+      });
+      if (!res.ok) return { ...none, error: res.error };
+      const numero = String(res.data.numero ?? "").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || null;
+      const d = String(res.data.delivre ?? "").match(/(\d{2})[\/.\-](\d{2})[\/.\-](\d{4})/);
+      const delivre = d ? `${d[1]}/${d[2]}/${d[3]}` : null;
+      return { ok: !!numero, numero, delivre, error: numero ? undefined : "Numéro illisible sur le permis." };
+    } catch {
+      return { ...none, error: "Lecture du permis impossible." };
+    }
+  });
+
 /* ======================================================================== */
 /*  RELAIS TÉLÉPHONE : signer sur le mobile, la signature revient sur le PC   */
 /*  Sans table : lien signé (HMAC, 15 min) + fichier temporaire dans le       */

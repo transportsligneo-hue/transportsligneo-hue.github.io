@@ -6,7 +6,7 @@ import { ChevronDown, Download, ExternalLink, FileSignature, Loader2, Search, Sh
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/admin/AdminUI";
 import ContratYousignCard from "@/components/admin/ContratYousignCard";
-import { esignConvoyeurKbisInfo, esignDownloadUrls, esignList } from "@/lib/esign.functions";
+import { esignConvoyeurPermisInfo, esignConvoyeurKbisInfo, esignDownloadUrls, esignList } from "@/lib/esign.functions";
 import { generateContratConvoyeurPdf } from "@/lib/documents-officiels";
 import { useCompanyInfo } from "@/hooks/useCompanyInfo";
 import { SiretBadge } from "@/components/SiretBadge";
@@ -44,6 +44,7 @@ function ContratsConvoyeursPage() {
   const list = useServerFn(esignList);
   const dl = useServerFn(esignDownloadUrls);
   const kbis = useServerFn(esignConvoyeurKbisInfo);
+  const permisFn = useServerFn(esignConvoyeurPermisInfo);
   const { data: company } = useCompanyInfo();
   const [convs, setConvs] = useState<Conv[]>([]);
   const [reqs, setReqs] = useState<Req[]>([]);
@@ -92,20 +93,24 @@ function ContratsConvoyeursPage() {
   const [bulk, setBulk] = useState(false);
   /** Lit le Kbis de chaque convoyeur sans SIRET/adresse et l'enregistre sur sa fiche. */
   const recupererKbis = async () => {
-    const cibles = convs.filter((c) => !isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom }) && (!c.siret || !c.adresse));
+    const cibles = convs.filter((c) => !isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom }) && (!c.siret || !c.adresse || !c.permis_numero));
     if (!cibles.length) { toast.info("Tous les convoyeurs ont déjà leur SIRET et leur adresse."); return; }
     setBulk(true);
     let ok = 0; const ko: string[] = [];
     for (const c of cibles) {
       const nom = [c.prenom, c.nom].filter(Boolean).join(" ") || c.email || "convoyeur";
       const k = await kbis({ data: { convoyeurId: c.id } }).catch(() => null);
-      if (k?.ok) {
-        await (supabase as any).from("convoyeurs").update({ siret: c.siret || k.siret || null, adresse: c.adresse || k.adresse || null }).eq("id", c.id);
+      const pi = c.permis_numero ? null : await permisFn({ data: { convoyeurId: c.id } }).catch(() => null);
+      if (k?.ok || pi?.ok) {
+        await (supabase as any).from("convoyeurs").update({
+          siret: c.siret || k?.siret || null, adresse: c.adresse || k?.adresse || null,
+          ...(pi?.ok && pi.numero ? { permis_numero: pi.numero } : {}),
+        }).eq("id", c.id);
         ok++;
-      } else ko.push(`${nom} (${k?.error ?? "illisible"})`);
+      } else ko.push(`${nom} (${k?.error ?? pi?.error ?? "illisible"})`);
     }
     setBulk(false);
-    if (ok) toast.success(`${ok} convoyeur(s) mis à jour depuis leur Kbis.`);
+    if (ok) toast.success(`${ok} convoyeur(s) mis à jour depuis leurs documents.`);
     if (ko.length) toast.error(`Non récupéré : ${ko.join(" · ")}`, { duration: 12000 });
     void load();
   };
@@ -123,8 +128,17 @@ function ContratsConvoyeursPage() {
           await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null }).eq("id", c.id);
         }
       }
+      let permisNum: string | null = c.permis_numero ?? null;
+      let permisDate: string | null = null;
+      if (!permisNum) {
+        const pi = await permisFn({ data: { convoyeurId: c.id } }).catch(() => null);
+        if (pi?.ok && pi.numero) {
+          permisNum = pi.numero; permisDate = pi.delivre;
+          await (supabase as any).from("convoyeurs").update({ permis_numero: pi.numero }).eq("id", c.id);
+        }
+      }
       const blob = await generateContratConvoyeurPdf(
-        { nom_complet: nom, siret: siret || null, adresse: adresse || null, permis_numero: c.permis_numero ?? c.permis ?? null, date_naissance: (c as any).date_naissance ?? null, lieu_naissance: (c as any).lieu_naissance ?? null },
+        { nom_complet: nom, siret: siret || null, adresse: adresse || null, permis_numero: permisNum, permis_date: permisDate, date_naissance: (c as any).date_naissance ?? null, lieu_naissance: (c as any).lieu_naissance ?? null },
         company,
       );
       const url = URL.createObjectURL(blob);
@@ -171,7 +185,7 @@ function ContratsConvoyeursPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={() => void recupererKbis()} disabled={bulk} className="btn-mini">
-          {bulk ? <Loader2 size={14} className="animate-spin" /> : <FileSignature size={14} />} Récupérer SIRET + adresse depuis les Kbis
+          {bulk ? <Loader2 size={14} className="animate-spin" /> : <FileSignature size={14} />} Récupérer SIRET, adresse et n° de permis
         </button>
         <div className="inline-flex rounded-lg border border-pro-border overflow-hidden text-sm">
           <button onClick={() => setTab("reel")} className={`px-3 py-1.5 ${tab === "reel" ? "bg-[#2F5FFF] text-white" : "bg-white"}`}>Convoyeurs</button>
@@ -227,7 +241,7 @@ function ContratsConvoyeursPage() {
                     nomComplet={nom}
                     email={c.email}
                     telephone={c.telephone}
-                    permisNumero={c.permis_numero ?? c.permis}
+                    permisNumero={c.permis_numero ?? null}
                     dateNaissance={(c as any).date_naissance} lieuNaissance={(c as any).lieu_naissance}
                     siret={c.siret}
                     adresse={c.adresse}
