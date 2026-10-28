@@ -127,6 +127,22 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
             .eq("user_id", userId)
             .maybeSingle();
 
+          // SIRET + adresse saisis à l'inscription (colonnes ajoutées par convoyeurs-siret-adresse.sql)
+          const extraSiret = String(form.get("extra_siret") ?? "").replace(/\D/g, "").slice(0, 14);
+          const extraAdresse = String(form.get("extra_adresse") ?? "").trim().slice(0, 300);
+          const extraNaiss = String(form.get("extra_date_naissance") ?? "").match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? "";
+          const extraLieu = String(form.get("extra_lieu_naissance") ?? "").trim().slice(0, 120);
+          if ((extraNaiss || extraLieu) && convoyeur?.id) {
+            const { error: nErr } = await (supabaseAdmin as any).from("convoyeurs")
+              .update({ ...(extraNaiss ? { date_naissance: extraNaiss } : {}), ...(extraLieu ? { lieu_naissance: extraLieu } : {}) }).eq("id", convoyeur.id);
+            if (nErr) console.warn(`[signup/finalize] naissance non enregistrée user=${userId} code=${nErr.message}`);
+          }
+          if ((extraSiret || extraAdresse) && convoyeur?.id) {
+            const { error: extraErr } = await (supabaseAdmin as any).from("convoyeurs")
+              .update({ ...(extraSiret ? { siret: extraSiret } : {}), ...(extraAdresse ? { adresse: extraAdresse } : {}) }).eq("id", convoyeur.id);
+            if (extraErr) console.warn(`[signup/finalize] siret/adresse non enregistrés user=${userId} code=${extraErr.message}`);
+          }
+
           if (convoyeur?.id) {
             const { count } = await supabaseAdmin
               .from("documents_convoyeurs")

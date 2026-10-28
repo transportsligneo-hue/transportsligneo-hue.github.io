@@ -29,7 +29,7 @@ function ConvoyeurProfil() {
   });
 
   const [form, setForm] = useState({
-    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "",
+    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "", date_naissance: "", lieu_naissance: "",
   });
 
   const [pwd, setPwd] = useState({ next: "", confirm: "" });
@@ -42,7 +42,7 @@ function ConvoyeurProfil() {
     (async () => {
       const { data } = await supabase
         .from("convoyeurs")
-        .select("id, prenom, nom, email, telephone, ville, permis, annees_experience, statut, niveau, missions_terminees, note_moyenne")
+        .select("*")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -58,6 +58,7 @@ function ConvoyeurProfil() {
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
           annees_experience: data.annees_experience != null ? String(data.annees_experience) : "",
+          date_naissance: (data as any).date_naissance ?? "", lieu_naissance: (data as any).lieu_naissance ?? "",
         });
       }
 
@@ -77,7 +78,8 @@ function ConvoyeurProfil() {
         prenom: form.prenom, nom: form.nom, telephone: form.telephone,
         ville: form.ville, permis: form.permis,
         annees_experience: form.annees_experience ? parseInt(form.annees_experience, 10) : null,
-      })
+        date_naissance: form.date_naissance || null, lieu_naissance: form.lieu_naissance.trim() || null,
+      } as any)
       .eq("id", convoyeurId);
     setSaving(false);
     setSavedMsg(error ? `Erreur : ${error.message}` : "Profil mis à jour ✓");
@@ -223,6 +225,18 @@ function ConvoyeurProfil() {
         <div>
           <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Ville</label>
           <input type="text" value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} className={inputClass} />
+        </div>
+
+        <div className={"grid sm:grid-cols-2 gap-4 rounded-xl p-3 " + (!form.date_naissance || !form.lieu_naissance ? "bg-amber-50 border border-amber-200" : "")}>
+          <div>
+            <label className="block text-xs font-medium text-pro-text-soft mb-1"><Calendar size={11} className="inline mr-1" />Date de naissance</label>
+            <input type="date" value={form.date_naissance} onChange={(e) => setForm({ ...form, date_naissance: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Lieu de naissance (ville)</label>
+            <input type="text" value={form.lieu_naissance} onChange={(e) => setForm({ ...form, lieu_naissance: e.target.value })} className={inputClass} />
+          </div>
+          {(!form.date_naissance || !form.lieu_naissance) && <p className="sm:col-span-2 text-xs text-amber-800">À compléter : ces informations sont nécessaires pour votre contrat de partenariat.</p>}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">

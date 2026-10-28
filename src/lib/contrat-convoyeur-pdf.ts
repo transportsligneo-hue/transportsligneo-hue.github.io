@@ -13,12 +13,19 @@ import {
 } from "@/lib/contrat-convoyeur-content";
 import { CONTRAT_BOX_X_RIGHT_MM, CONTRAT_BOX_Y_MM } from "@/lib/contrat-signature-field";
 
+const fmtNaiss = (v: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : v;
+};
+
 export interface ContratConvoyeurData {
   nom_complet: string;
   siret?: string | null;
   adresse?: string | null;
   permis_numero?: string | null;
   permis_date?: string | null;
+  date_naissance?: string | null;
+  lieu_naissance?: string | null;
   signature_nom?: string | null;
   signed_at?: string | null;
   signature_ip?: string | null;
@@ -190,7 +197,7 @@ export async function generateContratConvoyeurPdf(
   const vierge = /[….]{3}/.test(d.nom_complet);
   const dots = "………………………………………";
   const presta =
-    `M / Mme ${d.nom_complet}, entrepreneur individuel ou gérant, inscrit au répertoire SIRENE ou société immatriculée au Registre du Commerce et des Sociétés sous le numéro ${d.siret || dots}, ` +
+    `M / Mme ${d.nom_complet}${d.date_naissance ? `, né(e) le ${fmtNaiss(d.date_naissance)}${d.lieu_naissance ? " à " + d.lieu_naissance : ""}` : ""}, entrepreneur individuel ou gérant, inscrit au répertoire SIRENE ou société immatriculée au Registre du Commerce et des Sociétés sous le numéro ${d.siret || dots}, ` +
     `domicilié(e) ${d.adresse ? "à " + d.adresse : "à " + dots}` +
     `${d.permis_numero ? `, titulaire du permis de conduire de catégorie B n° ${d.permis_numero}${d.permis_date ? ` (délivré le ${d.permis_date})` : ""}` : ""}.`;
   set(BODY);

@@ -738,6 +738,7 @@ function AdminConvoyeurDetail() {
               email={conv.email}
               telephone={conv.telephone}
               permisNumero={(conv as any).permis_numero ?? conv.permis}
+              dateNaissance={(conv as any).date_naissance} lieuNaissance={(conv as any).lieu_naissance}
               siret={(conv as any).siret}
               adresse={(conv as any).adresse}
             />

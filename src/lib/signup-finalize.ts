@@ -36,11 +36,13 @@ export async function finalizeSignup(
   kind: SignupKind,
   documents?: Record<string, File | null>,
   onProgress?: (percent: number) => void,
+  extra?: Record<string, string>,
 ): Promise<void> {
   try {
     const form = new FormData();
     form.append("userId", userId);
     form.append("kind", kind);
+    for (const [k, v] of Object.entries(extra ?? {})) form.append(`extra_${k}`, v);
     let count = 0;
     for (const [type, file] of Object.entries(documents ?? {})) {
       if (!file) continue;

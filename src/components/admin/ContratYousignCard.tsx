@@ -20,6 +20,8 @@ interface Props {
   siret?: string | null;
   adresse?: string | null;
   permisNumero?: string | null;
+  dateNaissance?: string | null;
+  lieuNaissance?: string | null;
 }
 
 export default function ContratYousignCard(props: Props) {
@@ -82,7 +84,7 @@ export default function ContratYousignCard(props: Props) {
             // conserve SIRET / adresse sur la fiche : ils servent ensuite à l'auto-facture
             try { await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null }).eq("id", props.convoyeurId); } catch { /* non bloquant */ }
             return generateContratConvoyeurPdf(
-            { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null },
+            { nom_complet: props.nomComplet, siret: siret || null, adresse: adresse || null, permis_numero: permis || null, date_naissance: props.dateNaissance ?? null, lieu_naissance: props.lieuNaissance ?? null },
             company,
           );
           }}

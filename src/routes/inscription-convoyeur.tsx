@@ -54,7 +54,7 @@ function InscriptionConvoyeur() {
     nom: "", prenom: "", email: "", telephone: "",
     password: "", ville: "", disponibilite: "", permis: "", message: "",
     permis_numero: "", annees_experience: "", type_convoyeur: "independant",
-    permis_date_obtention: "",
+    permis_date_obtention: "", siret: "", adresse: "", date_naissance: "", lieu_naissance: "",
   });
   const [permisFile, setPermisFile] = useState<File | null>(null);
   const [permisVersoFile, setPermisVersoFile] = useState<File | null>(null);
@@ -135,6 +135,10 @@ function InscriptionConvoyeur() {
       if (!form.prenom || !form.nom) return "Prénom et nom obligatoires.";
       if (!form.email) return "Email obligatoire.";
       if (!form.telephone) return "Téléphone obligatoire.";
+      if (!form.date_naissance) return "Date de naissance obligatoire.";
+      { const b = new Date(form.date_naissance); const age = (Date.now() - b.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+        if (Number.isNaN(b.getTime()) || age < 18 || age > 100) return "Date de naissance invalide (18 ans minimum)."; }
+      if (form.lieu_naissance.trim().length < 2) return "Lieu de naissance obligatoire (ville).";
       if (form.password.length < 8) return "Mot de passe : minimum 8 caractères.";
     }
     if (s === 2) {
@@ -156,6 +160,10 @@ function InscriptionConvoyeur() {
       if (!ribFile) return "Ajoutez le RIB.";
       if (!rcProFile) return "Ajoutez l'attestation RC Pro.";
       if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le Kbis ou l'avis de situation SIRENE.";
+      if (form.type_convoyeur === "independant") {
+        if (form.siret.replace(/\D/g, "").length !== 14) return "Saisissez votre numéro SIRET (14 chiffres).";
+        if (form.adresse.trim().length < 8) return "Saisissez l'adresse complète de votre entreprise (rue, code postal, ville).";
+      }
       if (!photoProfilFile) return "Ajoutez une photo de profil.";
       if (Object.keys(fileErrors).length > 0) return "Corrigez les documents refusés avant de continuer.";
     }
@@ -200,6 +208,8 @@ function InscriptionConvoyeur() {
             annees_experience: form.annees_experience,
             type_convoyeur: form.type_convoyeur,
             permis_date_obtention: form.permis_date_obtention,
+            siret: form.siret.replace(/\D/g, ""), adresse: form.adresse.trim(),
+            date_naissance: form.date_naissance, lieu_naissance: form.lieu_naissance.trim(),
           },
         },
       });
@@ -249,7 +259,7 @@ function InscriptionConvoyeur() {
         kbis: kbisFile,
         assurance: rcProFile,
         photo_profil: photoProfilFile,
-      }, setUploadProgress);
+      }, setUploadProgress, { siret: form.siret.replace(/\D/g, ""), adresse: form.adresse.trim(), date_naissance: form.date_naissance, lieu_naissance: form.lieu_naissance.trim() });
       setUploadProgress(100);
 
       // Rattachement automatique à l'organisation Flotte invitante
@@ -482,6 +492,14 @@ function InscriptionConvoyeur() {
                   <input type="tel" value={form.telephone} onChange={update("telephone")} className={inputClass} required />
                 </div>
                 <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Date de naissance *</label>
+                  <input type="date" value={form.date_naissance} onChange={update("date_naissance")} className={inputClass} required />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Lieu de naissance * (ville)</label>
+                  <input type="text" value={form.lieu_naissance} onChange={update("lieu_naissance")} className={inputClass} placeholder="Ex: Tours" required />
+                </div>
+                <div>
                   <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
                     <MapPin size={12} className="inline mr-1" /> Ville
                   </label>
@@ -573,6 +591,18 @@ function InscriptionConvoyeur() {
               {form.type_convoyeur === "independant" && (
                 <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} errorKey="kbis" scanKey="kbis" setFile={setKbisFile} onChange={makeFileHandler("kbis", setKbisFile, kbisFile)} />
               )}
+              {form.type_convoyeur === "independant" && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">N° SIRET * (14 chiffres)</label>
+                    <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={update("siret")} className={inputClass} placeholder="000 000 000 00000" />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse de l'entreprise *</label>
+                    <input type="text" value={form.adresse} onChange={update("adresse")} className={inputClass} placeholder="Rue, code postal, ville" />
+                  </div>
+                </div>
+              )}
               <FileUpload label="RIB *" file={ribFile} errorKey="rib" scanKey="rib" setFile={setRibFile} onChange={makeFileHandler("rib", setRibFile, ribFile)} />
               <div>
                 <FileUpload label="Attestation RC Pro *" file={rcProFile} errorKey="assurance" scanKey="assurance" setFile={setRcProFile} onChange={makeFileHandler("assurance", setRcProFile, rcProFile)} />
@@ -609,7 +639,10 @@ function InscriptionConvoyeur() {
                 <RecapRow label="Nom" value={form.nom} />
                 <RecapRow label="Email" value={form.email} />
                 <RecapRow label="Téléphone" value={form.telephone} />
+                <RecapRow label="Né(e) le" value={form.date_naissance ? `${form.date_naissance.split("-").reverse().join("/")} à ${form.lieu_naissance}` : " · "} />
                 <RecapRow label="Ville" value={form.ville || " · "} />
+                {form.type_convoyeur === "independant" && <RecapRow label="SIRET" value={form.siret || " · "} />}
+                {form.type_convoyeur === "independant" && <RecapRow label="Adresse" value={form.adresse || " · "} />}
                 <RecapRow label="Statut" value="Indépendant" />
                 <RecapRow label="Disponibilité" value={form.disponibilite || " · "} />
                 <RecapRow label="N° permis" value={form.permis_numero} />

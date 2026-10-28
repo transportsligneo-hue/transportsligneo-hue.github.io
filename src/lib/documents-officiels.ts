@@ -669,6 +669,8 @@ export interface ContratConvoyeurData {
   adresse?: string | null;
   permis_numero?: string | null;
   permis_date?: string | null;
+  date_naissance?: string | null;
+  lieu_naissance?: string | null;
   signature_nom?: string | null;
   signed_at?: string | null;
   signature_ip?: string | null;

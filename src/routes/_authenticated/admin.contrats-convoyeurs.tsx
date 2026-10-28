@@ -103,7 +103,7 @@ function ContratsConvoyeursPage() {
         }
       }
       const blob = await generateContratConvoyeurPdf(
-        { nom_complet: nom, siret: siret || null, adresse: adresse || null, permis_numero: c.permis_numero ?? c.permis ?? null },
+        { nom_complet: nom, siret: siret || null, adresse: adresse || null, permis_numero: c.permis_numero ?? c.permis ?? null, date_naissance: (c as any).date_naissance ?? null, lieu_naissance: (c as any).lieu_naissance ?? null },
         company,
       );
       const url = URL.createObjectURL(blob);
@@ -203,6 +203,7 @@ function ContratsConvoyeursPage() {
                     email={c.email}
                     telephone={c.telephone}
                     permisNumero={c.permis_numero ?? c.permis}
+                    dateNaissance={(c as any).date_naissance} lieuNaissance={(c as any).lieu_naissance}
                     siret={c.siret}
                     adresse={c.adresse}
                   />
