@@ -1,3 +1,4 @@
+import { logApiUsage } from "@/lib/api-usage-client";
 // Helper Google Maps JS API (Places + Distance Matrix)
 // Chargement à la demande, singleton, fallback silencieux si pas de clé.
 
@@ -72,7 +73,7 @@ export async function getAutocompleteSuggestions(input: string): Promise<PlaceSu
   if (isGoogleAvailable()) {
     try {
       const g = await loadGoogle();
-      if (!sessionToken) sessionToken = new g.maps.places.AutocompleteSessionToken();
+      if (!sessionToken) { sessionToken = new g.maps.places.AutocompleteSessionToken(); logApiUsage("places_session"); }
       const svc = new g.maps.places.AutocompleteService();
       const googleResults = await new Promise<PlaceSuggestion[]>((resolve) => {
         svc.getPlacePredictions(
@@ -172,6 +173,7 @@ export async function getGoogleDistanceKm(from: string, to: string): Promise<num
   try {
     const g = await loadGoogle();
     const svc = new g.maps.DistanceMatrixService();
+    logApiUsage("distance_matrix");
     const result: number | null = await new Promise((resolve) => {
       svc.getDistanceMatrix(
         {

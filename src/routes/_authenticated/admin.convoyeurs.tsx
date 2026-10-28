@@ -1,5 +1,6 @@
 import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -548,9 +549,7 @@ function AdminConvoyeurs() {
           <button type="button" className="dvx-btn outline" onClick={() => setShowCreate(true)}>
             <UserPlus size={14} /> Créer directement
           </button>
-          <button type="button" className="dvx-btn outline" onClick={fetchAll} title="Actualiser">
-            <RefreshCw size={14} />
-          </button>
+          <RefreshButton onRefresh={fetchAll} className="dvx-btn outline" label={null} />
           <button type="button" className="dvx-cta" onClick={() => setShowInvite(true)}>
             <Send size={16} /> Inviter un convoyeur (email)
           </button>

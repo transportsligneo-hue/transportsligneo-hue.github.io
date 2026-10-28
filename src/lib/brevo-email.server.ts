@@ -29,6 +29,7 @@ export async function sendBrevoEmail(p: {
   text?: string
   replyTo?: string
   tag?: string
+  attachments?: { name: string; contentBase64: string }[]
 }): Promise<void> {
   const apiKey = process.env['BREVO_API_KEY']
   if (!apiKey) throw new EmailAPIError('BREVO_API_KEY manquante', 500, 'not_configured')
@@ -41,6 +42,7 @@ export async function sendBrevoEmail(p: {
   }
   if (p.text) body['textContent'] = p.text
   if (p.replyTo) body['replyTo'] = { email: p.replyTo }
+  if (p.attachments?.length) body['attachment'] = p.attachments.map((a) => ({ name: a.name, content: a.contentBase64 }))
   if (p.tag) body['tags'] = [p.tag.slice(0, 100)]
 
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {

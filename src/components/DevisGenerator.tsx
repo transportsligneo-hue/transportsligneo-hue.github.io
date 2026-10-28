@@ -1,5 +1,6 @@
 import { resolveMotorisation } from "@/lib/vehicle-meta";
 import { useState, useMemo, useEffect, useId } from "react";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 import { createPortal } from "react-dom";
 import EstimatorLine from "@/components/devis/EstimatorLine";
 import { PlateBadge } from "@/components/plate/PlateBadge";
@@ -144,6 +145,7 @@ export interface DevisGeneratorProps {
 
 export default function DevisGenerator({ prefill, hideAccountStep = false, successRedirect = "/login", variant = "bar", miniTitle }: DevisGeneratorProps = {}) {
   const inputId = useId();
+  const tarifRegime = useTarifRegime();
 
   // --- régime de facturation (micro = franchise en base de TVA) ---
   const [microRegime, setMicroRegime] = useState(true);
@@ -415,7 +417,7 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
     }
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option, vehicleType);
-  }, [customMatch, distance, departure, arrival, option, vehicleType]);
+  }, [customMatch, distance, departure, arrival, option, vehicleType, tarifRegime]);
 
 
 

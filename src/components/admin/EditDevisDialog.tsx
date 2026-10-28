@@ -8,6 +8,7 @@
  * - La fenêtre ne se ferme QUE via Fermer / Annuler (jamais au clic extérieur)
  */
 import { PlateInput } from "@/components/plate/PlateInput";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 import { useMemo, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Loader2, Plus, RefreshCw, Save, Search, X } from 'lucide-react'
@@ -91,6 +92,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function EditDevisDialog({ devis, onClose, onSaved }: Props) {
+  const tarifRegime = useTarifRegime();
   const initialOption = String(devis.option_trajet ?? 'Livraison simple')
   const initialParsed = parseDevisSupplements(devis.message)
   const initialPlateau = initialParsed.plateau

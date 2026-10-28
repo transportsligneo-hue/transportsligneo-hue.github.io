@@ -1,5 +1,6 @@
 import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -219,10 +220,7 @@ function AdminClients() {
             {clients.length} client{clients.length > 1 ? "s" : ""} inscrit{clients.length > 1 ? "s" : ""}.
           </p>
         </div>
-        <button type="button" className="dvx-cta" onClick={fetchClients}>
-          <RefreshCw size={16} />
-          Actualiser
-        </button>
+        <RefreshButton onRefresh={fetchClients} className="dvx-cta" size={16} />
       </div>
 
       {/* ===== Statistiques ===== */}

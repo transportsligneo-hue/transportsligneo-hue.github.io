@@ -3,6 +3,7 @@
  * Onglets : Suivi convoyeurs · Modules (édition contenu / checklist / quiz).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -109,13 +110,7 @@ function AdminFormation() {
             {icon} {label}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={() => void load()}
-          className="ml-auto px-3 text-xs text-pro-muted flex items-center gap-1.5 hover:text-pro-text"
-        >
-          <RefreshCw size={13} /> Actualiser
-        </button>
+        <RefreshButton onRefresh={load} size={13} className="ml-auto px-3 text-xs text-pro-muted flex items-center gap-1.5 hover:text-pro-text" />
       </div>
 
       {loading ? (

@@ -1,9 +1,10 @@
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { DemandesRapidesPanel } from "@/components/admin/DemandesRapidesPanel";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertDemandeToMissions } from "@/lib/admin-demande-conversion.functions";
 import { PlateBadge } from "@/components/plate/PlateBadge";
@@ -131,6 +132,7 @@ function DemandesListe() {
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [testView, setTestView] = useState(false);
+  const listRef = useRef<HTMLDivElement | null>(null);
   const [converting, setConverting] = useState<string | null>(null);
   const [selected, setSelected] = useState<Demande | null>(null);
   const [refusing, setRefusing] = useState<Demande | null>(null);
@@ -221,7 +223,8 @@ function DemandesListe() {
     const q = search.trim().toLowerCase();
     return demandes.filter((d) => {
       if (isDemoOrTestIdentity({ email: d.email, nom: d.nom, prenom: d.prenom }) !== testView) return false;
-      if (filterStatut !== "all" && d.statut !== filterStatut) return false;
+      if (filterStatut === "todo") { if (d.statut !== "nouvelle" && d.statut !== "a_traiter") return false; }
+      else if (filterStatut !== "all" && d.statut !== filterStatut) return false;
       if (!q) return true;
       return (
         d.nom.toLowerCase().includes(q) ||
@@ -244,13 +247,7 @@ function DemandesListe() {
         subtitle={`${filtered.length} demande${filtered.length > 1 ? "s" : ""} affichée${filtered.length > 1 ? "s" : ""}`}
         breadcrumb={[{ label: "Admin", to: "/admin" }, { label: "Demandes" }]}
         actions={
-          <button
-            onClick={fetchDemandes}
-            className="admin-btn-ghost inline-flex items-center gap-1.5"
-            title="Actualiser"
-          >
-            <RefreshCw size={14} /> Actualiser
-          </button>
+          <RefreshButton onRefresh={fetchDemandes} className="admin-btn-ghost inline-flex items-center gap-1.5" />
         }
       />
 
@@ -258,12 +255,13 @@ function DemandesListe() {
 
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard label="À traiter" value={stats.nouvelles} icon={Inbox} accent={stats.nouvelles ? "warning" : "default"} hint="Demandes non converties" />
+        <AdminStatCard onClick={() => { setTestView(false); setSearch(""); setFilterStatut("todo"); setTimeout(() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} label="À traiter" value={stats.nouvelles} icon={Inbox} accent={stats.nouvelles ? "warning" : "default"} hint="Demandes non converties" />
         <AdminStatCard label="Reçues aujourd'hui" value={stats.aujourdhui} icon={Clock} />
-        <AdminStatCard label="Converties en mission" value={stats.converties} icon={CheckCircle2} accent="success" />
+        <AdminStatCard onClick={() => { setTestView(false); setSearch(""); setFilterStatut("convertie"); setTimeout(() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }} label="Converties en mission" value={stats.converties} icon={CheckCircle2} accent="success" />
         <AdminStatCard label="Potentiel en attente" value={`${Math.round(stats.potentiel)} €`} icon={Euro} accent="info" hint="Somme des estimations à traiter" />
       </div>
 
+      <div ref={listRef} />
       <AdminSection>
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
           <div className="relative flex-1">
@@ -300,7 +298,16 @@ function DemandesListe() {
               Tous
               <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${filterStatut === "all" ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{demandes.length}</span>
             </button>
-            {statuts.map((s) => {
+            <button
+              onClick={() => setFilterStatut("todo")}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                filterStatut === "todo" ? "bg-[#2F5FFF] text-white border-[#2F5FFF]" : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[#2F5FFF]"
+              }`}
+            >
+              À traiter
+              <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${filterStatut === "todo" ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{stats.nouvelles}</span>
+            </button>
+            {statuts.filter((x) => x !== "nouvelle" && x !== "a_traiter").map((s) => {
               const active = filterStatut === s;
               const count = countByStatut[s] ?? 0;
               if (count === 0 && !active) return null;

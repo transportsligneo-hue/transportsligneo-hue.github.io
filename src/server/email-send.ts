@@ -42,6 +42,7 @@ interface Params {
   recipientEmail?: string // optional if template has fixed `to`
   idempotencyKey?: string
   templateData?: Record<string, any>
+  attachments?: { name: string; contentBase64: string }[]
 }
 
 /**
@@ -122,6 +123,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
     sendTemplateEmail(params.templateName, effectiveRecipient, {
       templateData,
       idempotencyKey: params.idempotencyKey || messageId,
+      attachments: params.attachments,
     })
 
 

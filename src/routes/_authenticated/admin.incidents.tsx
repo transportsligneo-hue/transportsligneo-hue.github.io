@@ -4,6 +4,7 @@
  * fiche détaillée, statistiques agrégées et export CSV.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertTriangle, Download, Filter, Loader2, RefreshCw, Search, ChevronRight, BarChart3, X,
@@ -252,9 +253,7 @@ function IncidentsRegistryPage() {
           <button onClick={exportCsv} disabled={filtered.length === 0} className="dvx-btn outline">
             <Download size={14} /> Export CSV
           </button>
-          <button onClick={fetchAll} className="dvx-cta">
-            <RefreshCw size={16} /> Actualiser
-          </button>
+          <RefreshButton onRefresh={fetchAll} className="dvx-cta" size={16} />
         </div>
       </div>
 

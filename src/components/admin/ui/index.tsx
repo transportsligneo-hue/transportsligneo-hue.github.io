@@ -67,8 +67,10 @@ interface StatProps {
   icon?: LucideIcon;
   hint?: ReactNode;
   accent?: "default" | "success" | "warning" | "danger" | "info";
+  /** Rend la carte cliquable (ex. filtrer la liste). */
+  onClick?: () => void;
 }
-export function AdminStatCard({ label, value, delta, icon: Icon, hint, accent = "default" }: StatProps) {
+export function AdminStatCard({ label, value, delta, icon: Icon, hint, accent = "default", onClick }: StatProps) {
   const accentBg: Record<string, string> = {
     default: "bg-[color:var(--admin-accent-soft)] text-[color:var(--admin-accent-strong)]",
     success: "bg-[color:var(--admin-success-soft)] text-emerald-700",
@@ -76,8 +78,12 @@ export function AdminStatCard({ label, value, delta, icon: Icon, hint, accent = 
     danger: "bg-[color:var(--admin-danger-soft)] text-red-700",
     info: "bg-[color:var(--admin-info-soft)] text-sky-700",
   };
+  const Wrapper: any = onClick ? "button" : "div";
   return (
-    <div className="admin-stat flex items-start justify-between gap-3">
+    <Wrapper
+      {...(onClick ? { type: "button", onClick, title: "Cliquer pour voir la liste" } : {})}
+      className={"admin-stat flex items-start justify-between gap-3 " + (onClick ? "w-full text-left cursor-pointer transition hover:-translate-y-0.5 hover:shadow-md hover:border-[#2F5FFF]" : "")}
+    >
       <div className="min-w-0">
         <p className="admin-stat__label">{label}</p>
         <p className="admin-stat__value mt-1">{value}</p>
@@ -93,7 +99,7 @@ export function AdminStatCard({ label, value, delta, icon: Icon, hint, accent = 
           <Icon size={18} />
         </span>
       )}
-    </div>
+    </Wrapper>
   );
 }
 

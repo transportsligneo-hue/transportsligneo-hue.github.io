@@ -1,5 +1,6 @@
 import { useServerFn as useServerFnCC } from "@tanstack/react-start";
 import { useMonContratCadre, prixContrat } from "@/lib/contrat-cadre";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 import { enregistrerDemandeRapide } from "@/lib/contrat-cadre.functions";
 import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
 import { HelpTip } from "@/components/ui/HelpTip";
@@ -118,6 +119,7 @@ export default function QuickMissionForm({
   successRedirect = "/dashboard-pro/missions",
   variant = "pro",
 }: Props) {
+  useTarifRegime();
   const isParticulier = variant === "particulier";
   const { user } = useAuth();
   const navigate = useNavigate();

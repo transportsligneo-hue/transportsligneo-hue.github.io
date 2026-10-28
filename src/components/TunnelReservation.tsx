@@ -1,5 +1,6 @@
 import { checkMinNotice } from "@/lib/min-notice";
 import { PlateInput } from "@/components/plate/PlateInput";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Loader2, MapPin, Calendar, Car, User, Sparkles } from "lucide-react";
@@ -64,6 +65,7 @@ interface Props {
 }
 
 export default function TunnelReservation({ onClose }: Props) {
+  const tarifRegime = useTarifRegime();
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
@@ -93,7 +95,7 @@ export default function TunnelReservation({ onClose }: Props) {
 
   const { base: stdBasePrice, label: stdPriceLabel } = useMemo(
     () => calculateBasePrice(form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance),
-    [form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance]
+    [form.ville_depart, form.ville_arrivee, form.type_trajet, googleDistance, tarifRegime]
   );
   // Règle de prix personnalisée du client (même source de vérité que le devis en base)
   const resolveServerPrice = useServerFn(resolvePersonalizedPrice);

@@ -1,5 +1,6 @@
 import { checkMinNotice } from "@/lib/min-notice";
 import { applyVehicleCoef } from "@/lib/vehicle-price-coef";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 import { useState, useMemo, useEffect } from "react";
 import {
   MapPin, Navigation, Clock, Euro, Car, Fuel, Calendar, ChevronDown, ChevronRight,
@@ -125,6 +126,7 @@ function estimateDuration(distance: number): string {
  * Visible uniquement < md. Le composant desktop reste inchangé.
  */
 export default function MobileDevisGenerator() {
+  const tarifRegime = useTarifRegime();
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
   const [vehicleType, setVehicleType] = useState("");
@@ -202,7 +204,7 @@ export default function MobileDevisGenerator() {
     }
     if (distance === null) return null;
     return calculatePrice(distance, departure, arrival, option, vehicleType);
-  }, [distance, departure, arrival, option, vehicleType]);
+  }, [distance, departure, arrival, option, vehicleType, tarifRegime]);
 
   // Majoration hors horaires / week-end : +30 % (avant 8h, après 19h, samedi/dimanche)
   const offHours = useMemo(() => {

@@ -1,5 +1,6 @@
 import { PlateInput } from "@/components/plate/PlateInput";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { RefreshButton } from "@/components/admin/RefreshButton";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -615,10 +616,7 @@ function AdminTrajets() {
         >
           Tests &amp; démo<span className="dvx-count">{testCount}</span>
         </button>
-        <button type="button" className="dvx-export" onClick={fetchTrajets}>
-          <RefreshCw size={14} />
-          Actualiser
-        </button>
+        <RefreshButton onRefresh={fetchTrajets} className="dvx-export" />
       </div>
 
       {typeof window !== "undefined" && localStorage.getItem("admin.trajets.dismissB2BBanner") !== "1" && (

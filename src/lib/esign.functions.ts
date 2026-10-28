@@ -394,7 +394,12 @@ export const esignPublicSign = createServerFn({ method: "POST" })
       const { sendTransactionalEmailServer } = await import("@/server/email-send");
       await sendTransactionalEmailServer({
         templateName: "esign-signe", recipientEmail: r.signer_email, idempotencyKey: `esign-done-${r.id}`,
-        templateData: { prenom: r.signer_name.split(" ")[0], titre: r.title, date: new Date(signedAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "long", timeStyle: "short" }), ctaUrl: `${S.SITE_URL}/signature/${data.token}` },
+        templateData: { prenom: r.signer_name.split(" ")[0], titre: r.title, date: new Date(signedAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "long", timeStyle: "short" }), ctaUrl: `${S.SITE_URL}/signature/${data.token}`, pieces: true, contrat: r.kind === "contrat_convoyeur" },
+        // copie PDF propre jointe : document signé (contrat + certificat) et dossier de preuve
+        attachments: [
+          { name: `${(r.title as string).replace(/[^A-Za-z0-9À-ÿ _.-]/g, "").trim().replace(/\s+/g, "-") || "document"}-signe.pdf`, contentBase64: Buffer.from(signed).toString("base64") },
+          { name: "Dossier-de-preuve-signature.pdf", contentBase64: Buffer.from(dossier).toString("base64") },
+        ],
       });
       await sendTransactionalEmailServer({
         templateName: "esign-signe-admin", idempotencyKey: `esign-done-admin-${r.id}`,

@@ -48,6 +48,7 @@ export const lookupVinByPlate = createServerFn({ method: "GET" })
       return { ok: false, error: "Service de recherche indisponible" };
     }
 
+    void (await import("@/lib/api-usage.server")).logServerUsage("plaque_siv", res);
     if (!res.ok) {
       const txt = await res.text().catch(() => "");
       console.error("[PLATE-VIN] api error", res.status, txt.slice(0, 300));

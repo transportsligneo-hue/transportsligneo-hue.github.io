@@ -1,5 +1,6 @@
 import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
 import { GuidedTour, type TourStep } from "@/components/onboarding/GuidedTour";
+import { useTarifRegime } from "@/lib/use-tarif-regime";
 
 const GROUPED_TOUR: TourStep[] = [
   { target: '[data-tour="gm-addresses"]', title: "Le trajet commun du lot", body: "Indiquez ici l'adresse d'enlèvement et de livraison partagée par tous les véhicules. Vous pouvez choisir une adresse favorite, puis personnaliser un véhicule si besoin." },
@@ -117,6 +118,7 @@ function eur(n: number) {
 }
 
 function GroupedMissionForm() {
+  const tarifRegime = useTarifRegime();
   const { user } = useAuth();
   const navigate = useNavigate();
   const createGrouped = useServerFn(createGroupedMission);

@@ -23,6 +23,7 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  attachments?: { name: string; contentBase64: string }[]
 }
 
 /**
@@ -72,6 +73,7 @@ export async function sendTemplateEmail(
       html,
       text,
       replyTo: options.replyTo,
+      attachments: options.attachments,
       tag: templateName,
     })
   } catch (error) {
