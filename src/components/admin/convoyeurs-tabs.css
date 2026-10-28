@@ -1,0 +1,9 @@
+/* Onglets Convoyeurs : vrais comptes / démo & test + repère « doublon » */
+.dvx-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.dvx-tab{display:inline-flex;gap:8px;align-items:center;padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;color:#5a6a93;background:#fff;border:1px solid #e1e8f5;cursor:pointer;transition:.16s;font-family:Poppins,system-ui,sans-serif}
+.dvx-tab b{font-weight:800;opacity:.75}
+.dvx-tab:hover{border-color:#2f5fff;color:#1c3fc4}
+.dvx-tab.on{background:linear-gradient(180deg,#4f86ff,#2f5fff 55%,#2347d9);color:#fff;border-color:transparent;box-shadow:0 8px 20px -8px rgba(47,95,255,.7)}
+.dvx-tab.demo.on{background:linear-gradient(180deg,#8b93ad,#5a6a93);box-shadow:0 8px 20px -8px rgba(90,106,147,.7)}
+.dvx-tab.dup{margin-left:auto;background:#fff1e3;color:#d9680f;border-color:#fbd9b6}
+.dvx-badge.dup{background:#fff1e3;color:#d9680f}

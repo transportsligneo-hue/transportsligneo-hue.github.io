@@ -33,6 +33,8 @@ import {
 } from "@/components/admin/StatutConvoyeurBadge";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import "@/components/admin/convoyeurs-tabs.css";
 import {
   getConvoyeurDocLabel,
   getRequiredConvoyeurDocTypes,
@@ -86,6 +88,7 @@ const STATUT_FILTERS: Array<{ value: string; label: string }> = [
   { value: "valide",     label: "Validés" },
   { value: "refuse",     label: "Refusés" },
   { value: "suspendu",   label: "Suspendus" },
+  { value: "doublons",   label: "Doublons" },
 ];
 
 function AdminConvoyeurs() {
@@ -107,6 +110,7 @@ function AdminConvoyeurs() {
   const [docs, setDocs] = useState<Array<{ type_document: string; nom_fichier: string; url_fichier: string; statut_validation: string }>>([]);
   const [missionsCount, setMissionsCount] = useState<number>(0);
   const [busy, setBusy] = useState<string | null>(null);
+  const [tab, setTab] = useState<"reel" | "demo">("reel");
 
   useEffect(() => {
     if (!selected) { setDocs([]); setMissionsCount(0); return; }
@@ -138,8 +142,19 @@ function AdminConvoyeurs() {
       arr.push(d);
       byConv.set(d.convoyeur_id, arr);
     }
+    const norm = (v: string | null | undefined) => (v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+    const emailCount = new Map<string, number>();
+    const nameCount = new Map<string, number>();
+    for (const c of convoyeurs) {
+      const e = norm(c.email);
+      const n = norm(`${c.prenom} ${c.nom}`);
+      if (e) emailCount.set(e, (emailCount.get(e) ?? 0) + 1);
+      if (n) nameCount.set(n, (nameCount.get(n) ?? 0) + 1);
+    }
     return convoyeurs.map((c) => ({
       ...c,
+      isDemo: isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom }),
+      isDup: (emailCount.get(norm(c.email)) ?? 0) > 1 || (nameCount.get(norm(`${c.prenom} ${c.nom}`)) ?? 0) > 1,
       statutUnifie: resolveStatutConvoyeur(c.statut, byConv.get(c.id) ?? []),
       docsCount: (byConv.get(c.id) ?? []).length,
       docsApprouves: (byConv.get(c.id) ?? []).filter((d) => d.statut_validation === "approuve").length,
@@ -151,17 +166,21 @@ function AdminConvoyeurs() {
     const counts: Record<StatutConvoyeur, number> = {
       valide: 0, en_attente: 0, a_corriger: 0, en_verif: 0, refuse: 0, suspendu: 0,
     };
-    for (const c of enriched) counts[c.statutUnifie]++;
-    const docsAValider = allDocs.filter((d) => (d.statut_validation ?? "en_attente") === "en_attente").length;
+    const reels = enriched.filter((c) => !c.isDemo);
+    const reelIds = new Set(reels.map((c) => c.id));
+    for (const c of reels) counts[c.statutUnifie]++;
+    const docsAValider = allDocs.filter((d) => reelIds.has(d.convoyeur_id) && (d.statut_validation ?? "en_attente") === "en_attente").length;
     const aVerifier = counts.en_attente + counts.en_verif + counts.a_corriger;
-    return { total: enriched.length, aVerifier, docsAValider, validated: counts.valide, suspendus: counts.suspendu, refuses: counts.refuse };
+    return { total: reels.length, aVerifier, docsAValider, validated: counts.valide, suspendus: counts.suspendu, refuses: counts.refuse };
   }, [enriched, allDocs]);
 
   // Filtrage
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return enriched.filter((c) => {
-      if (filterStatut !== "all" && c.statutUnifie !== filterStatut) return false;
+      if (tab === "demo" ? !c.isDemo : c.isDemo) return false;
+      if (filterStatut === "doublons") { if (!c.isDup) return false; }
+      else if (filterStatut !== "all" && c.statutUnifie !== filterStatut) return false;
       if (!q) return true;
       return (
         c.nom?.toLowerCase().includes(q) ||
@@ -170,7 +189,11 @@ function AdminConvoyeurs() {
         (c.ville ?? "").toLowerCase().includes(q)
       );
     });
-  }, [enriched, filterStatut, search]);
+  }, [enriched, filterStatut, search, tab]);
+
+  const demoCount = useMemo(() => enriched.filter((c) => c.isDemo).length, [enriched]);
+  const reelCount = enriched.length - demoCount;
+  const dupCount = useMemo(() => enriched.filter((c) => !c.isDemo && c.isDup).length, [enriched]);
 
   if (location.pathname !== "/admin/convoyeurs") {
     return <Outlet />;
@@ -294,6 +317,48 @@ function AdminConvoyeurs() {
     setBusy(null);
     toast.success("Compte suspendu");
     fetchAll();
+  };
+
+  /** Suppression définitive (doublons, comptes démo/test). Refusée pour un vrai convoyeur qui a des missions ou des paiements. */
+  const deleteConvoyeur = async (c: Convoyeur & { isDemo?: boolean }) => {
+    setBusy(c.id);
+    try {
+      const [{ count: nbAttrib }, { count: nbPaie }] = await Promise.all([
+        supabase.from("attributions").select("id", { count: "exact", head: true }).eq("convoyeur_id", c.id),
+        supabase.from("paiements_convoyeurs" as never).select("id", { count: "exact", head: true }).eq("convoyeur_id", c.id),
+      ]);
+      const missions = nbAttrib ?? 0;
+      const paiements = nbPaie ?? 0;
+      if ((missions > 0 || paiements > 0) && !c.isDemo) {
+        toast.error(`${c.prenom} ${c.nom} a ${missions} mission(s) et ${paiements} paiement(s) : suppression impossible.`, {
+          description: "Suspendez ce compte à la place, pour garder l'historique.",
+        });
+        return;
+      }
+      const warn = missions > 0 || paiements > 0 ? `\n\nSes ${missions} mission(s) et ${paiements} paiement(s) de démonstration seront supprimés aussi.` : "";
+      if (!(await confirmToast(`Supprimer définitivement ${c.prenom} ${c.nom} (${c.email}) ? Son compte et ses documents seront effacés. Action irréversible.${warn}`))) return;
+
+      if (c.user_id) {
+        const { data, error } = await supabase.functions.invoke("admin-user-actions", {
+          body: { action: "delete", user_id: c.user_id },
+        });
+        if (error || data?.error) {
+          toast.error(data?.error ?? "Suppression du compte impossible");
+          return;
+        }
+      }
+      await supabase.from("documents_convoyeurs").delete().eq("convoyeur_id", c.id);
+      const { error: delErr } = await supabase.from("convoyeurs").delete().eq("id", c.id);
+      if (delErr) {
+        toast.error(`Suppression impossible : ${delErr.message}`);
+        return;
+      }
+      toast.success("Compte supprimé");
+      setSelected(null);
+      await fetchAll();
+    } finally {
+      setBusy(null);
+    }
   };
 
   const reactivateConvoyeur = async (c: Convoyeur) => {
@@ -483,7 +548,7 @@ function AdminConvoyeurs() {
         <div className="min-w-0">
           <h1 className="dvx-title">Convoyeurs</h1>
           <p className="dvx-sub">
-            {enriched.length} convoyeur{enriched.length > 1 ? "s" : ""} · {kpis.aVerifier} à vérifier
+            {reelCount} convoyeur{reelCount > 1 ? "s" : ""} · {kpis.aVerifier} à vérifier
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -527,6 +592,21 @@ function AdminConvoyeurs() {
             {kpis.suspendus} suspendu(s) · {kpis.refuses} refusé(s)
           </p>
         </div>
+      </div>
+
+      {/* ===== Onglets : vrais comptes / démo & test ===== */}
+      <div className="dvx-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === "reel"} className={`dvx-tab ${tab === "reel" ? "on" : ""}`} onClick={() => { setTab("reel"); setFilterStatut("all"); }}>
+          Convoyeurs <b>{reelCount}</b>
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "demo"} className={`dvx-tab demo ${tab === "demo" ? "on" : ""}`} onClick={() => { setTab("demo"); setFilterStatut("all"); }}>
+          Démo &amp; test <b>{demoCount}</b>
+        </button>
+        {dupCount > 0 && tab === "reel" && (
+          <button type="button" className="dvx-tab dup" onClick={() => setFilterStatut(filterStatut === "doublons" ? "all" : "doublons")}>
+            <AlertTriangle size={13} /> {dupCount} doublon{dupCount > 1 ? "s" : ""} à vérifier
+          </button>
+        )}
       </div>
 
       {/* ===== Filtres ===== */}
@@ -628,7 +708,7 @@ function AdminConvoyeurs() {
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState icon={IdCard} title="Aucun convoyeur" description="Aucun résultat pour ce filtre." />
+        <EmptyState icon={IdCard} title={tab === "demo" ? "Aucun compte démo ou test" : "Aucun convoyeur"} description="Aucun résultat pour ce filtre." />
       ) : (
         <div className="space-y-3.5">
           {filtered.map((c) => (
@@ -641,6 +721,8 @@ function AdminConvoyeurs() {
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <StatutConvoyeurBadge statut={c.statutUnifie} />
                   <span className="dvx-badge violet">Indépendant</span>
+                  {c.isDemo && <span className="dvx-badge">Démo / test</span>}
+                  {c.isDup && !c.isDemo && <span className="dvx-badge dup">Doublon</span>}
                   <span className="text-[11.5px] text-[#a3a4ac]">
                     Inscrit le {new Date(c.created_at).toLocaleDateString("fr-FR")}
                   </span>
@@ -679,6 +761,15 @@ function AdminConvoyeurs() {
                       <Ban size={15} />
                     </button>
                   )}
+                  <button
+                    type="button"
+                    className="dvx-ico danger"
+                    title="Supprimer le compte"
+                    disabled={busy === c.id}
+                    onClick={() => deleteConvoyeur(c)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
                   {c.statutUnifie === "suspendu" && c.user_id && (
                     <button
                       type="button"
