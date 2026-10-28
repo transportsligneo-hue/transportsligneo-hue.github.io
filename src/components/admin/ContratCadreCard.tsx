@@ -104,8 +104,12 @@ export function ContratCadreCard({ clientUserId }: { clientUserId: string }) {
                     {r === 0 ? "Aucune" : `${r} %`}
                   </button>
                 ))}
-                <input value={f.remise_pct} onChange={(e) => setF({ ...f, remise_pct: e.target.value })} inputMode="decimal"
-                  className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-900" aria-label="Autre remise en %" />
+                <span className="inline-flex items-center gap-1 rounded-lg border border-[#2F5FFF] bg-white px-2 py-1">
+                  <span className="text-[11px] font-semibold text-slate-600">Autre :</span>
+                  <input value={f.remise_pct} onChange={(e) => setF({ ...f, remise_pct: e.target.value })} inputMode="decimal"
+                    className="w-14 text-right text-sm font-semibold text-slate-900 outline-none" aria-label="Remise personnalisée en %" />
+                  <span className="text-sm font-semibold text-slate-600">%</span>
+                </span>
               </div>
             </div>
             <label className="text-xs text-slate-500">Plafond par demande (€ TTC, facultatif)

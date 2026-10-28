@@ -71,25 +71,6 @@ function AdminLayout() {
   const [demandesCount, setDemandesCount] = useState(0);
   const [poCount, setPoCount] = useState(0);
   const [fraisCount, setFraisCount] = useState(0);
-  const [drCount, setDrCount] = useState(0);
-
-  useEffect(() => {
-    if (role !== "admin" && role !== "super_admin") return;
-    const fetchDr = async () => {
-      const { count } = await supabase
-        .from("demandes_convoyage" as never)
-        .select("id", { count: "exact", head: true })
-        .eq("sans_devis" as never, true as never)
-        .eq("validation_cadre" as never, "a_valider" as never);
-      setDrCount(count ?? 0);
-    };
-    void fetchDr();
-    const channel = supabase
-      .channel("admin-dr-badge")
-      .on("postgres_changes", { event: "*", schema: "public", table: "demandes_convoyage" }, fetchDr)
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [role]);
 
   useEffect(() => {
     if (role !== "admin" && role !== "super_admin") return;
@@ -247,15 +228,6 @@ function AdminLayout() {
     { to: "/admin/organisations", label: "Organisations", icon: Building2, group: "Clients & convoyeurs" },
     { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, group: "Clients & convoyeurs" },
     { to: "/admin/liste-attente", label: "Liste d'attente", icon: Hourglass, group: "Clients & convoyeurs" },
-    {
-      to: "/admin/demandes-rapides",
-      label: "Demandes rapides",
-      icon: Receipt,
-      group: "Clients & convoyeurs",
-      badge: drCount > 0
-        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#2F5FFF] text-white">{drCount > 99 ? "99+" : drCount}</span>
-        : undefined,
-    },
     { to: "/admin/inscriptions", label: "Suivi inscriptions", icon: ClipboardList, group: "Clients & convoyeurs" },
     { to: "/admin/documents", label: "Documents", icon: FolderOpen, group: "Clients & convoyeurs" },
     { to: "/admin/formation", label: "Formation", icon: GraduationCap, group: "Clients & convoyeurs" },

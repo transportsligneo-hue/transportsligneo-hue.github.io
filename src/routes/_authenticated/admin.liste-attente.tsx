@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { confirmToast } from "@/lib/confirm-toast";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { trouverDoublons } from "@/lib/doublons";
 import { inviteWaitlistBatch } from "@/lib/admin-bulk-communication.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/liste-attente")({
@@ -37,6 +39,7 @@ function WaitlistPage() {
   const [q, setQ] = useState("");
   const [ville, setVille] = useState("");
   const [sel, setSel] = useState<Set<string>>(new Set());
+  const [vue, setVue] = useState<"reels" | "doublons" | "demo">("reels");
   const [busy, setBusy] = useState(false);
   const [confirmInv, setConfirmInv] = useState<string[] | null>(null);
 
@@ -54,15 +57,22 @@ function WaitlistPage() {
 
   const count = (s: Statut) => rows.filter((r) => r.statut === s).length;
   const villes = useMemo(() => [...new Set(rows.map((r) => r.ville).filter(Boolean) as string[])].sort(), [rows]);
+  const demoIds = useMemo(() => new Set(rows.filter((r) => isDemoOrTestIdentity({ email: r.email, nom: r.nom })).map((r) => r.id)), [rows]);
+  const doublons = useMemo(
+    () => trouverDoublons(rows.filter((r) => !demoIds.has(r.id)).map((r) => ({ id: r.id, email: r.email, telephone: r.telephone, nom: r.nom }))),
+    [rows, demoIds],
+  );
   const visible = useMemo(() => {
     const t = q.trim().toLowerCase();
     return rows.filter(
       (r) =>
+        (vue === "demo" ? demoIds.has(r.id) : !demoIds.has(r.id)) &&
+        (vue !== "doublons" || doublons.has(r.id)) &&
         (filtre === "all" || r.statut === filtre) &&
         (!ville || r.ville === ville) &&
         (!t || `${r.nom ?? ""} ${r.ville ?? ""} ${r.telephone ?? ""} ${r.email}`.toLowerCase().includes(t)),
     );
-  }, [rows, filtre, ville, q]);
+  }, [rows, filtre, ville, q, vue, demoIds, doublons]);
   const allSel = visible.length > 0 && visible.every((r) => sel.has(r.id));
   const toggle = (id: string) => setSel((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
@@ -115,12 +125,12 @@ function WaitlistPage() {
   return (
     <div className="space-y-4 pb-28">
       <AdminSectionHeader
-        breadcrumb="Liste d'attente"
-        eyebrow="Clients & convoyeurs"
-        title="Liste d'"
-        highlight="attente"
+        breadcrumb="Liste d'attente convoyeurs"
+        eyebrow="Convoyeurs"
+        title="Liste d'attente "
+        highlight="convoyeurs"
         stats={[
-          { label: "Total", value: rows.length },
+          { label: "Total", value: rows.length - demoIds.size },
           { label: "À contacter", value: count("a_contacter"), tone: "accent" },
           { label: "Contactés", value: count("contacte") },
           { label: "Invités", value: count("invite") },
@@ -138,6 +148,10 @@ function WaitlistPage() {
           {villes.map((v) => <option key={v}>{v}</option>)}
         </select>
         <div className="wl-chips">
+          {([["reels", "Candidats", rows.length - demoIds.size], ["doublons", "Doublons", doublons.size], ["demo", "Démo / Test", demoIds.size]] as [string, string, number][]).map(([k, l, n]) => (
+            <button key={k} type="button" className={`wl-chip ${vue === k ? "act" : ""}`} onClick={() => setVue(k as typeof vue)}>{l}<b>{n}</b></button>
+          ))}
+          <span style={{ width: 10 }} />
           {([["all", "Tous", rows.length], ["a_contacter", "À contacter", count("a_contacter")], ["contacte", "Contactés", count("contacte")], ["invite", "Invités", count("invite")], ["refuse", "Refusés", count("refuse")]] as [string, string, number][]).map(([k, l, n]) => (
             <button key={k} type="button" className={`wl-chip ${filtre === k ? "act" : ""}`} onClick={() => setFiltre(k as "all" | Statut)}>{l}<b>{n}</b></button>
           ))}
@@ -158,7 +172,7 @@ function WaitlistPage() {
                 return (
                   <tr key={r.id} className={sel.has(r.id) ? "on" : ""}>
                     <td><button type="button" className={`wl-chk ${sel.has(r.id) ? "on" : ""}`} onClick={() => toggle(r.id)} aria-label="Sélectionner"><Check size={13} strokeWidth={3} /></button></td>
-                    <td><div className="wl-nm"><span className="wl-av">{ini}</span><div><b>{r.nom || "—"}</b><small>{r.email}</small></div></div></td>
+                    <td><div className="wl-nm"><span className="wl-av">{ini}</span><div><b>{r.nom || "—"}</b>{doublons.has(r.id) && <em style={{ marginLeft: 6, fontSize: 10, fontStyle: "normal", fontWeight: 700, color: "#d6303b" }}>Doublon · {doublons.get(r.id)}</em>}<small>{r.email}</small></div></div></td>
                     <td>{r.telephone || "—"}</td>
                     <td><b style={{ fontSize: 12.5 }}>{r.ville || "—"}</b><br /><small className="text-slate-400">{r.adresse}</small></td>
                     <td>{new Date(r.created_at).toLocaleDateString("fr-FR")}</td>

@@ -28,6 +28,9 @@ import { CreateAccountDialog } from "@/components/admin/CreateAccountDialog";
 import { toast } from "sonner";
 import { getHighestActiveRole } from "@/lib/roles";
 import { ClientLogo } from "@/components/admin/ClientLogo";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { trouverDoublons } from "@/lib/doublons";
+import { confirmToast } from "@/lib/confirm-toast";
 import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
@@ -78,6 +81,7 @@ function AdminUtilisateurs() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | UserCategory>("all");
   const [selected, setSelected] = useState<UnifiedUser | null>(null);
+  const [vue, setVue] = useState<"reels" | "demo" | "doublons">("reels");
 
   useEffect(() => { void loadUsers(); }, []);
 
@@ -136,10 +140,34 @@ function AdminUtilisateurs() {
     }
   }
 
+  const demoIds = useMemo(
+    () => new Set(users.filter((u) => isDemoOrTestIdentity({ email: u.email, nom: u.nom, prenom: u.prenom, societe: u.societe })).map((u) => u.user_id)),
+    [users],
+  );
+  const doublons = useMemo(
+    () => trouverDoublons(users.filter((u) => !demoIds.has(u.user_id)).map((u) => ({ id: u.user_id, email: u.email, telephone: u.telephone, nom: u.nom, prenom: u.prenom }))),
+    [users, demoIds],
+  );
+
+  async function supprimerCompte(u: UnifiedUser) {
+    if (u.role === "admin" || u.role === "super_admin") return toast.error("Un compte admin ne se supprime pas ici.");
+    const ok = await confirmToast(`Supprimer ${`${u.prenom} ${u.nom}`.trim() || u.email} ?`, {
+      description: "Le compte est supprimé définitivement. Garde la bonne copie, supprime l'autre.",
+      confirmLabel: "Supprimer", variant: "danger",
+    });
+    if (!ok) return;
+    const { data, error } = await supabase.functions.invoke("admin-user-actions", { body: { action: "delete", user_id: u.user_id } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error ?? error?.message ?? "Suppression impossible");
+    toast.success("Compte supprimé");
+    void loadUsers();
+  }
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return users
       .filter((u) => {
+        if (vue === "demo" ? !demoIds.has(u.user_id) : demoIds.has(u.user_id)) return false;
+        if (vue === "doublons" && !doublons.has(u.user_id)) return false;
         if (categoryFilter !== "all" && categoryOf(u) !== categoryFilter) return false;
         if (roleFilter !== "all" && u.role !== roleFilter) return false;
         if (statusFilter !== "all" && u.account_status !== statusFilter) return false;
@@ -157,21 +185,24 @@ function AdminUtilisateurs() {
         if (d !== 0) return d;
         return `${a.nom ?? ""} ${a.prenom ?? ""}`.localeCompare(`${b.nom ?? ""} ${b.prenom ?? ""}`, "fr");
       });
-  }, [users, search, roleFilter, statusFilter, categoryFilter]);
+  }, [users, search, roleFilter, statusFilter, categoryFilter, vue, demoIds, doublons]);
 
   const categoryCounts = useMemo(() => {
     const c: Record<string, number> = {};
-    users.forEach((u) => { const k = categoryOf(u); c[k] = (c[k] ?? 0) + 1; });
+    users.forEach((u) => { if (!demoIds.has(u.user_id) !== (vue !== "demo")) return; const k = categoryOf(u); c[k] = (c[k] ?? 0) + 1; });
     return c;
-  }, [users]);
+  }, [users, demoIds, vue]);
 
-  const counts = useMemo(() => ({
-    total: users.length,
-    admins: users.filter((u) => u.role === "admin" || u.role === "super_admin").length,
-    convoyeurs: users.filter((u) => u.role === "convoyeur").length,
-    b2b: users.filter((u) => u.type_client === "b2b").length,
-    particuliers: users.filter((u) => u.type_client === "particulier").length,
-  }), [users]);
+  const counts = useMemo(() => {
+    const r = users.filter((u) => !demoIds.has(u.user_id));
+    return {
+      total: r.length,
+      admins: r.filter((u) => u.role === "admin" || u.role === "super_admin").length,
+      convoyeurs: r.filter((u) => u.role === "convoyeur").length,
+      b2b: r.filter((u) => u.type_client === "b2b").length,
+      particuliers: r.filter((u) => u.type_client === "particulier").length,
+    };
+  }, [users, demoIds]);
 
   const hasFilters = categoryFilter !== "all" || roleFilter !== "all" || statusFilter !== "all" || search.trim() !== "";
 
@@ -181,10 +212,25 @@ function AdminUtilisateurs() {
         breadcrumb="Utilisateurs"
         eyebrow="Comptes & accès"
         title="Utilisateurs"
-        subtitle="Contrôle total : voir, modifier, suspendre, supprimer."
         actions={<CreateAccountDialog onCreated={() => void loadUsers()} />}
       />
 
+
+      <div className="flex flex-wrap gap-2">
+        {([["reels", "Comptes", users.length - demoIds.size], ["doublons", "Doublons", doublons.size], ["demo", "Démo / Test", demoIds.size]] as const).map(([k, l, n]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setVue(k)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
+              vue === k ? "border-[#2F5FFF] bg-[#2F5FFF] text-white" : "border-pro-border bg-white text-pro-text"
+            }`}
+          >
+            {l}
+            <span className={`rounded-full px-1.5 text-[11px] ${vue === k ? "bg-white/25" : n > 0 && k === "doublons" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"}`}>{n}</span>
+          </button>
+        ))}
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KpiCard label="Total" value={counts.total} icon={Users} />
@@ -323,7 +369,10 @@ function AdminUtilisateurs() {
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <div className="font-medium text-pro-text truncate">{u.prenom} {u.nom}</div>
+                          <div className="font-medium text-pro-text truncate">
+                            {u.prenom} {u.nom}
+                            {doublons.has(u.user_id) && <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">Doublon · {doublons.get(u.user_id)}</span>}
+                          </div>
                           <div className="text-xs text-pro-muted truncate">{u.email ?? "—"}</div>
                         </div>
                       </div>
@@ -342,6 +391,11 @@ function AdminUtilisateurs() {
                     </TableCell>
                     <TableCell className="text-xs text-pro-muted">{new Date(u.created_at).toLocaleDateString("fr-FR")}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
+                      {(vue === "doublons" || vue === "demo") && u.role !== "admin" && u.role !== "super_admin" && (
+                        <Button variant="ghost" size="icon" aria-label="Supprimer" onClick={() => void supprimerCompte(u)}>
+                          <Trash2 size={16} className="text-red-600" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" onClick={() => setSelected(u)}>
                         <MoreHorizontal size={16} />
                       </Button>

@@ -4,8 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  RefreshCw, Check, X, AlertTriangle, Mail, FileCheck2, Bell, Loader2, Search,
+  RefreshCw, Check, X, AlertTriangle, Mail, FileCheck2, Bell, Loader2, Search, Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { trouverDoublons } from "@/lib/doublons";
+import { confirmToast } from "@/lib/confirm-toast";
 
 export const Route = createFileRoute("/_authenticated/admin/inscriptions")({
   component: AdminInscriptions,
@@ -34,6 +38,8 @@ interface SignupEvent {
   status: string;
   error_message: string | null;
   created_at: string;
+  /** Compte réel créé sans passer par le suivi (ex. invitation) : ligne reconstituée. */
+  synthetic?: boolean;
 }
 
 const KIND_LABEL: Record<string, string> = {
@@ -56,12 +62,13 @@ function fmt(d: string) {
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
+    untracked: "bg-blue-500/15 text-blue-600 border-blue-500/30",
     ok: "bg-emerald-500/15 text-emerald-600 border-emerald-500/30",
     partial: "bg-amber-500/15 text-amber-600 border-amber-500/30",
     failed: "bg-red-500/15 text-red-600 border-red-500/30",
     pending: "bg-slate-500/15 text-slate-600 border-slate-500/30",
   };
-  const label: Record<string, string> = { ok: "Complet", partial: "Partiel", failed: "Échec", pending: "En cours" };
+  const label: Record<string, string> = { untracked: "Compte créé", ok: "Complet", partial: "Partiel", failed: "Échec", pending: "En cours" };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wider ${map[status] ?? map['pending']}`}>
       {status === "ok" ? <Check size={10} /> : status === "failed" ? <X size={10} /> : <AlertTriangle size={10} />}
@@ -75,6 +82,7 @@ function AdminInscriptions() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [vue, setVue] = useState<"reels" | "doublons" | "demo">("reels");
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["signup-events"],
@@ -83,13 +91,61 @@ function AdminInscriptions() {
         .from("signup_events")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(200);
+        .limit(500);
       if (error) throw error;
-      return (data ?? []) as unknown as SignupEvent[];
+      const events = (data ?? []) as unknown as SignupEvent[];
+
+      // Les comptes réellement créés, même quand le suivi n'a rien enregistré
+      // (convoyeur invité par lien, inscription interrompue, etc.).
+      const [{ data: convs }, { data: profs }] = await Promise.all([
+        supabase.from("convoyeurs").select("user_id, email, nom, prenom, created_at").order("created_at", { ascending: false }).limit(300),
+        supabase.from("profiles").select("user_id, email, nom, prenom, type_client, created_at").order("created_at", { ascending: false }).limit(300),
+      ]);
+      const seenUser = new Set(events.map((e) => e.user_id).filter(Boolean) as string[]);
+      const seenEmail = new Set(events.map((e) => (e.email ?? "").toLowerCase()).filter(Boolean));
+      const known = (id: string | null, email: string | null) => (id && seenUser.has(id)) || (email && seenEmail.has(email.toLowerCase()));
+      const extra: SignupEvent[] = [];
+      const convUsers = new Set<string>();
+      (convs ?? []).forEach((c: any) => {
+        if (c.user_id) convUsers.add(c.user_id);
+        if (known(c.user_id, c.email)) return;
+        extra.push({
+          id: `c-${c.user_id}`, user_id: c.user_id, email: c.email, full_name: `${c.prenom ?? ""} ${c.nom ?? ""}`.trim() || null,
+          kind: "convoyeur", documents_expected: 0, documents_uploaded: 0, documents_rejected: [], emails: [],
+          notification_created: false, status: "untracked", error_message: null, created_at: c.created_at, synthetic: true,
+        });
+      });
+      (profs ?? []).forEach((p: any) => {
+        if (convUsers.has(p.user_id) || known(p.user_id, p.email)) return;
+        if (!["particulier", "b2b", "flotte", "pro"].includes(p.type_client ?? "")) return;
+        extra.push({
+          id: `p-${p.user_id}`, user_id: p.user_id, email: p.email, full_name: `${p.prenom ?? ""} ${p.nom ?? ""}`.trim() || null,
+          kind: p.type_client === "particulier" ? "client" : p.type_client === "flotte" ? "flotte" : "pro",
+          documents_expected: 0, documents_uploaded: 0, documents_rejected: [], emails: [],
+          notification_created: false, status: "untracked", error_message: null, created_at: p.created_at, synthetic: true,
+        });
+      });
+      return [...events, ...extra].sort((a, b) => b.created_at.localeCompare(a.created_at));
     },
   });
 
+  const demoIds = new Set((data ?? []).filter((r) => isDemoOrTestIdentity({ email: r.email, nom: r.full_name })).map((r) => r.id));
+  const doublons = trouverDoublons(
+    (data ?? []).filter((r) => !demoIds.has(r.id)).map((r) => ({ id: r.id, email: r.email, nom: r.full_name })),
+  );
+
+  const supprimerLigne = async (r: SignupEvent) => {
+    if (r.synthetic) return toast.message("Cette ligne vient d'un vrai compte : supprime-le depuis Utilisateurs.");
+    if (!(await confirmToast("Supprimer cette ligne du suivi ?", { description: "Le compte n'est pas touché, seule la ligne de suivi disparaît.", variant: "danger" }))) return;
+    const { error } = await supabase.from("signup_events").delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    toast.success("Ligne supprimée");
+    void refetch();
+  };
+
   const rows = (data ?? []).filter((r) => {
+    if (vue === "demo" ? !demoIds.has(r.id) : demoIds.has(r.id)) return false;
+    if (vue === "doublons" && !doublons.has(r.id)) return false;
     if (kind !== "all" && r.kind !== kind) return false;
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (search) {
@@ -113,7 +169,6 @@ function AdminInscriptions() {
         eyebrow="Onboarding"
         title="Suivi des"
         highlight="inscriptions"
-        subtitle="Documents reçus, e-mails envoyés, notification admin et horodatage."
         actions={
           <button
             onClick={() => refetch()}
@@ -139,6 +194,15 @@ function AdminInscriptions() {
         ))}
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {([["reels", "Inscriptions", (data ?? []).length - demoIds.size], ["doublons", "Doublons", doublons.size], ["demo", "Démo / Test", demoIds.size]] as const).map(([k, l, n]) => (
+          <button key={k} type="button" onClick={() => setVue(k)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${vue === k ? "border-[#2F5FFF] bg-[#2F5FFF] text-white" : "border-pro-border bg-white text-pro-text"}`}>
+            {l}<span className={`rounded-full px-1.5 text-[11px] ${vue === k ? "bg-white/25" : "bg-slate-100 text-slate-600"}`}>{n}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-pro-muted" />
@@ -157,6 +221,7 @@ function AdminInscriptions() {
           <option value="ok">Complet</option>
           <option value="partial">Partiel</option>
           <option value="failed">Échec</option>
+          <option value="untracked">Compte créé (non suivi)</option>
         </select>
       </div>
 
@@ -176,6 +241,7 @@ function AdminInscriptions() {
                 <th className="text-left px-4 py-3">Notification</th>
                 <th className="text-left px-4 py-3">Statut</th>
                 <th className="text-left px-4 py-3">Horodatage</th>
+                <th className="px-2 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +255,7 @@ function AdminInscriptions() {
                       className="border-t border-pro-border cursor-pointer hover:bg-pro-bg-soft/40"
                     >
                       <td className="px-4 py-3">
-                        <p className="font-medium text-pro-text">{r.full_name || "—"}</p>
+                        <p className="font-medium text-pro-text">{r.full_name || "—"}{doublons.has(r.id) && <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">Doublon</span>}</p>
                         <p className="text-xs text-pro-muted">{r.email}</p>
                       </td>
                       <td className="px-4 py-3 text-pro-text">{KIND_LABEL[r.kind] ?? r.kind}</td>
@@ -211,10 +277,15 @@ function AdminInscriptions() {
                       </td>
                       <td className="px-4 py-3"><StatusPill status={r.status} /></td>
                       <td className="px-4 py-3 text-xs text-pro-muted whitespace-nowrap">{fmt(r.created_at)}</td>
+                      <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                        {!r.synthetic && (
+                          <button type="button" aria-label="Supprimer la ligne" onClick={() => void supprimerLigne(r)} className="text-red-600"><Trash2 size={15} /></button>
+                        )}
+                      </td>
                     </tr>
                     {isOpen && (
                       <tr className="border-t border-pro-border bg-pro-bg-soft/30">
-                        <td colSpan={7} className="px-4 py-4 space-y-3">
+                        <td colSpan={8} className="px-4 py-4 space-y-3">
                           <div>
                             <p className="text-[10px] uppercase tracking-wider text-pro-muted mb-1">Détail des e-mails</p>
                             {(r.emails ?? []).length === 0 ? (

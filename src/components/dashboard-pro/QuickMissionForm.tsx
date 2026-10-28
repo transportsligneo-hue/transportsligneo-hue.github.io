@@ -687,7 +687,7 @@ export default function QuickMissionForm({
         type: "client_action",
         titre: rapide ? `Demande rapide à valider · ${clientLabel}` : `Nouvelle demande · ${clientLabel}`,
         message: `${depart} → ${arrivee}${prixTtc ? ` · ${prixTtc.toFixed(0)} €` : ""}${devisNumero ? ` · Devis ${devisNumero}` : ""}`,
-        link: rapide ? "/admin/demandes-rapides" : devisId ? "/admin/devis" : "/admin/demandes",
+        link: rapide ? "/admin/demandes?vue=rapides" : devisId ? "/admin/devis" : "/admin/demandes",
         entityType: devisId ? "devis" : "demande",
         entityId: devisId ?? demandeId,
       }).catch(() => {});

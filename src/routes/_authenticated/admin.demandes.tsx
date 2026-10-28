@@ -1,4 +1,5 @@
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
+import { DemandesRapidesPanel } from "@/components/admin/DemandesRapidesPanel";
 import { JOKEAGE_LABELS } from "@/lib/jokeage-services";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -125,7 +126,7 @@ function extractFromOptions(options: string | null): { prix: number | null; dist
   };
 }
 
-function AdminDemandes() {
+function DemandesListe() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -733,5 +734,33 @@ function DemandeDrawer({
         </DrawerSection>
       )}
     </AdminDetailDrawer>
+  );
+}
+
+
+function AdminDemandes() {
+  const [onglet, setOnglet] = useState<"demandes" | "rapides">(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("vue") === "rapides" ? "rapides" : "demandes",
+  );
+  const [aValider, setAValider] = useState(0);
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
+        {([["demandes", "Demandes de convoyage", 0], ["rapides", "Demandes rapides (contrat-cadre)", aValider]] as const).map(([k, l, n]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setOnglet(k)}
+            className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
+              onglet === k ? "border-[#2F5FFF] bg-[#2F5FFF] text-white" : "border-slate-200 bg-white text-slate-700"
+            }`}
+          >
+            {l}
+            {n > 0 && <span className="rounded-full bg-red-500 px-1.5 text-[11px] text-white">{n}</span>}
+          </button>
+        ))}
+      </div>
+      {onglet === "demandes" ? <DemandesListe /> : <DemandesRapidesPanel onCount={setAValider} />}
+    </div>
   );
 }
