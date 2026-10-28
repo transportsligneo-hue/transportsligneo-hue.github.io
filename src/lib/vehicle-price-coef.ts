@@ -1,17 +1,14 @@
 /**
  * Coefficient de prix selon le type de véhicule (base = citadine).
- * Écarts alignés sur le marché : SUV +3 %, utilitaire +9 %.
- * Berline, break, monospace et luxe sont traités comme un SUV (+3 %).
- * Coupé, cabriolet et « autre » : tarif citadine.
+ * Même tarif pour citadine, berline, break, SUV/4x4, monospace et autre.
+ * Luxe et sport (luxe/supercar, coupé, cabriolet) : +5 %.
+ * Utilitaire (jusqu'à 15 m³) : +10 %.
  */
 const COEF: Record<string, number> = {
-  citadine: 1,
-  berline: 1.03,
-  break: 1.03,
-  suv: 1.03,
-  monospace: 1.03,
-  luxe: 1.03,
-  utilitaire: 1.09,
+  luxe: 1.05,
+  coupe: 1.05,
+  cabriolet: 1.05,
+  utilitaire: 1.1,
 };
 
 export function vehicleCoef(type?: string | null): number {

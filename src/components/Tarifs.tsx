@@ -30,11 +30,11 @@ export default function Tarifs() {
         {/* Main pricing highlight */}
         <div className="text-center mb-16 card-premium p-10 pb-12 rounded max-w-2xl mx-auto gold-border-strong overflow-visible">
           <p className="font-heading text-5xl md:text-6xl gold-gradient-text mb-2 leading-tight">
-            <span className="text-2xl align-middle mr-2">à partir de</span>{societe ? "0,94" : "0,85"} €<span className="text-2xl">/km</span>
+            <span className="text-2xl align-middle mr-2">à partir de</span>{societe ? "0,91" : "0,85"} €<span className="text-2xl">/km</span>
           </p>
           <p className="text-cream/70 text-sm mt-2">
             {societe
-              ? "TTC, soit 0,78 € HT/km, dès 700 km · tarif dégressif selon la distance · hors département 37 et limitrophes"
+              ? "TTC (0,76 € HT/km), dès 700 km · tarif dégressif selon la distance · hors département 37 et limitrophes"
               : "Dès 1 000 km · 1,03 €/km de 200 à 499 km, puis dégressif jusqu'à 0,85 €/km · hors département 37 et limitrophes"}
           </p>
           <p className="text-primary text-sm mt-3 font-medium tracking-wide">

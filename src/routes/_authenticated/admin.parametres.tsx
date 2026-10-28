@@ -21,6 +21,7 @@ import { TEMPLATES as TEMPLATES_MAP } from "@/lib/email-templates/registry";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
+import { PlateauToggleCard } from "@/components/admin/PlateauToggleCard";
 import { RegimeFacturationCard } from "@/components/admin/RegimeFacturationCard";
 import { AvisGoogleHistoryCard } from "@/components/admin/AvisGoogleHistoryCard";
 import { RegistrationGateCard } from "@/components/admin/RegistrationGateCard";
@@ -188,6 +189,7 @@ function AdminParametres() {
         {/* === FACTURATION === */}
         <TabsContent value="facturation" className="mt-0 space-y-4">
           <RegimeFacturationCard />
+          <PlateauToggleCard />
           <DeliveryRechargeSurchargeCard />
 
           <Card>

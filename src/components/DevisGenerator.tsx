@@ -28,6 +28,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { lookupPlate } from "@/lib/plate.functions";
 import { PlateInput } from "@/components/plate/PlateInput";
 import { resolvePersonalizedPrice } from "@/lib/pricing.functions";
+import { plateauPrice } from "@/lib/plateau-tarif";
+import { usePlateauEnabled } from "@/lib/use-plateau-enabled";
 import { applyVehicleCoef } from "@/lib/vehicle-price-coef";
 
 import { QrHandoffButton } from "@/components/scanner/QrHandoffButton";
@@ -162,6 +164,8 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
   const [vehicleType, setVehicleType] = useState("");
+  const plateauOn = usePlateauEnabled();
+  const [modePlateau, setModePlateau] = useState(false);
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const [option, setOption] = useState<"aller-simple" | "aller-retour" | "express">("aller-simple");
@@ -416,8 +420,14 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
       if (local) return local;
     }
     if (distance === null) return null;
+    if (plateauOn && modePlateau && distance > 0 && vehicleType !== "autre") {
+      const pp = plateauPrice(distance, vehicleType);
+      if (option === "aller-retour") return { price: pp, label: "Plateau", finalPrice: Math.round(pp * 1.5), multiplierLabel: "Plateau · aller-retour", hasExtra: true };
+      if (option === "express") return { price: pp, label: "Plateau", finalPrice: Math.round(pp * 1.2), multiplierLabel: "Plateau · +20% express", hasExtra: true };
+      return { price: pp, label: "Plateau", finalPrice: pp, multiplierLabel: "Plateau", hasExtra: true };
+    }
     return calculatePrice(distance, departure, arrival, option, vehicleType);
-  }, [customMatch, distance, departure, arrival, option, vehicleType, tarifRegime]);
+  }, [customMatch, distance, departure, arrival, option, vehicleType, tarifRegime, plateauOn, modePlateau]);
 
 
 
@@ -1410,6 +1420,21 @@ export default function DevisGenerator({ prefill, hideAccountStep = false, succe
                         <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5fb6ff]/60 pointer-events-none" />
                       </div>
                     </div>
+
+                    {plateauOn && (
+                      <div>
+                        <label className="dg-journey-label block mb-1.5">Mode de transport</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[{ v: false, l: "Par route" }, { v: true, l: "Par plateau" }].map((m) => (
+                            <button key={m.l} type="button" onClick={() => setModePlateau(m.v)}
+                              className={`rounded-xl border px-3 py-2.5 text-sm transition-colors ${modePlateau === m.v ? "border-neon-blue bg-neon-blue/15 text-white" : "border-white/15 text-cream/70 hover:border-neon-blue/50"}`}>
+                              {m.l}
+                            </button>
+                          ))}
+                        </div>
+                        {modePlateau && <p className="mt-1.5 text-xs text-cream/60">Véhicule transporté sans mise en route (0 km au compteur). Non disponible pour les gros utilitaires.</p>}
+                      </div>
+                    )}
 
                     {/* 6. Carburant */}
                     <div>

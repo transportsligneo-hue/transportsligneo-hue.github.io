@@ -87,3 +87,14 @@ export const getGooglePlacesBrowserKey = createServerFn({ method: "GET" }).handl
   const key = process.env["GOOGLE_PLACES_BROWSER_KEY"] ?? "";
   return { key };
 });
+
+/** Convoyage sur plateau activé dans l'admin (réglage app_settings « plateau_enabled »). Désactivé par défaut. */
+export const getPlateauEnabled = createServerFn({ method: "GET" }).handler(async (): Promise<boolean> => {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await (supabaseAdmin as any).from("app_settings").select("value").eq("key", "plateau_enabled").maybeSingle();
+    return Boolean((data?.value as { enabled?: boolean } | null)?.enabled);
+  } catch {
+    return false;
+  }
+});

@@ -5,7 +5,7 @@
 //  - 500 à 999 km    : dégressif et continu, de 1,03 €/km (500 km) à 0,85 €/km (1 000 km)
 //  - 1 000 km et plus : 0,85 €/km
 // Régime tarifaire : « micro » (auto-entrepreneur, franchise de TVA : grille ci-dessus) ou
-// « societe » (assujettie à la TVA : grille alignée sur le marché). Le choix se fait dans l'admin
+// « societe » (assujettie à la TVA : grille 5 % sous le concurrent). Le choix se fait dans l'admin
 // (réglage de facturation). Les prix des grilles sont des prix TTC client ; en société,
 // HT = TTC / 1,20 (calcul déjà fait par les devis et factures).
 export type TarifRegime = "micro" | "societe";
@@ -19,10 +19,17 @@ export function setTarifRegime(r: TarifRegime) {
 export function getTarifRegime(): TarifRegime { return regime; }
 export function subscribeTarifRegime(l: () => void) { listeners.add(l); return () => { listeners.delete(l); }; }
 
-/** Société : de 700 km à plus, 0,78 € HT/km (concurrent à 0,80 €), soit 0,936 € TTC/km. */
-const SOCIETE_HT_PAR_KM = 0.78;
 const TVA = 1.2;
-const SOCIETE_DEBUT = 700;
+/** En société on se place 5 % sous le concurrent (relevés du 28/10/2026, départ Tours, prix TTC). */
+const SOUS_CONCURRENT = 0.95;
+/** Tarif HT/km du concurrent selon la distance : 0,925 à 200 km, 0,90 de 250 à 560 km, 0,80 dès 700 km. */
+function concurrentHtParKm(d: number): number {
+  if (d <= 200) return 0.925;
+  if (d < 250) return 0.925 - ((d - 200) / 50) * 0.025;
+  if (d <= 560) return 0.9;
+  if (d < 700) return 0.9 - ((d - 560) / 140) * 0.1;
+  return 0.8;
+}
 
 export function kmRate(d: number): number {
   return d < 100 ? 1.66 : d < 200 ? 1.27 : d < 500 ? 1.03 : d < 1000 ? 1.03 - 0.18 * ((d - 500) / 500) : 0.85;
@@ -31,18 +38,19 @@ function microPrice(d: number): number {
   const p = Math.round(d * kmRate(d));
   return d >= 100 && d < 200 ? Math.max(p, 165) : p;
 }
-/** Prix TTC client en régime société (grille alignée marché à partir de 700 km, raccord progressif dès 500 km). */
+/** Prix TTC client en régime société : 5 % sous le concurrent dès 200 km (en dessous : grille habituelle). */
 function societePrice(d: number): number {
-  if (d < 500) return microPrice(d);
-  const fin = Math.round(SOCIETE_DEBUT * SOCIETE_HT_PAR_KM * TVA);
-  if (d >= SOCIETE_DEBUT) return Math.round(d * SOCIETE_HT_PAR_KM * TVA);
-  const debut = microPrice(500);
-  return Math.round(debut + ((fin - debut) * (d - 500)) / (SOCIETE_DEBUT - 500));
+  if (d < 200) return microPrice(d);
+  return Math.round(d * concurrentHtParKm(d) * TVA * SOUS_CONCURRENT);
+}
+/** Plus petit tarif au km affiché sur le site (TTC) : 0,80 € HT × 1,20 × 0,95. */
+export function kmRateMini(): number {
+  return regime === "societe" ? 0.8 * TVA * SOUS_CONCURRENT : 0.85;
 }
 export function kmBasePrice(d: number): number {
   return regime === "societe" ? societePrice(d) : microPrice(d);
 }
 export function kmRateLabel(d: number): string {
-  const r = regime === "societe" && d >= 500 && d > 0 ? kmBasePrice(d) / d : kmRate(d);
+  const r = regime === "societe" && d >= 200 ? kmBasePrice(d) / d : kmRate(d);
   return r.toFixed(2).replace(".", ",") + " €/km";
 }

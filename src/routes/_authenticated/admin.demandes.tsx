@@ -177,11 +177,13 @@ function DemandesListe() {
   }, [fetchDemandes]);
 
   const stats = useMemo(() => {
-    const nouvelles = demandes.filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter").length;
+    // Les demandes de test / démo ne comptent jamais dans les compteurs
+    const reelles = demandes.filter((d) => !isDemoOrTestIdentity({ email: d.email, nom: d.nom, prenom: d.prenom }));
+    const nouvelles = reelles.filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter").length;
     const today = new Date().toDateString();
-    const aujourdhui = demandes.filter((d) => new Date(d.created_at).toDateString() === today).length;
-    const converties = demandes.filter((d) => d.statut === "convertie" || d.statut === "attribuee" || d.statut === "terminee").length;
-    const potentiel = demandes
+    const aujourdhui = reelles.filter((d) => new Date(d.created_at).toDateString() === today).length;
+    const converties = reelles.filter((d) => d.statut === "convertie" || d.statut === "attribuee" || d.statut === "terminee").length;
+    const potentiel = reelles
       .filter((d) => d.statut === "nouvelle" || d.statut === "a_traiter")
       .reduce((sum, d) => sum + (extractFromOptions(d.options).prix ?? 0), 0);
     return { nouvelles, aujourdhui, converties, potentiel };
@@ -189,7 +191,7 @@ function DemandesListe() {
 
   const countByStatut = useMemo(() => {
     const m: Record<string, number> = {};
-    for (const d of demandes) m[d.statut] = (m[d.statut] ?? 0) + 1;
+    for (const d of demandes.filter((x) => !isDemoOrTestIdentity({ email: x.email, nom: x.nom, prenom: x.prenom }))) m[d.statut] = (m[d.statut] ?? 0) + 1;
     return m;
   }, [demandes]);
 
@@ -296,7 +298,7 @@ function DemandesListe() {
               }`}
             >
               Tous
-              <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${filterStatut === "all" ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{demandes.length}</span>
+              <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${filterStatut === "all" ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>{demandes.length - testCount}</span>
             </button>
             <button
               onClick={() => setFilterStatut("todo")}
