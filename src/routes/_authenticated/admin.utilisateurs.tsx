@@ -31,6 +31,7 @@ import { ClientLogo } from "@/components/admin/ClientLogo";
 import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { trouverDoublons } from "@/lib/doublons";
 import { confirmToast } from "@/lib/confirm-toast";
+import { FusionComptesDialog } from "@/components/admin/FusionComptesDialog";
 import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
@@ -81,6 +82,7 @@ function AdminUtilisateurs() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | UserCategory>("all");
   const [selected, setSelected] = useState<UnifiedUser | null>(null);
+  const [fusion, setFusion] = useState<{ garder?: string; source?: string } | null>(null);
   const [vue, setVue] = useState<"reels" | "demo" | "doublons">("reels");
 
   useEffect(() => { void loadUsers(); }, []);
@@ -212,7 +214,12 @@ function AdminUtilisateurs() {
         breadcrumb="Utilisateurs"
         eyebrow="Comptes & accès"
         title="Utilisateurs"
-        actions={<CreateAccountDialog onCreated={() => void loadUsers()} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => setFusion({})}>Fusionner des comptes</Button>
+            <CreateAccountDialog onCreated={() => void loadUsers()} />
+          </div>
+        }
       />
 
 
@@ -332,6 +339,16 @@ function AdminUtilisateurs() {
         )}
       </div>
 
+      {fusion && (
+        <FusionComptesDialog
+          users={users}
+          garderInitial={fusion.garder}
+          sourceInitial={fusion.source}
+          onClose={() => setFusion(null)}
+          onDone={() => void loadUsers()}
+        />
+      )}
+
       <UserDetailDrawer
         user={selected}
         onClose={() => setSelected(null)}
@@ -391,6 +408,9 @@ function AdminUtilisateurs() {
                     </TableCell>
                     <TableCell className="text-xs text-pro-muted">{new Date(u.created_at).toLocaleDateString("fr-FR")}</TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
+                      {vue === "doublons" && u.role !== "admin" && u.role !== "super_admin" && (
+                        <Button variant="ghost" size="sm" onClick={() => setFusion({ garder: u.user_id })}>Garder + fusionner</Button>
+                      )}
                       {(vue === "doublons" || vue === "demo") && u.role !== "admin" && u.role !== "super_admin" && (
                         <Button variant="ghost" size="icon" aria-label="Supprimer" onClick={() => void supprimerCompte(u)}>
                           <Trash2 size={16} className="text-red-600" />
