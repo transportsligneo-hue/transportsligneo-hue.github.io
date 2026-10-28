@@ -4,6 +4,8 @@ export interface ConvoyeurDocSpec {
   required: boolean;
   independantOnly?: boolean;
   hint?: string;
+  /** Document à renouveler : durée de validité en mois à compter du dépôt. */
+  renewMonths?: number;
 }
 
 export const CONVOYEUR_DOC_TYPES: ConvoyeurDocSpec[] = [
@@ -12,6 +14,7 @@ export const CONVOYEUR_DOC_TYPES: ConvoyeurDocSpec[] = [
   { key: "rib", label: "RIB", required: true },
   { key: "assurance", label: "Assurance RC Pro", required: true },
   { key: "kbis", label: "KBIS", required: true, independantOnly: true },
+  { key: "vigilance", label: "Attestation de vigilance URSSAF", required: true, independantOnly: true, renewMonths: 6, hint: "À renouveler tous les 6 mois, gratuit sur urssaf.fr (espace Mon compte > Mes attestations)." },
   { key: "autre", label: "Autres documents", required: false },
 ];
 
@@ -28,7 +31,9 @@ const DOC_ALIASES: Record<string, string> = {
   rc_pro: "assurance",
   assurance_rc_pro: "assurance",
   contrat: "autre",
-  vigilance: "autre",
+  vigilance: "vigilance",
+  attestation_vigilance: "vigilance",
+  attestation_urssaf: "vigilance",
   w_garage: "autre",
 };
 
@@ -59,4 +64,12 @@ export function getConvoyeurDocStatusLabel(status: string | null | undefined): s
   if (status === "refuse") return "Refusé";
   if (status === "a_renvoyer") return "À renvoyer";
   return "En attente";
+}
+/** Échéance d'un document à renouveler (null si le type n'expire pas). */
+export function getDocRenewal(spec: ConvoyeurDocSpec, createdAt: string | null | undefined, now = new Date()) {
+  if (!spec.renewMonths || !createdAt) return null;
+  const exp = new Date(createdAt);
+  exp.setMonth(exp.getMonth() + spec.renewMonths);
+  const daysLeft = Math.ceil((exp.getTime() - now.getTime()) / 86_400_000);
+  return { expiresAt: exp, daysLeft, expired: daysLeft < 0, soon: daysLeft >= 0 && daysLeft <= 30 };
 }

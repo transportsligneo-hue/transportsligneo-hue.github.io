@@ -257,10 +257,17 @@ export async function chainOk(requestId: string): Promise<boolean> {
 export async function missingConvoyeurDocs(convoyeurId: string): Promise<string[]> {
   const { getRequiredConvoyeurDocTypes, normalizeConvoyeurDocType } = await import("@/lib/convoyeur-documents");
   const { data: conv } = await supabaseAdmin.from("convoyeurs").select("type_convoyeur").eq("id", convoyeurId).maybeSingle();
-  const { data: docs } = await supabaseAdmin.from("documents_convoyeurs").select("type_document, statut_validation").eq("convoyeur_id", convoyeurId);
+  const { data: docs } = await supabaseAdmin.from("documents_convoyeurs").select("type_document, statut_validation, created_at").eq("convoyeur_id", convoyeurId);
+  const { getDocRenewal, CONVOYEUR_DOC_TYPES } = await import("@/lib/convoyeur-documents");
   const have = new Set(
     (docs ?? [])
       .filter((d: any) => d.statut_validation !== "refuse" && d.statut_validation !== "a_renvoyer")
+      // document à renouveler (attestation de vigilance, 6 mois) : périmé = comme absent
+      .filter((d: any) => {
+        const spec = CONVOYEUR_DOC_TYPES.find((s) => s.key === normalizeConvoyeurDocType(d.type_document));
+        const r = spec ? getDocRenewal(spec, d.created_at) : null;
+        return !r?.expired;
+      })
       .map((d: any) => normalizeConvoyeurDocType(d.type_document)),
   );
   return getRequiredConvoyeurDocTypes(conv?.type_convoyeur).filter((d) => !have.has(d.key)).map((d) => d.label);

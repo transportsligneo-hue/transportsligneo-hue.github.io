@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { notifyDocumentDepose } from "@/lib/admin-alert.functions";
 import {
   getVisibleConvoyeurDocTypes,
+  getDocRenewal,
   isConvoyeurDocApproved,
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
@@ -275,6 +276,15 @@ function ConvoyeurDocuments() {
                       {d.nom_fichier} · {new Date(d.created_at).toLocaleDateString("fr-FR")}
                     </p>
                   )}
+                  {d && (() => {
+                    const rn = getDocRenewal(spec, d.created_at);
+                    if (!rn) return null;
+                    const cls = rn.expired ? "bg-red-50 text-red-700 border-red-200" : rn.soon ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    const txt = rn.expired ? `Expirée depuis le ${rn.expiresAt.toLocaleDateString("fr-FR")} : renouvelez-la`
+                      : rn.soon ? `À renouveler avant le ${rn.expiresAt.toLocaleDateString("fr-FR")} (${rn.daysLeft} j)`
+                      : `Valable jusqu'au ${rn.expiresAt.toLocaleDateString("fr-FR")}`;
+                    return <span className={`inline-flex items-center gap-1 mt-2 mr-2 text-[11px] px-2 py-0.5 rounded-full border ${cls}`}>{txt}</span>;
+                  })()}
                   {d && badge && (
                     <span className={`inline-flex items-center gap-1 mt-2 text-[11px] px-2 py-0.5 rounded-full border ${badge.cls}`}>
                       <Icon size={11} /> {badge.label}

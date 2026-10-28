@@ -4,6 +4,7 @@
  * le convoyeur n'a pas déposé ses pièces obligatoires.
  */
 import { useEffect, useState } from "react";
+import { SiretBadge } from "@/components/SiretBadge";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, CheckCircle2, FileSignature } from "lucide-react";
@@ -69,7 +70,7 @@ export default function ContratYousignCard(props: Props) {
       {kbisState === "done" && <p className="mt-3 text-xs text-emerald-700">SIRET et adresse repris automatiquement du Kbis{denomination ? ` (${denomination})` : ""}. Vous pouvez les corriger.</p>}
       {kbisState === "none" && !siret && <p className="mt-3 text-xs text-pro-text-soft">Kbis non lisible : saisissez le SIRET et l'adresse à la main.</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <label className="text-xs text-pro-text-soft">SIRET<input value={siret} onChange={(e) => setSiret(e.target.value)} className={input} placeholder="000 000 000 00000" /></label>
+        <label className="text-xs text-pro-text-soft">SIRET<input value={siret} onChange={(e) => setSiret(e.target.value)} className={input} placeholder="000 000 000 00000" /><SiretBadge admin siret={siret} /></label>
         <label className="text-xs text-pro-text-soft">Adresse<input value={adresse} onChange={(e) => setAdresse(e.target.value)} className={input} placeholder="Adresse complète" /></label>
         <label className="text-xs text-pro-text-soft">N° de permis<input value={permis} onChange={(e) => setPermis(e.target.value)} className={input} placeholder="12AB34567" /></label>
       </div>
