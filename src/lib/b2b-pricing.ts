@@ -23,6 +23,7 @@ const URGENCY_MULTIPLIER: Record<B2BUrgency, number> = {
 };
 
 const NON_RUNNING_SURCHARGE = 1.40; // +40% si non roulant
+const PLANCHER_LONG_TRAJET_HT = 260; // = prix d'un trajet de ~199 km, jusqu'à ~274 km
 const MIN_PRICE_HT = 89; // minimum facturable HT
 const VAT_RATE = 0.20;
 
@@ -63,6 +64,11 @@ export function estimateB2BPrice(input: B2BEstimateInput, distOverride?: number 
   const rate = distance < 200 ? RATE_PER_KM_SHORT : RATE_PER_KM_LONG;
   let base = distance * rate;
   breakdown.push(`${distance} km × ${rate.toFixed(2)} €/km = ${base.toFixed(2)} €`);
+  // Évite qu'un trajet de 200 km coûte moins cher qu'un trajet de 199 km.
+  if (distance >= 200 && base < PLANCHER_LONG_TRAJET_HT) {
+    base = PLANCHER_LONG_TRAJET_HT;
+    breakdown.push(`Plancher trajet longue distance : ${PLANCHER_LONG_TRAJET_HT.toFixed(2)} €`);
+  }
 
   const vMult = VEHICLE_MULTIPLIER[input.vehicleType];
   if (vMult !== 1) {

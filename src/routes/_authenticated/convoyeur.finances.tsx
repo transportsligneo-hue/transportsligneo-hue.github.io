@@ -1,3 +1,4 @@
+import { FraisEnAttenteCard } from "@/components/convoyeur/FraisEnAttenteCard";
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -149,6 +150,7 @@ function FinancesPage() {
           <div className="sp"><h1>Espace Finances</h1><p className="sub">Chaque euro expliqué, mission par mission.</p></div>
           <span className="rv-mo fmo">{cap(MONTHS_FULL[mo])} {y}</span>
         </div>
+        <FraisEnAttenteCard />
 
         <div className="fh">
           <div className="fh-t">

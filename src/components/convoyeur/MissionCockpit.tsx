@@ -38,6 +38,7 @@ import { ArriveeSignatureSheet } from "@/components/inspection/ArriveeSignatureS
 import { DepartureChecklistSheet } from "@/components/mission/DepartureChecklistSheet";
 import { MissionContactsBlock } from "@/components/mission/MissionContactsBlock";
 import { NavigationChoiceSheet } from "@/components/mission/NavigationChoiceSheet";
+import { FraisMissionCard } from "@/components/convoyeur/FraisMissionCard";
 
 type ActionKind =
   | "selfie"
@@ -838,6 +839,8 @@ export function MissionCockpit({
               })()}
             </div>
           )}
+
+          <FraisMissionCard attributionId={attributionId} userId={userId} />
 
           {!isDone && (
             <button onClick={() => setOpenIncident(true)} className="mv3-incident">

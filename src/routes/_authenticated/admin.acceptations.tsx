@@ -242,6 +242,52 @@ function AdminAcceptationsPage() {
           ))}
         </div>
       )}
+      <DemandesRapidesPreuves />
+    </div>
+  );
+}
+
+/** Preuves des demandes rapides passées sous contrat-cadre (sans devis). */
+function DemandesRapidesPreuves() {
+  const [rows, setRows] = useState<Array<{ id: string; numero_dr: string | null; email: string; depart: string; arrivee: string; validation_cadre: string | null; preuve_contrat: Record<string, any> | null }>>([]);
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("demandes_convoyage" as never)
+        .select("id, numero_dr, email, depart, arrivee, validation_cadre, preuve_contrat")
+        .eq("sans_devis" as never, true as never)
+        .not("preuve_contrat" as never, "is", null)
+        .order("created_at" as never, { ascending: false })
+        .limit(200);
+      setRows((data ?? []) as never);
+    })();
+  }, []);
+  if (!rows.length) return null;
+  return (
+    <div className="mt-8">
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider">Demandes rapides (contrat-cadre)</h3>
+      <div className="space-y-2">
+        {rows.map((r) => {
+          const p = r.preuve_contrat ?? {};
+          return (
+            <Card key={r.id}>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
+                <b className="text-sm">{r.numero_dr}</b>
+                <span>{r.email}</span>
+                <span>{r.depart} → {r.arrivee}</span>
+                <span>IP {p.ip ?? "—"}</span>
+                <span>Contrat du {p.contrat_signe_le ?? "—"}</span>
+                <span>Remise {p.remise_pct ?? 0} %</span>
+                <span>Tarif {Number(p.tarif_applique_ttc ?? 0).toFixed(2)} € TTC</span>
+                <span>{p.envoye_le ? new Date(p.envoye_le).toLocaleString("fr-FR") : ""}</span>
+                <Badge tone={r.validation_cadre === "validee" ? "success" : r.validation_cadre === "refusee" ? "danger" : "neutral"}>
+                  {r.validation_cadre === "validee" ? "Validée" : r.validation_cadre === "refusee" ? "Refusée" : "À valider"}
+                </Badge>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

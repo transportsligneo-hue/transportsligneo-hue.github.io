@@ -62,6 +62,7 @@ import { missionNumberOf, displayTrajetRef, stripLegSuffix, displayNumero } from
 import { buildLegDossierPdf, mergeDossierParts } from "@/lib/dossier-mission";
 import { AdminMissionARBanner } from "@/components/admin/AdminMissionARBanner";
 import { MissionPriceCard } from "@/components/admin/MissionPriceCard";
+import { FraisAdminList } from "@/components/admin/frais/FraisAdminList";
 import { MissionPriceHistory } from "@/components/admin/MissionPriceHistory";
 import { ElectricBadge } from "@/components/mission/ElectricBadge";
 import { AdminMissionAiPanel } from "@/components/ai/AdminMissionAiPanel";
@@ -1799,6 +1800,14 @@ function AdminMissionDetail() {
           setTrajet({ ...trajet, prix, prix_convoyeur: prixConvoyeur, tarif_convoyeur: prixConvoyeur })
         }
       />
+
+      <Card>
+        <div className="flex items-center gap-2 mb-3">
+          <Receipt size={15} className="text-pro-accent" />
+          <h3 className="text-sm font-semibold text-pro-text uppercase tracking-wider">Frais de la mission</h3>
+        </div>
+        <FraisAdminList trajetId={trajet.id} convoyeurId={attribution?.convoyeur_id ?? null} onChanged={fetchAll} />
+      </Card>
 
       {/* === PO & facturation === */}
       <Card>

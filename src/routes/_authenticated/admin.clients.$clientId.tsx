@@ -30,6 +30,7 @@ import {
 import { LogoUploader } from "@/components/LogoUploader";
 import { ClientLogo } from "@/components/admin/ClientLogo";
 import { AdminAvatarUploader } from "@/components/admin/AdminAvatarUploader";
+import { ContratCadreCard } from "@/components/admin/ContratCadreCard";
 import { ClientPricingRulesBlock } from "@/components/admin/ClientPricingRulesBlock";
 import { ClientDefaultAddressesBlock } from "@/components/admin/ClientDefaultAddressesBlock";
 import { AdminOrgContextBanner, type OrgContextKind } from "@/components/admin/AdminOrgContextBanner";
@@ -821,6 +822,9 @@ function AdminClientDetail() {
             <div className="mt-6 space-y-6">
               <div id="adresses" className="scroll-mt-24">
                 <ClientDefaultAddressesBlock clientUserId={clientId} clientEmail={profile.email} />
+              </div>
+              <div id="contrat-cadre" className="scroll-mt-24">
+                <ContratCadreCard clientUserId={clientId} />
               </div>
               <div id="tarifs" className="scroll-mt-24">
                 <ClientPricingRulesBlock clientUserId={clientId} clientEmail={profile.email} />

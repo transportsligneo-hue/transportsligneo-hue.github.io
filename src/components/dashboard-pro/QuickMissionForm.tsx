@@ -1,3 +1,6 @@
+import { useServerFn as useServerFnCC } from "@tanstack/react-start";
+import { useMonContratCadre, prixContrat } from "@/lib/contrat-cadre";
+import { enregistrerDemandeRapide } from "@/lib/contrat-cadre.functions";
 import { JOKEAGE_SERVICES, type JokeageService } from "@/lib/jokeage-services";
 import { HelpTip } from "@/components/ui/HelpTip";
 import { MissionRequestHelp } from "@/components/onboarding/MissionRequestHelp";
@@ -14,7 +17,7 @@ const QUICK_TOUR: TourStep[] = [
   { target: 'section:has(> div > h2 [data-help-topic="recap"])', title: "Récapitulatif", body: "Relisez le trajet, le véhicule et l'estimation avant l'envoi." },
   { target: 'form:has([data-help-topic="request"]) button[type="submit"]', title: "Envoyez votre demande", body: "Un clic suffit. Notre équipe la traite sous 24 h et vous suivez ensuite la mission en direct depuis votre espace." },
 ];
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   MapPin, MapPinned, User, Phone, Calendar, Clock, Car,
@@ -118,6 +121,9 @@ export default function QuickMissionForm({
   const isParticulier = variant === "particulier";
   const { user } = useAuth();
   const navigate = useNavigate();
+  const contratCadre = useMonContratCadre(user?.id);
+  const enregistrerDR = useServerFnCC(enregistrerDemandeRapide);
+  const submitRapide = useRef(false);
 
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -514,6 +520,18 @@ export default function QuickMissionForm({
     }
 
 
+    const rapide = submitRapide.current && !!contratCadre;
+    submitRapide.current = false;
+    if (rapide && contratCadre) {
+      const base = priceView?.ttc ?? 0;
+      const net = prixContrat(base, contratCadre.remise_pct);
+      if (!(net > 0)) { setError("Prix indisponible pour cette demande, utilisez la demande avec devis."); return; }
+      if (contratCadre.plafond_ttc && net > contratCadre.plafond_ttc) {
+        setError(`Ce montant dépasse le plafond de votre contrat-cadre (${contratCadre.plafond_ttc} €). Utilisez la demande avec devis.`);
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const optionsMeta: Record<string, unknown> = {};
@@ -528,13 +546,15 @@ export default function QuickMissionForm({
           .map(({ key }) => key);
       }
 
-      const prixTtc = priceView?.ttc ?? null;
+      const prixTtc = rapide && contratCadre
+        ? prixContrat(priceView?.ttc ?? 0, contratCadre.remise_pct)
+        : (priceView?.ttc ?? null);
 
       // 1) Crée d'abord un DEVIS (statut "envoye") pour que le client reçoive
       //    immédiatement son estimation par email et le retrouve dans son espace.
       let devisId: string | null = null;
       let devisNumero: string | null = null;
-      if (prixTtc && prixTtc > 0) {
+      if (prixTtc && prixTtc > 0 && !rapide) {
         const { data: devisRow, error: devisErr } = await supabase
           .from("devis")
           .insert({
@@ -592,6 +612,7 @@ export default function QuickMissionForm({
         statut: "nouvelle",
         prix_estime: prixTtc,
         pricing_display_mode: profile.pricing_display_mode,
+        ...(rapide ? { sans_devis: true } : {}),
         default_address_id: defaultAddressId,
         contact_depart_nom: contactDepartNom || null,
         contact_depart_tel: contactDepartTel || null,
@@ -644,7 +665,16 @@ export default function QuickMissionForm({
       if (insErr) throw insErr;
 
       const demandeId = inserted?.id;
-      const numero = devisNumero ?? (demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "");
+      let drNumero: string | null = null;
+      if (rapide && demandeId) {
+        try {
+          const r = await enregistrerDR({ data: { demandeId } });
+          drNumero = r.numero;
+        } catch (e) {
+          console.warn("[QuickMissionForm] preuve demande rapide", e);
+        }
+      }
+      const numero = drNumero ?? devisNumero ?? (demandeId ? `DEM-${String(demandeId).slice(0, 8).toUpperCase()}` : "");
       const clientLabel = profile.societe || `${profile.prenom} ${profile.nom}`.trim() || profile.email;
 
       // Lier la demande au devis côté devis également (best-effort)
@@ -655,9 +685,9 @@ export default function QuickMissionForm({
       // Notification admin (in-app + push web)
       notifyAdmin({
         type: "client_action",
-        titre: `Nouvelle demande · ${clientLabel}`,
+        titre: rapide ? `Demande rapide à valider · ${clientLabel}` : `Nouvelle demande · ${clientLabel}`,
         message: `${depart} → ${arrivee}${prixTtc ? ` · ${prixTtc.toFixed(0)} €` : ""}${devisNumero ? ` · Devis ${devisNumero}` : ""}`,
-        link: devisId ? "/admin/devis" : "/admin/demandes",
+        link: rapide ? "/admin/demandes-rapides" : devisId ? "/admin/devis" : "/admin/demandes",
         entityType: devisId ? "devis" : "demande",
         entityId: devisId ?? demandeId,
       }).catch(() => {});
@@ -1390,12 +1420,25 @@ export default function QuickMissionForm({
         </button>
         <button
           type="submit"
+          onClick={() => { submitRapide.current = false; }}
           disabled={submitting || !!(date && heure && checkMinNotice(date, heure)) || !depart || !arrivee || !isPreciseAddress(depart) || !isPreciseAddress(arrivee) || !date || !heure || (tripType === "aller-retour" && (!dateRetour || !heureRetour || (!sameRetourVehicle && !immatRetour.trim())))}
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           {draftNumero ? `Valider le devis ${draftNumero}` : "Créer la demande de mission"}
         </button>
+        {contratCadre && (
+          <button
+            type="submit"
+            onClick={() => { submitRapide.current = true; }}
+            disabled={submitting || !!(date && heure && checkMinNotice(date, heure)) || !depart || !arrivee || !isPreciseAddress(depart) || !isPreciseAddress(arrivee) || !date || !heure || !immat.trim() || !priceView}
+            title="Sans devis, au tarif de votre contrat-cadre"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-gradient-to-r from-[#2F5FFF] to-[#00A3FF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          >
+            {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+            Demande rapide{priceView ? ` · ${prixContrat(priceView.ttc, contratCadre.remise_pct).toFixed(0)} € TTC` : ""}
+          </button>
+        )}
         </div>
       </div>
     </form>
