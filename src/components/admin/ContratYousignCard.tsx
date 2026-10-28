@@ -35,7 +35,7 @@ export default function ContratYousignCard(props: Props) {
 
   // SIRET + adresse repris automatiquement du Kbis déposé à l'inscription.
   useEffect(() => {
-    if (props.siret && props.adresse) return;
+    if (props.siret && props.adresse) return; // déjà enregistrés sur la fiche : rien à relire
     let dead = false;
     setKbisState("loading");
     void kbisInfo({ data: { convoyeurId: props.convoyeurId } })

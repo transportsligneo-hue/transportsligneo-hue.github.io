@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/contrats-convoyeurs"
 
 type Conv = {
   id: string; nom: string | null; prenom: string | null; email: string | null; telephone: string | null;
-  permis: string | null; statut: string | null; created_at: string;
+  permis: string | null; permis_numero?: string | null; siret?: string | null; adresse?: string | null; statut: string | null; created_at: string;
 };
 type Req = { id: string; ref_id: string | null; kind: string; status: string; signed_at: string | null; sent_at: string; expires_at: string };
 
@@ -53,10 +53,10 @@ function ContratsConvoyeursPage() {
     setLoading(true);
     try {
       const [{ data: c }, r] = await Promise.all([
-        supabase.from("convoyeurs").select("id, nom, prenom, email, telephone, permis, statut, created_at").order("created_at", { ascending: false }),
+        supabase.from("convoyeurs").select("*").order("created_at", { ascending: false }),
         list({ data: { refType: "convoyeur", limit: 300 } }),
       ]);
-      setConvs((c ?? []) as Conv[]);
+      setConvs((c ?? []) as unknown as Conv[]);
       setReqs((r.items as Req[]).filter((x) => x.kind === "contrat_convoyeur"));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Chargement impossible");
@@ -169,7 +169,9 @@ function ContratsConvoyeursPage() {
                     nomComplet={nom}
                     email={c.email}
                     telephone={c.telephone}
-                    permisNumero={c.permis}
+                    permisNumero={c.permis_numero ?? c.permis}
+                    siret={c.siret}
+                    adresse={c.adresse}
                   />
                 </div>
               )}

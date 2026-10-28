@@ -24,7 +24,7 @@ import {
   type Remuneration, type PaiementStatut,
 } from "@/lib/finances-convoyeurs";
 
-import { downloadAutofacture } from "@/lib/autofacture-convoyeur";
+import { previewAutofacture } from "@/lib/autofacture-convoyeur";
 
 export const Route = createFileRoute("/_authenticated/admin/paiements-convoyeurs")({
   component: AdminPaiementsConvoyeurs,
@@ -451,8 +451,8 @@ function AdminPaiementsConvoyeurs() {
                       <TD><Badge tone={PAIEMENT_STATUT_TONE[p.statut]}>{PAIEMENT_STATUT_LABEL[p.statut]}</Badge></TD>
                       <TD>
                         <div className="flex gap-1">
-                          <Button size="sm" variant="secondary" onClick={() => void downloadAutofacture(p.id).catch((e) => toast.error(e instanceof Error ? e.message : "Facture impossible"))}>
-                            Facture
+                          <Button size="sm" variant="secondary" onClick={() => void previewAutofacture(p.id).catch((e) => toast.error(e instanceof Error ? e.message : "Facture impossible"))}>
+                            Aperçu facture
                           </Button>
                           {p.statut === "prepare" && (
                             <Button size="sm" variant="secondary" onClick={() => void setPaiementStatut(p, "envoye")}>Envoyé</Button>

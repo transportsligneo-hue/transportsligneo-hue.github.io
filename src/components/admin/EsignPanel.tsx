@@ -99,6 +99,16 @@ export default function EsignPanel(p: EsignPanelProps) {
     if (error) throw new Error(`Envoi du document impossible : ${error.message}`);
     return u.path;
   };
+  const preview = async () => {
+    if (!p.getPdf) return;
+    const w = window.open("", "_blank");
+    setBusy("preview");
+    try {
+      const blob = await p.getPdf();
+      const url = URL.createObjectURL(blob);
+      if (w) w.location.href = url; else window.open(url, "_blank");
+    } catch (e) { w?.close(); toast.error(errMsg(e, "Aperçu impossible")); } finally { setBusy(null); }
+  };
   const send = async () => {
     setBusy("send");
     try {
@@ -150,10 +160,18 @@ export default function EsignPanel(p: EsignPanelProps) {
           <label className="text-xs text-pro-text-soft">Validité du lien (jours)<input className={field} type="number" min={1} max={60} value={days} onChange={(e) => setDays(Number(e.target.value) || 14)} /></label>
           {!p.getPdf && <label className="text-xs text-pro-text-soft">PDF à signer<input className={field} type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></label>}
         </div>
-        <button onClick={() => void send()} disabled={!canSend || busy === "send"}
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2F5FFF] text-white text-sm font-medium disabled:opacity-50">
-          {busy === "send" ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Envoyer pour signature
-        </button>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {p.getPdf && (
+            <button onClick={() => void preview()} disabled={busy === "preview"}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#2F5FFF] text-[#2F5FFF] text-sm font-medium disabled:opacity-50">
+              {busy === "preview" ? <Loader2 size={15} className="animate-spin" /> : <FileSignature size={15} />} Aperçu du contrat
+            </button>
+          )}
+          <button onClick={() => void send()} disabled={!canSend || busy === "send"}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2F5FFF] text-white text-sm font-medium disabled:opacity-50">
+            {busy === "send" ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} Envoyer pour signature
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-pro-border bg-white divide-y divide-pro-border">

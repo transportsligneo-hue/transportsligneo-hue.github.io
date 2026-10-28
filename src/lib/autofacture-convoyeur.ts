@@ -250,3 +250,13 @@ export async function downloadAutofacture(paiementId: string) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
+
+/** Aperçu dans un nouvel onglet (sans téléchargement) : l'admin vérifie que tout est bien rempli. */
+export async function previewAutofacture(paiementId: string) {
+  const w = window.open("", "_blank");
+  try {
+    const data = await loadAutofactureData(paiementId);
+    const url = URL.createObjectURL(await generateAutofacturePdf(data));
+    if (w) w.location.href = url; else window.open(url, "_blank");
+  } catch (e) { w?.close(); throw e; }
+}

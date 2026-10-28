@@ -737,7 +737,9 @@ function AdminConvoyeurDetail() {
               nomComplet={fullName}
               email={conv.email}
               telephone={conv.telephone}
-              permisNumero={conv.permis}
+              permisNumero={(conv as any).permis_numero ?? conv.permis}
+              siret={(conv as any).siret}
+              adresse={(conv as any).adresse}
             />
           </div>
         </TabsContent>
