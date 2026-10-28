@@ -91,16 +91,6 @@ function SignaturePage() {
   const pcv = useRef<HTMLCanvasElement | null>(null);
   const pDrawing = useRef(false);
   const pLast = useRef<{ x: number; y: number } | null>(null);
-  const initialsOf = (name: string) => name.split(/[\s-]+/).filter(Boolean).slice(0, 3).map((w) => w[0]!.toUpperCase()).join("") || "—";
-  const pGenerate = useCallback(() => {
-    const c = pcv.current; if (!c || !info) return;
-    const ctx = c.getContext("2d")!; ctx.clearRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "#0a1638"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.font = "italic 600 120px 'Segoe Script','Brush Script MT','Snell Roundhand',cursive,Georgia,serif";
-    ctx.fillText(initialsOf(info.signerName), c.width / 2, c.height / 2 + 6);
-    setHasPInk(true);
-  }, [info]);
-  useEffect(() => { if (step === "sign") { const t = setTimeout(pGenerate, 0); return () => clearTimeout(t); } }, [step, pGenerate]);
   const pPos = (e: React.PointerEvent) => {
     const r = pcv.current!.getBoundingClientRect();
     return { x: ((e.clientX - r.left) / r.width) * pcv.current!.width, y: ((e.clientY - r.top) / r.height) * pcv.current!.height };
@@ -349,8 +339,8 @@ function SignaturePage() {
           {fromPhone && !qr && <p className="mt-2 text-xs text-emerald-700 flex items-center gap-1"><CheckCircle2 size={14} /> Signature reçue depuis votre téléphone.</p>}
         </div>
         <div>
-          <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Votre paraphe (initiales)</span>
-            <span className="flex gap-3 text-sm text-[#2f5fff]"><button className="inline-flex items-center gap-1" onClick={pClear}><Eraser size={14} /> Effacer</button><button className="underline" onClick={pGenerate}>Mes initiales</button></span></div>
+          <div className="flex items-center justify-between mb-1"><span className="text-sm text-[#5a6788]">Paraphez avec le doigt / la souris (vos initiales)</span>
+            <span className="flex gap-3 text-sm text-[#2f5fff]"><button className="inline-flex items-center gap-1" onClick={pClear}><Eraser size={14} /> Effacer</button></span></div>
           <canvas ref={pcv} width={500} height={220} onPointerDown={pDown} onPointerMove={pMove} onPointerUp={pUp} onPointerCancel={pUp}
             className="w-full h-28 rounded-xl border-2 border-dashed border-[#9db6ff] bg-white touch-none" />
         </div>
@@ -379,7 +369,7 @@ function SignaturePage() {
         {(() => {
           const m: string[] = [];
           if (!consent) m.push("cochez la case de consentement");
-          if (!hasPInk) m.push("créez votre paraphe");
+          if (!hasPInk) m.push("paraphez dans le premier cadre");
           if (!hasInk) m.push("signez dans le cadre");
           if (typedName.trim().length < 2) m.push("saisissez votre nom");
           return <p className={"text-xs text-center font-medium " + (m.length ? "text-amber-700" : "text-emerald-700")}>{m.length ? `Pour continuer : ${m.join(", ")}.` : "Tout est prêt : vous pouvez signer."}</p>;
