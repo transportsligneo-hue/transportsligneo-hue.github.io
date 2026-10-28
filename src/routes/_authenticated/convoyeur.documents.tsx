@@ -13,6 +13,7 @@ import {
   normalizeConvoyeurDocType,
 } from "@/lib/convoyeur-documents";
 import MonContratCard from "@/components/convoyeur/MonContratCard";
+import IdVerifyCard from "@/components/convoyeur/IdVerifyCard";
 import { ProgressHero, ProfileCardView, DocCardView, SectionTitle, type DocStatus } from "@/components/convoyeur/DocumentsUI";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
 
@@ -271,6 +272,8 @@ function ConvoyeurDocuments() {
       )}
 
       <ProgressHero done={validatedCount} total={requiredCount} items={heroItems} />
+
+      <IdVerifyCard />
 
       <MonContratCard />
 
