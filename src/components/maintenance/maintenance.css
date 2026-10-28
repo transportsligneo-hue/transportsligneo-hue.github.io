@@ -5,10 +5,12 @@
 @keyframes mtn-slide{0%{margin-left:-40%}100%{margin-left:100%}}
 @keyframes mtn-ring{0%{transform:scale(.96);opacity:1}100%{transform:scale(1.12);opacity:0}}
 
-/* Bandeau fixé juste SOUS la barre de navigation (position mesurée par MaintenanceGate dans --mt-top) */
-.mtn-bn-wrap{position:fixed;top:var(--mt-top,0);left:0;right:0;z-index:49}
-/* La page démarre sous le bandeau : rien n'est caché */
-html[data-maint-banner] body{padding-top:var(--mt-h,0)}
+.mtn-bn-wrap{position:sticky;top:0;z-index:70}
+/* Site vitrine : bandeau fixé tout en haut, au-dessus de la barre de navigation, quel que soit le conteneur de la page. */
+.mtn-bn-wrap--site{position:fixed;top:0;left:0;right:0;z-index:2147483000}
+html[data-maint-banner] body:not(.is-driver-app){padding-top:var(--mt-h,0)}
+html[data-maint-banner] .tln-shell{top:var(--mt-h,0)!important}
+html[data-maint-banner] header.safe-top{top:var(--mt-h,0)!important}
 
 .mtn-bn{position:relative;display:flex;align-items:center;gap:16px;padding:16px 24px;color:#fff;overflow:hidden;font-family:Poppins,system-ui,sans-serif;background:linear-gradient(100deg,#0a2a9c 0%,#1f55e8 45%,#3b8cff 100%);box-shadow:0 10px 34px -8px rgba(31,85,232,.75);border-bottom:1px solid rgba(255,255,255,.28)}
 .mtn-bn:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 2px,transparent 2px 26px),radial-gradient(60% 160% at 85% -30%,rgba(122,208,255,.55),transparent)}
