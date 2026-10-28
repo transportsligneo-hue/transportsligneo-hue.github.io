@@ -85,6 +85,15 @@ export const subscribeNewsletter = createServerFn({ method: "POST" })
         metadata: details,
       });
       if (notifErr) console.error("[waitlist] admin bell failed", notifErr);
+      {
+        const { pushAdmins } = await import("@/lib/admin-alert.server");
+        await pushAdmins(
+          "Nouveau candidat en liste d'attente",
+          `${data.nom} · ${data.ville} · ${data.telephone}`,
+          "/admin/liste-attente",
+          `waitlist-${email}`,
+        );
+      }
 
       try {
         const { sendTransactionalEmailServer, getAdminNotificationEmail } = await import(

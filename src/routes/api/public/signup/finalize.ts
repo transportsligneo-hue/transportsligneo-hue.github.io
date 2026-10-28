@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { pushAdmins } from "@/lib/admin-alert.server";
 import { sendTransactionalEmailServer, getAdminNotificationEmail } from "@/server/email-send";
 
 /**
@@ -211,6 +212,7 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
             errorMessage = errorMessage ?? notifErr.message.slice(0, 200);
           } else {
             notificationCreated = true;
+            await pushAdmins("Nouvelle inscription convoyeur", `${prenom} ${nom} · ${meta['ville'] ?? ""} · ${uploaded.length} document(s)`, "/admin/convoyeurs", `signup-${userId}`);
           }
         } else {
           // Clients (particulier / pro B2B / flotte)
@@ -235,6 +237,7 @@ export const Route = createFileRoute("/api/public/signup/finalize")({
             errorMessage = notifErr.message.slice(0, 200);
           } else {
             notificationCreated = true;
+            await pushAdmins(label, `${prenom} ${nom} · ${email}`, "/admin/clients", `signup-${userId}`);
           }
         }
 

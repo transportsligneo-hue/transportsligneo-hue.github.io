@@ -8,6 +8,7 @@ import {
   User as UserIcon, Camera,
 } from "lucide-react";
 import { toast } from "sonner";
+import { notifyDocumentDepose } from "@/lib/admin-alert.functions";
 import {
   getVisibleConvoyeurDocTypes,
   isConvoyeurDocApproved,
@@ -127,6 +128,7 @@ function ConvoyeurDocuments() {
         statut_validation: "en_attente",
       });
       if (insErr) throw insErr;
+      void notifyDocumentDepose({ data: { convoyeurId, typeDocument: spec.key } }).catch(() => {});
       await reload(convoyeurId);
       toast.success("Document envoyé");
     } catch (err) {
