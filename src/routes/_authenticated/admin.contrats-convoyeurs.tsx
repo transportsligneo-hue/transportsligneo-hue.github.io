@@ -89,6 +89,26 @@ function ContratsConvoyeursPage() {
   });
 
   /** Aperçu du contrat, rempli avec les infos du convoyeur (fiche, sinon Kbis), sans rien envoyer. */
+  const [bulk, setBulk] = useState(false);
+  /** Lit le Kbis de chaque convoyeur sans SIRET/adresse et l'enregistre sur sa fiche. */
+  const recupererKbis = async () => {
+    const cibles = convs.filter((c) => !isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom }) && (!c.siret || !c.adresse));
+    if (!cibles.length) { toast.info("Tous les convoyeurs ont déjà leur SIRET et leur adresse."); return; }
+    setBulk(true);
+    let ok = 0; const ko: string[] = [];
+    for (const c of cibles) {
+      const nom = [c.prenom, c.nom].filter(Boolean).join(" ") || c.email || "convoyeur";
+      const k = await kbis({ data: { convoyeurId: c.id } }).catch(() => null);
+      if (k?.ok) {
+        await (supabase as any).from("convoyeurs").update({ siret: c.siret || k.siret || null, adresse: c.adresse || k.adresse || null }).eq("id", c.id);
+        ok++;
+      } else ko.push(`${nom} (${k?.error ?? "illisible"})`);
+    }
+    setBulk(false);
+    if (ok) toast.success(`${ok} convoyeur(s) mis à jour depuis leur Kbis.`);
+    if (ko.length) toast.error(`Non récupéré : ${ko.join(" · ")}`, { duration: 12000 });
+    void load();
+  };
   const apercu = async (c: Conv, nom: string) => {
     const w = window.open("", "_blank");
     setBusy("apercu" + c.id);
@@ -150,6 +170,9 @@ function ContratsConvoyeursPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        <button onClick={() => void recupererKbis()} disabled={bulk} className="btn-mini">
+          {bulk ? <Loader2 size={14} className="animate-spin" /> : <FileSignature size={14} />} Récupérer SIRET + adresse depuis les Kbis
+        </button>
         <div className="inline-flex rounded-lg border border-pro-border overflow-hidden text-sm">
           <button onClick={() => setTab("reel")} className={`px-3 py-1.5 ${tab === "reel" ? "bg-[#2F5FFF] text-white" : "bg-white"}`}>Convoyeurs</button>
           <button onClick={() => setTab("demo")} className={`px-3 py-1.5 ${tab === "demo" ? "bg-[#2F5FFF] text-white" : "bg-white"}`}>Démo / Test · {rows.filter((r) => r.demo).length}</button>
@@ -174,7 +197,7 @@ function ContratsConvoyeursPage() {
                 <div className="flex-1 min-w-[180px]">
                   <div className="font-semibold text-pro-text">{nom}</div>
                   <div className="text-xs text-pro-text-soft">{c.email}{c.telephone ? ` · ${c.telephone}` : ""}</div>
-                  {c.siret && <SiretBadge siret={c.siret} />}
+                  {c.siret && <SiretBadge admin siret={c.siret} />}
                   {req && (
                     <div className="text-xs text-pro-text-soft mt-0.5">
                       Envoyé le {new Date(req.sent_at).toLocaleDateString("fr-FR")}{req.signed_at ? ` · signé le ${new Date(req.signed_at).toLocaleDateString("fr-FR")}` : ""}

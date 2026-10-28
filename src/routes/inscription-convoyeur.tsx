@@ -168,7 +168,7 @@ function InscriptionConvoyeur() {
         if (siretCheck?.status === "invalide") return "Numéro SIRET invalide : vérifiez les chiffres.";
         if (siretCheck?.status === "inconnu") return "SIRET introuvable dans la base officielle : vérifiez le numéro.";
         if (siretCheck?.status === "ok" && !siretCheck.actif) return "Cette entreprise est radiée ou fermée : un SIRET actif est nécessaire.";
-        if (form.adresse.trim().length < 8) return "Saisissez l'adresse complète de votre entreprise (rue, code postal, ville).";
+        if (form.adresse.trim().length < 8) return "Saisissez votre adresse complète (rue, code postal, ville).";
       }
       if (!photoProfilFile) return "Ajoutez une photo de profil.";
       if (Object.keys(fileErrors).length > 0) return "Corrigez les documents refusés avant de continuer.";
@@ -608,7 +608,7 @@ function InscriptionConvoyeur() {
                     }} />
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse de l'entreprise *</label>
+                    <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse actuelle / de l'entreprise *</label>
                     <input type="text" value={form.adresse} onChange={update("adresse")} className={inputClass} placeholder="Rue, code postal, ville" />
                   </div>
                 </div>

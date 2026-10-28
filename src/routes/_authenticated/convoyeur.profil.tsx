@@ -7,6 +7,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   User, Mail, Phone, MapPin, IdCard, Calendar, Lock, Loader2, CheckCircle, AlertCircle, Trophy,
 } from "lucide-react";
+import { SiretBadge } from "@/components/SiretBadge";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { computeNiveauProgress, niveauLabel } from "@/lib/convoyeur-niveau";
 
@@ -29,7 +30,7 @@ function ConvoyeurProfil() {
   });
 
   const [form, setForm] = useState({
-    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "", date_naissance: "", lieu_naissance: "",
+    prenom: "", nom: "", email: "", telephone: "", ville: "", permis: "", annees_experience: "", date_naissance: "", lieu_naissance: "", adresse: "", siret: "",
   });
 
   const [pwd, setPwd] = useState({ next: "", confirm: "" });
@@ -58,7 +59,7 @@ function ConvoyeurProfil() {
           prenom: data.prenom ?? "", nom: data.nom ?? "", email: data.email ?? user.email ?? "",
           telephone: data.telephone ?? "", ville: data.ville ?? "", permis: data.permis ?? "",
           annees_experience: data.annees_experience != null ? String(data.annees_experience) : "",
-          date_naissance: (data as any).date_naissance ?? "", lieu_naissance: (data as any).lieu_naissance ?? "",
+          date_naissance: (data as any).date_naissance ?? "", lieu_naissance: (data as any).lieu_naissance ?? "", adresse: (data as any).adresse ?? "", siret: (data as any).siret ?? "",
         });
       }
 
@@ -78,7 +79,7 @@ function ConvoyeurProfil() {
         prenom: form.prenom, nom: form.nom, telephone: form.telephone,
         ville: form.ville, permis: form.permis,
         annees_experience: form.annees_experience ? parseInt(form.annees_experience, 10) : null,
-        date_naissance: form.date_naissance || null, lieu_naissance: form.lieu_naissance.trim() || null,
+        date_naissance: form.date_naissance || null, lieu_naissance: form.lieu_naissance.trim() || null, adresse: form.adresse.trim() || null, siret: form.siret.replace(/\D/g, "") || null,
       } as any)
       .eq("id", convoyeurId);
     setSaving(false);
@@ -225,6 +226,18 @@ function ConvoyeurProfil() {
         <div>
           <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Ville</label>
           <input type="text" value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} className={inputClass} />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-pro-text-soft mb-1"><IdCard size={11} className="inline mr-1" />N° SIRET</label>
+          <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="000 000 000 00000" className={inputClass} />
+          <SiretBadge siret={form.siret} />
+        </div>
+
+        <div className={"rounded-xl p-3 " + (!form.adresse.trim() ? "bg-amber-50 border border-amber-200" : "")}>
+          <label className="block text-xs font-medium text-pro-text-soft mb-1"><MapPin size={11} className="inline mr-1" />Adresse actuelle (rue, code postal, ville)</label>
+          <input type="text" value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} placeholder="12 rue des Lilas, 37000 Tours" className={inputClass} />
+          {!form.adresse.trim() && <p className="mt-1 text-xs text-amber-800">À compléter : elle figure sur votre contrat de partenariat et vos factures.</p>}
         </div>
 
         <div className={"grid sm:grid-cols-2 gap-4 rounded-xl p-3 " + (!form.date_naissance || !form.lieu_naissance ? "bg-amber-50 border border-amber-200" : "")}>

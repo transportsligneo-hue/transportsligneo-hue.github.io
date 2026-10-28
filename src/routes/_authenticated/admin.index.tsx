@@ -30,6 +30,7 @@ import { ExploitationOverview } from "@/components/admin/dashboard/ExploitationO
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import { PageHeader } from "@/components/admin/AdminUI";
+import { SmsCreditsCard } from "@/components/admin/SmsCreditsCard";
 import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
 
 
@@ -282,6 +283,7 @@ function AdminDashboard() {
         title="Tableau de bord"
         subtitle="Vue temps réel de l'activité Transports Ligneo"
       />
+      <SmsCreditsCard />
 
 
       {/* === KPI === */}

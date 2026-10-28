@@ -573,7 +573,36 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
       const mime = blob.type && blob.type !== "application/octet-stream"
         ? blob.type
         : ext === "pdf" ? "application/pdf" : ext === "png" ? "image/png" : "image/jpeg";
-      const b64 = Buffer.from(await blob.arrayBuffer()).toString("base64");
+      const buf = Buffer.from(await blob.arrayBuffer());
+      const b64 = buf.toString("base64");
+
+      // 1) Lecture directe du texte du PDF (sans IA) + base officielle pour nom/adresse.
+      if (mime === "application/pdf") {
+        try {
+          const { extractText, getDocumentProxy } = await import("unpdf");
+          const pdf = await getDocumentProxy(new Uint8Array(buf));
+          const { text } = await extractText(pdf, { mergePages: true });
+          const t = String(text ?? "").replace(/\u00a0/g, " ");
+          const luhnOk = (n: string) => { let s = 0; for (let i = 0; i < n.length; i++) { let d = Number(n[n.length - 1 - i]); if (i % 2) { d *= 2; if (d > 9) d -= 9; } s += d; } return s % 10 === 0; };
+          const sirets = [...t.matchAll(/(?<!\d)(\d{3}\s?\d{3}\s?\d{3}\s?\d{5})(?!\d)/g)].map((m) => m[1].replace(/\s/g, "")).filter(luhnOk);
+          const sirens = [...t.matchAll(/(?<!\d)(\d{3}\s?\d{3}\s?\d{3})(?!\d)/g)].map((m) => m[1].replace(/\s/g, "")).filter(luhnOk);
+          const q = sirets[0] ?? sirens[0];
+          if (q) {
+            const res = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${q}&page=1&per_page=1`, { headers: { accept: "application/json" } }).then((r) => (r.ok ? r.json() : null)).catch(() => null) as any;
+            const r0 = res?.results?.[0];
+            const etab = q.length === 14 ? [r0?.siege, ...(r0?.matching_etablissements ?? [])].find((x: any) => x && String(x.siret) === q) : r0?.siege;
+            const siretFinal = (q.length === 14 ? q : etab?.siret ? String(etab.siret) : "");
+            if (siretFinal) {
+              return {
+                ok: true,
+                siret: siretFinal.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4"),
+                adresse: String(etab?.adresse ?? "").replace(/\s+/g, " ").trim() || null,
+                denomination: String(r0?.nom_complet ?? "").trim() || null,
+              };
+            }
+          }
+        } catch { /* on tente l'IA ensuite */ }
+      }
 
       const apiKey = process.env.GEMINI_API_KEY ?? process.env.LOVABLE_API_KEY;
       if (!apiKey) return { ...none, error: "Service IA non configuré." };
