@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { SiretBadge } from "@/components/SiretBadge";
+import type { SiretCheck } from "@/lib/siret.functions";
 import { finalizeSignup, validateUploadFile, formatFileSize, MAX_UPLOAD_FILES } from "@/lib/signup-finalize";
 import {
   Loader2, Mail, Phone, User, MapPin, Calendar, FileText, Lock,
@@ -56,6 +58,7 @@ function InscriptionConvoyeur() {
     permis_numero: "", annees_experience: "", type_convoyeur: "independant",
     permis_date_obtention: "", siret: "", adresse: "", date_naissance: "", lieu_naissance: "",
   });
+  const [siretCheck, setSiretCheck] = useState<SiretCheck | null>(null);
   const [permisFile, setPermisFile] = useState<File | null>(null);
   const [permisVersoFile, setPermisVersoFile] = useState<File | null>(null);
   const [cniFile, setCniFile] = useState<File | null>(null);
@@ -162,6 +165,9 @@ function InscriptionConvoyeur() {
       if (form.type_convoyeur === "independant" && !kbisFile) return "Ajoutez le Kbis ou l'avis de situation SIRENE.";
       if (form.type_convoyeur === "independant") {
         if (form.siret.replace(/\D/g, "").length !== 14) return "Saisissez votre numéro SIRET (14 chiffres).";
+        if (siretCheck?.status === "invalide") return "Numéro SIRET invalide : vérifiez les chiffres.";
+        if (siretCheck?.status === "inconnu") return "SIRET introuvable dans la base officielle : vérifiez le numéro.";
+        if (siretCheck?.status === "ok" && !siretCheck.actif) return "Cette entreprise est radiée ou fermée : un SIRET actif est nécessaire.";
         if (form.adresse.trim().length < 8) return "Saisissez l'adresse complète de votre entreprise (rue, code postal, ville).";
       }
       if (!photoProfilFile) return "Ajoutez une photo de profil.";
@@ -596,6 +602,10 @@ function InscriptionConvoyeur() {
                   <div>
                     <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">N° SIRET * (14 chiffres)</label>
                     <input type="text" inputMode="numeric" maxLength={17} value={form.siret} onChange={update("siret")} className={inputClass} placeholder="000 000 000 00000" />
+                    <SiretBadge dark siret={form.siret} onResult={(r) => {
+                      setSiretCheck(r);
+                      if (r?.status === "ok" && r.actif && r.adresse) setForm((f) => (f.adresse.trim() ? f : { ...f, adresse: r.adresse }));
+                    }} />
                   </div>
                   <div>
                     <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">Adresse de l'entreprise *</label>

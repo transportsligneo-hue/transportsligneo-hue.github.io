@@ -174,7 +174,7 @@ function ContratsConvoyeursPage() {
                 <div className="flex-1 min-w-[180px]">
                   <div className="font-semibold text-pro-text">{nom}</div>
                   <div className="text-xs text-pro-text-soft">{c.email}{c.telephone ? ` · ${c.telephone}` : ""}</div>
-                  {c.siret && <SiretBadge admin siret={c.siret} />}
+                  {c.siret && <SiretBadge siret={c.siret} />}
                   {req && (
                     <div className="text-xs text-pro-text-soft mt-0.5">
                       Envoyé le {new Date(req.sent_at).toLocaleDateString("fr-FR")}{req.signed_at ? ` · signé le ${new Date(req.signed_at).toLocaleDateString("fr-FR")}` : ""}
