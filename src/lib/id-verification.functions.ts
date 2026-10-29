@@ -17,7 +17,10 @@ export const startIdVerification = createServerFn({ method: "POST" })
       headers: { "x-api-key": key, "Content-Type": "application/json" },
       body: JSON.stringify({ workflow_id: wf, vendor_data: context.userId, callback: `${origin}/convoyeur/documents?idv=done` }),
     });
-    if (!res.ok) throw new Error("Service de vérification indisponible, réessayez dans un instant.");
+    if (!res.ok) {
+      console.error("Didit", res.status, await res.text());
+      throw new Error("Service de vérification indisponible, réessayez dans un instant.");
+    }
     const j = (await res.json()) as { url: string; session_id: string };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await (supabaseAdmin as any).from("id_verifications").insert({ user_id: context.userId, session_id: j.session_id, status: "pending" });
