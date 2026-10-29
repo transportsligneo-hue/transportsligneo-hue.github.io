@@ -262,7 +262,8 @@ export const inviteWaitlistBatch = createServerFn({ method: 'POST' })
         sent++
       } catch (e) {
         console.error('[waitlist] invite failed', w.email, e)
-        failed.push(w.email)
+        const why = e instanceof Error ? e.message : String((e as { message?: string } | null)?.message ?? e)
+        failed.push(`${w.email} (${why.slice(0, 140)})`)
       }
     }
     return { sent, failed }

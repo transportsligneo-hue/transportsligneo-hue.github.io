@@ -166,7 +166,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
       error_message: message,
       metadata: meta,
     })
-    return { success: false, reason: 'send_failed' }
+    return { success: false, reason: `send_failed: ${message.slice(0, 140)}` }
   }
 }
 
