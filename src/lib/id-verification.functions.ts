@@ -20,7 +20,7 @@ export const startIdVerification = createServerFn({ method: "POST" })
     if (!res.ok) {
       const detail = (await res.text()).slice(0, 160);
       console.error("Didit", res.status, detail);
-      throw new Error(`Service de vérification indisponible (Didit ${res.status} : ${detail})`);
+      throw new Error("Service de vérification indisponible, réessayez dans un instant.");
     }
     const j = (await res.json()) as { url: string; session_id: string };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
