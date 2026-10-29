@@ -44,9 +44,14 @@ function InvitationConvoyeurPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [telephone, setTelephone] = useState("");
+  const [prenomSaisi, setPrenomSaisi] = useState("");
+  const [nomSaisi, setNomSaisi] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  // Nom / prénom connus de l'invitation = figés ; sinon le convoyeur les saisit lui-même.
+  const prenomFige = !!invitation?.prenom?.trim();
+  const nomFige = !!invitation?.nom?.trim();
 
   useEffect(() => {
     (async () => {
@@ -65,6 +70,9 @@ function InvitationConvoyeurPage() {
   const submit = async () => {
     if (!invitation) return;
     setError("");
+    const prenomFinal = prenomFige ? (invitation.prenom ?? "").trim() : prenomSaisi.trim();
+    const nomFinal = nomFige ? (invitation.nom ?? "").trim() : nomSaisi.trim();
+    if (!prenomFinal || !nomFinal) return setError("Indiquez votre prénom et votre nom.");
     if (password.length < 8) return setError("Le mot de passe doit contenir au moins 8 caractères.");
     if (password !== confirm) return setError("Les mots de passe ne correspondent pas.");
     setSubmitting(true);
@@ -75,8 +83,8 @@ function InvitationConvoyeurPage() {
         options: {
           data: {
             role: "convoyeur",
-            nom: invitation.nom,
-            prenom: invitation.prenom,
+            nom: nomFinal,
+            prenom: prenomFinal,
             telephone,
             type_convoyeur: "independant",
           },
@@ -173,16 +181,28 @@ function InvitationConvoyeurPage() {
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Prénom">
                   <input
-                    value={invitation.prenom ?? ""}
-                    readOnly
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
+                    value={prenomFige ? (invitation.prenom ?? "") : prenomSaisi}
+                    onChange={(e) => setPrenomSaisi(e.target.value)}
+                    readOnly={prenomFige}
+                    placeholder={prenomFige ? undefined : "Jean"}
+                    className={
+                      prenomFige
+                        ? "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
+                        : "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                    }
                   />
                 </Field>
                 <Field label="Nom">
                   <input
-                    value={invitation.nom ?? ""}
-                    readOnly
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
+                    value={nomFige ? (invitation.nom ?? "") : nomSaisi}
+                    onChange={(e) => setNomSaisi(e.target.value)}
+                    readOnly={nomFige}
+                    placeholder={nomFige ? undefined : "Martin"}
+                    className={
+                      nomFige
+                        ? "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
+                        : "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                    }
                   />
                 </Field>
               </div>
