@@ -22,6 +22,7 @@ import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoy
 import ScreenCaptureGuard from "@/components/convoyeur/ScreenCaptureGuard";
 import OfflineOutboxBadge from "@/components/convoyeur/OfflineOutboxBadge";
 import { DriverGpsTracker } from "@/components/convoyeur/DriverGpsTracker";
+import { IdVerifyGate } from "@/components/convoyeur/IdVerifyGate";
 
 export const Route = createFileRoute("/_authenticated/convoyeur")({
   component: ConvoyeurLayout,
@@ -109,7 +110,9 @@ function ConvoyeurLayout() {
           </div>
         </div>
       )}
-      <Outlet />
+      <IdVerifyGate active={isPending}>
+        <Outlet />
+      </IdVerifyGate>
       <DriverUpdateGate />
       <DriverPresenceBeacon />
       </UserMfaGate>

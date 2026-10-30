@@ -58,6 +58,7 @@ import { toast } from "sonner";
 import { confirmToast } from "@/lib/confirm-toast";
 import { DocumentsValidationCenter } from "@/components/admin/convoyeur/DocumentsValidationCenter";
 import ContratYousignCard from "@/components/admin/ContratYousignCard";
+import { IdVerifBadge, useIdVerifications } from "@/components/admin/IdVerifBadge";
 import { StatutConvoyeurBadge, resolveStatutConvoyeur } from "@/components/admin/StatutConvoyeurBadge";
 import { AdminManualCommunication } from "@/components/admin/AdminManualCommunication";
 import { notifyDriver } from "@/lib/push/driver-notify";
@@ -153,6 +154,7 @@ function AdminConvoyeurDetail() {
   const [logs, setLogs] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const { count: msgCount, refresh: refreshMsgCount } = useUserMessagesCount(conv?.user_id ?? null);
+  const idVerif = useIdVerifications([conv?.user_id]);
 
   const [form, setForm] = useState<Editable>(EMPTY);
   const [original, setOriginal] = useState<Editable>(EMPTY);
@@ -506,6 +508,7 @@ function AdminConvoyeurDetail() {
               <DriverAvatar convoyeurId={conv.id} src={avatarUrl} name={fullName} size="md" />
               <StatutConvoyeurBadge statut={statutUnifie} size="md" />
               <AdminBadge label={accountState.label} tone={accountState.tone} />
+              {conv.user_id && <IdVerifBadge status={idVerif[conv.user_id]?.status} />}
               {conv.ville && <AdminBadge label={conv.ville} tone="info" />}
             </div>
             {conv.statut !== "valide" && conv.statut !== "suspendu" && (

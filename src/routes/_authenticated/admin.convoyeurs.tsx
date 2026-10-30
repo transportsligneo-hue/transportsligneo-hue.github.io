@@ -28,6 +28,7 @@ import {
   TextInput,
   FormField,
 } from "@/components/admin/AdminUI";
+import { IdVerifBadge, useIdVerifications } from "@/components/admin/IdVerifBadge";
 import {
   StatutConvoyeurBadge,
   resolveStatutConvoyeur,
@@ -177,6 +178,7 @@ function AdminConvoyeurs() {
   }, [enriched, allDocs]);
 
   // Filtrage
+  const idVerif = useIdVerifications(convoyeurs.map((c) => c.user_id));
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return enriched.filter((c) => {
@@ -712,6 +714,7 @@ function AdminConvoyeurs() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <StatutConvoyeurBadge statut={c.statutUnifie} />
+                  {c.user_id && <IdVerifBadge status={idVerif[c.user_id]?.status} />}
                   <span className="dvx-badge violet">Indépendant</span>
                   {c.isDemo && <span className="dvx-badge">Démo / test</span>}
                   {c.isDup && !c.isDemo && <span className="dvx-badge dup">Doublon</span>}
