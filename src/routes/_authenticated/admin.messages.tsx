@@ -21,6 +21,7 @@ import {
 import { confirmToast } from "@/lib/confirm-toast";
 import { AdminSection } from "@/components/admin/ui";
 import { DirectEmailComposer } from "@/components/admin/DirectEmailComposer";
+import { ContactThread } from "@/components/admin/ContactThread";
 
 
 export const Route = createFileRoute("/_authenticated/admin/messages")({
@@ -228,12 +229,8 @@ function AdminMessages() {
                 <TD>
                   <div className="flex items-center justify-end gap-1">
                     <IconButton
-                      onClick={() => {
-                        setComposeTo(m.email);
-                        setComposing(true);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      title="Répondre par email"
+                      onClick={() => setSelected(m)}
+                      title="Ouvrir la conversation"
                     >
                       <Mail size={15} />
                     </IconButton>
@@ -249,7 +246,7 @@ function AdminMessages() {
         </Table>
       )}
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Détail message" size="md">
+      <Modal open={!!selected} onClose={() => setSelected(null)} title="Détail message" size="lg">
         {selected && (
           <>
             <Card padded={false} className="mb-4">
@@ -312,13 +309,12 @@ function AdminMessages() {
               </div>
             </div>
 
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-pro-text-soft">Conversation</p>
+            <div className="mb-4">
+              <ContactThread contact={selected} onReplied={fetchMessages} />
+            </div>
+
             <div className="flex flex-wrap gap-2">
-              <a
-                href={`mailto:${selected.email}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-pro-accent text-white text-sm font-medium hover:bg-pro-accent-hover"
-              >
-                <Mail size={14} /> Répondre
-              </a>
               {selected.telephone && (
                 <a
                   href={`tel:${selected.telephone}`}

@@ -43,6 +43,8 @@ interface Params {
   idempotencyKey?: string
   templateData?: Record<string, any>
   attachments?: { name: string; contentBase64: string }[]
+  /** Adresse qui reçoit les réponses du destinataire (sinon l'expéditeur technique). */
+  replyTo?: string
 }
 
 /**
@@ -124,6 +126,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
       templateData,
       idempotencyKey: params.idempotencyKey || messageId,
       attachments: params.attachments,
+      replyTo: params.replyTo,
     })
 
 

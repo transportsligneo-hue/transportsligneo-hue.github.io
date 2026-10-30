@@ -46,6 +46,7 @@ import { template as missionLivreeClient } from './mission-livree-client'
 import { template as convoyeurRefuse } from './convoyeur-refuse'
 import { template as convoyeurSuspendu } from './convoyeur-suspendu'
 import { template as messageManuel } from './message-manuel'
+import { template as reponseContact } from './reponse-contact'
 import { template as suiviGpsDestinataire } from './suivi-gps-destinataire'
 import { template as alerteAdmin } from './alerte-admin'
 import { template as devisOtpCode } from './devis-otp-code'
@@ -108,6 +109,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'convoyeur-refuse': convoyeurRefuse,
   'convoyeur-suspendu': convoyeurSuspendu,
   'message-manuel': messageManuel,
+  'reponse-contact': reponseContact,
   'suivi-gps-destinataire': suiviGpsDestinataire,
   'alerte-admin': alerteAdmin,
   'devis-otp-code': devisOtpCode,
