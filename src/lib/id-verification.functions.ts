@@ -31,25 +31,64 @@ async function fetchDiditStatus(sessionId: string): Promise<string | null> {
   }
 }
 
+/** Cherche chez Didit toutes les sessions de cet utilisateur (vendor_data = id du compte). Fonctionne même si la table locale est vide. */
+async function fetchDiditByUser(userId: string): Promise<Array<{ session_id: string; status: string }> | null> {
+  const key = process.env["DIDIT_API_KEY"];
+  if (!key) return null;
+  try {
+    const res = await fetch(`https://verification.didit.me/v3/sessions/?vendor_data=${encodeURIComponent(userId)}&limit=20`, {
+      headers: { "x-api-key": key },
+    });
+    if (!res.ok) { console.error("Didit list", res.status, (await res.text()).slice(0, 160)); return null; }
+    const j = (await res.json()) as { results?: Array<{ session_id: string; status: string }> };
+    return (j.results ?? []).map((r) => ({ session_id: r.session_id, status: MAP[r.status] ?? "pending" }));
+  } catch (e) {
+    console.error("Didit list failed", e);
+    return null;
+  }
+}
+
 /** Statut effectif d'un utilisateur : « approved » dès qu'une vérification a abouti, sinon la plus récente. */
 async function effectiveStatus(userId: string, reconcile: boolean): Promise<{ status: string; updated_at: string | null }> {
   const sb = await admin();
-  const { data } = await sb.from("id_verifications")
-    .select("status, session_id, updated_at, created_at").eq("user_id", userId)
-    .order("created_at", { ascending: false }).limit(10);
-  const rows = (data ?? []) as Row[];
-  if (!rows.length) return { status: "none", updated_at: null };
-  const done = rows.find((r) => r.status === "approved");
-  if (done) return { status: "approved", updated_at: done.updated_at };
+  let rows: Row[] = [];
+  try {
+    const { data, error } = await sb.from("id_verifications")
+      .select("status, session_id, updated_at, created_at").eq("user_id", userId)
+      .order("created_at", { ascending: false }).limit(10);
+    if (error) console.error("[idv] lecture id_verifications", error.message);
+    rows = (data ?? []) as Row[];
+  } catch (e) { console.error("[idv] lecture id_verifications", e); }
+
+  if (rows.some((r) => r.status === "approved")) {
+    return { status: "approved", updated_at: rows.find((r) => r.status === "approved")?.updated_at ?? null };
+  }
   const latest = rows[0];
-  if (reconcile && (latest.status === "pending" || latest.status === "review") && latest.session_id) {
-    const live = await fetchDiditStatus(latest.session_id);
-    if (live && live !== latest.status) {
-      await sb.from("id_verifications")
-        .update({ status: live, updated_at: new Date().toISOString() }).eq("session_id", latest.session_id);
-      return { status: live, updated_at: new Date().toISOString() };
+
+  if (reconcile) {
+    // Source de vérité : Didit. On prend toutes les sessions du compte.
+    const live = await fetchDiditByUser(userId);
+    if (live && live.length) {
+      const best = live.find((r) => r.status === "approved") ?? live.find((r) => r.status === "review") ?? live[0];
+      const now = new Date().toISOString();
+      try {
+        for (const r of live) {
+          const known = rows.find((x) => x.session_id === r.session_id);
+          if (!known) await sb.from("id_verifications").insert({ user_id: userId, session_id: r.session_id, status: r.status });
+          else if (known.status !== r.status) await sb.from("id_verifications").update({ status: r.status, updated_at: now }).eq("session_id", r.session_id);
+        }
+      } catch (e) { console.error("[idv] synchro id_verifications", e); }
+      return { status: best.status, updated_at: now };
+    }
+    if (latest && (latest.status === "pending" || latest.status === "review") && latest.session_id) {
+      const one = await fetchDiditStatus(latest.session_id);
+      if (one && one !== latest.status) {
+        try { await sb.from("id_verifications").update({ status: one, updated_at: new Date().toISOString() }).eq("session_id", latest.session_id); } catch { /* ignore */ }
+        return { status: one, updated_at: new Date().toISOString() };
+      }
     }
   }
+  if (!latest) return { status: "none", updated_at: null };
   return { status: latest.status, updated_at: latest.updated_at };
 }
 
@@ -82,7 +121,8 @@ export const startIdVerification = createServerFn({ method: "POST" })
     }
     const j = (await res.json()) as { url: string; session_id: string };
     const sb = await admin();
-    await sb.from("id_verifications").insert({ user_id: context.userId, session_id: j.session_id, status: "pending" });
+    const { error: insErr } = await sb.from("id_verifications").insert({ user_id: context.userId, session_id: j.session_id, status: "pending" });
+    if (insErr) console.error("[idv] enregistrement de la session impossible", insErr.message);
     return { url: j.url };
   });
 
