@@ -30,6 +30,8 @@ export const NOTIF_TYPES: Record<string, NotifTypeMeta> = {
 
   incident: { label: "Incident", icon: AlertTriangle, tone: "danger", category: "operations" },
   mission_offre: { label: "Offre convoyeur", icon: Truck, tone: "warning", category: "operations" },
+  attribution_refusee: { label: "Mission refusée par un convoyeur", icon: AlertTriangle, tone: "danger", category: "operations" },
+  attribution_acceptee: { label: "Mission acceptée par un convoyeur", icon: CheckCircle2, tone: "success", category: "operations" },
   mission_acceptee: { label: "Mission acceptée", icon: Truck, tone: "success", category: "operations" },
   mission_terminee: { label: "Mission terminée", icon: CheckCircle2, tone: "success", category: "operations" },
 

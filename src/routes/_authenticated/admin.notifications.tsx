@@ -310,7 +310,7 @@ function NotifRow({ n, onToggleRead }: { n: Notification; onToggleRead: (lu: boo
         <p className={`text-sm mt-1 ${n.lu ? "font-medium text-[color:var(--admin-text-soft)]" : "font-semibold text-[color:var(--admin-text)]"}`}>
           {n.titre}
         </p>
-        {n.message && <p className="text-[13px] text-[color:var(--admin-muted)] mt-0.5 line-clamp-2">{n.message}</p>}
+        {n.message && <p className="text-[13px] text-[color:var(--admin-muted)] mt-0.5 whitespace-pre-line">{n.message}</p>}
       </div>
 
       <div className="flex shrink-0 items-center gap-1 self-center">

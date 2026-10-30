@@ -98,7 +98,7 @@ function InscriptionConvoyeur() {
 
   if (gateLoading) {
     return (
-      <div className="auth-shell flex items-center justify-center px-4 py-10">
+      <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4 py-10">
         <Loader2 className="animate-spin text-white/60" size={32} />
       </div>
     );
@@ -294,7 +294,7 @@ function InscriptionConvoyeur() {
 
   if (submittedEmail) {
     return (
-      <div className="auth-shell flex items-center justify-center px-4">
+      <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-5 auth-card p-8">
           <div className="mx-auto h-14 w-14 rounded-full bg-blue-500/15 border border-blue-400/30 flex items-center justify-center">
             <Mail className="text-blue-300" size={28} />
@@ -319,7 +319,7 @@ function InscriptionConvoyeur() {
   // === Écran Prérequis avant le formulaire ===
   if (!prerequisOk) {
     return (
-      <div className="auth-shell flex items-center justify-center px-4 py-12">
+      <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4 py-12">
         {/* Lien de connexion en haut à droite */}
         <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-8 py-5">
           <Link to="/" className="auth-link-lg text-[13px]">
@@ -425,7 +425,7 @@ function InscriptionConvoyeur() {
 
 
   return (
-    <div className="auth-shell flex items-center justify-center px-4 py-12">
+    <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4 py-12">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
           <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
