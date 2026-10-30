@@ -42,7 +42,12 @@
 /* Fil de discussion en clair */
 .lgc-admin .lgc-thread { background: #f6f8ff; border: 1px solid #e3e9fb; color: #0f1d3d; }
 .lgc-admin .lgc-bubble { background: #fff; border: 1px solid #dfe6fb; color: #0f1d3d; box-shadow: 0 2px 8px -6px rgba(15,29,61,.3); }
-.lgc-admin .lgc-mine .lgc-bubble { color: #fff; border-color: transparent; }
+.lgc-admin .lgc-mine .lgc-bubble { background: linear-gradient(135deg, #2f5fff, #4d8bff); color: #fff; border-color: transparent; border-radius: 18px 18px 6px 18px; box-shadow: 0 12px 22px -14px #2f5fff; }
+.lgc-admin .lgc-mine .lgc-bubble .lgc-text,
+.lgc-admin .lgc-mine .lgc-bubble .lgc-meta,
+.lgc-admin .lgc-mine .lgc-bubble .lgc-meta * { color: #fff; }
+.lgc-admin .lgc-mine .lgc-bubble .lgc-meta { opacity: .85; }
+.lgc-admin .lgc-mine .lgc-att-file { background: rgba(255,255,255,.2); color: #fff; }
 .lgc-admin .lgc-author { color: #2f5fff; }
 .lgc-admin .lgc-from-convoyeur .lgc-author { color: #15803d; }
 .lgc-admin .lgc-empty { color: #7a88ab; }
