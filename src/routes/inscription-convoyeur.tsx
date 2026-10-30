@@ -296,15 +296,15 @@ function InscriptionConvoyeur() {
     return (
       <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-5 auth-card p-8">
-          <div className="mx-auto h-14 w-14 rounded-full bg-blue-500/15 border border-blue-400/30 flex items-center justify-center">
-            <Mail className="text-blue-300" size={28} />
+          <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center">
+            <Mail className="text-emerald-600" size={28} />
           </div>
           <h1 className="auth-title text-xl md:text-2xl">Vérifiez votre email</h1>
           <p className="auth-subtle text-sm leading-relaxed">
             Nous venons d'envoyer un lien de confirmation à <span className="text-white font-medium">{submittedEmail}</span>.
             Cliquez dessus pour activer votre compte.
           </p>
-          <div className="text-white/60 text-xs space-y-1 pt-2 border-t border-primary/10">
+          <div className="text-white/60 text-xs space-y-1 pt-2 border-t border-emerald-500/20">
             <p>Pas reçu ? Vérifiez vos spams.</p>
             <p>Notre équipe traite votre dossier sous 24 à 48 h ouvrées, pas des semaines.</p>
           </div>
@@ -330,7 +330,7 @@ function InscriptionConvoyeur() {
             <span className="text-white/55 hidden sm:inline">Déjà un compte ?</span>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 font-semibold text-white bg-white/[0.08] border border-blue-300/25 px-4 py-2 rounded-full hover:bg-white/[0.14] hover:border-blue-300/50 transition-all"
+              className="inline-flex items-center gap-2 font-semibold text-white bg-white/[0.08] border border-emerald-500/30 px-4 py-2 rounded-full hover:bg-white/[0.14] hover:border-emerald-500/60 transition-all"
             >
               Se connecter
             </Link>
@@ -339,16 +339,16 @@ function InscriptionConvoyeur() {
 
         <div className="max-w-2xl w-full pt-8">
           <div className="text-center mb-8">
-            <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
+            <div className="auth-eyebrow justify-center">Réseau Ligneo Driver</div>
             <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
             <p className="auth-subtle text-sm mt-2">Avant de commencer, vérifiez que vous remplissez ces conditions.</p>
           </div>
           <div className="auth-card p-6 md:p-8 space-y-5">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-blue-200">Conditions d'éligibilité</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700">Conditions d'éligibilité</p>
             <ul className="space-y-3">
               {PREREQUIS.map((p) => (
                 <li key={p} className="flex items-start gap-3 text-sm text-white/85">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-200">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-700">
                     <Check size={13} />
                   </span>
                   <span>{p}</span>
@@ -357,12 +357,12 @@ function InscriptionConvoyeur() {
             </ul>
             <div className="pt-2 text-xs text-white/60 leading-relaxed border-t border-white/10">
               Pas encore d'assurance RC Pro ou de statut ?{" "}
-              <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous oriente.
+              <Link to="/contact" className="text-emerald-700 underline hover:text-emerald-600">Contactez-nous</Link>, on vous oriente.
             </div>
             <button
               type="button"
               onClick={() => setPrerequisOk(true)}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)]"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#14B866] to-[#34e68b] text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(20,184,102,0.55)]"
             >
               Je remplis les conditions <ChevronRight size={14} />
             </button>
@@ -370,7 +370,7 @@ function InscriptionConvoyeur() {
           <div className="text-center mt-6">
             <p className="text-[13px] text-white/55">
               Vous avez déjà un compte convoyeur ?{" "}
-              <Link to="/login" className="text-white font-bold underline hover:text-blue-200 transition-colors">
+              <Link to="/login" className="text-white font-bold underline hover:text-emerald-600 transition-colors">
                 Connectez-vous ici
               </Link>
             </p>
@@ -401,7 +401,7 @@ function InscriptionConvoyeur() {
       </label>
       <input
         type="file" accept="image/*,application/pdf" onChange={onChange}
-        className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
+        className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-[#14B866] file:to-[#34e68b] file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-emerald-500 focus:outline-none"
       />
       {scanKey && setFile && (
         <div className="mt-2">
@@ -410,7 +410,7 @@ function InscriptionConvoyeur() {
             maxPages={4}
             mergeToPdf
             filenameBase={scanKey}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 border border-blue-300/30 text-white"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 border border-emerald-500/30 text-white"
             onFiles={(files) => { if (files[0]) applyScannedFile(scanKey, setFile, file)(files[0]); }}
           />
         </div>
@@ -418,7 +418,7 @@ function InscriptionConvoyeur() {
       {errorKey && fileErrors[errorKey]
         ? <p className="text-red-300 text-[11px] mt-1">{fileErrors[errorKey]}</p>
         : file
-          ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name} · {formatFileSize(file.size)}</p>
+          ? <p className="text-emerald-700 text-xs mt-1 flex items-center gap-1"><Check size={12}/> {file.name} · {formatFileSize(file.size)}</p>
           : hint && <p className="text-white/40 text-[10px] mt-1">{hint}</p>}
     </div>
   );
@@ -428,7 +428,7 @@ function InscriptionConvoyeur() {
     <div className="auth-shell auth-convoyeur-light flex items-center justify-center px-4 py-12">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
-          <div className="auth-eyebrow justify-center">Réseau Ligneo</div>
+          <div className="auth-eyebrow justify-center">Réseau Ligneo Driver</div>
           <h1 className="auth-title text-2xl md:text-[34px]">Devenir <span className="auth-accent">convoyeur</span></h1>
           <p className="auth-subtle text-sm mt-2">Un parcours d'inscription clair, rapide et sécurisé · validation sous 24 à 48 h.</p>
         </div>
@@ -451,16 +451,16 @@ function InscriptionConvoyeur() {
               <div key={s.id} className="flex-1 flex items-center">
                 <div className="flex flex-col items-center flex-1">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
-                    done ? "bg-primary/20 border-primary text-primary"
-                    : active ? "bg-primary text-primary-foreground border-primary shadow-[0_0_18px_rgba(212,175,55,0.35)]"
-                    : "bg-navy/60 border-primary/20 text-white/60"
+                    done ? "bg-emerald-500/15 border-emerald-500 text-emerald-700"
+                    : active ? "bg-[#14B866] text-white border-[#14B866] shadow-[0_0_18px_rgba(20,184,102,0.5)]"
+                    : "bg-white border-slate-300 text-slate-500"
                   }`}>
                     {done ? <Check size={16} /> : <Icon size={15} />}
                   </div>
-                  <span className={`text-[10px] uppercase tracking-[0.15em] mt-2 ${active || done ? "text-primary" : "text-white/60"}`}>{s.label}</span>
+                  <span className={`text-[10px] uppercase tracking-[0.15em] mt-2 ${active || done ? "text-emerald-700" : "text-slate-500"}`}>{s.label}</span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`h-px flex-1 mx-1 -mt-6 ${step > s.id ? "bg-blue-300/60" : "bg-white/10"}`} />
+                  <div className={`h-px flex-1 mx-1 -mt-6 ${step > s.id ? "bg-emerald-400/70" : "bg-white/10"}`} />
                 )}
               </div>
             );
@@ -593,7 +593,7 @@ function InscriptionConvoyeur() {
           {/* STEP 3 : Documents */}
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-[11px] uppercase tracking-[0.15em] text-blue-200">Documents officiels</p>
+              <p className="text-[11px] uppercase tracking-[0.15em] text-emerald-700">Documents officiels</p>
               <FileUpload label="Pièce d'identité (CNI ou passeport) *" file={cniFile} errorKey="identite" scanKey="identite" setFile={setCniFile} onChange={makeFileHandler("identite", setCniFile, cniFile)} />
               {form.type_convoyeur === "independant" && (
                 <FileUpload label="Kbis ou avis de situation SIRENE (moins de 3 mois) *" file={kbisFile} errorKey="kbis" scanKey="kbis" setFile={setKbisFile} onChange={makeFileHandler("kbis", setKbisFile, kbisFile)} />
@@ -629,7 +629,7 @@ function InscriptionConvoyeur() {
                 <FileUpload label="Attestation RC Pro *" file={rcProFile} errorKey="assurance" scanKey="assurance" setFile={setRcProFile} onChange={makeFileHandler("assurance", setRcProFile, rcProFile)} />
                 <p className="text-[11px] text-white/55 mt-1.5">
                   Pas encore d'assurance RC Pro ?{" "}
-                  <Link to="/contact" className="text-blue-200 underline hover:text-blue-100">Contactez-nous</Link>, on vous accompagne.
+                  <Link to="/contact" className="text-emerald-700 underline hover:text-emerald-600">Contactez-nous</Link>, on vous accompagne.
                 </p>
               </div>
               <div>
@@ -638,10 +638,10 @@ function InscriptionConvoyeur() {
                 </label>
                 <input
                   type="file" accept="image/*" onChange={makeFileHandler("photo_profil", setPhotoProfilFile, photoProfilFile)}
-                  className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-blue-500 file:to-blue-400 file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-blue-300/60 focus:outline-none"
+                  className="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-white/90 text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-[#14B866] file:to-[#34e68b] file:text-white file:text-xs file:uppercase file:tracking-wider file:cursor-pointer hover:file:brightness-110 transition-colors focus:border-emerald-500 focus:outline-none"
                 />
                 {photoProfilFile
-                  ? <p className="text-primary text-xs mt-1 flex items-center gap-1"><Check size={12}/> {photoProfilFile.name} · {formatFileSize(photoProfilFile.size)}</p>
+                  ? <p className="text-emerald-700 text-xs mt-1 flex items-center gap-1"><Check size={12}/> {photoProfilFile.name} · {formatFileSize(photoProfilFile.size)}</p>
                   : <p className="text-white/40 text-[10px] mt-1">Portrait clair, format carré recommandé.</p>}
               </div>
               <div>
@@ -679,21 +679,21 @@ function InscriptionConvoyeur() {
                 <DocRow label="RC Pro" ok={!!rcProFile} />
                 <DocRow label="Photo de profil" ok={!!photoProfilFile} />
               </div>
-              <div className="bg-primary/5 border border-primary/20 rounded p-3 text-xs text-cream/70 leading-relaxed">
-                <ShieldCheck size={14} className="inline text-blue-300 mr-1" />
+              <div className="bg-emerald-50 border border-emerald-500/25 rounded p-3 text-xs text-slate-600 leading-relaxed">
+                <ShieldCheck size={14} className="inline text-emerald-600 mr-1" />
                 Votre dossier est étudié par notre équipe sous 24 à 48 h ouvrées, pas des semaines. Après validation, vous recevrez le contrat de partenariat à signer électroniquement.
               </div>
             </div>
           )}
 
           {uploadProgress !== null && (
-            <div className="rounded-xl border border-blue-400/25 bg-blue-500/10 px-4 py-3">
-              <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-blue-100 mb-2">
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+              <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-emerald-700 mb-2">
                 <span>{uploadProgress < 100 ? "Envoi des documents…" : "Documents transmis"}</span>
                 <span>{uploadProgress}%</span>
               </div>
               <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-300 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                <div className="h-full rounded-full bg-gradient-to-r from-[#14B866] to-[#34e68b] transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
               </div>
             </div>
           )}
@@ -704,21 +704,21 @@ function InscriptionConvoyeur() {
           <div className="flex items-center justify-between pt-2">
             <button
               type="button" onClick={prev} disabled={step === 1 || loading}
-              className="flex items-center gap-1 px-4 py-2 text-white/60 hover:text-primary text-sm uppercase tracking-[0.1em] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-4 py-2 text-white/60 hover:text-emerald-700 text-sm uppercase tracking-[0.1em] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft size={14} /> Retour
             </button>
             {step < 4 ? (
               <button
                 type="button" onClick={next}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)]"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#14B866] to-[#34e68b] text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(20,184,102,0.55)]"
               >
                 Continuer <ChevronRight size={14} />
               </button>
             ) : (
               <button
                 type="button" onClick={handleSubmit} disabled={loading}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(59,130,246,0.7)] disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#14B866] to-[#34e68b] text-white font-bold text-xs tracking-[0.14em] uppercase hover:brightness-110 transition-all shadow-[0_10px_25px_-10px_rgba(20,184,102,0.55)] disabled:opacity-50"
               >
                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
                 {loading ? "Envoi..." : "Valider mon inscription"}
@@ -730,15 +730,15 @@ function InscriptionConvoyeur() {
         <div className="text-center mt-6 space-y-3">
           <p className="text-[10px] leading-relaxed text-white/45 px-2">
             Protégé par reCAPTCHA et soumis à la{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Politique de Confidentialité</a>
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-600">Politique de Confidentialité</a>
             {" "}et aux{" "}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-200">Termes d'Utilisation</a>
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-600">Termes d'Utilisation</a>
             {" "}de Google.
           </p>
           <Link to="/login" className="block auth-link uppercase tracking-[0.14em] text-[11px] font-semibold">
             Déjà inscrit ? Se connecter
           </Link>
-          <Link to="/" className="block text-white/60 text-xs hover:text-primary transition-colors">
+          <Link to="/" className="block text-white/60 text-xs hover:text-emerald-700 transition-colors">
             ← Retour au site
           </Link>
         </div>
@@ -761,7 +761,7 @@ function DocRow({ label, ok }: { label: string; ok: boolean }) {
     <div className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.03] border border-white/10 px-3 py-1.5">
       <span className="text-white/80">{label}</span>
       {ok ? (
-        <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-blue-200">
+        <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.14em] text-emerald-700">
           <Check size={12} /> fourni
         </span>
       ) : (

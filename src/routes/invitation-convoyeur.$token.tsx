@@ -139,16 +139,17 @@ function InvitationConvoyeurPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#050b1f] text-white flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-7 shadow-2xl">
+    <main className="min-h-screen bg-[#eef7f2] text-[#0b2a1f] flex items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md rounded-3xl border border-emerald-500/25 bg-white p-7 shadow-[0_18px_55px_-28px_rgba(11,90,56,0.35)]">
         <div className="flex items-center gap-2 mb-6">
           <span className="text-lg font-semibold tracking-wide">
-            TRANSPORTS <span className="text-[#4d8bff]">LIGNEO</span>
+            TRANSPORTS <span className="text-[#12b866]">LIGNEO</span>
+            <span className="ml-2 text-[11px] font-bold uppercase tracking-[0.3em] text-emerald-700">Driver</span>
           </span>
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-white/70 py-8">
+          <div className="flex items-center gap-2 text-slate-600 py-8">
             <Loader2 className="animate-spin" size={18} /> Vérification de l'invitation…
           </div>
         ) : !invitation ? (
@@ -159,14 +160,14 @@ function InvitationConvoyeurPage() {
           <InvalidState message="Cette invitation a expiré ou a été annulée. Demandez-en une nouvelle à notre équipe." />
         ) : done ? (
           <div className="text-center py-6">
-            <CheckCircle2 className="mx-auto text-emerald-400 mb-3" size={40} />
+            <CheckCircle2 className="mx-auto text-emerald-500 mb-3" size={40} />
             <h1 className="text-xl font-semibold mb-1">Compte créé</h1>
-            <p className="text-white/60 text-sm">Redirection vers votre espace convoyeur…</p>
+            <p className="text-slate-600 text-sm">Redirection vers votre espace convoyeur…</p>
           </div>
         ) : (
           <>
             <h1 className="text-2xl font-semibold mb-1">Créer mon compte</h1>
-            <p className="text-white/60 text-sm mb-6">
+            <p className="text-slate-600 text-sm mb-6">
               Invitation personnelle pour rejoindre les convoyeurs Transports Ligneo.
             </p>
 
@@ -175,7 +176,7 @@ function InvitationConvoyeurPage() {
                 <input
                   value={invitation.email}
                   readOnly
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm text-slate-600"
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
@@ -187,8 +188,8 @@ function InvitationConvoyeurPage() {
                     placeholder={prenomFige ? undefined : "Jean"}
                     className={
                       prenomFige
-                        ? "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
-                        : "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                        ? "w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm text-slate-600"
+                        : "w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#14B866]"
                     }
                   />
                 </Field>
@@ -200,8 +201,8 @@ function InvitationConvoyeurPage() {
                     placeholder={nomFige ? undefined : "Martin"}
                     className={
                       nomFige
-                        ? "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white/70"
-                        : "w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                        ? "w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm text-slate-600"
+                        : "w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#14B866]"
                     }
                   />
                 </Field>
@@ -211,7 +212,7 @@ function InvitationConvoyeurPage() {
                   value={telephone}
                   onChange={(e) => setTelephone(e.target.value)}
                   placeholder="06 12 34 56 78"
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#14B866]"
                 />
               </Field>
               <Field label="Mot de passe">
@@ -220,7 +221,7 @@ function InvitationConvoyeurPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="8 caractères minimum"
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#14B866]"
                 />
               </Field>
               <Field label="Confirmer le mot de passe">
@@ -228,13 +229,13 @@ function InvitationConvoyeurPage() {
                   type="password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-[#4d8bff]"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#14B866]"
                 />
               </Field>
             </div>
 
             {error && (
-              <p className="mt-4 text-sm text-red-300 flex items-start gap-2">
+              <p className="mt-4 text-sm text-red-600 flex items-start gap-2">
                 <AlertTriangle size={15} className="mt-0.5 shrink-0" />
                 {error}
               </p>
@@ -243,15 +244,15 @@ function InvitationConvoyeurPage() {
             <button
               onClick={submit}
               disabled={submitting}
-              className="mt-6 w-full rounded-xl bg-[#0066ff] hover:bg-[#0a5be0] transition-colors py-3 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+              className="mt-6 w-full rounded-xl bg-[#14B866] hover:bg-[#0fa35a] text-[#04261a] transition-colors py-3 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {submitting ? <Loader2 className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
               Créer mon compte convoyeur
             </button>
 
-            <p className="mt-4 text-center text-xs text-white/45">
+            <p className="mt-4 text-center text-xs text-slate-500">
               Déjà un compte ?{" "}
-              <Link to="/login" className="text-[#4d8bff] hover:underline">
+              <Link to="/login" className="text-[#12b866] hover:underline">
                 Se connecter
               </Link>
             </p>
@@ -265,7 +266,7 @@ function InvitationConvoyeurPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-[11px] uppercase tracking-wider text-white/45 mb-1.5">{label}</span>
+      <span className="block text-[11px] uppercase tracking-wider text-slate-500 mb-1.5">{label}</span>
       {children}
     </label>
   );
@@ -274,12 +275,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function InvalidState({ message }: { message: string }) {
   return (
     <div className="text-center py-6">
-      <AlertTriangle className="mx-auto text-amber-400 mb-3" size={36} />
+      <AlertTriangle className="mx-auto text-amber-500 mb-3" size={36} />
       <h1 className="text-lg font-semibold mb-1">Invitation indisponible</h1>
-      <p className="text-white/60 text-sm mb-5">{message}</p>
+      <p className="text-slate-600 text-sm mb-5">{message}</p>
       <Link
         to="/login"
-        className="inline-block rounded-xl bg-[#0066ff] px-5 py-2.5 text-sm font-semibold"
+        className="inline-block rounded-xl bg-[#14B866] text-[#04261a] px-5 py-2.5 text-sm font-semibold"
       >
         Aller à la connexion
       </Link>
