@@ -6,6 +6,8 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { AdminAvatarUploader } from "@/components/admin/AdminAvatarUploader";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { convoyeurAutoRemplir } from "@/lib/esign.functions";
 import {
   ArrowLeft,
   CheckCircle,
@@ -277,6 +279,28 @@ function AdminConvoyeurDetail() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Fiche incomplète : on reprend automatiquement naissance, adresse et SIRET
+  // (formulaire d'inscription, puis Kbis / base officielle) et on enregistre.
+  const autoRemplir = useServerFn(convoyeurAutoRemplir);
+  const [autoFait, setAutoFait] = useState<string | null>(null);
+  useEffect(() => {
+    if (!conv || autoFait === conv.id) return;
+    const c = conv as any;
+    const manque = ["date_naissance", "lieu_naissance", "siret", "adresse_rue", "code_postal"].some((k) => !String(c[k] ?? "").trim()) || !String(c.ville ?? "").trim();
+    setAutoFait(conv.id);
+    if (!manque) return;
+    void autoRemplir({ data: { convoyeurId: conv.id } })
+      .then((r) => {
+        const n = Object.keys(r.rempli ?? {}).length;
+        if (!r.ok || n === 0) return;
+        toast.success(`Fiche complétée automatiquement (${n} champ${n > 1 ? "s" : ""})`, {
+          description: r.source.includes("kbis") ? "Infos reprises de l'inscription et du Kbis." : "Infos reprises du formulaire d'inscription.",
+        });
+        void load();
+      })
+      .catch(() => undefined);
+  }, [conv, autoFait, autoRemplir, load]);
 
   const updateStatut = async (statut: string) => {
     if (!conv) return;

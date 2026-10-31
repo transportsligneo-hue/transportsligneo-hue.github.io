@@ -89,7 +89,12 @@ export function ChatThread({
 
   const markRead = useCallback(() => {
     void supabase.rpc("chat_mark_read", { _conv: conversationId });
-  }, [conversationId]);
+    // Côté admin : on remet aussi le compteur à zéro directement, pour que
+    // les pastilles disparaissent dès la lecture (même si la RPC échoue).
+    if (viewer === "admin") {
+      void supabase.from("chat_conversations").update({ unread_admin: 0 }).eq("id", conversationId);
+    }
+  }, [conversationId, viewer]);
 
   useEffect(() => {
     let alive = true;

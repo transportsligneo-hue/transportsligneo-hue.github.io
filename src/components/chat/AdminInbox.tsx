@@ -199,7 +199,7 @@ export function AdminMissionInbox() {
 }
 
 export function AdminConseillerInbox() {
-  const { rows, loading } = useConversations("conseiller");
+  const { rows, loading, setRows } = useConversations("conseiller");
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Conv["status"]>("all");
   const [settings, setSettings] = useState<{ advisor_available: boolean; quick_replies: string[] } | null>(null);
@@ -240,7 +240,11 @@ export function AdminConseillerInbox() {
         {loading ? <div className="lgc-empty"><Loader2 className="animate-spin" size={18} /></div> : list.length === 0 ? (
           <div className="lgc-empty">Aucune conversation.</div>
         ) : list.map((c) => (
-          <button key={c.id} type="button" className={`lgc-item${selected === c.id ? " active" : ""}`} onClick={() => setSelected(c.id)}>
+          <button key={c.id} type="button" className={`lgc-item${selected === c.id ? " active" : ""}`} onClick={() => {
+            setSelected(c.id);
+            // Pastille effacée tout de suite à l'ouverture
+            if (c.unread_admin > 0) setRows((prev) => prev.map((r) => (r.id === c.id ? { ...r, unread_admin: 0 } : r)));
+          }}>
             <div className="lgc-item-top">
               <span className="lgc-name">{c.visitor_name ?? (c.client_user_id ? "Client connecté" : "Visiteur")}</span>
               {c.unread_admin > 0 && <span className="lgc-badge">{c.unread_admin}</span>}

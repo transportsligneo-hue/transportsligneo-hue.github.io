@@ -366,6 +366,7 @@ export function DocumentsValidationCenter({
           </div>
         </div>
         <div className="dvc-hr">
+          <div className="dvc-kp"><small>Reçus</small><b>{totalDeposes}/{requiredTypes.length}</b></div>
           <div className="dvc-kp"><small>À traiter</small><b>{attente}</b></div>
           <div className="dvc-kp"><small>Manquants</small><b>{stats.manquants}</b></div>
           <div className="dvc-ring" style={{ ["--p" as string]: pct }}>

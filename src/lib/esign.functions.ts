@@ -560,11 +560,34 @@ export const esignConvoyeurDocsStatus = createServerFn({ method: "POST" })
  * Admin : lit le Kbis déposé par le convoyeur et en extrait SIRET, dénomination et adresse du siège,
  * pour pré-remplir le contrat de partenariat (aucune saisie à refaire).
  */
-export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { convoyeurId: string }) => d)
-  .handler(async ({ data, context }): Promise<{ ok: boolean; siret: string | null; adresse: string | null; denomination: string | null; error?: string }> => {
-    await assertAdmin(context);
+type KbisResult = { ok: boolean; siret: string | null; adresse: string | null; denomination: string | null; error?: string };
+
+/** Base officielle (recherche-entreprises) : retrouve le SIRET d'un indépendant par son nom quand le Kbis est illisible. */
+async function siretParNom(prenom: string, nom: string, codePostal?: string | null): Promise<KbisResult | null> {
+  const q = `${prenom} ${nom}`.trim();
+  if (q.length < 4) return null;
+  const url = `https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(q)}&etat_administratif=A&page=1&per_page=10${codePostal && /^\d{5}$/.test(codePostal) ? `&code_postal=${codePostal}` : ""}`;
+  const res = await fetch(url, { headers: { accept: "application/json" } }).then((r) => (r.ok ? r.json() : null)).catch(() => null) as any;
+  const norm = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const n = norm(nom), p = norm(prenom);
+  const hits = (res?.results ?? []).filter((r: any) => {
+    const dir = (r?.dirigeants ?? []).some((d: any) => norm(String(d?.nom ?? "")).includes(n) && norm(String(d?.prenoms ?? "")).includes(p));
+    const nc = norm(String(r?.nom_complet ?? ""));
+    return dir || (nc.includes(n) && nc.includes(p));
+  });
+  if (hits.length !== 1) return null; // ambigu ou absent : on ne devine pas
+  const siege = hits[0]?.siege;
+  const siret = String(siege?.siret ?? "");
+  if (siret.length !== 14) return null;
+  return {
+    ok: true,
+    siret: siret.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4"),
+    adresse: String(siege?.adresse ?? "").replace(/\s+/g, " ").trim() || null,
+    denomination: String(hits[0]?.nom_complet ?? "").trim() || null,
+  };
+}
+
+async function lireKbisConvoyeur(convoyeurId: string): Promise<KbisResult> {
     const none = { ok: false, siret: null, adresse: null, denomination: null };
     try {
       const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
@@ -573,7 +596,7 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
       const { data: docs } = await db
         .from("documents_convoyeurs")
         .select("type_document, url_fichier, nom_fichier, statut_validation, created_at")
-        .eq("convoyeur_id", data.convoyeurId)
+        .eq("convoyeur_id", convoyeurId)
         .order("created_at", { ascending: false });
       const kbis = (docs ?? []).find(
         (d: any) => normalizeConvoyeurDocType(d.type_document) === "kbis" && d.statut_validation !== "refuse",
@@ -648,7 +671,13 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
         timeoutMs: 25_000,
       });
       if (!res.ok) return { ...none, error: res.error };
-      const digits = String(res.data.siret ?? "").replace(/\D/g, "");
+      let digits = String(res.data.siret ?? "").replace(/\D/g, "");
+      // SIREN seul (9 chiffres) : on récupère le SIRET complet du siège dans la base officielle
+      if (digits.length === 9) {
+        const rs = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${digits}&page=1&per_page=1`, { headers: { accept: "application/json" } }).then((r) => (r.ok ? r.json() : null)).catch(() => null) as any;
+        const sie = String(rs?.results?.[0]?.siege?.siret ?? "");
+        if (sie.length === 14) digits = sie;
+      }
       const siret = digits.length === 14 ? digits.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4") : digits.length === 9 ? digits.replace(/^(\d{3})(\d{3})(\d{3})$/, "$1 $2 $3") : null;
       const adresse = String(res.data.adresse ?? "").replace(/\s+/g, " ").trim() || null;
       const denomination = String(res.data.denomination ?? "").trim() || null;
@@ -656,6 +685,86 @@ export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
     } catch {
       return { ...none, error: "Lecture du Kbis impossible." };
     }
+}
+
+export const esignConvoyeurKbisInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { convoyeurId: string }) => d)
+  .handler(async ({ data, context }): Promise<KbisResult> => {
+    await assertAdmin(context);
+    const r = await lireKbisConvoyeur(data.convoyeurId);
+    if (r.siret) return r;
+    // Kbis absent ou illisible : recherche dans la base officielle par nom du convoyeur
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: c } = await (supabaseAdmin as any).from("convoyeurs").select("prenom, nom, code_postal").eq("id", data.convoyeurId).maybeSingle();
+      const byName = c ? await siretParNom(String(c.prenom ?? ""), String(c.nom ?? ""), c.code_postal) : null;
+      if (byName) return { ...byName, adresse: r.adresse || byName.adresse };
+    } catch { /* non bloquant */ }
+    return r;
+  });
+
+/**
+ * Admin : complète automatiquement la fiche convoyeur (naissance, adresse, SIRET)
+ * à partir des infos saisies à l'inscription, puis du Kbis / de la base officielle.
+ * Ne remplace jamais une valeur déjà renseignée. Enregistre ce qui a été trouvé.
+ */
+export const convoyeurAutoRemplir = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { convoyeurId: string }) => d)
+  .handler(async ({ data, context }): Promise<{ ok: boolean; rempli: Record<string, string>; source: string[] }> => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin as any;
+    const { data: c } = await db.from("convoyeurs").select("*").eq("id", data.convoyeurId).maybeSingle();
+    if (!c) return { ok: false, rempli: {}, source: [] };
+    const vide = (v: unknown) => v == null || String(v).trim() === "";
+    const rempli: Record<string, string> = {};
+    const source: string[] = [];
+    const poser = (k: string, v: unknown) => { const s = String(v ?? "").trim(); if (s && vide(c[k]) && !rempli[k]) rempli[k] = s; };
+
+    // 1) Infos saisies dans le formulaire d'inscription (métadonnées du compte)
+    if (c.user_id) {
+      const { data: u } = await db.auth.admin.getUserById(c.user_id);
+      const m = (u?.user?.user_metadata ?? {}) as Record<string, string>;
+      const avant = Object.keys(rempli).length;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(m.date_naissance ?? ""))) poser("date_naissance", m.date_naissance);
+      poser("lieu_naissance", m.lieu_naissance);
+      poser("siret", String(m.siret ?? "").replace(/\D/g, "").length === 14 ? String(m.siret).replace(/\D/g, "") : "");
+      poser("adresse", m.adresse);
+      poser("adresse_rue", m.adresse_rue);
+      poser("code_postal", m.code_postal);
+      poser("ville", m.ville);
+      if (!vide(m.adresse) && (vide(c.adresse_rue) || vide(c.code_postal))) {
+        const mm = String(m.adresse).match(/^(.*?)[,\s]+(\d{5})\s+(.+)$/);
+        if (mm) { poser("adresse_rue", mm[1]); poser("code_postal", mm[2]); poser("ville", mm[3]); }
+      }
+      if (Object.keys(rempli).length > avant) source.push("inscription");
+    }
+
+    // 2) SIRET + adresse lus sur le Kbis, sinon base officielle par nom
+    if (vide(c.siret) && !rempli.siret) {
+      let k = await lireKbisConvoyeur(data.convoyeurId).catch(() => null);
+      if (!k?.siret) k = await siretParNom(String(c.prenom ?? ""), String(c.nom ?? ""), c.code_postal ?? rempli.code_postal).catch(() => null);
+      if (k?.siret) {
+        poser("siret", k.siret.replace(/\D/g, ""));
+        if (k.adresse) {
+          poser("adresse", k.adresse);
+          const mm = k.adresse.match(/^(.*?)[,\s]+(\d{5})\s+(.+)$/);
+          if (mm) { poser("adresse_rue", mm[1]); poser("code_postal", mm[2]); poser("ville", mm[3]); }
+        }
+        source.push("kbis");
+      }
+    }
+
+    if (Object.keys(rempli).length) {
+      const { error } = await db.from("convoyeurs").update(rempli).eq("id", data.convoyeurId);
+      if (error) {
+        console.warn(`[convoyeurAutoRemplir] ${error.message}`);
+        return { ok: false, rempli: {}, source: [] };
+      }
+    }
+    return { ok: true, rempli, source };
   });
 
 /**

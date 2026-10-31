@@ -39,6 +39,11 @@ export default function ContratYousignCard(props: Props) {
   const [kbisState, setKbisState] = useState<"idle" | "loading" | "done" | "none">("idle");
   const [denomination, setDenomination] = useState("");
 
+  // Fiche complétée après coup (auto-remplissage) : on reprend les nouvelles valeurs si le champ est vide.
+  useEffect(() => { if (props.siret) setSiret((v) => v || props.siret!); }, [props.siret]);
+  useEffect(() => { if (props.adresse) setAdresse((v) => v || props.adresse!); }, [props.adresse]);
+  useEffect(() => { if (props.permisNumero) setPermis((v) => v || props.permisNumero!); }, [props.permisNumero]);
+
   // SIRET + adresse repris automatiquement du Kbis déposé à l'inscription.
   useEffect(() => {
     if (props.siret && props.adresse) return; // déjà enregistrés sur la fiche : rien à relire
