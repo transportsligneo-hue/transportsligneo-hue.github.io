@@ -348,9 +348,12 @@ export function DocumentsValidationCenter({
   const selectedDocs = docs.filter((d) => selected.has(d.id));
   const countBy = (s: Statut) => requiredTypes.filter((t) => (byType[t.key]?.statut_validation ?? (byType[t.key] ? "en_attente" : "")) === s).length;
   const attente = countBy("en_attente");
-  const totalDeposes = requiredTypes.filter((t) => byType[t.key]).length;
-  const approuvesAll = requiredTypes.filter((t) => isConvoyeurDocApproved(byType[t.key]?.statut_validation)).length;
-  const pct = requiredTypes.length ? Math.round((approuvesAll / requiredTypes.length) * 100) : 0;
+  // Compteurs sur les documents OBLIGATOIRES uniquement (comme la fiche convoyeur) :
+  // « Autres documents » est facultatif et ne compte pas.
+  const obligatoires = requiredTypes.filter((t) => t.required);
+  const totalDeposes = obligatoires.filter((t) => byType[t.key]).length;
+  const approuvesAll = obligatoires.filter((t) => isConvoyeurDocApproved(byType[t.key]?.statut_validation)).length;
+  const pct = obligatoires.length ? Math.round((approuvesAll / obligatoires.length) * 100) : 0;
   const initiales = `${convoyeurPrenom?.[0] ?? ""}${convoyeurNom?.[0] ?? ""}`.toUpperCase();
 
   return (
@@ -366,11 +369,11 @@ export function DocumentsValidationCenter({
           </div>
         </div>
         <div className="dvc-hr">
-          <div className="dvc-kp"><small>Reçus</small><b>{totalDeposes}/{requiredTypes.length}</b></div>
+          <div className="dvc-kp"><small>Reçus</small><b>{totalDeposes}/{obligatoires.length}</b></div>
           <div className="dvc-kp"><small>À traiter</small><b>{attente}</b></div>
           <div className="dvc-kp"><small>Manquants</small><b>{stats.manquants}</b></div>
           <div className="dvc-ring" style={{ ["--p" as string]: pct }}>
-            <i><span>{approuvesAll}/{requiredTypes.length}</span><small>validés</small></i>
+            <i><span>{approuvesAll}/{obligatoires.length}</span><small>validés</small></i>
           </div>
         </div>
       </div>
