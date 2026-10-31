@@ -2,6 +2,7 @@ import { invokeAdminUserAction } from "@/lib/admin-user-actions";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { RefreshButton } from "@/components/admin/RefreshButton";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { normalizeNiveau } from "@/lib/convoyeur-niveau";
 import { DriverAvatar } from "@/components/admin/DriverAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -28,6 +29,7 @@ import {
   TextInput,
   FormField,
 } from "@/components/admin/AdminUI";
+import { IdVerifBadge, useIdVerifications } from "@/components/admin/IdVerifBadge";
 import {
   StatutConvoyeurBadge,
   resolveStatutConvoyeur,
@@ -65,6 +67,7 @@ interface Convoyeur {
   account_status?: string | null;
   has_completed_training?: boolean | null;
   training_status?: string | null;
+  niveau?: string | null;
 }
 
 interface Invitation {
@@ -100,6 +103,8 @@ function AdminConvoyeurs() {
   const [allDocs, setAllDocs] = useState<DocLite[]>([]);
   const [filterStatut, setFilterStatut] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [filterVille, setFilterVille] = useState("all");
+  const [filterNiveau, setFilterNiveau] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "", password: "" });
   const [creating, setCreating] = useState(false);
@@ -177,12 +182,15 @@ function AdminConvoyeurs() {
   }, [enriched, allDocs]);
 
   // Filtrage
+  const idVerif = useIdVerifications(convoyeurs.map((c) => c.user_id));
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return enriched.filter((c) => {
       if (tab === "demo" ? !c.isDemo : c.isDemo) return false;
       if (filterStatut === "doublons") { if (!c.isDup) return false; }
       else if (filterStatut !== "all" && c.statutUnifie !== filterStatut) return false;
+      if (filterVille !== "all" && (c.ville ?? "").trim().toLowerCase() !== filterVille) return false;
+      if (filterNiveau !== "all" && normalizeNiveau(c.niveau) !== filterNiveau) return false;
       if (!q) return true;
       return (
         c.nom?.toLowerCase().includes(q) ||
@@ -191,7 +199,16 @@ function AdminConvoyeurs() {
         (c.ville ?? "").toLowerCase().includes(q)
       );
     });
-  }, [enriched, filterStatut, search, tab]);
+  }, [enriched, filterStatut, filterVille, filterNiveau, search, tab]);
+
+  const villes = useMemo(() => {
+    const m = new Map<string, string>();
+    enriched.forEach((c) => {
+      const v = (c.ville ?? "").trim();
+      if (v && !c.isDemo) m.set(v.toLowerCase(), v);
+    });
+    return Array.from(m.entries()).sort((a, b) => a[1].localeCompare(b[1], "fr"));
+  }, [enriched]);
 
   const demoCount = useMemo(() => enriched.filter((c) => c.isDemo).length, [enriched]);
   const reelCount = enriched.length - demoCount;
@@ -619,6 +636,16 @@ function AdminConvoyeurs() {
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
+        <select className="dvx-select" value={filterVille} onChange={(e) => setFilterVille(e.target.value)} aria-label="Ville">
+          <option value="all">Toutes les villes</option>
+          {villes.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+        <select className="dvx-select" value={filterNiveau} onChange={(e) => setFilterNiveau(e.target.value)} aria-label="Niveau">
+          <option value="all">Tous les niveaux</option>
+          <option value="debutant">Débutant</option>
+          <option value="confirme">Confirmé</option>
+          <option value="expert">Expert</option>
+        </select>
       </div>
 
       {invitations.filter((i) => i.status === "pending" || i.status === "accepted").length > 0 && (
@@ -714,6 +741,7 @@ function AdminConvoyeurs() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <StatutConvoyeurBadge statut={c.statutUnifie} />
+                  {c.user_id && <IdVerifBadge status={idVerif[c.user_id]?.status} />}
                   <span className="dvx-badge violet">Indépendant</span>
                   {c.isDemo && <span className="dvx-badge">Démo / test</span>}
                   {c.isDup && !c.isDemo && <span className="dvx-badge dup">Doublon</span>}

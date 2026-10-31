@@ -200,8 +200,9 @@ function AdminLayout() {
       to: "/admin/notifications",
       label: "Notifications",
       icon: Bell,
+      alert: unreadCount > 0,
       badge: unreadCount > 0
-        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
+        ? <span className="lig-nav-badge lig-notif-badge ml-auto" aria-label={`${unreadCount} notification(s) non lue(s)`}><i aria-hidden="true" />{unreadCount > 99 ? "99+" : unreadCount}</span>
         : undefined,
     },
 

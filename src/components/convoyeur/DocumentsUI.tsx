@@ -129,6 +129,8 @@ export function DocCardView(p: {
   status: DocStatus; fileName?: string; dateLabel?: string; refusMotif?: string | null;
   renewal?: { tone: "ok" | "soon" | "expired"; text: string } | null;
   uploading: boolean;
+  /** Étape d'envoi en cours (vérification, envoi, enregistrement) et avancement 0-100. */
+  uploadStep?: { label: string; pct: number } | null;
   onPreview?: () => void;
   onDelete?: () => void;
   uploadLabels?: { add: string; replace: string };
@@ -150,7 +152,7 @@ export function DocCardView(p: {
   const outBtn = "inline-flex min-h-[42px] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border-[1.5px] bg-white px-2 text-[12.5px] font-bold text-[#0b7a45] active:scale-[.98]";
   return (
     <div>
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3 text-left">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open || p.uploading} className="flex w-full items-center gap-3 px-3.5 py-3 text-left">
         <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px]" style={{ background: st.tile, color: st.fg }}><Icon size={18} /></span>
         <span className="min-w-0 flex-1">
           <b className="block truncate text-[13.5px] leading-tight" style={{ color: INK }}>{p.label}</b>
@@ -159,7 +161,7 @@ export function DocCardView(p: {
         <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold" style={{ background: st.tile, color: st.fg }}>{addRow && !has ? "Ajouter" : st.label}</span>
         <ChevronDown size={16} className={"shrink-0 text-[#9bb0a8] transition-transform " + (open ? "rotate-180" : "")} />
       </button>
-      {open && (
+      {(open || p.uploading) && (
         <div className="px-3.5 pb-3.5 pl-[58px]">
           {p.hint && <p className="text-[11.5px] leading-snug" style={{ color: MUT }}>{p.hint}</p>}
           {p.renewal && <span className={"mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold " + renewCls}>{p.renewal.text}</span>}
@@ -176,6 +178,14 @@ export function DocCardView(p: {
             </label>
             <span className="contents">{p.scanButton}</span>
           </div>
+          {p.uploading && (
+            <div className="mt-2.5" role="status" aria-live="polite">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-100">
+                <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-500 ease-out" style={{ width: `${Math.max(8, p.uploadStep?.pct ?? 35)}%` }} />
+              </div>
+              <p className="mt-1.5 text-xs font-medium text-emerald-700">{p.uploadStep?.label ?? "Envoi en cours…"}</p>
+            </div>
+          )}
           {p.onDelete && (
             <button type="button" onClick={p.onDelete} className="mt-2 text-xs font-bold text-[#d92d4a] underline underline-offset-2">Supprimer ce document</button>
           )}

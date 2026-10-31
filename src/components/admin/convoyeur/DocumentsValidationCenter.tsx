@@ -348,10 +348,15 @@ export function DocumentsValidationCenter({
   const selectedDocs = docs.filter((d) => selected.has(d.id));
   const countBy = (s: Statut) => requiredTypes.filter((t) => (byType[t.key]?.statut_validation ?? (byType[t.key] ? "en_attente" : "")) === s).length;
   const attente = countBy("en_attente");
-  const totalDeposes = requiredTypes.filter((t) => byType[t.key]).length;
-  // Même règle que l'appli driver : seuls les documents requis comptent dans « X / Y validés ».
-  const approuvesAll = stats.approuves;
-  const pct = stats.total ? Math.round((approuvesAll / stats.total) * 100) : 0;
+  // Compteurs sur les documents OBLIGATOIRES uniquement (comme la fiche convoyeur) :
+  // « Autres documents » est facultatif et ne compte pas.
+  const obligatoires = requiredTypes.filter((t) => t.required);
+  const totalDeposes = obligatoires.filter((t) => byType[t.key]).length;
+  const approuvesAll = obligatoires.filter((t) => isConvoyeurDocApproved(byType[t.key]?.statut_validation)).length;
+  const pct = obligatoires.length ? Math.round((approuvesAll / obligatoires.length) * 100) : 0;
+  // documents en plus (CV, autres justificatifs…) : affichés à part, sans fausser le compte
+  const clesObligatoires = new Set(obligatoires.map((t) => t.key));
+  const enPlus = docs.filter((d) => !clesObligatoires.has(normalizeConvoyeurDocType(d.type_document))).length;
   const initiales = `${convoyeurPrenom?.[0] ?? ""}${convoyeurNom?.[0] ?? ""}`.toUpperCase();
 
   return (
@@ -367,10 +372,13 @@ export function DocumentsValidationCenter({
           </div>
         </div>
         <div className="dvc-hr">
+          <div className="dvc-kp" title={enPlus ? `${totalDeposes} documents obligatoires sur ${obligatoires.length}, plus ${enPlus} document(s) facultatif(s)` : undefined}>
+            <small>Reçus</small><b>{totalDeposes}/{obligatoires.length}{enPlus > 0 && <em className="dvc-plus">+{enPlus}</em>}</b>
+          </div>
           <div className="dvc-kp"><small>À traiter</small><b>{attente}</b></div>
           <div className="dvc-kp"><small>Manquants</small><b>{stats.manquants}</b></div>
           <div className="dvc-ring" style={{ ["--p" as string]: pct }}>
-            <i><span>{approuvesAll}/{stats.total}</span><small>validés</small></i>
+            <i><span>{approuvesAll}/{obligatoires.length}</span><small>validés</small></i>
           </div>
         </div>
       </div>

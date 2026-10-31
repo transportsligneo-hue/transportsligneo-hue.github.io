@@ -336,6 +336,10 @@ function AdminDashboard() {
           { label: "Missions actives", value: stats.missionsEnCours, tone: "accent" },
         ]}
       />
+      <div className="flex flex-wrap items-stretch gap-3">
+        <SmsCreditsCard />
+        <ApiUsageCards />
+      </div>
 
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">

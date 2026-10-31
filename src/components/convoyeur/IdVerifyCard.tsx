@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -14,12 +14,35 @@ const LABEL: Record<string, [string, string]> = {
 };
 
 /** Vérification d'identité automatique (CNI ou passeport + selfie) : carte compacte, thème clair. */
-export default function IdVerifyCard() {
+export default function IdVerifyCard({ onStatus }: { large?: boolean; onStatus?: (s: string) => void } = {}) {
   const statusFn = useServerFn(getIdVerificationStatus);
   const startFn = useServerFn(startIdVerification);
-  const [status, setStatus] = useState("none");
+  const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { statusFn().then((r) => setStatus(r.status)).catch(() => {}); }, [statusFn]);
+
+  const refresh = useCallback(async () => {
+    try { const r = await statusFn(); setStatus(r.status); onStatus?.(r.status); return r.status; }
+    catch { setStatus((s) => s ?? "none"); return null; }
+  }, [statusFn, onStatus]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const s = await refresh();
+      // Retour depuis Didit : le résultat peut mettre quelques secondes à arriver.
+      const back = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("idv") === "done";
+      if (back && alive && s !== "approved") {
+        for (let i = 0; i < 6 && alive; i++) {
+          await new Promise((r) => setTimeout(r, 3000));
+          const n = await refresh();
+          if (n === "approved" || n === "declined" || n === "review") break;
+        }
+      }
+    })();
+    return () => { alive = false; };
+  }, [refresh]);
+
+  if (status === null) return null;
   const ok = status === "approved";
   const wait = status === "review";
   const [title, sub] = LABEL[status] ?? LABEL.none;
@@ -40,7 +63,7 @@ export default function IdVerifyCard() {
           onClick={async () => {
             setBusy(true);
             try { const r = await startFn({ data: { origin: window.location.origin } }); window.location.href = r.url; }
-            catch (e) { toast.error((e as Error).message); setBusy(false); }
+            catch (e) { toast.error((e as Error).message); setBusy(false); refresh(); }
           }}
           className="inline-flex min-h-[40px] items-center justify-center rounded-xl px-2 text-[12.5px] font-bold text-[#04261a] active:scale-[.98] disabled:opacity-60"
           style={{ background: "linear-gradient(135deg,#14B866,#4FE8A0)" }}
