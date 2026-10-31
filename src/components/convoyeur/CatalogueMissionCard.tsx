@@ -57,6 +57,8 @@ interface Props {
   canApply: boolean;
   /** Niveau du convoyeur connecté (pour verrouiller les missions trop élevées). */
   driverNiveau?: string | null;
+  /** Heure de livraison (ex. « 14h00 »), si connue. */
+  livraisonLabel?: string | null;
   onOpen: () => void;
   onQuickApply: () => void;
   /** Ouvre la fiche d'enchère (missions en enchère). */
@@ -94,6 +96,7 @@ export function CatalogueMissionCard({
   myOfferPrice,
   canApply,
   driverNiveau,
+  livraisonLabel,
   onOpen,
   onQuickApply,
   onAuction,
@@ -139,7 +142,7 @@ export function CatalogueMissionCard({
           </span>
           {isAR && <span className="badge-new">Restitution et livraison</span>}
           <span className="sp" />
-          {dateLabel && <span className="tiny mut">{dateLabel}{t.heure_trajet ? ` · ${t.heure_trajet.slice(0, 5)}` : ""}</span>}
+          {dateLabel && <span className="tiny mut">{dateLabel}</span>}
         </div>
 
         <MissionChips
@@ -163,7 +166,9 @@ export function CatalogueMissionCard({
           </div>
           <div className="sp">
             <p className="semi" style={{ fontSize: 15 }}>{routeDepart}</p>
+            {t.heure_trajet && <p className="tiny" style={{ color: "#0b7a45", fontWeight: 700, marginTop: 2 }}>Enlèvement · {t.heure_trajet.slice(0, 5).replace(":", "h")}</p>}
             <p className="semi" style={{ fontSize: 15, marginTop: 14 }}>{routeArrivee}</p>
+            {livraisonLabel && <p className="tiny" style={{ color: "#2147c9", fontWeight: 700, marginTop: 2 }}>Livraison · {livraisonLabel}</p>}
             {isAR && <p className="semi" style={{ fontSize: 15, marginTop: 14 }}>{routeRetour}</p>}
           </div>
           <div style={{ textAlign: "right" }}>
@@ -175,7 +180,7 @@ export function CatalogueMissionCard({
 
         <div className="row xs soft" style={{ marginTop: 12, gap: 8 }}>
           <Ic n="car" s={13} /> <b style={{ whiteSpace: "nowrap" }}>{vehicule || "Véhicule à confirmer"}</b>
-          <span className="mut tiny">· {isAR ? "Livraison + restitution" : "Enlèvement + livraison"}</span>
+          <span className="mut tiny">· {isAR ? "Livraison puis restitution" : "Trajet simple, sans retour"}</span>
         </div>
         {countdown && <p className="tiny mut" style={{ marginTop: 8 }}><Ic n="clock" s={11} sw={2.4} /> {countdown}</p>}
 

@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { messageErreurAcces } from "@/lib/acces-erreur";
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,7 @@ import {
   type CatalogTrajet,
 } from "@/components/convoyeur/CatalogueMissionCard";
 import { MissionDetailSheet } from "@/components/convoyeur/MissionDetailSheet";
+import { useLivraisonTimes, livraisonLabel } from "@/lib/livraison-times";
 import { CatalogueTrainingGate } from "@/components/convoyeur/CatalogueTrainingGate";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import { haversineKm } from "@/lib/geo/haversine";
@@ -240,6 +240,7 @@ function ConvoyeurCatalogue() {
   }, [catalogueTrajets, geo.position, coords]);
 
 
+  const livTimes = useLivraisonTimes(trajets.map((x) => x.id));
   const filtered = useMemo(() => {
     const s = filters.search.trim().toLowerCase();
     const km = filters.maxKm ? Number(filters.maxKm) : null;
@@ -335,7 +336,7 @@ function ConvoyeurCatalogue() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error(messageErreurAcces(error.message));
+      toast.error(error.message);
       return;
     }
     toast.success(
@@ -468,6 +469,7 @@ function ConvoyeurCatalogue() {
               <CatalogueMissionCard
                 key={t.id}
                 trajet={t}
+                livraisonLabel={livraisonLabel(livTimes[t.id], t.date_trajet)}
                 distanceFromMe={dist}
                 myOfferStatus={mine?.statut ?? null}
                 myOfferPrice={mine?.prix_propose ?? null}
@@ -498,6 +500,7 @@ function ConvoyeurCatalogue() {
         {openTrajet && (
           <MissionDetailSheet
             trajet={openTrajet}
+            livraisonLabel={livraisonLabel(livTimes[openTrajet.id], openTrajet.date_trajet)}
             distanceFromMe={openDist}
             onClose={() => setOpenId(null)}
             canApply={canApply}

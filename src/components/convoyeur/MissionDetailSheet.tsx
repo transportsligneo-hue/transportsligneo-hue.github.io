@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   X, User, Calendar, Clock, Car, Lock, ShieldCheck,
-  Minus, Plus, ChevronDown, Check, Coins, Info, Zap, Loader2,
+  Minus, Plus, ChevronDown, Check, Coins, Info, Zap,
   FileCheck2, ArrowLeftRight,
 } from "lucide-react";
 import { ReturnTripHelper } from "./ReturnTripHelper";
@@ -15,6 +15,7 @@ import { MissionPublisherChip } from "./MissionPublisherChip";
 
 interface Props {
   trajet: CatalogTrajet;
+  livraisonLabel?: string | null;
   onClose: () => void;
   onSubmit: (price: number, message: string) => Promise<void> | void;
   canApply: boolean;
@@ -33,6 +34,7 @@ function formatDuration(min?: number | null) {
 
 export function MissionDetailSheet({
   trajet: t,
+  livraisonLabel,
   onClose,
   onSubmit,
   canApply,
@@ -77,7 +79,7 @@ export function MissionDetailSheet({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-stretch justify-center bg-black/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[70] flex items-stretch justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <style>{`
@@ -89,69 +91,49 @@ export function MissionDetailSheet({
         @keyframes cat-borderDrift{0%,100%{background-position:0 0,0% 50%}50%{background-position:0 0,100% 50%}}
         @keyframes cat-shine{0%{left:-60%}45%{left:130%}100%{left:130%}}
 
-        .cat-frame{background:
-          radial-gradient(560px 460px at 90% 0%, rgba(63,123,255,.34), transparent 60%),
-          radial-gradient(460px 380px at -8% 30%, rgba(217,181,74,.13), transparent 60%),
-          radial-gradient(520px 440px at 105% 60%, rgba(79,140,255,.22), transparent 60%),
-          linear-gradient(180deg,#132a6b 0%,#102153 45%,#0c1c4a 100%);}
-        .cat-card{background:rgba(255,255,255,.055);border:1px solid rgba(122,163,255,.22);border-radius:20px;padding:20px;margin-bottom:16px;backdrop-filter:blur(10px)}
-        .cat-pay{position:relative;background:rgba(14,20,44,.92);border:none;padding:3px;overflow:visible}
-        .cat-pay::before{content:'';position:absolute;inset:0;border-radius:20px;padding:1.4px;
-          background:linear-gradient(135deg,rgba(217,181,74,.9),rgba(122,163,255,.5),rgba(217,181,74,.25),rgba(217,181,74,.9));
-          background-size:280% 280%;animation:cat-payBorder 6s ease-in-out infinite;
-          -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-          -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-        .cat-pay-inner{position:relative;background:linear-gradient(135deg,rgba(217,181,74,.1),rgba(63,123,255,.06));border-radius:18px;padding:20px;overflow:hidden}
-        .cat-pay-inner::after{content:'';position:absolute;top:-60px;right:-40px;width:160px;height:160px;border-radius:50%;
-          background:radial-gradient(circle,rgba(217,181,74,.25),transparent 70%);pointer-events:none}
+        .cat-frame{background:linear-gradient(180deg,#e9f7f0 0%,#f4fbf7 45%,#f7fcf9 100%);color:#08243f}
+        .cat-card{background:#fff;border:1px solid rgba(8,90,60,.14);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 10px 26px -16px rgba(8,90,60,.3)}
+        .cat-pay{position:relative;background:#fff;padding:0;overflow:hidden}
+                .cat-pay-inner{position:relative;padding:18px;border-radius:22px;background:linear-gradient(135deg,rgba(20,184,102,.07),rgba(255,255,255,0))}
         .cat-pulseD{animation:cat-pulseD 1.6s ease-in-out infinite}
 
         .cat-tl-line{position:absolute;left:5.5px;top:12px;bottom:12px;width:2px;
-          background:repeating-linear-gradient(180deg,rgba(122,163,255,.5) 0 4px,transparent 4px 8px)}
+          background:repeating-linear-gradient(180deg,rgba(20,184,102,.45) 0 4px,transparent 4px 8px)}
 
-        .cat-secure{position:relative;overflow:hidden;background:rgba(0,0,0,.22);
-          border:1px solid rgba(122,163,255,.3);border-radius:12px;padding:11px 12px}
+        .cat-secure{position:relative;overflow:hidden;background:#f1f8f4;
+          border:1px solid rgba(8,90,60,.14);border-radius:12px;padding:11px 12px}
         .cat-secure::after{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;
-          background:linear-gradient(120deg,transparent,rgba(122,163,255,.35),transparent);
+          background:linear-gradient(120deg,transparent,rgba(20,184,102,.35),transparent);
           transform:skewX(-20deg);animation:cat-secureScan 3.2s ease-in-out infinite}
         .cat-secure:nth-child(2)::after{animation-delay:.6s}
         .cat-secure-v{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13.5px;font-weight:700;
-          letter-spacing:2.5px;color:#a8b8e8;filter:blur(3.2px);user-select:none}
+          letter-spacing:2.5px;color:#3a5a58;filter:blur(3.2px);user-select:none}
         .cat-lock-ic{animation:cat-lockPulse 2.2s ease-in-out infinite}
 
-        .cat-bid-toggle{position:relative;overflow:hidden;width:100%;display:flex;align-items:center;justify-content:center;
-          gap:8px;padding:11px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:#fff;
-          border:1.5px solid transparent;
-          background:linear-gradient(rgba(9,16,42,.9),rgba(9,16,42,.9)) padding-box,
-            linear-gradient(120deg,#4f8cff,#d9b54a,#4f8cff) border-box;
-          background-size:100% 100%,220% 220%;
-          box-shadow:0 8px 20px rgba(47,95,255,.25);
-          animation:cat-borderDrift 5s ease-in-out infinite;transition:transform .2s}
+        .cat-bid-toggle{position:relative;overflow:hidden;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 16px;border-radius:16px;font-size:14px;font-weight:700;color:#0b7a45;background:#fff;border:1.5px solid rgba(20,184,102,.45);transition:transform .2s}
         .cat-bid-toggle:active{transform:scale(.98)}
-        .cat-bid-toggle::after{content:'';position:absolute;top:0;left:-70%;width:35%;height:100%;
-          background:linear-gradient(120deg,transparent,rgba(255,255,255,.4),transparent);
-          transform:skewX(-20deg);animation:cat-ghostShine 4s ease-in-out infinite}
+        
         .cat-confirm{position:relative;overflow:hidden;width:100%;text-align:center;padding:15px 26px;
-          border-radius:999px;font-weight:700;font-size:14px;color:#fff;
-          background:linear-gradient(120deg,#2f5fff,#2450e0 60%,#4f8cff);
-          box-shadow:0 14px 32px rgba(47,95,255,.4);
+          border-radius:16px;font-weight:800;font-size:16px;color:#04261a;
+          background:linear-gradient(135deg,#14B866,#4FE8A0);
+          box-shadow:0 12px 26px -10px rgba(20,184,102,.6);
           display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .2s}
         .cat-confirm:active{transform:scale(.98)}
         .cat-confirm:disabled{opacity:.55;cursor:not-allowed}
         .cat-confirm::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
           background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);
           transform:skewX(-20deg);animation:cat-shine 3.4s ease-in-out infinite}
-        .cat-chip{font-size:11.5px;font-weight:700;color:#d9b54a;background:rgba(217,181,74,.12);
-          border:1px solid rgba(217,181,74,.35);padding:7px 14px;border-radius:999px;transition:transform .15s}
+        .cat-chip{font-size:11.5px;font-weight:700;color:#0b7a45;background:rgba(20,184,102,.1);
+          border:1px solid rgba(20,184,102,.35);padding:7px 14px;border-radius:999px;transition:transform .15s}
         .cat-chip:active{transform:scale(.94)}
         .cat-step{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-          background:rgba(122,163,255,.14);border:1.4px solid rgba(122,163,255,.4);color:#dbe6ff;transition:all .15s}
-        .cat-step:active{transform:scale(.9);background:rgba(122,163,255,.28)}
+          background:rgba(20,184,102,.1);border:1.4px solid rgba(20,184,102,.4);color:#0b7a45;transition:all .15s}
+        .cat-step:active{transform:scale(.9);background:rgba(20,184,102,.22)}
       `}</style>
 
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden text-white shadow-[0_0_80px_rgba(0,0,0,.7)] sm:animate-slide-in-right cat-frame"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-[440px] flex-col overflow-hidden text-[#08243f] shadow-[0_0_80px_rgba(0,0,0,.35)] sm:animate-slide-in-right cat-frame"
         style={{ fontFamily: "'Inter',sans-serif" }}
       >
         {/* Scrollable content */}
@@ -166,9 +148,9 @@ export function MissionDetailSheet({
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider"
                 style={{
-                  background: "rgba(122,163,255,.1)",
-                  border: "1px solid rgba(122,163,255,.35)",
-                  color: "#cddcff",
+                  background: "rgba(20,184,102,.1)",
+                  border: "1px solid rgba(20,184,102,.35)",
+                  color: "#3a5a58",
                 }}
               >
                 → {isAR ? "restitution et livraison" : "Livraison simple"}
@@ -176,9 +158,9 @@ export function MissionDetailSheet({
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider"
                 style={{
-                  background: "rgba(74,208,160,.1)",
-                  border: "1px solid rgba(74,208,160,.4)",
-                  color: "#4ad0a0",
+                  background: "rgba(20,184,102,.1)",
+                  border: "1px solid rgba(20,184,102,.4)",
+                  color: "#14B866",
                 }}
               >
                 Niveau {level}
@@ -187,9 +169,9 @@ export function MissionDetailSheet({
                 <span
                   className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-wider"
                   style={{
-                    background: "rgba(239,68,68,.14)",
+                    background: "rgba(239,68,68,.1)",
                     border: "1px solid rgba(239,68,68,.4)",
-                    color: "#fecaca",
+                    color: "#b42318",
                   }}
                 >
                   <Zap size={11} /> Urgent
@@ -199,10 +181,10 @@ export function MissionDetailSheet({
             <button
               onClick={onClose}
               aria-label="Fermer"
-              className="flex h-[38px] w-[38px] items-center justify-center rounded-xl text-white"
+              className="flex h-[38px] w-[38px] items-center justify-center rounded-xl text-[#08243f]"
               style={{
-                background: "rgba(255,255,255,.06)",
-                border: "1px solid rgba(122,163,255,.2)",
+                background: "#fff",
+                border: "1px solid rgba(20,184,102,.2)",
               }}
             >
               <X size={16} strokeWidth={2.4} />
@@ -216,12 +198,12 @@ export function MissionDetailSheet({
               style={{ fontFamily: "'Poppins',sans-serif" }}
             >
               {t.depart}
-              <span style={{ color: "#d9b54a", margin: "0 6px" }}>
+              <span style={{ color: "#0b7a45", margin: "0 6px" }}>
                 {isAR ? "↔" : "→"}
               </span>
               {t.arrivee}
             </div>
-            <div className="mt-1.5 text-[12.5px]" style={{ color: "#9aa6c9" }}>
+            <div className="mt-1.5 text-[12.5px]" style={{ color: "#6a867e" }}>
               Mission #{t.id.slice(0, 8).toUpperCase()}
             </div>
             <div className="mt-3.5">
@@ -239,21 +221,21 @@ export function MissionDetailSheet({
               <div className="cat-pay-inner">
                 <div
                   className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.1em]"
-                  style={{ color: "#d9b54a", position: "relative" }}
+                  style={{ color: "#0b7a45", position: "relative" }}
                 >
                   Rémunération convoyeur
                 </div>
                 <div className="flex items-baseline gap-2.5 relative">
                   <span
-                    className="text-[44px] font-extrabold text-white leading-none"
+                    className="text-[44px] font-extrabold text-[#08243f] leading-none"
                     style={{
                       fontFamily: "'Poppins',sans-serif",
-                      textShadow: "0 0 20px rgba(217,181,74,.35)",
+                      
                     }}
                   >
                     {suggested.toFixed(0)}
                   </span>
-                  <span className="text-[12.5px]" style={{ color: "#9aa6c9" }}>
+                  <span className="text-[12.5px]" style={{ color: "#6a867e" }}>
                     €
                   </span>
                 </div>
@@ -261,16 +243,16 @@ export function MissionDetailSheet({
                   <div
                     className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold"
                     style={{
-                      color: "#d9b54a",
-                      background: "rgba(217,181,74,.12)",
-                      border: "1px solid rgba(217,181,74,.35)",
+                      color: "#0b7a45",
+                      background: "rgba(20,184,102,.12)",
+                      border: "1px solid rgba(20,184,102,.35)",
                     }}
                   >
                     <span
                       className="cat-pulseD"
                       style={{
                         width: 6, height: 6, borderRadius: "50%",
-                        background: "#d9b54a", display: "inline-block",
+                        background: "#0b7a45", display: "inline-block",
                       }}
                     />
                     Contre-offre autorisée
@@ -283,7 +265,7 @@ export function MissionDetailSheet({
             <div className="cat-card">
               <div
                 className="mb-4 text-[11px] font-bold uppercase tracking-[0.1em]"
-                style={{ color: "#9aa6c9" }}
+                style={{ color: "#6a867e" }}
               >
                 Trajet
               </div>
@@ -306,12 +288,12 @@ export function MissionDetailSheet({
                       key: "Prise en charge du véhicule",
                       value: t.depart,
                       when: fmt(t.date_trajet, t.heure_trajet),
-                      dot: "#4ad0a0",
+                      dot: "#14B866",
                     },
                     {
                       key: "Livraison du véhicule",
                       value: t.arrivee,
-                      when: "",
+                      when: livraisonLabel ?? "",
                       dot: "#4f8cff",
                     },
                     ...(isAR
@@ -323,7 +305,7 @@ export function MissionDetailSheet({
                               retourLeg?.date_trajet,
                               retourLeg?.heure_trajet,
                             ),
-                            dot: "#d9b54a",
+                            dot: "#0b7a45",
                           },
                         ]
                       : []),
@@ -344,7 +326,7 @@ export function MissionDetailSheet({
                     <div className="min-w-0 flex-1">
                       <div
                         className="mb-0.5 text-[10.5px] uppercase tracking-wider"
-                        style={{ color: "#9aa6c9" }}
+                        style={{ color: "#6a867e" }}
                       >
                         {row.key}
                       </div>
@@ -357,14 +339,14 @@ export function MissionDetailSheet({
                       {row.when && (
                         <div
                           className="mt-1 text-[11.5px] font-semibold"
-                          style={{ color: "#d9b54a" }}
+                          style={{ color: "#0b7a45" }}
                         >
                           {row.when}
                         </div>
                       )}
                       <div
                         className="mt-1.5 flex items-center gap-1.5 text-[11.5px]"
-                        style={{ color: "#9aa6c9" }}
+                        style={{ color: "#6a867e" }}
                       >
                         <User size={12} style={{ color: "#4f8cff" }} />
                         Contact sur place communiqué à l'acceptation
@@ -413,16 +395,16 @@ export function MissionDetailSheet({
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div
                     className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em]"
-                    style={{ color: "#d9b54a" }}
+                    style={{ color: "#0b7a45" }}
                   >
                     <ArrowLeftRight size={15} /> Mission liée
                   </div>
                   <span
                     className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
                     style={{
-                      background: "rgba(217,181,74,.13)",
-                      border: "1px solid rgba(217,181,74,.36)",
-                      color: "#fde68a",
+                      background: "rgba(20,184,102,.13)",
+                      border: "1px solid rgba(20,184,102,.36)",
+                      color: "#0b7a45",
                     }}
                   >
                     <FileCheck2 size={11} /> 2 EDL
@@ -437,28 +419,28 @@ export function MissionDetailSheet({
                         key={`${leg.id}-${index}`}
                         className="rounded-2xl px-3.5 py-3"
                         style={{
-                          background: "rgba(0,0,0,.2)",
-                          border: "1px solid rgba(122,163,255,.16)",
+                          background: "#f1f8f4",
+                          border: "1px solid rgba(8,90,60,.12)",
                         }}
                       >
                         <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#cddcff" }}>
+                          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#3a5a58" }}>
                             {label}
                           </span>
                           {typeof amount === "number" && (
-                            <span className="text-[11px] font-bold" style={{ color: "#d9b54a" }}>
+                            <span className="text-[11px] font-bold" style={{ color: "#0b7a45" }}>
                               {amount.toFixed(0)} €
                             </span>
                           )}
                         </div>
-                        <div className="text-[13px] font-semibold leading-snug" style={{ color: "#eef3ff" }}>
-                          {leg.depart} <span style={{ color: "#d9b54a" }}>→</span> {leg.arrivee}
+                        <div className="text-[13px] font-semibold leading-snug" style={{ color: "#08243f" }}>
+                          {leg.depart} <span style={{ color: "#0b7a45" }}>→</span> {leg.arrivee}
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                <div className="mt-3 flex items-start gap-2 text-[12px]" style={{ color: "#9aa6c9" }}>
+                <div className="mt-3 flex items-start gap-2 text-[12px]" style={{ color: "#6a867e" }}>
                   <Info size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#4f8cff" }} />
                   Une seule candidature pour la mission complète ; deux états des lieux seront réalisés séparément.
                 </div>
@@ -469,7 +451,7 @@ export function MissionDetailSheet({
             <div className="cat-card">
               <div
                 className="mb-4 text-[11px] font-bold uppercase tracking-[0.1em]"
-                style={{ color: "#9aa6c9" }}
+                style={{ color: "#6a867e" }}
               >
                 Véhicule
               </div>
@@ -477,11 +459,11 @@ export function MissionDetailSheet({
                 <span
                   className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl flex-shrink-0"
                   style={{
-                    background: "linear-gradient(135deg,rgba(217,181,74,.18),rgba(217,181,74,.05))",
-                    border: "1px solid rgba(217,181,74,.35)",
+                    background: "linear-gradient(135deg,rgba(20,184,102,.18),rgba(20,184,102,.05))",
+                    border: "1px solid rgba(20,184,102,.35)",
                   }}
                 >
-                  <Car size={24} style={{ color: "#d9b54a" }} />
+                  <Car size={24} style={{ color: "#0b7a45" }} />
                 </span>
                 <div>
                   <div
@@ -494,7 +476,7 @@ export function MissionDetailSheet({
                       force={isElectricEnergie(t.type_carburant) || guessElectricFromModel(t.marque, t.modele)}
                     />
                   </div>
-                  <div className="mt-0.5 text-[12px]" style={{ color: "#9aa6c9" }}>
+                  <div className="mt-0.5 text-[12px]" style={{ color: "#6a867e" }}>
                     {t.type_carburant ?? "Détails communiqués à l'acceptation"}
                   </div>
                 </div>
@@ -503,7 +485,7 @@ export function MissionDetailSheet({
               {/* Identification sécurisée */}
               <div
                 className="mt-3.5 pt-3.5"
-                style={{ borderTop: "1px solid rgba(122,163,255,.16)" }}
+                style={{ borderTop: "1px solid rgba(8,90,60,.12)" }}
               >
                 <div
                   className="mb-3 flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-wider"
@@ -516,7 +498,7 @@ export function MissionDetailSheet({
                   <div className="cat-secure">
                     <div
                       className="mb-1.5 text-[9px] uppercase tracking-wider"
-                      style={{ color: "#9aa6c9" }}
+                      style={{ color: "#6a867e" }}
                     >
                       Plaque
                     </div>
@@ -525,7 +507,7 @@ export function MissionDetailSheet({
                   <div className="cat-secure">
                     <div
                       className="mb-1.5 text-[9px] uppercase tracking-wider"
-                      style={{ color: "#9aa6c9" }}
+                      style={{ color: "#6a867e" }}
                     >
                       N° VIN
                     </div>
@@ -540,7 +522,7 @@ export function MissionDetailSheet({
                     className="cat-lock-ic flex h-[22px] w-[22px] items-center justify-center rounded-full flex-shrink-0"
                     style={{
                       background: "rgba(63,123,255,.16)",
-                      border: "1px solid rgba(122,163,255,.4)",
+                      border: "1px solid rgba(20,184,102,.4)",
                     }}
                   >
                     <ShieldCheck size={11} />
@@ -554,7 +536,7 @@ export function MissionDetailSheet({
             <div className="cat-card">
               <div
                 className="mb-4 text-[11px] font-bold uppercase tracking-[0.1em]"
-                style={{ color: "#9aa6c9" }}
+                style={{ color: "#6a867e" }}
               >
                 Documents &amp; informations utiles
               </div>
@@ -567,15 +549,15 @@ export function MissionDetailSheet({
                 "Téléphone chargé (état des lieux photo + signature)",
                 "Application Ligneo à jour pour scanner clés & documents",
               ].map((line) => (
-                <div key={line} className="mb-3 flex items-start gap-2.5 text-[13px] leading-snug" style={{ color: "#e4e9f7" }}>
+                <div key={line} className="mb-3 flex items-start gap-2.5 text-[13px] leading-snug" style={{ color: "#08243f" }}>
                   <span
                     className="mt-1.5 flex-shrink-0"
-                    style={{ width: 7, height: 7, borderRadius: "50%", background: "#d9b54a" }}
+                    style={{ width: 7, height: 7, borderRadius: "50%", background: "#0b7a45" }}
                   />
                   {line}
                 </div>
               ))}
-              <div className="flex items-start gap-2.5 text-[12px] italic" style={{ color: "#9aa6c9" }}>
+              <div className="flex items-start gap-2.5 text-[12px] italic" style={{ color: "#6a867e" }}>
                 <Info size={14} className="mt-0.5 flex-shrink-0" style={{ color: "#4f8cff" }} />
                 Respect strict du protocole d'inspection au départ et à l'arrivée.
               </div>
@@ -594,10 +576,10 @@ export function MissionDetailSheet({
         <div
           className="relative z-20 shrink-0 max-h-[70dvh] overflow-y-auto px-[18px] pt-4"
           style={{
-            background: "rgba(10,18,44,.97)",
+            background: "rgba(255,255,255,.97)",
             backdropFilter: "blur(18px)",
-            borderTop: "1px solid rgba(122,163,255,.3)",
-            boxShadow: "0 -10px 30px rgba(4,8,22,.5)",
+            borderTop: "1px solid rgba(8,90,60,.14)",
+            boxShadow: "0 -10px 30px rgba(8,90,60,.12)",
             paddingBottom: "calc(18px + env(safe-area-inset-bottom))",
           }}
         >
@@ -614,8 +596,8 @@ export function MissionDetailSheet({
                   <Coins
                     size={15}
                     style={{
-                      color: "#d9b54a",
-                      filter: "drop-shadow(0 0 4px rgba(217,181,74,.6))",
+                      color: "#0b7a45",
+                      
                     }}
                   />
                   Faire une contre-offre
@@ -644,30 +626,30 @@ export function MissionDetailSheet({
                   <div
                     className="rounded-2xl p-4"
                     style={{
-                      background: "rgba(0,0,0,.2)",
-                      border: "1px solid rgba(122,163,255,.25)",
+                      background: "#f1f8f4",
+                      border: "1px solid rgba(20,184,102,.25)",
                     }}
                   >
                     <div className="mb-3.5 flex items-center justify-between">
                       <span
                         className="text-[10.5px] font-bold uppercase tracking-wider"
-                        style={{ color: "#9aa6c9" }}
+                        style={{ color: "#6a867e" }}
                       >
                         Votre contre-offre
                       </span>
                       <span
                         className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9.5px] font-bold"
                         style={{
-                          color: "#d9b54a",
-                          background: "rgba(217,181,74,.14)",
-                          border: "1px solid rgba(217,181,74,.35)",
+                          color: "#0b7a45",
+                          background: "rgba(20,184,102,.14)",
+                          border: "1px solid rgba(20,184,102,.35)",
                         }}
                       >
                         <span
                           className="cat-pulseD"
                           style={{
                             width: 5, height: 5, borderRadius: "50%",
-                            background: "#d9b54a", display: "inline-block",
+                            background: "#0b7a45", display: "inline-block",
                           }}
                         />
                         Enchère activée
@@ -684,16 +666,16 @@ export function MissionDetailSheet({
                       </button>
                       <div className="text-center">
                         <div
-                          className="text-[32px] font-extrabold leading-none text-white"
+                          className="text-[32px] font-extrabold leading-none text-[#08243f]"
                           style={{
                             fontFamily: "'Poppins',sans-serif",
-                            textShadow: "0 0 18px rgba(217,181,74,.35)",
+                            
                           }}
                         >
                           {bidPrice}
                           <span
                             className="ml-1 text-[19px]"
-                            style={{ color: "#d9b54a" }}
+                            style={{ color: "#0b7a45" }}
                           >
                             €
                           </span>
@@ -710,12 +692,12 @@ export function MissionDetailSheet({
 
                     <div
                       className="mb-3.5 text-center text-[11px]"
-                      style={{ color: "#9aa6c9" }}
+                      style={{ color: "#6a867e" }}
                     >
                       Tarif de base <b>{suggested} €</b> · votre offre{" "}
                       <span
                         style={{
-                          color: delta === 0 ? "#9aa6c9" : delta > 0 ? "#4ad0a0" : "#fca5a5",
+                          color: delta === 0 ? "#6a867e" : delta > 0 ? "#14B866" : "#b42318",
                           fontWeight: 700,
                         }}
                       >
@@ -747,9 +729,9 @@ export function MissionDetailSheet({
                 placeholder="Message pour l'admin (facultatif)…"
                 className="mb-3 w-full rounded-2xl px-3.5 py-[11px] text-[12.5px] italic outline-none"
                 style={{
-                  background: "rgba(0,0,0,.24)",
-                  border: "1px solid rgba(122,163,255,.22)",
-                  color: "#dbe6ff",
+                  background: "#f1f8f4",
+                  border: "1px solid rgba(20,184,102,.22)",
+                  color: "#08243f",
                 }}
               />
 
@@ -760,16 +742,12 @@ export function MissionDetailSheet({
                 disabled={submitting}
                 className="cat-confirm"
               >
-                {submitting ? (
-                  <Loader2 size={17} strokeWidth={2.6} className="animate-spin" />
-                ) : (
-                  <Check size={17} strokeWidth={2.6} />
-                )}
-                Confirmer la mission
+                {!submitting && <Check size={17} strokeWidth={2.6} />}
+                {submitting ? "Envoi en cours…" : bidOpen && allowBid ? "Envoyer ma contre-offre" : "Accepter la mission"}
               </button>
               <div
                 className="mt-2 text-center text-[10.5px]"
-                style={{ color: "#9aa6c9" }}
+                style={{ color: "#6a867e" }}
               >
                 Vous serez notifié dès validation par l'admin
               </div>
@@ -778,9 +756,9 @@ export function MissionDetailSheet({
             <div
               className="rounded-2xl p-3.5 text-center text-[12px]"
               style={{
-                background: "rgba(217,181,74,.1)",
-                border: "1px solid rgba(217,181,74,.35)",
-                color: "#fef3c7",
+                background: "rgba(20,184,102,.1)",
+                border: "1px solid rgba(20,184,102,.35)",
+                color: "#0b7a45",
               }}
             >
               Terminez votre formation et faites valider vos documents pour
@@ -798,13 +776,13 @@ function TripStat({ k, v }: { k: string; v: string }) {
     <div
       className="rounded-xl text-center px-2 py-2.5"
       style={{
-        background: "rgba(0,0,0,.18)",
-        border: "1px solid rgba(122,163,255,.16)",
+        background: "#f1f8f4",
+        border: "1px solid rgba(8,90,60,.12)",
       }}
     >
       <div
         className="mb-1 text-[9px] uppercase tracking-wider"
-        style={{ color: "#9aa6c9" }}
+        style={{ color: "#6a867e" }}
       >
         {k}
       </div>
@@ -825,8 +803,8 @@ function DtField({
     <div
       className="flex items-center gap-2.5 rounded-2xl px-3.5 py-3"
       style={{
-        background: "rgba(0,0,0,.2)",
-        border: "1px solid rgba(122,163,255,.16)",
+        background: "#f1f8f4",
+        border: "1px solid rgba(8,90,60,.12)",
       }}
     >
       <span style={{ color: "#4f8cff" }} className="flex-shrink-0">
@@ -835,7 +813,7 @@ function DtField({
       <div>
         <div
           className="text-[10px] uppercase tracking-wider"
-          style={{ color: "#9aa6c9" }}
+          style={{ color: "#6a867e" }}
         >
           {k}
         </div>

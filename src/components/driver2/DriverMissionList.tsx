@@ -4,6 +4,7 @@ import { isElectricVehicle } from "@/lib/vehicule-electrique";
 import { resolveMissionStatus, type MissionCardData } from "@/components/convoyeur/MissionCard";
 import { displayNumero } from "@/lib/mission-number";
 import { LgBadge } from "@/components/ui/LgBadge";
+import { useLivraisonTimes, livraisonLabel } from "@/lib/livraison-times";
 
 const STATUS: Record<string, { label: string; tone: string; color?: string }> = {
   propose: { label: "Proposée", tone: "amber", color: "#00AEEF" },
@@ -43,6 +44,7 @@ export function DriverMissionList({
   activeId: string | null;
   onOpen: (id: string) => void;
 }) {
+  const livTimes = useLivraisonTimes(missions.map((m) => (m as { trajet_id?: string | null }).trajet_id));
   const groups: { key: string; date: string | null; items: Item[] }[] = [];
   for (const m of missions) {
     const date = m.trajet?.date_trajet ?? null;
@@ -89,8 +91,8 @@ export function DriverMissionList({
                   <div className="dml-route">
                     <span className="dml-rail"><i className="a" /><u /><i className="b" /></span>
                     <div className="dml-addrs">
-                      <p><small>Départ</small>{t?.depart ?? "—"}</p>
-                      <p><small>Arrivée</small>{t?.arrivee ?? "—"}</p>
+                      <p><small>Départ{t?.heure_trajet && <em className="dml-hh">{hhmm(t.heure_trajet)}</em>}</small>{t?.depart ?? "—"}</p>
+                      <p><small>Arrivée{(() => { const lv = livraisonLabel(livTimes[(m as { trajet_id?: string | null }).trajet_id ?? ""], t?.date_trajet); return lv ? <em className="dml-hh">{lv}</em> : null; })()}</small>{t?.arrivee ?? "—"}</p>
                     </div>
                   </div>
 

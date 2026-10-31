@@ -16,7 +16,7 @@ interface Props {
  */
 export function PublishToCatalogueButton({ trajetId, onDone, variant = "button", label = "Publier au catalogue" }: Props) {
   const [open, setOpen] = useState(false);
-  const [allowCounter, setAllowCounter] = useState(true);
+  const [allowCounter, setAllowCounter] = useState(false);
   const [expiresH, setExpiresH] = useState(168);
   const [busy, setBusy] = useState(false);
   const [equip, setEquip] = useState<string[]>([]);

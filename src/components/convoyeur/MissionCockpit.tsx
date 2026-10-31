@@ -305,9 +305,13 @@ export function MissionCockpit({
   const baseDef = STEPS[currentIdx] ?? STEPS[0];
   const isDone = currentKey === "done";
   const isValidated = ["validee", "termine"].includes(statut);
+  // Avant d'appuyer sur « En route », la mission n'est pas commencée : on ne dit pas « En route ».
+  const notStarted = currentKey === "demarrer" && !isValidated;
   const currentDef = isValidated
     ? { ...baseDef, short: "Validée", label: "Mission validée par l'admin", cta: "Mission validée", hint: "L'admin a validé votre dossier. Merci !" }
-    : baseDef;
+    : notStarted
+      ? { ...baseDef, short: "À démarrer", label: "Prêt à démarrer", hint: "Touchez le bouton quand vous partez récupérer le véhicule." }
+      : baseDef;
 
   useEffect(() => {
     const e = normalizedEtape;
