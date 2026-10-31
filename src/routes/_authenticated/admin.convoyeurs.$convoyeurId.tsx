@@ -53,7 +53,6 @@ import {
   AdminSection,
   AdminField,
   AdminBadge,
-  AdminStatCard,
   AdminEmpty,
 } from "@/components/admin/ui";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -503,6 +502,8 @@ function AdminConvoyeurDetail() {
   const docsApprouves = requiredDocs.filter((spec) =>
     docs.some((doc) => normalizeConvoyeurDocType(doc.type_document) === spec.key && isConvoyeurDocApproved(doc.statut_validation)),
   ).length;
+  const clesRequises = new Set(requiredDocs.map((d) => d.key));
+  const docsEnPlus = docs.filter((d) => !clesRequises.has(normalizeConvoyeurDocType(d.type_document))).length;
   const revenus = attribs
     .filter((a) => ["terminee", "livree"].includes(a.statut))
     .reduce((sum, a) => sum + (a.trajet?.tarif_convoyeur ?? 0), 0);
@@ -604,26 +605,40 @@ function AdminConvoyeurDetail() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <AdminStatCard label="Missions totales" value={attribs.length} icon={Truck} />
-        <AdminStatCard label="Terminées" value={terminees} icon={CheckCircle} accent="success" />
-        <AdminStatCard
-          label="Documents approuvés"
-          value={`${docsApprouves} / ${requiredDocs.length}`}
-          icon={FileBadge}
-          accent={docsApprouves === requiredDocs.length ? "success" : "warning"}
-        />
-        {conv.type_convoyeur === "independant" && (
-          <AdminStatCard label="Revenus générés" value={`${revenus.toFixed(0)} €`} icon={Euro} accent="success" />
-        )}
-        <AdminStatCard label="Jours dispo (à venir)" value={prochainesDispos} icon={CalendarDays} />
-      </div>
+      {/* Chiffres clés : mêmes compteurs que le centre de validation (documents obligatoires) */}
+      {(() => {
+        const docsOk = docsApprouves === requiredDocs.length;
+        const pctDocs = requiredDocs.length ? Math.round((docsApprouves / requiredDocs.length) * 100) : 0;
+        const pctTerm = attribs.length ? Math.round((terminees / attribs.length) * 100) : 0;
+        const Kpi = ({ tone, label, icon: I, children, sub, pct }: { tone: string; label: string; icon: typeof Truck; children: React.ReactNode; sub?: string; pct?: number }) => (
+          <div className={`cvx-kpi ${tone}`}>
+            <div className="cvx-kpi-top"><span className="cvx-kpi-lbl">{label}</span><span className="cvx-kpi-ic"><I size={18} /></span></div>
+            <div className="cvx-kpi-val">{children}</div>
+            {sub && <div className="cvx-kpi-sub">{sub}</div>}
+            {pct !== undefined && <div className="cvx-kpi-bar"><i style={{ width: `${pct}%` }} /></div>}
+          </div>
+        );
+        return (
+          <div className="cvx-kpis">
+            <Kpi tone="cvx-blue" label="Missions" icon={Truck} sub={attribs.length ? `${attribs.length - terminees} en cours ou à venir` : "Aucune mission pour l'instant"}>{attribs.length}</Kpi>
+            <Kpi tone="cvx-green" label="Terminées" icon={CheckCircle} pct={pctTerm} sub={attribs.length ? `${pctTerm} % des missions` : undefined}>{terminees}</Kpi>
+            <Kpi tone={docsOk ? "cvx-green" : "cvx-amber"} label="Documents validés" icon={FileBadge} pct={pctDocs}
+              sub={(docsOk ? "Dossier complet" : `${requiredDocs.length - docsApprouves} à valider ou à déposer`) + (docsEnPlus ? ` · +${docsEnPlus} en plus` : "")}>
+              {docsApprouves}<small>/ {requiredDocs.length}</small>
+            </Kpi>
+            {conv.type_convoyeur === "independant" && (
+              <Kpi tone="cvx-violet" label="Revenus générés" icon={Euro} sub="Missions terminées">{revenus.toFixed(0)}<small>€</small></Kpi>
+            )}
+            <Kpi tone="cvx-blue" label="Jours disponibles" icon={CalendarDays} sub="À venir">{prochainesDispos}</Kpi>
+          </div>
+        );
+      })()}
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-slate-100/70 p-1 rounded-xl">
           <TabsTrigger value="overview" className="gap-1.5"><User size={14} /> Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="missions" className="gap-1.5"><Truck size={14} /> Missions ({attribs.length})</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/{requiredDocs.length})</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileBadge size={14} /> Documents ({docsApprouves}/{requiredDocs.length}{docsEnPlus ? ` +${docsEnPlus}` : ""})</TabsTrigger>
           <TabsTrigger value="communication" className="gap-1.5"><Megaphone size={14} /> Emails & push</TabsTrigger>
           <TabsTrigger value="messages" className="gap-1.5">
             <MessageSquare size={14} className={msgCount > 0 ? "text-[#6effcd] drop-shadow-[0_0_6px_rgba(110,255,205,0.9)]" : ""} />

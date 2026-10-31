@@ -9,7 +9,8 @@ export interface ConvoyeurDocSpec {
 }
 
 export const CONVOYEUR_DOC_TYPES: ConvoyeurDocSpec[] = [
-  { key: "permis", label: "Permis de conduire", required: true },
+  { key: "permis", label: "Permis de conduire (recto)", required: true, hint: "Le devant du permis, en entier et lisible." },
+  { key: "permis_verso", label: "Permis de conduire (verso)", required: true, hint: "Le dos du permis, avec les catégories et dates." },
   { key: "identite", label: "Pièce d'identité (CNI recto)", required: true },
   { key: "identite_verso", label: "Pièce d'identité (CNI verso)", required: true },
   { key: "rib", label: "RIB", required: true },
@@ -26,7 +27,7 @@ const DOC_ALIASES: Record<string, string> = {
   identite_recto: "identite",
   carte_identite: "identite",
   permis_recto: "permis",
-  permis_verso: "permis",
+  permis_dos: "permis_verso",
   permis_photo: "permis",
   rc_pro: "assurance",
   assurance_rc_pro: "assurance",

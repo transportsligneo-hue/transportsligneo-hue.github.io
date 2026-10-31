@@ -7,17 +7,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Bell, Loader2, CheckCheck, Search, Inbox, AlertTriangle, Clock, Check, X,
+  Bell, Loader2, CheckCheck, Search, Inbox, AlertTriangle, Clock, Check, X, Phone, Mail, ArrowRight,
 } from "lucide-react";
+import { PlateBadge } from "@/components/plate/PlateBadge";
+import { useNotifContexte, type NotifContexte } from "@/lib/admin-notification-contexte";
 import { toast } from "sonner";
-import { ClientLogo } from "@/components/admin/ClientLogo";
 import { NotificationSettingsPanel } from "@/components/admin/NotificationSettingsPanel";
 import {
   AdminPageHeader, AdminSection, AdminStatCard, AdminEmpty,
 } from "@/components/admin/ui";
 import {
-  NOTIF_CATEGORIES, TONE_CLASSES, dayLabel, notifMeta, relativeTime,
-  type NotifCategoryKey,
+  FAMILLES, dayLabel, familleOf, notifMeta, relativeTime,
+  type NotifFamille,
 } from "@/lib/admin-notification-taxonomy";
 
 export const Route = createFileRoute("/_authenticated/admin/notifications")({
@@ -37,7 +38,7 @@ interface Notification {
   created_at: string;
 }
 
-type CatFilter = "all" | NotifCategoryKey;
+type CatFilter = "all" | NotifFamille;
 
 function AdminNotifications() {
   const [items, setItems] = useState<Notification[]>([]);
@@ -67,6 +68,9 @@ function AdminNotifications() {
     return () => { void supabase.removeChannel(channel); };
   }, [fetchData]);
 
+  // noms, téléphones, missions, trajets, plaques, montants des notifications
+  const ctx = useNotifContexte(items);
+
   /* ---------- compteurs ---------- */
   const stats = useMemo(() => {
     const unread = items.filter((n) => !n.lu);
@@ -81,7 +85,7 @@ function AdminNotifications() {
     for (const n of items) {
       if (onlyUnread && n.lu) continue;
       map.all += 1;
-      const c = notifMeta(n.type).category;
+      const c = familleOf(n).key;
       map[c] = (map[c] ?? 0) + 1;
     }
     return map;
@@ -91,15 +95,13 @@ function AdminNotifications() {
     const q = search.trim().toLowerCase();
     return items.filter((n) => {
       if (onlyUnread && n.lu) return false;
-      if (category !== "all" && notifMeta(n.type).category !== category) return false;
+      if (category !== "all" && familleOf(n).key !== category) return false;
       if (!q) return true;
-      return (
-        n.titre.toLowerCase().includes(q) ||
-        (n.message ?? "").toLowerCase().includes(q) ||
-        notifMeta(n.type).label.toLowerCase().includes(q)
-      );
+      const c = ctx[n.id];
+      return [n.titre, n.message, notifMeta(n.type).label, c?.qui, c?.email, c?.telephone, c?.plaque, ...(c?.details ?? []).map((d) => d.value)]
+        .some((v) => String(v ?? "").toLowerCase().includes(q));
     });
-  }, [items, category, onlyUnread, search]);
+  }, [items, category, onlyUnread, search, ctx]);
 
   const grouped = useMemo(() => {
     const groups: { label: string; rows: Notification[] }[] = [];
@@ -211,27 +213,17 @@ function AdminNotifications() {
               </div>
             </div>
 
-            {/* Familles */}
-            <div className="mt-3 flex flex-wrap gap-1.5 border-t border-[color:var(--admin-border)] pt-3">
-              {([{ key: "all" as const, label: "Tout", icon: Inbox }, ...NOTIF_CATEGORIES]).map((c) => {
-                const count = countsByCategory[c.key] ?? 0;
-                const active = category === c.key;
-                if (c.key !== "all" && count === 0 && !active) return null;
+            {/* Familles : une couleur par sujet */}
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-[color:var(--admin-border)] pt-3">
+              {([{ key: "all" as const, label: "Tout", c1: "#2f5fff", c2: "#5de0ff", soft: "#ebf0ff", ink: "#1f3fcc" }, ...FAMILLES]).map((f) => {
+                const count = countsByCategory[f.key] ?? 0;
+                const active = category === f.key;
+                if (f.key !== "all" && count === 0 && !active) return null;
                 return (
-                  <button
-                    key={c.key}
-                    onClick={() => setCategory(c.key as CatFilter)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
-                      active
-                        ? "bg-[#2F5FFF] text-white border-[#2F5FFF]"
-                        : "border-[color:var(--admin-border)] text-[color:var(--admin-text-soft)] hover:border-[#2F5FFF]"
-                    }`}
-                  >
-                    <c.icon size={13} />
-                    {c.label}
-                    <span className={`rounded-full px-1.5 text-[10px] tabular-nums ${active ? "bg-white/20" : "bg-[color:var(--admin-bg-soft)]"}`}>
-                      {count}
-                    </span>
+                  <button key={f.key} onClick={() => setCategory(f.key as CatFilter)}
+                    className={`ntf-fam${active ? " on" : ""}`}
+                    style={{ ["--c1" as string]: f.c1, ["--c2" as string]: f.c2, ["--soft" as string]: f.soft, ["--ink" as string]: f.ink }}>
+                    <i aria-hidden />{f.label}<b>{count}</b>
                   </button>
                 );
               })}
@@ -256,9 +248,9 @@ function AdminNotifications() {
                         <span className="h-px flex-1 bg-[color:var(--admin-border)]" />
                         <span className="text-[11px] text-[color:var(--admin-muted)] tabular-nums">{g.rows.length}</span>
                       </div>
-                      <ul className="rounded-xl border border-[color:var(--admin-border)] overflow-hidden divide-y divide-[color:var(--admin-border)]">
+                      <ul className="space-y-2.5">
                         {g.rows.map((n) => (
-                          <NotifRow key={n.id} n={n} onToggleRead={(lu) => void markRead([n.id], lu)} />
+                          <NotifRow key={n.id} n={n} c={ctx[n.id]} onToggleRead={(lu) => void markRead([n.id], lu)} onOpen={async () => { if (!n.lu) await markRead([n.id]); }} />
                         ))}
                       </ul>
                     </div>
@@ -273,61 +265,52 @@ function AdminNotifications() {
   );
 }
 
-function NotifRow({ n, onToggleRead }: { n: Notification; onToggleRead: (lu: boolean) => void }) {
+function NotifRow({ n, c, onToggleRead, onOpen }: { n: Notification; c?: NotifContexte; onToggleRead: (lu: boolean) => void; onOpen: () => Promise<void> }) {
   const meta = notifMeta(n.type);
-  const tone = TONE_CLASSES[meta.tone];
+  const f = familleOf(n);
   const Icon = meta.icon;
-  const m = (n.metadata ?? {}) as Record<string, any>;
-  const logo = (m.clientLogoUrl || m.logo_url || m.orgLogoUrl) as string | undefined;
-  const brand = (m.clientName || m.societe || m.nom_complet || m.orgName || m.client) as string | undefined;
+  const initiales = (c?.qui ?? "").split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0]?.toUpperCase()).join("");
+  const role = c?.role === "convoyeur" ? "Convoyeur" : c?.role === "client" ? "Client" : c?.role === "visiteur" ? "Visiteur" : null;
 
   return (
-    <li
-      className={`group flex items-start gap-3 px-4 py-3 transition-colors ${
-        n.lu ? "bg-[color:var(--admin-surface)]" : "bg-[#2F5FFF]/[0.035]"
-      } hover:bg-[color:var(--admin-bg-soft)]`}
-    >
-      <span className="relative shrink-0 mt-0.5">
-        {logo || brand ? (
-          <ClientLogo src={logo} name={brand} size="md" />
-        ) : (
-          <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border ${tone.chip}`}>
-            <Icon size={16} />
-          </span>
-        )}
-        {!n.lu && <span className={`absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white ${tone.dot}`} />}
+    <li className={`ntf-card${n.lu ? " lu" : ""}`}
+      style={{ ["--c1" as string]: f.c1, ["--c2" as string]: f.c2, ["--soft" as string]: f.soft, ["--ink" as string]: f.ink }}>
+      <span className="ntf-av">
+        {c?.avatar ? <img src={c.avatar} alt="" /> : initiales ? <em>{initiales}</em> : <Icon size={18} />}
+        {!n.lu && <span className="ntf-dot" aria-label="Non lue" />}
       </span>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tone.chip}`}>
-            {meta.label}
-          </span>
-          <span className="text-[11px] text-[color:var(--admin-muted)]" title={new Date(n.created_at).toLocaleString("fr-FR")}>
-            {relativeTime(n.created_at)}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="ntf-chip">{f.label}</span>
+          <span className="ntf-type">{meta.label}</span>
+          <span className="ntf-time" title={new Date(n.created_at).toLocaleString("fr-FR")}>
+            {relativeTime(n.created_at)} · {new Date(n.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>
-        <p className={`text-sm mt-1 ${n.lu ? "font-medium text-[color:var(--admin-text-soft)]" : "font-semibold text-[color:var(--admin-text)]"}`}>
-          {n.titre}
-        </p>
-        {n.message && <p className="text-[13px] text-[color:var(--admin-muted)] mt-0.5 whitespace-pre-line">{n.message}</p>}
+        <p className="ntf-title">{n.titre}</p>
+        {c?.qui && (
+          <p className="ntf-who">
+            {c.qui}{role && <span className="ntf-role">{role}</span>}
+          </p>
+        )}
+        {n.message && <p className="ntf-msg">{n.message}</p>}
+        {(c?.details.length || c?.plaque || c?.telephone || c?.email) ? (
+          <div className="ntf-meta">
+            {c?.plaque && <PlateBadge plate={c.plaque} size="sm" />}
+            {c?.details.map((d) => <span key={d.label + d.value} className="ntf-pill"><small>{d.label}</small>{d.value}</span>)}
+            {c?.telephone && <a href={`tel:${c.telephone.replace(/\s/g, "")}`} className="ntf-pill ntf-link"><Phone size={12} />{c.telephone}</a>}
+            {c?.email && <a href={`mailto:${c.email}`} className="ntf-pill ntf-link"><Mail size={12} />{c.email}</a>}
+          </div>
+        ) : null}
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 self-center">
+      <div className="ntf-actions">
         {n.link && n.link.startsWith("/") && (
-          <a
-            href={n.link}
-            className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-[#2F5FFF] hover:bg-[#2F5FFF]/10 whitespace-nowrap"
-          >
-            Ouvrir
-          </a>
+          <a href={n.link} onClick={(e) => { e.preventDefault(); const to = n.link!; void onOpen().finally(() => window.location.assign(to)); }} className="ntf-open">Ouvrir <ArrowRight size={14} /></a>
         )}
-        <button
-          onClick={() => onToggleRead(!n.lu)}
-          title={n.lu ? "Marquer comme non lue" : "Marquer comme lue"}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[color:var(--admin-muted)] hover:bg-[color:var(--admin-bg-soft)] hover:text-[color:var(--admin-text)]"
-        >
-          {n.lu ? <Bell size={14} /> : <Check size={15} />}
+        <button onClick={() => onToggleRead(!n.lu)} title={n.lu ? "Marquer comme non lue" : "Marquer comme lue"} className="ntf-read">
+          {n.lu ? <Bell size={15} /> : <Check size={16} />}
         </button>
       </div>
     </li>
