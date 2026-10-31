@@ -6,9 +6,10 @@ import { AlertTriangle, ArrowRight, ShieldCheck } from "lucide-react";
 import { useMissionAlerts } from "@/hooks/useMissionAlerts";
 import { SEVERITY_META, alertTypeLabel, sinceLabel } from "@/lib/mission-alerts";
 
-export function MissionsAtRiskWidget({ limit = 4 }: { limit?: number }) {
+export function MissionsAtRiskWidget({ limit = 4, hideWhenEmpty = false }: { limit?: number; hideWhenEmpty?: boolean }) {
   const { alerts, counts, loading } = useMissionAlerts("active");
   const top = alerts.slice(0, limit);
+  if (hideWhenEmpty && (loading || top.length === 0)) return null;
 
   return (
     <div className="a6-card p-5">

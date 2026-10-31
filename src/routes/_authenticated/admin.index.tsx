@@ -3,13 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   FileText,
-  Route as RouteIcon,
   Users,
   Truck,
   ArrowRight,
   Receipt,
   Briefcase,
-  ClipboardList,
   ChevronRight,
   AlertCircle,
   UserCheck,
@@ -21,15 +19,11 @@ import {
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
-import {
-  AdminBadge,
-  AdminSection,
-  AdminEmpty,
-} from "@/components/admin/ui";
+import { AdminBadge } from "@/components/admin/ui";
 import { ExploitationOverview } from "@/components/admin/dashboard/ExploitationOverview";
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
-import { PageHeader } from "@/components/admin/AdminUI";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { SmsCreditsCard } from "@/components/admin/SmsCreditsCard";
 import { ApiUsageCards } from "@/components/admin/ApiUsageCards";
 import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
@@ -254,16 +248,6 @@ function AdminDashboard() {
     [stats]
   );
 
-  const hubCards = [
-    { to: "/admin/missions", title: "Missions", icon: RouteIcon, count: stats.trajets, accent: "info" as const },
-    { to: "/admin/convoyeurs", title: "Convoyeurs", icon: Users, count: stats.convoyeurs, accent: "default" as const },
-    { to: "/admin/clients", title: "Clients", icon: Briefcase, count: stats.clients, accent: "info" as const },
-    { to: "/admin/devis", title: "Devis", icon: Receipt, count: stats.devisTotal, accent: "danger" as const },
-    { to: "/admin/factures", title: "Factures", icon: ClipboardList, count: stats.devisEnvoyes, accent: "warning" as const },
-    { to: "/admin/documents", title: "Documents", icon: FolderOpen, count: stats.docsEnAttente, accent: "warning" as const },
-    { to: "/admin/notifications", title: "Notifications", icon: BellRing, count: notifs.filter((n) => !n.lu).length, accent: "default" as const },
-  ];
-
   const chartData = demandes7j.map((d) => ({
     label: new Date(d.day).toLocaleDateString("fr-FR", { weekday: "short" }).slice(0, 3),
     value: d.count,
@@ -277,18 +261,22 @@ function AdminDashboard() {
     info: "bg-[color:var(--admin-info-soft)] text-sky-700",
   };
 
-  return (
-    <div className="space-y-6 adm6">
-      <PageHeader
-        eyebrow="Espace administration"
-        title="Tableau de bord"
-        subtitle="Vue temps réel de l'activité Transports Ligneo"
-      />
-      <div className="flex flex-wrap items-stretch gap-3">
-        <SmsCreditsCard />
-        <ApiUsageCards />
-      </div>
+  const totalAlertes = alertes.length;
+  const aTraiter = stats.demandesNouvelles + stats.convoyeursEnAttente + stats.docsEnAttente + stats.devisEnvoyes;
 
+  return (
+    <div className="space-y-3 adm6">
+      <AdminSectionHeader
+        breadcrumb="Tableau de bord"
+        eyebrow="Espace administration"
+        title="Tableau"
+        highlight="de bord"
+        stats={[
+          { label: "Aujourd'hui", value: new Date().toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }) },
+          { label: "À traiter", value: aTraiter, tone: aTraiter > 0 ? "warn" : "default" },
+          { label: "Missions actives", value: stats.missionsEnCours, tone: "accent" },
+        ]}
+      />
 
       {/* === KPI === */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -336,200 +324,121 @@ function AdminDashboard() {
         />
       </section>
 
-      {/* === Missions à risque === */}
-      <MissionsAtRiskWidget />
+      {/* === Carte en direct + à traiter / activité === */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1.55fr_1fr] gap-3 items-start">
+        <ExploitationOverview compact />
 
-      {/* === Carte trajets en cours === */}
-       <ExploitationOverview />
-
-
-      {/* === ALERTES === */}
-      {alertes.length > 0 && (
-        <AdminSection
-          title={
-            <span className="inline-flex items-center gap-2">
-              <AlertCircle size={16} className="text-amber-600" /> À traiter en priorité
-            </span>
-          }
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {alertes.map((a) => (
-              <Link
-                key={a.to}
-                to={a.to}
-                className="group flex items-center gap-3 px-4 py-3 rounded-lg border border-[color:var(--admin-border)] bg-[color:var(--admin-surface-2)] hover:border-[color:var(--admin-accent)] transition-all"
-              >
-                <span className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${toneAlerteIcon[a.tone]}`}>
-                  <a.icon size={17} />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-[color:var(--admin-text)]">{a.title}</p>
-                  <p className="text-xs text-[color:var(--admin-muted)]">Action requise</p>
-                </div>
-                <ChevronRight size={16} className="text-[color:var(--admin-muted)] group-hover:translate-x-1 transition-all" />
-              </Link>
-            ))}
-          </div>
-        </AdminSection>
-      )}
-
-      {/* === DUO : graphe demandes + feed live === */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 a6-card a6-card-hover p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
-              <TrendingUp size={16} className="text-[var(--a6-blue)]" /> Demandes — 7 derniers jours
-            </p>
-            <span className="a6-badge new">
-              {demandes7j.reduce((s, d) => s + d.count, 0)} au total
-            </span>
-          </div>
-          <p className="text-[11.5px] text-[var(--a6-dim)] mb-2">Volume quotidien réel des demandes reçues</p>
-          <AreaChartV6 data={chartData} />
-        </div>
-
-
-        <AdminSection
-          title={
-            <span className="inline-flex items-center gap-2">
-              <BellRing size={16} className="text-[color:var(--admin-accent)]" /> Activité en direct
-            </span>
-          }
-          actions={
-            <Link to="/admin/notifications" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
-              Tout voir <ArrowRight size={12} />
-            </Link>
-          }
-        >
-          {notifs.length === 0 ? (
-            <AdminEmpty icon={BellRing} title="Aucune notification" description="Les nouveaux événements apparaîtront ici en direct." />
-          ) : (
-            <ul className="space-y-2">
-              {notifs.map((n) => {
-                const safeLink = n.link && n.link.startsWith("/") ? n.link : null;
-                const Container: React.ElementType = safeLink ? Link : "div";
-                const props = safeLink ? { to: safeLink as never } : {};
-                return (
-                  <li key={n.id}>
-                    <Container
-                      {...props}
-                      className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
-                        n.lu
-                          ? "border-[color:var(--admin-border)] bg-transparent"
-                          : "border-[color:var(--admin-accent)]/30 bg-[color:var(--admin-accent-soft)]"
-                      } ${safeLink ? "hover:border-[color:var(--admin-accent)] cursor-pointer" : ""}`}
-                    >
-                      <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-[color:var(--admin-text)] truncate">{n.titre}</p>
-                        {n.message && (
-                          <p className="text-xs text-[color:var(--admin-muted)] line-clamp-2">{n.message}</p>
-                        )}
-                        <p className="text-[10px] text-[color:var(--admin-muted)] mt-1">
-                          {new Date(n.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </p>
+        <div className="flex flex-col gap-3">
+          <MissionsAtRiskWidget hideWhenEmpty />
+          <div className="a6-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--admin-border)]">
+              <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+                <AlertCircle size={16} className="text-amber-600" /> À traiter en priorité
+              </p>
+              <span className="text-xs font-semibold text-[color:var(--admin-accent)]">{totalAlertes > 0 ? `${aTraiter} actions` : "Tout est à jour"}</span>
+            </div>
+            {alertes.length === 0 ? (
+              <p className="px-4 py-5 text-center text-xs text-[color:var(--admin-muted)]">Rien à traiter pour le moment.</p>
+            ) : (
+              <ul>
+                {alertes.map((a) => (
+                  <li key={a.to} className="border-b border-[color:var(--admin-border)] last:border-b-0">
+                    <Link to={a.to} className="group flex items-center gap-3 px-4 py-2 hover:bg-[color:var(--admin-accent-soft)] transition-colors">
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${toneAlerteIcon[a.tone]}`}>
+                        <a.icon size={15} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[12.8px] text-[color:var(--admin-text)] truncate">{a.title}</p>
+                        <p className="text-[11px] text-[color:var(--admin-muted)]">Action requise</p>
                       </div>
-                    </Container>
+                      <ChevronRight size={15} className="text-[color:var(--admin-muted)] group-hover:translate-x-1 transition-all" />
+                    </Link>
                   </li>
-                );
-              })}
-            </ul>
-          )}
-        </AdminSection>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="a6-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--admin-border)]">
+              <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+                <BellRing size={16} className="text-[color:var(--admin-accent)]" /> Activité en direct
+              </p>
+              <Link to="/admin/notifications" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
+                Tout voir <ArrowRight size={12} />
+              </Link>
+            </div>
+            {notifs.length === 0 ? (
+              <p className="px-4 py-5 text-center text-xs text-[color:var(--admin-muted)]">Les nouveaux événements apparaîtront ici en direct.</p>
+            ) : (
+              <ul className="max-h-[210px] overflow-y-auto">
+                {notifs.map((n) => {
+                  const safeLink = n.link && n.link.startsWith("/") ? n.link : null;
+                  const Container: React.ElementType = safeLink ? Link : "div";
+                  const props = safeLink ? { to: safeLink as never } : {};
+                  return (
+                    <li key={n.id} className="border-b border-[color:var(--admin-border)] last:border-b-0">
+                      <Container {...props} className={`flex items-start gap-3 px-4 py-2 transition-colors ${safeLink ? "hover:bg-[color:var(--admin-accent-soft)] cursor-pointer" : ""}`}>
+                        <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[12.5px] font-semibold text-[color:var(--admin-text)] truncate">{n.titre}</p>
+                          {n.message && <p className="text-[11px] text-[color:var(--admin-muted)] truncate">{n.message}</p>}
+                          <p className="text-[10px] text-[color:var(--admin-muted)]">
+                            {new Date(n.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </Container>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* === HUB === */}
-      <AdminSection title="Sections de gestion" description="Accès rapide à tout l'écosystème">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {hubCards.map((c) => (
-            <Link
-              key={c.to}
-              to={c.to}
-              className="group rounded-xl border border-[color:var(--admin-border)] bg-[color:var(--admin-surface)] p-4 hover:border-[color:var(--admin-accent)] hover:shadow-sm transition-all flex flex-col gap-3"
-            >
-              <div className="flex items-start justify-between">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--admin-accent-soft)] text-[color:var(--admin-accent-strong)]">
-                  <c.icon size={17} />
-                </span>
-                <span className="text-xs font-semibold text-[color:var(--admin-text)]">{c.count}</span>
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-[color:var(--admin-text)]">{c.title}</p>
-                <span className="text-[11px] text-[color:var(--admin-muted)] inline-flex items-center gap-1 mt-1 group-hover:text-[color:var(--admin-accent)] transition-colors">
-                  Ouvrir <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </AdminSection>
-
-      {/* === DERNIÈRES DEMANDES === */}
-      <AdminSection
-        title="Dernières demandes"
-        actions={
-          <Link to="/admin/missions" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
-            Tout voir <ArrowRight size={12} />
-          </Link>
-        }
-      >
-        {recentDemandes.length === 0 ? (
-          <AdminEmpty icon={FileText} title="Aucune demande" description="Les nouvelles demandes apparaîtront ici." />
-        ) : (
-          <div className="overflow-x-auto -mx-2 sm:mx-0">
-            <table className="admin-table w-full">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th className="hidden sm:table-cell">Trajet</th>
-                  <th className="hidden lg:table-cell">Téléphone</th>
-                  <th>Statut</th>
-                  <th className="hidden md:table-cell">Reçue le</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentDemandes.map((d) => (
-                  <tr key={d.id}>
-                    <td>
-                      <Link to="/admin/missions" className="font-medium text-[color:var(--admin-text)] hover:text-[color:var(--admin-accent)]">
-                        {d.prenom} {d.nom}
-                      </Link>
-                      <p className="text-[color:var(--admin-muted)] text-xs sm:hidden">
-                        {d.depart} → {d.arrivee}
-                      </p>
-                    </td>
-                    <td className="hidden sm:table-cell text-[color:var(--admin-text)]">
-                      <span className="inline-flex items-center gap-1.5">
-                        {d.depart}
-                        <ArrowRight size={11} className="text-[color:var(--admin-muted)]" />
-                        {d.arrivee}
-                      </span>
-                    </td>
-                    <td className="hidden lg:table-cell text-[color:var(--admin-muted)] text-xs font-mono">
-                      {d.telephone ?? "—"}
-                    </td>
-                    <td>
-                      <AdminBadge label={statutLabel[d.statut] ?? d.statut} />
-                    </td>
-                    <td className="hidden md:table-cell text-[color:var(--admin-muted)] text-xs">
-                      {new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}
-                    </td>
-                    <td className="text-right">
-                      <Link
-                        to="/admin/missions"
-                        className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1"
-                      >
-                        Ouvrir <ChevronRight size={12} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* === Demandes 7 jours + dernières demandes === */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-3">
+        <div className="a6-card p-4">
+          <div className="flex items-center justify-between mb-1">
+            <p className="inline-flex items-center gap-2 font-bold text-[13.5px] text-[var(--a6-text)]">
+              <TrendingUp size={16} className="text-[var(--a6-blue)]" /> Demandes · 7 jours
+            </p>
+            <span className="a6-badge new">{demandes7j.reduce((s, d) => s + d.count, 0)} au total</span>
           </div>
-        )}
-      </AdminSection>
+          <div className="[&_svg]:!h-[120px]"><AreaChartV6 data={chartData} /></div>
+        </div>
+
+        <div className="a6-card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--admin-border)]">
+            <p className="font-bold text-[13.5px] text-[var(--a6-text)]">Dernières demandes</p>
+            <Link to="/admin/missions" className="text-xs text-[color:var(--admin-accent)] hover:underline inline-flex items-center gap-1">
+              Tout voir <ArrowRight size={12} />
+            </Link>
+          </div>
+          {recentDemandes.length === 0 ? (
+            <p className="px-4 py-5 text-center text-xs text-[color:var(--admin-muted)]">Les nouvelles demandes apparaîtront ici.</p>
+          ) : (
+            <ul>
+              {recentDemandes.slice(0, 4).map((d) => (
+                <li key={d.id} className="border-b border-[color:var(--admin-border)] last:border-b-0">
+                  <Link to="/admin/missions" className="grid grid-cols-[1.1fr_2.4fr_auto_auto] items-center gap-3 px-4 py-2 text-[12px] hover:bg-[color:var(--admin-accent-soft)] transition-colors">
+                    <span className="font-semibold truncate text-[color:var(--admin-text)]">{d.prenom} {d.nom}</span>
+                    <span className="truncate text-[color:var(--admin-muted)]">{d.depart} → {d.arrivee}</span>
+                    <AdminBadge label={statutLabel[d.statut] ?? d.statut} />
+                    <span className="text-[11px] text-[color:var(--admin-muted)] whitespace-nowrap">{new Date(d.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* === Quotas === */}
+      <div className="flex flex-wrap items-stretch gap-3">
+        <SmsCreditsCard />
+        <ApiUsageCards />
+      </div>
     </div>
   );
 }
