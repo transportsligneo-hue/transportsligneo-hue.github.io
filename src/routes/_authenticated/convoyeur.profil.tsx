@@ -1,5 +1,6 @@
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { UserMfaSettingsCard } from "@/components/security/UserMfaSettingsCard";
+import { PermisCategories } from "@/components/PermisCategories";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -282,7 +283,7 @@ function ConvoyeurProfil() {
           <div className="grid sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-pro-text-soft mb-1">Catégories</label>
-              <input type="text" value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C…" className={inputClass} />
+              <PermisCategories value={form.permis} onChange={(v) => setForm({ ...form, permis: v })} />
             </div>
             <div>
               <label className="block text-xs font-medium text-pro-text-soft mb-1">N° du permis</label>

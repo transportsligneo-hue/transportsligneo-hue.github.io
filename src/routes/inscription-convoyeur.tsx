@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { PermisCategories } from "@/components/PermisCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { composeAdresse, splitAdresse } from "@/lib/adresse";
 import { SiretBadge } from "@/components/SiretBadge";
@@ -571,9 +572,9 @@ function InscriptionConvoyeur() {
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">
-                  <FileText size={12} className="inline mr-1" /> Catégories additionnelles
+                  <FileText size={12} className="inline mr-1" /> Catégories de permis
                 </label>
-                <input type="text" value={form.permis} onChange={update("permis")} className={inputClass} placeholder="Ex: Permis B + EB" />
+                <PermisCategories dark value={form.permis} onChange={(v) => setForm((f) => ({ ...f, permis: v }))} />
               </div>
               <div>
                 <label className="block text-xs uppercase tracking-wider text-white/60 mb-1">

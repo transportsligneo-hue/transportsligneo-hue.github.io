@@ -46,6 +46,7 @@ function BlocTitre({ icon: Icon, titre, manque = 0 }: { icon: React.ComponentTyp
     </div>
   );
 }
+import { PermisCategories } from "@/components/PermisCategories";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MessageSquare } from "lucide-react";
 import { UserMessagesPanel, useUserMessagesCount } from "@/components/admin/UserMessagesPanel";
@@ -751,9 +752,11 @@ function AdminConvoyeurDetail() {
             <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
               <BlocTitre icon={IdCard} titre="Permis de conduire" manque={[form.permis, form.permis_numero, form.permis_date_obtention].filter((v) => !v).length} />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-3">
                 <AdminField label="Catégories">
-                  <input className={inp} value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C, EC..." />
+                  <PermisCategories value={form.permis} onChange={(v) => setForm({ ...form, permis: v })} />
                 </AdminField>
+                </div>
                 <AdminField label="N° du permis">
                   <input className={inp} value={form.permis_numero} onChange={(e) => setForm({ ...form, permis_numero: e.target.value })} placeholder="12AB34567890" />
                 </AdminField>
