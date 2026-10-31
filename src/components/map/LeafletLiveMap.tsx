@@ -82,7 +82,7 @@ const CAR_SVG = `<svg viewBox="0 0 40 40" width="34" height="34" xmlns="http://w
 function carIcon(heading: number) {
   return L.divIcon({
     className: "ligneo-car",
-    html: `<div style="position:relative;width:34px;height:34px"><span class="halo"></span><div style="transform:rotate(${heading}deg);transform-origin:center;transition:transform 700ms ease-out">${CAR_SVG}</div></div>`,
+    html: `<div style="position:relative;width:34px;height:34px"><span class="halo"></span><div style="transform:rotate(${heading + 180}deg);transform-origin:center;transition:transform 700ms ease-out">${CAR_SVG}</div></div>`,
     iconSize: [34, 34],
     iconAnchor: [17, 17],
   });

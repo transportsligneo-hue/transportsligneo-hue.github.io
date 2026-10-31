@@ -182,6 +182,18 @@ function dotEl(color: string, label?: string) {
   return el;
 }
 
+/** L'image de la voiture regarde vers l'arrière : on la retourne pour qu'elle avance dans le sens du trajet. */
+const CAR_OFFSET = 180;
+
+/** Drapeau d'arrivée rouge, planté à côté du véhicule quand la mission est terminée. */
+function flagEl() {
+  const el = document.createElement("div");
+  el.className = "ligneo-mbx-flag";
+  el.style.cssText = "width:44px;height:58px;pointer-events:none;filter:drop-shadow(0 5px 6px rgba(11,16,38,.35));";
+  el.innerHTML = '<div style="animation:ligneo-mbx-done-in .6s cubic-bezier(.2,.9,.3,1.2) both"><svg viewBox="0 0 44 58" width="44" height="58" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4d5e"/><stop offset="1" stop-color="#c4122f"/></linearGradient></defs><ellipse cx="10" cy="55" rx="7" ry="2.2" fill="rgba(11,16,38,.28)"/><rect x="8.5" y="4" width="3" height="51" rx="1.5" fill="#e9edf7" stroke="#9aa6c4" stroke-width=".6"/><circle cx="10" cy="4" r="3.2" fill="#fff" stroke="#9aa6c4" stroke-width=".6"/><path d="M11.5 7 C 19 3.5, 25 11, 32 7 C 36 5, 39 6, 41 7 L 41 25 C 39 24, 36 23, 32 25 C 25 29, 19 21, 11.5 25 Z" fill="url(#lfg)"/><path d="M11.5 7 C 19 3.5, 25 11, 32 7 C 36 5, 39 6, 41 7" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1"/></svg></div>';
+  return el;
+}
+
 /** Marqueur véhicule (icône voiture Ligneo + halo pulsé), réutilisé en mode flotte. */
 function carEl(heading: number, size = 62) {
   const wrap = document.createElement("div");
@@ -197,7 +209,7 @@ function carEl(heading: number, size = 62) {
   image.draggable = false;
   image.style.cssText = `display:block;width:${size}px;height:${size}px;object-fit:contain;filter:drop-shadow(0 4px 7px rgba(11,16,38,.30));pointer-events:none;user-select:none`;
   inner.appendChild(image);
-  inner.style.transform = `rotate(${heading}deg)`;
+  inner.style.transform = `rotate(${heading + CAR_OFFSET}deg)`;
   wrap.append(halo, inner);
   return { wrap, inner };
 }
@@ -225,6 +237,7 @@ export function MapboxLiveMap({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const readyRef = useRef(false);
   const carRef = useRef<mapboxgl.Marker | null>(null);
+  const flagRef = useRef<mapboxgl.Marker | null>(null);
   const carInnerRef = useRef<HTMLDivElement | null>(null);
   const fleetRef = useRef<Map<number, mapboxgl.Marker>>(new Map());
   const startRef = useRef<mapboxgl.Marker | null>(null);
@@ -618,6 +631,16 @@ export function MapboxLiveMap({
     }
   }, [metrics, route, points, snappedTrail, ready, signalLost]);
 
+  // ——— Drapeau d'arrivée planté à côté du véhicule quand la mission est terminée
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    if (!completed || !last) { flagRef.current?.remove(); flagRef.current = null; return; }
+    const pos: [number, number] = [last.longitude, last.latitude];
+    if (flagRef.current) { flagRef.current.setLngLat(pos); return; }
+    flagRef.current = new mapboxgl.Marker({ element: flagEl(), anchor: "bottom", offset: [26, 8] }).setLngLat(pos).addTo(map);
+  }, [completed, last, ready]);
+
   // ——— Véhicule : interpolation fluide + rotation
   useEffect(() => {
     const map = mapRef.current;
@@ -652,7 +675,7 @@ export function MapboxLiveMap({
     carRef.current.getElement().title = signalLost ? `Dernière position connue le ${new Date(last.recorded_at).toLocaleString("fr-FR")}` : "Position actuelle";
     if (carInnerRef.current) {
       carInnerRef.current.style.transition = "transform 800ms ease-out";
-      carInnerRef.current.style.transform = `rotate(${headingRef.current}deg)`;
+      carInnerRef.current.style.transform = `rotate(${headingRef.current + CAR_OFFSET}deg)`;
     }
     const cur = carRef.current.getLngLat();
     const from = cur ? { lat: cur.lat, lng: cur.lng } : (posRef.current ?? target);
