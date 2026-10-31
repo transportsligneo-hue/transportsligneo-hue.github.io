@@ -1,82 +1,51 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { getIdVerificationStatus, startIdVerification } from "@/lib/id-verification.functions";
 
-const LABEL: Record<string, string> = {
-  approved: "Identité vérifiée", review: "Vérification en cours d'examen", declined: "Vérification refusée — recommencez",
-  pending: "Vérification commencée", abandoned: "Vérification interrompue — reprenez-la", none: "Vérifiez votre identité en 1 minute",
+const LABEL: Record<string, [string, string]> = {
+  approved: ["Identité vérifiée", "Vérification réussie"],
+  review: ["Vérification en cours", "En cours d'examen"],
+  declined: ["Vérification refusée", "Recommencez"],
+  pending: ["Vérification commencée", "À terminer"],
+  abandoned: ["Vérification interrompue", "Reprenez-la"],
+  none: ["Vérifiez votre identité", "CNI ou passeport + selfie, 1 minute"],
 };
 
-/** Vérification d'identité automatique (CNI ou passeport + selfie), via Didit. Une fois validée, elle ne peut plus être relancée. */
-export default function IdVerifyCard({ large = false, onStatus }: { large?: boolean; onStatus?: (s: string) => void }) {
+/** Vérification d'identité automatique (CNI ou passeport + selfie) : carte compacte, thème clair. */
+export default function IdVerifyCard() {
   const statusFn = useServerFn(getIdVerificationStatus);
   const startFn = useServerFn(startIdVerification);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState("none");
   const [busy, setBusy] = useState(false);
-
-  const refresh = useCallback(async () => {
-    try { const r = await statusFn(); setStatus(r.status); onStatus?.(r.status); return r.status; }
-    catch { setStatus((s) => s ?? "none"); return null; }
-  }, [statusFn, onStatus]);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const s = await refresh();
-      // Retour depuis Didit : le résultat peut mettre quelques secondes à arriver.
-      const back = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("idv") === "done";
-      if (back && alive && s !== "approved") {
-        for (let i = 0; i < 6 && alive; i++) {
-          await new Promise((r) => setTimeout(r, 3000));
-          const n = await refresh();
-          if (n === "approved" || n === "declined" || n === "review") break;
-        }
-      }
-    })();
-    return () => { alive = false; };
-  }, [refresh]);
-
-  if (status === null) return null;
+  useEffect(() => { statusFn().then((r) => setStatus(r.status)).catch(() => {}); }, [statusFn]);
   const ok = status === "approved";
-  const inReview = status === "review";
-
-  if (ok) {
-    return (
-      <div className="mb-4 flex items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
-        <span className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-500 text-white"><CheckCircle2 size={24} /></span>
-        <div className="flex-1">
-          <p className="text-[15px] font-bold text-slate-900">Identité vérifiée</p>
-          <p className="text-[12.5px] text-slate-600">Votre pièce d'identité a été validée. Rien d'autre à faire.</p>
+  const wait = status === "review";
+  const [title, sub] = LABEL[status] ?? LABEL.none;
+  return (
+    <div className="flex min-w-0 flex-1 basis-0 flex-col gap-2 rounded-[20px] border bg-white p-3 shadow-[0_10px_26px_-18px_rgba(8,90,60,.35)]" style={{ borderColor: "rgba(8,90,60,.13)" }}>
+      <div className="flex items-center gap-2.5">
+        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px]" style={{ background: ok ? "linear-gradient(135deg,#14B866,#4FE8A0)" : "#e1f7ec", color: ok ? "#04261a" : "#0b7a45" }}>
+          <ShieldCheck size={18} />
+        </span>
+        <div className="min-w-0">
+          <b className="block text-[13px] leading-tight text-[#08243f]">{title}</b>
+          <small className="block text-[11px] leading-snug text-[#5d7a72]">{sub}</small>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className={"mb-4 flex flex-wrap items-center gap-4 rounded-2xl border border-emerald-200 bg-white shadow-sm " + (large ? "p-6" : "p-4")}>
-      <span className="grid h-12 w-12 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
-        <ShieldCheck size={24} />
-      </span>
-      <div className="min-w-[200px] flex-1">
-        <p className="text-[15px] font-bold text-slate-900">{LABEL[status] ?? LABEL.none}</p>
-        <p className="text-[12.5px] text-slate-600">
-          {inReview ? "Notre équipe examine votre dossier, vous serez prévenu dès que c'est validé."
-            : "Carte d'identité ou passeport, puis un selfie. Rapide et sécurisé."}
-        </p>
-      </div>
-      {!inReview && (
+      {!ok && !wait && (
         <button
           disabled={busy}
           onClick={async () => {
             setBusy(true);
             try { const r = await startFn({ data: { origin: window.location.origin } }); window.location.href = r.url; }
-            catch (e) { toast.error((e as Error).message); setBusy(false); refresh(); }
+            catch (e) { toast.error((e as Error).message); setBusy(false); }
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-[13.5px] font-bold text-white transition hover:bg-emerald-600 disabled:opacity-60"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-xl px-2 text-[12.5px] font-bold text-[#04261a] active:scale-[.98] disabled:opacity-60"
+          style={{ background: "linear-gradient(135deg,#14B866,#4FE8A0)" }}
         >
-          {busy ? "Ouverture…" : "Vérifier mon identité"} <ArrowRight size={16} />
+          {busy ? "Ouverture…" : "Vérifier"}
         </button>
       )}
     </div>

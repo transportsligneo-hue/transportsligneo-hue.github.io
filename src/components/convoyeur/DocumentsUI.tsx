@@ -2,55 +2,46 @@
  * Page « Mes documents » du convoyeur : composants d'affichage (sans logique serveur).
  * Charte appli Driver : bleu nuit + vert, grandes cartes arrondies, boutons larges et lisibles.
  */
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
-  Plus, Trash2, AlertCircle, Camera, CheckCircle2, Clock, Download, Eye, FileSignature, FileText, Loader2,
-  RotateCcw, ShieldCheck, Upload, User as UserIcon, PenLine, BadgeCheck, XCircle,
+  Plus, Trash2, AlertCircle, Camera, CheckCircle2, ChevronDown, Clock, Download, Eye, FileText, Loader2,
+  RotateCcw, ShieldCheck, Upload, User as UserIcon, PenLine, XCircle,
 } from "lucide-react";
 
-const NAVY = "#0a1638";
 
 /* ------------------------------ Avancement ------------------------------ */
+const INK = "#08243f";
+const MUT = "#5d7a72";
+const LINE = "rgba(8,90,60,.13)";
+const CARD = "rounded-[20px] border bg-white shadow-[0_10px_26px_-18px_rgba(8,90,60,.35)]";
+const GREEN_BTN = "linear-gradient(135deg,#14B866,#4FE8A0)";
+
 export function ProgressHero({ done, total, items = [] }: { done: number; total: number; items?: Array<{ label: string; status: "approved" | "pending" | "refused" | "none"; required: boolean }> }) {
   const complete = total > 0 && done >= total;
+  const C = 176;
+  const off = C - (C * Math.min(done, Math.max(total, 1))) / Math.max(total, 1);
+  const todo = items.filter((i) => i.required && i.status !== "approved");
   return (
-    <div className="relative overflow-hidden rounded-3xl p-5 text-white shadow-[0_18px_40px_-20px_rgba(4,27,82,.8)]"
-      style={{ background: "linear-gradient(135deg,#0a1f55 0%,#0d3a8a 60%,#0b6b5a 130%)" }}>
-      <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
-      <div className="relative flex items-center justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[.18em] text-emerald-300/90">Dossier convoyeur</p>
-          <p className="mt-1 text-4xl font-bold leading-none tracking-tight">{done}<span className="text-2xl text-white/60"> / {total}</span></p>
-          <p className="mt-1.5 text-sm text-white/80">documents requis validés</p>
-        </div>
-        <div className={"grid h-14 w-14 shrink-0 place-items-center rounded-2xl border " + (complete ? "border-emerald-300/50 bg-emerald-400/20 text-emerald-300" : "border-white/20 bg-white/10 text-white/80")}>
-          {complete ? <BadgeCheck size={28} /> : <FileText size={26} />}
-        </div>
+    <div className={CARD + " flex items-center gap-3.5 p-4"} style={{ borderColor: LINE }}>
+      <div className="relative h-[66px] w-[66px] shrink-0">
+        <svg width="66" height="66" viewBox="0 0 66 66" style={{ transform: "rotate(-90deg)" }} aria-hidden>
+          <defs><linearGradient id="docRing" x1="0" x2="1"><stop stopColor="#14B866" /><stop offset="1" stopColor="#4FE8A0" /></linearGradient></defs>
+          <circle cx="33" cy="33" r="28" fill="none" stroke="#e3f1ea" strokeWidth="7" />
+          <circle cx="33" cy="33" r="28" fill="none" stroke="url(#docRing)" strokeWidth="7" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={off} />
+        </svg>
+        <b className="absolute inset-0 grid place-items-center text-[17px] font-extrabold" style={{ color: INK }}>{done}/{total}</b>
       </div>
-      <div className="relative mt-4 flex gap-1.5" aria-hidden>
-        {Array.from({ length: Math.max(total, 1) }, (_, i) => (
-          <span key={i} className={"h-2 flex-1 rounded-full " + (i < done ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,230,140,.7)]" : "bg-white/15")} />
-        ))}
+      <div className="min-w-0">
+        <h2 className="text-[15px] font-bold leading-tight" style={{ color: INK }}>{complete ? "Dossier complet" : "Dossier à compléter"}</h2>
+        <p className="mt-0.5 text-[12px] leading-snug" style={{ color: MUT }}>
+          {complete ? "Tous vos documents sont validés. Vous pouvez recevoir des missions." : `Il vous reste ${total - done} document${total - done > 1 ? "s" : ""} à faire valider pour recevoir des missions.`}
+        </p>
+        {todo.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {todo.map((t) => <span key={t.label} className="rounded-full bg-[#fff1d6] px-2.5 py-0.5 text-[10.5px] font-bold text-[#c27a00]">{t.label}</span>)}
+          </div>
+        )}
       </div>
-      {items.length > 0 && (
-        <div className="relative mt-4 flex flex-wrap gap-1.5">
-          {items.map((it) => {
-            const cls = it.status === "approved" ? "bg-emerald-400/20 text-emerald-100 ring-emerald-300/40"
-              : it.status === "pending" ? "bg-sky-400/20 text-sky-100 ring-sky-300/40"
-              : it.status === "refused" ? "bg-red-400/25 text-red-100 ring-red-300/40"
-              : "bg-white/8 text-white/55 ring-white/15";
-            return (
-              <span key={it.label} className={"inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 " + cls}>
-                {it.status === "approved" ? <CheckCircle2 size={11} /> : it.status === "pending" ? <Clock size={11} /> : it.status === "refused" ? <XCircle size={11} /> : <span className="h-2.5 w-2.5 rounded-full border border-current opacity-70" />}
-                {it.label}{!it.required && it.status === "none" ? " (facultatif)" : ""}
-              </span>
-            );
-          })}
-        </div>
-      )}
-      <p className="relative mt-3 text-xs text-white/70">
-        {complete ? "Votre dossier est complet. Vous pouvez recevoir des missions." : `Il vous reste ${total - done} document${total - done > 1 ? "s" : ""} à faire valider.`}
-      </p>
     </div>
   );
 }
@@ -59,51 +50,37 @@ export function ProgressHero({ done, total, items = [] }: { done: number; total:
 export function ContratCardView(p: {
   signed: boolean; signedAt: string | null; blocked: boolean; expired: boolean; missing: string[];
   busy: boolean; onSign: () => void; onDownload: (w: "signed" | "dossier") => void;
-  /** Contrat signé dans une ancienne version : nouvelle signature requise. */
-  outdated?: boolean; version?: number; versionCourante?: number;
 }) {
-  const pill = p.outdated
-    ? <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-400/20 px-3 py-1 text-xs font-semibold text-sky-200 ring-1 ring-sky-300/40"><AlertCircle size={13} /> Nouvelle version à signer</span>
-    : p.signed
-    ? <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-emerald-300/40"><ShieldCheck size={13} /> Signé le {p.signedAt ? new Date(p.signedAt).toLocaleDateString("fr-FR") : "—"}</span>
-    : p.blocked
-      ? <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 ring-1 ring-amber-300/40"><AlertCircle size={13} /> Documents manquants</span>
-      : <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-400/20 px-3 py-1 text-xs font-semibold text-sky-200 ring-1 ring-sky-300/40"><Clock size={13} /> {p.expired ? "Lien expiré" : "En attente de votre signature"}</span>;
+  const title = p.signed ? "Contrat signé" : "Contrat de partenariat";
+  const sub = p.signed ? `Le ${p.signedAt ? new Date(p.signedAt).toLocaleDateString("fr-FR") : "—"}`
+    : p.blocked ? `Déposez d'abord : ${p.missing.join(", ")}`
+    : p.expired ? "Lien expiré, demandez-en un nouveau" : "À lire et signer";
+  const btn = "inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-2 text-[12.5px] font-bold active:scale-[.98] disabled:opacity-60";
   return (
-    <div className="relative overflow-hidden rounded-3xl p-5 text-white shadow-[0_18px_40px_-22px_rgba(4,27,82,.85)]"
-      style={{ background: "linear-gradient(160deg,#0a1638 0%,#10286b 100%)" }}>
-      <div className="pointer-events-none absolute -left-8 -bottom-10 h-36 w-36 rounded-full bg-sky-400/15 blur-3xl" />
-      <div className="relative flex items-start gap-3.5">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-sky-200 ring-1 ring-white/15"><FileSignature size={22} /></span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-bold leading-tight">Contrat de partenariat{p.version ? <span className="ml-2 align-middle text-xs font-semibold text-sky-200/90">version {p.version}</span> : null}</h2>
-          <div className="mt-2">{pill}</div>
+    <div className={CARD + " flex min-w-0 flex-1 basis-0 flex-col gap-2 p-3"} style={{ borderColor: LINE }}>
+      <div className="flex items-center gap-2.5">
+        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px] text-[#04261a]" style={{ background: p.blocked ? "#fff1d6" : GREEN_BTN, color: p.blocked ? "#c27a00" : "#04261a" }}>
+          {p.signed ? <ShieldCheck size={18} /> : p.blocked ? <AlertCircle size={18} /> : <PenLine size={18} />}
+        </span>
+        <div className="min-w-0">
+          <b className="block text-[13px] leading-tight" style={{ color: INK }}>{title}</b>
+          <small className="block text-[11px] leading-snug" style={{ color: MUT }}>{sub}</small>
         </div>
       </div>
-      <p className="relative mt-3 text-[13px] leading-relaxed text-white/75">
-        {p.outdated ? `Le contrat a évolué (version ${p.versionCourante ?? ""}). Vous allez recevoir la nouvelle version à signer : l'accès aux nouvelles missions reprend dès votre signature.`
-          : p.signed ? "Une copie signée vous a été envoyée par e-mail. Vous la retrouvez ici à tout moment."
-          : p.blocked ? `Pour signer, déposez d'abord : ${p.missing.join(", ")}.`
-          : p.expired ? "Demandez un nouveau lien pour signer votre contrat."
-          : "Votre contrat est prêt : lisez-le, paraphez-le et signez en quelques minutes."}
-      </p>
-      <div className="relative mt-4 grid gap-2.5 md:grid-cols-2">
-        {p.signed ? (<>
-          <button type="button" onClick={() => p.onDownload("signed")} disabled={p.busy}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(16,185,129,.9)] active:scale-[.98] disabled:opacity-60">
-            {p.busy ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />} Télécharger le contrat signé
+      {p.signed ? (
+        <div className="flex gap-1.5">
+          <button type="button" onClick={() => p.onDownload("signed")} disabled={p.busy} className={btn + " text-[#04261a]"} style={{ background: GREEN_BTN }}>
+            <Download size={15} /> Contrat
           </button>
-          <button type="button" onClick={() => p.onDownload("dossier")} disabled={p.busy}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 text-[15px] font-semibold text-white active:scale-[.98] disabled:opacity-60">
-            <ShieldCheck size={18} /> Preuve de signature
+          <button type="button" onClick={() => p.onDownload("dossier")} disabled={p.busy} className={btn + " border-[1.5px] bg-white text-[#0b7a45]"} style={{ borderColor: "rgba(20,184,102,.4)" }}>
+            Preuve
           </button>
-        </>) : !p.blocked ? (
-          <button type="button" onClick={p.onSign} disabled={p.busy}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(16,185,129,.9)] active:scale-[.98] disabled:opacity-60 md:col-span-2">
-            {p.busy ? <Loader2 size={18} className="animate-spin" /> : <PenLine size={18} />} Signer mon contrat
-          </button>
-        ) : null}
-      </div>
+        </div>
+      ) : !p.blocked ? (
+        <button type="button" onClick={p.onSign} disabled={p.busy} className={btn + " text-[#04261a]"} style={{ background: GREEN_BTN }}>
+          <PenLine size={15} /> {p.busy ? "Ouverture…" : "Signer"}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -111,31 +88,47 @@ export function ContratCardView(p: {
 /* ------------------------------ Photo de profil ------------------------------ */
 export function ProfileCardView({ avatarUrl, uploading, children }: { avatarUrl: string | null; uploading: boolean; children: ReactNode }) {
   return (
-    <div className="flex items-center gap-4 rounded-3xl border border-[#e3e8f2] bg-[#ffffff] p-4 shadow-[0_10px_30px_-22px_rgba(10,22,56,.45)]">
-      <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-emerald-300 bg-emerald-50">
-        {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <UserIcon size={26} className="text-emerald-600" />}
+    <div className={CARD + " flex items-center gap-3 px-3.5 py-3"} style={{ borderColor: LINE }}>
+      <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e1f7ec] text-[#0b7a45]">
+        {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <UserIcon size={20} />}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[15px] font-semibold" style={{ color: NAVY }}>Photo de profil</p>
-        <p className="text-xs leading-snug text-[#5a6788]">Visible par l'équipe et vos clients.</p>
+        <p className="text-[13.5px] font-bold" style={{ color: INK }}>Photo de profil</p>
+        <p className="text-[11px]" style={{ color: MUT }}>Visible par l'équipe et vos clients</p>
       </div>
-      <label className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white active:scale-[.98]">
-        {uploading ? <Loader2 size={15} className="animate-spin" /> : <Camera size={15} />} Modifier
+      <label className="inline-flex min-h-[38px] shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border-[1.5px] bg-white px-3.5 text-[12.5px] font-bold text-[#0b7a45] active:scale-[.98]" style={{ borderColor: "rgba(20,184,102,.4)" }}>
+        {uploading ? "Envoi…" : <><Camera size={14} /> Modifier</>}
         {children}
       </label>
     </div>
   );
 }
 
-/* ------------------------------ Carte d'un document ------------------------------ */
+/* ------------------------------ Rubrique repliable ------------------------------ */
+export function CollapsibleSection({ title, count, warn, defaultOpen = true, children }: { title: string; count?: string | number; warn?: boolean; defaultOpen?: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
+        className="flex w-full items-center gap-2 px-1 py-1.5 text-left text-[11px] font-extrabold uppercase tracking-[.14em]" style={{ color: "#3b5c53" }}>
+        <ChevronDown size={14} className={"transition-transform " + (open ? "" : "-rotate-90")} />
+        {title}
+        {count !== undefined && (
+          <span className="ml-auto rounded-full border bg-white px-2.5 py-0.5 text-[11px] tracking-normal" style={{ borderColor: warn ? "#f1dca0" : LINE, color: warn ? "#c27a00" : "#0b7a45", background: warn ? "#fff7e6" : "#fff" }}>{count}</span>
+        )}
+      </button>
+      {open && <div className={CARD + " mt-1 divide-y overflow-hidden"} style={{ borderColor: LINE }}>{children}</div>}
+    </section>
+  );
+}
+
+/* ------------------------------ Ligne d'un document (dépliable) ------------------------------ */
 export type DocStatus = "approved" | "pending" | "refused" | "none";
 export function DocCardView(p: {
   label: string; required: boolean; hint?: string;
   status: DocStatus; fileName?: string; dateLabel?: string; refusMotif?: string | null;
   renewal?: { tone: "ok" | "soon" | "expired"; text: string } | null;
   uploading: boolean;
-  /** Étape d'envoi en cours (vérification, envoi, enregistrement) et avancement 0-100. */
-  uploadStep?: { label: string; pct: number } | null;
   onPreview?: () => void;
   onDelete?: () => void;
   uploadLabels?: { add: string; replace: string };
@@ -143,58 +136,49 @@ export function DocCardView(p: {
   scanButton: ReactNode;       // <DocScanButton className=… />
   scanClass: string;
 }) {
+  const [open, setOpen] = useState(false);
   const st = {
-    approved: { tile: "bg-emerald-50 text-emerald-600 ring-emerald-200", icon: CheckCircle2, label: "Approuvé", pill: "bg-emerald-50 text-emerald-700 ring-emerald-200", bar: "bg-emerald-500" },
-    pending: { tile: "bg-sky-50 text-sky-600 ring-sky-200", icon: Clock, label: "En attente de validation", pill: "bg-sky-50 text-sky-700 ring-sky-200", bar: "bg-sky-400" },
-    refused: { tile: "bg-red-50 text-red-600 ring-red-200", icon: XCircle, label: "Refusé", pill: "bg-red-50 text-red-700 ring-red-200", bar: "bg-red-500" },
-    none: { tile: "bg-[#f1f4fa] text-[#7b88a8] ring-[#e1e7f3]", icon: FileText, label: "", pill: "", bar: "bg-[#d5dcec]" },
+    approved: { tile: "#e1f7ec", fg: "#0b7a45", icon: CheckCircle2, label: "Approuvé" },
+    pending: { tile: "#e6eeff", fg: "#2147c9", icon: Clock, label: "En validation" },
+    refused: { tile: "#ffe4e9", fg: "#d92d4a", icon: XCircle, label: "Refusé" },
+    none: { tile: "#f0f4f2", fg: "#5d7a72", icon: FileText, label: "À envoyer" },
   }[p.status];
   const Icon = st.icon;
   const has = p.status !== "none";
-  const renewCls = p.renewal?.tone === "expired" ? "bg-red-50 text-red-700 ring-red-200" : p.renewal?.tone === "soon" ? "bg-amber-50 text-amber-800 ring-amber-200" : "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  const addRow = !!p.uploadLabels;
+  const renewCls = p.renewal?.tone === "expired" ? "bg-[#ffe4e9] text-[#d92d4a]" : p.renewal?.tone === "soon" ? "bg-[#fff1d6] text-[#c27a00]" : "bg-[#e1f7ec] text-[#0b7a45]";
+  const outBtn = "inline-flex min-h-[42px] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl border-[1.5px] bg-white px-2 text-[12.5px] font-bold text-[#0b7a45] active:scale-[.98]";
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#e3e8f2] bg-[#ffffff] p-4 pl-5 shadow-[0_10px_30px_-22px_rgba(10,22,56,.45)]">
-      <span className={"absolute left-0 top-0 h-full w-1.5 " + st.bar} />
-      <div className="flex items-start gap-3.5">
-        <span className={"grid h-12 w-12 shrink-0 place-items-center rounded-2xl ring-1 " + st.tile}><Icon size={22} /></span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[15.5px] font-semibold leading-tight" style={{ color: NAVY }}>{p.label}</h3>
-            {p.required && <span className="rounded-md bg-[#eef3ff] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#2f5fff]">Requis</span>}
+    <div>
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center gap-3 px-3.5 py-3 text-left">
+        <span className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px]" style={{ background: st.tile, color: st.fg }}><Icon size={18} /></span>
+        <span className="min-w-0 flex-1">
+          <b className="block truncate text-[13.5px] leading-tight" style={{ color: INK }}>{p.label}</b>
+          <small className="block truncate text-[11px]" style={{ color: MUT }}>{has && p.fileName ? `${p.fileName}${p.dateLabel ? ` · ${p.dateLabel}` : ""}` : addRow ? "Diplôme, attestation, justificatif…" : "Aucun fichier envoyé"}</small>
+        </span>
+        <span className="shrink-0 rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold" style={{ background: st.tile, color: st.fg }}>{addRow && !has ? "Ajouter" : st.label}</span>
+        <ChevronDown size={16} className={"shrink-0 text-[#9bb0a8] transition-transform " + (open ? "rotate-180" : "")} />
+      </button>
+      {open && (
+        <div className="px-3.5 pb-3.5 pl-[58px]">
+          {p.hint && <p className="text-[11.5px] leading-snug" style={{ color: MUT }}>{p.hint}</p>}
+          {p.renewal && <span className={"mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold " + renewCls}>{p.renewal.text}</span>}
+          {p.status === "refused" && p.refusMotif && <p className="mt-1.5 text-[12px] font-semibold text-[#d92d4a]">Motif : {p.refusMotif}</p>}
+          <div className="mt-2.5 flex gap-2">
+            {p.onPreview && (
+              <button type="button" onClick={p.onPreview} className={outBtn} style={{ borderColor: "rgba(20,184,102,.4)" }}><Eye size={15} /> Voir</button>
+            )}
+            <label className={has ? outBtn : "inline-flex min-h-[42px] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-2 text-[12.5px] font-bold text-[#04261a] active:scale-[.98]"}
+              style={has ? { borderColor: "rgba(20,184,102,.4)" } : { background: GREEN_BTN, boxShadow: "0 8px 18px -10px rgba(20,184,102,.8)" }}>
+              {has ? <RotateCcw size={15} /> : <Upload size={15} />}
+              {p.uploading ? "Envoi…" : has ? (p.uploadLabels?.replace ?? "Remplacer") : (p.uploadLabels?.add ?? "Envoyer")}
+              {p.uploadInput}
+            </label>
+            <span className="contents">{p.scanButton}</span>
           </div>
-          {p.hint && <p className="mt-1 text-xs leading-snug text-[#6b7aa3]">{p.hint}</p>}
-          {has && p.fileName && <p className="mt-1.5 truncate text-[13px] text-[#44516f]">{p.fileName}{p.dateLabel ? ` · ${p.dateLabel}` : ""}</p>}
-          {has && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <span className={"inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-semibold ring-1 " + st.pill}><Icon size={12} /> {st.label}</span>
-              {p.renewal && <span className={"inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-semibold ring-1 " + renewCls}>{p.renewal.text}</span>}
-            </div>
+          {p.onDelete && (
+            <button type="button" onClick={p.onDelete} className="mt-2 text-xs font-bold text-[#d92d4a] underline underline-offset-2">Supprimer ce document</button>
           )}
-          {p.status === "refused" && p.refusMotif && <p className="mt-2 text-xs text-red-700">Motif : {p.refusMotif}</p>}
-          {!has && <p className="mt-1.5 text-[13px] text-[#8793b0]">Aucun fichier envoyé</p>}
-        </div>
-      </div>
-      {p.onDelete && (
-        <button type="button" onClick={p.onDelete} className="mt-3 text-xs font-semibold text-red-600 underline underline-offset-2">Supprimer ce document</button>
-      )}
-      <div className={"mt-4 grid gap-2 " + (p.onPreview ? "grid-cols-[auto_1fr_1fr]" : "grid-cols-2")}>
-        {p.onPreview && (
-          <button type="button" onClick={p.onPreview} aria-label="Voir le document"
-            className="grid min-h-[46px] w-12 place-items-center rounded-2xl border border-[#d7dff0] bg-[#ffffff] text-[#2a3a66] active:scale-[.97]"><Eye size={18} /></button>
-        )}
-        <label className={"inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold active:scale-[.98] " + (has ? "border border-[#d7dff0] bg-[#ffffff] text-[#1c2c58]" : "bg-emerald-600 text-white shadow-[0_10px_22px_-12px_rgba(5,150,105,.9)]")}>
-          {has ? <RotateCcw size={16} /> : <Upload size={16} />}
-          {has ? (p.uploadLabels?.replace ?? "Remplacer") : (p.uploadLabels?.add ?? "Envoyer")}
-          {p.uploadInput}
-        </label>
-        <span className="contents">{p.scanButton}</span>
-      </div>
-      {p.uploading && (
-        <div className="mt-3" role="status" aria-live="polite">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-100">
-            <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-500 ease-out" style={{ width: `${Math.max(8, p.uploadStep?.pct ?? 35)}%` }} />
-          </div>
-          <p className="mt-1.5 text-xs font-medium text-emerald-700">{p.uploadStep?.label ?? "Envoi en cours…"}</p>
         </div>
       )}
     </div>
@@ -202,7 +186,7 @@ export function DocCardView(p: {
 }
 
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className="px-1 pt-1 text-[11px] font-bold uppercase tracking-[.2em] text-[#5a6788]">{children}</h2>;
+  return <h2 className="px-1 pt-1 text-[11px] font-extrabold uppercase tracking-[.14em]" style={{ color: "#3b5c53" }}>{children}</h2>;
 }
 
 /* ------------------------------ Autres documents (plusieurs fichiers) ------------------------------ */
@@ -221,7 +205,7 @@ export function OtherDocsView(p: {
       <div className="flex items-start gap-3.5">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#eef3ff] text-[#2f5fff] ring-1 ring-[#d6e0ff]"><FileText size={22} /></span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[15.5px] font-semibold leading-tight" style={{ color: NAVY }}>Autres documents</h3>
+          <h3 className="text-[15.5px] font-semibold leading-tight" style={{ color: INK }}>Autres documents</h3>
           <p className="mt-1 text-xs leading-snug text-[#6b7aa3]">{p.hint ?? "Ajoutez autant de documents que vous voulez : diplômes, attestations, contrats…"}</p>
         </div>
       </div>

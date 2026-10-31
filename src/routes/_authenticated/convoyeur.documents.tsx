@@ -14,9 +14,8 @@ import {
 } from "@/lib/convoyeur-documents";
 import MonContratCard from "@/components/convoyeur/MonContratCard";
 import IdVerifyCard from "@/components/convoyeur/IdVerifyCard";
-import { ProgressHero, ProfileCardView, DocCardView, SectionTitle, type DocStatus } from "@/components/convoyeur/DocumentsUI";
+import { ProgressHero, ProfileCardView, DocCardView, CollapsibleSection, type DocStatus } from "@/components/convoyeur/DocumentsUI";
 import { DocumentScanner } from "@/components/inspection/DocumentScanner";
-import { avecReprise, messageErreurDepot, preparerDocument } from "@/lib/convoyeur-doc-upload";
 
 /** Nettoie le nom de fichier : Supabase Storage refuse accents/espaces/caractères spéciaux. */
 function safeFileName(name: string) {
@@ -53,7 +52,6 @@ function ConvoyeurDocuments() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
-  const [uploadStep, setUploadStep] = useState<{ label: string; pct: number } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const avatarRef = useRef<HTMLInputElement>(null);
@@ -98,72 +96,45 @@ function ConvoyeurDocuments() {
     })();
   }, [user, reload]);
 
-  const handleUpload = async (spec: { key: string }, file: File, via: "fichier" | "scanner" = "fichier") => {
+  const handleUpload = async (spec: { key: string }, file: File) => {
     if (!user) return;
     if (!convoyeurId) {
       toast.error("Votre fiche convoyeur n'est pas encore créée. Contactez le support.");
       return;
     }
-    if (uploadingKey) { toast.info("Un envoi est déjà en cours, patientez quelques secondes."); return; }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux (15 Mo maximum).");
+      return;
+    }
     setUploadingKey(spec.key);
-    setUploadStep({ label: "Vérification du fichier…", pct: 15 });
     try {
-      // 1) contrôles : format réel, taille, lisibilité ; photo optimisée si trop lourde
-      const prep = await preparerDocument(file);
+      const path = `${user.id}/${spec.key}_${Date.now()}_${safeFileName(file.name)}`;
+      const { error: upErr } = await supabase.storage
+        .from("convoyeur-documents")
+        .upload(path, file, { upsert: false, contentType: file.type || "application/octet-stream" });
+      if (upErr) throw upErr;
 
-      // 2) même fichier déjà envoyé pour ce document : inutile de le renvoyer
+      // Replace previous of same type
       const previous = spec.key === "autre" ? undefined : docs[spec.key];
-      if (previous && (previous as DocRow & { sha256?: string | null }).sha256 === prep.sha256) {
-        toast.info("Ce fichier est identique au document déjà envoyé.");
-        return;
+      if (previous) {
+        await supabase.from("documents_convoyeurs").delete().eq("id", previous.id);
       }
-
-      // 3) envoi du fichier, avec reprise automatique si le réseau coupe
-      setUploadStep({ label: "Envoi sécurisé du document…", pct: 45 });
-      const ext = prep.mime === "application/pdf" ? "pdf" : prep.mime === "image/png" ? "png" : prep.mime === "image/webp" ? "webp" : prep.mime === "image/heic" ? "heic" : "jpg";
-      const base = safeFileName(prep.file.name).replace(/\.[a-z0-9]+$/i, "");
-      const path = `${user.id}/${spec.key}_${Date.now()}_${base}.${ext}`;
-      await avecReprise(async () => {
-        const { error } = await supabase.storage
-          .from("convoyeur-documents")
-          .upload(path, prep.file, { upsert: true, contentType: prep.mime });
-        if (error) throw error;
+      const { error: insErr } = await supabase.from("documents_convoyeurs").insert({
+        convoyeur_id: convoyeurId,
+        nom_fichier: file.name,
+        type_document: spec.key,
+        url_fichier: path,
+        statut_validation: "en_attente",
       });
-
-      // 4) enregistrement du nouveau document AVANT de retirer l'ancien (rien n'est jamais perdu)
-      setUploadStep({ label: "Enregistrement dans votre dossier…", pct: 80 });
-      const { error: insErr } = await avecReprise(async () => {
-        const r = await supabase.from("documents_convoyeurs").insert({
-          convoyeur_id: convoyeurId,
-          nom_fichier: prep.file.name,
-          type_document: spec.key,
-          url_fichier: path,
-          statut_validation: "en_attente",
-          sha256: prep.sha256,
-          taille_octets: prep.taille,
-          mime_type: prep.mime,
-          depose_via: via,
-        } as never);
-        if (r.error && !/DOC_REFUS/.test(r.error.message)) throw r.error;
-        return r;
-      });
-      if (insErr) {
-        await supabase.storage.from("convoyeur-documents").remove([path]).catch(() => undefined);
-        throw insErr;
-      }
-      // l'ancienne version est archivée automatiquement (historique consultable par l'équipe)
-      if (previous) await supabase.from("documents_convoyeurs").delete().eq("id", previous.id);
-
-      setUploadStep({ label: "Document reçu", pct: 100 });
+      if (insErr) throw insErr;
       void notifyDocumentDepose({ data: { convoyeurId, typeDocument: spec.key } }).catch(() => {});
       await reload(convoyeurId);
-      toast.success("Document envoyé : l'équipe Ligneo le vérifie.");
+      toast.success("Document envoyé");
     } catch (err) {
       console.error("[convoyeur.documents] upload", err);
-      toast.error(messageErreurDepot(err), { duration: 7000 });
+      toast.error(err instanceof Error ? err.message : "Envoi impossible");
     } finally {
       setUploadingKey(null);
-      setUploadStep(null);
     }
   };
 
@@ -239,7 +210,7 @@ function ConvoyeurDocuments() {
             : `Valable jusqu'au ${rn.expiresAt.toLocaleDateString("fr-FR")}`,
         }
       : null;
-    const scanClass = "inline-flex min-h-[46px] items-center justify-center gap-2 rounded-2xl border border-[#d7dff0] bg-[#ffffff] px-3 text-sm font-semibold text-[#1c2c58] active:scale-[.98]";
+    const scanClass = "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[rgba(20,184,102,.4)] bg-white px-2 text-[12.5px] font-bold text-[#0b7a45] active:scale-[.98]";
     return (
       <DocCardView
         key={override?.id ?? spec.key + (extra?.add ? "-add" : "")}
@@ -254,7 +225,6 @@ function ConvoyeurDocuments() {
         refusMotif={d?.motif_refus}
         renewal={renewal}
         uploading={uploadingKey === spec.key}
-        uploadStep={uploadingKey === spec.key ? uploadStep : null}
         onPreview={d ? () => void openPreview(d) : undefined}
         scanClass={scanClass}
         uploadInput={
@@ -263,12 +233,12 @@ function ConvoyeurDocuments() {
             type="file"
             accept="image/*,application/pdf"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) void handleUpload(spec, f); }}
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(spec, f); }}
           />
         }
         scanButton={
           <button type="button" className={scanClass} onClick={() => setScanFor(spec)}>
-            <ScanLine size={16} /> Scanner
+            <ScanLine size={15} /> Scanner
           </button>
         }
       />
@@ -287,8 +257,7 @@ function ConvoyeurDocuments() {
   return (
     <div className="space-y-4 pb-6">
       <div className="px-1">
-        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-[#0a1638]">Mes documents</h1>
-        <p className="mt-0.5 text-sm text-[#5a6788]">Vos pièces officielles et votre contrat, au même endroit.</p>
+        <h1 className="text-[25px] font-extrabold leading-tight tracking-tight text-[#08243f]">Documents</h1>
       </div>
 
       {!convoyeurId && (
@@ -303,9 +272,25 @@ function ConvoyeurDocuments() {
 
       <ProgressHero done={validatedCount} total={requiredCount} items={heroItems} />
 
-      <IdVerifyCard />
+      <div className="flex gap-2.5">
+        <IdVerifyCard />
+        <MonContratCard />
+      </div>
 
-      <MonContratCard />
+      <CollapsibleSection title="Pièces obligatoires" count={`${validatedCount} / ${requiredCount}`} warn={validatedCount < requiredCount}>
+        {requiredDocs.map((d) => renderDoc(d))}
+      </CollapsibleSection>
+
+      {optionalDocs.length > 0 && (
+        <CollapsibleSection title="Si vous êtes indépendant" count={optionalDocs.filter((d) => isConvoyeurDocApproved(docs[d.key]?.statut_validation)).length + " / " + optionalDocs.length} defaultOpen={false}>
+          {optionalDocs.map((d) => renderDoc(d))}
+        </CollapsibleSection>
+      )}
+
+      <CollapsibleSection title="Autres documents" count={autres.length} defaultOpen={false}>
+        {autres.map((d) => renderDoc(autreSpec, d, { label: "Document complémentaire", onDelete: () => void deleteAutre(d) }))}
+        {renderDoc(autreSpec, undefined, { label: "Ajouter un document", add: true })}
+      </CollapsibleSection>
 
       <ProfileCardView avatarUrl={avatarUrl} uploading={uploadingKey === "__avatar"}>
         <input
@@ -317,25 +302,11 @@ function ConvoyeurDocuments() {
         />
       </ProfileCardView>
 
-      <SectionTitle>Pièces obligatoires</SectionTitle>
-      <div className="space-y-3">{requiredDocs.map((d) => renderDoc(d))}</div>
-
-      {optionalDocs.length > 0 && (<>
-        <SectionTitle>Si vous êtes indépendant</SectionTitle>
-        <div className="space-y-3">{optionalDocs.map((d) => renderDoc(d))}</div>
-      </>)}
-
-      <SectionTitle>Autres documents</SectionTitle>
-      <div className="space-y-3">
-        {autres.map((d) => renderDoc(autreSpec, d, { label: "Document complémentaire", onDelete: () => void deleteAutre(d) }))}
-        {renderDoc(autreSpec, undefined, { label: "Ajouter un autre document", add: true })}
-      </div>
-
       {scanFor && (
         <div className="drv2">
           <DocumentScanner
             onCancel={() => setScanFor(null)}
-            onScanned={async (file) => { const k = scanFor; setScanFor(null); await handleUpload(k, file, "scanner"); }}
+            onScanned={async (file) => { const k = scanFor; setScanFor(null); await handleUpload(k, file); }}
           />
         </div>
       )}
