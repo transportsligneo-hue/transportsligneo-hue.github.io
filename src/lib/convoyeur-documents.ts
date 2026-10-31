@@ -9,8 +9,7 @@ export interface ConvoyeurDocSpec {
 }
 
 export const CONVOYEUR_DOC_TYPES: ConvoyeurDocSpec[] = [
-  { key: "permis", label: "Permis de conduire (recto)", required: true, hint: "Le devant du permis, en entier et lisible." },
-  { key: "permis_verso", label: "Permis de conduire (verso)", required: true, hint: "Le dos du permis, avec les catégories et dates." },
+  { key: "permis", label: "Permis de conduire", required: true },
   { key: "identite", label: "Pièce d'identité (CNI recto)", required: true },
   { key: "identite_verso", label: "Pièce d'identité (CNI verso)", required: true },
   { key: "rib", label: "RIB", required: true },
@@ -27,7 +26,7 @@ const DOC_ALIASES: Record<string, string> = {
   identite_recto: "identite",
   carte_identite: "identite",
   permis_recto: "permis",
-  permis_dos: "permis_verso",
+  permis_verso: "permis",
   permis_photo: "permis",
   rc_pro: "assurance",
   assurance_rc_pro: "assurance",
@@ -48,14 +47,9 @@ export function getConvoyeurDocLabel(type: string | null | undefined): string {
   return CONVOYEUR_DOC_TYPES.find((doc) => doc.key === normalized)?.label ?? type ?? "Document";
 }
 
-/** Tous les types sont affichés ; KBIS et attestation de vigilance ne sont « requis » que pour les indépendants. */
-export function getVisibleConvoyeurDocTypes(typeConvoyeur: string | null | undefined): ConvoyeurDocSpec[] {
-  const indep = typeConvoyeur === "independant";
-  return CONVOYEUR_DOC_TYPES.map((doc) =>
-    doc.independantOnly && !indep
-      ? { ...doc, required: false, hint: [doc.hint, "Pour les convoyeurs indépendants."].filter(Boolean).join(" ") }
-      : doc,
-  );
+/** Tous les convoyeurs sont indépendants : KBIS et attestation de vigilance sont requis pour tous. */
+export function getVisibleConvoyeurDocTypes(_typeConvoyeur?: string | null): ConvoyeurDocSpec[] {
+  return CONVOYEUR_DOC_TYPES;
 }
 
 export function getRequiredConvoyeurDocTypes(typeConvoyeur: string | null | undefined): ConvoyeurDocSpec[] {

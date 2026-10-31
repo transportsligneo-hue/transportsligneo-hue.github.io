@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
 import { Ic, Plate } from "@/components/driver2/icons";
+import { useLivraisonTimes, livraisonLabel } from "@/lib/livraison-times";
 import { InfosLigneoBar } from "@/components/driver2/InfosLigneo";
 import { useDriverIdentity } from "@/hooks/useDriverIdentity";
 import heroCar from "@/assets/driver-v2/hero.jpg";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/convoyeur/")({
 
 interface HomeMission {
   id: string;
+  trajetId?: string | null;
   statut: string;
   trajet: {
     depart: string;
@@ -114,7 +116,7 @@ function ConvoyeurDashboard() {
           .select("depart, arrivee, date_trajet, heure_trajet, marque, modele, immatriculation")
           .eq("id", a.trajet_id)
           .maybeSingle();
-        enriched.push({ id: a.id, statut: a.statut, trajet: (t as unknown as HomeMission["trajet"]) ?? null });
+        enriched.push({ id: a.id, trajetId: a.trajet_id as string | null, statut: a.statut, trajet: (t as unknown as HomeMission["trajet"]) ?? null });
       }
 
       // Semaine en cours (lundi → dimanche) : nombre de missions par jour.
@@ -142,6 +144,9 @@ function ConvoyeurDashboard() {
       setLoading(false);
     })();
   }, [user]);
+
+  const livTimes = useLivraisonTimes([next?.trajetId]);
+  const livLabel = livraisonLabel(livTimes[next?.trajetId ?? ""], next?.trajet?.date_trajet);
 
   if (loading) {
     return <DriverLoader full label="" />;
@@ -187,8 +192,8 @@ function ConvoyeurDashboard() {
               {when && <span className="chipx"><Ic n="clock" s={12} /> {when}</span>}
             </div>
             <div className="nmr">
-              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Enlèvement</small><b>{t.depart}</b></div></div>
-              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Livraison</small><b>{t.arrivee}</b></div></div>
+              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Enlèvement{t.heure_trajet && <em className="nm-hh">{t.heure_trajet.slice(0, 5).replace(":", "h")}</em>}</small><b>{t.depart}</b></div></div>
+              <div className="nmr-s"><i className="nmr-d" /><div className="nmr-t"><small>Livraison{livLabel && <em className="nm-hh">{livLabel}</em>}</small><b>{t.arrivee}</b></div></div>
             </div>
             <div className="row" style={{ marginTop: 14, gap: 8 }}>
               {(t.marque || t.modele) && <span className="chipx"><Ic n="car" s={12} /> {[t.marque, t.modele].filter(Boolean).join(" ")}</span>}
