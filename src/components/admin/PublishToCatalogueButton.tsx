@@ -20,7 +20,7 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
   const [expiresH, setExpiresH] = useState(168);
   const [busy, setBusy] = useState(false);
   const [equip, setEquip] = useState<string[]>([]);
-  const [carburant, setCarburant] = useState<"rembourse" | "plein">("rembourse");
+  const [carburant, setCarburant] = useState<"" | "rembourse" | "plein">("");
   const [miseEnMain, setMiseEnMain] = useState(false);
   const [auction, setAuction] = useState(false);
   const [plafond, setPlafond] = useState("");
@@ -39,7 +39,7 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
     const db = supabase as unknown as { from: (t: string) => any };
     const { error: e2 } = await db.from("trajets").update({
       equipements_requis: equip,
-      carburant_mode: carburant,
+      carburant_mode: carburant || null,
       mise_en_main: miseEnMain,
       enchere_active: auction,
       enchere_plafond: auction && plafond ? Number(plafond) : null,
@@ -95,8 +95,9 @@ export function PublishToCatalogueButton({ trajetId, onDone, variant = "button",
               ))}
             </div>
             <label className="block text-xs font-semibold text-pro-text-soft mb-1">Carburant</label>
-            <select value={carburant} onChange={(e) => setCarburant(e.target.value as "rembourse" | "plein")}
+            <select value={carburant} onChange={(e) => setCarburant(e.target.value as "" | "rembourse" | "plein")}
               className="w-full mb-3 px-3 py-2 rounded-lg border border-pro-border text-sm">
+              <option value="">Aucun (carburant compris, rien d'affiché)</option>
               <option value="rembourse">Carburant remboursé</option>
               <option value="plein">Plein fourni</option>
             </select>
