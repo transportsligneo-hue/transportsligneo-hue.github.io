@@ -883,11 +883,13 @@ export const esignHandoffSubmit = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { S, supabaseAdmin, r } = await handoffCheck(data.ht);
     const bytes = S.b64ToBytes(data.signaturePng.split(",")[1]);
+    // le paraphe est déposé AVANT la signature : l'ordinateur surveille la signature, il ne doit jamais la voir sans le paraphe
+    if (data.initialsPng) {
+      const pu = await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id).replace(/\.png$/, "-p.png"), S.b64ToBytes(data.initialsPng.split(",")[1]), { contentType: "image/png", upsert: true });
+      if (pu.error) throw new Error("Envoi du paraphe impossible, réessayez.");
+    }
     const up = await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id), bytes, { contentType: "image/png", upsert: true });
     if (up.error) throw new Error("Envoi impossible, réessayez.");
-    if (data.initialsPng) {
-      await supabaseAdmin.storage.from(S.BUCKET).upload(handoffPath(r.id).replace(/\.png$/, "-p.png"), S.b64ToBytes(data.initialsPng.split(",")[1]), { contentType: "image/png", upsert: true });
-    }
     try { await S.logEvent(r.id, "signature_drawn_on_phone", {}, reqMeta()); } catch { /* journal facultatif */ }
     return { ok: true };
   });
