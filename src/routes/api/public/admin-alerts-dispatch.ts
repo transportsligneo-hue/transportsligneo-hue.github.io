@@ -36,6 +36,48 @@ const LABELS: Record<string, string> = {
   b2b: 'Demande professionnelle',
 }
 
+/**
+ * Push (appli native + navigateur) vers tous les admins et super admins, pour chaque
+ * notification admin pas encore poussée. Indépendant des emails : un échec d'un côté
+ * ne bloque jamais l'autre. Idempotent grâce à `push_sent_at`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function dispatchPush(supabase: any) {
+  try {
+    const since = new Date(Date.now() - MAX_AGE_HOURS * 3_600_000).toISOString()
+    const { data: pending, error } = await supabase
+      .from('admin_notifications')
+      .select('id, titre, message, link')
+      .is('push_sent_at', null)
+      .gte('created_at', since)
+      .order('created_at', { ascending: true })
+      .limit(MAX_BATCH)
+    if (error || !pending?.length) return { push: 0, error: error?.message }
+
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .in('role', ['admin', 'super_admin'])
+      .eq('actif', true)
+    const userIds: string[] = [...new Set<string>((roles ?? []).map((r: { user_id: string }) => r.user_id))]
+    if (!userIds.length) return { push: 0 }
+
+    const { sendPushToUser } = await import('@/lib/push/send.server')
+    let done = 0
+    for (const n of pending as Array<{ id: string; titre: string; message: string | null; link: string | null }>) {
+      const url = n.link && n.link.startsWith('/') ? n.link : '/admin/notifications'
+      const payload = { title: (n.titre || 'Transports Ligneo').slice(0, 120), body: n.message?.slice(0, 300) ?? undefined, url, tag: `admin-notif-${n.id}` }
+      await Promise.allSettled(userIds.map((uid) => sendPushToUser(uid, payload)))
+      await supabase.from('admin_notifications').update({ push_sent_at: new Date().toISOString() }).eq('id', n.id)
+      done += 1
+    }
+    return { push: done }
+  } catch (e) {
+    console.warn('[admin-alerts-dispatch] push', e)
+    return { push: 0 }
+  }
+}
+
 async function handle(request: Request) {
   const supabaseUrl = sbServerUrl()
   const serviceKey = sbServiceRoleKey()
@@ -56,6 +98,8 @@ async function handle(request: Request) {
     return new Response('Unauthorized', { status: 401 })
   }
 
+  const pushResult = await dispatchPush(supabase)
+
   const { data: settingRow } = await supabase
     .from('app_settings')
     .select('value')
@@ -66,10 +110,10 @@ async function handle(request: Request) {
     enabled?: boolean
     emails?: string[]
   }
-  if (setting.enabled === false) return Response.json({ skipped: 'disabled' })
+  if (setting.enabled === false) return Response.json({ skipped: 'disabled', ...pushResult })
 
   const recipients = (setting.emails ?? []).filter((e) => typeof e === 'string' && e.includes('@'))
-  if (!recipients.length) return Response.json({ skipped: 'no_recipients' })
+  if (!recipients.length) return Response.json({ skipped: 'no_recipients', ...pushResult })
 
   const since = new Date(Date.now() - MAX_AGE_HOURS * 3_600_000).toISOString()
   const { data: pending, error } = await supabase
@@ -81,7 +125,7 @@ async function handle(request: Request) {
     .limit(MAX_BATCH)
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
-  if (!pending?.length) return Response.json({ sent: 0 })
+  if (!pending?.length) return Response.json({ sent: 0, ...pushResult })
 
   let sent = 0
   for (const notif of pending as Array<Record<string, any>>) {
@@ -111,7 +155,7 @@ async function handle(request: Request) {
     sent += 1
   }
 
-  return Response.json({ sent, recipients: recipients.length })
+  return Response.json({ sent, recipients: recipients.length, ...pushResult })
 }
 
 export const Route = createFileRoute('/api/public/admin-alerts-dispatch')({
