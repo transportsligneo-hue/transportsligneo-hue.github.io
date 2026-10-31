@@ -35,11 +35,14 @@ import {
   IdCard,
 } from "lucide-react";
 
-function BlocTitre({ icon: Icon, titre }: { icon: React.ComponentType<{ size?: number; className?: string }>; titre: string }) {
+function BlocTitre({ icon: Icon, titre, manque = 0 }: { icon: React.ComponentType<{ size?: number; className?: string }>; titre: string; manque?: number }) {
   return (
-    <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-      <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#eaf0ff] text-[#2F5FFF]"><Icon size={15} /></span>
-      {titre}
+    <div className="mb-4 flex items-center gap-3 text-[15px] font-bold text-[#0a1638]">
+      <span className="grid h-9 w-9 place-items-center rounded-xl text-white shadow-[0_8px_18px_-8px_rgba(47,95,255,.8)]" style={{ background: "linear-gradient(135deg,#2F5FFF,#5de0ff)" }}><Icon size={17} /></span>
+      <span className="flex-1">{titre}</span>
+      {manque > 0
+        ? <span className="rounded-full bg-[#fff1d6] px-2.5 py-0.5 text-[11px] font-bold text-[#b36b00]">{manque} à compléter</span>
+        : <span className="rounded-full bg-[#e1f7ec] px-2.5 py-0.5 text-[11px] font-bold text-[#0b7a45]">Complet</span>}
     </div>
   );
 }
@@ -518,7 +521,9 @@ function AdminConvoyeurDetail() {
     return { label: "Compte non vérifié", tone: "warning" as const };
   })();
 
-  const inp = "w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--admin-accent)]/30";
+  const inp = "w-full rounded-xl border border-[#d9e2f5] bg-[#f8faff] px-3.5 py-2.5 text-sm text-[#0a1638] placeholder:text-[#a3b0cf] focus:border-[#2F5FFF] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#2F5FFF]/10";
+  const champsCles = [form.prenom, form.nom, form.date_naissance, form.lieu_naissance, form.telephone, form.adresse_rue, form.code_postal, form.ville, form.siret, form.permis, form.permis_numero, form.permis_date_obtention];
+  const rempli = champsCles.filter((v) => !!String(v ?? "").trim()).length;
   const isSuspended = conv.statut === "suspendu";
 
   return (
@@ -654,9 +659,21 @@ function AdminConvoyeurDetail() {
 
         <TabsContent value="overview" className="mt-6">
           <AdminSection title="Coordonnées" description="Modifiez les champs puis enregistrez.">
-            <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <BlocTitre icon={User} titre="Identité" />
+            <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
+            <div className="xl:col-span-2 rounded-2xl border border-[#dbe5ff] bg-gradient-to-r from-[#f3f6ff] to-[#effcff] p-4">
+              <div className="flex items-center justify-between gap-3 text-sm font-bold text-[#0a1638]">
+                <span>Dossier renseigné</span>
+                <span className="text-[#2F5FFF]">{rempli} / {champsCles.length}</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-white">
+                <div className="h-full rounded-full" style={{ width: `${Math.round((rempli / champsCles.length) * 100)}%`, background: "linear-gradient(90deg,#2F5FFF,#5de0ff)" }} />
+              </div>
+              {rempli < champsCles.length && (
+                <p className="mt-2 text-xs text-[#5a6788]">Un convoyeur invité par email ne renseigne que son nom, son téléphone et son mot de passe : il complète le reste depuis son profil dans l'appli. Vous pouvez aussi remplir ici.</p>
+              )}
+            </div>
+            <div className="xl:col-span-2 rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
+              <BlocTitre icon={User} titre="Identité" manque={[form.prenom, form.nom, form.date_naissance, form.lieu_naissance].filter((v) => !v).length} />
               <AdminField label="Photo de profil">
                 <AdminAvatarUploader
                   ownerUserId={conv.user_id ?? null}
@@ -683,8 +700,8 @@ function AdminConvoyeurDetail() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <BlocTitre icon={AtSign} titre="Contact" />
+            <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
+              <BlocTitre icon={AtSign} titre="Contact" manque={[form.telephone].filter((v) => !v).length} />
               <AdminField label="Email (connexion)">
                 <div className="flex items-center gap-2">
                   <input className={`${inp} bg-slate-50`} value={conv.email ?? ""} readOnly />
@@ -706,8 +723,8 @@ function AdminConvoyeurDetail() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <BlocTitre icon={MapPin} titre="Adresse actuelle" />
+            <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
+              <BlocTitre icon={MapPin} titre="Adresse actuelle" manque={[form.adresse_rue, form.code_postal, form.ville].filter((v) => !v).length} />
               <AdminField label="Rue et numéro">
                 <input className={inp} value={form.adresse_rue} onChange={(e) => setForm({ ...form, adresse_rue: e.target.value })} placeholder="12 rue des Lilas" />
               </AdminField>
@@ -723,16 +740,16 @@ function AdminConvoyeurDetail() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <BlocTitre icon={Building2} titre="Entreprise" />
+            <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
+              <BlocTitre icon={Building2} titre="Entreprise" manque={[form.siret].filter((v) => !v).length} />
               <AdminField label="N° SIRET">
                 <input className={inp} inputMode="numeric" maxLength={17} value={form.siret} onChange={(e) => setForm({ ...form, siret: e.target.value })} placeholder="000 000 000 00000" />
                 <SiretBadge admin siret={form.siret} />
               </AdminField>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <BlocTitre icon={IdCard} titre="Permis de conduire" />
+            <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
+              <BlocTitre icon={IdCard} titre="Permis de conduire" manque={[form.permis, form.permis_numero, form.permis_date_obtention].filter((v) => !v).length} />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <AdminField label="Catégories">
                   <input className={inp} value={form.permis} onChange={(e) => setForm({ ...form, permis: e.target.value })} placeholder="B, C, EC..." />
@@ -746,13 +763,14 @@ function AdminConvoyeurDetail() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+            <div className="rounded-2xl border border-[#e3e9f7] bg-white p-5 shadow-[0_14px_34px_-24px_rgba(20,40,110,.45)]">
               <BlocTitre icon={CalendarDays} titre="Disponibilité" />
               <AdminField label="Disponibilité">
                 <input className={inp} value={form.disponibilite} onChange={(e) => setForm({ ...form, disponibilite: e.target.value })} />
               </AdminField>
             </div>
 
+            <div className="xl:col-span-2 grid gap-4 sm:grid-cols-[2fr_1fr]">
             <AdminField label="Notes internes">
               <textarea
                 className={`${inp} min-h-[80px]`}
@@ -764,8 +782,9 @@ function AdminConvoyeurDetail() {
             <AdminField label="Inscrit le">
               <span className="inline-flex items-center gap-1.5"><Calendar size={14} className="text-slate-400" /> {new Date(conv.created_at).toLocaleDateString("fr-FR")}</span>
             </AdminField>
+            </div>
 
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+            <div className="xl:col-span-2 flex flex-wrap gap-2 pt-2 border-t border-slate-100">
               <button
                 onClick={saveProfile}
                 disabled={!dirty || saving}

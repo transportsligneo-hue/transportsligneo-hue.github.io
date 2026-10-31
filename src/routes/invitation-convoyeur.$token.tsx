@@ -131,8 +131,8 @@ function InvitationConvoyeurPage() {
       }
 
       setDone(true);
-      toast.success("Compte créé — bienvenue chez Transports Ligneo !");
-      setTimeout(() => navigate({ to: "/convoyeur" }), 1400);
+      toast.success("Compte créé — complétez maintenant votre profil pour recevoir des missions.");
+      setTimeout(() => navigate({ to: "/convoyeur/profil" }), 1400);
     } finally {
       setSubmitting(false);
     }
