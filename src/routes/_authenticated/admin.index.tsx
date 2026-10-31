@@ -24,6 +24,7 @@ import { ExploitationOverview } from "@/components/admin/dashboard/ExploitationO
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
+import { AdminNotifButton } from "@/components/admin/AdminNotifButton";
 import { SmsCreditsCard } from "@/components/admin/SmsCreditsCard";
 import { ApiUsageCards } from "@/components/admin/ApiUsageCards";
 import { isAdminAppShell } from "@/lib/app-mode";
@@ -298,6 +299,7 @@ function AdminDashboard() {
         eyebrow="Espace administration"
         title="Tableau"
         highlight="de bord"
+        actions={<AdminNotifButton />}
         stats={[
           { label: "Aujourd'hui", value: new Date().toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }) },
           { label: "À traiter", value: aTraiter, tone: aTraiter > 0 ? "warn" : "default" },
