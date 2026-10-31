@@ -38,6 +38,7 @@ const SECTIONS: SectionDef[] = [
     fields: [
       { key: "date_trajet", label: "Date de mission", type: "date" },
       { key: "heure_trajet", label: "Heure de prise en charge", type: "time" },
+      { key: "heure_livraison", label: "Heure de livraison", type: "time", hint: "Affichée au convoyeur sur sa mission et dans le catalogue." },
       { key: "date_souhaitee", label: "Date souhaitée (client)", type: "date" },
     ],
   },
