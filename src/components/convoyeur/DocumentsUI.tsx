@@ -55,7 +55,7 @@ export function ContratCardView(p: {
   const sub = p.signed ? `Le ${p.signedAt ? new Date(p.signedAt).toLocaleDateString("fr-FR") : "—"}`
     : p.blocked ? `Déposez d'abord : ${p.missing.join(", ")}`
     : p.expired ? "Lien expiré, demandez-en un nouveau" : "À lire et signer";
-  const btn = "inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-2 text-[12.5px] font-bold active:scale-[.98] disabled:opacity-60";
+  const btn = "inline-flex min-h-[40px] min-w-0 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-1.5 text-[12px] font-bold active:scale-[.98] disabled:opacity-60";
   return (
     <div className={CARD + " flex min-w-0 flex-1 basis-0 flex-col gap-2 p-3"} style={{ borderColor: LINE }}>
       <div className="flex items-center gap-2.5">
@@ -68,9 +68,9 @@ export function ContratCardView(p: {
         </div>
       </div>
       {p.signed ? (
-        <div className="flex gap-1.5">
+        <div className="flex w-full min-w-0 gap-1.5">
           <button type="button" onClick={() => p.onDownload("signed")} disabled={p.busy} className={btn + " text-[#04261a]"} style={{ background: GREEN_BTN }}>
-            <Download size={15} /> Contrat
+            <Download size={14} /> Contrat
           </button>
           <button type="button" onClick={() => p.onDownload("dossier")} disabled={p.busy} className={btn + " border-[1.5px] bg-white text-[#0b7a45]"} style={{ borderColor: "rgba(20,184,102,.4)" }}>
             Preuve
