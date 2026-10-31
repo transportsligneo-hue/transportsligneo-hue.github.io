@@ -2665,3 +2665,14 @@ html.theme-dark .drv2 .pp2-no{background:rgba(255,255,255,.05);color:#fca5a5}
 .drv2 .dl-brand{margin-top:0!important}
 .drv2 .dl p:empty{display:none}
 .drv2 .dl-wrap img{box-shadow:0 10px 26px rgba(20,184,102,.4)}
+
+/* Heures d'enlèvement / livraison sur les cartes mission + plaque jamais coupée */
+.drv2 .dml-hh,.drv2 .nm-hh{font-style:normal;margin-left:8px;padding:1px 8px;border-radius:999px;background:rgba(20,184,102,.14);color:#0b7a45;font-size:11.5px;font-weight:800;letter-spacing:0;text-transform:none}
+.drv2.drv2 .nm .row{flex-wrap:wrap}
+.drv2.drv2 .nm .pb{flex:none;max-width:100%}
+.drv2.drv2 .nm .chipx{min-width:0;max-width:100%}
+.drv2 .dml-veh{flex-wrap:wrap}.drv2 .dml-veh .pb{flex:none;max-width:100%}
+
+/* Logo de démarrage : le halo vert ne doit jamais passer au-dessus du logo (il le verdissait) */
+.drv2 .dl-wrap img{position:relative;z-index:1}
+.drv2 .dl-halo{z-index:0;pointer-events:none}
