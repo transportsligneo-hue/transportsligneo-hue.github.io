@@ -126,8 +126,9 @@ function ConvoyeurDocuments() {
       await avecReprise(async () => {
         const { error } = await supabase.storage
           .from("convoyeur-documents")
-          .upload(path, prep.file, { upsert: true, contentType: prep.mime });
-        if (error) throw error;
+          .upload(path, prep.file, { upsert: false, contentType: prep.mime });
+        // Chemin unique : « existe déjà » = un envoi précédent a abouti (reprise réseau), pas une erreur.
+        if (error && !/already exists|duplicate|resource already/i.test(error.message)) throw error;
       });
 
       // 4) enregistrement du nouveau document AVANT de retirer l'ancien (rien n'est jamais perdu)
