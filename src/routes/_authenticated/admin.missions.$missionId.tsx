@@ -1512,7 +1512,7 @@ function AdminMissionDetail() {
       </Card>
 
       {/* === Onglets de la mission (mise en page : mêmes blocs, rangés par thème) === */}
-      <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-pro-bg/90 backdrop-blur" role="tablist" aria-label="Sections de la mission">
+      <div className="mis-tabs sticky top-14 lg:top-0 z-20 -mx-1 px-1 py-2 bg-pro-bg/90 backdrop-blur" role="tablist" aria-label="Sections de la mission">
         <div className="flex gap-1 overflow-x-auto rounded-2xl border border-pro-border bg-pro-surface p-1 shadow-sm">
           {([
             ["apercu", "Vue d'ensemble"],
