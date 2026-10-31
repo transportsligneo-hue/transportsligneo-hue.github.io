@@ -28,7 +28,6 @@ import {
   TextInput,
   FormField,
 } from "@/components/admin/AdminUI";
-import { IdVerifBadge, useIdVerifications } from "@/components/admin/IdVerifBadge";
 import {
   StatutConvoyeurBadge,
   resolveStatutConvoyeur,
@@ -178,7 +177,6 @@ function AdminConvoyeurs() {
   }, [enriched, allDocs]);
 
   // Filtrage
-  const idVerif = useIdVerifications(convoyeurs.map((c) => c.user_id));
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return enriched.filter((c) => {
@@ -338,7 +336,9 @@ function AdminConvoyeurs() {
       const warn = missions > 0 || paiements > 0 ? `\n\nSes ${missions} mission(s) et ${paiements} paiement(s) de démonstration seront supprimés aussi.` : "";
       if (!(await confirmToast(`Supprimer définitivement ${c.prenom} ${c.nom} (${c.email}) ? Son compte et ses documents seront effacés. Action irréversible.${warn}`))) return;
 
-      if (c.user_id) {
+      // Garde-fou doublon : si une autre fiche utilise le même compte de connexion, on ne supprime que cette fiche.
+      const sharedLogin = !!c.user_id && convoyeurs.some((x) => x.id !== c.id && x.user_id === c.user_id);
+      if (c.user_id && !sharedLogin) {
         const { data, error } = await invokeAdminUserAction({ action: "delete", user_id: c.user_id } as any);
         if (error || data?.error) {
           toast.error(data?.error ?? "Suppression du compte impossible");
@@ -714,7 +714,6 @@ function AdminConvoyeurs() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <StatutConvoyeurBadge statut={c.statutUnifie} />
-                  {c.user_id && <IdVerifBadge status={idVerif[c.user_id]?.status} />}
                   <span className="dvx-badge violet">Indépendant</span>
                   {c.isDemo && <span className="dvx-badge">Démo / test</span>}
                   {c.isDup && !c.isDemo && <span className="dvx-badge dup">Doublon</span>}
