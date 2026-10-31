@@ -131,11 +131,18 @@ function wrap(text: string, font: { widthOfTextAtSize: (t: string, s: number) =>
 const paris = (iso: string) =>
   new Date(iso).toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "long", timeStyle: "medium" });
 
+/** « Olivier Gourlaouen » → « O.G. » ; « Jean-Marc Dupont » → « J.M.D. ». */
+export function initialesDe(nom: string): string {
+  return nom.trim().split(/[\s-]+/).filter(Boolean).map((p) => p[0]!.toUpperCase() + ".").join("").slice(0, 8);
+}
+
 export async function buildSignedPdf(opts: {
   original: Uint8Array;
   signaturePng: Uint8Array;
   /** Paraphe (initiales) apposé en bas à droite de chaque page du document d'origine. */
   initialsPng?: Uint8Array;
+  /** Initiales écrites (ex. « O.G. ») quand le signataire n'a pas dessiné de paraphe. Jamais la signature. */
+  initialsText?: string;
   req: { id: string; title: string; signer_name: string; signer_email: string; signer_company?: string | null; doc_sha256: string; consent_version: string };
   signedAt: string; ip: string | null; method: string;
   /** "contrat_convoyeur" : la signature est aussi apposée dans l'encadré « Pour le prestataire » de la dernière page du contrat. */
@@ -144,20 +151,35 @@ export async function buildSignedPdf(opts: {
   const pdf = await PDFDocument.load(opts.original);
   const f = await pdf.embedFont(StandardFonts.Helvetica);
   const b = await pdf.embedFont(StandardFonts.HelveticaBold);
-  if (opts.initialsPng) {
+  // Paraphe = INITIALES en bas de chaque page. Pour un contrat, la dernière page porte
+  // la signature complète (encadré « Pour le prestataire ») : pas de paraphe dessus.
+  {
+    const all = pdf.getPages();
+    const pagesParaphe = opts.kind === "contrat_convoyeur" && all.length > 1 ? all.slice(0, -1) : all;
+    const tilt = [-2.5, 1.2, -1, 2];
+    const dy = [0, 2, -1, 1];
     try {
-      const ini = await pdf.embedPng(opts.initialsPng);
-      const all = pdf.getPages();
-      const maxW = 78, maxH = 34;
-      const sc = Math.min(maxW / ini.width, maxH / ini.height);
-      const iw = ini.width * sc, ih = ini.height * sc;
-      // paraphe « au stylo » : encre seule (fond transparent), en bas à droite, juste au-dessus du pied de page
-      // légère variation d'une page à l'autre, comme un vrai paraphe fait à la main
-      const tilt = [-2.5, 1.2, -1, 2];
-      const dy = [0, 2, -1, 1];
-      all.forEach((pg, i) => {
-        pg.drawImage(ini, { x: pg.getWidth() - iw - 52 + (i % 3), y: 38 + dy[i % 4]!, width: iw, height: ih, rotate: degrees(tilt[i % 4]!) });
-      });
+      if (opts.initialsPng) {
+        const ini = await pdf.embedPng(opts.initialsPng);
+        const maxW = 64, maxH = 28;
+        const sc = Math.min(maxW / ini.width, maxH / ini.height);
+        const iw = ini.width * sc, ih = ini.height * sc;
+        // encre seule (fond transparent), en bas à droite, légère variation comme un vrai paraphe
+        pagesParaphe.forEach((pg, i) => {
+          pg.drawImage(ini, { x: pg.getWidth() - iw - 52 + (i % 3), y: 38 + dy[i % 4]!, width: iw, height: ih, rotate: degrees(tilt[i % 4]!) });
+        });
+      } else if (opts.initialsText?.trim()) {
+        const fi = await pdf.embedFont(StandardFonts.HelveticaBoldOblique);
+        const txt = win(opts.initialsText.trim());
+        const size = 15;
+        const ink = rgb(0.09, 0.17, 0.55);
+        const w = fi.widthOfTextAtSize(txt, size);
+        pagesParaphe.forEach((pg, i) => {
+          const x = pg.getWidth() - w - 58 + (i % 3), y = 44 + dy[i % 4]!;
+          pg.drawText(txt, { x, y, size, font: fi, color: ink, rotate: degrees(tilt[i % 4]! + 4) });
+          pg.drawLine({ start: { x: x - 2, y: y - 4 }, end: { x: x + w + 4, y: y - 2 }, thickness: 0.9, color: ink, opacity: 0.8 });
+        });
+      }
     } catch (e) { console.error("[esign] apposition des paraphes", e); }
   }
   if (opts.kind === "contrat_convoyeur") {
@@ -358,7 +380,8 @@ export async function ensureModernParaphe(requestId: string, meta: { ip?: string
   if (!r || r.status !== "signed" || !r.signed_doc_path || !r.signature_path) return false;
   const { data: evs } = await supabaseAdmin.from("esign_events").select("type, ip_address, payload").eq("request_id", requestId).order("seq");
   const events = (evs ?? []) as Array<{ type: string; ip_address: string | null; payload: any }>;
-  if (events.some((e) => e.type === "paraphe_restyled")) return false;
+  // déjà corrigé au rendu « initiales » : rien à faire
+  if (events.some((e) => e.type === "paraphe_initiales")) return false;
 
   const dl = async (p: string) => {
     const x = await supabaseAdmin.storage.from(BUCKET).download(p);
@@ -366,19 +389,23 @@ export async function ensureModernParaphe(requestId: string, meta: { ip?: string
   };
   const [original, oldSigned, sig] = await Promise.all([dl(r.doc_path), dl(r.signed_doc_path), dl(r.signature_path)]);
   if (!original || !oldSigned || !sig) return false;
-  // Paraphe dessiné à la main s'il existe ; sinon (anciens contrats aux initiales automatiques en cadre blanc),
-  // on reprend l'encre de la signature du signataire : rendu naturel, jamais de cadre.
-  const initials = (await dl(`${requestId}/paraphe.png`)) ?? sig;
+  // Paraphe dessiné à la main s'il existe ET qu'il n'est pas une copie de la signature
+  // (un ancien rendu recopiait la signature en bas de chaque page) ; sinon initiales écrites.
+  const parapheDessine = await dl(`${requestId}/paraphe.png`);
+  const vraiParaphe = parapheDessine && (await sha256Bytes(parapheDessine)) !== (await sha256Bytes(sig)) ? parapheDessine : null;
+  const dejaBon = vraiParaphe && events.some((e) => e.type === "paraphe_restyled") && r.kind !== "contrat_convoyeur";
+  if (dejaBon) return false;
 
   const signedEv = events.find((e) => e.type === "signed");
   const method = signedEv?.payload?.auth === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";
-  const rebuilt = await buildSignedPdf({ original, signaturePng: sig, initialsPng: initials, req: r, signedAt: r.signed_at, ip: signedEv?.ip_address ?? null, method, kind: r.kind });
+  const rebuilt = await buildSignedPdf({ original, signaturePng: sig, initialsPng: vraiParaphe ?? undefined, initialsText: initialesDe(r.signer_name ?? ""), req: r, signedAt: r.signed_at, ip: signedEv?.ip_address ?? null, method, kind: r.kind });
   const newHash = await sha256Bytes(rebuilt);
-  await supabaseAdmin.storage.from(BUCKET).upload(`${requestId}/paraphe.png`, initials, { contentType: "image/png", upsert: true });
+  // la copie de signature enregistrée comme « paraphe » est retirée
+  if (parapheDessine && !vraiParaphe) await supabaseAdmin.storage.from(BUCKET).remove([`${requestId}/paraphe.png`]);
   const up = await supabaseAdmin.storage.from(BUCKET).upload(r.signed_doc_path, rebuilt, { contentType: "application/pdf", upsert: true });
   if (up.error) return false;
   await supabaseAdmin.from("esign_requests").update({ signed_doc_sha256: newHash }).eq("id", requestId);
-  await logEvent(requestId, "paraphe_restyled", { previous_signed_doc_sha256: r.signed_doc_sha256, signed_doc_sha256: newHash, note: "Nouveau rendu du paraphe (encre seule, bas de page)" }, meta);
+  await logEvent(requestId, "paraphe_initiales", { previous_signed_doc_sha256: r.signed_doc_sha256, signed_doc_sha256: newHash, note: "Paraphe = initiales en bas de chaque page ; signature complète uniquement sur la dernière page" }, meta);
   const { data: head } = await supabaseAdmin.from("esign_events").select("hash").eq("request_id", requestId).order("seq", { ascending: false }).limit(1).single();
   const seal = await hmacSeal(`${requestId}|${newHash}|${head?.hash}|${r.signed_at}`);
   await supabaseAdmin.from("esign_requests").update({ seal }).eq("id", requestId);

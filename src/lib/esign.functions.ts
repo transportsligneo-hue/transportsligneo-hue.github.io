@@ -363,7 +363,8 @@ export const esignPublicSign = createServerFn({ method: "POST" })
     const signedAt = new Date().toISOString();
     const method = otp.channel === "sms" ? "Lien personnel + code SMS a usage unique" : "Lien personnel + code e-mail a usage unique";
     const initialsBytes = data.initialsPng ? S.b64ToBytes(data.initialsPng) : undefined;
-    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, initialsPng: initialsBytes, req: r as any, signedAt, ip: meta.ip, method, kind: r.kind });
+    // pas de paraphe dessiné : initiales écrites du signataire (jamais la signature en bas de page)
+    const signed = await S.buildSignedPdf({ original, signaturePng: sigBytes, initialsPng: initialsBytes, initialsText: S.initialesDe(r.signer_name ?? data.typedName ?? ""), req: r as any, signedAt, ip: meta.ip, method, kind: r.kind });
     const signedHash = await S.sha256Bytes(signed);
     const sigHash = await S.sha256Bytes(sigBytes);
 
