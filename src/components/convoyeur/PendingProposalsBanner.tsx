@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { messageErreurAcces } from "@/lib/acces-erreur";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -87,7 +88,7 @@ export function PendingProposalsBanner() {
       _attribution_id: id, _accept: accept, _reason: reason,
     });
     setBusy(null);
-    if (error) toast.error(error.message);
+    if (error) toast.error(messageErreurAcces(error.message));
     else { toast.success(accept ? "Mission acceptée !" : "Mission refusée"); fetchData(); }
   };
 

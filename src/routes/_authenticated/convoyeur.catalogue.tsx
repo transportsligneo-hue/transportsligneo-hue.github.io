@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { messageErreurAcces } from "@/lib/acces-erreur";
 import { PageSkeleton } from "@/components/driver2/PageSkeleton";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -334,7 +335,7 @@ function ConvoyeurCatalogue() {
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(messageErreurAcces(error.message));
       return;
     }
     toast.success(

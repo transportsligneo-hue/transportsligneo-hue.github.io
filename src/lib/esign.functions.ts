@@ -137,7 +137,7 @@ export const esignList = createServerFn({ method: "POST" })
     const supabaseAdmin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
     let q = supabaseAdmin
       .from("esign_requests")
-      .select("id, kind, title, ref_type, ref_id, signer_name, signer_email, signer_phone, signer_company, status, sent_at, opened_at, signed_at, declined_at, decline_reason, expires_at, signed_doc_path, dossier_path, last_reminder_at, created_at")
+      .select("id, kind, title, ref_type, ref_id, signer_name, signer_email, signer_phone, signer_company, status, sent_at, opened_at, signed_at, declined_at, decline_reason, expires_at, signed_doc_path, dossier_path, last_reminder_at, created_at, contrat_version")
       .order("created_at", { ascending: false })
       .limit(Math.min(data.limit ?? 100, 300));
     if (data.refType) q = q.eq("ref_type", data.refType);
@@ -498,12 +498,17 @@ export const esignMyContrat = createServerFn({ method: "POST" })
     const cid = await myConvoyeurId(context);
     if (!cid) return { exists: false as const };
     const { data: row } = await supabaseAdmin.from("esign_requests")
-      .select("id, status, title, signed_at, expires_at").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
+      .select("id, status, title, signed_at, expires_at, contrat_version").eq("kind", "contrat_convoyeur").eq("ref_type", "convoyeur").eq("ref_id", cid)
       .in("status", ["sent", "opened", "signed", "expired"]).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!row) return { exists: false as const };
+    const { data: vc } = await supabaseAdmin.rpc("contrat_version_courante");
+    const versionCourante = Number(vc ?? 1);
+    const version = Number(row.contrat_version ?? 1);
     const missing = row.status === "signed" ? [] : await S.missingConvoyeurDocs(cid);
     const expired = row.status === "expired" || (row.status !== "signed" && new Date(row.expires_at) < new Date());
-    return { exists: true as const, id: row.id as string, status: (expired ? "expired" : row.status) as string, title: row.title as string, signedAt: (row.signed_at ?? null) as string | null, missing };
+    // contrat signé dans une ancienne version : une nouvelle signature est requise
+    const outdated = row.status === "signed" && version < versionCourante;
+    return { exists: true as const, id: row.id as string, status: (expired ? "expired" : row.status) as string, title: row.title as string, signedAt: (row.signed_at ?? null) as string | null, missing, version, versionCourante, outdated };
   });
 
 /** Convoyeur : liens de téléchargement (5 min) de SON contrat signé et de son dossier de preuve. */

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, RefreshCw, Trash2, MessageSquare, Mail, Phone, Building2 } from "lucide-react";
+import { Eye, RefreshCw, Trash2, MessageSquare, Mail, Phone, Building2, Send } from "lucide-react";
 import {
   PageHeader,
   Card,
@@ -84,9 +84,24 @@ function AdminMessages() {
   const [composeTo, setComposeTo] = useState("");
 
 
+  // E-mails envoyés à la main (Nouvel email direct, fiche client/convoyeur)
+  type Envoi = { id: string; recipient_email: string; status: string; created_at: string; error_message: string | null; metadata: any };
+  const [envois, setEnvois] = useState<Envoi[]>([]);
+  const [envoiOuvert, setEnvoiOuvert] = useState<Envoi | null>(null);
+  const fetchEnvois = useCallback(async () => {
+    const { data } = await supabase
+      .from("email_send_log")
+      .select("id, recipient_email, status, created_at, error_message, metadata")
+      .eq("template_name", "message-manuel")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setEnvois(((data ?? []) as Envoi[]).filter((e) => e.metadata?.auto !== true));
+  }, []);
+  useEffect(() => { void fetchEnvois(); }, [fetchEnvois]);
+
   const fetchMessages = useCallback(async () => {
     let q = supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
-    if (filterType !== "all") q = q.eq("type_demande", filterType);
+    if (filterType !== "all" && filterType !== "envoyes") q = q.eq("type_demande", filterType);
     if (filterStatut !== "all") q = q.eq("statut", filterStatut);
     const { data } = await q;
     if (data) setMessages(data as ContactMessage[]);
@@ -139,7 +154,7 @@ function AdminMessages() {
                 </option>
               ))}
             </Select>
-            <IconButton onClick={fetchMessages} title="Actualiser">
+            <IconButton onClick={() => { void fetchMessages(); void fetchEnvois(); }} title="Actualiser">
               <RefreshCw size={15} />
             </IconButton>
           </>
@@ -152,7 +167,7 @@ function AdminMessages() {
             title="Envoi direct"
             description="Même éditeur que les campagnes, avec aperçu en direct — envoi ponctuel à un destinataire choisi manuellement."
           >
-            <DirectEmailComposer key={composeTo} defaultTo={composeTo} />
+            <DirectEmailComposer key={composeTo} defaultTo={composeTo} onSent={() => { void fetchEnvois(); setFilterType("envoyes"); }} />
           </AdminSection>
         </div>
       )}
@@ -183,9 +198,80 @@ function AdminMessages() {
             {TYPE_LABELS[t]} {filterType === "all" ? `(${counts[t] ?? 0})` : ""}
           </button>
         ))}
+        <button
+          onClick={() => setFilterType("envoyes")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+            filterType === "envoyes"
+              ? "bg-pro-accent text-white border-pro-accent"
+              : "bg-white border-pro-border text-pro-text-soft hover:bg-pro-bg-soft"
+          }`}
+        >
+          <Send size={12} /> Envoyés ({envois.length})
+        </button>
       </div>
 
-      {messages.length === 0 ? (
+      {filterType === "envoyes" ? (
+        envois.length === 0 ? (
+          <EmptyState icon={Send} title="Aucun e-mail envoyé" description="Les e-mails envoyés avec « Nouvel email direct » apparaîtront ici." />
+        ) : (
+          <Table>
+            <THead>
+              <TH>Destinataire</TH>
+              <TH className="hidden sm:table-cell">Objet</TH>
+              <TH className="hidden md:table-cell">Date</TH>
+              <TH>Statut</TH>
+              <TH className="text-right">Actions</TH>
+            </THead>
+            <tbody>
+              {envois.map((e) => {
+                const nom = [e.metadata?.prenom, e.metadata?.nom].filter(Boolean).join(" ");
+                const ok = e.status === "sent";
+                return (
+                  <TR key={e.id}>
+                    <TD>
+                      <p className="font-medium text-pro-text">{nom || e.recipient_email}</p>
+                      {nom && <p className="text-pro-muted text-xs truncate max-w-[220px]">{e.recipient_email}</p>}
+                    </TD>
+                    <TD className="hidden sm:table-cell text-pro-text-soft text-sm max-w-[320px] truncate">{e.metadata?.subject ?? "—"}</TD>
+                    <TD className="hidden md:table-cell text-pro-muted text-xs">
+                      {new Date(e.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                    </TD>
+                    <TD>
+                      <Badge tone={ok ? "success" : e.status === "suppressed" ? "neutral" : "warning"}>
+                        {ok ? "Envoyé" : e.status === "suppressed" ? "Désinscrit" : "Échec"}
+                      </Badge>
+                    </TD>
+                    <TD>
+                      <div className="flex items-center justify-end gap-1">
+                        <IconButton onClick={() => setEnvoiOuvert(e)} title="Voir l'e-mail" tone="primary"><Eye size={15} /></IconButton>
+                        <IconButton onClick={() => { setComposeTo(e.recipient_email); setComposing(true); }} title="Écrire à nouveau"><Mail size={15} /></IconButton>
+                      </div>
+                    </TD>
+                  </TR>
+                );
+              })}
+            </tbody>
+          </Table>
+        )
+      ) : null}
+
+      <Modal open={!!envoiOuvert} onClose={() => setEnvoiOuvert(null)} title={envoiOuvert?.metadata?.subject ?? "E-mail envoyé"} size="lg">
+        {envoiOuvert && (
+          <div className="space-y-3">
+            <p className="text-sm text-pro-text-soft">
+              À {envoiOuvert.recipient_email} · {new Date(envoiOuvert.created_at).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}
+            </p>
+            {envoiOuvert.error_message && <p className="text-sm text-red-600">{envoiOuvert.error_message}</p>}
+            {envoiOuvert.metadata?.html ? (
+              <iframe title="Aperçu de l'e-mail" sandbox="" srcDoc={envoiOuvert.metadata.html} className="w-full h-[70vh] rounded-lg border border-pro-border bg-white" />
+            ) : (
+              <p className="whitespace-pre-wrap text-sm text-pro-text">{envoiOuvert.metadata?.message ?? ""}</p>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {filterType === "envoyes" ? null : messages.length === 0 ? (
         <EmptyState
           icon={MessageSquare}
           title="Aucun message"

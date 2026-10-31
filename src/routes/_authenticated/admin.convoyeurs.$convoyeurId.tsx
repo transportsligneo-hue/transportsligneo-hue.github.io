@@ -53,6 +53,7 @@ import {
   AdminSection,
   AdminField,
   AdminBadge,
+  AdminStatCard,
   AdminEmpty,
 } from "@/components/admin/ui";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -603,34 +604,20 @@ function AdminConvoyeurDetail() {
         }
       />
 
-      {/* Chiffres clés : mêmes compteurs que le centre de validation (documents obligatoires) */}
-      {(() => {
-        const docsOk = docsApprouves === requiredDocs.length;
-        const pctDocs = requiredDocs.length ? Math.round((docsApprouves / requiredDocs.length) * 100) : 0;
-        const pctTerm = attribs.length ? Math.round((terminees / attribs.length) * 100) : 0;
-        const Kpi = ({ tone, label, icon: I, children, sub, pct }: { tone: string; label: string; icon: typeof Truck; children: React.ReactNode; sub?: string; pct?: number }) => (
-          <div className={`cvx-kpi ${tone}`}>
-            <div className="cvx-kpi-top"><span className="cvx-kpi-lbl">{label}</span><span className="cvx-kpi-ic"><I size={18} /></span></div>
-            <div className="cvx-kpi-val">{children}</div>
-            {sub && <div className="cvx-kpi-sub">{sub}</div>}
-            {pct !== undefined && <div className="cvx-kpi-bar"><i style={{ width: `${pct}%` }} /></div>}
-          </div>
-        );
-        return (
-          <div className="cvx-kpis">
-            <Kpi tone="cvx-blue" label="Missions" icon={Truck} sub={attribs.length ? `${attribs.length - terminees} en cours ou à venir` : "Aucune mission pour l'instant"}>{attribs.length}</Kpi>
-            <Kpi tone="cvx-green" label="Terminées" icon={CheckCircle} pct={pctTerm} sub={attribs.length ? `${pctTerm} % des missions` : undefined}>{terminees}</Kpi>
-            <Kpi tone={docsOk ? "cvx-green" : "cvx-amber"} label="Documents validés" icon={FileBadge} pct={pctDocs}
-              sub={docsOk ? "Dossier complet" : `${requiredDocs.length - docsApprouves} à valider ou à déposer`}>
-              {docsApprouves}<small>/ {requiredDocs.length}</small>
-            </Kpi>
-            {conv.type_convoyeur === "independant" && (
-              <Kpi tone="cvx-violet" label="Revenus générés" icon={Euro} sub="Missions terminées">{revenus.toFixed(0)}<small>€</small></Kpi>
-            )}
-            <Kpi tone="cvx-blue" label="Jours disponibles" icon={CalendarDays} sub="À venir">{prochainesDispos}</Kpi>
-          </div>
-        );
-      })()}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <AdminStatCard label="Missions totales" value={attribs.length} icon={Truck} />
+        <AdminStatCard label="Terminées" value={terminees} icon={CheckCircle} accent="success" />
+        <AdminStatCard
+          label="Documents approuvés"
+          value={`${docsApprouves} / ${requiredDocs.length}`}
+          icon={FileBadge}
+          accent={docsApprouves === requiredDocs.length ? "success" : "warning"}
+        />
+        {conv.type_convoyeur === "independant" && (
+          <AdminStatCard label="Revenus générés" value={`${revenus.toFixed(0)} €`} icon={Euro} accent="success" />
+        )}
+        <AdminStatCard label="Jours dispo (à venir)" value={prochainesDispos} icon={CalendarDays} />
+      </div>
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-slate-100/70 p-1 rounded-xl">

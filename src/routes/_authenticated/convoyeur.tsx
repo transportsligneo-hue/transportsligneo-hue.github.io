@@ -2,7 +2,7 @@ import { DriverUpdateGate } from "@/components/convoyeur/DriverUpdateGate";
 import { DriverPresenceBeacon } from "@/components/convoyeur/DriverPresenceBeacon";
 import { UserMfaGate } from "@/components/security/UserMfaGate";
 import { DriverLoader } from "@/components/driver2/DriverLoader";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Wallet,
   Wrench,
+  FileSignature,
 } from "lucide-react";
 import { useEffect } from "react";
 import { ConvoyeurSidebar, type ConvoyeurSidebarItem } from "@/components/convoyeur/ConvoyeurSidebar";
@@ -23,6 +24,7 @@ import ScreenCaptureGuard from "@/components/convoyeur/ScreenCaptureGuard";
 import OfflineOutboxBadge from "@/components/convoyeur/OfflineOutboxBadge";
 import { DriverGpsTracker } from "@/components/convoyeur/DriverGpsTracker";
 import { IdVerifyGate } from "@/components/convoyeur/IdVerifyGate";
+import { AccesMissionsBanner, AccesMissionsGate, useAccesMissions } from "@/components/convoyeur/ParcoursActivation";
 
 export const Route = createFileRoute("/_authenticated/convoyeur")({
   component: ConvoyeurLayout,
@@ -36,6 +38,7 @@ const navItems: ConvoyeurSidebarItem[] = [
   { to: "/convoyeur/disponibilites", label: "Disponibilités", shortLabel: "Agenda", icon: CalendarDays },
   { to: "/convoyeur/materiel", label: "Mon matériel", shortLabel: "Matériel", icon: Wrench },
   { to: "/convoyeur/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
+  { to: "/convoyeur/contrat" as never, label: "Mon contrat", shortLabel: "Contrat", icon: FileSignature },
   { to: "/convoyeur/historique", label: "Historique", icon: History },
   { to: "/convoyeur/finances", label: "Finances", shortLabel: "Finances", icon: Wallet },
   { to: "/convoyeur/profil", label: "Mon profil", shortLabel: "Profil", icon: UserRound },
@@ -44,6 +47,8 @@ const navItems: ConvoyeurSidebarItem[] = [
 function ConvoyeurLayout() {
   const { isAuthenticated, role, convoyeurStatut, isLoading, logout, homeRoute } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (st) => st.location.pathname });
+  const { acces } = useAccesMissions();
 
   useEffect(() => {
     if (isLoading) return;
@@ -110,9 +115,21 @@ function ConvoyeurLayout() {
           </div>
         </div>
       )}
-      <IdVerifyGate active={isPending}>
-        <Outlet />
-      </IdVerifyGate>
+      {/* Accès aux missions : dossier validé + contrat signé (règle vérifiée en base) */}
+      {(() => {
+        const bloque = !!acces && acces.acces !== "ok";
+        const pageMissions = /^\/convoyeur\/(catalogue|disponibles)(\/|$)/.test(pathname);
+        const pageParcours = /^\/convoyeur\/(contrat|documents|profil)(\/|$)/.test(pathname);
+        if (bloque && pageMissions) return <AccesMissionsGate acces={acces!} />;
+        return (
+          <>
+            {bloque && !pageParcours && !isPending && <AccesMissionsBanner acces={acces} />}
+            <IdVerifyGate active={isPending}>
+              <Outlet />
+            </IdVerifyGate>
+          </>
+        );
+      })()}
       <DriverUpdateGate />
       <DriverPresenceBeacon />
       </UserMfaGate>

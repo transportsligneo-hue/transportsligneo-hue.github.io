@@ -45,6 +45,8 @@ interface Params {
   attachments?: { name: string; contentBase64: string }[]
   /** Adresse qui reçoit les réponses du destinataire (sinon l'expéditeur technique). */
   replyTo?: string
+  /** Informations ajoutées à l'historique d'envoi (ex. { direct: true } pour un e-mail direct). */
+  logMeta?: Record<string, unknown>
 }
 
 /**
@@ -119,6 +121,7 @@ export async function sendTransactionalEmailServer(params: Params): Promise<{ su
     message: templateData['message'] ?? templateData['customMessage'] ?? null,
     doc_url: templateData['pdfUrl'] ?? templateData['signUrl'] ?? null,
     html: renderedHtml,
+    ...(params.logMeta ?? {}),
   }
 
   const send = () =>

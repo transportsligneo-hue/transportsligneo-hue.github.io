@@ -40,6 +40,8 @@ export const sendDirectEmail = createServerFn({ method: 'POST' })
       templateName: 'message-manuel',
       recipientEmail: data.to,
       idempotencyKey: `email-direct-${crypto.randomUUID()}`,
+      // visible dans Messages & Demandes > Envoyés
+      logMeta: { direct: true, prenom: data.prenom ?? null, nom: data.nom ?? null, envoye_par: authContext.userId },
       templateData: {
         prenom: data.prenom ?? '',
         subject: String(data.subject ?? '').trim(),

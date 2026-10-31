@@ -24,10 +24,12 @@ interface Props {
   defaultTo?: string
   defaultPrenom?: string
   defaultNom?: string
+  /** Appelé après un envoi réussi (rafraîchir la liste des envois). */
+  onSent?: () => void
 }
 
 /** Éditeur d'email ponctuel : même rendu que les campagnes, un seul destinataire. */
-export function DirectEmailComposer({ defaultTo = '', defaultPrenom = '', defaultNom = '' }: Props) {
+export function DirectEmailComposer({ defaultTo = '', defaultPrenom = '', defaultNom = '', onSent }: Props) {
   const send = useServerFn(sendDirectEmail)
   const [draft, setDraft] = useState<CampaignDraft>(EMPTY)
   const [to, setTo] = useState(defaultTo)
@@ -47,7 +49,8 @@ export function DirectEmailComposer({ defaultTo = '', defaultPrenom = '', defaul
           entreprise: '',
         },
       })
-      toast.success(`Email mis en file pour ${to.trim()}`)
+      toast.success(`Email envoyé à ${to.trim()}`)
+      onSent?.()
       setDraft({ ...EMPTY })
     } catch (e: any) {
       toast.error(e?.message ?? "Envoi impossible")

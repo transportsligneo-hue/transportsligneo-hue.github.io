@@ -69,6 +69,7 @@ import { Route as InvitationEquipeTokenRouteImport } from './routes/invitation-e
 import { Route as PaiementConfirmationRouteImport } from './routes/paiement.confirmation'
 import { Route as ScanIndexRouteImport } from './routes/scan.index'
 import { Route as ScanTokenRouteImport } from './routes/scan.$token'
+import { Route as SignatureMobileHtRouteImport } from './routes/signature-mobile.$ht'
 import { Route as SignatureTokenRouteImport } from './routes/signature.$token'
 import { Route as SignerIndexRouteImport } from './routes/signer.index'
 import { Route as SignerTokenRouteImport } from './routes/signer.$token'
@@ -88,20 +89,25 @@ import { Route as AuthenticatedAdminCatalogueVehiculesRouteImport } from './rout
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 import { Route as AuthenticatedAdminCommunicationRouteImport } from './routes/_authenticated/admin.communication'
 import { Route as AuthenticatedAdminContenuRouteImport } from './routes/_authenticated/admin.contenu'
+import { Route as AuthenticatedAdminContratsConvoyeursRouteImport } from './routes/_authenticated/admin.contrats-convoyeurs'
 import { Route as AuthenticatedAdminConvoyeursRouteImport } from './routes/_authenticated/admin.convoyeurs'
+import { Route as AuthenticatedAdminConvoyeursEnLigneRouteImport } from './routes/_authenticated/admin.convoyeurs-en-ligne'
 import { Route as AuthenticatedAdminDemandesRouteImport } from './routes/_authenticated/admin.demandes'
+import { Route as AuthenticatedAdminDemandesRapidesRouteImport } from './routes/_authenticated/admin.demandes-rapides'
 import { Route as AuthenticatedAdminDevisRouteImport } from './routes/_authenticated/admin.devis'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminExploitationRouteImport } from './routes/_authenticated/admin.exploitation'
 import { Route as AuthenticatedAdminFacturesRouteImport } from './routes/_authenticated/admin.factures'
 import { Route as AuthenticatedAdminFideliteRouteImport } from './routes/_authenticated/admin.fidelite'
 import { Route as AuthenticatedAdminFormationRouteImport } from './routes/_authenticated/admin.formation'
+import { Route as AuthenticatedAdminFraisRouteImport } from './routes/_authenticated/admin.frais'
 import { Route as AuthenticatedAdminGrilleTarifaireRouteImport } from './routes/_authenticated/admin.grille-tarifaire'
 import { Route as AuthenticatedAdminHistoriqueRouteImport } from './routes/_authenticated/admin.historique'
 import { Route as AuthenticatedAdminIncidentsRouteImport } from './routes/_authenticated/admin.incidents'
 import { Route as AuthenticatedAdminInformationsLegalesRouteImport } from './routes/_authenticated/admin.informations-legales'
 import { Route as AuthenticatedAdminInfosLigneoRouteImport } from './routes/_authenticated/admin.infos-ligneo'
 import { Route as AuthenticatedAdminInscriptionsRouteImport } from './routes/_authenticated/admin.inscriptions'
+import { Route as AuthenticatedAdminListeAttenteRouteImport } from './routes/_authenticated/admin.liste-attente'
 import { Route as AuthenticatedAdminMaintenanceRouteImport } from './routes/_authenticated/admin.maintenance'
 import { Route as AuthenticatedAdminMessagerieRouteImport } from './routes/_authenticated/admin.messagerie'
 import { Route as AuthenticatedAdminMessagerieConseillerRouteImport } from './routes/_authenticated/admin.messagerie-conseiller'
@@ -118,12 +124,16 @@ import { Route as AuthenticatedAdminParametresIaRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminRemarketingRouteImport } from './routes/_authenticated/admin.remarketing'
 import { Route as AuthenticatedAdminScanDocumentRouteImport } from './routes/_authenticated/admin.scan-document'
 import { Route as AuthenticatedAdminSignaturesRouteImport } from './routes/_authenticated/admin.signatures'
+import { Route as AuthenticatedAdminStatistiquesEstimateurRouteImport } from './routes/_authenticated/admin.statistiques-estimateur'
+import { Route as AuthenticatedAdminStatistiquesFrequentationRouteImport } from './routes/_authenticated/admin.statistiques-frequentation'
+import { Route as AuthenticatedAdminStatistiquesGoogleRouteImport } from './routes/_authenticated/admin.statistiques-google'
 import { Route as AuthenticatedAdminSuperAdminRouteImport } from './routes/_authenticated/admin.super-admin'
 import { Route as AuthenticatedAdminTestNotificationsRouteImport } from './routes/_authenticated/admin.test-notifications'
 import { Route as AuthenticatedAdminTrajetsRouteImport } from './routes/_authenticated/admin.trajets'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedConvoyeurIndexRouteImport } from './routes/_authenticated/convoyeur.index'
 import { Route as AuthenticatedConvoyeurCatalogueRouteImport } from './routes/_authenticated/convoyeur.catalogue'
+import { Route as AuthenticatedConvoyeurContratRouteImport } from './routes/_authenticated/convoyeur.contrat'
 import { Route as AuthenticatedConvoyeurDisponibilitesRouteImport } from './routes/_authenticated/convoyeur.disponibilites'
 import { Route as AuthenticatedConvoyeurDisponiblesRouteImport } from './routes/_authenticated/convoyeur.disponibles'
 import { Route as AuthenticatedConvoyeurDocumentsRouteImport } from './routes/_authenticated/convoyeur.documents'
@@ -183,6 +193,7 @@ import { Route as ApiPublicAlertesDocumentsVehiculesRouteImport } from './routes
 import { Route as ApiPublicAlertesFlotteTcoRouteImport } from './routes/api/public/alertes-flotte-tco'
 import { Route as ApiPublicAssistantChatRouteImport } from './routes/api/public/assistant-chat'
 import { Route as ApiPublicCampaignUnsubscribeRouteImport } from './routes/api/public/campaign-unsubscribe'
+import { Route as ApiPublicDiditWebhookRouteImport } from './routes/api/public/didit-webhook'
 import { Route as ApiPublicRevolutWebhookRouteImport } from './routes/api/public/revolut-webhook'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicTrackClickRouteImport } from './routes/api/public/track-click'
@@ -545,6 +556,11 @@ const ScanTokenRoute = ScanTokenRouteImport.update({
   path: '/scan/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignatureMobileHtRoute = SignatureMobileHtRouteImport.update({
+  id: '/signature-mobile/$ht',
+  path: '/signature-mobile/$ht',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignatureTokenRoute = SignatureTokenRouteImport.update({
   id: '/signature/$token',
   path: '/signature/$token',
@@ -654,16 +670,34 @@ const AuthenticatedAdminContenuRoute =
     path: '/contenu',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminContratsConvoyeursRoute =
+  AuthenticatedAdminContratsConvoyeursRouteImport.update({
+    id: '/contrats-convoyeurs',
+    path: '/contrats-convoyeurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminConvoyeursRoute =
   AuthenticatedAdminConvoyeursRouteImport.update({
     id: '/convoyeurs',
     path: '/convoyeurs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminConvoyeursEnLigneRoute =
+  AuthenticatedAdminConvoyeursEnLigneRouteImport.update({
+    id: '/convoyeurs-en-ligne',
+    path: '/convoyeurs-en-ligne',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDemandesRoute =
   AuthenticatedAdminDemandesRouteImport.update({
     id: '/demandes',
     path: '/demandes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDemandesRapidesRoute =
+  AuthenticatedAdminDemandesRapidesRouteImport.update({
+    id: '/demandes-rapides',
+    path: '/demandes-rapides',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDevisRoute = AuthenticatedAdminDevisRouteImport.update({
@@ -701,6 +735,11 @@ const AuthenticatedAdminFormationRoute =
     path: '/formation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminFraisRoute = AuthenticatedAdminFraisRouteImport.update({
+  id: '/frais',
+  path: '/frais',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminGrilleTarifaireRoute =
   AuthenticatedAdminGrilleTarifaireRouteImport.update({
     id: '/grille-tarifaire',
@@ -735,6 +774,12 @@ const AuthenticatedAdminInscriptionsRoute =
   AuthenticatedAdminInscriptionsRouteImport.update({
     id: '/inscriptions',
     path: '/inscriptions',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminListeAttenteRoute =
+  AuthenticatedAdminListeAttenteRouteImport.update({
+    id: '/liste-attente',
+    path: '/liste-attente',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminMaintenanceRoute =
@@ -833,6 +878,24 @@ const AuthenticatedAdminSignaturesRoute =
     path: '/signatures',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminStatistiquesEstimateurRoute =
+  AuthenticatedAdminStatistiquesEstimateurRouteImport.update({
+    id: '/statistiques-estimateur',
+    path: '/statistiques-estimateur',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminStatistiquesFrequentationRoute =
+  AuthenticatedAdminStatistiquesFrequentationRouteImport.update({
+    id: '/statistiques-frequentation',
+    path: '/statistiques-frequentation',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminStatistiquesGoogleRoute =
+  AuthenticatedAdminStatistiquesGoogleRouteImport.update({
+    id: '/statistiques-google',
+    path: '/statistiques-google',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminSuperAdminRoute =
   AuthenticatedAdminSuperAdminRouteImport.update({
     id: '/super-admin',
@@ -867,6 +930,12 @@ const AuthenticatedConvoyeurCatalogueRoute =
   AuthenticatedConvoyeurCatalogueRouteImport.update({
     id: '/catalogue',
     path: '/catalogue',
+    getParentRoute: () => AuthenticatedConvoyeurRoute,
+  } as any)
+const AuthenticatedConvoyeurContratRoute =
+  AuthenticatedConvoyeurContratRouteImport.update({
+    id: '/contrat',
+    path: '/contrat',
     getParentRoute: () => AuthenticatedConvoyeurRoute,
   } as any)
 const AuthenticatedConvoyeurDisponibilitesRoute =
@@ -1217,6 +1286,11 @@ const ApiPublicCampaignUnsubscribeRoute =
     path: '/api/public/campaign-unsubscribe',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDiditWebhookRoute = ApiPublicDiditWebhookRouteImport.update({
+  id: '/api/public/didit-webhook',
+  path: '/api/public/didit-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRevolutWebhookRoute = ApiPublicRevolutWebhookRouteImport.update({
   id: '/api/public/revolut-webhook',
   path: '/api/public/revolut-webhook',
@@ -1599,6 +1673,7 @@ export interface FileRoutesByFullPath {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature-mobile/$ht': typeof SignatureMobileHtRoute
   '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
@@ -1620,20 +1695,25 @@ export interface FileRoutesByFullPath {
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/contenu': typeof AuthenticatedAdminContenuRoute
+  '/admin/contrats-convoyeurs': typeof AuthenticatedAdminContratsConvoyeursRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
+  '/admin/convoyeurs-en-ligne': typeof AuthenticatedAdminConvoyeursEnLigneRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/demandes-rapides': typeof AuthenticatedAdminDemandesRapidesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/admin/frais': typeof AuthenticatedAdminFraisRoute
   '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/liste-attente': typeof AuthenticatedAdminListeAttenteRoute
   '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -1650,11 +1730,15 @@ export interface FileRoutesByFullPath {
   '/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
+  '/admin/statistiques-estimateur': typeof AuthenticatedAdminStatistiquesEstimateurRoute
+  '/admin/statistiques-frequentation': typeof AuthenticatedAdminStatistiquesFrequentationRoute
+  '/admin/statistiques-google': typeof AuthenticatedAdminStatistiquesGoogleRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
+  '/convoyeur/contrat': typeof AuthenticatedConvoyeurContratRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -1710,6 +1794,7 @@ export interface FileRoutesByFullPath {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/didit-webhook': typeof ApiPublicDiditWebhookRoute
   '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
@@ -1825,6 +1910,7 @@ export interface FileRoutesByTo {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature-mobile/$ht': typeof SignatureMobileHtRoute
   '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
@@ -1846,20 +1932,25 @@ export interface FileRoutesByTo {
   '/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/admin/contenu': typeof AuthenticatedAdminContenuRoute
+  '/admin/contrats-convoyeurs': typeof AuthenticatedAdminContratsConvoyeursRoute
   '/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
+  '/admin/convoyeurs-en-ligne': typeof AuthenticatedAdminConvoyeursEnLigneRoute
   '/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/admin/demandes-rapides': typeof AuthenticatedAdminDemandesRapidesRoute
   '/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/admin/frais': typeof AuthenticatedAdminFraisRoute
   '/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/admin/liste-attente': typeof AuthenticatedAdminListeAttenteRoute
   '/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -1876,11 +1967,15 @@ export interface FileRoutesByTo {
   '/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
+  '/admin/statistiques-estimateur': typeof AuthenticatedAdminStatistiquesEstimateurRoute
+  '/admin/statistiques-frequentation': typeof AuthenticatedAdminStatistiquesFrequentationRoute
+  '/admin/statistiques-google': typeof AuthenticatedAdminStatistiquesGoogleRoute
   '/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
+  '/convoyeur/contrat': typeof AuthenticatedConvoyeurContratRoute
   '/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -1933,6 +2028,7 @@ export interface FileRoutesByTo {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/didit-webhook': typeof ApiPublicDiditWebhookRoute
   '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
@@ -2056,6 +2152,7 @@ export interface FileRoutesById {
   '/invitation-equipe/$token': typeof InvitationEquipeTokenRoute
   '/paiement/confirmation': typeof PaiementConfirmationRoute
   '/scan/$token': typeof ScanTokenRoute
+  '/signature-mobile/$ht': typeof SignatureMobileHtRoute
   '/signature/$token': typeof SignatureTokenRoute
   '/signer/$token': typeof SignerTokenRoute
   '/verify-certificat/$token': typeof VerifyCertificatTokenRoute
@@ -2077,20 +2174,25 @@ export interface FileRoutesById {
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRouteWithChildren
   '/_authenticated/admin/communication': typeof AuthenticatedAdminCommunicationRoute
   '/_authenticated/admin/contenu': typeof AuthenticatedAdminContenuRoute
+  '/_authenticated/admin/contrats-convoyeurs': typeof AuthenticatedAdminContratsConvoyeursRoute
   '/_authenticated/admin/convoyeurs': typeof AuthenticatedAdminConvoyeursRouteWithChildren
+  '/_authenticated/admin/convoyeurs-en-ligne': typeof AuthenticatedAdminConvoyeursEnLigneRoute
   '/_authenticated/admin/demandes': typeof AuthenticatedAdminDemandesRoute
+  '/_authenticated/admin/demandes-rapides': typeof AuthenticatedAdminDemandesRapidesRoute
   '/_authenticated/admin/devis': typeof AuthenticatedAdminDevisRouteWithChildren
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/exploitation': typeof AuthenticatedAdminExploitationRoute
   '/_authenticated/admin/factures': typeof AuthenticatedAdminFacturesRoute
   '/_authenticated/admin/fidelite': typeof AuthenticatedAdminFideliteRoute
   '/_authenticated/admin/formation': typeof AuthenticatedAdminFormationRoute
+  '/_authenticated/admin/frais': typeof AuthenticatedAdminFraisRoute
   '/_authenticated/admin/grille-tarifaire': typeof AuthenticatedAdminGrilleTarifaireRoute
   '/_authenticated/admin/historique': typeof AuthenticatedAdminHistoriqueRoute
   '/_authenticated/admin/incidents': typeof AuthenticatedAdminIncidentsRoute
   '/_authenticated/admin/informations-legales': typeof AuthenticatedAdminInformationsLegalesRoute
   '/_authenticated/admin/infos-ligneo': typeof AuthenticatedAdminInfosLigneoRoute
   '/_authenticated/admin/inscriptions': typeof AuthenticatedAdminInscriptionsRoute
+  '/_authenticated/admin/liste-attente': typeof AuthenticatedAdminListeAttenteRoute
   '/_authenticated/admin/maintenance': typeof AuthenticatedAdminMaintenanceRoute
   '/_authenticated/admin/messagerie': typeof AuthenticatedAdminMessagerieRoute
   '/_authenticated/admin/messagerie-conseiller': typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -2107,11 +2209,15 @@ export interface FileRoutesById {
   '/_authenticated/admin/remarketing': typeof AuthenticatedAdminRemarketingRoute
   '/_authenticated/admin/scan-document': typeof AuthenticatedAdminScanDocumentRoute
   '/_authenticated/admin/signatures': typeof AuthenticatedAdminSignaturesRoute
+  '/_authenticated/admin/statistiques-estimateur': typeof AuthenticatedAdminStatistiquesEstimateurRoute
+  '/_authenticated/admin/statistiques-frequentation': typeof AuthenticatedAdminStatistiquesFrequentationRoute
+  '/_authenticated/admin/statistiques-google': typeof AuthenticatedAdminStatistiquesGoogleRoute
   '/_authenticated/admin/super-admin': typeof AuthenticatedAdminSuperAdminRoute
   '/_authenticated/admin/test-notifications': typeof AuthenticatedAdminTestNotificationsRoute
   '/_authenticated/admin/trajets': typeof AuthenticatedAdminTrajetsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/convoyeur/catalogue': typeof AuthenticatedConvoyeurCatalogueRoute
+  '/_authenticated/convoyeur/contrat': typeof AuthenticatedConvoyeurContratRoute
   '/_authenticated/convoyeur/disponibilites': typeof AuthenticatedConvoyeurDisponibilitesRoute
   '/_authenticated/convoyeur/disponibles': typeof AuthenticatedConvoyeurDisponiblesRoute
   '/_authenticated/convoyeur/documents': typeof AuthenticatedConvoyeurDocumentsRoute
@@ -2167,6 +2273,7 @@ export interface FileRoutesById {
   '/api/public/alertes-flotte-tco': typeof ApiPublicAlertesFlotteTcoRoute
   '/api/public/assistant-chat': typeof ApiPublicAssistantChatRoute
   '/api/public/campaign-unsubscribe': typeof ApiPublicCampaignUnsubscribeRoute
+  '/api/public/didit-webhook': typeof ApiPublicDiditWebhookRoute
   '/api/public/revolut-webhook': typeof ApiPublicRevolutWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/track-click': typeof ApiPublicTrackClickRoute
@@ -2290,6 +2397,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature-mobile/$ht'
     | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
@@ -2311,20 +2419,25 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/communication'
     | '/admin/contenu'
+    | '/admin/contrats-convoyeurs'
     | '/admin/convoyeurs'
+    | '/admin/convoyeurs-en-ligne'
     | '/admin/demandes'
+    | '/admin/demandes-rapides'
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
     | '/admin/formation'
+    | '/admin/frais'
     | '/admin/grille-tarifaire'
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/infos-ligneo'
     | '/admin/inscriptions'
+    | '/admin/liste-attente'
     | '/admin/maintenance'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
@@ -2341,11 +2454,15 @@ export interface FileRouteTypes {
     | '/admin/remarketing'
     | '/admin/scan-document'
     | '/admin/signatures'
+    | '/admin/statistiques-estimateur'
+    | '/admin/statistiques-frequentation'
+    | '/admin/statistiques-google'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
+    | '/convoyeur/contrat'
     | '/convoyeur/disponibilites'
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
@@ -2401,6 +2518,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/didit-webhook'
     | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
@@ -2516,6 +2634,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature-mobile/$ht'
     | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
@@ -2537,20 +2656,25 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/communication'
     | '/admin/contenu'
+    | '/admin/contrats-convoyeurs'
     | '/admin/convoyeurs'
+    | '/admin/convoyeurs-en-ligne'
     | '/admin/demandes'
+    | '/admin/demandes-rapides'
     | '/admin/devis'
     | '/admin/documents'
     | '/admin/exploitation'
     | '/admin/factures'
     | '/admin/fidelite'
     | '/admin/formation'
+    | '/admin/frais'
     | '/admin/grille-tarifaire'
     | '/admin/historique'
     | '/admin/incidents'
     | '/admin/informations-legales'
     | '/admin/infos-ligneo'
     | '/admin/inscriptions'
+    | '/admin/liste-attente'
     | '/admin/maintenance'
     | '/admin/messagerie'
     | '/admin/messagerie-conseiller'
@@ -2567,11 +2691,15 @@ export interface FileRouteTypes {
     | '/admin/remarketing'
     | '/admin/scan-document'
     | '/admin/signatures'
+    | '/admin/statistiques-estimateur'
+    | '/admin/statistiques-frequentation'
+    | '/admin/statistiques-google'
     | '/admin/super-admin'
     | '/admin/test-notifications'
     | '/admin/trajets'
     | '/admin/utilisateurs'
     | '/convoyeur/catalogue'
+    | '/convoyeur/contrat'
     | '/convoyeur/disponibilites'
     | '/convoyeur/disponibles'
     | '/convoyeur/documents'
@@ -2624,6 +2752,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/didit-webhook'
     | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
@@ -2746,6 +2875,7 @@ export interface FileRouteTypes {
     | '/invitation-equipe/$token'
     | '/paiement/confirmation'
     | '/scan/$token'
+    | '/signature-mobile/$ht'
     | '/signature/$token'
     | '/signer/$token'
     | '/verify-certificat/$token'
@@ -2767,20 +2897,25 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/clients'
     | '/_authenticated/admin/communication'
     | '/_authenticated/admin/contenu'
+    | '/_authenticated/admin/contrats-convoyeurs'
     | '/_authenticated/admin/convoyeurs'
+    | '/_authenticated/admin/convoyeurs-en-ligne'
     | '/_authenticated/admin/demandes'
+    | '/_authenticated/admin/demandes-rapides'
     | '/_authenticated/admin/devis'
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/exploitation'
     | '/_authenticated/admin/factures'
     | '/_authenticated/admin/fidelite'
     | '/_authenticated/admin/formation'
+    | '/_authenticated/admin/frais'
     | '/_authenticated/admin/grille-tarifaire'
     | '/_authenticated/admin/historique'
     | '/_authenticated/admin/incidents'
     | '/_authenticated/admin/informations-legales'
     | '/_authenticated/admin/infos-ligneo'
     | '/_authenticated/admin/inscriptions'
+    | '/_authenticated/admin/liste-attente'
     | '/_authenticated/admin/maintenance'
     | '/_authenticated/admin/messagerie'
     | '/_authenticated/admin/messagerie-conseiller'
@@ -2797,11 +2932,15 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/remarketing'
     | '/_authenticated/admin/scan-document'
     | '/_authenticated/admin/signatures'
+    | '/_authenticated/admin/statistiques-estimateur'
+    | '/_authenticated/admin/statistiques-frequentation'
+    | '/_authenticated/admin/statistiques-google'
     | '/_authenticated/admin/super-admin'
     | '/_authenticated/admin/test-notifications'
     | '/_authenticated/admin/trajets'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/convoyeur/catalogue'
+    | '/_authenticated/convoyeur/contrat'
     | '/_authenticated/convoyeur/disponibilites'
     | '/_authenticated/convoyeur/disponibles'
     | '/_authenticated/convoyeur/documents'
@@ -2857,6 +2996,7 @@ export interface FileRouteTypes {
     | '/api/public/alertes-flotte-tco'
     | '/api/public/assistant-chat'
     | '/api/public/campaign-unsubscribe'
+    | '/api/public/didit-webhook'
     | '/api/public/revolut-webhook'
     | '/api/public/stripe-webhook'
     | '/api/public/track-click'
@@ -2969,6 +3109,7 @@ export interface RootRouteChildren {
   InvitationEquipeTokenRoute: typeof InvitationEquipeTokenRoute
   PaiementConfirmationRoute: typeof PaiementConfirmationRoute
   ScanTokenRoute: typeof ScanTokenRoute
+  SignatureMobileHtRoute: typeof SignatureMobileHtRoute
   SignatureTokenRoute: typeof SignatureTokenRoute
   SignerTokenRoute: typeof SignerTokenRoute
   VerifyCertificatTokenRoute: typeof VerifyCertificatTokenRoute
@@ -2986,6 +3127,7 @@ export interface RootRouteChildren {
   ApiPublicAlertesFlotteTcoRoute: typeof ApiPublicAlertesFlotteTcoRoute
   ApiPublicAssistantChatRoute: typeof ApiPublicAssistantChatRoute
   ApiPublicCampaignUnsubscribeRoute: typeof ApiPublicCampaignUnsubscribeRoute
+  ApiPublicDiditWebhookRoute: typeof ApiPublicDiditWebhookRoute
   ApiPublicRevolutWebhookRoute: typeof ApiPublicRevolutWebhookRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   ApiPublicTrackClickRoute: typeof ApiPublicTrackClickRoute
@@ -3446,6 +3588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScanTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signature-mobile/$ht': {
+      id: '/signature-mobile/$ht'
+      path: '/signature-mobile/$ht'
+      fullPath: '/signature-mobile/$ht'
+      preLoaderRoute: typeof SignatureMobileHtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signature/$token': {
       id: '/signature/$token'
       path: '/signature/$token'
@@ -3579,6 +3728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContenuRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/contrats-convoyeurs': {
+      id: '/_authenticated/admin/contrats-convoyeurs'
+      path: '/contrats-convoyeurs'
+      fullPath: '/admin/contrats-convoyeurs'
+      preLoaderRoute: typeof AuthenticatedAdminContratsConvoyeursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/convoyeurs': {
       id: '/_authenticated/admin/convoyeurs'
       path: '/convoyeurs'
@@ -3586,11 +3742,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConvoyeursRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/convoyeurs-en-ligne': {
+      id: '/_authenticated/admin/convoyeurs-en-ligne'
+      path: '/convoyeurs-en-ligne'
+      fullPath: '/admin/convoyeurs-en-ligne'
+      preLoaderRoute: typeof AuthenticatedAdminConvoyeursEnLigneRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/demandes': {
       id: '/_authenticated/admin/demandes'
       path: '/demandes'
       fullPath: '/admin/demandes'
       preLoaderRoute: typeof AuthenticatedAdminDemandesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/demandes-rapides': {
+      id: '/_authenticated/admin/demandes-rapides'
+      path: '/demandes-rapides'
+      fullPath: '/admin/demandes-rapides'
+      preLoaderRoute: typeof AuthenticatedAdminDemandesRapidesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/devis': {
@@ -3635,6 +3805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFormationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/frais': {
+      id: '/_authenticated/admin/frais'
+      path: '/frais'
+      fullPath: '/admin/frais'
+      preLoaderRoute: typeof AuthenticatedAdminFraisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/grille-tarifaire': {
       id: '/_authenticated/admin/grille-tarifaire'
       path: '/grille-tarifaire'
@@ -3675,6 +3852,13 @@ declare module '@tanstack/react-router' {
       path: '/inscriptions'
       fullPath: '/admin/inscriptions'
       preLoaderRoute: typeof AuthenticatedAdminInscriptionsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/liste-attente': {
+      id: '/_authenticated/admin/liste-attente'
+      path: '/liste-attente'
+      fullPath: '/admin/liste-attente'
+      preLoaderRoute: typeof AuthenticatedAdminListeAttenteRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/maintenance': {
@@ -3789,6 +3973,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSignaturesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/statistiques-estimateur': {
+      id: '/_authenticated/admin/statistiques-estimateur'
+      path: '/statistiques-estimateur'
+      fullPath: '/admin/statistiques-estimateur'
+      preLoaderRoute: typeof AuthenticatedAdminStatistiquesEstimateurRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/statistiques-frequentation': {
+      id: '/_authenticated/admin/statistiques-frequentation'
+      path: '/statistiques-frequentation'
+      fullPath: '/admin/statistiques-frequentation'
+      preLoaderRoute: typeof AuthenticatedAdminStatistiquesFrequentationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/statistiques-google': {
+      id: '/_authenticated/admin/statistiques-google'
+      path: '/statistiques-google'
+      fullPath: '/admin/statistiques-google'
+      preLoaderRoute: typeof AuthenticatedAdminStatistiquesGoogleRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/super-admin': {
       id: '/_authenticated/admin/super-admin'
       path: '/super-admin'
@@ -3829,6 +4034,13 @@ declare module '@tanstack/react-router' {
       path: '/catalogue'
       fullPath: '/convoyeur/catalogue'
       preLoaderRoute: typeof AuthenticatedConvoyeurCatalogueRouteImport
+      parentRoute: typeof AuthenticatedConvoyeurRoute
+    }
+    '/_authenticated/convoyeur/contrat': {
+      id: '/_authenticated/convoyeur/contrat'
+      path: '/contrat'
+      fullPath: '/convoyeur/contrat'
+      preLoaderRoute: typeof AuthenticatedConvoyeurContratRouteImport
       parentRoute: typeof AuthenticatedConvoyeurRoute
     }
     '/_authenticated/convoyeur/disponibilites': {
@@ -4242,6 +4454,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/campaign-unsubscribe'
       fullPath: '/api/public/campaign-unsubscribe'
       preLoaderRoute: typeof ApiPublicCampaignUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/didit-webhook': {
+      id: '/api/public/didit-webhook'
+      path: '/api/public/didit-webhook'
+      fullPath: '/api/public/didit-webhook'
+      preLoaderRoute: typeof ApiPublicDiditWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/revolut-webhook': {
@@ -4720,20 +4939,25 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRouteWithChildren
   AuthenticatedAdminCommunicationRoute: typeof AuthenticatedAdminCommunicationRoute
   AuthenticatedAdminContenuRoute: typeof AuthenticatedAdminContenuRoute
+  AuthenticatedAdminContratsConvoyeursRoute: typeof AuthenticatedAdminContratsConvoyeursRoute
   AuthenticatedAdminConvoyeursRoute: typeof AuthenticatedAdminConvoyeursRouteWithChildren
+  AuthenticatedAdminConvoyeursEnLigneRoute: typeof AuthenticatedAdminConvoyeursEnLigneRoute
   AuthenticatedAdminDemandesRoute: typeof AuthenticatedAdminDemandesRoute
+  AuthenticatedAdminDemandesRapidesRoute: typeof AuthenticatedAdminDemandesRapidesRoute
   AuthenticatedAdminDevisRoute: typeof AuthenticatedAdminDevisRouteWithChildren
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminExploitationRoute: typeof AuthenticatedAdminExploitationRoute
   AuthenticatedAdminFacturesRoute: typeof AuthenticatedAdminFacturesRoute
   AuthenticatedAdminFideliteRoute: typeof AuthenticatedAdminFideliteRoute
   AuthenticatedAdminFormationRoute: typeof AuthenticatedAdminFormationRoute
+  AuthenticatedAdminFraisRoute: typeof AuthenticatedAdminFraisRoute
   AuthenticatedAdminGrilleTarifaireRoute: typeof AuthenticatedAdminGrilleTarifaireRoute
   AuthenticatedAdminHistoriqueRoute: typeof AuthenticatedAdminHistoriqueRoute
   AuthenticatedAdminIncidentsRoute: typeof AuthenticatedAdminIncidentsRoute
   AuthenticatedAdminInformationsLegalesRoute: typeof AuthenticatedAdminInformationsLegalesRoute
   AuthenticatedAdminInfosLigneoRoute: typeof AuthenticatedAdminInfosLigneoRoute
   AuthenticatedAdminInscriptionsRoute: typeof AuthenticatedAdminInscriptionsRoute
+  AuthenticatedAdminListeAttenteRoute: typeof AuthenticatedAdminListeAttenteRoute
   AuthenticatedAdminMaintenanceRoute: typeof AuthenticatedAdminMaintenanceRoute
   AuthenticatedAdminMessagerieRoute: typeof AuthenticatedAdminMessagerieRoute
   AuthenticatedAdminMessagerieConseillerRoute: typeof AuthenticatedAdminMessagerieConseillerRoute
@@ -4750,6 +4974,9 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRemarketingRoute: typeof AuthenticatedAdminRemarketingRoute
   AuthenticatedAdminScanDocumentRoute: typeof AuthenticatedAdminScanDocumentRoute
   AuthenticatedAdminSignaturesRoute: typeof AuthenticatedAdminSignaturesRoute
+  AuthenticatedAdminStatistiquesEstimateurRoute: typeof AuthenticatedAdminStatistiquesEstimateurRoute
+  AuthenticatedAdminStatistiquesFrequentationRoute: typeof AuthenticatedAdminStatistiquesFrequentationRoute
+  AuthenticatedAdminStatistiquesGoogleRoute: typeof AuthenticatedAdminStatistiquesGoogleRoute
   AuthenticatedAdminSuperAdminRoute: typeof AuthenticatedAdminSuperAdminRoute
   AuthenticatedAdminTestNotificationsRoute: typeof AuthenticatedAdminTestNotificationsRoute
   AuthenticatedAdminTrajetsRoute: typeof AuthenticatedAdminTrajetsRoute
@@ -4776,15 +5003,22 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRouteWithChildren,
   AuthenticatedAdminCommunicationRoute: AuthenticatedAdminCommunicationRoute,
   AuthenticatedAdminContenuRoute: AuthenticatedAdminContenuRoute,
+  AuthenticatedAdminContratsConvoyeursRoute:
+    AuthenticatedAdminContratsConvoyeursRoute,
   AuthenticatedAdminConvoyeursRoute:
     AuthenticatedAdminConvoyeursRouteWithChildren,
+  AuthenticatedAdminConvoyeursEnLigneRoute:
+    AuthenticatedAdminConvoyeursEnLigneRoute,
   AuthenticatedAdminDemandesRoute: AuthenticatedAdminDemandesRoute,
+  AuthenticatedAdminDemandesRapidesRoute:
+    AuthenticatedAdminDemandesRapidesRoute,
   AuthenticatedAdminDevisRoute: AuthenticatedAdminDevisRouteWithChildren,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminExploitationRoute: AuthenticatedAdminExploitationRoute,
   AuthenticatedAdminFacturesRoute: AuthenticatedAdminFacturesRoute,
   AuthenticatedAdminFideliteRoute: AuthenticatedAdminFideliteRoute,
   AuthenticatedAdminFormationRoute: AuthenticatedAdminFormationRoute,
+  AuthenticatedAdminFraisRoute: AuthenticatedAdminFraisRoute,
   AuthenticatedAdminGrilleTarifaireRoute:
     AuthenticatedAdminGrilleTarifaireRoute,
   AuthenticatedAdminHistoriqueRoute: AuthenticatedAdminHistoriqueRoute,
@@ -4793,6 +5027,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminInformationsLegalesRoute,
   AuthenticatedAdminInfosLigneoRoute: AuthenticatedAdminInfosLigneoRoute,
   AuthenticatedAdminInscriptionsRoute: AuthenticatedAdminInscriptionsRoute,
+  AuthenticatedAdminListeAttenteRoute: AuthenticatedAdminListeAttenteRoute,
   AuthenticatedAdminMaintenanceRoute: AuthenticatedAdminMaintenanceRoute,
   AuthenticatedAdminMessagerieRoute: AuthenticatedAdminMessagerieRoute,
   AuthenticatedAdminMessagerieConseillerRoute:
@@ -4813,6 +5048,12 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRemarketingRoute: AuthenticatedAdminRemarketingRoute,
   AuthenticatedAdminScanDocumentRoute: AuthenticatedAdminScanDocumentRoute,
   AuthenticatedAdminSignaturesRoute: AuthenticatedAdminSignaturesRoute,
+  AuthenticatedAdminStatistiquesEstimateurRoute:
+    AuthenticatedAdminStatistiquesEstimateurRoute,
+  AuthenticatedAdminStatistiquesFrequentationRoute:
+    AuthenticatedAdminStatistiquesFrequentationRoute,
+  AuthenticatedAdminStatistiquesGoogleRoute:
+    AuthenticatedAdminStatistiquesGoogleRoute,
   AuthenticatedAdminSuperAdminRoute: AuthenticatedAdminSuperAdminRoute,
   AuthenticatedAdminTestNotificationsRoute:
     AuthenticatedAdminTestNotificationsRoute,
@@ -4855,6 +5096,7 @@ const AuthenticatedConvoyeurFormationRouteWithChildren =
 
 interface AuthenticatedConvoyeurRouteChildren {
   AuthenticatedConvoyeurCatalogueRoute: typeof AuthenticatedConvoyeurCatalogueRoute
+  AuthenticatedConvoyeurContratRoute: typeof AuthenticatedConvoyeurContratRoute
   AuthenticatedConvoyeurDisponibilitesRoute: typeof AuthenticatedConvoyeurDisponibilitesRoute
   AuthenticatedConvoyeurDisponiblesRoute: typeof AuthenticatedConvoyeurDisponiblesRoute
   AuthenticatedConvoyeurDocumentsRoute: typeof AuthenticatedConvoyeurDocumentsRoute
@@ -4872,6 +5114,7 @@ interface AuthenticatedConvoyeurRouteChildren {
 const AuthenticatedConvoyeurRouteChildren: AuthenticatedConvoyeurRouteChildren =
   {
     AuthenticatedConvoyeurCatalogueRoute: AuthenticatedConvoyeurCatalogueRoute,
+    AuthenticatedConvoyeurContratRoute: AuthenticatedConvoyeurContratRoute,
     AuthenticatedConvoyeurDisponibilitesRoute:
       AuthenticatedConvoyeurDisponibilitesRoute,
     AuthenticatedConvoyeurDisponiblesRoute:
@@ -5211,6 +5454,7 @@ const rootRouteChildren: RootRouteChildren = {
   InvitationEquipeTokenRoute: InvitationEquipeTokenRoute,
   PaiementConfirmationRoute: PaiementConfirmationRoute,
   ScanTokenRoute: ScanTokenRoute,
+  SignatureMobileHtRoute: SignatureMobileHtRoute,
   SignatureTokenRoute: SignatureTokenRoute,
   SignerTokenRoute: SignerTokenRoute,
   VerifyCertificatTokenRoute: VerifyCertificatTokenRoute,
@@ -5229,6 +5473,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAlertesFlotteTcoRoute: ApiPublicAlertesFlotteTcoRoute,
   ApiPublicAssistantChatRoute: ApiPublicAssistantChatRoute,
   ApiPublicCampaignUnsubscribeRoute: ApiPublicCampaignUnsubscribeRoute,
+  ApiPublicDiditWebhookRoute: ApiPublicDiditWebhookRoute,
   ApiPublicRevolutWebhookRoute: ApiPublicRevolutWebhookRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   ApiPublicTrackClickRoute: ApiPublicTrackClickRoute,

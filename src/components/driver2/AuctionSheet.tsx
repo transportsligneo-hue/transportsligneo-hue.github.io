@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { messageErreurAcces } from "@/lib/acces-erreur";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,7 +66,7 @@ export function AuctionSheet({ trajetId, depart, arrivee, marque, km, dateLabel,
     setBusy(true);
     const { error } = await supabase.rpc("place_auction_bid" as never, { _trajet_id: trajetId, _prix: v } as never);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(messageErreurAcces(error.message)); return; }
     toast.success(`Offre de ${v} € enregistrée`);
     onChanged();
     onClose();

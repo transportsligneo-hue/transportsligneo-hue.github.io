@@ -38,6 +38,10 @@ export default function ContratYousignCard(props: Props) {
   const [permisDate, setPermisDate] = useState(props.permisDate ? props.permisDate.split("-").reverse().join("/") : "");
   const [kbisState, setKbisState] = useState<"idle" | "loading" | "done" | "none">("idle");
   const [denomination, setDenomination] = useState("");
+  const [versionContrat, setVersionContrat] = useState<number | null>(null);
+  useEffect(() => {
+    void (supabase as any).rpc("contrat_version_courante").then(({ data }: { data: number | null }) => setVersionContrat(data ?? null));
+  }, []);
 
   // Fiche complétée après coup (auto-remplissage) : on reprend les nouvelles valeurs si le champ est vide.
   useEffect(() => { if (props.siret) setSiret((v) => v || props.siret!); }, [props.siret]);
@@ -100,7 +104,8 @@ export default function ContratYousignCard(props: Props) {
           refType="convoyeur"
           refId={props.convoyeurId}
           title="Envoyer le contrat pour signature"
-          defaults={{ title: `Contrat de partenariat - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "", company: denomination }}
+          key={versionContrat ?? 0}
+          defaults={{ title: `Contrat de partenariat${versionContrat ? ` v${versionContrat}` : ""} - ${props.nomComplet}`, name: props.nomComplet, email: props.email ?? "", phone: props.telephone ?? "", company: denomination }}
           getPdf={async () => {
             // conserve SIRET / adresse sur la fiche : ils servent ensuite à l'auto-facture
             try { await (supabase as any).from("convoyeurs").update({ siret: siret || null, adresse: adresse || null, ...(permis ? { permis_numero: permis } : {}) }).eq("id", props.convoyeurId); } catch { /* non bloquant */ }

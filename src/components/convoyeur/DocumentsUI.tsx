@@ -59,8 +59,12 @@ export function ProgressHero({ done, total, items = [] }: { done: number; total:
 export function ContratCardView(p: {
   signed: boolean; signedAt: string | null; blocked: boolean; expired: boolean; missing: string[];
   busy: boolean; onSign: () => void; onDownload: (w: "signed" | "dossier") => void;
+  /** Contrat signé dans une ancienne version : nouvelle signature requise. */
+  outdated?: boolean; version?: number; versionCourante?: number;
 }) {
-  const pill = p.signed
+  const pill = p.outdated
+    ? <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-400/20 px-3 py-1 text-xs font-semibold text-sky-200 ring-1 ring-sky-300/40"><AlertCircle size={13} /> Nouvelle version à signer</span>
+    : p.signed
     ? <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-emerald-300/40"><ShieldCheck size={13} /> Signé le {p.signedAt ? new Date(p.signedAt).toLocaleDateString("fr-FR") : "—"}</span>
     : p.blocked
       ? <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-200 ring-1 ring-amber-300/40"><AlertCircle size={13} /> Documents manquants</span>
@@ -72,12 +76,13 @@ export function ContratCardView(p: {
       <div className="relative flex items-start gap-3.5">
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-sky-200 ring-1 ring-white/15"><FileSignature size={22} /></span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-bold leading-tight">Contrat de partenariat</h2>
+          <h2 className="text-lg font-bold leading-tight">Contrat de partenariat{p.version ? <span className="ml-2 align-middle text-xs font-semibold text-sky-200/90">version {p.version}</span> : null}</h2>
           <div className="mt-2">{pill}</div>
         </div>
       </div>
       <p className="relative mt-3 text-[13px] leading-relaxed text-white/75">
-        {p.signed ? "Une copie signée vous a été envoyée par e-mail. Vous la retrouvez ici à tout moment."
+        {p.outdated ? `Le contrat a évolué (version ${p.versionCourante ?? ""}). Vous allez recevoir la nouvelle version à signer : l'accès aux nouvelles missions reprend dès votre signature.`
+          : p.signed ? "Une copie signée vous a été envoyée par e-mail. Vous la retrouvez ici à tout moment."
           : p.blocked ? `Pour signer, déposez d'abord : ${p.missing.join(", ")}.`
           : p.expired ? "Demandez un nouveau lien pour signer votre contrat."
           : "Votre contrat est prêt : lisez-le, paraphez-le et signez en quelques minutes."}
@@ -129,6 +134,8 @@ export function DocCardView(p: {
   status: DocStatus; fileName?: string; dateLabel?: string; refusMotif?: string | null;
   renewal?: { tone: "ok" | "soon" | "expired"; text: string } | null;
   uploading: boolean;
+  /** Étape d'envoi en cours (vérification, envoi, enregistrement) et avancement 0-100. */
+  uploadStep?: { label: string; pct: number } | null;
   onPreview?: () => void;
   onDelete?: () => void;
   uploadLabels?: { add: string; replace: string };
@@ -176,12 +183,20 @@ export function DocCardView(p: {
             className="grid min-h-[46px] w-12 place-items-center rounded-2xl border border-[#d7dff0] bg-[#ffffff] text-[#2a3a66] active:scale-[.97]"><Eye size={18} /></button>
         )}
         <label className={"inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl px-3 text-sm font-semibold active:scale-[.98] " + (has ? "border border-[#d7dff0] bg-[#ffffff] text-[#1c2c58]" : "bg-emerald-600 text-white shadow-[0_10px_22px_-12px_rgba(5,150,105,.9)]")}>
-          {p.uploading ? <Loader2 size={16} className="animate-spin" /> : has ? <RotateCcw size={16} /> : <Upload size={16} />}
+          {has ? <RotateCcw size={16} /> : <Upload size={16} />}
           {has ? (p.uploadLabels?.replace ?? "Remplacer") : (p.uploadLabels?.add ?? "Envoyer")}
           {p.uploadInput}
         </label>
         <span className="contents">{p.scanButton}</span>
       </div>
+      {p.uploading && (
+        <div className="mt-3" role="status" aria-live="polite">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-100">
+            <div className="h-full rounded-full bg-emerald-500 transition-[width] duration-500 ease-out" style={{ width: `${Math.max(8, p.uploadStep?.pct ?? 35)}%` }} />
+          </div>
+          <p className="mt-1.5 text-xs font-medium text-emerald-700">{p.uploadStep?.label ?? "Envoi en cours…"}</p>
+        </div>
+      )}
     </div>
   );
 }
