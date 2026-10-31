@@ -1,7 +1,8 @@
 import { useFeatureFlag, isLoyaltyPath } from "@/hooks/useFeatureFlag";
 import { Link, useLocation } from "@tanstack/react-router";
 import ThemeToggle from "@/components/ThemeToggle";
-import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X, House, Route as RouteIco, IdCard, Bell, LayoutGrid, type LucideIcon } from "lucide-react";
+import { isAdminAppShell } from "@/lib/app-mode";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { LigneoBrand } from "@/components/brand/LigneoBrand";
@@ -33,6 +34,8 @@ export function AdminSidebar({ items: allItems, children }: Props) {
   const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [nativeApp, setNativeApp] = useState(false);
+  useEffect(() => { setNativeApp(isAdminAppShell()); }, []);
 
   // Restaure la préférence (rétracté / déployé) après hydratation
   useEffect(() => {
@@ -90,6 +93,19 @@ export function AdminSidebar({ items: allItems, children }: Props) {
     .filter((i): i is AdminSidebarItem => !!i)
     .map((i) => ({ ...i, label: i.label === "Tableau de bord" ? "Bord" : i.label === "Demandes de convoyage" ? "Demandes" : i.label }));
 
+
+  // Appli native « Ligneo Admin » : 5 onglets fixes.
+  const alertBadge = items.find((i) => i.to === "/admin/alertes")?.badge;
+  const nativeTabs: { to: string; label: string; icon: LucideIcon; match: string[] }[] = [
+    { to: "/admin", label: "Accueil", icon: House, match: ["/admin"] },
+    { to: "/admin/missions", label: "Missions", icon: RouteIco, match: ["/admin/missions", "/admin/demandes", "/admin/devis", "/admin/candidatures"] },
+    { to: "/admin/convoyeurs", label: "Convoyeurs", icon: IdCard, match: ["/admin/convoyeurs", "/admin/documents", "/admin/inscriptions"] },
+    { to: "/admin/alertes", label: "Alertes", icon: Bell, match: ["/admin/alertes", "/admin/incidents", "/admin/notifications"] },
+  ];
+  const nativeActive = (t: { to: string; match: string[] }) =>
+    t.to === "/admin"
+      ? location.pathname === "/admin"
+      : t.match.some((m) => location.pathname === m || location.pathname.startsWith(`${m}/`));
 
   const renderNav = (onClick?: () => void, mini = false) => (
     <nav className={`lig-nav flex-1 ${mini ? "p-2" : "p-3"} space-y-5 overflow-y-auto overflow-x-hidden`}>
@@ -257,6 +273,21 @@ export function AdminSidebar({ items: allItems, children }: Props) {
       </button>
 
       {/* === Barre d'onglets mobile (style appli native) === */}
+      {nativeApp ? (
+      <nav className="admin-tabbar admin-tabbar--native lg:hidden" aria-label="Navigation principale">
+        {nativeTabs.map((t) => (
+          <Link key={t.to} to={t.to} className={`admin-tabbar__item${nativeActive(t) ? " is-active" : ""}`}>
+            <span className="admin-tabbar__pill"><t.icon size={21} strokeWidth={2} /></span>
+            <span>{t.label}</span>
+            {t.to === "/admin/alertes" && alertBadge ? <em className="admin-tabbar__badge">{alertBadge}</em> : null}
+          </Link>
+        ))}
+        <button type="button" onClick={() => setMobileOpen(true)} className="admin-tabbar__item" aria-label="Plus">
+          <span className="admin-tabbar__pill"><LayoutGrid size={21} strokeWidth={2} /></span>
+          <span>Plus</span>
+        </button>
+      </nav>
+      ) : (
       <nav className="admin-tabbar lg:hidden">
         {tabItems.map((item) => {
           const active = isActive(item);
@@ -281,6 +312,7 @@ export function AdminSidebar({ items: allItems, children }: Props) {
           <span>Menu</span>
         </button>
       </nav>
+      )}
 
       {/* === Main === */}
       <main

@@ -9112,6 +9112,14 @@ html.theme-light .r4-page .v5-hero .v4-accent {
 .admin-tabbar__item:active { background: #eef2f9; transform: scale(0.97); }
 .admin-tabbar__item.is-active { color: #1d4ed8; background: #e8efff; }
 
+/* Appli native Ligneo Admin : onglets avec pastille */
+.admin-tabbar--native { height: calc(68px + env(safe-area-inset-bottom)); padding-top: 8px; }
+.admin-tabbar--native .admin-tabbar__item { position: relative; background: transparent !important; min-height: 0; gap: 3px; color: #8091b5; }
+.admin-tabbar--native .admin-tabbar__item.is-active { color: #2147c9; }
+.admin-tabbar--native .admin-tabbar__pill { width: 50px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background .15s; max-width: none; overflow: visible; }
+.admin-tabbar--native .admin-tabbar__item.is-active .admin-tabbar__pill { background: #e6eeff; }
+.admin-tabbar--native .admin-tabbar__badge { position: absolute; top: -2px; left: 54%; font-style: normal; pointer-events: none; }
+.admin-tabbar--native .admin-tabbar__badge .lig-nav-badge { margin: 0; font-size: 9px; padding: 1px 5px; }
 @media (max-width: 1023px) {
   /* Cibles tactiles confortables */
   .admin-shell button,

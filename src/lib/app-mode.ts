@@ -38,7 +38,7 @@ export function isMobileAppShell(): boolean {
 
   const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
   if (w.Capacitor?.isNativePlatform?.()) return true;
-  if (navigator.userAgent.includes("LigneoDriverApp")) return true;
+  if (/Ligneo(Driver|Admin)App/.test(navigator.userAgent)) return true;
 
   try {
     if (new URLSearchParams(window.location.search).get("app") === "1") {
@@ -49,4 +49,9 @@ export function isMobileAppShell(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Vrai dans l'appli native (Driver) : l'admin y prend l'apparence d'une appli. */
+export function isAdminAppShell(): boolean {
+  return isMobileAppShell();
 }

@@ -26,6 +26,7 @@ import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import { SmsCreditsCard } from "@/components/admin/SmsCreditsCard";
 import { ApiUsageCards } from "@/components/admin/ApiUsageCards";
+import { isAdminAppShell } from "@/lib/app-mode";
 import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
 
 
@@ -100,6 +101,8 @@ function AdminDashboard() {
   const [recentDemandes, setRecentDemandes] = useState<RecentDemande[]>([]);
   const [notifs, setNotifs] = useState<Notif[]>([]);
   const [demandes7j, setDemandes7j] = useState<Array<{ day: string; count: number }>>([]);
+  const [nativeApp, setNativeApp] = useState(false);
+  useEffect(() => { setNativeApp(isAdminAppShell()); }, []);
 
   async function fetchAll() {
     const now = new Date();
@@ -263,6 +266,62 @@ function AdminDashboard() {
 
   const totalAlertes = alertes.length;
   const aTraiter = stats.demandesNouvelles + stats.convoyeursEnAttente + stats.docsEnAttente + stats.devisEnvoyes;
+
+  if (nativeApp) {
+    const kpis: Array<[string, string | number, string]> = [
+      ["Missions actives", stats.missionsEnCours, "/admin/missions"],
+      ["Terminées", stats.missionsTerminees, "/admin/historique"],
+      ["CA réalisé", `${stats.caTotal.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`, "/admin/factures"],
+      ["Convoyeurs", stats.convoyeurs, "/admin/convoyeurs"],
+      ["Clients", stats.clients, "/admin/clients"],
+      ["Demandes", stats.demandesNouvelles, "/admin/demandes"],
+    ];
+    const toneBg: Record<Alerte["tone"], string> = { danger: "#e5484d", warning: "#e8960c", info: "#2f5fff" };
+    return (
+      <div className="adm-app-home space-y-3">
+        <div className="rounded-3xl overflow-hidden border border-[color:var(--admin-border)] shadow-sm">
+          <ExploitationOverview compact />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {kpis.map(([label, value, to]) => (
+            <Link key={label} to={to as never} className="rounded-2xl bg-white border border-[color:var(--admin-border)] px-3 py-2.5 active:scale-[0.98] transition-transform">
+              <p className="text-[10.5px] font-semibold text-[color:var(--admin-muted)] truncate">{label}</p>
+              <p className="text-[19px] font-extrabold text-[color:var(--admin-text)] leading-tight truncate">{value}</p>
+            </Link>
+          ))}
+        </div>
+        <MissionsAtRiskWidget hideWhenEmpty />
+        <div className="rounded-3xl bg-white border border-[color:var(--admin-border)] overflow-hidden">
+          <p className="px-4 pt-3 pb-1 text-[13px] font-extrabold text-[color:var(--admin-text)]">À traiter en priorité</p>
+          {alertes.length === 0 ? (
+            <p className="px-4 pb-4 text-xs text-[color:var(--admin-muted)]">Tout est à jour.</p>
+          ) : alertes.map((a) => (
+            <Link key={a.to} to={a.to as never} className="flex items-center gap-3 px-4 py-3 border-t border-[color:var(--admin-border)] active:bg-slate-50">
+              <span className="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0" style={{ background: toneBg[a.tone] }}><a.icon size={15} /></span>
+              <span className="flex-1 min-w-0 text-[13.5px] font-semibold truncate">{a.title}</span>
+              <ChevronRight size={16} className="text-[color:var(--admin-muted)]" />
+            </Link>
+          ))}
+        </div>
+        <div className="rounded-3xl bg-white border border-[color:var(--admin-border)] overflow-hidden">
+          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+            <p className="text-[13px] font-extrabold text-[color:var(--admin-text)]">Activité</p>
+            <Link to="/admin/notifications" className="text-xs font-semibold text-[color:var(--admin-accent)]">Tout voir</Link>
+          </div>
+          {notifs.slice(0, 4).map((n) => (
+            <div key={n.id} className="flex items-start gap-3 px-4 py-2.5 border-t border-[color:var(--admin-border)]">
+              <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${n.lu ? "bg-slate-300" : "bg-[color:var(--admin-accent)]"}`} />
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold truncate">{n.titre}</p>
+                {n.message && <p className="text-[11.5px] text-[color:var(--admin-muted)] truncate">{n.message}</p>}
+              </div>
+            </div>
+          ))}
+          {notifs.length === 0 && <p className="px-4 pb-4 text-xs text-[color:var(--admin-muted)]">Les événements apparaîtront ici.</p>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 adm6">
