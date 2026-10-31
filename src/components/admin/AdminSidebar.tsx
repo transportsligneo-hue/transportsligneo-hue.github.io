@@ -15,8 +15,6 @@ export interface AdminSidebarItem {
   exact?: boolean;
   badge?: ReactNode;
   group?: string;
-  /** Mise en avant (ex. notifications non lues) : halo, cloche animée. */
-  alert?: boolean;
 }
 
 interface Props {
@@ -44,7 +42,7 @@ export function AdminSidebar({ items: allItems, children }: Props) {
   }, []);
 
   // Sections repliables : "Essentiel" ouverte par défaut, la section de la page active s'ouvre seule.
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ Essentiel: true });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ Missions: true, Convoyeurs: true });
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("admin-sidebar-groups") || "null");
@@ -126,7 +124,7 @@ export function AdminSidebar({ items: allItems, children }: Props) {
                 onClick={onClick}
                 title={mini ? item.label : undefined}
                 aria-label={mini ? item.label : undefined}
-                className={`lig-nav-item${active ? " is-active" : ""}${item.alert ? " lig-nav-alert" : ""}${mini ? " justify-center px-0" : ""}`}
+                className={`lig-nav-item${active ? " is-active" : ""}${mini ? " justify-center px-0" : ""}`}
               >
                 <span className="lig-nav-ic"><item.icon size={15} /></span>
                 {!mini && <span className="flex-1">{item.label}</span>}

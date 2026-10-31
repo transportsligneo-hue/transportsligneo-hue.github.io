@@ -174,7 +174,7 @@ function AdminLayout() {
     return () => { supabase.removeChannel(channel); };
   }, [role]);
 
-  const navItems: AdminSidebarItem[] = [
+  const rawNavItems: AdminSidebarItem[] = [
     // Essentiel (sans titre, toujours visible)
     { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
     {
@@ -200,9 +200,8 @@ function AdminLayout() {
       to: "/admin/notifications",
       label: "Notifications",
       icon: Bell,
-      alert: unreadCount > 0,
       badge: unreadCount > 0
-        ? <span className="lig-nav-badge lig-notif-badge ml-auto" aria-label={`${unreadCount} notification(s) non lue(s)`}><i aria-hidden="true" />{unreadCount > 99 ? "99+" : unreadCount}</span>
+        ? <span className="lig-nav-badge ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-pro-gold text-[#0b1026]">{unreadCount > 99 ? "99+" : unreadCount}</span>
         : undefined,
     },
 
@@ -272,6 +271,24 @@ function AdminLayout() {
     { to: "/admin/maintenance", label: "Mise à jour et maintenance", icon: Wrench, group: "Réglages & outils" },
 
   ];
+
+  // Regroupement simplifié du menu : 6 rubriques claires (aucune page supprimée).
+  const MENU_GROUPS: Record<string, string[]> = {
+    Missions: ["demandes", "missions", "devis", "exploitation", "alertes", "incidents", "candidatures", "remarketing", "bons-commande", "acceptations"],
+    Convoyeurs: ["convoyeurs", "liste-attente", "inscriptions", "contrats-convoyeurs", "documents", "formation", "paiements-convoyeurs", "mises-a-jour-driver"],
+    Clients: ["clients", "organisations", "b2b-leads", "acces-demo", "fidelite"],
+    Finances: ["factures", "paiements", "frais", "signatures", "grille-tarifaire", "informations-legales"],
+    Communication: ["notifications", "messagerie", "messagerie-conseiller", "messages", "communication", "campagnes", "infos-ligneo", "test-notifications"],
+    Réglages: ["utilisateurs", "catalogue-vehicules", "contenu", "historique", "parametres", "parametres-ia", "assistant-ia", "scan-document", "outils-externes", "maintenance"],
+  };
+  const MENU_ORDER = ["_main", ...Object.keys(MENU_GROUPS)];
+  const navItems: AdminSidebarItem[] = rawNavItems
+    .map((it) => {
+      const slug = it.to.replace("/admin/", "");
+      const g = Object.keys(MENU_GROUPS).find((k) => MENU_GROUPS[k].includes(slug));
+      return g ? { ...it, group: g } : { ...it, group: it.to === "/admin" ? undefined : it.group };
+    })
+    .sort((a, b) => MENU_ORDER.indexOf(a.group ?? "_main") - MENU_ORDER.indexOf(b.group ?? "_main"));
 
   // Section Super Admin : visible uniquement pour super_admin
   if (role === "super_admin") {
