@@ -11,7 +11,7 @@ const FINISHED = ["terminee", "termine", "validee", "livree", "annulee", "annule
 type Live = { id: string; numero: string | null; depart: string | null; arrivee: string | null; plaque: string | null; statut: string | null; etape: string | null;
   lat: number | null; lng: number | null; recordedAt: string | null };
 
-export type AppHomeAlert = { to: string; icon: LucideIcon; title: string; count: number; tone: "warning" | "danger" | "info" };
+export type AppHomeAlert = { to: string; search?: Record<string, string>; icon: LucideIcon; title: string; count: number; tone: "warning" | "danger" | "info" };
 export type AppHomeKpi = { label: string; value: string | number; delta?: string; to: string };
 export type AppHomeNotif = { id: string; titre: string; message: string | null; lu: boolean; created_at: string };
 
@@ -92,7 +92,7 @@ export function AdminAppHome({ kpis, alerts, notifs, alertCount }: { kpis: AppHo
         <Link to="/admin/missions" className="pointer-events-auto flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-white/80 bg-white/95 px-4 text-[13px] font-medium text-[#6b7aa3] shadow-[0_8px_24px_-12px_rgba(20,40,110,.45)] backdrop-blur">
           <Search size={17} className="shrink-0" /><span className="truncate">Rechercher missions, convoyeurs…</span>
         </Link>
-        <Link to="/admin/alertes" aria-label="Alertes" className="pointer-events-auto relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/80 bg-white/95 text-[#1c2c58] shadow-[0_8px_24px_-12px_rgba(20,40,110,.45)] backdrop-blur">
+        <Link to="/admin/notifications" aria-label="Notifications" className="pointer-events-auto relative grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/80 bg-white/95 text-[#1c2c58] shadow-[0_8px_24px_-12px_rgba(20,40,110,.45)] backdrop-blur">
           <Bell size={19} />
           {alertCount > 0 && <span className="absolute -right-0.5 -top-0.5 min-w-[18px] rounded-full bg-[#e5484d] px-1 text-center text-[10px] font-bold leading-[18px] text-white">{alertCount > 99 ? "99+" : alertCount}</span>}
         </Link>
@@ -117,7 +117,7 @@ export function AdminAppHome({ kpis, alerts, notifs, alertCount }: { kpis: AppHo
 
           <h3 className="mb-1.5 mt-5 text-[11px] font-extrabold uppercase tracking-[.14em] text-[#5a6788]">À traiter en priorité</h3>
           {alerts.length === 0 ? <p className="text-[13px] text-[#6b7aa3]">Tout est à jour.</p> : alerts.map((a) => (
-            <Link key={a.to} to={a.to as never} className="flex items-center gap-3 border-t border-[#e9eef9] py-3 first:border-t-0 active:bg-slate-50">
+            <Link key={a.to} to={a.to as never} search={a.search as never} className="flex items-center gap-3 border-t border-[#e9eef9] py-3 first:border-t-0 active:bg-slate-50">
               <span className="grid h-8 min-w-8 place-items-center rounded-full px-2 text-[13px] font-extrabold text-white" style={{ background: TONE[a.tone] }}>{a.count}</span>
               <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[#0a1638]">{a.title}</span>
               <ChevronRight size={17} className="shrink-0 text-[#9aa6c4]" />

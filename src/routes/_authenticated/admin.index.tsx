@@ -24,10 +24,11 @@ import { ExploitationOverview } from "@/components/admin/dashboard/ExploitationO
 import { KpiCardV6 } from "@/components/admin/dashboard/KpiCardV6";
 import { AreaChartV6 } from "@/components/admin/dashboard/AreaChartV6";
 import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
-import { AdminNotifButton } from "@/components/admin/AdminNotifButton";
+import { AdminNotifButton, useAdminUnread } from "@/components/admin/AdminNotifButton";
 import { SmsCreditsCard } from "@/components/admin/SmsCreditsCard";
 import { ApiUsageCards } from "@/components/admin/ApiUsageCards";
 import { isAdminAppShell } from "@/lib/app-mode";
+import { isDemoOrTestIdentity } from "@/lib/demo-detect";
 import { AdminAppHome } from "@/components/admin/dashboard/AdminAppHome";
 import { MissionsAtRiskWidget } from "@/components/admin/alerts/MissionsAtRiskWidget";
 
@@ -118,7 +119,7 @@ function AdminDashboard() {
       clients, clientsB2B,
       enCours, terminees,
       devis, devisEnvoyes,
-      docsAttente,
+      docsAttente, convReels,
       caTermine,
       caMoisRows,
       demandesWeek,
@@ -134,8 +135,9 @@ function AdminDashboard() {
       supabase.from("trajets").select("id", { count: "exact", head: true }).or("is_test_data.is.null,is_test_data.eq.false").in("statut", ["en_cours", "attribue", "accepte", "en_attente_validation"]),
       supabase.from("trajets").select("id", { count: "exact", head: true }).or("is_test_data.is.null,is_test_data.eq.false").eq("statut", "termine"),
       supabase.from("devis").select("id", { count: "exact", head: true }),
-      supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye"),
-      supabase.from("documents_convoyeurs").select("id", { count: "exact", head: true }).eq("statut_validation", "en_attente"),
+      supabase.from("devis").select("id", { count: "exact", head: true }).eq("statut", "envoye").is("mission_id", null).is("converted_at", null).gte("created_at", start7j),
+      supabase.from("documents_convoyeurs").select("convoyeur_id").eq("statut_validation", "en_attente"),
+      supabase.from("convoyeurs").select("id, email, nom, prenom"),
       supabase.from("trajets").select("prix").or("is_test_data.is.null,is_test_data.eq.false").eq("statut", "termine"),
       supabase.from("trajets").select("prix").or("is_test_data.is.null,is_test_data.eq.false").eq("statut", "termine").gte("created_at", startMonth),
       supabase.from("demandes_convoyage").select("created_at").gte("created_at", start7j),
@@ -177,7 +179,10 @@ function AdminDashboard() {
       missionsTerminees: terminees.count ?? 0,
       devisTotal: devis.count ?? 0,
       devisEnvoyes: devisEnvoyes.count ?? 0,
-      docsEnAttente: docsAttente.count ?? 0,
+      docsEnAttente: (() => {
+        const reels = new Set(((convReels.data ?? []) as any[]).filter((c) => !isDemoOrTestIdentity({ email: c.email, nom: c.nom, prenom: c.prenom })).map((c) => c.id));
+        return ((docsAttente.data ?? []) as any[]).filter((d) => reels.has(d.convoyeur_id)).length;
+      })(),
       caTotal: ca,
       caMois,
     });
@@ -267,12 +272,13 @@ function AdminDashboard() {
   };
 
   const totalAlertes = alertes.length;
+  const unreadNotifs = useAdminUnread();
   const aTraiter = stats.demandesNouvelles + stats.convoyeursEnAttente + stats.docsEnAttente + stats.devisEnvoyes;
 
   if (nativeApp) {
     return (
       <AdminAppHome
-        alertCount={aTraiter}
+        alertCount={unreadNotifs}
         kpis={[
           { label: "Missions actives", value: stats.missionsEnCours, to: "/admin/missions" },
           { label: "Terminées", value: stats.missionsTerminees, to: "/admin/historique" },
@@ -284,7 +290,7 @@ function AdminDashboard() {
         alerts={[
           { to: "/admin/convoyeurs", icon: UserCheck, title: "Convoyeurs à valider", count: stats.convoyeursEnAttente, tone: "danger" as const },
           { to: "/admin/devis", icon: Receipt, title: "Devis sans réponse", count: stats.devisEnvoyes, tone: "warning" as const },
-          { to: "/admin/documents", icon: FolderOpen, title: "Documents en attente", count: stats.docsEnAttente, tone: "info" as const },
+          { to: "/admin/documents", search: { f: "incomplets" }, icon: FolderOpen, title: "Documents en attente", count: stats.docsEnAttente, tone: "info" as const },
           { to: "/admin/demandes", icon: FileText, title: "Nouvelles demandes", count: stats.demandesNouvelles, tone: "info" as const },
         ].filter((a) => a.count > 0)}
         notifs={notifs}

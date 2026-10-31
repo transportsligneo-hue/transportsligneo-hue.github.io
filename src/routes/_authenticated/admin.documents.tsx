@@ -60,7 +60,7 @@ function AdminDocuments() {
   const [convoyeurs, setConvoyeurs] = useState<Convoyeur[]>([]);
   const [docsByConvoyeur, setDocsByConvoyeur] = useState<Record<string, Document[]>>({});
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "incomplets" | "valides">("all");
+  const [filter, setFilter] = useState<"all" | "incomplets" | "valides">(() => (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("f") === "incomplets" ? "incomplets" : "all"));
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

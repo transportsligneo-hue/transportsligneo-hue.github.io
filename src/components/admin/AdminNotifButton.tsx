@@ -4,7 +4,7 @@ import { Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Bouton Notifications du tableau de bord : même compteur, même rendu et même lien que dans le menu de gauche. */
-export function AdminNotifButton() {
+export function useAdminUnread() {
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     const fetchUnread = async () => {
@@ -21,6 +21,11 @@ export function AdminNotifButton() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+  return unread;
+}
+
+export function AdminNotifButton() {
+  const unread = useAdminUnread();
   return (
     <div className="lig-nav w-[220px] max-w-full">
       <Link to="/admin/notifications" className={`lig-nav-item${unread > 0 ? " lig-nav-alert" : ""}`}>
